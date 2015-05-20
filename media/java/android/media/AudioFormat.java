@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 
 /**
  * The AudioFormat class is used to access a number of audio format and
@@ -53,6 +54,22 @@ public class AudioFormat {
     public static final int ENCODING_DTS = 7;
     /** Audio data format: DTS HD compressed */
     public static final int ENCODING_DTS_HD = 8;
+    /** Audio data format: MP3 compressed
+     * @hide
+     * */
+    public static final int ENCODING_MP3 = 9;
+    /** Audio data format: AAC LC compressed
+     * @hide
+     * */
+    public static final int ENCODING_AAC_LC = 10;
+    /** Audio data format: AAC HE V1 compressed
+     * @hide
+     * */
+    public static final int ENCODING_AAC_HE_V1 = 11;
+    /** Audio data format: AAC HE V2 compressed
+     * @hide
+     * */
+    public static final int ENCODING_AAC_HE_V2 = 12;
 
     /** Invalid audio channel configuration */
     /** @deprecated Use {@link #CHANNEL_INVALID} instead.  */
@@ -241,6 +258,27 @@ public class AudioFormat {
         case ENCODING_E_AC3:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
+        case ENCODING_MP3:
+        case ENCODING_AAC_LC:
+        case ENCODING_AAC_HE_V1:
+        case ENCODING_AAC_HE_V2:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    /** @hide */
+    public static boolean isPublicEncoding(int audioFormat)
+    {
+        switch (audioFormat) {
+        case ENCODING_PCM_8BIT:
+        case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_FLOAT:
+        case ENCODING_AC3:
+        case ENCODING_E_AC3:
+        case ENCODING_DTS:
+        case ENCODING_DTS_HD:
             return true;
         default:
             return false;
@@ -260,11 +298,37 @@ public class AudioFormat {
         case ENCODING_E_AC3:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
+        case ENCODING_MP3:
+        case ENCODING_AAC_LC:
+        case ENCODING_AAC_HE_V1:
+        case ENCODING_AAC_HE_V2:
             return false;
         case ENCODING_INVALID:
         default:
             throw new IllegalArgumentException("Bad audio format " + audioFormat);
         }
+    }
+
+    /**
+     * Returns an array of public encoding values extracted from an array of
+     * encoding values.
+     * @hide
+     */
+    public static int[] filterPublicFormats(int[] formats) {
+        if (formats == null) {
+            return null;
+        }
+        int[] myCopy = Arrays.copyOf(formats, formats.length);
+        int size = 0;
+        for (int i = 0; i < myCopy.length; i++) {
+            if (isPublicEncoding(myCopy[i])) {
+                if (size != i) {
+                    myCopy[size] = myCopy[i];
+                }
+                size++;
+            }
+        }
+        return Arrays.copyOf(myCopy, size);
     }
 
     /** @removed */
