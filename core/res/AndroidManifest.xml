@@ -681,7 +681,7 @@
         android:permissionGroup="android.permission-group.SENSORS"
         android:label="@string/permlab_useFingerprint"
         android:description="@string/permdesc_useFingerprint"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- ====================================================================== -->
     <!-- INSTALLTIME PERMISSIONS                                                -->
