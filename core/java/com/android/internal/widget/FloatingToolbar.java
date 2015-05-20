@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
+import android.text.TextUtils;
 import android.util.Size;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,6 +45,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -902,7 +904,7 @@ public final class FloatingToolbar {
             boolean isFirstItem = true;
             while (!remainingMenuItems.isEmpty()) {
                 final MenuItem menuItem = remainingMenuItems.peek();
-                Button menuItemButton = createMenuItemButton(mContext, menuItem);
+                View menuItemButton = createMenuItemButton(mContext, menuItem);
 
                 // Adding additional start padding for the first button to even out button spacing.
                 if (isFirstItem) {
@@ -926,8 +928,7 @@ public final class FloatingToolbar {
                 menuItemButton.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
                 int menuItemButtonWidth = Math.min(menuItemButton.getMeasuredWidth(), toolbarWidth);
                 if (menuItemButtonWidth <= availableWidth) {
-                    menuItemButton.setTag(menuItem);
-                    menuItemButton.setOnClickListener(mMenuItemButtonOnClickListener);
+                    setButtonTagAndClickListener(menuItemButton, menuItem);
                     mContentView.addView(menuItemButton);
                     ViewGroup.LayoutParams params = menuItemButton.getLayoutParams();
                     params.width = menuItemButtonWidth;
@@ -936,7 +937,7 @@ public final class FloatingToolbar {
                     remainingMenuItems.pop();
                 } else {
                     if (mOpenOverflowButton == null) {
-                        mOpenOverflowButton = (ImageButton) LayoutInflater.from(mContext)
+                        mOpenOverflowButton = LayoutInflater.from(mContext)
                                 .inflate(R.layout.floating_popup_open_overflow_button, null);
                         mOpenOverflowButton.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -979,6 +980,15 @@ public final class FloatingToolbar {
             Preconditions.checkState(mContentView.getParent() == null);
             mContentView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
             return new Size(mContentView.getMeasuredWidth(), mContentView.getMeasuredHeight());
+        }
+
+        private void setButtonTagAndClickListener(View menuItemButton, MenuItem menuItem) {
+            View button = menuItemButton;
+            if (isIconOnlyMenuItem(menuItem)) {
+                button = menuItemButton.findViewById(R.id.floating_toolbar_menu_item_image_button);
+            }
+            button.setTag(menuItem);
+            button.setOnClickListener(mMenuItemButtonOnClickListener);
         }
     }
 
@@ -1141,10 +1151,34 @@ public final class FloatingToolbar {
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             overflowListView.setDivider(null);
             overflowListView.setDividerHeight(0);
+
+            final int viewTypeCount = 2;
+            final int stringLabelViewType = 0;
+            final int iconOnlyViewType = 1;
             final ArrayAdapter overflowListViewAdapter =
                     new ArrayAdapter<MenuItem>(context, 0) {
                         @Override
+                        public int getViewTypeCount() {
+                            return viewTypeCount;
+                        }
+
+                        @Override
+                        public int getItemViewType(int position) {
+                            if (isIconOnlyMenuItem(getItem(position))) {
+                                return iconOnlyViewType;
+                            }
+                            return stringLabelViewType;
+                        }
+
+                        @Override
                         public View getView(int position, View convertView, ViewGroup parent) {
+                            if (getItemViewType(position) == iconOnlyViewType) {
+                                return getIconOnlyView(position, convertView);
+                            }
+                            return getStringTitleView(position, convertView);
+                        }
+
+                        private View getStringTitleView(int position, View convertView) {
                             TextView menuButton;
                             if (convertView != null) {
                                 menuButton = (TextView) convertView;
@@ -1154,6 +1188,22 @@ public final class FloatingToolbar {
                             MenuItem menuItem = getItem(position);
                             menuButton.setText(menuItem.getTitle());
                             menuButton.setContentDescription(menuItem.getTitle());
+                            menuButton.setMinimumWidth(mOverflowWidth);
+                            return menuButton;
+                        }
+
+                        private View getIconOnlyView(int position, View convertView) {
+                            View menuButton;
+                            if (convertView != null) {
+                                menuButton = convertView;
+                            } else {
+                                menuButton = LayoutInflater.from(context).inflate(
+                                        R.layout.floating_popup_overflow_image_list_item, null);
+                            }
+                            MenuItem menuItem = getItem(position);
+                            ((ImageView) menuButton
+                                    .findViewById(R.id.floating_toolbar_menu_item_image_button))
+                                    .setImageDrawable(menuItem.getIcon());
                             menuButton.setMinimumWidth(mOverflowWidth);
                             return menuButton;
                         }
@@ -1208,11 +1258,30 @@ public final class FloatingToolbar {
         }
     }
 
+    /**
+     * @return {@code true} if the menu item does not not have a string title but has an icon.
+     *   {@code false} otherwise.
+     */
+    private static boolean isIconOnlyMenuItem(MenuItem menuItem) {
+        if (TextUtils.isEmpty(menuItem.getTitle()) && menuItem.getIcon() != null) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Creates and returns a menu button for the specified menu item.
      */
-    private static Button createMenuItemButton(Context context, MenuItem menuItem) {
+    private static View createMenuItemButton(Context context, MenuItem menuItem) {
+        if (isIconOnlyMenuItem(menuItem)) {
+            View imageMenuItemButton = LayoutInflater.from(context)
+                    .inflate(R.layout.floating_popup_menu_image_button, null);
+            ((ImageButton) imageMenuItemButton
+                    .findViewById(R.id.floating_toolbar_menu_item_image_button))
+                    .setImageDrawable(menuItem.getIcon());
+            return imageMenuItemButton;
+        }
+
         Button menuItemButton = (Button) LayoutInflater.from(context)
                 .inflate(R.layout.floating_popup_menu_button, null);
         menuItemButton.setText(menuItem.getTitle());
