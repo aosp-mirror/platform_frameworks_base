@@ -1554,6 +1554,11 @@ exit:
     return jStatus;
 }
 
+static jint
+android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
+{
+    return nativeToJavaStatus(AudioSystem::systemReady());
+}
 
 
 // ----------------------------------------------------------------------------
@@ -1601,6 +1606,7 @@ static JNINativeMethod gMethods[] = {
                                             (void *)android_media_AudioSystem_registerPolicyMixes},
     {"native_register_dynamic_policy_callback", "()V",
                                     (void *)android_media_AudioSystem_registerDynPolicyCallback},
+    {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
 };
 
 

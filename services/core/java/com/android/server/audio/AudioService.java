@@ -217,6 +217,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_PERSIST_MICROPHONE_MUTE = 23;
     private static final int MSG_UNMUTE_STREAM = 24;
     private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 25;
+    private static final int MSG_INDICATE_SYSTEM_READY = 26;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -228,6 +229,9 @@ public class AudioService extends IAudioService.Stub {
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
     private static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
+
+    // retry delay in case of failure to indicate system ready to AudioFlinger
+    private static final int INDICATE_SYSTEM_READY_RETRY_DELAY_MS = 1000;
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -733,6 +737,108 @@ public class AudioService extends IAudioService.Stub {
 
         StreamOverride.init(mContext);
         mControllerService.init();
+        onIndicateSystemReady();
+    }
+
+    void onIndicateSystemReady() {
+        if (AudioSystem.systemReady() == AudioSystem.SUCCESS) {
+            return;
+        }
+        sendMsg(mAudioHandler,
+                MSG_INDICATE_SYSTEM_READY,
+                SENDMSG_REPLACE,
+                0,
+                0,
+                null,
+                INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
+    }
+
+    public void onMediaServerDied() {
+        if (!mSystemReady ||
+                (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK)) {
+            Log.e(TAG, "Media server died.");
+            sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
+                    null, 500);
+            return;
+        }
+        Log.e(TAG, "Media server started.");
+
+        // indicate to audio HAL that we start the reconfiguration phase after a media
+        // server crash
+        // Note that we only execute this when the media server
+        // process restarts after a crash, not the first time it is started.
+        AudioSystem.setParameters("restarting=true");
+
+        readAndSetLowRamDevice();
+
+        // Restore device connection states
+        synchronized (mConnectedDevices) {
+            for (int i = 0; i < mConnectedDevices.size(); i++) {
+                DeviceListSpec spec = mConnectedDevices.valueAt(i);
+                AudioSystem.setDeviceConnectionState(
+                                                spec.mDeviceType,
+                                                AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                spec.mDeviceAddress,
+                                                spec.mDeviceName);
+            }
+        }
+        // Restore call state
+        AudioSystem.setPhoneState(mMode);
+
+        // Restore forced usage for communcations and record
+        AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm);
+        AudioSystem.setForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm);
+        AudioSystem.setForceUse(AudioSystem.FOR_SYSTEM, mCameraSoundForced ?
+                        AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE);
+
+        // Restore stream volumes
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+            VolumeStreamState streamState = mStreamStates[streamType];
+            AudioSystem.initStreamVolume(streamType, 0, (streamState.mIndexMax + 5) / 10);
+
+            streamState.applyAllVolumes();
+        }
+
+        // Restore ringer mode
+        setRingerModeInt(getRingerModeInternal(), false);
+
+        // Reset device orientation (if monitored for this device)
+        if (mMonitorOrientation) {
+            setOrientationForAudioSystem();
+        }
+        if (mMonitorRotation) {
+            setRotationForAudioSystem();
+        }
+
+        synchronized (mBluetoothA2dpEnabledLock) {
+            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
+                    mBluetoothA2dpEnabled ?
+                            AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
+        }
+
+        synchronized (mSettingsLock) {
+            AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
+                    mDockAudioMediaEnabled ?
+                            AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
+        }
+        if (mHdmiManager != null) {
+            synchronized (mHdmiManager) {
+                if (mHdmiTvClient != null) {
+                    setHdmiSystemAudioSupported(mHdmiSystemAudioSupported);
+                }
+            }
+        }
+
+        synchronized (mAudioPolicies) {
+            for (AudioPolicyProxy policy : mAudioPolicies.values()) {
+                policy.connectMixes();
+            }
+        }
+
+        onIndicateSystemReady();
+        // indicate the end of reconfiguration phase to audio HAL
+        AudioSystem.setParameters("restarting=false");
     }
 
     private void createAudioSystemThread() {
@@ -4147,90 +4253,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_MEDIA_SERVER_DIED:
-                    if (!mSystemReady ||
-                            (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK)) {
-                        Log.e(TAG, "Media server died.");
-                        sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
-                                null, 500);
-                        break;
-                    }
-                    Log.e(TAG, "Media server started.");
-
-                    // indicate to audio HAL that we start the reconfiguration phase after a media
-                    // server crash
-                    // Note that we only execute this when the media server
-                    // process restarts after a crash, not the first time it is started.
-                    AudioSystem.setParameters("restarting=true");
-
-                    readAndSetLowRamDevice();
-
-                    // Restore device connection states
-                    synchronized (mConnectedDevices) {
-                        for (int i = 0; i < mConnectedDevices.size(); i++) {
-                            DeviceListSpec spec = mConnectedDevices.valueAt(i);
-                            AudioSystem.setDeviceConnectionState(
-                                                            spec.mDeviceType,
-                                                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                            spec.mDeviceAddress,
-                                                            spec.mDeviceName);
-                        }
-                    }
-                    // Restore call state
-                    AudioSystem.setPhoneState(mMode);
-
-                    // Restore forced usage for communcations and record
-                    AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm);
-                    AudioSystem.setForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm);
-                    AudioSystem.setForceUse(AudioSystem.FOR_SYSTEM, mCameraSoundForced ?
-                                    AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE);
-
-                    // Restore stream volumes
-                    int numStreamTypes = AudioSystem.getNumStreamTypes();
-                    for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                        VolumeStreamState streamState = mStreamStates[streamType];
-                        AudioSystem.initStreamVolume(streamType, 0, (streamState.mIndexMax + 5) / 10);
-
-                        streamState.applyAllVolumes();
-                    }
-
-                    // Restore ringer mode
-                    setRingerModeInt(getRingerModeInternal(), false);
-
-                    // Reset device orientation (if monitored for this device)
-                    if (mMonitorOrientation) {
-                        setOrientationForAudioSystem();
-                    }
-                    if (mMonitorRotation) {
-                        setRotationForAudioSystem();
-                    }
-
-                    synchronized (mBluetoothA2dpEnabledLock) {
-                        AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
-                                mBluetoothA2dpEnabled ?
-                                        AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
-                    }
-
-                    synchronized (mSettingsLock) {
-                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
-                                mDockAudioMediaEnabled ?
-                                        AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
-                    }
-                    if (mHdmiManager != null) {
-                        synchronized (mHdmiManager) {
-                            if (mHdmiTvClient != null) {
-                                setHdmiSystemAudioSupported(mHdmiSystemAudioSupported);
-                            }
-                        }
-                    }
-
-                    synchronized (mAudioPolicies) {
-                        for(AudioPolicyProxy policy : mAudioPolicies.values()) {
-                            policy.connectMixes();
-                        }
-                    }
-
-                    // indicate the end of reconfiguration phase to audio HAL
-                    AudioSystem.setParameters("restarting=false");
+                    onMediaServerDied();
                     break;
 
                 case MSG_UNLOAD_SOUND_EFFECTS:
@@ -4333,6 +4356,10 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_SYSTEM_READY:
                     onSystemReady();
+                    break;
+
+                case MSG_INDICATE_SYSTEM_READY:
+                    onIndicateSystemReady();
                     break;
 
                 case MSG_PERSIST_MUSIC_ACTIVE_MS:
@@ -4872,7 +4899,7 @@ public class AudioService extends IAudioService.Stub {
                 if (btDevice == null) {
                     return;
                 }
- 
+
                 address = btDevice.getAddress();
                 BluetoothClass btClass = btDevice.getBluetoothClass();
                 if (btClass != null) {
@@ -5933,7 +5960,7 @@ public class AudioService extends IAudioService.Stub {
             final AudioPolicyProxy app = mAudioPolicies.get(pcb.asBinder());
             if (duckingBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
                 // is there already one policy managing ducking?
-                for(AudioPolicyProxy policy : mAudioPolicies.values()) {
+                for (AudioPolicyProxy policy : mAudioPolicies.values()) {
                     if (policy.mFocusDuckBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
                         Slog.e(TAG, "Cannot change audio policy ducking behavior, already handled");
                         return AudioManager.ERROR;
@@ -5950,7 +5977,7 @@ public class AudioService extends IAudioService.Stub {
     private void dumpAudioPolicies(PrintWriter pw) {
         pw.println("\nAudio policies:");
         synchronized (mAudioPolicies) {
-            for(AudioPolicyProxy policy : mAudioPolicies.values()) {
+            for (AudioPolicyProxy policy : mAudioPolicies.values()) {
                 pw.println(policy.toLogFriendlyString());
             }
         }
