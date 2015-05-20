@@ -41,9 +41,7 @@ void init() {
     gRotate = 0.0f;
 }
 
-static int pos = 50;
 static float gRotateY = 120.0f;
-static float3 gLookAt = 0;
 static float gZoom = 50.0f;
 static void displayLoading() {
     if (rsIsObject(gRobotTex) && rsIsObject(gRobotMesh)) {
