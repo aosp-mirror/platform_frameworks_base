@@ -58,9 +58,17 @@ import java.util.Objects;
  * high-resolution still capture would also include a Surface from a ImageReader
  * configured for high-resolution JPEG images.</p>
  *
- * @see CameraDevice#capture
- * @see CameraDevice#setRepeatingRequest
+ * <p>A reprocess capture request allows a previously-captured image from the camera device to be
+ * sent back to the device for further processing. It can be created with
+ * {@link CameraDevice#createReprocessCaptureRequest}, and used with a reprocessible capture session
+ * created with {@link CameraDevice#createReprocessableCaptureSession}.</p>
+ *
+ * @see CameraCaptureSession#capture
+ * @see CameraCaptureSession#setRepeatingRequest
+ * @see CameraCaptureSession#captureBurst
+ * @see CameraCaptureSession#setRepeatingBurst
  * @see CameraDevice#createCaptureRequest
+ * @see CameraDevice#createReprocessCaptureRequest
  */
 public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         implements Parcelable {
