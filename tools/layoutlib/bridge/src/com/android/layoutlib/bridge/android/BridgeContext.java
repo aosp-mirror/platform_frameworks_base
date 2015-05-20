@@ -138,8 +138,9 @@ public final class BridgeContext extends Context {
 
     private final Stack<BridgeXmlBlockParser> mParserStack = new Stack<BridgeXmlBlockParser>();
     private SharedPreferences mSharedPreferences;
+    private ClassLoader mClassLoader;
 
-  /**
+    /**
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
      * @param metrics the {@link DisplayMetrics}.
      * @param renderResources the configured resources (both framework and projects) for this
@@ -462,7 +463,21 @@ public final class BridgeContext extends Context {
 
     @Override
     public ClassLoader getClassLoader() {
-        return this.getClass().getClassLoader();
+        if (mClassLoader == null) {
+            mClassLoader = new ClassLoader(getClass().getClassLoader()) {
+                @Override
+                protected Class<?> findClass(String name) throws ClassNotFoundException {
+                    for (String prefix : BridgeInflater.getClassPrefixList()) {
+                        if (name.startsWith(prefix)) {
+                            // These are framework classes and should not be loaded from the app.
+                            throw new ClassNotFoundException(name + " not found");
+                        }
+                    }
+                    return BridgeContext.this.mLayoutlibCallback.findClass(name);
+                }
+            };
+        }
+        return mClassLoader;
     }
 
     @Override
