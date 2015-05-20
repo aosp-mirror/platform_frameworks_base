@@ -2142,8 +2142,9 @@
     <!-- Keyguard component -->
     <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
 
-    <!-- This config is used to force VoiceInteractionService to start on certain low ram devices. -->
-    <bool name="config_forceEnableVoiceInteractionService">false</bool>
+    <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
+         It declares the package name of VoiceInteractionService that should be started. -->
+    <string translatable="false" name="config_forceVoiceInteractionServicePackage"></string>
 
     <!-- This config is ued to determine whether animations are allowed in low power mode. -->
     <bool name="config_allowAnimationsInLowPowerMode">false</bool>
