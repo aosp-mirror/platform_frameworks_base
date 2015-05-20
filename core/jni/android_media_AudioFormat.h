@@ -27,6 +27,10 @@
 #define ENCODING_E_AC3      6
 #define ENCODING_DTS        7
 #define ENCODING_DTS_HD     8
+#define ENCODING_MP3        9
+#define ENCODING_AAC_LC     10
+#define ENCODING_AAC_HE_V1  11
+#define ENCODING_AAC_HE_V2  12
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
 
@@ -52,6 +56,14 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_DTS;
     case ENCODING_DTS_HD:
         return AUDIO_FORMAT_DTS_HD;
+    case ENCODING_MP3:
+        return AUDIO_FORMAT_MP3;
+    case ENCODING_AAC_LC:
+        return AUDIO_FORMAT_AAC_LC;
+    case ENCODING_AAC_HE_V1:
+        return AUDIO_FORMAT_AAC_HE_V1;
+    case ENCODING_AAC_HE_V2:
+        return AUDIO_FORMAT_AAC_HE_V2;
     case ENCODING_DEFAULT:
         return AUDIO_FORMAT_DEFAULT;
     default:
@@ -76,6 +88,14 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_DTS;
     case AUDIO_FORMAT_DTS_HD:
         return ENCODING_DTS_HD;
+    case AUDIO_FORMAT_MP3:
+        return ENCODING_MP3;
+    case AUDIO_FORMAT_AAC_LC:
+        return ENCODING_AAC_LC;
+    case AUDIO_FORMAT_AAC_HE_V1:
+        return ENCODING_AAC_HE_V1;
+    case AUDIO_FORMAT_AAC_HE_V2:
+        return ENCODING_AAC_HE_V2;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:
