@@ -373,12 +373,12 @@ public interface WindowManagerPolicy {
     }
 
     /**
-     * Representation of a "fake window" that the policy has added to the
-     * window manager to consume events.
+     * Representation of a input consumer that the policy has added to the
+     * window manager to consume input events going to windows below it.
      */
-    public interface FakeWindow {
+    public interface InputConsumer {
         /**
-         * Remove the fake window from the window manager.
+         * Remove the input consumer from the window manager.
          */
         void dismiss();
     }
@@ -402,13 +402,10 @@ public interface WindowManagerPolicy {
         public void reevaluateStatusBarVisibility();
 
         /**
-         * Add a fake window to the window manager.  This window sits
-         * at the top of the other windows and consumes events.
+         * Add a input consumer which will consume all input events going to any window below it.
          */
-        public FakeWindow addFakeWindow(Looper looper,
-                InputEventReceiver.Factory inputEventReceiverFactory,
-                String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
-                boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen);
+        public InputConsumer addInputConsumer(Looper looper,
+                InputEventReceiver.Factory inputEventReceiverFactory);
 
         /**
          * Returns a code that describes the current state of the lid switch.
