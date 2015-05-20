@@ -4787,7 +4787,7 @@ public class AudioService extends IAudioService.Stub {
                         if (devicePort.type() == AudioManager.DEVICE_OUT_HDMI ||
                                 devicePort.type() == AudioManager.DEVICE_OUT_HDMI_ARC) {
                             // format the list of supported encodings
-                            int[] formats = devicePort.formats();
+                            int[] formats = AudioFormat.filterPublicFormats(devicePort.formats());
                             if (formats.length > 0) {
                                 ArrayList<Integer> encodingList = new ArrayList(1);
                                 for (int format : formats) {

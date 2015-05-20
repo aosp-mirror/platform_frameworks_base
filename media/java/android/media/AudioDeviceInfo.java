@@ -204,7 +204,7 @@ public final class AudioDeviceInfo {
      * @see AudioFormat
      */
     public @NonNull int[] getEncodings() {
-        return mPort.formats();
+        return AudioFormat.filterPublicFormats(mPort.formats());
     }
 
    /**
