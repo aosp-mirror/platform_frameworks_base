@@ -73,7 +73,8 @@ public class IpReachabilityMonitor {
     private final Set<InetAddress> mIpWatchList;
     private int mIpWatchListVersion;
     private boolean mRunning;
-    final private Thread mObserverThread;
+    private final NetlinkSocketObserver mNetlinkSocketObserver;
+    private final Thread mObserverThread;
 
     public IpReachabilityMonitor(String ifName, Callback callback) throws IllegalArgumentException {
         mInterfaceName = ifName;
@@ -88,15 +89,15 @@ public class IpReachabilityMonitor {
         mIpWatchList = new HashSet<InetAddress>();
         mIpWatchListVersion = 0;
         mRunning = false;
-        mObserverThread = new Thread(new NetlinkSocketObserver());
+        mNetlinkSocketObserver = new NetlinkSocketObserver();
+        mObserverThread = new Thread(mNetlinkSocketObserver);
         mObserverThread.start();
     }
 
     public void stop() {
-        synchronized (mLock) {
-            mRunning = false;
-            mIpWatchList.clear();
-        }
+        synchronized (mLock) { mRunning = false; }
+        clearLinkProperties();
+        mNetlinkSocketObserver.clearNetlinkSocket();
     }
 
     // TODO: add a public dump() method that can be called during a bug report.
@@ -251,6 +252,7 @@ public class IpReachabilityMonitor {
     }
 
 
+    // TODO: simply the number of objects by making this extend Thread.
     private final class NetlinkSocketObserver implements Runnable {
         private static final String TAG = "NetlinkSocketObserver";
         private NetlinkSocket mSocket;
@@ -292,7 +294,6 @@ public class IpReachabilityMonitor {
             if (mSocket != null) {
                 mSocket.close();
             }
-            mSocket = null;
         }
 
             // TODO: Refactor the main loop to recreate the socket upon recoverable errors.

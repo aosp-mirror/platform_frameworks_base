@@ -90,4 +90,27 @@ public class NetlinkSocketTest extends TestCase {
 
         s.close();
     }
+
+    public void testRepeatedCloseCallsAreQuiet() throws Exception {
+        // Create a working NetlinkSocket.
+        NetlinkSocket s = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
+        assertNotNull(s);
+        s.connectToKernel();
+        NetlinkSocketAddress localAddr = s.getLocalAddress();
+        assertNotNull(localAddr);
+        assertEquals(0, localAddr.getGroupsMask());
+        assertTrue(0 != localAddr.getPortId());
+        // Close once.
+        s.close();
+        // Test that it is closed.
+        boolean expectedErrorSeen = false;
+        try {
+            localAddr = s.getLocalAddress();
+        } catch (ErrnoException e) {
+            expectedErrorSeen = true;
+        }
+        assertTrue(expectedErrorSeen);
+        // Close once more.
+        s.close();
+    }
 }
