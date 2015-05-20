@@ -792,6 +792,9 @@ include the action bar on devices running Android 2.1 or higher."
             <a href="<?cs var:toroot ?>training/wearables/apps/layouts.html">Creating Custom Layouts</a>
           </li>
           <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/always-on.html">Keeping Your App Visible</a>
+          </li>
+          <li>
             <a href="<?cs var:toroot ?>training/wearables/apps/voice.html">Adding Voice Capabilities</a>
           </li>
           <li>
