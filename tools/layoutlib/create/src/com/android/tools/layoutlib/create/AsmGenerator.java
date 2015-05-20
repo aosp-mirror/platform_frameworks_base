@@ -24,9 +24,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -86,7 +88,23 @@ public class AsmGenerator {
     public AsmGenerator(Log log, String osDestJar, ICreateInfo createInfo) {
         mLog = log;
         mOsDestJar = osDestJar;
-        mInjectClasses = createInfo.getInjectedClasses();
+        ArrayList<Class<?>> injectedClasses =
+                new ArrayList<Class<?>>(Arrays.asList(createInfo.getInjectedClasses()));
+        // Search for and add anonymous inner classes also.
+        ListIterator<Class<?>> iter = injectedClasses.listIterator();
+        while (iter.hasNext()) {
+            Class<?> clazz = iter.next();
+            try {
+                int i = 1;
+                while(i < 100) {
+                    iter.add(Class.forName(clazz.getName() + "$" + i));
+                    i++;
+                }
+            } catch (ClassNotFoundException ignored) {
+                // Expected.
+            }
+        }
+        mInjectClasses = injectedClasses.toArray(new Class<?>[0]);
         mStubMethods = new HashSet<String>(Arrays.asList(createInfo.getOverriddenMethods()));
 
         // Create the map/set of methods to change to delegates
@@ -290,13 +308,7 @@ public class AsmGenerator {
      * e.g. it returns something like "com/foo/OuterClass$InnerClass1$InnerClass2.class"
      */
     private String classToEntryPath(Class<?> clazz) {
-        String name = "";
-        Class<?> parent;
-        while ((parent = clazz.getEnclosingClass()) != null) {
-            name = "$" + clazz.getSimpleName() + name;
-            clazz = parent;
-        }
-        return classNameToEntryPath(clazz.getCanonicalName() + name);
+        return classNameToEntryPath(clazz.getName());
     }
 
     /**
