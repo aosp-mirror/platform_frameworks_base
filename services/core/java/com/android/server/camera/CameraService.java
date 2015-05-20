@@ -19,6 +19,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.ICameraService;
+import android.hardware.ICameraServiceProxy;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -42,13 +43,29 @@ public class CameraService extends SystemService {
      */
     private static final String CAMERA_SERVICE_BINDER_NAME = "media.camera";
 
+    public static final String CAMERA_SERVICE_PROXY_BINDER_NAME = "media.camera.proxy";
+
     // Event arguments to use with the camera service notifySystemEvent call:
     public static final int NO_EVENT = 0; // NOOP
     public static final int USER_SWITCHED = 1; // User changed, argument is the new user handle
 
     private final Context mContext;
     private UserManager mUserManager;
+
+    private final Object mLock = new Object();
     private Set<Integer> mEnabledCameraUsers;
+
+    private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
+        @Override
+        public void pingForUserUpdate() {
+            // Binder call
+            synchronized(mLock) {
+                if (mEnabledCameraUsers != null) {
+                    notifyMediaserver(USER_SWITCHED, mEnabledCameraUsers);
+                }
+            }
+        }
+    };
 
     public CameraService(Context context) {
         super(context);
@@ -62,18 +79,27 @@ public class CameraService extends SystemService {
             // Should never see this unless someone messes up the SystemServer service boot order.
             throw new IllegalStateException("UserManagerService must start before CameraService!");
         }
+        publishBinderService(CAMERA_SERVICE_PROXY_BINDER_NAME, mCameraServiceProxy);
     }
 
     @Override
     public void onStartUser(int userHandle) {
-        if (mEnabledCameraUsers == null) {
-            // Initialize mediaserver, or update mediaserver if we are recovering from a crash.
-            onSwitchUser(userHandle);
+        synchronized(mLock) {
+            if (mEnabledCameraUsers == null) {
+                // Initialize mediaserver, or update mediaserver if we are recovering from a crash.
+                switchUserLocked(userHandle);
+            }
         }
     }
 
     @Override
     public void onSwitchUser(int userHandle) {
+        synchronized(mLock) {
+            switchUserLocked(userHandle);
+        }
+    }
+
+    private void switchUserLocked(int userHandle) {
         Set<Integer> currentUserHandles = getEnabledUserHandles(userHandle);
         if (mEnabledCameraUsers == null || !mEnabledCameraUsers.equals(currentUserHandles)) {
             // Some user handles have been added or removed, update mediaserver.
@@ -81,7 +107,6 @@ public class CameraService extends SystemService {
             notifyMediaserver(USER_SWITCHED, currentUserHandles);
         }
     }
-
 
     private Set<Integer> getEnabledUserHandles(int currentUserHandle) {
         List<UserInfo> userProfiles = mUserManager.getEnabledProfiles(currentUserHandle);
