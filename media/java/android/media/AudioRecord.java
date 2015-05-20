@@ -494,7 +494,7 @@ public class AudioRecord
          * than this size. See {@link #getMinBufferSize(int, int, int)} to determine the minimum
          * required buffer size for the successful creation of an AudioRecord instance.
          * Since bufferSizeInBytes may be internally increased to accommodate the source
-         * requirements, use {@link #getNativeFrameCount()} to determine the actual buffer size
+         * requirements, use {@link #getBufferSizeInFrames()} to determine the actual buffer size
          * in frames.
          * @param bufferSizeInBytes a value strictly greater than 0
          * @return the same Builder instance.
@@ -777,7 +777,7 @@ public class AudioRecord
     }
 
     /**
-     *  Returns the "native frame count" of the <code>AudioRecord</code> buffer.
+     *  Returns the frame count of the native <code>AudioRecord</code> buffer.
      *  This is greater than or equal to the bufferSizeInBytes converted to frame units
      *  specified in the <code>AudioRecord</code> constructor or Builder.
      *  The native frame count may be enlarged to accommodate the requirements of the
@@ -786,8 +786,8 @@ public class AudioRecord
      *  @return current size in frames of the <code>AudioRecord</code> buffer.
      *  @throws IllegalStateException
      */
-    public int getNativeFrameCount() throws IllegalStateException {
-        return native_get_native_frame_count();
+    public int getBufferSizeInFrames() {
+        return native_get_buffer_size_in_frames();
     }
 
     /**
@@ -1542,7 +1542,7 @@ public class AudioRecord
     private native final int native_read_in_direct_buffer(Object jBuffer,
             int sizeInBytes, boolean isBlocking);
 
-    private native final int native_get_native_frame_count();
+    private native final int native_get_buffer_size_in_frames();
 
     private native final int native_set_marker_pos(int marker);
     private native final int native_get_marker_pos();
