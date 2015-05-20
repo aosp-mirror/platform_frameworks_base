@@ -8884,7 +8884,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException("updateLockTaskPackage called from non-system process");
         }
         synchronized (this) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" + packages);
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
+                    Arrays.toString(packages));
             mLockTaskPackages.put(userId, packages);
             mStackSupervisor.onLockTaskPackagesUpdatedLocked();
         }
@@ -8927,7 +8928,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
                     ActivityManager.LOCK_TASK_MODE_PINNED :
                     ActivityManager.LOCK_TASK_MODE_LOCKED,
-                    "startLockTask");
+                    "startLockTask", true);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -8992,7 +8993,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Stop lock task
             synchronized (this) {
                 mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
-                        "stopLockTask");
+                        "stopLockTask", true);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -19433,7 +19434,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
-                        "startUser");
+                        "startUser", false);
 
                 final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
                 if (userInfo == null) {

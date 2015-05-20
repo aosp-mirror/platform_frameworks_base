@@ -1185,7 +1185,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final TaskRecord task = r.task;
         if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
-            setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE");
+            setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE", false);
         }
 
         final ActivityStack stack = task.stack;
@@ -3675,7 +3675,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void removeLockedTaskLocked(final TaskRecord task) {
-        if (mLockTaskModeTasks.remove(task) && mLockTaskModeTasks.isEmpty()) {
+        if (!mLockTaskModeTasks.remove(task)) {
+            return;
+        }
+        if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "removeLockedTaskLocked: removed " + task);
+        if (mLockTaskModeTasks.isEmpty()) {
             // Last one.
             if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "removeLockedTask: task=" + task +
                     " last task, reverting locktask mode. Callers=" + Debug.getCallers(3));
@@ -3696,7 +3700,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void setLockTaskModeLocked(TaskRecord task, int lockTaskModeState, String reason) {
+    void setLockTaskModeLocked(TaskRecord task, int lockTaskModeState, String reason,
+            boolean andResume) {
         if (task == null) {
             // Take out of lock task mode if necessary
             final TaskRecord lockedTask = getLockedTaskLocked();
@@ -3745,8 +3750,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (task.mLockTaskUid == -1) {
             task.mLockTaskUid = task.mCallingUid;
         }
-        findTaskToMoveToFrontLocked(task, 0, null, reason);
-        resumeTopActivitiesLocked();
+
+        if (andResume) {
+            findTaskToMoveToFrontLocked(task, 0, null, reason);
+            resumeTopActivitiesLocked();
+        }
     }
 
     boolean isLockTaskModeViolation(TaskRecord task) {
@@ -3780,6 +3788,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             lockedTask.setLockTaskAuth();
             if (wasLaunchable && lockedTask.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE) {
                 // Lost whitelisting authorization. End it now.
+                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "onLockTaskPackagesUpdated: removing " +
+                        lockedTask + " mLockTaskAuth=" + lockedTask.lockTaskAuthToString());
                 removeLockedTaskLocked(lockedTask);
                 lockedTask.performClearTaskLocked();
                 didSomething = true;
@@ -3797,7 +3807,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (mLockTaskModeTasks.isEmpty() && task != null
                 && task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
             // This task must have just been authorized.
-            setLockTaskModeLocked(task, ActivityManager.LOCK_TASK_MODE_LOCKED, "package updated");
+            if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK,
+                    "onLockTaskPackagesUpdated: starting new locktask task=" + task);
+            setLockTaskModeLocked(task, ActivityManager.LOCK_TASK_MODE_LOCKED, "package updated",
+                    false);
+            didSomething = true;
         }
         if (didSomething) {
             resumeTopActivitiesLocked();
