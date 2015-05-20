@@ -1575,11 +1575,12 @@ public final class Bitmap implements Parcelable {
      */
     public boolean sameAs(Bitmap other) {
         checkRecycled("Can't call sameAs on a recycled bitmap!");
+        if (this == other) return true;
+        if (other == null) return false;
         if (other.isRecycled()) {
             throw new IllegalArgumentException("Can't compare to a recycled bitmap!");
         }
-        return this == other || (other != null
-                && nativeSameAs(mFinalizer.mNativeBitmap, other.mFinalizer.mNativeBitmap));
+        return nativeSameAs(mFinalizer.mNativeBitmap, other.mFinalizer.mNativeBitmap);
     }
 
     /**
