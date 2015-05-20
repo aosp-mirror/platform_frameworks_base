@@ -19,7 +19,7 @@
 #include "scenegraph_objects.rsh"
 
 //#define DEBUG_PARAMS
-static void debugParam(SgShaderParam *p, SgShaderParamData *pData) {
+static inline void debugParam(SgShaderParam *p, SgShaderParamData *pData) {
     rsDebug("____________ Param ____________", p);
     printName(pData->paramName);
     rsDebug("bufferOffset", p->bufferOffset);
@@ -44,8 +44,7 @@ static void debugParam(SgShaderParam *p, SgShaderParamData *pData) {
     }
 }
 
-
-static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
+static inline void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
 #ifdef DEBUG_PARAMS
     rsDebug("Writing value ", *input);
     rsDebug("Writing vec size ", vecSize);
@@ -67,7 +66,7 @@ static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
     }
 }
 
-static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
+static inline bool processParam(SgShaderParam *p, SgShaderParamData *pData,
                          uint8_t *constantBuffer,
                          const SgCamera *currentCam,
                          SgFragmentShader *shader) {
@@ -155,7 +154,7 @@ static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
     return true;
 }
 
-static void processAllParams(rs_allocation shaderConst,
+static inline void processAllParams(rs_allocation shaderConst,
                              rs_allocation allParams,
                              const SgCamera *camera) {
     if (rsIsObject(shaderConst)) {
@@ -177,7 +176,7 @@ static void processAllParams(rs_allocation shaderConst,
     }
 }
 
-static void processTextureParams(SgFragmentShader *shader) {
+static inline void processTextureParams(SgFragmentShader *shader) {
     int numParams = 0;
     if (rsIsObject(shader->shaderTextureParams)) {
         numParams = rsAllocationGetDimX(shader->shaderTextureParams);
