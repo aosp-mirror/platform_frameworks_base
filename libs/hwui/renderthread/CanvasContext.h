@@ -122,8 +122,6 @@ private:
     void swapBuffers(const SkRect& dirty, EGLint width, EGLint height);
     void requireSurface();
 
-    void requireGlContext();
-
     void freePrefetechedLayers();
 
     RenderThread& mRenderThread;
