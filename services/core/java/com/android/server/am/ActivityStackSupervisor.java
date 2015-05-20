@@ -1028,7 +1028,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 stack.mConfigWillChange = false;
                 if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Updating to new configuration after starting activity.");
-                mService.updateConfigurationLocked(config, null, false, false);
+                mService.updateConfigurationLocked(config, null, false);
             }
 
             if (outResult != null) {
@@ -1166,7 +1166,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
                     mService.mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r.appToken : null);
-            mService.updateConfigurationLocked(config, r, false, false);
+            mService.updateConfigurationLocked(config, r, false);
         }
 
         r.app = app;
