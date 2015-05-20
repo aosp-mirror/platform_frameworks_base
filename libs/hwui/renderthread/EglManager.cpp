@@ -78,8 +78,7 @@ EglManager::EglManager(RenderThread& thread)
         , mAllowPreserveBuffer(load_dirty_regions_property())
         , mCurrentSurface(EGL_NO_SURFACE)
         , mAtlasMap(nullptr)
-        , mAtlasMapSize(0)
-        , mInFrame(false) {
+        , mAtlasMapSize(0) {
     mCanSetPreserveBuffer = mAllowPreserveBuffer;
     ALOGD("Use EGL_SWAP_BEHAVIOR_PRESERVED: %s", mAllowPreserveBuffer ? "true" : "false");
 }
@@ -101,24 +100,14 @@ void EglManager::initialize() {
 
     loadConfig();
     createContext();
-    usePBufferSurface();
+    createPBufferSurface();
+    makeCurrent(mPBufferSurface);
     mRenderThread.renderState().onGLContextCreated();
     initAtlas();
 }
 
 bool EglManager::hasEglContext() {
     return mEglDisplay != EGL_NO_DISPLAY;
-}
-
-void EglManager::requireGlContext() {
-    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY, "No EGL context");
-
-    if (!mInFrame) {
-        // We can't be certain about the state of the current surface (whether
-        // or not it is destroyed, for example), so err on the side of using
-        // the pbuffer surface which we fully control
-        usePBufferSurface();
-    }
 }
 
 void EglManager::loadConfig() {
@@ -173,7 +162,6 @@ void EglManager::setTextureAtlas(const sp<GraphicBuffer>& buffer,
     mAtlasMapSize = mapSize;
 
     if (hasEglContext()) {
-        usePBufferSurface();
         initAtlas();
     }
 }
@@ -185,7 +173,7 @@ void EglManager::initAtlas() {
     }
 }
 
-void EglManager::usePBufferSurface() {
+void EglManager::createPBufferSurface() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
             "usePBufferSurface() called on uninitialized GlobalContext!");
 
@@ -193,7 +181,6 @@ void EglManager::usePBufferSurface() {
         EGLint attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
         mPBufferSurface = eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
     }
-    makeCurrent(mPBufferSurface);
 }
 
 EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
@@ -217,8 +204,6 @@ void EglManager::destroySurface(EGLSurface surface) {
 void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
-    usePBufferSurface();
-
     mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
     eglDestroySurface(mEglDisplay, mPBufferSurface);
@@ -236,11 +221,10 @@ bool EglManager::makeCurrent(EGLSurface surface) {
     if (isCurrent(surface)) return false;
 
     if (surface == EGL_NO_SURFACE) {
-        // If we are setting EGL_NO_SURFACE we don't care about any of the potential
-        // return errors, which would only happen if mEglDisplay had already been
-        // destroyed in which case the current context is already NO_CONTEXT
-        eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    } else if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
+        // Ensure we always have a valid surface & context
+        surface = mPBufferSurface;
+    }
+    if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
         LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
                 (void*)surface, egl_error_str());
     }
@@ -259,12 +243,10 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
         eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, height);
     }
     eglBeginFrame(mEglDisplay, surface);
-    mInFrame = true;
 }
 
 bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
         EGLint width, EGLint height) {
-    mInFrame = false;
 
 #if WAIT_FOR_GPU_COMPLETION
     {
@@ -326,10 +308,6 @@ void EglManager::fence() {
     eglClientWaitSyncKHR(mEglDisplay, fence,
             EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
     eglDestroySyncKHR(mEglDisplay, fence);
-}
-
-void EglManager::cancelFrame() {
-    mInFrame = false;
 }
 
 bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
