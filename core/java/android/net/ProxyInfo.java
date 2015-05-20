@@ -35,13 +35,7 @@ import java.util.Locale;
  *
  * Other HTTP stacks will need to obtain the proxy info from
  * {@link Proxy#PROXY_CHANGE_ACTION} broadcast as the extra {@link Proxy#EXTRA_PROXY_INFO}.
- *
- * @deprecated Please use {@link java.net.URL#openConnection}, {@link java.net.Proxy} and
- *     friends. The Apache HTTP client is no longer maintained and may be removed in a future
- *     release. Please visit <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">this webpage</a>
- *     for further details.
  */
-@Deprecated
 public class ProxyInfo implements Parcelable {
 
     private String mHost;
