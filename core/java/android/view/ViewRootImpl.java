@@ -1705,10 +1705,19 @@ public final class ViewRootImpl implements ViewParent,
                         mFullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
+                        // Only initialize up-front if transparent regions are not
+                        // requested, otherwise defer to see if the entire window
+                        // will be transparent
                         if (mAttachInfo.mHardwareRenderer != null) {
                             try {
                                 hwInitialized = mAttachInfo.mHardwareRenderer.initialize(
                                         mSurface);
+                                if (hwInitialized && (host.mPrivateFlags
+                                        & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
+                                    // Don't pre-allocate if transparent regions
+                                    // are requested as they may not be needed
+                                    mSurface.allocateBuffers();
+                                }
                             } catch (OutOfResourcesException e) {
                                 handleOutOfResourcesException(e);
                                 return;
