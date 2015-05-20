@@ -1725,28 +1725,68 @@ public class BackupManagerService {
                 // At package-changed we only care about looking at new transport states
                 if (changed) {
                     try {
+                        String[] components =
+                                intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+
                         if (MORE_DEBUG) {
                             Slog.i(TAG, "Package " + pkgName + " changed; rechecking");
+                            for (int i = 0; i < components.length; i++) {
+                                Slog.i(TAG, "   * " + components[i]);
+                            }
                         }
-                        // unbind existing possibly-stale connections to that package's transports
+
+                        // In general we need to try to bind any time we see a component enable
+                        // state change, because that change may have made a transport available.
+                        // However, because we currently only support a single transport component
+                        // per package, we can skip the bind attempt if the change (a) affects a
+                        // package known to host a transport, but (b) does not affect the known
+                        // transport component itself.
+                        //
+                        // In addition, if the change *is* to a known transport component, we need
+                        // to unbind it before retrying the binding.
+                        boolean tryBind = true;
                         synchronized (mTransports) {
                             TransportConnection conn = mTransportConnections.get(pkgName);
                             if (conn != null) {
+                                // We have a bound transport in this package; do we need to rebind it?
                                 final ServiceInfo svc = conn.mTransport;
                                 ComponentName svcName =
                                         new ComponentName(svc.packageName, svc.name);
-                                String flatName = svcName.flattenToShortString();
-                                Slog.i(TAG, "Unbinding " + svcName);
-
-                                mContext.unbindService(conn);
-                                mTransportConnections.remove(pkgName);
-                                mTransports.remove(mTransportNames.get(flatName));
-                                mTransportNames.remove(flatName);
+                                if (svc.packageName.equals(pkgName)) {
+                                    final String className = svcName.getClassName();
+                                    if (MORE_DEBUG) {
+                                        Slog.i(TAG, "Checking need to rebind " + className);
+                                    }
+                                    // See whether it's the transport component within this package
+                                    boolean isTransport = false;
+                                    for (int i = 0; i < components.length; i++) {
+                                        if (className.equals(components[i])) {
+                                            // Okay, it's an existing transport component.
+                                            final String flatName = svcName.flattenToShortString();
+                                            mContext.unbindService(conn);
+                                            mTransportConnections.remove(pkgName);
+                                            mTransports.remove(mTransportNames.get(flatName));
+                                            mTransportNames.remove(flatName);
+                                            isTransport = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!isTransport) {
+                                        // A non-transport component within a package that is hosting
+                                        // a bound transport
+                                        tryBind = false;
+                                    }
+                                }
                             }
                         }
-                        // and then (re)bind as appropriate
-                        PackageInfo app = mPackageManager.getPackageInfo(pkgName, 0);
-                        checkForTransportAndBind(app);
+                        // and now (re)bind as appropriate
+                        if (tryBind) {
+                            if (MORE_DEBUG) {
+                                Slog.i(TAG, "Yes, need to recheck binding");
+                            }
+                            PackageInfo app = mPackageManager.getPackageInfo(pkgName, 0);
+                            checkForTransportAndBind(app);
+                        }
                     } catch (NameNotFoundException e) {
                         // Nope, can't find it - just ignore
                         if (MORE_DEBUG) {
