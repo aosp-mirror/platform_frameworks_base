@@ -109,6 +109,7 @@ import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate;
 import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate.ShowListener;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 
@@ -459,6 +460,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpDecorFrame = new Rect();
     static final Rect mTmpStableFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
+    static final Rect mTmpOutsetFrame = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
     HashSet<IApplicationToken> mAppsToBeHidden = new HashSet<IApplicationToken>();
@@ -3328,6 +3330,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect of = mTmpOverscanFrame;
         final Rect vf = mTmpVisibleFrame;
         final Rect dcf = mTmpDecorFrame;
+        final Rect osf = mTmpOutsetFrame;
         pf.left = df.left = of.left = vf.left = mDockLeft;
         pf.top = df.top = of.top = vf.top = mDockTop;
         pf.right = df.right = of.right = vf.right = mDockRight;
@@ -3439,7 +3442,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // And compute the final frame.
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
                         mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
-                        mTmpNavigationFrame);
+                        mTmpNavigationFrame, mTmpNavigationFrame);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
                 if (mNavigationBarController.checkHiddenLw()) {
                     updateSysUiVisibility = true;
@@ -3464,7 +3467,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarLayer = mStatusBar.getSurfaceLayer();
 
                 // Let the status bar determine its size.
-                mStatusBar.computeFrameLw(pf, df, vf, vf, vf, dcf, vf);
+                mStatusBar.computeFrameLw(pf, df, vf, vf, vf, dcf, vf, osf);
 
                 // For layout, the status bar is always at the top with our fixed height.
                 mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
@@ -3638,6 +3641,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect vf = mTmpVisibleFrame;
         final Rect dcf = mTmpDecorFrame;
         final Rect sf = mTmpStableFrame;
+        final Rect osf = mTmpOutsetFrame;
         dcf.setEmpty();
 
         final boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
@@ -3650,6 +3654,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             sf.set(mOverscanLeft, mOverscanTop, mOverscanRight, mOverscanBottom);
         }
+        osf.set(mStableLeft, mStableTop, mStableRight, mStableBottom);
 
         if (!isDefaultDisplay) {
             if (attached != null) {
@@ -4022,6 +4027,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // If the device has a chin (e.g. some watches), a dead area at the bottom of the screen we
+        // need to provide information to the clients that want to pretend that you can draw there.
+        if (isDefaultDisplay) {
+            int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+            if (outset > 0) {
+                int rotation = Surface.ROTATION_0;
+                try {
+                    rotation = mWindowManager.getRotation();
+                } catch (RemoteException e) {
+                }
+                if (rotation == Surface.ROTATION_0) {
+                    osf.bottom += outset;
+                } else if (rotation == Surface.ROTATION_90) {
+                    osf.right += outset;
+                } else if (rotation == Surface.ROTATION_180) {
+                    osf.top -= outset;
+                } else if (rotation == Surface.ROTATION_270) {
+                    osf.left -= outset;
+                }
+                if (DEBUG_LAYOUT) Slog.v(TAG, "applying bottom outset of " + outset
+                        + " with rotation " + rotation + ", result: " + osf);
+            }
+        }
+
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
                 + " attach=" + attached + " type=" + attrs.type
@@ -4030,9 +4059,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " of=" + of.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
                 + " dcf=" + dcf.toShortString()
-                + " sf=" + sf.toShortString());
+                + " sf=" + sf.toShortString()
+                + " osf=" + osf.toShortString());
 
-        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf);
+        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf);
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.

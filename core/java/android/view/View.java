@@ -6667,6 +6667,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the outsets, which areas of the device that aren't a surface, but we would like to
+     * treat them as such.
+     * @hide
+     */
+    public void getOutsets(Rect outOutsetRect) {
+        outOutsetRect.set(mAttachInfo.mOutsets);
+    }
+
+    /**
      * Returns the visibility status for this view.
      *
      * @return One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
@@ -20310,6 +20319,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * stable system windows.
          */
         final Rect mStableInsets = new Rect();
+
+        /**
+         * For windows that include areas that are not covered by real surface these are the outsets
+         * for real surface.
+         */
+        final Rect mOutsets = new Rect();
 
         /**
          * The internal insets given by this window.  This value is
