@@ -115,6 +115,18 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
+         * Completely clears all the {@code NetworkCapabilities} from this builder instance,
+         * removing even the capabilities that are set by default when the object is constructed.
+         *
+         * @return The builder to facilitate chaining.
+         * @hide
+         */
+        public Builder clearCapabilities() {
+            mNetworkCapabilities.clearAll();
+            return this;
+        }
+
+        /**
          * Adds the given transport requirement to this builder.  These represent
          * the set of allowed transports for the request.  Only networks using one
          * of these transports will satisfy the request.  If no particular transports
