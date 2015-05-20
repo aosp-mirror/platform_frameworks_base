@@ -52,7 +52,6 @@ static void displayFontSamples(int fillNum) {
     fonts[3] = gFontSerif;
     fonts[4] = gFontSans;
 
-    uint width = gRenderSurfaceW;
     uint height = gRenderSurfaceH;
     int left = 0, right = 0, top = 0, bottom = 0;
     rsgMeasureText(sampleText, &left, &right, &top, &bottom);
