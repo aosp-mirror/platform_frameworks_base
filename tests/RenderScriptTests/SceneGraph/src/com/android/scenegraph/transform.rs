@@ -26,6 +26,7 @@ typedef struct {
 } ParentData;
 
 //#define DEBUG_TRANSFORMS
+/* Unused function:
 static void debugTransform(SgTransform *data, const ParentData *parent) {
     rsDebug("****** <Transform> ******", (int)data);
     printName(data->name);
@@ -53,6 +54,7 @@ static void debugTransform(SgTransform *data, const ParentData *parent) {
     rsDebug("timestamp", data->timestamp);
     rsDebug("****** </Transform> ******", (int)data);
 }
+*/
 
 static void appendTransformation(int type, float4 data, rs_matrix4x4 *mat) {
     rs_matrix4x4 temp;
@@ -119,7 +121,7 @@ void root(const rs_allocation *v_in, rs_allocation *v_out, const void *usrData) 
     }
 
     if (rsIsObject(data->children)) {
-        rs_allocation nullAlloc;
+        rs_allocation nullAlloc = {0};
         rsForEach(gTransformScript, data->children, nullAlloc, &toChild, sizeof(toChild));
     }
 

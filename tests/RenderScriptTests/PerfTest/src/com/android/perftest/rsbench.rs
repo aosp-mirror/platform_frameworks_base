@@ -85,7 +85,7 @@ static void runSubTest(int index) {
     TestData testData;
     fillSurfaceParams(&testData);
 
-    rs_allocation null_alloc;
+    rs_allocation null_alloc = {0};
     rsForEach(gTestScripts[index].testScript,
               gTestScripts[index].testData,
               null_alloc,
@@ -125,7 +125,6 @@ static bool checkInit() {
 
 static int benchMode = 0;
 static bool benchmarkSingleTest = false;
-static int benchSubMode = 0;
 static int runningLoops = 0;
 static bool sendMsgFlag = false;
 
@@ -209,7 +208,6 @@ static void benchmark() {
     drawOffscreenResult(0, 0, quadW, quadH);
 
     int left = 0, right = 0, top = 0, bottom = 0;
-    uint width = rsgGetWidth();
     uint height = rsgGetHeight();
     rsgFontColor(0.9f, 0.9f, 0.95f, 1.0f);
     rsgBindFont(gFontSerif);
