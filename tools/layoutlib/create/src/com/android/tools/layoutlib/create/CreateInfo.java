@@ -26,7 +26,9 @@ import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -105,6 +107,7 @@ public final class CreateInfo implements ICreateInfo {
       return JAVA_PKG_CLASSES;
     }
 
+    @Override
     public Set<String> getExcludedClasses() {
         String[] refactoredClasses = getJavaPkgClasses();
         int count = refactoredClasses.length / 2 + EXCLUDED_CLASSES.length;
@@ -115,6 +118,12 @@ public final class CreateInfo implements ICreateInfo {
         excludedClasses.addAll(Arrays.asList(EXCLUDED_CLASSES));
         return excludedClasses;
     }
+
+    @Override
+    public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
+        return INJECTED_METHODS;
+    }
+
     //-----
 
     /**
@@ -286,5 +295,11 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] DELETE_RETURNS =
         new String[] {
             null };                         // separator, for next class/methods list.
+
+    private final static Map<String, InjectMethodRunnable> INJECTED_METHODS =
+            new HashMap<String, InjectMethodRunnable>(1) {{
+                put("android.content.Context",
+                        InjectMethodRunnables.CONTEXT_GET_FRAMEWORK_CLASS_LOADER);
+            }};
 }
 
