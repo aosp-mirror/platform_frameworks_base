@@ -14,30 +14,24 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
+
 <set
     xmlns:android="http://schemas.android.com/apk/res/android" >
-    <objectAnimator
-        android:duration="166"
-        android:propertyName="trimPathEnd"
-        android:valueFrom="0.0"
-        android:valueTo="1.0"
-        android:valueType="floatType"
-        android:interpolator="@android:interpolator/fast_out_slow_in" />
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="150"
+            android:duration="60"
             android:propertyName="trimPathStart"
             android:valueFrom="0.0"
             android:valueTo="0.0"
             android:valueType="floatType"
             android:interpolator="@android:interpolator/linear" />
         <objectAnimator
-            android:duration="166"
+            android:duration="216"
             android:propertyName="trimPathStart"
             android:valueFrom="0.0"
             android:valueTo="1.0"
             android:valueType="floatType"
-            android:interpolator="@interpolator/lockscreen_fingerprint_error_state_animation_interpolator_2" />
+            android:interpolator="@interpolator/lockscreen_fingerprint_draw_off_animation_interpolator_1" />
     </set>
 </set>

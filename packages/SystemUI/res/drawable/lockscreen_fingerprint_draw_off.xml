@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2015 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="lockscreen_fingerprint_draw_off"
+    android:width="32dp"
+    android:viewportWidth="32"
+    android:height="32dp"
+    android:viewportHeight="32" >
+    <group
+        android:name="white_fingerprint_ridges"
+        android:translateX="16.125"
+        android:translateY="19.75" >
+        <group
+            android:name="white_fingerprint_ridges_pivot"
+            android:translateX="33.2085"
+            android:translateY="30.91685" >
+            <group
+                android:name="ridge_5" >
+                <path
+                    android:name="ridge_5_path"
+                    android:pathData="M -25.3591003418,-24.4138946533 c -0.569000244141,0.106399536133 -1.12660217285,0.140594482422 -1.45460510254,0.140594482422 c -1.29689025879,0.0 -2.53239440918,-0.343307495117 -3.62019348145,-1.12400817871 c -1.67700195312,-1.20349121094 -2.76950073242,-3.17008972168 -2.76950073242,-5.39189147949"
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.5"
+                    android:strokeWidth="1.45"
+                    android:strokeLineCap="round" />
+            </group>
+            <group
+                android:name="ridge_4" >
+                <path
+                    android:name="ridge_7_path"
+                    android:pathData="M -36.1409912109,-21.7843475342 c -1.00540161133,-1.19300842285 -1.57499694824,-1.9181060791 -2.36520385742,-3.50170898438 c -0.827560424805,-1.65869140625 -1.31352233887,-3.49159240723 -1.31352233887,-5.48489379883 c 0.0,-3.66279602051 2.96932983398,-6.63220214844 6.63221740723,-6.63220214844 c 3.6628112793,0.0 6.63220214844,2.96940612793 6.63220214844,6.63220214844"
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.5"
+                    android:strokeWidth="1.45"
+                    android:strokeLineCap="round" />
+            </group>
+            <group
+                android:name="ridge_3" >
+                <path
+                    android:name="ridge_6_path"
+                    android:pathData="M -42.1907958984,-25.6756896973 c -0.758117675781,-2.14370727539 -0.896545410156,-3.86891174316 -0.896545410156,-5.12921142578 c 0.0,-1.46069335938 0.249176025391,-2.84799194336 0.814682006836,-4.09748840332 c 1.56153869629,-3.45030212402 5.03434753418,-5.85076904297 9.0679473877,-5.85076904297 c 5.49430847168,0.0 9.94830322266,4.4539642334 9.94830322266,9.94825744629 c 0.0,1.83151245117 -1.48460388184,3.31610107422 -3.31610107422,3.31610107422 c -1.83149719238,0.0 -3.31610107422,-1.48469543457 -3.31610107422,-3.31610107422 c 0.0,-1.83139038086 -1.48458862305,-3.31610107422 -3.31610107422,-3.31610107422 c -1.83149719238,0.0 -3.31610107422,1.48471069336 -3.31610107422,3.31610107422 c 0.0,2.57020568848 0.989517211914,4.88710021973 2.60510253906,6.5865020752 c 1.22210693359,1.28550720215 2.43139648438,2.09950256348 4.47590637207,2.69030761719"
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.5"
+                    android:strokeWidth="1.45"
+                    android:strokeLineCap="round" />
+            </group>
+            <group
+                android:name="ridge_2" >
+                <path
+                    android:name="ridge_2_path"
+                    android:pathData="M -44.0646514893,-38.1672973633 c 1.19026184082,-1.77430725098 2.67503356934,-3.24531555176 4.55902099609,-4.27278137207 c 1.88395690918,-1.0274810791 4.04466247559,-1.61137390137 6.34175109863,-1.61137390137 c 2.28761291504,0.0 4.43991088867,0.579071044922 6.31831359863,1.59861755371 c 1.8784942627,1.01954650879 3.36059570312,2.4796295166 4.55279541016,4.24153137207"
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.5"
+                    android:strokeWidth="1.45"
+                    android:strokeLineCap="round" />
+            </group>
+            <group
+                android:name="ridge_1"
+                android:translateX="-97.5"
+                android:translateY="-142.5" >
+                <path
+                    android:name="ridge_1_path"
+                    android:pathData="M 71.7812347412,97.0507202148 c -2.27149963379,-1.31344604492 -4.71360778809,-2.07006835938 -7.56221008301,-2.07006835938 c -2.84869384766,0.0 -5.23320007324,0.779556274414 -7.34411621094,2.07006835938"
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.5"
+                    android:strokeWidth="1.45"
+                    android:strokeLineCap="round" />
+            </group>
+        </group>
+    </group>
+</vector>
