@@ -275,7 +275,6 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             mContext.getRenderResources().setLogger(null);
         }
         ParserFactory.setParserFactory(null);
-
     }
 
     public static BridgeContext getCurrentContext() {
