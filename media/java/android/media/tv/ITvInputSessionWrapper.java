@@ -173,10 +173,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_TIME_SHIFT_SET_PLAYBACK_PARAMS: {
-                PlaybackParams params = new PlaybackParams()
-                        .setSpeed((Float) msg.obj)
-                        .setAudioFallbackMode(msg.arg1);
-                mTvInputSessionImpl.timeShiftSetPlaybackParams(params);
+                mTvInputSessionImpl.timeShiftSetPlaybackParams((PlaybackParams) msg.obj);
                 break;
             }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
