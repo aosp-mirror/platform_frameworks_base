@@ -25178,13 +25178,6 @@ package android.provider {
     field public static final int TYPE_KEEP_TOGETHER = 1; // 0x1
   }
 
-  public static final class ContactsContract.Authorization {
-    ctor public ContactsContract.Authorization();
-    field public static final java.lang.String AUTHORIZATION_METHOD = "authorize";
-    field public static final java.lang.String KEY_AUTHORIZED_URI = "authorized_uri";
-    field public static final java.lang.String KEY_URI_TO_AUTHORIZE = "uri_to_authorize";
-  }
-
   protected static abstract interface ContactsContract.BaseSyncColumns {
     field public static final java.lang.String SYNC1 = "sync1";
     field public static final java.lang.String SYNC2 = "sync2";
@@ -25827,16 +25820,6 @@ package android.provider {
     method public static void set(android.content.ContentProviderClient, android.accounts.Account, byte[]) throws android.os.RemoteException;
     field public static final java.lang.String CONTENT_DIRECTORY = "syncstate";
     field public static final android.net.Uri CONTENT_URI;
-  }
-
-  public static final class ContactsContract.ProviderStatus {
-    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/provider_status";
-    field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String STATUS = "status";
-    field public static final int STATUS_CHANGING_LOCALE = 3; // 0x3
-    field public static final int STATUS_NORMAL = 0; // 0x0
-    field public static final int STATUS_NO_ACCOUNTS_NO_CONTACTS = 4; // 0x4
-    field public static final int STATUS_UPGRADING = 1; // 0x1
   }
 
   public static final class ContactsContract.QuickContact {
