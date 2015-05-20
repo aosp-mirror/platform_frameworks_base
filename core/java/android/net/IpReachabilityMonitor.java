@@ -76,6 +76,60 @@ public class IpReachabilityMonitor {
     private final NetlinkSocketObserver mNetlinkSocketObserver;
     private final Thread mObserverThread;
 
+    /**
+     * Make the kernel to perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
+     * for the given IP address on the specified interface index.
+     *
+     * @return true, if the request was successfully passed to the kernel; false otherwise.
+     */
+    public static boolean probeNeighbor(int ifIndex, InetAddress ip) {
+        final long IO_TIMEOUT = 300L;
+        // This currently does not cause neighbor probing if the target |ip|
+        // has been confirmed reachable within the past "delay_probe_time"
+        // seconds, i.e. within the past 5 seconds.
+        //
+        // TODO: replace with a transition directly to NUD_PROBE state once
+        // kernels are updated to do so correctly.
+        if (DBG) { Log.d(TAG, "Probing ip=" + ip.getHostAddress()); }
+
+        final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
+                1, ip, StructNdMsg.NUD_DELAY, ifIndex, null);
+        NetlinkSocket nlSocket = null;
+        boolean returnValue = false;
+
+        try {
+            nlSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
+            nlSocket.connectToKernel();
+            nlSocket.sendMessage(msg, 0, msg.length, IO_TIMEOUT);
+            final ByteBuffer bytes = nlSocket.recvMessage(IO_TIMEOUT);
+            final NetlinkMessage response = NetlinkMessage.parse(bytes);
+            if (response != null && response instanceof NetlinkErrorMessage &&
+                    (((NetlinkErrorMessage) response).getNlMsgError() != null) &&
+                    (((NetlinkErrorMessage) response).getNlMsgError().error == 0)) {
+                returnValue = true;
+            } else {
+                String errmsg;
+                if (bytes == null) {
+                    errmsg = "null recvMessage";
+                } else if (response == null) {
+                    bytes.position(0);
+                    errmsg = "raw bytes: " + NetlinkConstants.hexify(bytes);
+                } else {
+                    errmsg = response.toString();
+                }
+                Log.e(TAG, "Error probing ip=" + ip.getHostAddress() +
+                        ", errmsg=" + errmsg);
+            }
+        } catch (ErrnoException | InterruptedIOException | SocketException e) {
+            Log.d(TAG, "Error probing ip=" + ip.getHostAddress(), e);
+        }
+
+        if (nlSocket != null) {
+            nlSocket.close();
+        }
+        return returnValue;
+    }
+
     public IpReachabilityMonitor(String ifName, Callback callback) throws IllegalArgumentException {
         mInterfaceName = ifName;
         int ifIndex = -1;
@@ -216,38 +270,10 @@ public class IpReachabilityMonitor {
             ipProbeList.addAll(mIpWatchList);
         }
         for (InetAddress target : ipProbeList) {
-            if (!stillRunning()) { break; }
-            probeIp(target);
-        }
-    }
-
-    private void probeIp(InetAddress ip) {
-        // This currently does not cause neighbor probing if the target |ip|
-        // has been confirmed reachable within the past "delay_probe_time"
-        // seconds, i.e. within the past 5 seconds.
-        //
-        // TODO: replace with a transition directly to NUD_PROBE state once
-        // kernels are updated to do so correctly.
-        if (DBG) { Log.d(TAG, "Probing ip=" + ip.getHostAddress()); }
-
-        final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
-                1, ip, StructNdMsg.NUD_DELAY, mInterfaceIndex, null);
-        NetlinkSocket nlSocket = null;
-
-        try {
-            nlSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
-            nlSocket.connectToKernel();
-            nlSocket.sendMessage(msg, 0, msg.length, 300);
-            final NetlinkMessage response = NetlinkMessage.parse(nlSocket.recvMessage(300));
-            if (response != null && response instanceof NetlinkErrorMessage) {
-                Log.e(TAG, "Error probing ip=" + response.toString());
+            if (!stillRunning()) {
+                break;
             }
-        } catch (ErrnoException | InterruptedIOException | SocketException e) {
-            Log.d(TAG, "Error probing ip=" + ip.getHostAddress(), e);
-        }
-
-        if (nlSocket != null) {
-            nlSocket.close();
+            probeNeighbor(mInterfaceIndex, target);
         }
     }
 
