@@ -19907,7 +19907,7 @@ package android.net {
     field public static final java.lang.String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 
-  public deprecated class ProxyInfo implements android.os.Parcelable {
+  public class ProxyInfo implements android.os.Parcelable {
     method public static android.net.ProxyInfo buildDirectProxy(java.lang.String, int);
     method public static android.net.ProxyInfo buildDirectProxy(java.lang.String, int, java.util.List<java.lang.String>);
     method public static android.net.ProxyInfo buildPacProxy(android.net.Uri);
