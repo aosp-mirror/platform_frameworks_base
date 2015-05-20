@@ -2153,16 +2153,23 @@ public class AudioTrack
     //--------------------------------------------------------------------------
     // (Re)Routing Info
     //--------------------
+    /**
+     * Defines the interface by which applications can receive notifications of routing
+     * changes for the associated {@link AudioTrack}.
+     */
     public interface OnRoutingChangedListener {
         /**
          * Called when the routing of an AudioTrack changes from either and explicit or
-         * policy rerouting.
+         * policy rerouting.  Use {@link #getRoutedDevice()} to retrieve the newly routed-to
+         * device.
          */
         public void onRoutingChanged(AudioTrack audioTrack);
     }
 
     /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
+     * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
+     * <code>getRoutedDevice()</code> will return null.
      */
     public AudioDeviceInfo getRoutedDevice() {
         int deviceId = native_getRoutedDeviceId();
@@ -2180,8 +2187,9 @@ public class AudioTrack
     }
 
     /**
-     * The message sent to apps when the routing of this AudioTrack changes if they provide
-     * a {#link Handler} object to addOnRoutingChangedListener().
+     * The list of AudioTrack.OnRoutingChangedListener interfaces added (with
+     * {@link AudioTrack#addOnRoutingChangedListener(OnRoutingChangedListener, android.os.Handler)}
+     * by an app to receive (re)routing notifications.
      */
     private ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>
         mRoutingChangeListeners =
@@ -2190,6 +2198,11 @@ public class AudioTrack
     /**
      * Adds an {@link OnRoutingChangedListener} to receive notifications of routing changes
      * on this AudioTrack.
+     * @param listener The {@link OnRoutingChangedListener} interface to receive notifications
+     * of rerouting events.
+     * @param handler  Specifies the {@link Handler} object for the thread on which to execute
+     * the callback. If <code>null</code>, the {@link Handler} associated with the main
+     * {@link Looper} will be used.
      */
     public void addOnRoutingChangedListener(OnRoutingChangedListener listener,
             android.os.Handler handler) {
@@ -2206,7 +2219,8 @@ public class AudioTrack
 
     /**
      * Removes an {@link OnRoutingChangedListener} which has been previously added
-     * to receive notifications of changes to the set of connected audio devices.
+     * to receive rerouting notifications.
+     * @param listener The previously added {@link OnRoutingChangedListener} interface to remove.
      */
     public void removeOnRoutingChangedListener(OnRoutingChangedListener listener) {
         synchronized (mRoutingChangeListeners) {
