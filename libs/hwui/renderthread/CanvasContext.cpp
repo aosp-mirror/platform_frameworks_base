@@ -262,8 +262,6 @@ void CanvasContext::draw() {
 
     if (drew) {
         swapBuffers(dirty, width, height);
-    } else {
-        mEglManager.cancelFrame();
     }
 
     // TODO: Use a fence for real completion?
@@ -297,7 +295,6 @@ void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
     ATRACE_CALL();
     DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
     if (thread.eglManager().hasEglContext()) {
-        thread.eglManager().requireGlContext();
         mode = DrawGlInfo::kModeProcess;
     }
 
@@ -318,7 +315,6 @@ static void destroyPrefetechedNode(RenderNode* node) {
 
 void CanvasContext::freePrefetechedLayers() {
     if (mPrefetechedLayers.size()) {
-        requireGlContext();
         std::for_each(mPrefetechedLayers.begin(), mPrefetechedLayers.end(), destroyPrefetechedNode);
         mPrefetechedLayers.clear();
     }
@@ -329,7 +325,6 @@ void CanvasContext::buildLayer(RenderNode* node) {
     if (!mEglManager.hasEglContext() || !mCanvas) {
         return;
     }
-    requireGlContext();
     // buildLayer() will leave the tree in an unknown state, so we must stop drawing
     stopDrawing();
 
@@ -352,7 +347,6 @@ void CanvasContext::buildLayer(RenderNode* node) {
 }
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
-    requireGlContext();
     layer->apply();
     return LayerRenderer::copyLayer(mRenderThread.renderState(), layer->backingLayer(), bitmap);
 }
@@ -360,7 +354,6 @@ bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap)
 void CanvasContext::destroyHardwareResources() {
     stopDrawing();
     if (mEglManager.hasEglContext()) {
-        requireGlContext();
         freePrefetechedLayers();
         mRootRenderNode->destroyHardwareResources();
         Caches::getInstance().flush(Caches::kFlushMode_Layers);
@@ -372,7 +365,6 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     if (!thread.eglManager().hasEglContext()) return;
 
     ATRACE_CALL();
-    thread.eglManager().requireGlContext();
     if (level >= TRIM_MEMORY_COMPLETE) {
         Caches::getInstance().flush(Caches::kFlushMode_Full);
         thread.eglManager().destroy();
@@ -382,17 +374,14 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
 }
 
 void CanvasContext::runWithGlContext(RenderTask* task) {
-    requireGlContext();
+    LOG_ALWAYS_FATAL_IF(!mEglManager.hasEglContext(),
+            "GL context not initialized!");
     task->run();
 }
 
 Layer* CanvasContext::createTextureLayer() {
     requireSurface();
     return LayerRenderer::createTextureLayer(mRenderThread.renderState());
-}
-
-void CanvasContext::requireGlContext() {
-    mEglManager.requireGlContext();
 }
 
 void CanvasContext::setTextureAtlas(RenderThread& thread,

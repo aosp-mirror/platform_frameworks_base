@@ -119,7 +119,6 @@ void DeferredLayerUpdater::doUpdateTexImage() {
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
     if (mSurfaceTexture.get()) {
-        mRenderThread.eglManager().requireGlContext();
         status_t err = mSurfaceTexture->detachFromContext();
         if (err != 0) {
             // TODO: Elevate to fatal exception

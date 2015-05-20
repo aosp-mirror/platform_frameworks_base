@@ -169,7 +169,8 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
 
 void RenderState::requireGLContext() {
     assertOnGLThread();
-    mRenderThread.eglManager().requireGlContext();
+    LOG_ALWAYS_FATAL_IF(!mRenderThread.eglManager().hasEglContext(),
+            "No GL context!");
 }
 
 void RenderState::assertOnGLThread() {

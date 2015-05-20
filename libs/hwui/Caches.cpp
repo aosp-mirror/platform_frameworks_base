@@ -23,6 +23,7 @@
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
+#include "utils/GLUtils.h"
 
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -276,6 +277,9 @@ void Caches::flush(FlushMode mode) {
 
     clearGarbage();
     glFinish();
+    // Errors during cleanup should be considered non-fatal, dump them and
+    // and move on. TODO: All errors or just errors like bad surface?
+    GLUtils::dumpGLErrors();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
