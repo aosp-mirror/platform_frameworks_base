@@ -136,7 +136,8 @@ import java.util.List;
         }
     }
 
-    private Result retrieveStatementFromUrl(String url, int maxIncludeLevel, AbstractAsset source)
+    private Result retrieveStatementFromUrl(String urlString, int maxIncludeLevel,
+                                            AbstractAsset source)
             throws AssociationServiceException {
         List<Statement> statements = new ArrayList<Statement>();
         if (maxIncludeLevel < 0) {
@@ -145,7 +146,12 @@ import java.util.List;
 
         WebContent webContent;
         try {
-            webContent = mUrlFetcher.getWebContentFromUrl(new URL(url),
+            URL url = new URL(urlString);
+            if (!source.followInsecureInclude()
+                    && !url.getProtocol().toLowerCase().equals("https")) {
+                return Result.create(statements, DO_NOT_CACHE_RESULT);
+            }
+            webContent = mUrlFetcher.getWebContentFromUrl(url,
                     HTTP_CONTENT_SIZE_LIMIT_IN_BYTES, HTTP_CONNECTION_TIMEOUT_MILLIS);
         } catch (IOException e) {
             return Result.create(statements, DO_NOT_CACHE_RESULT);
