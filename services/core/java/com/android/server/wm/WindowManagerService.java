@@ -108,7 +108,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.FakeWindow;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -382,10 +381,10 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<>();
 
     /**
-     * Fake windows added to the window manager.  Note: ordered from top to
-     * bottom, opposite of mWindows.
+     * The input consumer added to the window manager which consumes input events to windows below
+     * it.
      */
-    final ArrayList<FakeWindowImpl> mFakeWindows = new ArrayList<>();
+    InputConsumerImpl mInputConsumer;
 
     /**
      * Windows that are being resized.  Used so we can tell the client about
@@ -8966,9 +8965,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
 
-        final int NFW = mFakeWindows.size();
-        for (int i=0; i<NFW; i++) {
-            mFakeWindows.get(i).layout(dw, dh);
+        if (mInputConsumer != null) {
+            mInputConsumer.layout(dw, dh);
         }
 
         final int N = windows.size();
@@ -10995,28 +10993,19 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public FakeWindow addFakeWindow(Looper looper,
-            InputEventReceiver.Factory inputEventReceiverFactory,
-            String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
-            boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen) {
+    public InputConsumerImpl addInputConsumer(Looper looper,
+            InputEventReceiver.Factory inputEventReceiverFactory) {
         synchronized (mWindowMap) {
-            FakeWindowImpl fw = new FakeWindowImpl(this, looper, inputEventReceiverFactory,
-                    name, windowType, layoutParamsFlags, canReceiveKeys, hasFocus, touchFullscreen);
-            int i=0;
-            while (i<mFakeWindows.size()) {
-                if (mFakeWindows.get(i).mWindowLayer <= fw.mWindowLayer) {
-                    break;
-                }
-            }
-            mFakeWindows.add(i, fw);
+            mInputConsumer = new InputConsumerImpl(this, looper, inputEventReceiverFactory);
             mInputMonitor.updateInputWindowsLw(true);
-            return fw;
+            return mInputConsumer;
         }
     }
 
-    boolean removeFakeWindowLocked(FakeWindow window) {
+    boolean removeInputConsumer() {
         synchronized (mWindowMap) {
-            if (mFakeWindows.remove(window)) {
+            if (mInputConsumer != null) {
+                mInputConsumer = null;
                 mInputMonitor.updateInputWindowsLw(true);
                 return true;
             }

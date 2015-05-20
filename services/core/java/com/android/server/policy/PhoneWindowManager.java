@@ -51,7 +51,6 @@ import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.session.MediaSessionLegacyHelper;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.FactoryTest;
@@ -97,7 +96,6 @@ import com.android.internal.policy.PhoneWindow;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -458,7 +456,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // menu needs to be displayed.
     boolean mLastFocusNeedsMenu = false;
 
-    FakeWindow mHideNavFakeWindow = null;
+    InputConsumer mInputConsumer = null;
 
     static final Rect mTmpParentFrame = new Rect();
     static final Rect mTmpDisplayFrame = new Rect();
@@ -1817,7 +1815,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_APPLICATION_STARTING:
             case TYPE_BOOT_PROGRESS:
             case TYPE_DISPLAY_OVERLAY:
-            case TYPE_HIDDEN_NAV_CONSUMER:
+            case TYPE_INPUT_CONSUMER:
             case TYPE_KEYGUARD_SCRIM:
             case TYPE_KEYGUARD_DIALOG:
             case TYPE_MAGNIFICATION_OVERLAY:
@@ -1942,75 +1940,75 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_VOICE_INTERACTION:
             // voice interaction layer is almost immediately above apps.
             return 5;
-        case TYPE_SYSTEM_DIALOG:
+        case TYPE_INPUT_CONSUMER:
             return 6;
+        case TYPE_SYSTEM_DIALOG:
+            return 7;
         case TYPE_TOAST:
             // toasts and the plugged-in battery thing
-            return 7;
+            return 8;
         case TYPE_PRIORITY_PHONE:
             // SIM errors and unlock.  Not sure if this really should be in a high layer.
-            return 8;
+            return 9;
         case TYPE_DREAM:
             // used for Dreams (screensavers with TYPE_DREAM windows)
-            return 9;
+            return 10;
         case TYPE_SYSTEM_ALERT:
             // like the ANR / app crashed dialogs
-            return 10;
+            return 11;
         case TYPE_INPUT_METHOD:
             // on-screen keyboards and other such input method user interfaces go here.
-            return 11;
+            return 12;
         case TYPE_INPUT_METHOD_DIALOG:
             // on-screen keyboards and other such input method user interfaces go here.
-            return 12;
+            return 13;
         case TYPE_KEYGUARD_SCRIM:
             // the safety window that shows behind keyguard while keyguard is starting
-            return 13;
-        case TYPE_STATUS_BAR_SUB_PANEL:
             return 14;
-        case TYPE_STATUS_BAR:
+        case TYPE_STATUS_BAR_SUB_PANEL:
             return 15;
-        case TYPE_STATUS_BAR_PANEL:
+        case TYPE_STATUS_BAR:
             return 16;
-        case TYPE_KEYGUARD_DIALOG:
+        case TYPE_STATUS_BAR_PANEL:
             return 17;
+        case TYPE_KEYGUARD_DIALOG:
+            return 18;
         case TYPE_VOLUME_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 18;
+            return 19;
         case TYPE_SYSTEM_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 19;
+            return 20;
         case TYPE_NAVIGATION_BAR:
             // the navigation bar, if available, shows atop most things
-            return 20;
+            return 21;
         case TYPE_NAVIGATION_BAR_PANEL:
             // some panels (e.g. search) need to show on top of the navigation bar
-            return 21;
+            return 22;
         case TYPE_SYSTEM_ERROR:
             // system-level error dialogs
-            return 22;
+            return 23;
         case TYPE_MAGNIFICATION_OVERLAY:
             // used to highlight the magnified portion of a display
-            return 23;
+            return 24;
         case TYPE_DISPLAY_OVERLAY:
             // used to simulate secondary display devices
-            return 24;
+            return 25;
         case TYPE_DRAG:
             // the drag layer: input for drag-and-drop is associated with this window,
             // which sits above all other focusable windows
-            return 25;
+            return 26;
         case TYPE_ACCESSIBILITY_OVERLAY:
             // overlay put by accessibility services to intercept user interaction
-            return 26;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 27;
-        case TYPE_BOOT_PROGRESS:
+        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 28;
+        case TYPE_BOOT_PROGRESS:
+            return 29;
         case TYPE_POINTER:
             // the (mouse) pointer layer
-            return 29;
-        case TYPE_HIDDEN_NAV_CONSUMER:
             return 30;
         }
         Log.e(TAG, "Unknown window type: " + type);
@@ -3385,15 +3383,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // detect when the user presses anywhere to bring back the nav
             // bar and ensure the application doesn't see the event.
             if (navVisible || navAllowedHidden) {
-                if (mHideNavFakeWindow != null) {
-                    mHideNavFakeWindow.dismiss();
-                    mHideNavFakeWindow = null;
+                if (mInputConsumer != null) {
+                    mInputConsumer.dismiss();
+                    mInputConsumer = null;
                 }
-            } else if (mHideNavFakeWindow == null) {
-                mHideNavFakeWindow = mWindowManagerFuncs.addFakeWindow(
-                        mHandler.getLooper(), mHideNavInputEventReceiverFactory,
-                        "hidden nav", WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER, 0,
-                        0, false, false, true);
+            } else if (mInputConsumer == null) {
+                mInputConsumer = mWindowManagerFuncs.addInputConsumer(mHandler.getLooper(),
+                        mHideNavInputEventReceiverFactory);
             }
 
             // For purposes of positioning and showing the nav bar, if we have
@@ -6311,7 +6307,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         vis = mNavigationBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
 
         // prevent status bar interaction from clearing certain flags
-        boolean statusBarHasFocus = win.getAttrs().type == TYPE_STATUS_BAR;
+        int type = win.getAttrs().type;
+        boolean statusBarHasFocus = type == TYPE_STATUS_BAR;
         if (statusBarHasFocus && !isStatusBarKeyguard()) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -6322,6 +6319,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 flags |= View.STATUS_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSLUCENT;
             }
             vis = (vis & ~flags) | (oldVis & flags);
+        }
+        if (windowTypeToLayerLw(type) > windowTypeToLayerLw(TYPE_INPUT_CONSUMER)) {
+            // We can't get into fullscreen from this window otherwise the consumer would not get
+            // the input events.
+            vis = (vis & ~View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
 
         if (!areTranslucentBarsAllowed() && transWin != mStatusBar) {
