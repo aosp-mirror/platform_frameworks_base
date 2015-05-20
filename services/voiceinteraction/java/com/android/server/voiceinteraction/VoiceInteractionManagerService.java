@@ -151,13 +151,25 @@ public class VoiceInteractionManagerService extends SystemService {
                 // the user to have the default voice interaction service enabled.
                 // Note that we don't do this for low-RAM devices, since we aren't
                 // supporting voice interaction services there.
-                curInteractorInfo = findAvailInteractor(userHandle, curRecognizer);
+                curInteractorInfo = findAvailInteractor(userHandle, curRecognizer.getPackageName());
                 if (curInteractorInfo != null) {
                     // Looks good!  We'll apply this one.  To make it happen, we clear the
                     // recognizer so that we don't think we have anything set and will
                     // re-apply the settings.
                     if (DEBUG) Slog.d(TAG, "No set interactor, found avail: "
                             + curInteractorInfo.getServiceInfo().name);
+                    curRecognizer = null;
+                }
+            }
+
+            // If forceInteractorPackage exists, try to apply the interactor from this package if
+            // possible and ignore the regular interactor setting.
+            String forceInteractorPackage =
+                    getForceVoiceInteractionServicePackage(mContext.getResources());
+            if (forceInteractorPackage != null) {
+                curInteractorInfo = findAvailInteractor(userHandle, forceInteractorPackage);
+                if (curInteractorInfo != null) {
+                    // We'll apply this one. Clear the recognizer and re-apply the settings.
                     curRecognizer = null;
                 }
             }
@@ -225,8 +237,14 @@ public class VoiceInteractionManagerService extends SystemService {
 
         private boolean shouldEnableService(Resources res) {
             // VoiceInteractionService should not be enabled on low ram devices unless it has the config flag.
-            return !ActivityManager.isLowRamDeviceStatic()
-                    || res.getBoolean(com.android.internal.R.bool.config_forceEnableVoiceInteractionService);
+            return !ActivityManager.isLowRamDeviceStatic() ||
+                    getForceVoiceInteractionServicePackage(res) != null;
+        }
+
+        private String getForceVoiceInteractionServicePackage(Resources res) {
+            String interactorPackage =
+                    res.getString(com.android.internal.R.string.config_forceVoiceInteractionServicePackage);
+            return TextUtils.isEmpty(interactorPackage) ? null : interactorPackage;
         }
 
         public void systemRunning(boolean safeMode) {
@@ -279,7 +297,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        VoiceInteractionServiceInfo findAvailInteractor(int userHandle, ComponentName recognizer) {
+        VoiceInteractionServiceInfo findAvailInteractor(int userHandle, String packageName) {
             List<ResolveInfo> available =
                     mContext.getPackageManager().queryIntentServicesAsUser(
                             new Intent(VoiceInteractionService.SERVICE_INTERFACE), 0, userHandle);
@@ -300,8 +318,8 @@ public class VoiceInteractionManagerService extends SystemService {
                             VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
                                     mContext.getPackageManager(), comp, userHandle);
                             if (info.getParseError() == null) {
-                                if (recognizer == null || info.getServiceInfo().packageName.equals(
-                                        recognizer.getPackageName())) {
+                                if (packageName == null || info.getServiceInfo().packageName.equals(
+                                        packageName)) {
                                     if (foundInfo == null) {
                                         foundInfo = info;
                                     } else {
