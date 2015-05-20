@@ -42,6 +42,8 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     private boolean mKeyguardMode;
     final UserManager mUserManager;
 
+    private final int[] mTmpInt2 = new int[2];
+
     public MultiUserSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUserManager = UserManager.get(getContext());
@@ -77,7 +79,15 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                     UserSwitcherController userSwitcherController =
                             mQsPanel.getHost().getUserSwitcherController();
                     if (userSwitcherController != null) {
-                        mQsPanel.showDetailAdapter(true, userSwitcherController.userDetailAdapter);
+                        View center = getChildCount() > 0 ? getChildAt(0) : this;
+
+                        center.getLocationInWindow(mTmpInt2);
+                        mTmpInt2[0] += center.getWidth() / 2;
+                        mTmpInt2[1] += center.getHeight() / 2;
+
+                        mQsPanel.showDetailAdapter(true,
+                                userSwitcherController.userDetailAdapter,
+                                mTmpInt2);
                     }
                 }
             }
