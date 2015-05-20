@@ -218,7 +218,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR, to = "TYPE_NAVIGATION_BAR"),
             @ViewDebug.IntToString(from = TYPE_VOLUME_OVERLAY, to = "TYPE_VOLUME_OVERLAY"),
             @ViewDebug.IntToString(from = TYPE_BOOT_PROGRESS, to = "TYPE_BOOT_PROGRESS"),
-            @ViewDebug.IntToString(from = TYPE_HIDDEN_NAV_CONSUMER, to = "TYPE_HIDDEN_NAV_CONSUMER"),
+            @ViewDebug.IntToString(from = TYPE_INPUT_CONSUMER, to = "TYPE_INPUT_CONSUMER"),
             @ViewDebug.IntToString(from = TYPE_DREAM, to = "TYPE_DREAM"),
             @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL, to = "TYPE_NAVIGATION_BAR_PANEL"),
             @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY, to = "TYPE_DISPLAY_OVERLAY"),
@@ -490,12 +490,11 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_BOOT_PROGRESS = FIRST_SYSTEM_WINDOW+21;
 
         /**
-         * Window type: Fake window to consume touch events when the navigation
-         * bar is hidden.
+         * Window type to consume input events when the systemUI bars are hidden.
          * In multiuser systems shows on all users' windows.
          * @hide
          */
-        public static final int TYPE_HIDDEN_NAV_CONSUMER = FIRST_SYSTEM_WINDOW+22;
+        public static final int TYPE_INPUT_CONSUMER = FIRST_SYSTEM_WINDOW+22;
 
         /**
          * Window type: Dreams (screen saver) window, just above keyguard.

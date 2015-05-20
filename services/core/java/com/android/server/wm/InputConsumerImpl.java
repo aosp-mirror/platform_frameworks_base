@@ -16,17 +16,18 @@
 
 package com.android.server.wm;
 
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
-
 import android.os.Looper;
 import android.os.Process;
 import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
+import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
-public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputWindowHandle;
+
+public final class InputConsumerImpl implements WindowManagerPolicy.InputConsumer {
     final WindowManagerService mService;
     final InputChannel mServerChannel, mClientChannel;
     final InputApplicationHandle mApplicationHandle;
@@ -34,12 +35,9 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
     final InputEventReceiver mInputEventReceiver;
     final int mWindowLayer;
 
-    boolean mTouchFullscreen;
-
-    public FakeWindowImpl(WindowManagerService service,
-            Looper looper, InputEventReceiver.Factory inputEventReceiverFactory,
-            String name, int windowType, int layoutParamsFlags,
-            boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen) {
+    public InputConsumerImpl(WindowManagerService service, Looper looper,
+            InputEventReceiver.Factory inputEventReceiverFactory) {
+        String name = "input consumer";
         mService = service;
 
         InputChannel[] channels = InputChannel.openInputChannelPair(name);
@@ -58,31 +56,25 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
         mWindowHandle = new InputWindowHandle(mApplicationHandle, null, Display.DEFAULT_DISPLAY);
         mWindowHandle.name = name;
         mWindowHandle.inputChannel = mServerChannel;
-        mWindowLayer = getLayerLw(windowType);
+        mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+        mWindowLayer = getLayerLw(mWindowHandle.layoutParamsType);
         mWindowHandle.layer = mWindowLayer;
-        mWindowHandle.layoutParamsFlags = layoutParamsFlags;
-        mWindowHandle.layoutParamsType = windowType;
+        mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
         mWindowHandle.visible = true;
-        mWindowHandle.canReceiveKeys = canReceiveKeys;
-        mWindowHandle.hasFocus = hasFocus;
+        mWindowHandle.canReceiveKeys = false;
+        mWindowHandle.hasFocus = false;
         mWindowHandle.hasWallpaper = false;
         mWindowHandle.paused = false;
         mWindowHandle.ownerPid = Process.myPid();
         mWindowHandle.ownerUid = Process.myUid();
         mWindowHandle.inputFeatures = 0;
         mWindowHandle.scaleFactor = 1.0f;
-
-        mTouchFullscreen = touchFullscreen;
     }
 
     void layout(int dw, int dh) {
-        if (mTouchFullscreen) {
-            mWindowHandle.touchableRegion.set(0, 0, dw, dh);
-        } else {
-            mWindowHandle.touchableRegion.setEmpty();
-        }
+        mWindowHandle.touchableRegion.set(0, 0, dw, dh);
         mWindowHandle.frameLeft = 0;
         mWindowHandle.frameTop = 0;
         mWindowHandle.frameRight = dw;
@@ -92,7 +84,7 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
     @Override
     public void dismiss() {
         synchronized (mService.mWindowMap) {
-            if (mService.removeFakeWindowLocked(this)) {
+            if (mService.removeInputConsumer()) {
                 mInputEventReceiver.dispose();
                 mService.mInputManager.unregisterInputChannel(mServerChannel);
                 mClientChannel.dispose();
