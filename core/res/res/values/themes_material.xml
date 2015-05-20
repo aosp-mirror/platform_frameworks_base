@@ -303,6 +303,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Material</item>
         <item name="preferenceFragmentPaddingSide">@dimen/preference_fragment_padding_side_material</item>
         <item name="detailsElementBackground">?attr/colorBackground</item>
+        <item name="fingerprintDrawable">@drawable/ic_fingerprint_dark</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@color/search_widget_corpus_item_background</item>
@@ -656,6 +657,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Material</item>
         <item name="preferenceFragmentPaddingSide">@dimen/preference_fragment_padding_side_material</item>
         <item name="detailsElementBackground">?attr/colorBackground</item>
+        <item name="fingerprintDrawable">@drawable/ic_fingerprint_light</item>
 
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@style/Widget.Material.PreferenceFrameLayout</item>
