@@ -2355,9 +2355,9 @@ public class AccountManagerService
             callingUid = packageUid;
         }
         checkReadAccountsPermission();
-        UserAccounts accounts = getUserAccounts(userId);
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             synchronized (accounts.cacheLock) {
                 return getAccountsFromCacheLocked(accounts, type, callingUid, callingPackage);
             }
