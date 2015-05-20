@@ -2022,83 +2022,8 @@ final class Settings {
                     |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
 
-            // Write package list file now, use a JournaledFile.
-            File tempFile = new File(mPackageListFilename.getAbsolutePath() + ".tmp");
-            JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
-
-            final File writeTarget = journal.chooseForWrite();
-            fstr = new FileOutputStream(writeTarget);
-            str = new BufferedOutputStream(fstr);
-            try {
-                FileUtils.setPermissions(fstr.getFD(), 0640, SYSTEM_UID, PACKAGE_INFO_GID);
-
-                StringBuilder sb = new StringBuilder();
-                for (final PackageSetting pkg : mPackages.values()) {
-                    if (pkg.pkg == null || pkg.pkg.applicationInfo == null) {
-                        Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
-                        continue;
-                    }
-
-                    final ApplicationInfo ai = pkg.pkg.applicationInfo;
-                    final String dataPath = ai.dataDir;
-                    final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-                    final int[] gids = pkg.getPermissionsState().computeGids();
-
-                    // Avoid any application that has a space in its path.
-                    if (dataPath.indexOf(" ") >= 0)
-                        continue;
-
-                    // we store on each line the following information for now:
-                    //
-                    // pkgName    - package name
-                    // userId     - application-specific user id
-                    // debugFlag  - 0 or 1 if the package is debuggable.
-                    // dataPath   - path to package's data path
-                    // seinfo     - seinfo label for the app (assigned at install time)
-                    // gids       - supplementary gids this app launches with
-                    //
-                    // NOTE: We prefer not to expose all ApplicationInfo flags for now.
-                    //
-                    // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
-                    // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
-                    //   system/core/logd/LogStatistics.cpp
-                    //   system/core/run-as/run-as.c
-                    //   system/core/sdcard/sdcard.c
-                    //   external/libselinux/src/android.c:package_info_init()
-                    //
-                    sb.setLength(0);
-                    sb.append(ai.packageName);
-                    sb.append(" ");
-                    sb.append((int)ai.uid);
-                    sb.append(isDebug ? " 1 " : " 0 ");
-                    sb.append(dataPath);
-                    sb.append(" ");
-                    sb.append(ai.seinfo);
-                    sb.append(" ");
-                    if (gids != null && gids.length > 0) {
-                        sb.append(gids[0]);
-                        for (int i = 1; i < gids.length; i++) {
-                            sb.append(",");
-                            sb.append(gids[i]);
-                        }
-                    } else {
-                        sb.append("none");
-                    }
-                    sb.append("\n");
-                    str.write(sb.toString().getBytes());
-                }
-                str.flush();
-                FileUtils.sync(fstr);
-                str.close();
-                journal.commit();
-            } catch (Exception e) {
-                Slog.wtf(TAG, "Failed to write packages.list", e);
-                IoUtils.closeQuietly(str);
-                journal.rollback();
-            }
-
+            writePackageListLPr();
             writeAllUsersPackageRestrictionsLPr();
-
             writeAllRuntimePermissionsLPr();
             return;
 
@@ -2117,6 +2042,99 @@ final class Settings {
             }
         }
         //Debug.stopMethodTracing();
+    }
+
+    void writePackageListLPr() {
+        writePackageListLPr(-1);
+    }
+
+    void writePackageListLPr(int creatingUserId) {
+        // Only derive GIDs for active users (not dying)
+        final List<UserInfo> users = UserManagerService.getInstance().getUsers(true);
+        int[] userIds = new int[users.size()];
+        for (int i = 0; i < userIds.length; i++) {
+            userIds[i] = users.get(i).id;
+        }
+        if (creatingUserId != -1) {
+            userIds = ArrayUtils.appendInt(userIds, creatingUserId);
+        }
+
+        // Write package list file now, use a JournaledFile.
+        File tempFile = new File(mPackageListFilename.getAbsolutePath() + ".tmp");
+        JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
+
+        final File writeTarget = journal.chooseForWrite();
+        FileOutputStream fstr = null;
+        BufferedOutputStream str = null;
+        try {
+            fstr = new FileOutputStream(writeTarget);
+            str = new BufferedOutputStream(fstr);
+            FileUtils.setPermissions(fstr.getFD(), 0640, SYSTEM_UID, PACKAGE_INFO_GID);
+
+            StringBuilder sb = new StringBuilder();
+            for (final PackageSetting pkg : mPackages.values()) {
+                if (pkg.pkg == null || pkg.pkg.applicationInfo == null) {
+                    Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
+                    continue;
+                }
+
+                final ApplicationInfo ai = pkg.pkg.applicationInfo;
+                final String dataPath = ai.dataDir;
+                final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                final int[] gids = pkg.getPermissionsState().computeGids(userIds);
+
+                // Avoid any application that has a space in its path.
+                if (dataPath.indexOf(" ") >= 0)
+                    continue;
+
+                // we store on each line the following information for now:
+                //
+                // pkgName    - package name
+                // userId     - application-specific user id
+                // debugFlag  - 0 or 1 if the package is debuggable.
+                // dataPath   - path to package's data path
+                // seinfo     - seinfo label for the app (assigned at install time)
+                // gids       - supplementary gids this app launches with
+                //
+                // NOTE: We prefer not to expose all ApplicationInfo flags for now.
+                //
+                // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
+                // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
+                //   system/core/logd/LogStatistics.cpp
+                //   system/core/run-as/run-as.c
+                //   system/core/sdcard/sdcard.c
+                //   external/libselinux/src/android.c:package_info_init()
+                //
+                sb.setLength(0);
+                sb.append(ai.packageName);
+                sb.append(" ");
+                sb.append((int)ai.uid);
+                sb.append(isDebug ? " 1 " : " 0 ");
+                sb.append(dataPath);
+                sb.append(" ");
+                sb.append(ai.seinfo);
+                sb.append(" ");
+                if (gids != null && gids.length > 0) {
+                    sb.append(gids[0]);
+                    for (int i = 1; i < gids.length; i++) {
+                        sb.append(",");
+                        sb.append(gids[i]);
+                    }
+                } else {
+                    sb.append("none");
+                }
+                sb.append("\n");
+                str.write(sb.toString().getBytes());
+            }
+            str.flush();
+            FileUtils.sync(fstr);
+            str.close();
+            journal.commit();
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Failed to write packages.list", e);
+            IoUtils.closeQuietly(str);
+            journal.rollback();
+        }
     }
 
     void writeDisabledSysPackageLPr(XmlSerializer serializer, final PackageSetting pkg)
@@ -3491,6 +3509,7 @@ final class Settings {
         }
         readDefaultPreferredAppsLPw(service, userHandle);
         writePackageRestrictionsLPr(userHandle);
+        writePackageListLPr(userHandle);
     }
 
     void removeUserLPw(int userId) {
@@ -3506,6 +3525,8 @@ final class Settings {
         removeCrossProfileIntentFiltersLPw(userId);
 
         mRuntimePermissionsPersistence.onUserRemoved(userId);
+
+        writePackageListLPr();
     }
 
     void removeCrossProfileIntentFiltersLPw(int userId) {
