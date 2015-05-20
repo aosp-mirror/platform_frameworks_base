@@ -3183,6 +3183,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final PermissionsState permissionsState = sb.getPermissionsState();
 
+            final int flags = permissionsState.getPermissionFlags(name, userId);
+            if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
+                throw new SecurityException("Cannot grant system fixed permission: "
+                        + name + " for package: " + packageName);
+            }
+
             final int result = permissionsState.grantRuntimePermission(bp, userId);
             switch (result) {
                 case PermissionsState.PERMISSION_OPERATION_FAILURE: {
@@ -3239,6 +3245,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final PermissionsState permissionsState = sb.getPermissionsState();
+
+            final int flags = permissionsState.getPermissionFlags(name, userId);
+            if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
+                throw new SecurityException("Cannot revoke system fixed permission: "
+                        + name + " for package: " + packageName);
+            }
 
             if (permissionsState.revokeRuntimePermission(bp, userId) ==
                     PermissionsState.PERMISSION_OPERATION_FAILURE) {
