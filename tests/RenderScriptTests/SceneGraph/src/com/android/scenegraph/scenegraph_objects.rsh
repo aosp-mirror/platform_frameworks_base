@@ -208,7 +208,7 @@ typedef struct Texture_s {
     rs_allocation texture;
 } SgTexture;
 
-static void printName(rs_allocation name) {
+static inline void printName(rs_allocation name) {
     if (!rsIsObject(name)) {
         rsDebug("no name", 0);
         return;
@@ -217,7 +217,7 @@ static void printName(rs_allocation name) {
     rsDebug((const char*)rsGetElementAt(name, 0), 0);
 }
 
-static void printCameraInfo(const SgCamera *cam) {
+static inline void printCameraInfo(const SgCamera *cam) {
     rsDebug("***** Camera information. ptr:", cam);
     printName(cam->name);
     const SgTransform *camTransform = (const SgTransform *)rsGetElementAt(cam->transformMatrix, 0);
@@ -233,7 +233,7 @@ static void printCameraInfo(const SgCamera *cam) {
     rsDebug("View: ", &cam->view);
 }
 
-static void printLightInfo(const SgLight *light) {
+static inline void printLightInfo(const SgLight *light) {
     rsDebug("***** Light information. ptr:", light);
     printName(light->name);
     const SgTransform *lTransform = (const SgTransform *)rsGetElementAt(light->transformMatrix, 0);
@@ -246,7 +246,7 @@ static void printLightInfo(const SgLight *light) {
     rsDebug("Type: ", light->type);
 }
 
-static void getCameraRay(const SgCamera *cam, int screenX, int screenY, float3 *pnt, float3 *vec) {
+static inline void getCameraRay(const SgCamera *cam, int screenX, int screenY, float3 *pnt, float3 *vec) {
     rsDebug("=================================", screenX);
     rsDebug("Point X", screenX);
     rsDebug("Point Y", screenY);
@@ -290,7 +290,7 @@ static void getCameraRay(const SgCamera *cam, int screenX, int screenY, float3 *
     *pnt = cam->position.xyz;
 }
 
-static bool intersect(const SgRenderable *obj, float3 pnt, float3 vec) {
+static inline bool intersect(const SgRenderable *obj, float3 pnt, float3 vec) {
     // Solving for t^2 + Bt + C = 0
     float3 originMinusCenter = pnt - obj->worldBoundingSphere.xyz;
     float B = dot(originMinusCenter, vec) * 2.0f;

@@ -123,7 +123,6 @@ static void renderAllMeshes() {
     rs_allocation allMeshes = rsGetAllocation(gMeshes);
     int size = rsAllocationGetDimX(allMeshes);
     gLookAt = 0.0f;
-    float minX, minY, minZ, maxX, maxY, maxZ;
     for (int i = 0; i < size; i++) {
         MeshInfo_t *info = (MeshInfo_t*)rsGetElementAt(allMeshes, i);
         rsgDrawMesh(info->mMesh);
@@ -131,7 +130,6 @@ static void renderAllMeshes() {
 }
 
 void drawDescription() {
-    uint width = rsgGetWidth();
     uint height = rsgGetHeight();
     int left = 0, right = 0, top = 0, bottom = 0;
 
@@ -163,7 +161,7 @@ int root(void) {
     rsMatrixMultiply(&matrix, &gPostureMatrix);
     rsMatrixRotate(&matrix, gRotateX, 1.0f, 0.0f, 0.0f);
     rsMatrixRotate(&matrix, gRotateY, 0.0f, 1.0f, 0.0f);
-    
+
     rsgProgramVertexLoadModelMatrix(&matrix);
 
     renderAllMeshes();
