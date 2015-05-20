@@ -3713,10 +3713,17 @@ public class AudioManager {
     private final static int MSG_DEVICES_DEVICES_ADDED = 0;
     private final static int MSG_DEVICES_DEVICES_REMOVED = 1;
 
+    /**
+     * The list of {@link AudioDeviceCallback} objects to receive add/remove notifications.
+     */
     private ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate>
         mDeviceCallbacks =
             new ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate>();
 
+    /**
+     * The following are flags to allow users of {@link AudioManager#getDevices(int)} to filter
+     * the results list to only those device types they are interested in.
+     */
     /**
      * Specifies to the {@link AudioManager#getDevices(int)} method to include
      * source (i.e. input) audio devices.
@@ -3747,21 +3754,25 @@ public class AudioManager {
     }
 
     /**
-     * Generates a list of AudioDeviceInfo objects corresponding to the audio devices currently
-     * connected to the system and meeting the criteria specified in the <code>flags</code>
-     * parameter.
+     * Returns an array of {@link AudioDeviceInfo} objects corresponding to the audio devices
+     * currently connected to the system and meeting the criteria specified in the
+     * <code>flags</code> parameter.
      * @param flags A set of bitflags specifying the criteria to test.
-     * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@lGET_DEVICES_CES_ALL}.
+     * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@link GET_DEVICES_ALL}.
      * @return A (possibly zero-length) array of AudioDeviceInfo objects.
      */
     public AudioDeviceInfo[] getDevices(int flags) {
         return getDevicesStatic(flags);
     }
 
+    /**
+     * Does the actual computation to generate an array of (externally-visible) AudioDeviceInfo
+     * objects from the current (internal) AudioDevicePort list.
+     */
     private static AudioDeviceInfo[]
         infoListFromPortList(ArrayList<AudioDevicePort> ports, int flags) {
 
-        // figure out how many AudioDeviceInfo we need space for
+        // figure out how many AudioDeviceInfo we need space for...
         int numRecs = 0;
         for (AudioDevicePort port : ports) {
             if (checkFlags(port, flags)) {
@@ -3769,7 +3780,7 @@ public class AudioManager {
             }
         }
 
-        // Now load them up
+        // Now load them up...
         AudioDeviceInfo[] deviceList = new AudioDeviceInfo[numRecs];
         int slot = 0;
         for (AudioDevicePort port : ports) {
@@ -3782,7 +3793,12 @@ public class AudioManager {
     }
 
     /*
-     * Calculate the list of ports that are in ports_B, but not in ports_A
+     * Calculate the list of ports that are in ports_B, but not in ports_A. This is used by
+     * the add/remove callback mechanism to provide a list of the newly added or removed devices
+     * rather than the whole list and make the app figure it out.
+     * Note that calling this method with:
+     *  ports_A == PREVIOUS_ports and ports_B == CURRENT_ports will calculated ADDED ports.
+     *  ports_A == CURRENT_ports and ports_B == PREVIOUS_ports will calculated REMOVED ports.
      */
     private static AudioDeviceInfo[] calcListDeltas(
             ArrayList<AudioDevicePort> ports_A, ArrayList<AudioDevicePort> ports_B, int flags) {
@@ -3811,6 +3827,7 @@ public class AudioManager {
      * Generates a list of AudioDeviceInfo objects corresponding to the audio devices currently
      * connected to the system and meeting the criteria specified in the <code>flags</code>
      * parameter.
+     * This is an internal function. The public API front is getDevices(int).
      * @param flags A set of bitflags specifying the criteria to test.
      * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@link GET_DEVICES_ALL}.
      * @return A (possibly zero-length) array of AudioDeviceInfo objects.
@@ -3821,15 +3838,20 @@ public class AudioManager {
         int status = AudioManager.listAudioDevicePorts(ports);
         if (status != AudioManager.SUCCESS) {
             // fail and bail!
-            return new AudioDeviceInfo[0];
+            return new AudioDeviceInfo[0];  // Always return an array.
         }
 
         return infoListFromPortList(ports, flags);
     }
 
     /**
-     * Adds an {@link AudioDeviceCallback} to receive notifications of changes
+     * Registers an {@link AudioDeviceCallback} object to receive notifications of changes
      * to the set of connected audio devices.
+     * @param callback The {@link AudioDeviceCallback} object to receive connect/disconnect
+     * notifications.
+     * @param handler Specifies the {@link Handler} object for the thread on which to execute
+     * the callback. If <code>null</code>, the {@link Handler} associated with the main
+     * {@link Looper} will be used.
      */
     public void registerAudioDeviceCallback(AudioDeviceCallback callback,
             android.os.Handler handler) {
@@ -3842,8 +3864,10 @@ public class AudioManager {
     }
 
     /**
-     * Removes an {@link AudioDeviceCallback} which has been previously registered
+     * Unregisters an {@link AudioDeviceCallback} object which has been previously registered
      * to receive notifications of changes to the set of connected audio devices.
+     * @param callback The {@link AudioDeviceCallback} object that was previously registered
+     * with {@link AudioManager#registerAudioDeviceCallback) to be unregistered.
      */
     public void unregisterAudioDeviceCallback(AudioDeviceCallback callback) {
         synchronized (mDeviceCallbacks) {
@@ -3854,7 +3878,8 @@ public class AudioManager {
     }
 
     /**
-     * Sends device list change notification to all listeners.
+     * Internal method to compute and generate add/remove messages and then send to any
+     * registered callbacks.
      */
     private void broadcastDeviceListChange() {
         int status;
@@ -3908,7 +3933,8 @@ public class AudioManager {
 
         /**
          * Callback method called upon audio patch list update.
-         * @param patchList the updated list of audio patches
+         * Note: We don't do anything with Patches at this time, so ignore this notification.
+         * @param patchList the updated list of audio patches.
          */
         public void onAudioPatchListUpdate(AudioPatch[] patchList) {}
 
