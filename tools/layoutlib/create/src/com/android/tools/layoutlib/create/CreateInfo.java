@@ -136,6 +136,8 @@ public final class CreateInfo implements ICreateInfo {
             ICreateInfo.class,
             CreateInfo.class,
             LayoutlibDelegate.class,
+            InjectMethodRunnable.class,
+            InjectMethodRunnables.class,
             /* Java package classes */
             AutoCloseable.class,
             Objects.class,
@@ -302,4 +304,3 @@ public final class CreateInfo implements ICreateInfo {
                         InjectMethodRunnables.CONTEXT_GET_FRAMEWORK_CLASS_LOADER);
             }};
 }
-
