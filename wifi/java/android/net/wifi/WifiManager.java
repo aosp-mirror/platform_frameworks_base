@@ -403,6 +403,14 @@ public class WifiManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
+
+    /**
+     * The result of previous scan, reported with {@link #SCAN_RESULTS_AVAILABLE_ACTION}.
+     * @return true scan was successful, results updated
+     * @return false scan was not successful, results haven't been updated since previous scan
+     */
+    public static final String EXTRA_RESULTS_UPDATED = "resultsUpdated";
+
     /**
      * A batch of access point scans has been completed and the results areavailable.
      * Call {@link #getBatchedScanResults()} to obtain the results.
