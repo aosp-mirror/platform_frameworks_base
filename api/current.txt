@@ -5775,7 +5775,7 @@ package android.app.admin {
     method public void setPasswordMinimumSymbols(android.content.ComponentName, int);
     method public void setPasswordMinimumUpperCase(android.content.ComponentName, int);
     method public void setPasswordQuality(android.content.ComponentName, int);
-    method public boolean setPermissionGranted(android.content.ComponentName, java.lang.String, java.lang.String, boolean);
+    method public boolean setPermissionGrantState(android.content.ComponentName, java.lang.String, java.lang.String, int);
     method public void setPermissionPolicy(android.content.ComponentName, int);
     method public boolean setPermittedAccessibilityServices(android.content.ComponentName, java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(android.content.ComponentName, java.util.List<java.lang.String>);
@@ -5864,6 +5864,9 @@ package android.app.admin {
     field public static final int PASSWORD_QUALITY_NUMERIC_COMPLEX = 196608; // 0x30000
     field public static final int PASSWORD_QUALITY_SOMETHING = 65536; // 0x10000
     field public static final int PASSWORD_QUALITY_UNSPECIFIED = 0; // 0x0
+    field public static final int PERMISSION_GRANT_STATE_DEFAULT = 0; // 0x0
+    field public static final int PERMISSION_GRANT_STATE_DENIED = 2; // 0x2
+    field public static final int PERMISSION_GRANT_STATE_GRANTED = 1; // 0x1
     field public static final int PERMISSION_POLICY_AUTO_DENY = 2; // 0x2
     field public static final int PERMISSION_POLICY_AUTO_GRANT = 1; // 0x1
     field public static final int PERMISSION_POLICY_PROMPT = 0; // 0x0
