@@ -14803,8 +14803,8 @@ package android.media {
     ctor public AudioFormat.Builder();
     ctor public AudioFormat.Builder(android.media.AudioFormat);
     method public android.media.AudioFormat build();
-    method public android.media.AudioFormat.Builder setChannelIndexMask(int) throws java.lang.IllegalArgumentException;
-    method public android.media.AudioFormat.Builder setChannelMask(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioFormat.Builder setChannelIndexMask(int);
+    method public android.media.AudioFormat.Builder setChannelMask(int);
     method public android.media.AudioFormat.Builder setEncoding(int) throws java.lang.IllegalArgumentException;
     method public android.media.AudioFormat.Builder setSampleRate(int) throws java.lang.IllegalArgumentException;
   }
@@ -14966,11 +14966,11 @@ package android.media {
     method public int getAudioFormat();
     method public int getAudioSessionId();
     method public int getAudioSource();
+    method public int getBufferSizeInFrames();
     method public int getChannelConfiguration();
     method public int getChannelCount();
     method public android.media.AudioFormat getFormat();
     method public static int getMinBufferSize(int, int, int);
-    method public int getNativeFrameCount() throws java.lang.IllegalStateException;
     method public int getNotificationMarkerPosition();
     method public int getPositionNotificationPeriod();
     method public android.media.AudioDeviceInfo getPreferredDevice();
@@ -15039,13 +15039,14 @@ package android.media {
     method public void flush();
     method public int getAudioFormat();
     method public int getAudioSessionId();
+    method public int getBufferSizeInFrames();
     method public int getChannelConfiguration();
     method public int getChannelCount();
     method public android.media.AudioFormat getFormat();
     method public static float getMaxVolume();
     method public static int getMinBufferSize(int, int, int);
     method public static float getMinVolume();
-    method public int getNativeFrameCount() throws java.lang.IllegalStateException;
+    method protected deprecated int getNativeFrameCount();
     method public static int getNativeOutputSampleRate(int);
     method public int getNotificationMarkerPosition();
     method public int getPlayState();
