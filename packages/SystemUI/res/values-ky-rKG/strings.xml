@@ -339,9 +339,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Ачуу үчүн кайра тийиңиз"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Кулпуну ачуу үчүн серпип коюңуз"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү нукуп, телефонго өтүңүз"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Сүрөтчөнү нукуп, үн жардамчысына өтүңүз"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү нукуп, камерага өтүңүз"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Сүрөтчөнү серпип үн жардамчысына өтүңүз"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү серпип камерага өтүңүз"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Артыкчылык гана"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкучтар гана"</string>
@@ -405,8 +405,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Баарын жашыруу"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Азыр бүтүрүү"</string>
-    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Жаюу"</string>
-    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жыйноо"</string>
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Жайып көрсөтүү"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жыйнап коюу"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран кадалган"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Бул бошотулмайынча көрүнө берет. Бошотуу үчүн, бир убакта Артка жана Карап чыгууну коё бербей басып туруңуз."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Бул бошотулмайынча көрүнө берет. Бошотуу үчүн, Карап чыгууну коё бербей басып туруңуз."</string>
@@ -421,6 +421,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> үндү катуулатуу диалогу"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Түпнусканы калыбына келтирүү үчүн тийип коюңуз."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Сиз Жумуш профилиндесиз"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <!-- no translation found for system_ui_tuner (3442596010150119600) -->
     <skip />
+    <string name="quick_settings" msgid="10042998191725428">"Ыкчам жөндөөлөр"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Тайл кошуу"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Тайлды жайылтуу"</string>
 </resources>

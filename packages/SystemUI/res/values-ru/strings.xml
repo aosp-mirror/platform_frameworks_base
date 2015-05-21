@@ -318,9 +318,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные оповещения"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Проведите вверх, чтобы разблокировать"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведите пальцем в любую сторону от значка"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Аудиоподсказки: проведите пальцем в любую сторону от значка"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Камера: проведите пальцем в любую сторону от значка"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведите от значка"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Аудиоподсказки: проведите от значка"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Камера: проведите от значка"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Полная тишина"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Только важные"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Только будильник"</string>
@@ -400,6 +400,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Вы вошли в профиль Android for Work"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Быстрые настройки"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Добавить кнопку быстрого доступа"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Кнопка трансляции"</string>
 </resources>

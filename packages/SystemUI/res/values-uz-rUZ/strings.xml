@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Kam ahamiyatli bildirishnomalarni pastda ko‘rsatish"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Ochish uchun yana bosing"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Qulfdan chiqarish uchun tepaga suring"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Telefonni ochish uchun ikonkani suring"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Ovozli yordamni ochish uchun ikonkani suring"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Kamerani ochish uchun ikonkani suring"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Telefon: ekranni ikonkadan boshlab istalgan tomonga suring"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Ovozli yordam: ikonkadan boshlab istalgan tomonga suring"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Kamera: ekranni ikonkadan boshlab istalgan tomonga suring"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Tinchlik saqlansin"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Faqat muhimlari"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Faqat signallar"</string>
@@ -380,7 +380,7 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Barchasini yashirish"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Tugatish"</string>
-    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Kengaytirish"</string>
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Ekran yechilmaguncha u qadalgan holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy nazar” tugmalarini bir vaqtda bosing va ushlab turing."</string>
@@ -396,6 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Siz Android for Work profiliga kirgansiz"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Tezkor sozlamalar"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Tezkor sozlamalar tugmasini qo‘shish"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Translatsiya tugmasi"</string>
 </resources>

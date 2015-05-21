@@ -396,6 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"현재 직장 프로필에 있음"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"시스템 UI 튜너"</string>
+    <string name="quick_settings" msgid="10042998191725428">"빠른 설정"</string>
+    <string name="add_tile" msgid="2995389510240786221">"타일 추가"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"브로드캐스트 타일"</string>
 </resources>
