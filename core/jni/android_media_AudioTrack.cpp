@@ -998,6 +998,9 @@ static jboolean android_media_AudioTrack_setOutputDevice(
                 JNIEnv *env,  jobject thiz, jint device_id) {
 
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == 0) {
+        return false;
+    }
     return lpTrack->setOutputDevice(device_id) == NO_ERROR;
 }
 
