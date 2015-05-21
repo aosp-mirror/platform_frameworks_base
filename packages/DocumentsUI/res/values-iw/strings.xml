@@ -32,6 +32,7 @@
     <string name="menu_select" msgid="8711270657353563424">"בחר ב-\"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="menu_select_all" msgid="4320518282375109902">"בחר הכל"</string>
     <string name="menu_copy" msgid="3612326052677229148">"העתק אל…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"העברה אל…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"הצג אחסון פנימי"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"‏הצג כרטיס SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"הסתר אחסון פנימי"</string>
@@ -39,6 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"הצג גודל קובץ"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"הסתר גודל קובץ"</string>
     <string name="button_copy" msgid="8706475544635021302">"העתק"</string>
+    <string name="button_move" msgid="2202666023104202232">"העבר"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> נבחרו"</string>
     <string name="sort_name" msgid="9183560467917256779">"לפי שם"</string>
     <string name="sort_date" msgid="586080032956151448">"לפי תאריך שינוי"</string>
@@ -65,6 +67,12 @@
       <item quantity="many">מעתיק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
       <item quantity="other">מעתיק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
       <item quantity="one">מעתיק קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
+    </plurals>
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="two">מעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="many">מעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="other">מעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="one">מעביר קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"מתכונן להעתקה..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

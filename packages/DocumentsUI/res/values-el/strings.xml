@@ -32,6 +32,7 @@
     <string name="menu_select" msgid="8711270657353563424">"Επιλογή \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="menu_select_all" msgid="4320518282375109902">"Επιλογή όλων"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Αντιγραφή σε…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"Μετακίνηση σε..."</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Εμφ.εσωτ.χώρου αποθήκ."</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Εμφάνιση κάρτας SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Απόκρ.εσωτ.χώρου αποθήκ."</string>
@@ -39,6 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"Εμφ. μεγέθους αρχείου"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Απόκρ. μεγέθους αρχείου"</string>
     <string name="button_copy" msgid="8706475544635021302">"Αντιγραφή"</string>
+    <string name="button_move" msgid="2202666023104202232">"Μετακίνηση"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Επιλέχθηκαν <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Κατά όνομα"</string>
     <string name="sort_date" msgid="586080032956151448">"Κατά ημερομηνία τροποποίησης"</string>
@@ -63,6 +65,10 @@
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">Αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων.</item>
       <item quantity="one">Αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου.</item>
+    </plurals>
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="other">Μετακίνηση <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων.</item>
+      <item quantity="one">Μετακίνηση <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Προετοιμασία για αντιγραφή…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
