@@ -65,8 +65,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInterface;
 import android.os.Looper;
+import android.os.Parcel;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -82,6 +85,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.textservice.TextServicesManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -139,6 +143,7 @@ public final class BridgeContext extends Context {
     private final Stack<BridgeXmlBlockParser> mParserStack = new Stack<BridgeXmlBlockParser>();
     private SharedPreferences mSharedPreferences;
     private ClassLoader mClassLoader;
+    private IBinder mBinder;
 
     /**
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
@@ -708,44 +713,48 @@ public final class BridgeContext extends Context {
                 }
             }
         } else if (defStyleRes != 0) {
-            boolean isFrameworkRes = true;
-            Pair<ResourceType, String> value = Bridge.resolveResourceId(defStyleRes);
-            if (value == null) {
-                value = mLayoutlibCallback.resolveResourceId(defStyleRes);
-                isFrameworkRes = false;
-            }
+            StyleResourceValue item = mDynamicIdToStyleMap.get(defStyleRes);
+            if (item != null) {
+                defStyleValues = item;
+            } else {
+                boolean isFrameworkRes = true;
+                Pair<ResourceType, String> value = Bridge.resolveResourceId(defStyleRes);
+                if (value == null) {
+                    value = mLayoutlibCallback.resolveResourceId(defStyleRes);
+                    isFrameworkRes = false;
+                }
 
-            if (value != null) {
-                if ((value.getFirst() == ResourceType.STYLE)) {
-                    // look for the style in all resources:
-                    StyleResourceValue item = mRenderResources.getStyle(value.getSecond(),
-                            isFrameworkRes);
-                    if (item != null) {
-                        if (defaultPropMap != null) {
-                            defaultPropMap.put("style", item.getName());
+                if (value != null) {
+                    if ((value.getFirst() == ResourceType.STYLE)) {
+                        // look for the style in all resources:
+                        item = mRenderResources.getStyle(value.getSecond(), isFrameworkRes);
+                        if (item != null) {
+                            if (defaultPropMap != null) {
+                                defaultPropMap.put("style", item.getName());
+                            }
+
+                            defStyleValues = item;
+                        } else {
+                            Bridge.getLog().error(null,
+                                    String.format(
+                                            "Style with id 0x%x (resolved to '%s') does not exist.",
+                                            defStyleRes, value.getSecond()),
+                                    null);
                         }
-
-                        defStyleValues = item;
                     } else {
                         Bridge.getLog().error(null,
                                 String.format(
-                                        "Style with id 0x%x (resolved to '%s') does not exist.",
-                                        defStyleRes, value.getSecond()),
+                                        "Resource id 0x%x is not of type STYLE (instead %s)",
+                                        defStyleRes, value.getFirst().toString()),
                                 null);
                     }
                 } else {
                     Bridge.getLog().error(null,
                             String.format(
-                                    "Resource id 0x%x is not of type STYLE (instead %s)",
-                                    defStyleRes, value.getFirst().toString()),
+                                    "Failed to find style with id 0x%x in current theme",
+                                    defStyleRes),
                             null);
                 }
-            } else {
-                Bridge.getLog().error(null,
-                        String.format(
-                                "Failed to find style with id 0x%x in current theme",
-                                defStyleRes),
-                        null);
             }
         }
 
@@ -994,6 +1003,61 @@ public final class BridgeContext extends Context {
             context = ((ContextWrapper) context).getBaseContext();
         }
         return context;
+    }
+
+    public IBinder getBinder() {
+        if (mBinder == null) {
+            // create a dummy binder. We only need it be not null.
+            mBinder = new IBinder() {
+                @Override
+                public String getInterfaceDescriptor() throws RemoteException {
+                    return null;
+                }
+
+                @Override
+                public boolean pingBinder() {
+                    return false;
+                }
+
+                @Override
+                public boolean isBinderAlive() {
+                    return false;
+                }
+
+                @Override
+                public IInterface queryLocalInterface(String descriptor) {
+                    return null;
+                }
+
+                @Override
+                public void dump(FileDescriptor fd, String[] args) throws RemoteException {
+
+                }
+
+                @Override
+                public void dumpAsync(FileDescriptor fd, String[] args) throws RemoteException {
+
+                }
+
+                @Override
+                public boolean transact(int code, Parcel data, Parcel reply, int flags)
+                        throws RemoteException {
+                    return false;
+                }
+
+                @Override
+                public void linkToDeath(DeathRecipient recipient, int flags)
+                        throws RemoteException {
+
+                }
+
+                @Override
+                public boolean unlinkToDeath(DeathRecipient recipient, int flags) {
+                    return false;
+                }
+            };
+        }
+        return mBinder;
     }
 
     //------------ NOT OVERRIDEN --------------------
