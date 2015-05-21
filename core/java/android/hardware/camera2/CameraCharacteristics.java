@@ -375,8 +375,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of frame rate ranges for {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange} supported by
      * this camera device.</p>
-     * <p>For devices at the LIMITED level or above, this list will include at least (30, 30) for
-     * constant-framerate recording.</p>
+     * <p>For devices at the LEGACY level or above:</p>
+     * <ul>
+     * <li>This list will always include (30, 30).</li>
+     * <li>Also, for constant-framerate recording, for each normal
+     * {@link android.media.CamcorderProfile CamcorderProfile} that has
+     * {@link android.media.CamcorderProfile#quality quality} in
+     * the range [{@link android.media.CamcorderProfile#QUALITY_LOW QUALITY_LOW},
+     * {@link android.media.CamcorderProfile#QUALITY_2160P QUALITY_2160P}], if the profile is
+     * supported by the device and has
+     * {@link android.media.CamcorderProfile#videoFrameRate videoFrameRate} <code>x</code>, this list will
+     * always include (<code>x</code>,<code>x</code>).</li>
+     * <li>For preview streaming use case, this list will always include (<code>min</code>, <code>max</code>) where
+     * <code>min</code> &lt;= 15 and <code>max</code> &gt;= 30.</li>
+     * </ul>
+     * <p>For devices at the LIMITED level or above:</p>
+     * <ul>
+     * <li>For YUV_420_888 burst capture use case, this list will always include (<code>min</code>, <code>max</code>)
+     * and (<code>max</code>, <code>max</code>) where <code>min</code> &lt;= 15 and <code>max</code> = the maximum output frame rate of the
+     * maximum YUV_420_888 output size.</li>
+     * </ul>
      * <p><b>Units</b>: Frames per second (FPS)</p>
      * <p>This key is available on all devices.</p>
      *
