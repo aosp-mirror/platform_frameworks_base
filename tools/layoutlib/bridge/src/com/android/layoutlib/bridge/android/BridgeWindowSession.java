@@ -89,7 +89,7 @@ public final class BridgeWindowSession implements IWindowSession {
     @Override
     public int relayout(IWindow iWindow, int i, LayoutParams layoutParams, int i2,
             int i3, int i4, int i5, Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5,
-            Configuration configuration, Surface surface) throws RemoteException {
+            Rect rect6, Configuration configuration, Surface surface) throws RemoteException {
         // pass for now.
         return 0;
     }
