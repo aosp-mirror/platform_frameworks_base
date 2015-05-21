@@ -72,6 +72,11 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected void setPasswordEntryInputEnabled(boolean enabled) {
+        mPasswordEntry.setEnabled(enabled);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (KeyEvent.isConfirmKey(keyCode)) {
             performClick(mOkButton);
