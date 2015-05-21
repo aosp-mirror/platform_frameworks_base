@@ -312,6 +312,8 @@ public class VolumeDialog {
         writer.print("  mShowHeaders: "); writer.println(mShowHeaders);
         writer.print("  mAutomute: "); writer.println(mAutomute);
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
+        writer.print("  mAccessibility.mFeedbackEnabled: ");
+        writer.println(mAccessibility.mFeedbackEnabled);
     }
 
     private static int getImpliedLevel(SeekBar seekBar, int progress) {
