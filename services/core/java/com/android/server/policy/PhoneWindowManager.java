@@ -3642,15 +3642,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private boolean canReceiveInput(WindowState win) {
+        boolean notFocusable =
+                (win.getAttrs().flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0;
+        boolean altFocusableIm =
+                (win.getAttrs().flags & WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM) != 0;
+        boolean notFocusableForIm = notFocusable ^ altFocusableIm;
+        return !notFocusableForIm;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void layoutWindowLw(WindowState win, WindowState attached) {
-        // we've already done the status bar
-        final WindowManager.LayoutParams attrs = win.getAttrs();
-        if ((win == mStatusBar && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) == 0) ||
-                win == mNavigationBar) {
+        // We've already done the navigation bar and status bar. If the status bar can receive
+        // input, we need to layout it again to accomodate for the IME window.
+        if ((win == mStatusBar && !canReceiveInput(win)) || win == mNavigationBar) {
             return;
         }
+        final WindowManager.LayoutParams attrs = win.getAttrs();
         final boolean isDefaultDisplay = win.isDefaultDisplay();
         final boolean needsToOffsetInputMethodTarget = isDefaultDisplay &&
                 (win == mLastInputMethodTargetWindow && mLastInputMethodWindow != null);
@@ -3717,7 +3726,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + mUnrestrictedScreenHeight;
             cf.bottom = vf.bottom = mStableBottom;
             cf.top = vf.top = mStableTop;
-        } else if (win == mStatusBar && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+        } else if (win == mStatusBar) {
             pf.left = df.left = of.left = mUnrestrictedScreenLeft;
             pf.top = df.top = of.top = mUnrestrictedScreenTop;
             pf.right = df.right = of.right = mUnrestrictedScreenWidth + mUnrestrictedScreenLeft;
