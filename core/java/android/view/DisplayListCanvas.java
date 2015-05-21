@@ -89,6 +89,7 @@ public class DisplayListCanvas extends Canvas {
 
     private DisplayListCanvas() {
         super(nCreateDisplayListCanvas());
+        mDensity = 0; // disable bitmap density scaling
     }
 
     private static native long nCreateDisplayListCanvas();
@@ -96,6 +97,12 @@ public class DisplayListCanvas extends Canvas {
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
     ///////////////////////////////////////////////////////////////////////////
+
+
+    @Override
+    public void setDensity(int density) {
+        // drop silently, since DisplayListCanvas doesn't perform density scaling
+    }
 
     @Override
     public boolean isHardwareAccelerated() {
