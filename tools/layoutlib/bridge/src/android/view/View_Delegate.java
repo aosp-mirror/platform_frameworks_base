@@ -16,7 +16,11 @@
 
 package android.view;
 
+import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+
+import android.content.Context;
+import android.os.IBinder;
 
 /**
  * Delegate used to provide new implementation of a select few methods of {@link View}
@@ -30,5 +34,14 @@ public class View_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean isInEditMode(View thisView) {
         return true;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static IBinder getWindowToken(View thisView) {
+        Context baseContext = BridgeContext.getBaseContext(thisView.getContext());
+        if (baseContext instanceof BridgeContext) {
+            return ((BridgeContext) baseContext).getBinder();
+        }
+        return null;
     }
 }

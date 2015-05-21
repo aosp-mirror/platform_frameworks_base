@@ -174,6 +174,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.Display#getWindowManager",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
+        "android.view.View#getWindowToken",
         "android.view.View#isInEditMode",
         "android.view.ViewRootImpl#isInTouchMode",
         "android.view.WindowManagerGlobal#getWindowManagerService",
