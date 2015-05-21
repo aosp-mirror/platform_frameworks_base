@@ -29,15 +29,28 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-multidex
 mainDexList:= \
 	$(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 
-LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
-
 LOCAL_DEX_PREOPT := false
+
+LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
+LOCAL_JACK_FLAGS := -D jack.dex.output.policy=minimal-multidex -D jack.preprocessor=true\
+    -D jack.preprocessor.file=$(LOCAL_PATH)/test.jpp -D jack.dex.output.multidex.legacy=true
+
+#################################
+include $(BUILD_SYSTEM)/configure_local_jack.mk
+#################################
+
+ifdef LOCAL_JACK_ENABLED
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
+endif
 
 include $(BUILD_PACKAGE)
 
+ifndef LOCAL_JACK_ENABLED
 $(mainDexList): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
+	$(hide) mkdir -p $(dir $@)
 	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
 	echo "com/android/framework/multidexlegacyversionedtestapp/MultiDexUpdateTest.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList)
+endif
 
