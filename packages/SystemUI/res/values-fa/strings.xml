@@ -396,12 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> کنترل‌کننده صدا است"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"برای بازیابی کنترل‌کننده اصلی، لمس کنید."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"در نمایه کاری هستید"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
-    <!-- no translation found for quick_settings (10042998191725428) -->
-    <skip />
-    <!-- no translation found for add_tile (2995389510240786221) -->
-    <skip />
-    <!-- no translation found for broadcast_tile (3894036511763289383) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"تنظیم‌کننده واسط کاربری سیستم"</string>
+    <string name="quick_settings" msgid="10042998191725428">"تنظیمات سریع"</string>
+    <string name="add_tile" msgid="2995389510240786221">"افزودن کاشی"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"کاشی پخش عمومی"</string>
 </resources>

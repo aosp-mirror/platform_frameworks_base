@@ -87,7 +87,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Lås op"</string>
     <string name="unlock_label" msgid="8779712358041029439">"lås op"</string>
     <string name="phone_label" msgid="2320074140205331708">"åbn telefon"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"åbn talehjælp"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"åbn voice assist"</string>
     <string name="camera_label" msgid="7261107956054836961">"åbn kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Vælg nyt opgavelayout"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuller"</string>
@@ -315,7 +315,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryk igen for at åbne"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg for at låse op"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Stryg fra talehjælpsikonet"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Stryg fra ikonet for voice assist"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Stryg fra kameraikonet"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stilhed"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Kun prioritet"</string>
@@ -396,12 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er dialogboksen for lydstyrke"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryk for at gendanne originalen."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du er i arbejdsprofilen"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
-    <!-- no translation found for quick_settings (10042998191725428) -->
-    <skip />
-    <!-- no translation found for add_tile (2995389510240786221) -->
-    <skip />
-    <!-- no translation found for broadcast_tile (3894036511763289383) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"Tuner til systemets grænseflade"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Hurtige indstillinger"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Tilføj et felt"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Felt for udsendelser"</string>
 </resources>
