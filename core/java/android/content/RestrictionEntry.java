@@ -200,7 +200,7 @@ public class RestrictionEntry implements Parcelable {
      * {@link #TYPE_BUNDLE_ARRAY bundle-array} type, otherwise the type will be set to
      * {@link #TYPE_BUNDLE bundle}.
      */
-    public RestrictionEntry(String key, RestrictionEntry[] restrictionEntries,
+    private RestrictionEntry(String key, RestrictionEntry[] restrictionEntries,
             boolean isBundleArray) {
         mKey = key;
         if (isBundleArray) {
@@ -217,6 +217,29 @@ public class RestrictionEntry implements Parcelable {
             mType = TYPE_BUNDLE;
         }
         setRestrictions(restrictionEntries);
+    }
+
+    /**
+     * Creates an entry of type {@link #TYPE_BUNDLE}.
+     * @param key the unique key for this restriction
+     * @param restrictionEntries array of nested restriction entries.
+     * @return the newly created restriction
+     */
+    public static RestrictionEntry createBundleEntry(String key,
+            RestrictionEntry[] restrictionEntries) {
+        return new RestrictionEntry(key, restrictionEntries, false);
+    }
+
+    /**
+     * Creates an entry of type {@link #TYPE_BUNDLE_ARRAY}.
+     * @param key the unique key for this restriction
+     * @param restrictionEntries array of nested restriction entries. The array may only contain
+     * elements of type {@link #TYPE_BUNDLE bundle}.
+     * @return the newly created restriction
+     */
+    public static RestrictionEntry createBundleArrayEntry(String key,
+            RestrictionEntry[] restrictionEntries) {
+        return new RestrictionEntry(key, restrictionEntries, true);
     }
 
     /**
