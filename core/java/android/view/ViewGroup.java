@@ -2830,12 +2830,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < count; i++) {
             final View child = children[i];
             child.dispatchAttachedToWindow(info,
-                    visibility | (child.mViewFlags & VISIBILITY_MASK));
+                    combineVisibility(visibility, child.getVisibility()));
         }
         final int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
         for (int i = 0; i < transientCount; ++i) {
             View view = mTransientViews.get(i);
-            view.dispatchAttachedToWindow(info, visibility | (view.mViewFlags & VISIBILITY_MASK));
+            view.dispatchAttachedToWindow(info,
+                    combineVisibility(visibility, view.getVisibility()));
         }
     }
 
