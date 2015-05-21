@@ -461,7 +461,7 @@ public class VoicemailContract {
             Uri statusUri = buildSourceUri(context.getPackageName());
             ContentValues values = new ContentValues();
             values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
-                    accountHandle.getComponentName().toString());
+                    accountHandle.getComponentName().flattenToString());
             values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
             values.put(Status.CONFIGURATION_STATE, configurationState);
             values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
