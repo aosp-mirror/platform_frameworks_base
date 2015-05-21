@@ -17367,7 +17367,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final ActivityRecord r = app.activities.get(j);
                 if (r.app != app) {
                     Slog.w(TAG, "Wtf, activity " + r + " in proc activity list not using proc "
-                            + app + "?!?");
+                            + app + "?!? Using " + r.app + " instead.");
                     continue;
                 }
                 if (r.visible) {
