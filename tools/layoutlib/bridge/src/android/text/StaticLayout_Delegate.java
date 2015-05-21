@@ -82,36 +82,8 @@ public class StaticLayout_Delegate {
 
         builder.mText = text;
         builder.mWidths = new float[length];
-
-        // compute all possible breakpoints.
-        BreakIterator it = BreakIterator.getLineInstance(new ULocale(builder.mLocale));
-        it.setText(new Segment(builder.mText, 0, length));
-
-        // average word length in english is 5. So, initialize the possible breaks with a guess.
-        List<Integer> breaks = new ArrayList<Integer>((int) Math.ceil(length / 5d));
-        int loc;
-        it.first();
-        while ((loc = it.next()) != BreakIterator.DONE) {
-            breaks.add(loc);
-        }
-        LineWidth lineWidth = new LineWidth(firstWidth, firstWidthLineCount, restWidth);
-        TabStops tabStopCalculator = new TabStops(variableTabStops, defaultTabStop);
-        List<Primitive> primitives =
-                computePrimitives(builder.mText, builder.mWidths, length, breaks);
-        BreakStrategy strategy = BreakStrategy.getStrategy(breakStrategy);
-        switch (strategy) {
-            case GREEDY:
-                builder.mLineBreaker =
-                        new GreedyLineBreaker(primitives, lineWidth, tabStopCalculator);
-                break;
-            case HIGH_QUALITY:
-                // TODO
-//                break;
-            case BALANCED:
-                builder.mLineBreaker = new OptimizingLineBreaker(primitives, lineWidth,
-                        tabStopCalculator);
-                break;
-        }
+        builder.mLineWidth = new LineWidth(firstWidth, firstWidthLineCount, restWidth);
+        builder.mTabStopCalculator = new TabStops(variableTabStops, defaultTabStop);
     }
 
     @LayoutlibDelegate
@@ -159,6 +131,37 @@ public class StaticLayout_Delegate {
         Builder builder = sBuilderManager.getDelegate(nativeBuilder);
         if (builder == null) {
             return 0;
+        }
+
+        // compute all possible breakpoints.
+        int length = builder.mWidths.length;
+        BreakIterator it = BreakIterator.getLineInstance(new ULocale(builder.mLocale));
+        it.setText(new Segment(builder.mText, 0, length));
+
+        // average word length in english is 5. So, initialize the possible breaks with a guess.
+        List<Integer> breaks = new ArrayList<Integer>((int) Math.ceil(length / 5d));
+        int loc;
+        it.first();
+        while ((loc = it.next()) != BreakIterator.DONE) {
+            breaks.add(loc);
+        }
+
+        List<Primitive> primitives =
+                computePrimitives(builder.mText, builder.mWidths, length, breaks);
+        switch (builder.mBreakStrategy) {
+            case Layout.BREAK_STRATEGY_SIMPLE:
+                builder.mLineBreaker = new GreedyLineBreaker(primitives, builder.mLineWidth,
+                        builder.mTabStopCalculator);
+                break;
+            case Layout.BREAK_STRATEGY_HIGH_QUALITY:
+                // TODO
+//                break;
+            case Layout.BREAK_STRATEGY_BALANCED:
+                builder.mLineBreaker = new OptimizingLineBreaker(primitives, builder.mLineWidth,
+                        builder.mTabStopCalculator);
+                break;
+            default:
+                throw new AssertionError("Unknown break strategy: " + builder.mBreakStrategy);
         }
         builder.mLineBreaker.computeBreaks(recycle);
         return recycle.breaks.length;
@@ -223,22 +226,8 @@ public class StaticLayout_Delegate {
         float[] mWidths;
         LineBreaker mLineBreaker;
         long mNativeHyphenator;
-    }
-
-    private enum BreakStrategy {
-        GREEDY, HIGH_QUALITY, BALANCED;
-
-        static BreakStrategy getStrategy(int strategy) {
-            switch (strategy) {
-                case 0:
-                    return GREEDY;
-                case 1:
-                    return HIGH_QUALITY;
-                case 2:
-                    return BALANCED;
-                default:
-                    throw new AssertionError("Unknown break strategy: " + strategy);
-            }
-        }
+        int mBreakStrategy;
+        LineWidth mLineWidth;
+        TabStops mTabStopCalculator;
     }
 }
