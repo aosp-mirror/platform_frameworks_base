@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"Жүйенің пайдаланушы интерфейстері"</string>
+    <string name="app_label" msgid="7164937344850004466">"Жүйе интерфейсі"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Тазалау"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Тізімнен алу"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Қолданба ақпараты"</string>
@@ -244,7 +244,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> құрылғылары)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth өшірулі"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Жұпталған құрылғылар қол жетімді емес"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Жұптасқан құрылғылар жоқ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Жарықтығы"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматты түрде бұру"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Бұру бекітілген"</string>
@@ -313,10 +313,10 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Шұғылдығы азырақ хабарландырулар төменде"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Ашу үшін қайтадан түртіңіз"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Бекітпесін ашу үшін жанаңыз"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Белгішеден телефонға қарай сырғытыңыз"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Дауыс көмекшісі үшін белгішеден сырғытыңыз"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Белгішеден камераға қарай сырғытыңыз"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Құлыпты ашу үшін жоғары сырғытыңыз"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Телефонды ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Дауыс көмекшісін ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Камераны ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Толық тыныштық"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Тек басымдық"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Тек дабылдар"</string>
@@ -380,8 +380,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Барлығын жасыру"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Қазір өшіру"</string>
-    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Кеңейту"</string>
-    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Тасалау"</string>
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Жаю"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жию"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран түйрелді"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Бұл сіз оны босатқанша оны көрсетіп тұрады. Босату үшін «Кері» және «Шолу» түймелерін бір уақытта басып тұрыңыз."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Бұл сіз оны босатқанша оны көрсетіп тұрады. Босату үшін «Шолу» түймесін бір уақытта басып тұрыңыз."</string>
@@ -396,12 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> — көлем диалогтық терезесі"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Түпнұсқаны қалпына келтіру үшін түртіңіз."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Жұмыс профиліндесіз"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
-    <!-- no translation found for quick_settings (10042998191725428) -->
-    <skip />
-    <!-- no translation found for add_tile (2995389510240786221) -->
-    <skip />
-    <!-- no translation found for broadcast_tile (3894036511763289383) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"Жүйе интерфейсінің тюнері"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Жылдам параметрлер"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Тор қосу"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Трансляция торы"</string>
 </resources>
