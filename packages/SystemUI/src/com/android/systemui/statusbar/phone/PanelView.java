@@ -382,7 +382,6 @@ public abstract class PanelView extends FrameLayout {
             boolean expand = flingExpands(vel, vectorVel, x, y)
                     || event.getActionMasked() == MotionEvent.ACTION_CANCEL
                     || forceCancel;
-            onTrackingStopped(expand);
             DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                     mStatusBar.isFalsingThresholdNeeded(),
                     mStatusBar.isScreenOnComingFromTouch());
@@ -396,6 +395,7 @@ public abstract class PanelView extends FrameLayout {
                                 heightDp, velocityDp);
                     }
             fling(vel, expand, isFalseTouch(x, y));
+            onTrackingStopped(expand);
             mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
             if (mUpdateFlingOnLayout) {
                 mUpdateFlingVelocity = vel;
@@ -424,6 +424,7 @@ public abstract class PanelView extends FrameLayout {
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
         mBar.onTrackingStopped(PanelView.this, expand);
+        notifyBarPanelExpansionChanged();
     }
 
     protected void onTrackingStarted() {
@@ -432,6 +433,7 @@ public abstract class PanelView extends FrameLayout {
         mCollapseAfterPeek = false;
         mBar.onTrackingStarted(PanelView.this);
         notifyExpandingStarted();
+        notifyBarPanelExpansionChanged();
     }
 
     @Override
@@ -675,6 +677,7 @@ public abstract class PanelView extends FrameLayout {
                 if (!mCancelled) {
                     notifyExpandingFinished();
                 }
+                notifyBarPanelExpansionChanged();
             }
         });
         mHeightAnimator = animator;
@@ -985,6 +988,7 @@ public abstract class PanelView extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 mHeightAnimator = null;
                 onAnimationFinished.run();
+                notifyBarPanelExpansionChanged();
             }
         });
         animator.start();
@@ -1004,7 +1008,8 @@ public abstract class PanelView extends FrameLayout {
 
     protected void notifyBarPanelExpansionChanged() {
         mBar.panelExpansionChanged(this, mExpandedFraction, mExpandedFraction > 0f || mPeekPending
-                || mPeekAnimator != null || mInstantExpanding || mHeadsUpManager.hasPinnedHeadsUp());
+                || mPeekAnimator != null || mInstantExpanding || mHeadsUpManager.hasPinnedHeadsUp()
+                || mTracking || mHeightAnimator != null);
     }
 
     /**
