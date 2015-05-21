@@ -32,6 +32,7 @@
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" પસંદ કરો"</string>
     <string name="menu_select_all" msgid="4320518282375109902">"બધા પસંદ કરો"</string>
     <string name="menu_copy" msgid="3612326052677229148">"આના પર કૉપિ કરો…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"આમાં ખસેડો…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ દર્શાવો"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ દર્શાવો"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"આંતરિક સંગ્રહ છુપાવો"</string>
@@ -39,6 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"ફાઇલ કદ દર્શાવો"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ફાઇલ કદ છુપાવો"</string>
     <string name="button_copy" msgid="8706475544635021302">"કૉપિ કરો"</string>
+    <string name="button_move" msgid="2202666023104202232">"ખસેડો"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> પસંદ કર્યા"</string>
     <string name="sort_name" msgid="9183560467917256779">"નામ દ્વારા"</string>
     <string name="sort_date" msgid="586080032956151448">"સંશોધન તારીખ દ્વારા"</string>
@@ -63,6 +65,10 @@
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી રહ્યાં છે.</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી રહ્યાં છે.</item>
+    </plurals>
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી રહ્યાં છે.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી રહ્યાં છે.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"કૉપિ માટે તૈયારી કરી રહ્યું છે…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

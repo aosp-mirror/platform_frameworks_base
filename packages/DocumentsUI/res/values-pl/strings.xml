@@ -32,6 +32,7 @@
     <string name="menu_select" msgid="8711270657353563424">"Zaznacz „<xliff:g id="DIRECTORY">^1</xliff:g>”"</string>
     <string name="menu_select_all" msgid="4320518282375109902">"Wybierz wszystko"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopiuj do…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"Przenieś do…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Pokaż pamięć wewnętrzną"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Pokaż kartę SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ukryj pamięć wewnętrzną"</string>
@@ -39,6 +40,8 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"Pokaż rozmiar pliku"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ukryj rozmiar pliku"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiuj"</string>
+    <!-- no translation found for button_move (2202666023104202232) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"Wybrano: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Według nazwy"</string>
     <string name="sort_date" msgid="586080032956151448">"Według daty edycji"</string>
@@ -65,6 +68,12 @@
       <item quantity="many">Kopiowanie <xliff:g id="COUNT_1">%1$d</xliff:g> plików.</item>
       <item quantity="other">Kopiowanie <xliff:g id="COUNT_1">%1$d</xliff:g> pliku.</item>
       <item quantity="one">Kopiowanie <xliff:g id="COUNT_0">%1$d</xliff:g> pliku.</item>
+    </plurals>
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="few">Przenoszę <xliff:g id="COUNT_1">%1$d</xliff:g> pliki.</item>
+      <item quantity="many">Przenoszę <xliff:g id="COUNT_1">%1$d</xliff:g> plików.</item>
+      <item quantity="other">Przenoszę <xliff:g id="COUNT_1">%1$d</xliff:g> pliku.</item>
+      <item quantity="one">Przenoszę <xliff:g id="COUNT_0">%1$d</xliff:g> plik.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Przygotowuję do kopiowania…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
