@@ -457,8 +457,6 @@ public interface IActivityManager extends IInterface {
 
     public int getActivityDisplayId(IBinder activityToken) throws RemoteException;
 
-    public IBinder getHomeActivityToken() throws RemoteException;
-
     public void startLockTaskModeOnCurrent() throws RemoteException;
 
     public void startLockTaskMode(int taskId) throws RemoteException;
@@ -788,7 +786,7 @@ public interface IActivityManager extends IInterface {
     int RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+180;
     int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
     int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
-    int GET_HOME_ACTIVITY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
+    // Available
     int GET_ACTIVITY_DISPLAY_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
 
