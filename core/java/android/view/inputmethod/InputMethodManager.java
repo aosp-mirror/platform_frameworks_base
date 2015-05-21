@@ -801,25 +801,21 @@ public final class InputMethodManager {
             mServedInputConnectionWrapper = null;
         }
     }
-    
+
     /**
      * Disconnect any existing input connection, clearing the served view.
      */
     void finishInputLocked() {
-        mCurRootView = null;
         mNextServedView = null;
         if (mServedView != null) {
             if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
-            
             if (mCurrentTextBoxAttribute != null) {
                 try {
                     mService.finishInput(mClient);
                 } catch (RemoteException e) {
                 }
             }
-            
             notifyInputConnectionFinished();
-            
             mServedView = null;
             mCompletions = null;
             mServedConnecting = false;
