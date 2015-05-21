@@ -466,7 +466,9 @@ public class DocumentsActivity extends BaseActivity {
 
         boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
                 || mState.action == ACTION_BROWSE);
-        if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
+        if (mState.action == ACTION_CREATE
+                || mState.action == ACTION_OPEN_TREE
+                || mState.action == ACTION_OPEN_COPY_DESTINATION) {
             createDir.setVisible(cwd != null && cwd.isCreateSupported());
             mSearchManager.showMenu(false);
 
