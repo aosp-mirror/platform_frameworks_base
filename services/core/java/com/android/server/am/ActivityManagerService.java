@@ -8704,15 +8704,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public IBinder getHomeActivityToken() throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getHomeActivityToken()");
-        synchronized (this) {
-            return mStackSupervisor.getHomeActivityToken();
-        }
-    }
-
-    @Override
     public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
