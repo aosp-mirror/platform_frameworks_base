@@ -5,8 +5,32 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 @jd:body
 
-<div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
-</div>
+<!-- <div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
+</div> -->
+
+<article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);">
+<a class="dac-hero-carousel-action" href="{@docRoot}preview/index.html">
+  <div class="wrap" style="max-width:1100px;">
+    <div class="cols dac-hero-content">
+      <div class="col-10of16 col-push-6of16 dac-hero-figure">
+        <img src="{@docRoot}images/home/devices-hero_620px_2x.png">
+      </div>
+      <div class="col-6of16 col-pull-10of16">
+        <div class="dac-hero-tag"></div>
+
+        <h1 class="dac-hero-title">Android M Developer Preview</h1>
+        <p class="dac-hero-description">Get your apps ready for the next version
+        of Android. Test on Nexus 5, 6, 9, and Player. </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}preview/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Learn more
+        </a>
+      </div>
+    </div>
+  </div>
+</a>
+</article>
 
 <div class="actions-bar dac-expand dac-invert">
   <div class="wrap dac-offset-parent">
