@@ -281,7 +281,6 @@
   <java-symbol type="bool" name="config_enableScreenshotChord" />
   <java-symbol type="bool" name="config_bluetooth_default_profiles" />
   <java-symbol type="bool" name="config_enableWifiDisplay" />
-  <java-symbol type="bool" name="config_forceEnableVoiceInteractionService" />
   <java-symbol type="bool" name="config_allowAnimationsInLowPowerMode" />
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
