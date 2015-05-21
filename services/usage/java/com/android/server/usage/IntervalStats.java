@@ -131,6 +131,11 @@ class IntervalStats {
         usageStats.mBeginIdleTime = timeStamp;
     }
 
+    void updateLastUsedTime(String packageName, long lastUsedTime) {
+        UsageStats usageStats = getOrCreateUsageStats(packageName);
+        usageStats.mLastTimeUsed = lastUsedTime;
+    }
+
     void updateConfigurationStats(Configuration config, long timeStamp) {
         if (activeConfiguration != null) {
             ConfigurationStats activeStats = configurations.get(activeConfiguration);
