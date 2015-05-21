@@ -729,12 +729,6 @@ public class FingerprintManager {
         }
     }
 
-    private void clearCallbacks() {
-        mAuthenticationCallback = null;
-        mEnrollmentCallback = null;
-        mRemovalCallback = null;
-    }
-
     private void cancelEnrollment() {
         if (mService != null) try {
             mService.cancelEnrollment(mToken);

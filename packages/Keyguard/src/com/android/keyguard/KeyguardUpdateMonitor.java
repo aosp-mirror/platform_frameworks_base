@@ -361,9 +361,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
                 return;
             }
-            if (groupId == userId) {
-                onFingerprintAuthenticated(groupId);
-            }
+            onFingerprintAuthenticated(userId);
         } finally {
             setFingerprintRunningDetectionRunning(false);
         }
