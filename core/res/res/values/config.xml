@@ -496,7 +496,7 @@
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
     <!-- Wifi HAL supported PNO -->
-    <bool translatable="false" name="config_wifi_hal_pno_enable">true</bool>
+    <bool translatable="false" name="config_wifi_hal_pno_enable">false</bool>
 
     <!-- Wifi SSID white list (can't be enabled if config_wifi_hal_pno_enable is not) -->
     <bool translatable="false" name="config_wifi_ssid_white_list_enable">true</bool>
