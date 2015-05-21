@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"የጣት አሻራ ስርዓተ ክወና ተትቷል።"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"እንደገና ይሞክሩ።"</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"ጣት <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"የሥምሪያ ቅንብሮች አንብብ"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"አንድ መተግበሪያ የDRM እውቅና ማረጋገጫዎችን እንዲያስወግድ ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ወደሞባይል አገልግሎት ሰጪ የመልዕክት አገልግሎት አያይዝ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ያዢው በሞባይል አገልግሎት ሰጪ የመልዕክት አላላክ አገልግሎት ላይ ከፍተኛውን ደረጃ በይነ ገጽ እንዲይዝ ይፈቅድለታል። ለመደበኛ መተግበሪያ በጭራሽ አያስፈልግም።"</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"ከአገልግሎት ማዋቀር አገልግሎት ጋር ያስተሳስራል"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"ያዢው ከአገልግሎት ማዋቀር አገልግሎት ጋር እንዲተሳሰር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ከአገልግሎት አቅራቢ አገልግሎቶች ጋር እሰር"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ያዢው የአገልግሎት አቅራቢ አገልግሎቶችን እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>
@@ -1042,18 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB ማህደረ ትውስታ ካበራህ፤የምትጠቀማቸው አንዳንድ መተግበሪያዎች ይቆማሉ እና የUSB ማህደረ ትውስታ እስክታጠፋ ድረስ ላይገኙ ይችላሉ።"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB ክወና ስኬታማ አልነበረም"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"እሺ"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"ዩኤስቢ ለኃይል መሙላት"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ዩኤስቢ ለፋይል ሽግግር"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ዩኤስቢ ለፎቶ ሽግግር"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"ዩኤስቢ ለMIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"እንደ ጫኝ ተያይዟል"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ለUSB ተቀጥላ ተያይዟል"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"ለተጨማሪ አማራጮች ነካ ያድርጉ።"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"የUSB ማከማቻ ቅረፅ"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD ካርድ ቅረፅ"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"በUSB ማህደረ ትውስታህ ውስጥ የተከማቹ ሁሉም ፋይሎች ይጠፋሉ፡፡ ይህ እርምጃ አይቀለበስም!"</string>
@@ -1472,22 +1466,34 @@
       <item quantity="one">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
       <item quantity="other">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">ለ%1$d ደቂቃ (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">ለ%1$d ደቂቃ (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">ለ%1$d ሰዓቶች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
       <item quantity="other">ለ%1$d ሰዓቶች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">ለ%1$d ሰዓት (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">ለ%1$d ሰዓት (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">ለ%d ደቂቃዎች</item>
       <item quantity="other">ለ%d ደቂቃዎች</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">ለ%d ደቂቃ</item>
+      <item quantity="other">ለ%d ደቂቃ</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">ለ%d ሰዓቶች</item>
       <item quantity="other">ለ%d ሰዓቶች</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">ለ%d ሰዓት</item>
+      <item quantity="other">ለ%d ሰዓት</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ድረስ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ይህን እስኪያጠፉት ድረስ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

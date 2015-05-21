@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"යෙදුමකට DRM  සහතික ඉවත් කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"වාහක පණිවිඩ යැවීමේ සේවාවට බදින්න"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"වාහක වින්‍යාස සේවාවට බඳින්න"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"වාහක වින්‍යාස සේවාවක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"වාහක සේවා වෙත බඳින්න"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"වාහක සේවා වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1044,18 +1043,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"ඔබ USB ආචයනය සක්‍රිය නම්, ඔබ භාවිතා කරන සමහර යෙදුම් නැවතීම සහ ඔබ USB ආචයනය අක්‍රිය කරන තුරු නොතිබේවී."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB ක්‍රියාවලිය අසාර්ථකයි"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"හරි"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"ආරෝපණය කිරීම සඳහා USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ගොනු හුවමාරුව සඳහා USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ඡායාරූප හුවමාරුව සඳහා USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI සඳහා USB"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ස්ථාපිතයක් ලෙස සම්බන්ධයි"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB මෙවලමකට සම්බන්ධිතයි"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB ආචයනය ෆෝමැට් කරන්නද?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD පත ෆෝමැට් කරන්නද?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ඔබගේ USB ආචයනයේ ඇති සියලුම ගොනු මැකී යනු ඇත. මෙම ක්‍රියාව ආපසු හැරවිය නොහැක!"</string>
@@ -1474,22 +1468,34 @@
       <item quantity="one">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
       <item quantity="other">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+      <item quantity="other">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
       <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+      <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">මිනිත්තු %d ක් සඳහා</item>
       <item quantity="other">මිනිත්තු %d ක් සඳහා</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">විනාඩි %d ක් සඳහා</item>
+      <item quantity="other">විනාඩි %d ක් සඳහා</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">පැය %d ක් සඳහා</item>
       <item quantity="other">පැය %d ක් සඳහා</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">පැය %d ක් සඳහා</item>
+      <item quantity="other">පැය %d ක් සඳහා</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ඔබ මෙය අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

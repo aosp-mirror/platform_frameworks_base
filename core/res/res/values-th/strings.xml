@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ยกเลิกการทำงานของลายนิ้วมือ"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ดำเนินการหลายครั้งเกินไป ลองอีกครั้งในภายหลัง"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ลองอีกครั้ง"</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"นิ้ว <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"อนุญาตให้แอปพลิเคชันนำใบรับรอง DRM ออก แอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"เชื่อมโยงกับบริการรับส่งข้อความของผู้ให้บริการ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการรับส่งข้อความของผู้ให้บริการ ไม่ควรใช้สำหรับแอปธรรมดาทั่วไป"</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"เชื่อมโยงกับบริการกำหนดค่าของผู้ให้บริการ"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"อนุญาตให้แอปเชื่อมโยงกับบริการกำหนดค่าของผู้ให้บริการ ไม่จำเป็นสำหรับแอปทั่วไป"</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"เชื่อมโยงกับบริการของผู้ให้บริการ"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"อนุญาตให้เจ้าของเชื่อมโยงกับบริการของผู้ให้บริการ ไม่ควรต้องใช้สำหรับแอปทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1042,18 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"หากคุณเปิดที่จัดเก็บข้อมูล USB แอปพลิเคชันบางอย่างที่คุณใช้อยู่อาจหยุดทำงานและไม่สามารถใช้ได้จนกว่าจะปิดที่จัดเก็บข้อมูล USB"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"การทำงานของ USB ไม่สำเร็จ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ตกลง"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB สำหรับการชาร์จ"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB สำหรับการโอนไฟล์"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB สำหรับการโอนรูปภาพ"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB สำหรับ MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"เชื่อมต่อเป็นตัวติดตั้ง"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"เชื่อมต่อกับอุปกรณ์เสริม USB แล้ว"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ฟอร์แมต USB หรือไม่"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ฟอร์แมตการ์ด SD หรือไม่"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ไฟล์ทั้งหมดที่เก็บไว้ในที่จัดเก็บข้อมูล USB ของคุณจะถูกลบทิ้ง การทำงานนี้ไม่สามารถย้อนกลับได้!"</string>
@@ -1472,22 +1466,34 @@
       <item quantity="other">ระยะเวลา %1$d นาที (จนถึงเวลา <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">ระยะเวลา 1 นาที (จนถึงเวลา <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">เป็นเวลา %1$d นาที (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">เป็นเวลา 1 นาที (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">ระยะเวลา %1$d ชั่วโมง (จนถึงเวลา <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">ระยะเวลา 1 ชั่วโมง (จนถึงเวลา <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">เป็นเวลา %1$d ชม. (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">เป็นเวลา 1 ชม. (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">ระยะเวลา %d นาที</item>
       <item quantity="one">ระยะเวลา 1 นาที</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">เป็นเวลา %d นาที</item>
+      <item quantity="one">เป็นเวลา 1 นาที</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">ระยะเวลา %d ชั่วโมง</item>
       <item quantity="one">ระยะเวลา 1 ชั่วโมง</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">เป็นเวลา %d ชม.</item>
+      <item quantity="one">เป็นเวลา 1 ชม.</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"จนกว่าคุณจะปิดฟังก์ชันนี้"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

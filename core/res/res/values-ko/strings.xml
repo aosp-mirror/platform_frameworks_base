@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"다시 시도해 보세요."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>번째 손가락"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"이동통신사 설정 서비스 사용"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"권한을 가진 프로그램이 이동통신사 설정 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"이동통신사 서비스 사용"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"권한을 가진 애플리케이션에서 이동통신사 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -1042,18 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB 저장소를 사용하면 사용 중인 일부 애플리케이션이 중지되며 USB 저장소를 사용중지할 때까지 사용하지 못할 수 있습니다."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB 작업을 하지 못했습니다."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"충전용 USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"파일 전송용 USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"사진 전송용 USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI용 USB"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"설치 프로그램으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB 액세서리에 연결됨"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB 저장소를 포맷하시겠습니까?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD 카드를 포맷하시겠습니까?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 저장소에 저장된 파일이 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다."</string>
@@ -1472,22 +1466,34 @@
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
       <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
+      <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d시간 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
       <item quantity="one">1시간 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">%1$d시간 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
+      <item quantity="one">1시간 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d분 동안</item>
       <item quantity="one">1분 동안</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">%d분 동안</item>
+      <item quantity="one">1분 동안</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d시간 동안</item>
       <item quantity="one">1시간 동안</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">%d시간 동안</item>
+      <item quantity="one">1시간 동안</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

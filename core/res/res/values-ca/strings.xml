@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Torna-ho a provar."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permet que una aplicació suprimeixi els certificats DRM. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"vincular-la al servei de missatgeria d\'un operador"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permet que el propietari la pugui vincular a la interfície principal del servei de missatgeria d\'un operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"vincula-la amb un servei de configuració d\'operadors de telefonia mòbil"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Permet que el titular la vinculi amb un servei de configuració d\'operadors de telefonia mòbil. Mai no hauria de ser necessari per a les aplicacions normals."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular-la a serveis de l\'operador de telefonia mòbil"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permet que el propietari la vinculi a serveis de l\'operador de telefonia mòbil. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar els intents de desbloqueig de pantalla"</string>
@@ -1042,18 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Si actives l\'emmagatzematge USB, algunes de les aplicacions que utilitzes s\'aturaran i pot ser que no estiguin disponibles fins que no desactivis l\'emmagatzematge USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"S\'ha produït un error amb l\'operació de l\'USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"D\'acord"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB per carregar"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB per transferir fitxers"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB per transferir fotos"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB per a MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connectat com a instal·lador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"Toca per veure més opcions."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formata l\'emmagatzematge USB"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vols formatar la targeta SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"S\'esborraran tots els fitxers emmagatzemats al dispositiu d\'emmagatzematge USB. Aquesta acció no es pot desfer."</string>
@@ -1472,22 +1466,34 @@
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durant 1 minut (fins a les <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">Durant %1$d min (fins a: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durant 1 min (fins a: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">Durant %1$d hores (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durant 1 hora (fins a les <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">Durant %1$d h (fins a: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durant 1 h (fins a: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">Durant %d minuts</item>
       <item quantity="one">Durant un minut</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">Durant %d min</item>
+      <item quantity="one">Durant 1 min</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">Durant %d hores</item>
       <item quantity="one">Durant 1 hora</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">Durant %d h</item>
+      <item quantity="one">Durant 1 h</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Fins que no ho desactivis"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

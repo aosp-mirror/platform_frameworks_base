@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ਫਿੰਗਰ"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ. ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ DRM ਸਰਟੀਫਿਕੇਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ਇੱਕ ਕੈਰੀਅਰ ਮੈਸੇਜਿੰਗ ਸੇਵਾ ਨਾਲ ਜੋੜੋ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਕੈਰੀਅਰ ਮੈਸੇਜਿੰਗ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"ਇੱਕ ਕੈਰੀਅਰ ਕੰਫੀਗ੍ਰੇਸ਼ਨ ਸੇਵਾ ਨਾਲ ਜੋੜੋ"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"ਹੋਲਡਰ ਨੂੰ ਕਿਸੇ ਕੈਰੀਅਰ ਕੰਫ਼ੀਗ੍ਰੇਸ਼ਨ ਸੇਵਾ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ਕੈਰੀਅਰ ਸੇਵਾਵਾਂ ਨਾਲ ਜੋੜੋ"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ਹੋਲਡਰ ਨੂੰ ਕੈਰੀਅਰ ਸੇਵਾਵਾਂ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲੌਕ ਪਾਸਵਰਡਾਂ ਅਤੇ PIN ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ਸਕ੍ਰੀਨ-ਅਨਲੌਕ ਸੈਟਿੰਗਾਂ ਦਾ ਨਿਰੀਖਣ ਕਰੋ"</string>
@@ -1042,18 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"ਜੇਕਰ ਤੁਸੀਂ USB ਸਟੋਰੇਜ ਚਾਲੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਕੁਝ ਐਪਸ, ਜੋ ਤੁਸੀਂ ਵਰਤ ਰਹੇ ਹੋ, ਬੰਦ ਹੋ ਜਾਣਗੇ ਅਤੇ ਅਣਉਪਲਬਧ ਕੀਤੇ ਜਾ ਸਕਦੇ ਹਨ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ USB ਸਟੋਰੇਜ ਬੰਦ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB ਓਪਰੇਸ਼ਨ ਅਸਫਲ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ਠੀਕ"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"ਚਾਰਜਿੰਗ ਲਈ USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ਫੋਟੋ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI ਲਈ USB"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ਇੱਕ ਇੰਸਟੌਲਰ ਦੇ ਤੌਰ ਤੇ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ਇੱਕ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ਕੀ USB ਸਟੋਰੇਜ ਨੂੰ ਫੌਰਮੈਟ ਕਰਨਾ ਹੈ?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ਕੀ SD ਕਾਰਡ ਨੂੰ ਫੌਰਮੈਟ ਕਰਨਾ ਹੈ?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ਤੁਹਾਡੀ USB ਸਟੋਰੇਜ ਵਿੱਚ ਸਟੋਰ ਕੀਤੀਆਂ ਸਾਰੀਆਂ ਫਾਈਲਾਂ ਮਿਟਾ ਦਿੱਤੀਆਂ ਜਾਣਗੀਆਂ। ਇਹ ਕਿਰਿਆ ਉਲਟਾਈ ਨਹੀਂ ਜਾ ਸਕਦੀ!"</string>
@@ -1472,22 +1466,34 @@
       <item quantity="one">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ) </item>
       <item quantity="other">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">%1$d ਮਿੰਟਾਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+      <item quantity="other">%1$d ਮਿੰਟਾਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
       <item quantity="other">%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">%1$d ਘੰਟਿਆਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+      <item quantity="other">%1$d ਘੰਟਿਆਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">%d ਮਿੰਟਾਂ ਤੱਕ</item>
       <item quantity="other">%d ਮਿੰਟਾਂ ਤੱਕ</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">%d ਮਿੰਟਾਂ ਲਈ</item>
+      <item quantity="other">%d ਮਿੰਟਾਂ ਲਈ</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">%d ਘੰਟਿਆਂ ਤੱਕ</item>
       <item quantity="other">%d ਘੰਟਿਆਂ ਤੱਕ</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">%d ਘੰਟਿਆਂ ਲਈ</item>
+      <item quantity="other">%d ਘੰਟਿਆਂ ਲਈ</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ਤੱਕ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇਸਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ ਹੋ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
