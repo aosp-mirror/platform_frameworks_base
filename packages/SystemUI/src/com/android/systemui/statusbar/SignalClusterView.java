@@ -56,10 +56,13 @@ public class SignalClusterView
     private boolean mVpnVisible = false;
     private boolean mEthernetVisible = false;
     private int mEthernetIconId = 0;
+    private int mLastEthernetIconId = -1;
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
+    private int mLastWifiStrengthId = -1;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
+    private int mLastAirplaneIconId = -1;
     private String mAirplaneContentDescription;
     private String mWifiDescription;
     private String mEthernetDescription;
@@ -275,10 +278,14 @@ public class SignalClusterView
 
         if (mEthernet != null) {
             mEthernet.setImageDrawable(null);
+            mEthernetDark.setImageDrawable(null);
+            mLastEthernetIconId = -1;
         }
 
         if (mWifi != null) {
             mWifi.setImageDrawable(null);
+            mWifiDark.setImageDrawable(null);
+            mLastWifiStrengthId = -1;
         }
 
         for (PhoneState state : mPhoneStates) {
@@ -290,8 +297,9 @@ public class SignalClusterView
             }
         }
 
-        if(mAirplane != null) {
+        if (mAirplane != null) {
             mAirplane.setImageDrawable(null);
+            mLastAirplaneIconId = -1;
         }
 
         apply();
@@ -310,8 +318,11 @@ public class SignalClusterView
         if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
 
         if (mEthernetVisible) {
-            mEthernet.setImageResource(mEthernetIconId);
-            mEthernetDark.setImageResource(mEthernetIconId);
+            if (mLastEthernetIconId != mEthernetIconId) {
+                mEthernet.setImageResource(mEthernetIconId);
+                mEthernetDark.setImageResource(mEthernetIconId);
+                mLastEthernetIconId = mEthernetIconId;
+            }
             mEthernetGroup.setContentDescription(mEthernetDescription);
             mEthernetGroup.setVisibility(View.VISIBLE);
         } else {
@@ -324,8 +335,11 @@ public class SignalClusterView
 
 
         if (mWifiVisible) {
-            mWifi.setImageResource(mWifiStrengthId);
-            mWifiDark.setImageResource(mWifiStrengthId);
+            if (mWifiStrengthId != mLastWifiStrengthId) {
+                mWifi.setImageResource(mWifiStrengthId);
+                mWifiDark.setImageResource(mWifiStrengthId);
+                mLastWifiStrengthId = mWifiStrengthId;
+            }
             mWifiGroup.setContentDescription(mWifiDescription);
             mWifiGroup.setVisibility(View.VISIBLE);
         } else {
@@ -349,7 +363,10 @@ public class SignalClusterView
         }
 
         if (mIsAirplaneMode) {
-            mAirplane.setImageResource(mAirplaneIconId);
+            if (mLastAirplaneIconId != mAirplaneIconId) {
+                mAirplane.setImageResource(mAirplaneIconId);
+                mLastAirplaneIconId = mAirplaneIconId;
+            }
             mAirplane.setContentDescription(mAirplaneContentDescription);
             mAirplane.setVisibility(View.VISIBLE);
         } else {
