@@ -396,6 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"మీరు కార్యాలయ ప్రొఫైల్‌లో ఉన్నారు"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"సిస్టమ్ UI ట్యూనర్"</string>
+    <string name="quick_settings" msgid="10042998191725428">"శీఘ్ర సెట్టింగ్‌లు"</string>
+    <string name="add_tile" msgid="2995389510240786221">"టైల్‌ను జోడించండి"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"ప్రసార టైల్"</string>
 </resources>

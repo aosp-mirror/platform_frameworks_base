@@ -85,7 +85,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Тайлах"</string>
     <string name="unlock_label" msgid="8779712358041029439">"тайлах"</string>
     <string name="phone_label" msgid="2320074140205331708">"утас нээх"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"нээлттэй дуут туслах"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"дуут туслахыг нээнэ"</string>
     <string name="camera_label" msgid="7261107956054836961">"камер нээх"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Шинэ ажиллах талбарыг сонгоно уу"</string>
     <string name="cancel" msgid="6442560571259935130">"Цуцлах"</string>
@@ -312,9 +312,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Нээхийн тулд дахин хүрнэ үү"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Түгжээг тайлах бол шудрана уу"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Утсыг гаргахын тулд тэмдгээс шудрах"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Дуут туслахыг нээхийн тулд тэмдгээс шудрах"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Камер нээхийн тулд тэмдгээс шудрах"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Утсыг гаргахын тулд дүрс тэмдгээс шудрах"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Дуут туслахыг нээхийн тулд дүрс тэмдгээс шудрах"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Камер нээхийн тулд дүрс тэмдгийг шудрах"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Дуугүй болгох"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Зөвхөн чухал зүйлс"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Зөвхөн сэрүүлэг"</string>
@@ -379,7 +379,7 @@
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Одоо дуусгах"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Дэлгэх"</string>
-    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Хумих"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Хураах"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Дэлгэц эхэнд байрлуулагдсан"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Таныг эхэнд нээхийг болиулах хүртэл харагдана. Хүрээд, Back дээр удаан дараад хаахдаа Overview-ийг дар"</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Таныг эхэнд нээхийг болиулах хүртэл харагдана. Хаахын тулд хүрээдOverview-ийг дар"</string>
@@ -394,6 +394,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь дууны диалог юм."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Анхны хувилбарыг эргүүлэн хадгалахыг хүсвэл хүрнэ үү."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Та Work профайлд байна"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Түргэвчилсэн Tохиргоо"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Вэбсайтын цонх нэмэх"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Вэбсайтын цонх дамжуулах"</string>
 </resources>

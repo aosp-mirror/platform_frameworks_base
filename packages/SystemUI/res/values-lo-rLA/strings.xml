@@ -396,6 +396,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ສໍາ​ຜັດ​ເພື່ອກູ້​ຄືນ​ຕົ້ນ​ສະ​ບັບ​."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"ທ່ານ​ຢູ່​ໃນ​ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
-    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
-    <skip />
+    <string name="system_ui_tuner" msgid="3442596010150119600">"ຕົວ​ປັບ UI ລະ​ບົບ"</string>
+    <string name="quick_settings" msgid="10042998191725428">"ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
+    <string name="add_tile" msgid="2995389510240786221">"ເພີ່ມ​ລາຍ​ຕາ​ກະ​ໂລ່"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"ເຜີຍ​ແຜ່​ລາຍ​ຕາ​ກະ​ໂລ່"</string>
 </resources>
