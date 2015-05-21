@@ -739,38 +739,40 @@ final class TaskRecord {
         performClearTaskAtIndexLocked(0);
     }
 
+    String lockTaskAuthToString() {
+        switch (mLockTaskAuth) {
+            case LOCK_TASK_AUTH_DONT_LOCK: return "LOCK_TASK_AUTH_DONT_LOCK";
+            case LOCK_TASK_AUTH_PINNABLE: return "LOCK_TASK_AUTH_PINNABLE";
+            case LOCK_TASK_AUTH_LAUNCHABLE: return "LOCK_TASK_AUTH_LAUNCHABLE";
+            case LOCK_TASK_AUTH_WHITELISTED: return "LOCK_TASK_AUTH_WHITELISTED";
+            default: return "unknown=" + mLockTaskAuth;
+        }
+    }
+
     void setLockTaskAuth() {
         switch (mLockTaskMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
-                        " mLockTaskAuth=" + (isLockTaskWhitelistedLocked() ?
-                        "WHITELISTED" : "PINNABLE"));
                 mLockTaskAuth = isLockTaskWhitelistedLocked() ?
                     LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_NEVER:
-                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
-                        " mLockTaskAuth=" + (mPrivileged ? "DONT_LOCK" : "PINNABLE"));
                 mLockTaskAuth = mPrivileged ?
                         LOCK_TASK_AUTH_DONT_LOCK : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_ALWAYS:
-                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
-                        " mLockTaskAuth=" + (mPrivileged ? "LAUNCHABLE" : "PINNABLE"));
                 mLockTaskAuth = mPrivileged ?
                         LOCK_TASK_AUTH_LAUNCHABLE: LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
-                        " mLockTaskAuth=" + (isLockTaskWhitelistedLocked() ?
-                        "LAUNCHABLE" : "PINNABLE"));
                 mLockTaskAuth = isLockTaskWhitelistedLocked() ?
                         LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }
+        if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
+                " mLockTaskAuth=" + lockTaskAuthToString());
     }
 
     boolean isLockTaskWhitelistedLocked() {
@@ -1173,10 +1175,12 @@ final class TaskRecord {
                     pw.print(" taskType="); pw.print(taskType);
                     pw.print(" mTaskToReturnTo="); pw.println(mTaskToReturnTo);
         }
-        if (rootWasReset || mNeverRelinquishIdentity || mReuseTask) {
+        if (rootWasReset || mNeverRelinquishIdentity || mReuseTask
+                || mLockTaskAuth != LOCK_TASK_AUTH_PINNABLE) {
             pw.print(prefix); pw.print("rootWasReset="); pw.print(rootWasReset);
                     pw.print(" mNeverRelinquishIdentity="); pw.print(mNeverRelinquishIdentity);
-                    pw.print(" mReuseTask="); pw.println(mReuseTask);
+                    pw.print(" mReuseTask="); pw.print(mReuseTask);
+                    pw.print(" mLockTaskAuth="); pw.println(lockTaskAuthToString());
         }
         if (mAffiliatedTaskId != taskId || mPrevAffiliateTaskId != INVALID_TASK_ID
                 || mPrevAffiliate != null || mNextAffiliateTaskId != INVALID_TASK_ID
