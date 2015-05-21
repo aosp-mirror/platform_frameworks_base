@@ -320,7 +320,8 @@ public final class BridgeTypedArray extends TypedArray {
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                         parser, mContext, resValue.isFramework());
                 try {
-                    return ColorStateList.createFromXml(mContext.getResources(), blockParser);
+                    return ColorStateList.createFromXml(mContext.getResources(), blockParser,
+                            mContext.getTheme());
                 } finally {
                     blockParser.ensurePopped();
                 }
