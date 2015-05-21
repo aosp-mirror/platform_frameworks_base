@@ -334,7 +334,7 @@
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Сиздин социалдык маалыматыңыз"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Сиздин байланыштарыңыз жана социалдык байланыштарыңыз тууралуу маалыматтарга түз жетки алуу."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнбарак"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"күнбарагыңызга уруксат"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS билдирүүлөрдү көрүү жана башкаруу"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Колдонуучунун сөздүгү"</string>
@@ -348,7 +348,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлор"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"сенсорлордон жана тагынма түзмөктөрдөн маалымат алуу"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"сенсорлордон жана тагынма түзмөктөрдөн дайындарды алуу"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмунун алуу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сиз иштеп жаткан терезенин мазмунун изилдөө."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Сыйпалап изилдөөнү жандыруу"</string>
@@ -563,8 +563,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Манжа изи иш-аракети жокко чыгарылды."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Аракеттер өтө көп болду. Кийинчерээк кайра аракет кылыңыз."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Кайра бир аракеттениңиз."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> манжасы"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
@@ -635,8 +634,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Колдонмого DRM тастыктамаларын алып салуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордун билдирүү кызматына байланышуу"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"оператордун конфигурация кызматына жалгашуу"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Кармоочуга оператордун конфигурация кызматына жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <!-- no translation found for permlab_bindCarrierServices (3233108656245526783) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierServices (1391552602551084192) -->
+    <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
@@ -1385,19 +1386,14 @@
     <string name="dlg_error_title" msgid="7323658469626514207">"USB иши ийгиликсиз болду"</string>
     <!-- no translation found for dlg_ok (7376953167039865701) -->
     <skip />
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"Кубаттоо үчүн USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Файл өткөрүү үчүн USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Сүрөт өткөрүү үчүн USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI үчүн USB"</string>
     <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
     <skip />
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB аксессуарга байланышты"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"Көбүрөөк параметр үчүн тийип коюңуз."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB сактагычы форматталсынбы?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD карта форматталсынбы?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB сактагычыңызда сакталган бардык файлдар тазаланып салынат. Бул аракетти артка кайтаруу мүмкүн эмес!"</string>
@@ -1886,22 +1882,34 @@
       <item quantity="other">%1$d мүнөткө (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
       <item quantity="one">Бир мүнөткө (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">%1$d мүнөткө (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
+      <item quantity="one">1 мүнөткө (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d саатка (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
       <item quantity="one">Бир саатка (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">%1$d саатка (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
+      <item quantity="one">1 саатка (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d мүнөткө</item>
       <item quantity="one">Бир мүнөткө</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">%d мүнөткө</item>
+      <item quantity="one">1 мүнөткө</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d саатка</item>
       <item quantity="one">Бир саатка</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">%d саатка</item>
+      <item quantity="one">1 саатка</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Бул өчүрүлгөнгө чейин"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

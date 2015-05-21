@@ -438,8 +438,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operace otisku prstu byla zrušena."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Příliš mnoho pokusů. Zkuste to později."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Zkuste to znovu."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
@@ -504,8 +503,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Povoluje aplikaci odstranit certifikáty DRM. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"navázat se na službu konfigurace prostřednictvím operátora"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Umožňuje držiteli navázat se na službu konfigurace prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"navázat se na služby operátora"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Umožňuje držiteli oprávnění navázat se na služby operátora. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
@@ -1056,18 +1055,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Pokud zapnete úložiště USB, dojde k zastavení některých používaných aplikací. Tyto aplikace pravděpodobně nebudou k dispozici až do vypnutí úložiště USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operace rozhraní USB se nezdařila."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB na nabíjení"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB na přenos souborů"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB na přenos fotek"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB v režimu MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Připojeno jako instalátor"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Připojeno k perifernímu zařízení USB"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"Klepnutím zobrazíte další možnosti."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formátovat úložiště USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formátovat kartu SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všechny soubory uložené v úložišti USB budou vymazány. Tuto akci nelze vrátit zpět."</string>
@@ -1492,28 +1486,48 @@
       <item quantity="other">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Jednu minutu (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="few">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 min (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="few">%1$d hodiny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d hodiny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d hodin (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Jednu hodinu (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="few">%1$d h (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">%1$d h (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d h (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 h (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="few">%d minuty</item>
       <item quantity="many">%d minuty</item>
       <item quantity="other">%d minut</item>
       <item quantity="one">Jednu minutu</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="few">%d min</item>
+      <item quantity="many">%d min</item>
+      <item quantity="other">%d min</item>
+      <item quantity="one">1 min</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="few">%d hodiny</item>
       <item quantity="many">%d hodiny</item>
       <item quantity="other">%d hodin</item>
       <item quantity="one">Jednu hodinu</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="few">%d h</item>
+      <item quantity="many">%d h</item>
+      <item quantity="other">%d h</item>
+      <item quantity="one">1 h</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokud tuto funkci nevypnete"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -436,8 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operasi sidik jari dibatalkan."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Terlalu banyak upaya. Coba lagi nanti."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Coba lagi."</string>
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca setelan sinkron"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Memungkinkan aplikasi membuang sertifikat DRM. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ikat ke layanan perpesanan operator"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Mengizinkan operator untuk mengikat ke antarmuka tingkat tinggi dari suatu layanan perpesanan operator. Fitur ini seharusnya tidak diperlukan oleh aplikasi normal."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"ikat ke layanan konfigurasi operator"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Memungkinkan pemegang untuk mengikat ke layanan konfigurasi operator. Hal ini tidak pernah dibutuhkan untuk aplikasi normal."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"mengikat ke layanan operator"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Memungkinkan pemegang untuk mengikat ke layanan operator. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Upaya pembukaan kunci layar monitor"</string>
@@ -1042,18 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Jika Anda menyalakan penyimpanan USB, beberapa apl yang Anda gunakan akan berhenti dan mungkin tidak dapat dibuka hingga penyimpanan USB dimatikan."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operasi USB gagal"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Oke"</string>
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB untuk pengisian daya"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB untuk transfer file"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB untuk transfer foto"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB untuk MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tersambung sebagai pemasang"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tersambung ke aksesori USB"</string>
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"Sentuh untuk opsi lainnya."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Format penyimpanan USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Format kartu SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Semua file yang tersimpan dalam penyimpanan USB Anda akan dihapus. Tindakan ini tidak dapat diurungkan!"</string>
@@ -1472,22 +1466,34 @@
       <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Selama satu menit (hingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Selama 1 menit (hingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">Selama %1$d jam (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Selama satu jam (hingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">Selama %1$d jam (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Selama 1 jam (hingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">Selama %d menit</item>
       <item quantity="one">Selama satu menit</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">Selama %d menit</item>
+      <item quantity="one">Selama 1 menit</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">Selama %d jam</item>
       <item quantity="one">Selama satu jam</item>
     </plurals>
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">Selama %d jam</item>
+      <item quantity="one">Selama 1 jam</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hingga Anda menonaktifkan ini"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
