@@ -634,6 +634,7 @@ public class AudioSystem
 
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
 
+    public static native int systemReady();
 
     // Items shared with audio service
 
