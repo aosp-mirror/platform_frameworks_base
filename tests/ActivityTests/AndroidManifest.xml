@@ -75,5 +75,6 @@
         <provider android:name="SingleUserProvider"
             android:authorities="com.google.android.test.activity.single_user"
             android:singleUser="true" android:exported="true" />
+        <receiver android:name="TrackTimeReceiver" />
     </application>
 </manifest>
