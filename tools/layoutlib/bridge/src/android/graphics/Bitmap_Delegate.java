@@ -274,6 +274,13 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static Bitmap nativeCopyAshmem(long nativeSrcBitmap) {
+        // Unused method; no implementation provided.
+        assert false;
+        return null;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void nativeDestructor(long nativeBitmap) {
         sManager.removeJavaReferenceFor(nativeBitmap);
     }
