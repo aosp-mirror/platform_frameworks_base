@@ -180,7 +180,10 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     const int bitmapWidth = bitmap.width();
     const int bitmapHeight = bitmap.height();
 
-    SkScalar* dstRights = (SkScalar*) alloca((numXDivs + 1) * sizeof(SkScalar));
+    // Number of bytes needed for dstRights array.
+    // Need to cast numXDivs to a larger type to avoid overflow.
+    const size_t dstBytes = ((size_t) numXDivs + 1) * sizeof(SkScalar);
+    SkScalar* dstRights = (SkScalar*) alloca(dstBytes);
     bool dstRightsHaveBeenCached = false;
 
     int numStretchyXPixelsRemaining = 0;
