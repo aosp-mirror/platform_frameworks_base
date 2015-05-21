@@ -468,6 +468,20 @@ public final class BridgeContext extends Context {
 
     @Override
     public ClassLoader getClassLoader() {
+        // The documentation for this method states that it should return a class loader one can
+        // use to retrieve classes in this package. However, when called by LayoutInflater, we do
+        // not want the class loader to return app's custom views.
+        // This is so that the IDE can instantiate the custom views and also generate proper error
+        // messages in case of failure. This also enables the IDE to fallback to MockView in case
+        // there's an exception thrown when trying to inflate the custom view.
+        // To work around this issue, LayoutInflater is modified via LayoutLib Create tool to
+        // replace invocations of this method to a new method: getFrameworkClassLoader(). Also,
+        // the method is injected into Context. The implementation of getFrameworkClassLoader() is:
+        // "return getClass().getClassLoader();". This means that when LayoutInflater asks for
+        // the context ClassLoader, it gets only LayoutLib's ClassLoader which doesn't have
+        // access to the apps's custom views.
+        // This method can now return the right ClassLoader, which CustomViews can use to do the
+        // right thing.
         if (mClassLoader == null) {
             mClassLoader = new ClassLoader(getClass().getClassLoader()) {
                 @Override
