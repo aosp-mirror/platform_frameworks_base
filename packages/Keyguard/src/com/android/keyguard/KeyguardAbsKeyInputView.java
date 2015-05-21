@@ -110,7 +110,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     protected void verifyPasswordAndUnlock() {
         final String entry = getPasswordText();
-        setPasswordEntryEnabled(false);
+        setPasswordEntryInputEnabled(false);
         if (mPendingLockCheck != null) {
             mPendingLockCheck.cancel(false);
         }
@@ -121,7 +121,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 new LockPatternChecker.OnCheckCallback() {
                     @Override
                     public void onChecked(boolean matched) {
-                        setPasswordEntryEnabled(true);
+                        setPasswordEntryInputEnabled(true);
                         mPendingLockCheck = null;
                         onPasswordChecked(entry, matched);
                     }
@@ -152,6 +152,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected abstract void resetPasswordText(boolean animate);
     protected abstract String getPasswordText();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
+    protected abstract void setPasswordEntryInputEnabled(boolean enabled);
 
     // Prevent user from using the PIN/Password entry until scheduled deadline.
     protected void handleAttemptLockout(long elapsedRealtimeDeadline) {
