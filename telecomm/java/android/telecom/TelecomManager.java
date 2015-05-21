@@ -126,6 +126,23 @@ public class TelecomManager {
             "android.telecom.action.CHANGE_DEFAULT_DIALER";
 
     /**
+     * Activity action: Opens the settings screen where a user can enable and disable which
+     * {@link PhoneAccount}s are allows to make and receive calls. Because a user must
+     * explicitly enable an account before the system will use it, an app may want to send the
+     * user to this setting after registering a {@link PhoneAccount}.
+     * <p>
+     * Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT_DESCRIPTION} contains a string-based
+     * reference to the {@link PhoneAccountHandle} you want to enable. get*Extra field
+     * {@link #EXTRA_ENABLE_PHONE_ACCOUNT_VALUE} contains a boolean value indicated whether
+     * the account should be enabled or disabled.
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * @hide
+     */
+    public static final String ACTION_ENABLE_PHONE_ACCOUNT_SETTING =
+            "android.telecom.action.ENABLE_PHONE_ACCOUNT_SETTING";
+
+    /**
      * Extra value used to provide the package name for {@link #ACTION_CHANGE_DEFAULT_DIALER}.
      */
     public static final String EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME =
@@ -159,6 +176,25 @@ public class TelecomManager {
      */
     public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
             "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
+
+    /**
+     * The extra used with {@link #ACTION_ENABLE_PHONE_ACCOUNT_SETTING} to specify a phone account
+     * as a string value. The value is of the form: "A;B" where A is the component name of the
+     * {@link PhoneAccount} (e.g.,
+     * com.android.phone/com.android.services.telephony.TelephonyConnectionService) and B is the
+     * {@link PhoneAccount} ID.
+     * @hide
+     */
+    public static final String EXTRA_PHONE_ACCOUNT_DESCRIPTION =
+            "android.telecom.extra.PHONE_ACCOUNT_DESCRIPTION";
+
+    /**
+     * Boolean extra used to specify a value for enabling and disabling a phone account.
+     * Used with {@link #ACTION_ENABLE_PHONE_ACCOUNT_SETTING}.
+     * @hide
+     */
+    public static final String EXTRA_ENABLE_PHONE_ACCOUNT_VALUE =
+            "android.telecom.extra.ENABLE_PHONE_ACCOUNT_VALUE";
 
     /**
      * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
