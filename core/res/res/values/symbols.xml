@@ -944,6 +944,8 @@
   <java-symbol type="string" name="wifi_available_sign_in" />
   <java-symbol type="string" name="network_available_sign_in" />
   <java-symbol type="string" name="network_available_sign_in_detailed" />
+  <java-symbol type="string" name="wifi_no_internet" />
+  <java-symbol type="string" name="wifi_no_internet_detailed" />
   <java-symbol type="string" name="wifi_connect_alert_title" />
   <java-symbol type="string" name="wifi_connect_alert_message" />
   <java-symbol type="string" name="wifi_connect_default_application" />
