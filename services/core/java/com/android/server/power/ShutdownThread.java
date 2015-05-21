@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- 
+
 package com.android.server.power;
 
 import android.app.ActivityManagerNative;
@@ -44,12 +44,19 @@ import android.os.Vibrator;
 import android.os.SystemVibrator;
 import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
+import android.system.ErrnoException;
+import android.system.Os;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.server.pm.PackageManagerService;
 
 import android.util.Log;
 import android.view.WindowManager;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public final class ShutdownThread extends Thread {
     // constants
@@ -59,14 +66,18 @@ public final class ShutdownThread extends Thread {
     private static final int MAX_BROADCAST_TIME = 10*1000;
     private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
     private static final int MAX_RADIO_WAIT_TIME = 12*1000;
+    private static final int MAX_UNCRYPT_WAIT_TIME = 15*60*1000;
 
     // length of vibration before shutting down
     private static final int SHUTDOWN_VIBRATE_MS = 500;
-    
+
     // state tracking
     private static Object sIsStartedGuard = new Object();
     private static boolean sIsStarted = false;
-    
+
+    // uncrypt status file
+    private static final String UNCRYPT_STATUS_FILE = "/cache/recovery/uncrypt_status";
+
     private static boolean mReboot;
     private static boolean mRebootSafeMode;
     private static String mRebootReason;
@@ -94,10 +105,11 @@ public final class ShutdownThread extends Thread {
     private Handler mHandler;
 
     private static AlertDialog sConfirmDialog;
-    
+    private ProgressDialog mProgressDialog;
+
     private ShutdownThread() {
     }
- 
+
     /**
      * Request a clean shutdown, waiting for subsystems to clean up their
      * state etc.  Must be called from a Looper thread in which its UI
@@ -226,7 +238,11 @@ public final class ShutdownThread extends Thread {
         // throw up an indeterminate system dialog to indicate radio is
         // shutting down.
         ProgressDialog pd = new ProgressDialog(context);
-        pd.setTitle(context.getText(com.android.internal.R.string.power_off));
+        if (mRebootReason.equals(PowerManager.REBOOT_RECOVERY)) {
+            pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_recovery_title));
+        } else {
+            pd.setTitle(context.getText(com.android.internal.R.string.power_off));
+        }
         pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
         pd.setIndeterminate(true);
         pd.setCancelable(false);
@@ -234,6 +250,7 @@ public final class ShutdownThread extends Thread {
 
         pd.show();
 
+        sInstance.mProgressDialog = pd;
         sInstance.mContext = context;
         sInstance.mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
 
@@ -307,14 +324,14 @@ public final class ShutdownThread extends Thread {
         }
 
         Log.i(TAG, "Sending shutdown broadcast...");
-        
+
         // First send the high-level shut down broadcast.
         mActionDone = false;
         Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendOrderedBroadcastAsUser(intent,
                 UserHandle.ALL, null, br, mHandler, 0, null, null);
-        
+
         final long endTime = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
         synchronized (mActionDoneSync) {
             while (!mActionDone) {
@@ -329,9 +346,9 @@ public final class ShutdownThread extends Thread {
                 }
             }
         }
-        
+
         Log.i(TAG, "Shutting down activity manager...");
-        
+
         final IActivityManager am =
             ActivityManagerNative.asInterface(ServiceManager.checkService("activity"));
         if (am != null) {
@@ -390,7 +407,53 @@ public final class ShutdownThread extends Thread {
             }
         }
 
+        // If it's to reboot into recovery, invoke uncrypt via init service.
+        if (mRebootReason.equals(PowerManager.REBOOT_RECOVERY)) {
+            uncrypt();
+        }
+
         rebootOrShutdown(mContext, mReboot, mRebootReason);
+    }
+
+    private void prepareUncryptProgress() {
+        // Reset the dialog message to show the decrypt process.
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
+                // It doesn't work to change the style of the existing
+                // one. Have to create a new one.
+                ProgressDialog pd = new ProgressDialog(mContext);
+
+                pd.setTitle(mContext.getText(
+                        com.android.internal.R.string.reboot_to_recovery_title));
+                pd.setMessage(mContext.getText(
+                        com.android.internal.R.string.reboot_to_recovery_progress));
+                pd.setIndeterminate(false);
+                pd.setMax(100);
+                pd.setCancelable(false);
+                pd.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+                pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                pd.setProgressNumberFormat(null);
+                pd.setProgress(0);
+
+                mProgressDialog = pd;
+                mProgressDialog.show();
+            }
+        });
+    }
+
+    private void setUncryptProgress(final int progress) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgressDialog != null) {
+                    mProgressDialog.setProgress(progress);
+                }
+            }
+        });
     }
 
     private void shutdownRadios(int timeout) {
@@ -536,5 +599,79 @@ public final class ShutdownThread extends Thread {
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
         PowerManagerService.lowLevelShutdown();
+    }
+
+    private void uncrypt() {
+        Log.i(TAG, "Calling uncrypt and monitoring the progress...");
+
+        // Update the ProcessDialog message and style.
+        sInstance.prepareUncryptProgress();
+
+        final boolean[] done = new boolean[1];
+        done[0] = false;
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                // Create the status pipe file to communicate with /system/bin/uncrypt.
+                new File(UNCRYPT_STATUS_FILE).delete();
+                try {
+                    Os.mkfifo(UNCRYPT_STATUS_FILE, 0600);
+                } catch (ErrnoException e) {
+                    Log.w(TAG, "ErrnoException when creating named pipe \"" + UNCRYPT_STATUS_FILE +
+                            "\": " + e.getMessage());
+                }
+
+                SystemProperties.set("ctl.start", "uncrypt");
+
+                // Read the status from the pipe.
+                try (BufferedReader reader = new BufferedReader(
+                        new FileReader(UNCRYPT_STATUS_FILE))) {
+
+                    int last_status = Integer.MIN_VALUE;
+                    while (true) {
+                        String str = reader.readLine();
+                        try {
+                            int status = Integer.parseInt(str);
+
+                            // Avoid flooding the log with the same message.
+                            if (status == last_status && last_status != Integer.MIN_VALUE) {
+                                continue;
+                            }
+                            last_status = status;
+
+                            if (status >= 0 && status < 100) {
+                                // Update status
+                                Log.d(TAG, "uncrypt read status: " + status);
+                                sInstance.setUncryptProgress(status);
+                            } else if (status == 100) {
+                                Log.d(TAG, "uncrypt successfully finished.");
+                                sInstance.setUncryptProgress(status);
+                                break;
+                            } else {
+                                // Error in /system/bin/uncrypt. Or it's rebooting to recovery
+                                // to perform other operations (e.g. factory reset).
+                                Log.d(TAG, "uncrypt failed with status: " + status);
+                                break;
+                            }
+                        } catch (NumberFormatException unused) {
+                            Log.d(TAG, "uncrypt invalid status received: " + str);
+                            break;
+                        }
+                    }
+                } catch (IOException unused) {
+                    Log.w(TAG, "IOException when reading \"" + UNCRYPT_STATUS_FILE + "\".");
+                }
+                done[0] = true;
+            }
+        };
+        t.start();
+
+        try {
+            t.join(MAX_UNCRYPT_WAIT_TIME);
+        } catch (InterruptedException unused) {
+        }
+        if (!done[0]) {
+            Log.w(TAG, "Timed out waiting for uncrypt.");
+        }
     }
 }
