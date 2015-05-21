@@ -30,33 +30,29 @@ import android.security.KeystoreArguments;
  * @hide
  */
 interface IKeystoreService {
-    int test();
+    int getState(int userId);
     byte[] get(String name);
     int insert(String name, in byte[] item, int uid, int flags);
     int del(String name, int uid);
     int exist(String name, int uid);
-    String[] saw(String namePrefix, int uid);
+    String[] list(String namePrefix, int uid);
     int reset();
     int onUserPasswordChanged(int userId, String newPassword);
-    int lock();
+    int lock(int userId);
     int unlock(int userId, String userPassword);
-    int zero();
+    int isEmpty(int userId);
     int generate(String name, int uid, int keyType, int keySize, int flags,
         in KeystoreArguments args);
     int import_key(String name, in byte[] data, int uid, int flags);
     byte[] sign(String name, in byte[] data);
     int verify(String name, in byte[] data, in byte[] signature);
     byte[] get_pubkey(String name);
-    int del_key(String name, int uid);
     int grant(String name, int granteeUid);
     int ungrant(String name, int granteeUid);
     long getmtime(String name);
     int duplicate(String srcKey, int srcUid, String destKey, int destUid);
     int is_hardware_backed(String string);
     int clear_uid(long uid);
-    int reset_uid(int uid);
-    int sync_uid(int sourceUid, int targetUid);
-    int password_uid(String password, int uid);
 
     // Keymaster 0.4 methods
     int addRngEntropy(in byte[] data);
