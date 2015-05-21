@@ -358,6 +358,8 @@ public:
     void add(const sp<JavaDeathRecipient>& recipient);
     void remove(const sp<JavaDeathRecipient>& recipient);
     sp<JavaDeathRecipient> find(jobject recipient);
+
+    Mutex& lock();  // Use with care; specifically for mutual exclusion during binder death
 };
 
 // ----------------------------------------------------------------------------
@@ -392,11 +394,18 @@ public:
                         "*** Uncaught exception returned from death notification!");
             }
 
-            // Demote from strong ref to weak after binderDied() has been delivered,
-            // to allow the DeathRecipient and BinderProxy to be GC'd if no longer needed.
-            mObjectWeak = env->NewWeakGlobalRef(mObject);
-            env->DeleteGlobalRef(mObject);
-            mObject = NULL;
+            // Serialize with our containing DeathRecipientList so that we can't
+            // delete the global ref on mObject while the list is being iterated.
+            sp<DeathRecipientList> list = mList.promote();
+            if (list != NULL) {
+                AutoMutex _l(list->lock());
+
+                // Demote from strong ref to weak after binderDied() has been delivered,
+                // to allow the DeathRecipient and BinderProxy to be GC'd if no longer needed.
+                mObjectWeak = env->NewWeakGlobalRef(mObject);
+                env->DeleteGlobalRef(mObject);
+                mObject = NULL;
+            }
         }
     }
 
@@ -516,6 +525,10 @@ sp<JavaDeathRecipient> DeathRecipientList::find(jobject recipient) {
         }
     }
     return NULL;
+}
+
+Mutex& DeathRecipientList::lock() {
+    return mLock;
 }
 
 // ----------------------------------------------------------------------------
