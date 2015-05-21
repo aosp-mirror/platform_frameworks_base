@@ -89,6 +89,13 @@ public class RenderScript {
     */
     public static final int CREATE_FLAG_LOW_POWER = 0x0004;
 
+    /**
+     * @hide
+     * Context creation flag which instructs the implementation to wait for
+     * a debugger to be attached before continuing execution.
+    */
+    public static final int CREATE_FLAG_WAIT_FOR_ATTACH = 0x0008;
+
     /*
      * Detect the bitness of the VM to allow FieldPacker to do the right thing.
      */
@@ -1343,7 +1350,7 @@ public class RenderScript {
             return null;
         }
 
-        if ((flags & ~(CREATE_FLAG_LOW_LATENCY | CREATE_FLAG_LOW_POWER)) != 0) {
+        if ((flags & ~(CREATE_FLAG_LOW_LATENCY | CREATE_FLAG_LOW_POWER | CREATE_FLAG_WAIT_FOR_ATTACH)) != 0) {
             throw new RSIllegalArgumentException("Invalid flags passed.");
         }
 
