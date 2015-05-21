@@ -169,7 +169,7 @@ public final class BridgeResources extends Resources {
     }
 
     @Override
-    public int getColor(int id) throws NotFoundException {
+    public int getColor(int id, Theme theme) throws NotFoundException {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
@@ -192,22 +192,21 @@ public final class BridgeResources extends Resources {
             }
         }
 
-        // id was not found or not resolved. Throw a NotFoundException.
-        throwException(id);
-
-        // this is not used since the method above always throws
-        return 0;
+        // Suppress possible NPE. getColorStateList will never return null, it will instead
+        // throw an exception, but intelliJ can't figure that out
+        //noinspection ConstantConditions
+        return getColorStateList(id, theme).getDefaultColor();
     }
 
     @Override
-    public ColorStateList getColorStateList(int id) throws NotFoundException {
+    public ColorStateList getColorStateList(int id, Theme theme) throws NotFoundException {
         Pair<String, ResourceValue> resValue = getResourceValue(id, mPlatformResourceFlag);
 
         if (resValue != null) {
             ColorStateList stateList = ResourceHelper.getColorStateList(resValue.getSecond(),
                     mContext);
             if (stateList != null) {
-                return stateList;
+                return stateList.obtainForTheme(theme);
             }
         }
 
