@@ -99,7 +99,7 @@ public class ObservableScrollView extends ScrollView {
         } else if (!mTouchEnabled) {
             MotionEvent cancel = MotionEvent.obtain(ev);
             cancel.setAction(MotionEvent.ACTION_CANCEL);
-            super.dispatchTouchEvent(ev);
+            super.dispatchTouchEvent(cancel);
             cancel.recycle();
             mTouchCancelled = true;
             return false;
