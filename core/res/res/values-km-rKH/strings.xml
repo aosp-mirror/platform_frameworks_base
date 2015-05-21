@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ឲ្យ​កម្មវិធី​បន្ថែម លុប ឬ​ប្ដូរ​ព្រឹត្តិការណ៍​ដែល​អ្នក​អាច​កែ​លើ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក រួមមាន​មិត្តភ័ក្ដិ ឬ​មិត្ត​រួម​ការងារ។ វា​អាច​ឲ្យ​កម្មវិធី​ផ្ញើ​សារ​ដែល​បង្ហាញ​ថា​មក​ពី​ម្ចាស់​ប្រតិទិន​ ឬ​កែ​ព្រឹត្តិការណ៍​ដោយ​មិន​ឲ្យ​ម្ចាស់​ដឹង។"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"អនុញ្ញាតឲ្យកម្មវិធីបន្ថែម យកចេញ និងផ្លាស់ប្តូរព្រឹត្តិការណ៍ដែលអ្នកបានកែសម្រួលនៅលើទូរទស្សន៍របស់អ្នក ដោយរាប់បញ្ចូលទាំងព្រឹត្តិការណ៍របស់មិត្តភ័ក្ត និងមិត្តរួមការងាររបស់អ្នក។ វាអាចអនុញ្ញតឲ្យកម្មវិធីផ្ញើសារដែលបានមកពីម្ចាស់ប្រតិទិន ឬកែសម្រួលដោយមិនមានការដឹងលឺពីម្ចាស់ទាំងនោះ។"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ឲ្យ​កម្មវិធី​បន្ថែម លុប ឬ​ប្ដូរ​ព្រឹត្តិការណ៍​ដែល​អ្នក​អាច​កែប្រែ​លើ​ទូរស័ព្ទ​របស់​អ្នក រួមមាន​មិត្តភ័ក្ដិ ឬ​មិត្ត​រួម​ការងារ។ វា​​អាច​ឲ្យ​កម្មវិធី​ផ្ញើ​សារ​ដែល​បង្ហាញ​ថា​មក​ពី​ម្ចាស់​ប្រតិទិន ឬ​កែ​ព្រឹត្តិការណ៍​ដោយ​មិន​ឲ្យ​​អ្នក​ដឹង។"</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"ក្លែង​ប្រភព​ទីតាំង​សម្រាប់​សាកល្បង"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"បង្កើត​ប្រភព​ទីតាំង​ក្លែង​ក្លាយ​សម្រាប់​សាកល្បង ឬ​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង​ថ្មី។ វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​បដិសេធ​ទីតាំង​​ និង/ឬ​ស្ថានភាព​បាន​ត្រឡប់​ដោយ​ប្រភព​ទីតាំង​ផ្សេង​ដូច​ជា GPS ឬ​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង។"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​កម្មវិធី​ផ្ដល់​​ទីតាំង​បន្ថែម។ វា​អាច​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ប្រតិបត្តិការ​ជីភីអេស ឬ​ប្រភព​ទីតាំង​ផ្សេង។"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ទីតាំង​ពិតប្រាកដ (GPS និង​មាន​មូលដ្ឋាន​លើ​បណ្ដាញ)"</string>
@@ -438,6 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ព្យាយាមម្ដងទៀត។"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"ម្រាមដៃ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី​លុប​ចេញ​វិញ្ញាបនបត្រ DRM ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ភ្ជាប់ទៅសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"ភ្ជាប់ទៅសេវាកម្មកំណត់រចនាសម្ព័ន្ធក្រុមហ៊ុនផ្តល់សេវា"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"អនុញ្ញាតឲ្យម្ចាស់ភ្ជាប់ទៅសេវាកម្មកំណត់រចនាសម្ព័ន្ធក្រុមហ៊ុនផ្តល់សេវា។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ភ្ជាប់ទៅក្រុមហ៊ុនផ្តល់សេវាកម្ម"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"អនុញ្ញាតឲ្យម្ចាស់ភ្ជាប់ទៅសេវាកម្មក្រុមហ៊ុនផ្តល់សេវាកម្ម។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1044,12 +1043,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"បើ​អ្នក​បើក​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី កម្មវិធី​មួយ​ចំនួន​ដែល​អ្នក​កំពុង​ប្រើ​នឹង​បញ្ឈប់ ហើយ​អាច​ប្រើ​លែង​បាន​រហូត​ដល់​អ្នក​បិទ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"ប្រតិបត្តិការ​យូអេសប៊ី​​បរាជ័យ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"យល់ព្រម"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"បាន​តភ្ជាប់​ជា​ឧបករណ៍​​ផ្ទុក"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"បាន​ភ្ជាប់​ជា​ម៉ាស៊ីន​ថត"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"បានភ្ជាប់ជាឧបករណ៍មីឌី"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB សម្រាប់បញ្ចូលថ្ម"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB សម្រាប់ការផ្ទេរឯកសារ"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB សម្រាប់ការផ្ទេររូបថត"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB សម្រាប់ MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"បាន​ភ្ជាប់​ជា​កម្មវិធី​ដំឡើង"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"ប៉ះ ដើម្បី​មើល​ជម្រើស​យូអេសប៊ី​ផ្សេង។"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"ប៉ះដើម្បីបានជម្រើសថែមទៀត។"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ធ្វើ​ទ្រង់ទ្រាយ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ធ្វើ​ទ្រង់ទ្រាយ​កាត​អេសឌី?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ឯកសារ​ទាំងអស់​ដែល​បាន​រក្សាទុក​ក្នុង​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​នឹង​ត្រូវ​បាន​លុប។ សកម្មភាព​នេះ​មិន​អាច​ត្រឡប់​វិញ​បាន​ទេ!"</string>
@@ -1468,17 +1468,33 @@
       <item quantity="other">រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">រយៈពេលមួយនាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">អស់រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">អស់រយៈពេល 1 នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">រយៈពេល %1$d ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">រយៈពេលមួយម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">អស់រយៈពេល %1$d ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">អស់រយៈពេល 1 ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">រយៈពេល %d នាទី</item>
       <item quantity="one">រយៈពេលមួយនាទី</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">អស់រយៈពេល %d នាទី</item>
+      <item quantity="one">អស់រយៈពេល 1 នាទី</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">រយៈពេល %d ម៉ោង</item>
       <item quantity="one">រយៈពេលមួយម៉ោង</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">អស់រយៈពេល %d ម៉ោង</item>
+      <item quantity="one">អស់រយៈពេល 1 ម៉ោង</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"រហូត​ដល់ពេល​​អ្នក​បិទ​វា"</string>
