@@ -79,11 +79,13 @@ interface IWindowSession {
      * contents to make sure the user can see it.  This is different than
      * <var>outContentInsets</var> in that these insets change transiently,
      * so complex relayout of the window should not happen based on them.
+     * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
+     * treat as real display. Example of such area is a chin in some models of wearable devices.
      * @param outConfiguration New configuration of window, if it is now
      * becoming visible and the global configuration has changed since it
      * was last displayed.
      * @param outSurface Object in which is placed the new display surface.
-     * 
+     *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
@@ -91,7 +93,7 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Configuration outConfig, out Surface outSurface);
+            out Rect outOutsets, out Configuration outConfig, out Surface outSurface);
 
     /**
      * If a call to relayout() asked to have the surface destroy deferred,
