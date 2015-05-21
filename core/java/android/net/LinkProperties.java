@@ -88,6 +88,54 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
+    public enum ProvisioningChange {
+        STILL_NOT_PROVISIONED,
+        LOST_PROVISIONING,
+        GAINED_PROVISIONING,
+        STILL_PROVISIONED,
+    }
+
+    /**
+     * Compare the provisioning states of two LinkProperties instances.
+     *
+     * @hide
+     */
+    public static ProvisioningChange compareProvisioning(
+            LinkProperties before, LinkProperties after) {
+        if (before.isProvisioned() && after.isProvisioned()) {
+            // On dualstack networks, DHCPv4 renewals can occasionally fail.
+            // When this happens, IPv6-reachable services continue to function
+            // normally but IPv4-only services (naturally) fail.
+            //
+            // When an application using an IPv4-only service reports a bad
+            // network condition to the framework, attempts to re-validate
+            // the network succeed (since we support IPv6-only networks) and
+            // nothing is changed.
+            //
+            // For users, this is confusing and unexpected behaviour, and is
+            // not necessarily easy to diagnose.  Therefore, we treat changing
+            // from a dualstack network to an IPv6-only network equivalent to
+            // a total loss of provisioning.
+            //
+            // For one such example of this, see b/18867306.
+            //
+            // TODO: Remove this special case altogether.
+            if (before.isIPv4Provisioned() && !after.isIPv4Provisioned()) {
+                return ProvisioningChange.LOST_PROVISIONING;
+            }
+            return ProvisioningChange.STILL_PROVISIONED;
+        } else if (before.isProvisioned() && !after.isProvisioned()) {
+            return ProvisioningChange.LOST_PROVISIONING;
+        } else if (!before.isProvisioned() && after.isProvisioned()) {
+            return ProvisioningChange.GAINED_PROVISIONING;
+        } else {  // !before.isProvisioned() && !after.isProvisioned()
+            return ProvisioningChange.STILL_NOT_PROVISIONED;
+        }
+    }
+
+    /**
+     * @hide
+     */
     public LinkProperties() {
     }
 
@@ -282,6 +330,20 @@ public final class LinkProperties implements Parcelable {
         if (dnsServer != null && !mDnses.contains(dnsServer)) {
             mDnses.add(dnsServer);
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes the given {@link InetAddress} from the list of DNS servers.
+     *
+     * @param dnsServer The {@link InetAddress} to remove from the list of DNS servers.
+     * @return true if the DNS server was removed, false if it did not exist.
+     * @hide
+     */
+    public boolean removeDnsServer(InetAddress dnsServer) {
+        if (dnsServer != null) {
+            return mDnses.remove(dnsServer);
         }
         return false;
     }
@@ -679,8 +741,9 @@ public final class LinkProperties implements Parcelable {
      * This requires an IP address, default route, and DNS server.
      *
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     * @hide
      */
-    private boolean hasIPv4() {
+    public boolean isIPv4Provisioned() {
         return (hasIPv4Address() &&
                 hasIPv4DefaultRoute() &&
                 hasIPv4DnsServer());
@@ -691,8 +754,9 @@ public final class LinkProperties implements Parcelable {
      * This requires an IP address, default route, and DNS server.
      *
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     * @hide
      */
-    private boolean hasIPv6() {
+    public boolean isIPv6Provisioned() {
         return (hasGlobalIPv6Address() &&
                 hasIPv6DefaultRoute() &&
                 hasIPv6DnsServer());
@@ -706,7 +770,7 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public boolean isProvisioned() {
-        return (hasIPv4() || hasIPv6());
+        return (isIPv4Provisioned() || isIPv6Provisioned());
     }
 
     /**
