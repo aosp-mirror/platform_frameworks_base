@@ -18,9 +18,9 @@ navigation provide details about how to build apps using Android's various APIs.
 the following fundamental concepts about the Android app framework:</p>
 
 
-<div class="landing-banner">
-
-<div class="col-6">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-1of2">
 
 <h4>Apps provide multiple entry points</h4>
 
@@ -45,7 +45,7 @@ for an action that other apps may invoke.</p>
 </div>
 
 
-<div class="col-6">
+<div class="col-1of2">
 
 <h4>Apps adapt to different devices</h4>
 
@@ -69,7 +69,8 @@ that feature.</p>
 
 </div>
 
-</div><!-- end landing-banner -->
+</div>
+</div>
 
 
 

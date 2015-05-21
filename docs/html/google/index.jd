@@ -67,8 +67,8 @@ footer.hide=1
   </div>
 </section>
 
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
-  <h2 class="norule">Latest</h2>
+<section class="dac-section dac-gray dac-small dac-invert" id="videos"><div class="wrap">
+  <h2 class="norule">Videos</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:google/landing/videos"
        data-cardSizes="6x6"

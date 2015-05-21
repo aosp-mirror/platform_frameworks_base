@@ -9,7 +9,7 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-    <section class="dac-expand dac-hero dac-blue">
+<section class="dac-expand dac-hero dac-section-light">
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
@@ -25,7 +25,7 @@ excludeFromSuggestions=true
           <span class="dac-sprite dac-auto-chevron"></span>
           Set up Android Studio
         </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}training/basics/firstapp/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}training/basics/training/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Build your first app
         </a><br>
@@ -117,12 +117,13 @@ excludeFromSuggestions=true
   </ul>
 </div></section>
 
-<section class="dac-section dac-light"><div class="wrap">
+<section class="dac-section dac-light" id="courses"><div class="wrap">
   <h1 class="dac-section-title">Online Courses</h1>
   <div class="dac-section-subtitle">Free online courses from Android
     experts that bring you step-by-step to building your own apps.</div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/courses"
+       data-sortOrder="random"
        data-cardSizes="6x6"
-       data-maxResults="3"></div>
+       data-maxResults="6"></div>
 </div></section>

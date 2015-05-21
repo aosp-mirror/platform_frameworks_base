@@ -150,7 +150,14 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
       "https://www.udacity.com/course/developing-android-apps--ud853",
-      "https://www.udacity.com/course/android-performance--ud825"
+      "https://www.udacity.com/course/android-performance--ud825",
+      "https://www.udacity.com/android-nanodegree",
+      "https://www.udacity.com/course/advanced-android-app-development--ud855",
+      "https://www.udacity.com/course/android-ubiquitous-computing--ud875",
+      "https://www.udacity.com/course/google-play-services--ud876",
+      "https://www.udacity.com/course/android-design-for-developers--ud862",
+      "https://www.udacity.com/course/android-development-for-beginners--ud837",
+      "https://www.udacity.com/course/gradle-for-android-and-java--ud867"
     ]
   },
   "preview/landing/herolinks": {

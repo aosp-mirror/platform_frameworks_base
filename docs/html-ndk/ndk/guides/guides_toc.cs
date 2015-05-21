@@ -6,10 +6,25 @@
        localized titles are added in the language order specified below.
 ?>
 
-
 <ul id="nav">
-  <li><a href="/ndk/guides/index.html"><span class="en">Getting Started</span></a></li>
-  <li><a href="/ndk/guides/pg_html/md_1__concepts__concepts.html">Concepts</a></li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/ndk/guides/index.html">
+            <span class="en">Getting Started</span></a>
+    </div>
+    <ul>
+      <li><a href="/ndk/guides/md_1__concepts__concepts.html">
+            <span class="en">Concepts</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>ndk/index.html">
+            <span class="en">Device Compatibility</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>ndk/index.html">
+          <span class="en">System Permissions</span>
+        </a>
+      </li>
+    </ul>
+  </li>
 </ul>
 
 
