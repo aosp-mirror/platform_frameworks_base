@@ -4387,21 +4387,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (mHideLockScreen) {
                 mKeyguardHidden = true;
+                mWinDismissingKeyguard = null;
                 if (setKeyguardOccludedLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
             } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
-                // This is the case of keyguard isSecure() and not mHideLockScreen.
+                mKeyguardHidden = false;
+                if (setKeyguardOccludedLw(false)) {
+                    changes |= FINISH_LAYOUT_REDO_LAYOUT
+                            | FINISH_LAYOUT_REDO_CONFIG
+                            | FINISH_LAYOUT_REDO_WALLPAPER;
+                }
                 if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
                     // Only launch the next keyguard unlock window once per window.
-                    mKeyguardHidden = false;
-                    if (setKeyguardOccludedLw(false)) {
-                        changes |= FINISH_LAYOUT_REDO_LAYOUT
-                                | FINISH_LAYOUT_REDO_CONFIG
-                                | FINISH_LAYOUT_REDO_WALLPAPER;
-                    }
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
