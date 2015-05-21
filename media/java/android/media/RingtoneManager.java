@@ -158,7 +158,16 @@ public class RingtoneManager {
      * in most cases.
      */
     public static final String EXTRA_RINGTONE_TITLE = "android.intent.extra.ringtone.TITLE";
-    
+
+    /**
+     * @hide
+     * Given to the ringtone picker as an int. Additional AudioAttributes flags to use
+     * when playing the ringtone in the picker.
+     * @see #ACTION_RINGTONE_PICKER
+     */
+    public static final String EXTRA_RINGTONE_AUDIO_ATTRIBUTES_FLAGS =
+            "android.intent.extra.ringtone.AUDIO_ATTRIBUTES_FLAGS";
+
     /**
      * Returned from the ringtone picker as a {@link Uri}.
      * <p>
@@ -221,7 +230,7 @@ public class RingtoneManager {
     
     private boolean mStopPreviousRingtone = true;
     private Ringtone mPreviousRingtone;
-    
+
     /**
      * Constructs a RingtoneManager. This constructor is recommended as its
      * constructed instance manages cursor(s).
@@ -283,7 +292,7 @@ public class RingtoneManager {
                 return AudioManager.STREAM_RING;
         }
     }
-    
+
     /**
      * Whether retrieving another {@link Ringtone} will stop playing the
      * previously retrieved {@link Ringtone}.
