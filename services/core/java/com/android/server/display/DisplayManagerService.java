@@ -640,14 +640,13 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleDisplayDeviceAddedLocked(DisplayDevice device) {
-        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if (mDisplayDevices.contains(device)) {
-            Slog.w(TAG, "Attempted to add already added display device: " + info);
+            Slog.w(TAG, "Attempted to add already added display device: "
+                    + device.getDisplayDeviceInfoLocked());
             return;
         }
 
-        Slog.i(TAG, "Display device added: " + info);
-        device.mDebugLastLoggedDeviceInfo = info;
+        Slog.i(TAG, "Display device added: " + device.getDisplayDeviceInfoLocked());
 
         mDisplayDevices.add(device);
         addLogicalDisplayLocked(device);
@@ -660,20 +659,13 @@ public final class DisplayManagerService extends SystemService {
 
     private void handleDisplayDeviceChanged(DisplayDevice device) {
         synchronized (mSyncRoot) {
-            DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
             if (!mDisplayDevices.contains(device)) {
-                Slog.w(TAG, "Attempted to change non-existent display device: " + info);
+                Slog.w(TAG, "Attempted to change non-existent display device: "
+                        + device.getDisplayDeviceInfoLocked());
                 return;
             }
 
-            int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
-            if (diff == DisplayDeviceInfo.DIFF_STATE) {
-                Slog.i(TAG, "Display device changed state: \"" + info.name
-                        + "\", " + Display.stateToString(info.state));
-            } else if (diff != 0) {
-                Slog.i(TAG, "Display device changed: " + info);
-            }
-            device.mDebugLastLoggedDeviceInfo = info;
+            Slog.i(TAG, "Display device changed: " + device.getDisplayDeviceInfoLocked());
 
             device.applyPendingDisplayDeviceInfoChangesLocked();
             if (updateLogicalDisplaysLocked()) {
@@ -688,14 +680,13 @@ public final class DisplayManagerService extends SystemService {
         }
     }
     private void handleDisplayDeviceRemovedLocked(DisplayDevice device) {
-        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if (!mDisplayDevices.remove(device)) {
-            Slog.w(TAG, "Attempted to remove non-existent display device: " + info);
+            Slog.w(TAG, "Attempted to remove non-existent display device: "
+                    + device.getDisplayDeviceInfoLocked());
             return;
         }
 
-        Slog.i(TAG, "Display device removed: " + info);
-        device.mDebugLastLoggedDeviceInfo = info;
+        Slog.i(TAG, "Display device removed: " + device.getDisplayDeviceInfoLocked());
 
         updateLogicalDisplaysLocked();
         scheduleTraversalLocked(false);

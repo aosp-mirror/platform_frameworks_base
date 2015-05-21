@@ -47,10 +47,6 @@ abstract class DisplayDevice {
     // within a transaction from performTraversalInTransactionLocked.
     private Surface mCurrentSurface;
 
-    // DEBUG STATE: Last device info which was written to the log, or null if none.
-    // Do not use for any other purpose.
-    DisplayDeviceInfo mDebugLastLoggedDeviceInfo;
-
     public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId) {
         mDisplayAdapter = displayAdapter;
         mDisplayToken = displayToken;
