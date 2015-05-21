@@ -6320,11 +6320,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             vis = (vis & ~flags) | (oldVis & flags);
         }
-        if (windowTypeToLayerLw(type) > windowTypeToLayerLw(TYPE_INPUT_CONSUMER)) {
-            // We can't get into fullscreen from this window otherwise the consumer would not get
-            // the input events.
-            vis = (vis & ~View.SYSTEM_UI_FLAG_FULLSCREEN);
-        }
 
         if (!areTranslucentBarsAllowed() && transWin != mStatusBar) {
             vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
@@ -6361,6 +6356,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // clear the clearable flags instead
             clearClearableFlagsLw();
             vis &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
+        }
+
+        final boolean immersive = (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
+        immersiveSticky = (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
+        final boolean navAllowedHidden = immersive || immersiveSticky;
+
+        if (!navAllowedHidden
+                && windowTypeToLayerLw(type) > windowTypeToLayerLw(TYPE_INPUT_CONSUMER)) {
+            // We can't hide the navbar from this window otherwise the input consumer would not get
+            // the input events.
+            vis = (vis & ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
 
         vis = mStatusBarController.updateVisibilityLw(transientStatusBarAllowed, oldVis, vis);
