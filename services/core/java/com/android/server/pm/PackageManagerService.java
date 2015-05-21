@@ -6347,25 +6347,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
                 deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
             } else {
-                // Verify the ABIs haven't changed since we last deduced them.
-                String oldPrimaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
-                String oldSecondaryCpuAbi = pkg.applicationInfo.secondaryCpuAbi;
-
-                // TODO: The only purpose of this code is to update the native library paths
-                // based on the final install location. We can simplify this and avoid having
-                // to scan the package again.
+                // TODO: We need this second call to derive in two cases :
+                //
+                // - To update the native library paths based on the final install location.
+                // - We don't call dexopt when moving packages, and so we have to scan again.
+                //
+                // We can simplify this and avoid having to scan the package again by letting
+                // scanPackageLI know if the current install was a move (and deriving things only
+                // in that case) and by "reparenting" the native lib directory in the case of
+                // a normal (non-move) install.
                 deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, false /* extract libs */);
-                if (!TextUtils.equals(oldPrimaryCpuAbi, pkg.applicationInfo.primaryCpuAbi)) {
-                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                            "unexpected abi change for " + pkg.packageName + " ("
-                            + oldPrimaryCpuAbi + "-> " + pkg.applicationInfo.primaryCpuAbi);
-                }
-
-                if (!TextUtils.equals(oldSecondaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi)) {
-                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                            "unexpected abi change for " + pkg.packageName + " ("
-                            + oldSecondaryCpuAbi + "-> " + pkg.applicationInfo.secondaryCpuAbi);
-                }
             }
 
             if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
