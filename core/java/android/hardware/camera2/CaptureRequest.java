@@ -62,7 +62,7 @@ import java.util.Objects;
  *
  * <p>A reprocess capture request allows a previously-captured image from the camera device to be
  * sent back to the device for further processing. It can be created with
- * {@link CameraDevice#createReprocessCaptureRequest}, and used with a reprocessible capture session
+ * {@link CameraDevice#createReprocessCaptureRequest}, and used with a reprocessable capture session
  * created with {@link CameraDevice#createReprocessableCaptureSession}.</p>
  *
  * @see CameraCaptureSession#capture
