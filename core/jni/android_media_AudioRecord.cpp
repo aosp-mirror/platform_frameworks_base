@@ -623,7 +623,7 @@ static jboolean android_media_AudioRecord_setInputDevice(
 
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
     if (lpRecorder == 0) {
-        return 0;
+        return false;
     }
     return lpRecorder->setInputDevice(device_id) == NO_ERROR;
 }
