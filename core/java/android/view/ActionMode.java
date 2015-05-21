@@ -343,7 +343,9 @@ public abstract class ActionMode {
          * @param mode The ActionMode that requires positioning.
          * @param view The View that originated the ActionMode, in whose coordinates the Rect should
          *          be provided.
-         * @param outRect The Rect to be populated with the content position.
+         * @param outRect The Rect to be populated with the content position. Use this to specify
+         *          where the content in your app lives within the given view. This will be used
+         *          to avoid occluding the given content Rect with the created ActionMode.
          */
         public void onGetContentRect(ActionMode mode, View view, Rect outRect) {
             if (view != null) {
