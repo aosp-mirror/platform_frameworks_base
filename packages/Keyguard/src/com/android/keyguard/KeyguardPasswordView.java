@@ -74,7 +74,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     protected void resetState() {
         mSecurityMessageDisplay.setMessage(R.string.kg_password_instructions, false);
+        final boolean wasDisabled = mPasswordEntry.isEnabled();
         setPasswordEntryEnabled(true);
+        setPasswordEntryInputEnabled(true);
+        if (wasDisabled) {
+            mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     @Override
@@ -95,7 +100,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         post(new Runnable() {
             @Override
             public void run() {
-                if (isShown()) {
+                if (isShown() && mPasswordEntry.isEnabled()) {
                     mPasswordEntry.requestFocus();
                     if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
                         mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
@@ -190,6 +195,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     protected void setPasswordEntryEnabled(boolean enabled) {
+        mPasswordEntry.setEnabled(enabled);
+    }
+
+    @Override
+    protected void setPasswordEntryInputEnabled(boolean enabled) {
         mPasswordEntryDisabler.setInputEnabled(enabled);
     }
 
