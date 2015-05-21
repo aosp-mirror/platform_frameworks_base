@@ -99,7 +99,9 @@ public class UsageStatsService extends SystemService implements
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
     static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 4
-            : 1L * 24 * 60 * ONE_MINUTE; // 1 day
+            : 12 * 60 * ONE_MINUTE; // 12 hours of screen-on time sans dream-time
+    static final long DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 8
+            : 2L * 24 * 60 * ONE_MINUTE; // 2 days
     static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE
             : 8 * 60 * ONE_MINUTE; // 8 hours
     static final long DEFAULT_PAROLE_INTERVAL = DEBUG ? ONE_MINUTE * 10
@@ -356,7 +358,7 @@ public class UsageStatsService extends SystemService implements
                 final int packageCount = packages.size();
                 for (int p = 0; p < packageCount; p++) {
                     final String packageName = packages.get(p).packageName;
-                    final boolean isIdle = isAppIdleFiltered(packageName, userId);
+                    final boolean isIdle = isAppIdleFiltered(packageName, userId, timeNow);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
                             userId, isIdle ? 1 : 0, packageName));
                     mAppIdleHistory.addEntry(packageName, userId, isIdle, timeNow);
@@ -386,7 +388,8 @@ public class UsageStatsService extends SystemService implements
 
     void updateDisplayLocked() {
         boolean screenOn = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY).getState()
-                != Display.STATE_OFF;
+                == Display.STATE_ON;
+
         if (screenOn == mScreenOn) return;
 
         mScreenOn = screenOn;
@@ -533,14 +536,16 @@ public class UsageStatsService extends SystemService implements
     void reportEvent(UsageEvents.Event event, int userId) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
+            final long screenOnTime = getScreenOnTimeLocked(timeNow);
             convertToSystemTimeLocked(event);
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            final long lastUsed = service.getBeginIdleTime(event.mPackage);
-            final long screenOnTime = getScreenOnTimeLocked(timeNow);
-            final boolean previouslyIdle = hasPassedIdleTimeout(lastUsed, screenOnTime);
-            service.reportEvent(event, screenOnTime);
+            final long beginIdleTime = service.getBeginIdleTime(event.mPackage);
+            final long lastUsedTime = service.getLastUsedTime(event.mPackage);
+            final boolean previouslyIdle = hasPassedIdleTimeoutLocked(beginIdleTime,
+                    lastUsedTime, screenOnTime, timeNow);
+            service.reportEvent(event, getScreenOnTimeLocked(timeNow));
             // Inform listeners if necessary
             if ((event.mEventType == Event.MOVE_TO_FOREGROUND
                     || event.mEventType == Event.MOVE_TO_BACKGROUND
@@ -556,8 +561,9 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
-     * Forces the app's beginIdleTime to reflect idle or active. If idle, then it rolls back the
-     * beginIdleTime to a point in time thats behind the threshold for idle.
+     * Forces the app's beginIdleTime and lastUsedTime to reflect idle or active. If idle,
+     * then it rolls back the beginIdleTime and lastUsedTime to a point in time that's behind
+     * the threshold for idle.
      */
     void forceIdleState(String packageName, int userId, boolean idle) {
         synchronized (mLock) {
@@ -567,10 +573,13 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            final long lastUsed = service.getBeginIdleTime(packageName);
-            final boolean previouslyIdle = hasPassedIdleTimeout(lastUsed,
-                    getScreenOnTimeLocked(timeNow));
+            final long beginIdleTime = service.getBeginIdleTime(packageName);
+            final long lastUsedTime = service.getLastUsedTime(packageName);
+            final boolean previouslyIdle = hasPassedIdleTimeoutLocked(beginIdleTime,
+                    lastUsedTime, screenOnTime, timeNow);
             service.setBeginIdleTime(packageName, deviceUsageTime);
+            service.setLastUsedTime(packageName,
+                    timeNow - (idle ? DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS : 0) - 5000);
             // Inform listeners if necessary
             if (previouslyIdle != idle) {
                 // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
@@ -650,13 +659,14 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private boolean isAppIdleUnfiltered(String packageName, int userId) {
+    private boolean isAppIdleUnfiltered(String packageName, int userId, long timeNow) {
         synchronized (mLock) {
-            final long timeNow = checkAndGetTimeLocked();
+            final long screenOnTime = getScreenOnTimeLocked(timeNow);
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             long beginIdleTime = service.getBeginIdleTime(packageName);
-            return hasPassedIdleTimeout(beginIdleTime, getScreenOnTimeLocked(timeNow));
+            long lastUsedTime = service.getLastUsedTime(packageName);
+            return hasPassedIdleTimeoutLocked(beginIdleTime, lastUsedTime, screenOnTime, timeNow);
         }
     }
 
@@ -665,8 +675,10 @@ public class UsageStatsService extends SystemService implements
      * @param currentTime current time in device usage timebase
      * @return whether it's been used far enough in the past to be considered inactive
      */
-    boolean hasPassedIdleTimeout(long timestamp, long currentTime) {
-        return timestamp <= currentTime - mAppIdleDurationMillis;
+    boolean hasPassedIdleTimeoutLocked(long beginIdleTime, long lastUsedTime,
+            long screenOnTime, long currentTime) {
+        return (beginIdleTime <= screenOnTime - mAppIdleDurationMillis)
+                && (lastUsedTime <= currentTime - DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS);
     }
 
     void addListener(AppIdleStateChangeListener listener) {
@@ -689,9 +701,12 @@ public class UsageStatsService extends SystemService implements
      * This happens if the device is plugged in or temporarily allowed to make exceptions.
      * Called by interface impls.
      */
-    boolean isAppIdleFiltered(String packageName, int userId) {
+    boolean isAppIdleFiltered(String packageName, int userId, long timeNow) {
         if (packageName == null) return false;
         synchronized (mLock) {
+            if (timeNow == -1) {
+                timeNow = checkAndGetTimeLocked();
+            }
             // Temporary exemption, probably due to device charging or occasional allowance to
             // be allowed to sync, etc.
             if (mAppIdleParoled) {
@@ -715,7 +730,7 @@ public class UsageStatsService extends SystemService implements
             return false;
         }
 
-        return isAppIdleUnfiltered(packageName, userId);
+        return isAppIdleUnfiltered(packageName, userId, timeNow);
     }
 
     void setAppIdle(String packageName, boolean idle, int userId) {
@@ -948,7 +963,7 @@ public class UsageStatsService extends SystemService implements
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                return UsageStatsService.this.isAppIdleFiltered(packageName, userId);
+                return UsageStatsService.this.isAppIdleFiltered(packageName, userId, -1);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1053,7 +1068,7 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public boolean isAppIdle(String packageName, int userId) {
-            return UsageStatsService.this.isAppIdleFiltered(packageName, userId);
+            return UsageStatsService.this.isAppIdleFiltered(packageName, userId, -1);
         }
 
         @Override
