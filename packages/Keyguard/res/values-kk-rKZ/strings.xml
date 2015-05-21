@@ -56,7 +56,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жою"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Енгізу"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Кескінді ұмытып қалу"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате кескін"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате өрнек"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Қате кілтсөз"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Қате PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
@@ -75,9 +75,9 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Дұрыс PUK кодын қайта енгізіңіз. Әрекеттерді қайталау SIM картасының істен шығуына себеп болады."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN коды сәйкес емес."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Тым көп кескін әрекеттері"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN кодты <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Кілсөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Бекітпесін ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> қате сыздыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN кодты <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Құпия сөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Планшет бекітпесін ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет дұрыс емес әрекет жасадыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін осы планшет қалпына келтіріліп, оның бүкіл деректері жойылады."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Телефон бекітпесін ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет дұрыс емес әрекет жасадыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін осы телефон қалпына келтіріліп, оның бүкіл деректері жойылады."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Планшет бекітпесін ашуға <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс емес әрекет жасадыңыз. Осы планшет қалпына келтіріліп, оның бүкіл деректері жойылады."</string>
