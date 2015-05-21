@@ -85,6 +85,12 @@ public interface ICreateInfo {
     Map<String, InjectMethodRunnable> getInjectedMethodsMap();
 
     abstract class InjectMethodRunnable {
-        public abstract void generateMethods(ClassVisitor cv);
+        /**
+         * @param cv Must be {@link ClassVisitor}. However, the param type is object so that when
+         * loading the class, ClassVisitor is not loaded. This is because when injecting
+         * CreateInfo in LayoutLib (see {@link #getInjectedClasses()}, we don't want to inject
+         * asm classes also, but still keep CreateInfo loadable.
+         */
+        public abstract void generateMethods(Object cv);
     }
 }
