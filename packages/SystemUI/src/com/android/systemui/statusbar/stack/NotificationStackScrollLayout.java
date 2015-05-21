@@ -1656,7 +1656,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private boolean generateRemoveAnimation(View child) {
         if (mIsExpanded && mAnimationsEnabled && !isChildInInvisibleGroup(child)) {
-            if (!mChildrenToAddAnimated.contains(child)) {
+            if (!mChildrenToAddAnimated.contains(child) && !mAddedHeadsUpChildren.contains(child)) {
                 // Generate Animations
                 mChildrenToRemoveAnimated.add(child);
                 mNeedsAnimation = true;
@@ -1664,10 +1664,25 @@ public class NotificationStackScrollLayout extends ViewGroup
             } else {
                 mChildrenToAddAnimated.remove(child);
                 mFromMoreCardAdditions.remove(child);
+                boolean remove = mAddedHeadsUpChildren.remove(child);
+                if (remove) {
+                    removeChildFromHeadsUpChangeAnimations(child);
+                }
                 return false;
             }
         }
         return false;
+    }
+
+    private void removeChildFromHeadsUpChangeAnimations(View child) {
+        ArrayList<Pair<ExpandableNotificationRow, Boolean> > toRemove = new ArrayList<>();
+        for (Pair<ExpandableNotificationRow, Boolean> eventPair : mHeadsUpChangeAnimations) {
+            ExpandableNotificationRow row = eventPair.first;
+            if (child == row) {
+                toRemove.add(eventPair);
+            }
+        }
+        mHeadsUpChangeAnimations.removeAll(toRemove);
     }
 
     /**
