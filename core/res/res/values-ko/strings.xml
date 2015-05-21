@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"앱이 친구나 동료의 일정을 포함하여 태블릿에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"앱이 친구나 동료의 일정을 비롯하여 TV에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 발신자가 캘린더 소유자인 메시지를 전송하거나 소유자가 모르는 사이에 일정을 수정할 수 있습니다."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"앱이 친구나 동료의 일정을 포함하여 휴대전화에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 정보제공자로 가장"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"테스트용 가상 위치 소스를 만들거나 새로운 위치 정보 제공업체를 설치합니다. 이 경우 앱이 GPS 또는 위치 정보 제공업체 등 기타 위치 소스가 반환한 위치 또는 상태를 덮어쓸 수 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"앱이 추가 위치 정보 제공 기능의 명령에 액세스하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"정확한 위치(GPS 및 네트워크 기반)"</string>
@@ -438,6 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"다시 시도해 보세요."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>번째 손가락"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"이동통신사 설정 서비스 사용"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"권한을 가진 프로그램이 이동통신사 설정 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"이동통신사 서비스 사용"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"권한을 가진 애플리케이션에서 이동통신사 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -1042,12 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB 저장소를 사용하면 사용 중인 일부 애플리케이션이 중지되며 USB 저장소를 사용중지할 때까지 사용하지 못할 수 있습니다."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB 작업을 하지 못했습니다."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"미디어 기기로 연결됨"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"카메라로 연결됨"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI 기기로 연결됨"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"충전용 USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"파일 전송용 USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"사진 전송용 USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI용 USB"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"설치 프로그램으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB 액세서리에 연결됨"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"다른 USB 옵션을 보려면 터치하세요."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB 저장소를 포맷하시겠습니까?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD 카드를 포맷하시겠습니까?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 저장소에 저장된 파일이 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다."</string>
@@ -1466,7 +1466,15 @@
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
       <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
+      <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">%1$d시간 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
+      <item quantity="one">1시간 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">%1$d시간 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
       <item quantity="one">1시간 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
     </plurals>
@@ -1474,7 +1482,15 @@
       <item quantity="other">%d분 동안</item>
       <item quantity="one">1분 동안</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">%d분 동안</item>
+      <item quantity="one">1분 동안</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">%d시간 동안</item>
+      <item quantity="one">1시간 동안</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">%d시간 동안</item>
       <item quantity="one">1시간 동안</item>
     </plurals>

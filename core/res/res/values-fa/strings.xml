@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در رایانهٔ لوحی خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"به برنامه اجازه می‌دهد به افزودن، حذف یا تغییر رویدادهایی بپردازد که می‌توانید در تلویزیون‌تان تغییر دهید، از جمله رویدادهای دوستان یا همکاران خود. این ویژگی شاید به برنامه اجازه دهد پیامهایی را ارسال کند که به نظر می‌رسد از جانب مالکین تقویم است یا رویدادها را بدون اطلاع مالک تغییر دهد."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در تلفن خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"منابع مکان کاذب برای تست"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"‏منابع موقعیت مکانی کاذب را برای تست کردن یا نصب یک ارائه‌دهنده موقعیت مکانی جدید ایجاد نمایید. این کار به برنامه امکان می‌دهد موقعیت مکانی و/یا وضعیت گزارش داده شده توسط سایر منابع موقعیت مکانی مانند GPS یا ارائه‌دهندگان موقعیت مکانی را نادیده بگیرد."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"دسترسی به فرمان‌های بیشتر ارائه دهنده مکان"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏به برنامه اجازه می‌دهد به دستورات ارائه‌دهنده مکان تکمیلی دسترسی داشته باشد. این کار ممکن است به برنامه امکان دهد با کارکرد GPS یا منابع دیگر مکان تداخل داشته باشد."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"‏موقعیت مکانی دقیق (مبتنی بر GPS و شبکه)"</string>
@@ -438,6 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوباره امتحان کنید."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام‌سازی"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏به برنامه امکان می‌دهد گواهی‌های DRM را حذف کند. نباید برای برنامه‌های عادی هیچ‌وقت لازم باشد."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"مقید به سرویس پیام‌رسانی شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای رابط کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"اتصال به سرویس پیکربندی شرکت مخابراتی"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"به دارنده امکان می‌دهد به سرویس پیکربندی شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"اتصال به سرویس‌های شرکت مخابراتی"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
@@ -1042,12 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏در صورت فعال کردن حافظهٔ USB، برخی از برنامه‎هایی که از آن‌ها استفاده می‎کنید متوقف می‎شوند و تا زمانی که حافظهٔ USB را غیرفعال نکنید امکان استفاده از آن‌ها وجود نخواهد داشت."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"‏راه‌اندازی USB ناموفق بود."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"تأیید"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به‌عنوان دستگاه رسانه‌ای"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به‌عنوان دوربین"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏به عنوان یک دستگاه MIDI متصل شد"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏USB برای شارژ کردن"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB برای انتقال فایل"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB برای انتقال عکس"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB برای MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به‌عنوان نصب کننده"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏به یک وسیله جانبی USB وصل شده است"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"‏برای سایر گزینه‌های USB لمس کنید."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"برای گزینه‌های بیشتر لمس کنید."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏حافظهٔ USB فرمت شود؟"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏کارت SD فرمت شود؟"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏همه فایل‌های ذخیره شده در حافظهٔ USB پاک خواهد شد. این عمل را نمی‎توان برگرداند!"</string>
@@ -1466,17 +1466,33 @@
       <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">‏برای %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏برای %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">‏به مدت %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">‏به مدت %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">‏برای %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏برای %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">‏به مدت %d دقیقه</item>
       <item quantity="other">‏به مدت %d دقیقه</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">‏برای %d دقیقه</item>
+      <item quantity="other">‏برای %d دقیقه</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">‏به مدت %d ساعت</item>
       <item quantity="other">‏به مدت %d ساعت</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">‏برای %d ساعت</item>
+      <item quantity="other">‏برای %d ساعت</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"تا وقتی آن را خاموش کنید"</string>

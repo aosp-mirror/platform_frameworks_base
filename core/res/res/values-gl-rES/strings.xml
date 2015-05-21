@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permite á aplicación engadir, eliminar e cambiar eventos que podes modificar no teu tablet, incluídos os de amigos ou compañeiros de traballo. É posible que esta acción permita á aplicación enviar mensaxes que parecen proceder de propietarios de calendarios ou modificar eventos sen o coñecemento dos propietarios."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Permite que a aplicación engada, elimine e cambie eventos que se poden modificar na televisión, incluídos os de amigos e compañeiros de traballo. A aplicación pode utilizar este permiso para enviar mensaxes que poidan proceder de propietarios dun calendario ou para modificar eventos sen coñecemento dos propietarios."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite á aplicación engadir, eliminar e cambiar eventos que podes modificar no teu teléfono, incluídos os de amigos ou compañeiros de traballo. É posible que esta acción permita á aplicación enviar mensaxes que parecen proceder de propietarios de calendarios ou modificar eventos sen o coñecemento dos propietarios."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"fontes da localización falsas para probas"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Permite crear fontes de localización falsas para probar ou instalar un novo provedor de localizacións. Isto permite á aplicación anular a localización e/ou o estado obtido por outras fontes de localización como o GPS ou provedores de localización."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionais do provedor de situación"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite á aplicación acceder a comandos adicionais de fornecedor de localizacións. É posible que isto provoque que a aplicación interfira co funcionamento do GPS ou doutras fontes da localización."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"localización precisa (baseada en GPS e na rede)"</string>
@@ -438,6 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Cancelouse a operación da impresión dixital."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Demasiados intentos. Téntao de novo máis tarde."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Téntao de novo."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler a configuración de sincronización"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a unha aplicación eliminar os certificados DRM. As aplicacións normais non o deberían precisar nunca."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"vincular a un servizo de mensaxería"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxería. As aplicacións normais non deberían necesitar este permiso."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"vincular a un servizo de configuración de operador"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Permite ao titular vincularse ao servizo de configuración dun operador. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular aos servizos do operador"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite ao titular vincularse aos servizos do operador. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer as normas de contrasinal"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controla a lonxitude e os caracteres permitidos nos contrasinais e nos PIN de bloqueo da pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisar os intentos de desbloqueo da pantalla"</string>
@@ -1042,12 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Se activas o almacenamento USB, algunhas aplicacións que estás usando deteranse e é posible que non estean dispoñibles ata que desactives o almacenamento USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Produciuse un erro na operación do USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como dispositivo multimedia"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como unha cámara"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Conectado como dispositivo MIDI"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB para carga"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferencia de ficheiros"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferencia de fotos"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Toca para acceder a outras opcións de USB."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver máis opcións."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Queres formatar o almacenamento USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Queres formatar a tarxeta SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Borraranse todos os ficheiros gardados no teu almacenamento USB. Esta acción non se pode desfacer."</string>
@@ -1466,17 +1466,33 @@
       <item quantity="other">Durante %1$d minutos (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durante un minuto (ata as <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">Durante %1$d min (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durante un min (ata as <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">Durante %1$d horas (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durante unha hora (ata as <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">Durante %1$d h (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durante unha h (ata as <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">Durante %d minutos</item>
       <item quantity="one">Durante un minuto</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">Durante %d min</item>
+      <item quantity="one">Durante un min</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">Durante %d horas</item>
       <item quantity="one">Durante unha hora</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">Durante %d h</item>
+      <item quantity="one">Durante unha h</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Ata que desactives isto"</string>

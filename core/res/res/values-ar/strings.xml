@@ -339,8 +339,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على جهازك اللوحي، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"يتيح للتطبيق إضافة أحداث يمكنك تعديلها على التلفزيون كما يتيح إزالتها أو تغييرها، بما في ذلك أحداث الأصدقاء وزملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل تبدو أنها من أصحاب التقاويم أو تعديل الأحداث بدون علم أصحاب هذه التقاويم."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على هاتفك، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"مصادر مواقع وهمية للاختبار"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"‏لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة التي تعرضها مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"الدخول إلى المزيد من أوامر موفر الموقع"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏للسماح للتطبيق بالدخول إلى أوامر إضافية لموفر الموقع. قد يتيح هذا للتطبيق التداخل مع تشغيل تقنية نظام تحديد المواقع العالمي (GPS) أو مصادر الموقع الأخرى."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"الموقع الدقيق (مستند إلى نظام تحديد المواقع العالمي والشبكة)"</string>
@@ -442,6 +440,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"تم إلغاء تشغيل بصمة الإصبع."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"تم إجراء عدد كبير من المحاولات. أعد المحاولة لاحقًا."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"أعد المحاولة."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"قراءة إعدادات المزامنة"</string>
@@ -506,8 +505,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏للسماح لأحد التطبيقات بإزالة شهادات DRM. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"الالتزام بخدمة المراسلة التابعة لمشغل شبكة الجوّال"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"يسمح لحامله بالالتزام بواجهة المستوى العالي لخدمة المراسلة التابعة لمشغل شبكة الجوَّال. ومن المفترض عدم الحاجة إليه مع التطبيقات العادية."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"الربط بخدمة تهيئة أحد مشغِّلي شبكة الجوّال"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"للسماح لحامل البطاقة بالربط مع خدمة تهيئة لدى أحد مشغِّلي شبكة الجوّال. ولن تحتاج إليه أبدًا مع التطبيقات العادية."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"الالتزام بخدمات مشغل شبكة الجوال"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"للسماح للمالك بالالتزام بخدمات مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>
@@ -1070,12 +1069,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏إذا تم تشغيل وحدة تخزين USB، فستتوقف بعض التطبيقات التي تستخدمها وربما تصبح غير متاحة إلى أن يتم إيقاف وحدة تخزين USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"‏لم تتم عملية USB بنجاح"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"موافق"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"التوصيل كجهاز وسائط"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"التوصيل ككاميرا"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏تم التوصيل كجهاز MIDI"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏USB للشحن"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB لنقل الملفات"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB لنقل الصور"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB لـ MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"التوصيل كأداة تثبيت"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏الاتصال بجهاز USB ملحق"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"‏المس للاطلاع على خيارات USB الأخرى."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏تهيئة وحدة تخزين USB؟"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏هل تريد تنسيق بطاقة SD؟"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏سيتم مسح جميع الملفات المخزنة على وحدة تخزين USB. لا يمكن عكس هذا الإجراء!"</string>
@@ -1506,6 +1506,14 @@
       <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">لمدة دقيقة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="zero">لمدة أقل من دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">لمدة دقيقتين (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">‏لمدة %1$d دقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">لمدة دقيقة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="zero">‏لمدة أقل من ساعة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">‏لمدة ساعتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1513,6 +1521,14 @@
       <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">لمدة ساعة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="zero">لمدة أقل من ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">لمدة ساعتين (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">‏لمدة %1$d ساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">لمدة ساعة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="zero">‏لمدة أقل من دقيقة (%d)</item>
@@ -1522,6 +1538,14 @@
       <item quantity="other">‏لمدة %d من الدقائق</item>
       <item quantity="one">لمدة دقيقة واحدة</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="zero">لمدة أقل من دقيقة</item>
+      <item quantity="two">لمدة دقيقتين</item>
+      <item quantity="few">‏لمدة %d دقائق</item>
+      <item quantity="many">‏لمدة %d دقيقة</item>
+      <item quantity="other">‏لمدة %d من الدقائق</item>
+      <item quantity="one">لمدة دقيقة</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="zero">‏لمدة أقل من ساعة (%d)</item>
       <item quantity="two">‏لمدة ساعتين (%d)</item>
@@ -1529,6 +1553,14 @@
       <item quantity="many">‏لمدة %d ساعة</item>
       <item quantity="other">‏لمدة %d من الساعات</item>
       <item quantity="one">لمدة ساعة واحدة</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="zero">لمدة أقل من ساعة</item>
+      <item quantity="two">لمدة ساعتين</item>
+      <item quantity="few">‏لمدة %d ساعات</item>
+      <item quantity="many">‏لمدة %d ساعة</item>
+      <item quantity="other">‏لمدة %d من الساعات</item>
+      <item quantity="one">لمدة ساعة</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"لحين تعطيل هذا الإعداد"</string>

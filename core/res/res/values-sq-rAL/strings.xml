@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Lejon aplikacionin të shtojë, të heqë ose të ndryshojë ngjarje që mund t\'i modifikosh në tabletin tënd, përfshirë ato të miqve apo kolegëve të punës. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duket se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Lejon aplikacionin të shtojë, të heqë ose të ndryshojë ngjarje që mund t\'i modifikosh në televizorin tënd, përfshirë ato të miqve apo kolegëve të punës. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duket se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Lejon aplikacionin të shtojë, heqë, ndryshojë ngjarje që mund t\'i modifikosh në telefonin tënd, përfshi ato të miqve ose kolegëve. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duken se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imito burimet e vendndodhjes për testim"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Krijo burime imituese të vendndodhjes për testim ose instalo një ofrues të ri për vendndodhjen. Kjo lejon aplikacionin të mos refuzojë vendndodhjen dhe/ose statusin e rezultuar nga burime të tjera të vendndodhjes si GPS-ja ose ofruesit të saj."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qasje në komandat shtesë të ofruesit të vendndodhjes"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lejon aplikacionin të ketë qasje në komandat shtesë të ofruesit për vendndodhjen. Kjo mund ta lejojë aplikacionin të ndërhyjë në operacionin e GPS-së apo të burimeve të tjera për vendndodhjen."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"vendndodhja e përpiktë (në bazë të GPS-së dhe rrjetit)"</string>
@@ -438,6 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operacioni i gjurmës së gishtit u anulua."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Keni bërë shumë tentativa. Provo përsëri më vonë."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Provo përsëri."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lexo cilësimet e sinkronizimit"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lejon një aplikacion të heqë certifikatat DRM. Nuk nevojitet për aplikacionet normale."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"lidhu me një shërbim mesazhesh të operatorit"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lejon zotëruesin të lidhet me ndërfaqen e nivelit të lartë të shërbimit të mesazheve të operatorit. Nuk nevojitet për aplikacione normale."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"lidhu me një shërbim konfigurimi të operatorit celular"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Lejon zotëruesin të lidhet me një shërbim konfigurimi të operatorit celular. Nuk nevojitet asnjëherë për aplikacionet normale."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"lidhu me shërbimet e operatorit celular"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lejon që mbajtësi të lidhet me shërbimet e operatorit celular. Nuk duhet të jetë asnjëherë e nevojshme për aplikacionet normale."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitoro tentativat e shkyçjes së ekranit"</string>
@@ -1042,12 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Nëse aktivizon USB-në, disa aplikacione që po përdor do të ndalojnë. Ata mund të jenë të papërdorshëm derisa ta çaktivizosh sërish USB-në."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operacioni i USB-së nuk pati sukses"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Në rregull!"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Lidhur si pajisje e jashtme"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Lidhur si kamerë"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"U lidh si një pajisje MIDI"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB për ngarkim"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB për transferimin e skedarëve"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB për transferimin e fotografive"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB për MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"I lidhur si instalues"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"U lidh me një ndihmës USB-je"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Prek për opsione të tjera të USB-së."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Prek për më shumë opsione."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Të formatohet USB-ja?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Të formatohet karta SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Të gjithë skedarët e ruajtur në USB do të fshihen. Ky veprim nuk mund të kthehet mbrapsht!"</string>
@@ -1466,17 +1466,33 @@
       <item quantity="other">Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Për një minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">Për %1$d minutë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Për 1 minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Për një orë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Për 1 orë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">Për %d minuta</item>
       <item quantity="one">Për një minutë</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">Për %d minuta</item>
+      <item quantity="one">Për 1 minutë</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">Për %d orë</item>
       <item quantity="one">Për një orë</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">Për %d orë</item>
+      <item quantity="one">Për 1 orë</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Deri sa ta çaktivizosh këtë"</string>

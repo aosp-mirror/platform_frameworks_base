@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að vinna með í spjaldtölvunni, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að breyta í sjónvarpinu, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að breyta í símanum, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"gervistaðsetningarbúnaður fyrir prófun"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Búa til gervistaðsetningarbúnað til prófunar eða uppsetningar á nýrri staðsetningarveitu. Þetta gerir forritinu kleift að hnekkja staðsetningu og/eða stöðu frá öðrum staðsetningarbúnaði á borð við GPS eða staðsetningarveitur."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"aðgangur að viðbótarskipunum staðsetningarveitu"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Leyfir forriti að fá aðgang að fleiri skipunum staðsetningarveitu. Þetta getur gert forritinu kleift að hafa áhrif á virkni GPS og annars staðsetningarbúnaðar."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"nákvæm staðsetning (frá GPS og símakerfi)"</string>
@@ -438,6 +436,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Hætt við fingrafarsaðgerð."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Of margar tilraunir. Reyndu aftur síðar."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Reyndu aftur."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Fingur <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lesa samstillingar"</string>
@@ -502,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Leyfir forriti að fjarlægja DRM-vottorð. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bindast skilaboðaþjónustu símafyrirtækis"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Leyfir forriti að bindast efsta viðmótslagi skilaboðaþjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"bindast uppsetningarþjónustu símafyrirtækis"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Leyfir handhafa að bindast uppsetningarþjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"bindast þjónustu símafyrirtækis"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Leyfir handhafa að bindast þjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setja reglur um aðgangsorð"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stjórna lengd og fjölda stafa í aðgangsorðum og PIN-númerum skjáláss."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Fylgjast með tilraunum til að taka skjáinn úr lás"</string>
@@ -1042,12 +1041,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Ef þú kveikir á USB-geymslu stöðvast sum forrit sem eru í notkun og þau kunna að vera óaðgengileg þar til slökkt er á USB-geymslunni."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-aðgerð mistókst"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Í lagi"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tengt sem geymslumiðill"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Tengt sem myndavél"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Tengt sem MIDI-tæki"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB fyrir hleðslu"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB fyrir skráaflutning"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB fyrir myndaflutning"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB fyrir MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tengt sem uppsetningarforrit"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tengt við USB-aukabúnað"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Snertu til að sjá aðra USB-valkosti."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Snertu til að fá fleiri valkosti."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Sníða USB-geymslu?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Sníða SD-kort?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Öllum skrám í USB-geymslunni verður eytt. Ekki er hægt að afturkalla þessa aðgerð!"</string>
@@ -1466,17 +1466,33 @@
       <item quantity="one">Í %1$d mínútu (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Í %1$d mínútur (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">Í %1$d mín. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">Í %1$d mín. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">Í %1$d klukkustund (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Í %1$d klukkustundir (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">Í %1$d klst. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">Í %1$d klst. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">Í %d mínútu</item>
       <item quantity="other">Í %d mínútur</item>
     </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">Í %d mín.</item>
+      <item quantity="other">Í %d mín.</item>
+    </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">Í %d klukkustund</item>
       <item quantity="other">Í %d klukkustundir</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">Í %d klst.</item>
+      <item quantity="other">Í %d klst.</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Þar til þú slekkur á þessu"</string>
