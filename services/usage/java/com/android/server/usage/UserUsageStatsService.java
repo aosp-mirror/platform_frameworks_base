@@ -216,12 +216,19 @@ class UserUsageStatsService {
     }
 
     /**
-     * Sets the last timestamp for each of the intervals.
-     * @param lastTimestamp
+     * Sets the beginIdleTime for each of the intervals.
+     * @param beginIdleTime
      */
-    void setBeginIdleTime(String packageName, long deviceUsageTime) {
+    void setBeginIdleTime(String packageName, long beginIdleTime) {
         for (IntervalStats stats : mCurrentStats) {
-            stats.updateBeginIdleTime(packageName, deviceUsageTime);
+            stats.updateBeginIdleTime(packageName, beginIdleTime);
+        }
+        notifyStatsChanged();
+    }
+
+    void setLastUsedTime(String packageName, long lastUsedTime) {
+        for (IntervalStats stats : mCurrentStats) {
+            stats.updateLastUsedTime(packageName, lastUsedTime);
         }
         notifyStatsChanged();
     }
@@ -387,6 +394,16 @@ class UserUsageStatsService {
             return -1;
         } else {
             return packageUsage.getBeginIdleTime();
+        }
+    }
+
+    long getLastUsedTime(String packageName) {
+        final IntervalStats yearly = mCurrentStats[UsageStatsManager.INTERVAL_YEARLY];
+        UsageStats packageUsage;
+        if ((packageUsage = yearly.packageStats.get(packageName)) == null) {
+            return -1;
+        } else {
+            return packageUsage.getLastTimeUsed();
         }
     }
 
