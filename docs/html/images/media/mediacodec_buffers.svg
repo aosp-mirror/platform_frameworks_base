@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="20 17 540 208" width="45pc" height="208pt" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <defs>
+        <font-face font-family="Roboto" font-size="20" panose-1="2 0 0 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-73.242188" underline-thickness="48.828125" slope="0" x-height="538.08594" cap-height="720.70312" ascent="927.7344" descent="-244.14062" font-weight="500">
+            <font-face-src>
+                <font-face-name name="Roboto-Regular"/>
+            </font-face-src>
+        </font-face>
+        <font-face font-family="Roboto" font-size="12" panose-1="2 0 0 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-73.242188" underline-thickness="48.828125" slope="0" x-height="538.08594" cap-height="720.70312" ascent="927.7344" descent="-244.14062" font-weight="300">
+            <font-face-src>
+                <font-face-name name="Roboto-Light"/>
+            </font-face-src>
+        </font-face>
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" viewBox="-4 -2 5 4" markerWidth="5" markerHeight="4" color="#262626">
+            <g>
+                <path d="M -2.16 0 L 0 .81 L 0 -.81 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+            </g>
+        </marker>
+    </defs>
+    <g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1">
+        <title>MediaCodec buffer flow diagram</title>
+        <g>
+            <line x1="291" y1="20" x2="290" y2="220" stroke="#535353" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke-dasharray="4,4"/>
+            <path d="M 560 71 L 560 179 L 560 185 L 554 185 L 510 185 L 466 185 C 462.6863 185 460 182.31371 460 179 L 460 71 C 460 67.68629 462.6863 65 466 65 L 510 65 L 554 65 L 560 65 Z M 554 65 C 554 65 554 65 554 65 Z" fill="#178f46"/>
+            <text transform="translate(465 113)" fill="#aadcc2">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#aadcc2" x="19.555664" y="19" textLength="50.888672">Client</tspan>
+            </text>
+            <path d="M 246 75 L 334 75 C 337.3137 75 340 77.68629 340 81 L 340 169 C 340 172.31371 337.3137 175 334 175 L 246 175 C 242.68629 175 240 172.31371 240 169 L 240 81 C 240 77.68629 242.68629 75 246 75 Z" fill="#346df1"/>
+            <text transform="translate(245 113)" fill="#bad0fb">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#bad0fb" x="16.616211" y="19" textLength="56.767578">Codec</tspan>
+            </text>
+            <path d="M 132 140 L 148 140 C 149.10457 140 150 140.89543 150 142 L 150 158 C 150 159.10457 149.10457 160 148 160 L 132 160 C 130.89543 160 130 159.10457 130 158 L 130 142 C 130 140.89543 130.89543 140 132 140 Z" fill="#de6560"/>
+            <path d="M 132 140 L 148 140 C 149.10457 140 150 140.89543 150 142 L 150 158 C 150 159.10457 149.10457 160 148 160 L 132 160 C 130.89543 160 130 159.10457 130 158 L 130 142 C 130 140.89543 130.89543 140 132 140 Z" stroke="#b6251f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 172 140 L 188 140 C 189.10457 140 190 140.89543 190 142 L 190 158 C 190 159.10457 189.10457 160 188 160 L 172 160 C 170.89543 160 170 159.10457 170 158 L 170 142 C 170 140.89543 170.89543 140 172 140 Z" fill="#de6560"/>
+            <path d="M 172 140 L 188 140 C 189.10457 140 190 140.89543 190 142 L 190 158 C 190 159.10457 189.10457 160 188 160 L 172 160 C 170.89543 160 170 159.10457 170 158 L 170 142 C 170 140.89543 170.89543 140 172 140 Z" stroke="#b6251f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 212 140 L 228 140 C 229.10457 140 230 140.89543 230 142 L 230 158 C 230 159.10457 229.10457 160 228 160 L 212 160 C 210.89543 160 210 159.10457 210 158 L 210 142 C 210 140.89543 210.89543 140 212 140 Z" fill="#de6560"/>
+            <path d="M 212 140 L 228 140 C 229.10457 140 230 140.89543 230 142 L 230 158 C 230 159.10457 229.10457 160 228 160 L 212 160 C 210.89543 160 210 159.10457 210 158 L 210 142 C 210 140.89543 210.89543 140 212 140 Z" stroke="#b6251f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 212 90 L 228 90 C 229.10457 90 230 90.89543 230 92 L 230 108 C 230 109.10457 229.10457 110 228 110 L 212 110 C 210.89543 110 210 109.10457 210 108 L 210 92 C 210 90.89543 210.89543 90 212 90 Z" stroke="#b6251f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 172 90 L 188 90 C 189.10457 90 190 90.89543 190 92 L 190 108 C 190 109.10457 189.10457 110 188 110 L 172 110 C 170.89543 110 170 109.10457 170 108 L 170 92 C 170 90.89543 170.89543 90 172 90 Z" stroke="#b6251f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 132 90 L 148 90 C 149.10457 90 150 90.89543 150 92 L 150 108 C 150 109.10457 149.10457 110 148 110 L 132 110 C 130.89543 110 130 109.10457 130 108 L 130 92 C 130 90.89543 130.89543 90 132 90 Z" stroke="#b6251f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <text transform="translate(128.5 70.5)" fill="#262626">
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x=".19238281" y="11" textLength="86.44336">empty input buff</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="86.495117" y="11" textLength="16.3125">ers</tspan>
+            </text>
+            <path d="M 20 71 L 20 179 L 20 185 L 26 185 L 70 185 L 114 185 C 117.31371 185 120 182.31371 120 179 L 120 71 C 120 67.68629 117.31371 65 114 65 L 70 65 L 26 65 L 20 65 Z M 26 65 C 26 65 26 65 26 65 Z" fill="#178f46"/>
+            <text transform="translate(25 113)" fill="#aadcc2">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#aadcc2" x="19.555664" y="19" textLength="50.888672">Client</tspan>
+            </text>
+            <path d="M 352 110 L 368 110 C 369.10457 110 370 109.10457 370 108 L 370 92 C 370 90.89543 369.10457 90 368 90 L 352 90 C 350.89543 90 350 90.89543 350 92 L 350 108 C 350 109.10457 350.89543 110 352 110 Z" fill="#f4c23d"/>
+            <path d="M 352 110 L 368 110 C 369.10457 110 370 109.10457 370 108 L 370 92 C 370 90.89543 369.10457 90 368 90 L 352 90 C 350.89543 90 350 90.89543 350 92 L 350 108 C 350 109.10457 350.89543 110 352 110 Z" stroke="#eb8007" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 392 110 L 408 110 C 409.10457 110 410 109.10457 410 108 L 410 92 C 410 90.89543 409.10457 90 408 90 L 392 90 C 390.89543 90 390 90.89543 390 92 L 390 108 C 390 109.10457 390.89543 110 392 110 Z" fill="#f4c23d"/>
+            <path d="M 392 110 L 408 110 C 409.10457 110 410 109.10457 410 108 L 410 92 C 410 90.89543 409.10457 90 408 90 L 392 90 C 390.89543 90 390 90.89543 390 92 L 390 108 C 390 109.10457 390.89543 110 392 110 Z" stroke="#eb8007" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 432 110 L 448 110 C 449.10457 110 450 109.10457 450 108 L 450 92 C 450 90.89543 449.10457 90 448 90 L 432 90 C 430.89543 90 430 90.89543 430 92 L 430 108 C 430 109.10457 430.89543 110 432 110 Z" fill="#f4c23d"/>
+            <path d="M 432 110 L 448 110 C 449.10457 110 450 109.10457 450 108 L 450 92 C 450 90.89543 449.10457 90 448 90 L 432 90 C 430.89543 90 430 90.89543 430 92 L 430 108 C 430 109.10457 430.89543 110 432 110 Z" stroke="#eb8007" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 432 160 L 448 160 C 449.10457 160 450 159.10457 450 158 L 450 142 C 450 140.89543 449.10457 140 448 140 L 432 140 C 430.89543 140 430 140.89543 430 142 L 430 158 C 430 159.10457 430.89543 160 432 160 Z" fill="#f4c23d"/>
+            <path d="M 432 160 L 448 160 C 449.10457 160 450 159.10457 450 158 L 450 142 C 450 140.89543 449.10457 140 448 140 L 432 140 C 430.89543 140 430 140.89543 430 142 L 430 158 C 430 159.10457 430.89543 160 432 160 Z" stroke="#eb8007" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 392 160 L 408 160 C 409.10457 160 410 159.10457 410 158 L 410 142 C 410 140.89543 409.10457 140 408 140 L 392 140 C 390.89543 140 390 140.89543 390 142 L 390 158 C 390 159.10457 390.89543 160 392 160 Z" fill="#f4c23d"/>
+            <path d="M 392 160 L 408 160 C 409.10457 160 410 159.10457 410 158 L 410 142 C 410 140.89543 409.10457 140 408 140 L 392 140 C 390.89543 140 390 140.89543 390 142 L 390 158 C 390 159.10457 390.89543 160 392 160 Z" stroke="#eb8007" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 352 160 L 368 160 C 369.10457 160 370 159.10457 370 158 L 370 142 C 370 140.89543 369.10457 140 368 140 L 352 140 C 350.89543 140 350 140.89543 350 142 L 350 158 C 350 159.10457 350.89543 160 352 160 Z" fill="#f4c23d"/>
+            <path d="M 352 160 L 368 160 C 369.10457 160 370 159.10457 370 158 L 370 142 C 370 140.89543 369.10457 140 368 140 L 352 140 C 350.89543 140 350 140.89543 350 142 L 350 158 C 350 159.10457 350.89543 160 352 160 Z" stroke="#eb8007" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="230" y1="120.03223" x2="110" y2="120" stroke="#262626" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" stroke-dasharray="8,5"/>
+            <line x1="232.38" y1="130.03034" x2="110" y2="130" marker-start="url(#FilledArrow_Marker)" stroke="#262626" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" stroke-dasharray="8,5"/>
+            <path d="M 110 130 C 107.238576 130 105 127.76142 105 125 C 105 122.238576 107.238576 120 110 120" stroke="#262626" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" stroke-dasharray="8,5"/>
+            <line x1="350" y1="120.53223" x2="470" y2="120.5" stroke="#262626" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" stroke-dasharray="8,5"/>
+            <line x1="347.62" y1="130.53034" x2="470" y2="130.5" marker-start="url(#FilledArrow_Marker)" stroke="#262626" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" stroke-dasharray="8,5"/>
+            <path d="M 470 130.5 C 472.76142 130.5 475 128.26142 475 125.5 C 475 122.738576 472.76142 120.5 470 120.5" stroke="#262626" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" stroke-dasharray="8,5"/>
+            <text transform="translate(132.5 166.5)" fill="#262626">
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x=".3671875" y="11" textLength="6.4453125">fi</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="6.8125" y="11" textLength="71.648438">lled input buff</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="78.320312" y="11" textLength="16.3125">ers</tspan>
+            </text>
+            <text transform="translate(348.5 70.5)" fill="#262626">
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x=".42382812" y="11" textLength="6.4453125">fi</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="6.8691406" y="11" textLength="79.535156">lled output buff</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="86.26367" y="11" textLength="16.3125">ers</tspan>
+            </text>
+            <text transform="translate(366.5 165)" fill="#262626">
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="11.748047" y="11" textLength="32.080078">discar</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="43.716797" y="11" textLength="19.535156">ded</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x=".22851562" y="25" textLength="58.371094">output buff</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="58.458984" y="25" textLength="16.3125">ers</tspan>
+            </text>
+            <text transform="translate(35.5 192)" fill="#262626">
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x=".13378906" y="11" textLength="41.8125">client pr</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="41.829102" y="11" textLength="6.720703">o</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="48.461914" y="11" textLength="27.404297">vides</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="11.6621094" y="25" textLength="52.67578">input data</tspan>
+            </text>
+            <text transform="translate(466.5 192)" fill="#262626">
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x=".40136719" y="11" textLength="86.197266">client consumes</tspan>
+                <tspan font-family="Roboto" font-size="12" font-weight="300" fill="#262626" x="13.21875" y="25" textLength="60.5625">output data</tspan>
+            </text>
+            <text transform="translate(157.5 30)" fill="#d02d2a">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#d02d2a" x=".166015625" y="19" textLength="44.66797">input</tspan>
+            </text>
+            <text transform="translate(371 30)" fill="#f0a608">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#f0a608" x=".12792969" y="19" textLength="57.74414">output</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
