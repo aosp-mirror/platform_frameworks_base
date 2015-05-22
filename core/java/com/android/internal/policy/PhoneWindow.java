@@ -56,7 +56,6 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import com.android.internal.R;
-import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
@@ -156,7 +155,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     TypedValue mFixedWidthMinor;
     TypedValue mFixedHeightMajor;
     TypedValue mFixedHeightMinor;
-    int mOutsetBottomPx;
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
@@ -289,6 +287,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private Boolean mSharedElementsUseOverlay;
 
     private Rect mTempRect;
+    private Rect mOutsets = new Rect();
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2401,19 +2400,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
-        public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
-            if (mOutsetBottomPx != 0) {
-                WindowInsets newInsets = insets.replaceSystemWindowInsets(
-                        insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                        insets.getSystemWindowInsetRight(), mOutsetBottomPx);
-                return super.dispatchApplyWindowInsets(newInsets);
-            } else {
-                return super.dispatchApplyWindowInsets(insets);
-            }
-        }
-
-
-        @Override
         public boolean onTouchEvent(MotionEvent event) {
             return onInterceptTouchEvent(event);
         }
@@ -2624,11 +2610,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            if (mOutsetBottomPx != 0) {
+            getOutsets(mOutsets);
+            if (mOutsets.top > 0 || mOutsets.bottom > 0) {
                 int mode = MeasureSpec.getMode(heightMeasureSpec);
                 if (mode != MeasureSpec.UNSPECIFIED) {
                     int height = MeasureSpec.getSize(heightMeasureSpec);
-                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(height + mOutsetBottomPx, mode);
+                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            height + mOutsets.top + mOutsets.bottom, mode);
+                }
+            }
+            if (mOutsets.left > 0 || mOutsets.right > 0) {
+                int mode = MeasureSpec.getMode(widthMeasureSpec);
+                if (mode != MeasureSpec.UNSPECIFIED) {
+                    int width = MeasureSpec.getSize(widthMeasureSpec);
+                    widthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            width + mOutsets.left + mOutsets.right, mode);
                 }
             }
 
@@ -2666,6 +2662,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            super.onLayout(changed, left, top, right, bottom);
+            getOutsets(mOutsets);
+            if (mOutsets.left > 0) {
+                offsetLeftAndRight(-mOutsets.left);
+            }
+            if (mOutsets.top > 0) {
+                offsetTopAndBottom(-mOutsets.top);
+            }
+        }
+
+        @Override
         public void draw(Canvas canvas) {
             super.draw(canvas);
 
@@ -2673,7 +2681,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mMenuBackground.draw(canvas);
             }
         }
-
 
         @Override
         public boolean showContextMenuForChild(View originalView) {
@@ -3581,19 +3588,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (a.getBoolean(R.styleable.Window_windowActivityTransitions, false)) {
             requestFeature(FEATURE_ACTIVITY_TRANSITIONS);
-        }
-
-        final WindowManager windowService = (WindowManager) getContext().getSystemService(
-                Context.WINDOW_SERVICE);
-        if (windowService != null) {
-            final Display display = windowService.getDefaultDisplay();
-            final boolean shouldUseBottomOutset =
-                    display.getDisplayId() == Display.DEFAULT_DISPLAY
-                            || (getForcedWindowFlags() & FLAG_FULLSCREEN) != 0;
-            if (shouldUseBottomOutset) {
-                mOutsetBottomPx = ScreenShapeHelper.getWindowOutsetBottomPx(
-                        getContext().getResources().getDisplayMetrics(), a);
-            }
         }
 
         final Context context = getContext();
