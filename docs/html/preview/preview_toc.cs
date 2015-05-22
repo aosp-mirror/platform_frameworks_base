@@ -6,6 +6,11 @@
   </li>
 
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html">
+      Download</a></div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html">
       Set up the SDK</a></div>
   </li>
@@ -41,11 +46,6 @@
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/samples.html">
       Samples</a></div>
-  </li>
-
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/reference.html">
-      Reference</a></div>
   </li>
 
   <li class="nav-section">
