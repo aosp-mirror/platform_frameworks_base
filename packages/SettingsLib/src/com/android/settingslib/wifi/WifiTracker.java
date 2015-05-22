@@ -106,6 +106,10 @@ public class WifiTracker {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
         mContext = context;
+        if (currentLooper == null) {
+            // When we aren't on a looper thread, default to the main.
+            currentLooper = Looper.getMainLooper();
+        }
         mMainHandler = new MainHandler(currentLooper);
         mWorkHandler = new WorkHandler(
                 workerLooper != null ? workerLooper : currentLooper);

@@ -171,6 +171,30 @@ public class WifiTrackerTest extends BaseTest {
         assertEquals(TEST_SSIDS[0], accessPoints.get(1).getSsid());
     }
 
+    /**
+     * This tests the case where Settings runs this on a non-looper thread for indexing.
+     */
+    public void testSavedOnlyNoLooper() {
+        mWifiTracker = new WifiTracker(mContext, mWifiListener, mLooper, true, false, true,
+                mWifiManager,  null);
+        mWifiTracker.mScanner = mWifiTracker.new Scanner();
+
+        List<WifiConfiguration> wifiConfigs = new ArrayList<WifiConfiguration>();
+        List<ScanResult> scanResults = new ArrayList<ScanResult>();
+        generateTestNetworks(wifiConfigs, scanResults, true);
+
+        // Send all of the configs and scan results to the tracker.
+        Mockito.when(mWifiManager.getConfiguredNetworks()).thenReturn(wifiConfigs);
+        Mockito.when(mWifiManager.getScanResults()).thenReturn(scanResults);
+        mWifiTracker.forceUpdate();
+
+        List<AccessPoint> accessPoints = mWifiTracker.getAccessPoints();
+        // Only expect the first two to come back in the results.
+        assertEquals("Expected number of results", 2, accessPoints.size());
+        assertEquals(TEST_SSIDS[1], accessPoints.get(0).getSsid());
+        assertEquals(TEST_SSIDS[0], accessPoints.get(1).getSsid());
+    }
+
     public void testAvailableOnly() {
         mWifiTracker = new WifiTracker(mContext, mWifiListener, mLooper, false, true, true,
                 mWifiManager, mMainLooper);
