@@ -124,5 +124,24 @@ public final class BlackLevelPattern {
         return Arrays.hashCode(mCfaOffsets);
     }
 
+    /**
+     * Return this {@link BlackLevelPattern} as a string representation.
+     *
+     * <p> {@code "BlackLevelPattern([%d, %d], [%d, %d])"}, where each {@code %d} represents one
+     * black level offset of a color channel. The values are in the same order as channels listed
+     * for the CFA layout key (see
+     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT}).
+     * </p>
+     *
+     * @return string representation of {@link BlackLevelPattern}
+     *
+     * @see android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    @Override
+    public String toString() {
+        return String.format("BlackLevelPattern([%d, %d], [%d, %d])", mCfaOffsets[0],
+                mCfaOffsets[1], mCfaOffsets[2], mCfaOffsets[3]);
+    }
+
     private final int[] mCfaOffsets;
 }

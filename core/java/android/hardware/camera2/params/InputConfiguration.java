@@ -112,4 +112,17 @@ public final class InputConfiguration {
     public int hashCode() {
         return HashCodeHelpers.hashCode(mWidth, mHeight, mFormat);
     }
+
+    /**
+     * Return this {@link InputConfiguration} as a string representation.
+     *
+     * <p> {@code "InputConfiguration(w:%d, h:%d, format:%d)"}, where {@code %d} represents
+     * the width, height, and format, respectively.</p>
+     *
+     * @return string representation of {@link InputConfiguration}
+     */
+    @Override
+    public String toString() {
+        return String.format("InputConfiguration(w:%d, h:%d, format:%d)", mWidth, mHeight, mFormat);
+    }
 }
