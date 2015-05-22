@@ -1567,6 +1567,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             outActivity[0] = r;
         }
 
+        if (r.appTimeTracker == null && sourceRecord != null) {
+            // If the caller didn't specify an explicit time tracker, we want to continue
+            // tracking under any it has.
+            r.appTimeTracker = sourceRecord.appTimeTracker;
+        }
+
         final ActivityStack stack = mFocusedStack;
         if (voiceSession == null && (stack.mResumedActivity == null
                 || stack.mResumedActivity.info.applicationInfo.uid != callingUid)) {
@@ -1950,7 +1956,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             }
                             movedHome = true;
                             targetStack.moveTaskToFrontLocked(intentActivity.task, noAnimation,
-                                    options, "bringingFoundTaskToFront");
+                                    options, r.appTimeTracker, "bringingFoundTaskToFront");
                             movedToFront = true;
                             if ((launchFlags &
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
@@ -2192,7 +2198,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final TaskRecord topTask = targetStack.topTask();
             if (topTask != sourceTask) {
                 targetStack.moveTaskToFrontLocked(sourceTask, noAnimation, options,
-                        "sourceTaskToFront");
+                        r.appTimeTracker, "sourceTaskToFront");
             }
             if (!addingToTask && (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
@@ -2239,14 +2245,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     + " in existing task " + r.task + " from source " + sourceRecord);
 
         } else if (inTask != null) {
-            // The calling is asking that the new activity be started in an explicit
+            // The caller is asking that the new activity be started in an explicit
             // task it has provided to us.
             if (isLockTaskModeViolation(inTask)) {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             targetStack = inTask.stack;
-            targetStack.moveTaskToFrontLocked(inTask, noAnimation, options, "inTaskToFront");
+            targetStack.moveTaskToFrontLocked(inTask, noAnimation, options, r.appTimeTracker,
+                    "inTaskToFront");
 
             // Check whether we should actually launch the new activity in to the task,
             // or just reuse the current activity on top.
@@ -2628,7 +2635,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     + task + " to front. Stack is null");
             return;
         }
-        task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options, reason);
+        task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
+                task.getTopActivity() == null ? null : task.getTopActivity().appTimeTracker,
+                reason);
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
     }
@@ -3139,6 +3148,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 stack.ensureActivitiesVisibleLocked(starting, configChanges);
+            }
+        }
+    }
+
+    void clearOtherAppTimeTrackers(AppTimeTracker except) {
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            final int topStackNdx = stacks.size() - 1;
+            for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = stacks.get(stackNdx);
+                stack.clearOtherAppTimeTrackers(except);
             }
         }
     }

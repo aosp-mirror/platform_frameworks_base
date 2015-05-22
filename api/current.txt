@@ -3747,6 +3747,7 @@ package android.app {
   }
 
   public class ActivityOptions {
+    method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
@@ -3754,8 +3755,11 @@ package android.app {
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View, java.lang.String>...);
     method public static android.app.ActivityOptions makeTaskLaunchBehind();
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
+    method public void requestUsageTimeReport(android.app.PendingIntent);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
+    field public static final java.lang.String EXTRA_USAGE_REPORT_PACKAGES = "android.package";
+    field public static final java.lang.String EXTRA_USAGE_REPORT_TIME = "android.time";
   }
 
   public class AlarmManager {

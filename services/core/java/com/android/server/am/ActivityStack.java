@@ -1447,6 +1447,19 @@ final class ActivityStack {
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
     }
 
+    void clearOtherAppTimeTrackers(AppTimeTracker except) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if ( r.appTimeTracker != except) {
+                    r.appTimeTracker = null;
+                }
+            }
+        }
+    }
+
     /**
      * Called as activities below the top translucent activity are redrawn. When the last one is
      * redrawn notify the top activity by calling
@@ -3622,7 +3635,7 @@ final class ActivityStack {
     }
 
     final void moveTaskToFrontLocked(TaskRecord tr, boolean noAnimation, Bundle options,
-            String reason) {
+            AppTimeTracker timeTracker, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final int numTasks = mTaskHistory.size();
@@ -3635,6 +3648,13 @@ final class ActivityStack {
                 updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
             }
             return;
+        }
+
+        if (timeTracker != null) {
+            // The caller wants a time tracker associated with this task.
+            for (int i = tr.mActivities.size() - 1; i >= 0; i--) {
+                tr.mActivities.get(i).appTimeTracker = timeTracker;
+            }
         }
 
         // Shift all activities with this task up to the top
