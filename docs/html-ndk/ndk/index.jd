@@ -43,9 +43,10 @@ footer.hide=1
 <section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="type:blog+tag:featured+tag:preview"
+       data-query="type:blog+tag:ndk"
        data-cardSizes="6x6"
-       data-maxResults="3"></div>
+       data-maxResults="6"
+       data-initial-results="3"></div>
 </div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
