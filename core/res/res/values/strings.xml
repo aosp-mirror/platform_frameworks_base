@@ -1229,7 +1229,7 @@
     <!-- Message shown during fingerprint acquisision when the user removes their finger from the sensor too quickly -->
     <string name="fingerprint_acquired_too_fast">Finger moved too fast. Please try again.</string>
     <!-- Message shown during fingerprint acquisision when the user moves their finger too slowly -->
-    <string name="fingerprint_acquired_too_slow">Finger moved to slow. Please try again.</string>
+    <string name="fingerprint_acquired_too_slow">Finger moved too slow. Please try again.</string>
     <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
