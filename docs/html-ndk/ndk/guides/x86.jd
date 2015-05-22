@@ -1,0 +1,215 @@
+page.title=x86 Support
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#over">Overview</a></li>
+         <li><a href="#an">ARM NEON Intrinsics Support</a></li>
+         <li><a href="#st">Standalone Toolchain</a></li>
+         <li><a href="#comp">Compatibility</a></li>
+      </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+<p>The NDK includes support for the {@code x86} ABI, which allows native code to run on
+Android-based devices running on CPUs supporting the IA-32 instruction set.</p>
+
+<h2 id="over">Overview</h2>
+<p>To generate x86 machine code, add {@code x86} to the {@code APP_ABI} definition in your
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file. For example:</p>
+
+<pre class="no-pretty-print">
+APP_ABI := armeabi armeabi-v7a x86
+</pre
+
+<p>For more information about defining the {@code APP_ABI} variable, see
+<a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a>.</p>
+
+<p>The build system places generated libraries into {@code $PROJECT/libs/x86/}, where
+{@code $PROJECT} represents your project's root directory, and embeds them in your APK under
+{@code /lib/mips/}.</p>
+
+<p>The Android package extracts these libraries when installing your APK on a compatible x86-based
+device, placing them under your app's private data directory.</p>
+
+<p>In the Google Play store, the server filters applications so that a consumer sees only the native
+libraries that run on the CPU powering his or her device.</p>
+
+<h2 id="an">x86 Support for ARM NEON Intrinsics</h2>
+<p>Support for ARM NEON intrinsics is provided in the form of C/C++ language headers with the same
+name as the standard ARM NEON intrinsics header, {@code arm_neon.h}. These headers are available for
+all NDK x86 toolchains. They translate NEON intrinsics to native x86 SSE ones.</p>
+
+<p>Characteristics of this solution include the following:</p>
+<ul>
+<li>Default use of SSE through SSSE3 for porting ARM NEON to Intel SSE, covering ~93%
+(1869 of total 2009) of all NEON functions.</li>
+<li>Redefinition of ARM NEON 128 bit vectors into the equivalent x86 SIMD data.</li>
+<li>Redefinition of some functions from ARM NEON to Intel SSE if a 1:1 correspondence exists.</li>
+<li>Implementation of some ARM NEON functions using Intel SIMD if it will yield a performant result.
+</li>
+<li>Implementation of some of the remaining NEON functions using the serial solution, and issuing
+the corresponding "low performance" compiler warning.</li>
+</ul>
+
+
+<h3>Performance</h3>
+<p>In most cases, you should be able to attain performance similar to what you would get from ARM
+NEON code. Recommendations for best results include:</p>
+
+<ul>
+<li>Use 16-byte data alignment for faster load and store.</li>
+<li>Avoid using constants with NEON functions. Using constants results in a performance penalty due
+to having to load constants. If you must use constants, try to initialize them outside of hotspot
+loops. If possible, replace them with logical and compare operations.</li>
+<li>Try to avoid functions marked as "serially implemented" because they need to store data from
+registers to memory. Instead, process them serially and reload them. You may be able to change the
+data type or algorithm used to vectorize the whole port instead of leaving it as a serial one.</li>
+</ul>
+
+<p>For more information on this topic, see
+<a href="http://software.intel.com/en-us/blogs/2012/12/12/from-arm-neon-to-intel-mmxsse-automatic-porting-solution-tips-and-tricks">
+From ARM NEON to Intel SSE&ndash; the automatic porting solution, tips and tricks</a>.</p>
+
+<h3>Known differences from ARM version</h3>
+<p>In the great majority of cases, x86 implementations produce the same results as ARM
+implementations for NEON. x86 implementations pass
+<a href="https://gitorious.org/arm-neon-tests/arm-neon-tests">NEON tests</a> nearly 100% of the
+time. Still, there are several corner cases in which an x86 implementation produces results
+different from its ARM counterpart. Known incompatibilities are as follows:</p>
+
+<ul>
+<li>{@code VRECPS/VRECPSQ}<br/>
+  If one of the operands is +/- infinity and the second is +/- 0.0:
+  <ul>
+    <li>On ARM CPUs, these instructions
+    <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0489h/CIHDIACI.html">
+    return a result element equal to 2.0</a>.</li>
+
+    <li>x86 CPUs return {@code QNaN Indefinite}. For more information about the QNaN floating-point
+    indefinite, see "4.2.2 Floating-Point Data Types" and "4.8.3.7 QNaN Floating-Point Indefinite,"
+    in the
+    <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>.
+    </li>
+
+  </ul>
+</li>
+<li>{@code VRSQRTS/VRSQRTSQ}<br/>
+  If one of the operands is +/- infinity and the second is +/- 0.0:
+  <ul>
+    <li>On ARM CPUs, these instructions
+    <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0489h/CIHDIACI.html">
+    return a result element equal to 1.5</a>.</li>
+
+    <li>x86 CPUs return {@code QNaN Indefinite}. For more information about the QNaN floating-point
+    indefinite, see "4.2.2 Floating-Point Data Types" and "4.8.3.7 QNaN Floating-Point Indefinite,"
+    in the
+    <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>.
+    </li>
+  </ul>
+</li>
+
+<li>{@code VMAX/VMAXQ}<br/>
+  If one of the operands is NaN, or both operands are +/- 0.0:
+  <ul>
+    <li>On ARM CPUs, floating-point maximum works as follows:
+      <ul>
+        <li>max(+0.0, -0.0) = +0.0.</li>
+        <li>If any input is a NaN, the corresponding result element is the default NaN.</li>
+      </ul>
+      To learn more about this condition and result, see the
+      <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0489h/CIHDEEBE.html">
+      ARM Compiler toolchain Assembler Reference</a>, ignoring the "Superseded" watermark.
+    </li>
+
+    <li>On x86 CPUs, floating-point maximum works as follows:
+      <ul>
+        <li>If one of the source operands is NaN, then return the second source operand.</li>
+        <li>If both source operands are equal to 0, then return the second source operand.</li>
+      </ul>
+      For more information about these conditions and results, see Volume 1 Appendix E chapter
+      E.4.2.3 and Volume 2, p 3-488, of the
+      <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s
+      Manual</a>.
+    </li>
+  </ul>
+</li>
+
+<li>{@code VMIN/VMINQ}<br/>
+  If one of the operands is NaN or both are +/- 0.0:
+  <ul>
+    <li>On ARM CPUs floating-point minimum works as follows:
+      <ul>
+        <li>min(+0.0, -0.0) = -0.0.</li>
+        <li>If any input is a NaN, the corresponding result element is the default NaN.</li>
+      </ul>
+      To learn more about this condition and result, see the
+      <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0489h/CIHDEEBE.html">
+      ARM Compiler toolchain Assembler Reference</a>, ignoring the "Superseded" watermark.
+    </li>
+    <li>On x86 CPUs floating-point minimum works as follows:
+      <ul>
+        <li>If one of the source operands is NaN, than return the second source operand.</li>
+        <li>If both source operands are equal to 0, than return the second source operand.</li>
+      </ul>
+      For more information about these conditions and results, see Volume 1 Appendix E chapter
+      E.4.2.3 and Volume 2, p 3-497, of the
+      <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s
+      Manual</a>.
+    </li>
+  </ul>
+</li>
+
+<li>{@code VRECPE/VRECPEQ}<br/>
+  These instructions provide different levels of accuracy on ARM and x86 CPUs. For more information
+  about these differences, see
+  <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.faqs/ka14282.html">
+  How do I use VRECPE/VRECPEQ for reciprocal estimate?</a> on the ARM website, and Volume 2, p.
+  4-281 of the
+  <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>.
+</li>
+
+<li>{@code VRSQRTE/VRSQRTEQ}<br/>
+  <ul>
+    <li>These instructions provide different levels of accuracy on ARM and x86 CPUs. For more
+    information about these differences, see the
+    <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0204h/CIHCHECJ.html">
+    RealView Compilation Tools Assembler Guide</a>, and Volume 2, p. 4-325 of the
+    <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>.
+    </li>
+
+    <li>If one of the operands is negative or -infinity then
+      <ul>
+        <li>On ARM CPUs, these instructions by default return a (positive) NaN. For more information
+        about this result, see the
+        <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0489i/CIHIICBB.html">
+        ARM Compiler toolchain Assembler Reference</a>.</li>
+        <li>On x86 CPUs, these instructions return a (negative) QNaN floating-point Indefinite. For
+        more information about this result, see Volume 1, Appendix E, E.4.2.3, of the
+      <a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-manual-325462.pdf">Intel® 64 and IA-32 Architectures Software Developer’s
+      Manual</a>.</li>
+      </ul>
+    </li>
+  </ul>
+</li>
+</ul>
+
+<h3>Sample code</h3>
+<p>In your project make sure to include the {@code arm_neon.h} header, and define include
+{@code x86} in your definition of {@code APP_ABI}. The build system then ports your code to x86.</p>
+
+<p>For an example of how porting ARM NEON to x86 SSE works, see the hello-neon sample.</p>
+
+<h2 id="st">Standalone Toolchain</h2>
+<p>You can incorporate the {@code x86} ABI into your own toolchain. For more information, see
+<a href="{@docRoot}ndk/guides/standalone_toolchain.html">Standalone Toolchain</a>.</p>
+
+<h2 id="comp">Compatibility</h2>
+<p>x86 support requires, at minimum, Android 2.3 (Android API level 9). If your project files
+target an older API level, but include x86 as a targeted platform, the NDK build script
+automatically selects the right set of native platform headers/libraries for you.</p>
