@@ -33,6 +33,7 @@ public class StructNdMsg {
     public static final int STRUCT_SIZE = 12;
 
     // Neighbor Cache Entry States
+    public static final short NUD_NONE        = 0x00;
     public static final short NUD_INCOMPLETE  = 0x01;
     public static final short NUD_REACHABLE   = 0x02;
     public static final short NUD_STALE       = 0x04;
@@ -44,6 +45,7 @@ public class StructNdMsg {
 
     public static String stringForNudState(short nudState) {
         switch (nudState) {
+            case NUD_NONE: return "NUD_NONE";
             case NUD_INCOMPLETE: return "NUD_INCOMPLETE";
             case NUD_REACHABLE: return "NUD_REACHABLE";
             case NUD_STALE: return "NUD_STALE";
