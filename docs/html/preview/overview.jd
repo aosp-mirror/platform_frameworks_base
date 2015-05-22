@@ -4,11 +4,13 @@ page.image=images/cards/card-preview_16-9_2x.png
 @jd:body
 
 <p>
-  The M Developer Preview program is an opportunity for you to test the compatibility of your apps
-  with the next platform release, try out early versions of new API features, and provide feedback
-  to the Android team. The program includes update releases during course of the program to allow
-  you to follow the progress of feature development and fixes, leading up to the official release
-  of the platform, as shown in Figure 1.
+  The Android M platform is still under development, but we’re offering developers an early look
+  through the Android M Developer Preview program. This program is an opportunity for you to test
+  the compatibility of your apps with the next platform release, try out early versions of new API
+  features, and provide feedback to the Android team. Developers can try out the M Preview system
+  on with the Android SDK emulator or on Nexus 5, Nexus 6, Nexus 9, and Nexus Player devices. The
+  program includes update releases during course of the program to allow you to follow the progress
+  of feature development and fixes, leading up to the official release of the platform.
 </p>
 
 <img src="{@docRoot}preview/images/m-preview-timeline.png"
@@ -29,26 +31,30 @@ page.image=images/cards/card-preview_16-9_2x.png
 </p>
 
 <ul>
-  <li>Review the <a href="{@docRoot}preview/api-overview.html">
-	API Overview</a> and <a href=
-	"{@docRoot}preview/api-changes.html">Behavior Changes</a> to
-	get an idea of what's new and how it affects your app.
+  <li>Review the <a href="{@docRoot}preview/api-overview.html"> API Overview</a> and
+    <a href="{@docRoot}preview/api-changes.html">Behavior Changes</a> to
+    get an idea of what's new and how it affects your app.
   </li>
 
-  <li>Setup for testing and development by following the instructions for <a href=
-  "{@docRoot}preview/setup-sdk.html">Setting up the Preview
-  SDK</a> and configuring test devices.
+  <li>Setup for testing and development by following the instructions for
+    <a href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
+    and configuring test devices.
   </li>
 
-  <li>Review the <a href="{@docRoot}preview/reference.html">M
-  Preview API Reference</a> and <a href=
-  "{@docRoot}preview/samples.html">M Preview samples</a> to
-  gain more insight into new API features and how to use them in your app.
+  <li>You can <a href="{@docRoot}preview/download.html">download</a> the latest M Developer
+    Preview system image for compatible Nexus devices and install it for testing. Once you have
+    flashed a development device, it is upgraded automatically with the next preview release
+    through over-the-air (OTA) updates.
   </li>
 
-  <li>Join the <a href="https://plus.google.com/communities/101985907812750684586">M Preview
-  Google+ developer community</a> to get the latest developer updates and connect with other
-  developers working with the preview.
+  <li>Review the M Preview <a href="{@docRoot}preview/reference.html">API Reference</a> and
+    <a href="{@docRoot}preview/samples.html">samples</a> to
+    gain more insight into new API features and how to use them in your app.
+  </li>
+
+  <li>Join the M Preview <a href="http://g.co/dev/AndroidMDevPreview">Google+ developer
+    community</a> to get the latest developer updates and connect with other
+    developers working with the preview.
   </li>
 </ul>
 
