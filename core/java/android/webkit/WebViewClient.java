@@ -239,14 +239,6 @@ public class WebViewClient {
     }
 
     /**
-     * This method will be deleted after updated WebView.apk will be submitted
-     * into the Android tree.
-     */
-    public void onReceivedHttpError(
-            WebView view, WebResourceRequest request, WebResourceResponseBase errorResponse) {
-    }
-
-    /**
      * Notify the host application that an HTTP error has been received from the server while
      * loading a resource.  HTTP errors have status codes &gt;= 400.  This callback will be called
      * for any resource (iframe, image, etc), not just for the main page. Thus, it is recommended to
