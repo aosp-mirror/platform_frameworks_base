@@ -1,4 +1,25 @@
+ndk=true
+page.template=sdk
+
+ndk.mac64_download=android-ndk-r10e-darwin-x86_64.bin
+ndk.mac64_bytes=388937326
+ndk.mac64_checksum=2cb8893a5701603519d38a7e04c50e81
+
+ndk.linux64_download=android-ndk-r10e-linux-x86_64.bin
+ndk.linux64_bytes=401522849
+ndk.linux64_checksum=19af543b068bdb7f27787c2bc69aba7f
+
+ndk.linux32_download=android-ndk-r10e-linux-x86.bin
+ndk.linux32_bytes=394281908
+ndk.linux32_checksum=c3edd3273029da1cbd2f62c48249e978
+
+ndk.win64_download=android-ndk-r10e-windows-x86_64.exe
+ndk.win64_bytes=419616132
+ndk.win64_checksum=8412bb4991a95e08fda50b5a44d95df7
+
+ndk.win32_download=android-ndk-r10e-windows-x86.exe
+ndk.win32_bytes=396563176
+ndk.win32_checksum=1a82445baaf62aec3a46386ab1e5772c
+
 page.title=NDK Downloads
 @jd:body
-
-<p>downloads
