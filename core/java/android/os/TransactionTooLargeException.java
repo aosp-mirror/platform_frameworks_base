@@ -56,4 +56,8 @@ public class TransactionTooLargeException extends RemoteException {
     public TransactionTooLargeException() {
         super();
     }
+
+    public TransactionTooLargeException(String msg) {
+        super(msg);
+    }
 }
