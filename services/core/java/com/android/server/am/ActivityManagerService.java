@@ -1586,7 +1586,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             switch (msg.what) {
             case UPDATE_CONFIGURATION_MSG: {
                 final ContentResolver resolver = mContext.getContentResolver();
-                Settings.System.putConfiguration(resolver, (Configuration) msg.obj);
+                Settings.System.putConfigurationForUser(resolver, (Configuration) msg.obj,
+                        msg.arg1);
             } break;
             case GC_BACKGROUND_PROCESSES_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -4121,7 +4122,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mConfiguration, r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
-                if (!updateConfigurationLocked(config, r, false, false)) {
+                if (!updateConfigurationLocked(config, r, false)) {
                     mStackSupervisor.resumeTopActivitiesLocked();
                 }
             }
@@ -11250,7 +11251,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mAlwaysFinishActivities = alwaysFinishActivities;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
-            updateConfigurationLocked(configuration, null, false, true);
+            updateConfigurationLocked(configuration, null, true);
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Initial config: " + mConfiguration);
         }
@@ -16981,6 +16982,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return ci;
     }
 
+    @Override
     public void updatePersistentConfiguration(Configuration values) {
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "updateConfiguration()");
@@ -16990,9 +16992,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new NullPointerException("Configuration must not be null");
         }
 
+        int userId = UserHandle.getCallingUserId();
+
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
-            updateConfigurationLocked(values, null, true, false);
+            updateConfigurationLocked(values, null, false, true, userId);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -17015,9 +17019,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (values != null) {
                 Settings.System.clearConfiguration(values);
             }
-            updateConfigurationLocked(values, null, false, false);
+            updateConfigurationLocked(values, null, false);
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    boolean updateConfigurationLocked(Configuration values,
+            ActivityRecord starting, boolean initLocale) {
+        // pass UserHandle.USER_NULL as userId because we don't persist configuration for any user
+        return updateConfigurationLocked(values, starting, initLocale, false,
+                UserHandle.USER_NULL);
     }
 
     /**
@@ -17026,10 +17037,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      * configuration.  Returns true if the activity has been left running, or
      * false if <var>starting</var> is being destroyed to match the new
      * configuration.
-     * @param persistent TODO
+     *
+     * @param userId is only used when persistent parameter is set to true to persist configuration
+     *               for that particular user
      */
     boolean updateConfigurationLocked(Configuration values,
-            ActivityRecord starting, boolean persistent, boolean initLocale) {
+            ActivityRecord starting, boolean initLocale, boolean persistent, int userId) {
         int changes = 0;
 
         if (values != null) {
@@ -17081,6 +17094,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
                     Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
                     msg.obj = new Configuration(configCopy);
+                    msg.arg1 = userId;
                     mHandler.sendMessage(msg);
                 }
 
@@ -19502,6 +19516,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (foreground) {
                     mCurrentUserId = userId;
+                    updateUserConfigurationLocked();
                     mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
                     updateCurrentProfileIdsLocked();
                     mWindowManager.setCurrentUser(userId, mCurrentProfileIds);
@@ -19586,7 +19601,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (foreground) {
                     if (!uss.initializing) {
-                        moveUserToForeground(uss, oldUserId, userId);
+                        moveUserToForegroundLocked(uss, oldUserId, userId);
                     }
                 } else {
                     mStackSupervisor.startBackgroundUserLocked(userId, uss);
@@ -19728,14 +19743,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     void onUserInitialized(UserStartedState uss, boolean foreground, int oldUserId, int newUserId) {
         synchronized (this) {
             if (foreground) {
-                moveUserToForeground(uss, oldUserId, newUserId);
+                moveUserToForegroundLocked(uss, oldUserId, newUserId);
             }
         }
 
         completeSwitchAndInitalize(uss, newUserId, true, false);
     }
 
-    void moveUserToForeground(UserStartedState uss, int oldUserId, int newUserId) {
+    void moveUserToForegroundLocked(UserStartedState uss, int oldUserId, int newUserId) {
         boolean homeInFront = mStackSupervisor.switchUserLocked(newUserId, uss);
         if (homeInFront) {
             startHomeActivityLocked(newUserId, "moveUserToFroreground");
@@ -19745,6 +19760,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         EventLogTags.writeAmSwitchUser(newUserId);
         getUserManagerLocked().onUserForeground(newUserId);
         sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
+    }
+
+    private void updateUserConfigurationLocked() {
+        Configuration configuration = new Configuration(mConfiguration);
+        Settings.System.getConfigurationForUser(mContext.getContentResolver(), configuration,
+                mCurrentUserId);
+        updateConfigurationLocked(configuration, null, false);
     }
 
     void continueUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {

@@ -1883,7 +1883,7 @@ final class ActivityStack {
                 if (config != null) {
                     next.frozenBeforeDestroy = true;
                 }
-                notUpdated = !mService.updateConfigurationLocked(config, next, false, false);
+                notUpdated = !mService.updateConfigurationLocked(config, next, false);
             }
 
             if (notUpdated) {
