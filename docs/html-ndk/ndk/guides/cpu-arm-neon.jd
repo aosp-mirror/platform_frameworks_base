@@ -1,0 +1,109 @@
+page.title=NEON Support
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#ul">Using {@code LOCAL_ARM_NEON}</a></li>
+        <li><a href="#uns">Using the {@code .neon} Suffix</a></li>
+        <li><a href="#build">Build Requirements</a></li>
+        <li><a href="#rd">Runtime Detection</a></li>
+        <li><a href="#sc">Sample Code</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>The NDK supports the ARM Advanced SIMD, an optional instruction-set extension of the ARMv7 spec.
+NEON provides a set of scalar/vector instructions and registers (shared with the FPU) comparable to
+MMX/SSE/3DNow! in the x86 world. To function, it requires VFPv3-D32 (32 hardware FPU 64-bit
+registers, instead of the minimum of 16).</p>
+
+<p>The NDK supports the compilation of modules or even specific source files with support for NEON.
+As a result, a specific compiler flag enables the use of GCC ARM NEON intrinsics and VFPv3-D32
+at the same time.</p>
+
+<p>Not all ARMv7-based Android devices support NEON, but devices that do may benefit significantly
+from its support for scalar/vector instructions. For x86 devices, the NDK can also translate NEON
+instructions into SSE, although with several restrictions. For more information, see
+<a href="{docRoot}ndk/guides/x86.html#an>x86 Support for ARM NEON Intrinsics.</a></p>
+
+<h2 id="ul">Using LOCAL_ARM_NEON</h2>
+<p>To have the NDK build all its source files with NEON support, include the following line in
+your module definition:</p>
+
+<pre class="no-pretty-print">
+LOCAL_ARM_NEON := true
+</pre>
+
+<p>It can be especially useful to build all source files with NEON support if you want to build a
+static or shared library that specifically contains NEON code paths.</p>
+
+<h2 id="uns">Using the .neon Suffix</h2>
+<p>When listing source files for your {@code LOCAL_SRC_FILES} variable, you have the option of
+using the {@code .neon} suffix to indicate that you want to build binaries with NEON support.
+For example, the following example builds one file with {@code .neon} support, and another
+without it:</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES := foo.c.neon bar.c
+</pre>
+
+<p>You can combine the {@code .neon} suffix with the {@code .arm} suffix, which specifies the 32-bit
+ARM instruction set for non-NEON instructions. In such a definition, {@code arm} must come before
+{@code neon}. For example: {@code foo.c.arm.neon} works, but {@code foo.c.neon.arm} does not.</p>
+
+<h2 id="build">Build Requirements</h2>
+<p>NEON support only works with the {@code armeabi-v7a} and {@code x86} ABIs. If the NDK build
+scripts encounter other ABIs while attempting to build with NEON support, the NDK build scripts
+exit. x86 provides <a href="x86.html">partial NEON support</a> via translation header. It is
+important to use checks like the following in your <a href="{docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+
+<pre class="no-pretty-print">
+# define a static library containing our NEON code
+ifeq ($(TARGET_ARCH_ABI),$(filter $(TARGET_ARCH_ABI), armeabi-v7a x86))
+include $(CLEAR_VARS)
+LOCAL_MODULE    := mylib-neon
+LOCAL_SRC_FILES := mylib-neon.c
+LOCAL_ARM_NEON  := true
+include $(BUILD_STATIC_LIBRARY)
+endif # TARGET_ARCH_ABI == armeabi-v7a || x86
+</pre>
+
+<h2 id="rd">Runtime Detection</h2>
+<p>Your app must perform runtime detection to confirm that NEON-capable machine code can be run on
+the target device. This is because not all ARMv7-based Android devices support NEON. The app can
+perform this check using the
+<a href="{@docRoot}ndk/guides/cpu_features.html">{@code cpufeatures}</a> library that comes with
+this NDK.</p>
+
+<p>You should explicitly check that {@code android_getCpuFamily()} returns {@code
+ANDROID_CPU_FAMILY_ARM}, and that {@code android_getCpuFeatures()} returns a value including the
+{@code ANDROID_CPU_ARM_FEATURE_NEON flag} set. For example: </p>
+
+<pre class="no-pretty-print">
+#include &lt;cpu-features.h&gt;
+...
+...
+if (android_getCpuFamily() == ANDROID_CPU_FAMILY_ARM &amp;&amp;
+    (android_getCpuFeatures() &amp; ANDROID_CPU_ARM_FEATURE_NEON) != 0)
+{
+    // use NEON-optimized routines
+    ...
+}
+else
+{
+    // use non-NEON fallback routines instead
+    ...
+}
+
+...
+</pre>
+
+<h2 id="sc">Sample Code</h2>
+<p>The source code for the NDK's hello-neon sample provides an example of how to use the
+{@code cpufeatures} library and NEON intrinsics at the same time. This sample implements a tiny
+benchmark for a FIR filter loop using a C version, and a NEON-optimized one for devices that
+support it.</p>

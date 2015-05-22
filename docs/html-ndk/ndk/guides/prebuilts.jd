@@ -1,0 +1,145 @@
+page.title=Using Prebuilt Libraries
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#dm">Declaring a Prebuilt Library</a></li>
+        <li><a href="#rp">Referencing the Prebuilt Library from Other Modules</a></li>
+        <li><a href="#dp">Debugging Prebuilt Libraries</a></li>
+        <li><a href="#sa">Selecting ABIs for Prebuilt Libraries</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>The NDK supports the use of prebuilt libraries, both static and shared. There are two principal
+use cases for this functionality:</p>
+
+<ul>
+   <li>Distributing your own libraries to third-party NDK developers without distributing your
+    sources.</li>
+   <li>Using a prebuilt version of your own libraries to speed up your build.</li>
+</ul>
+
+<p>This page explains how to use prebuilt libraries.</p>
+
+<h2 id="dm">Declaring a Prebuilt Library</h2>
+<p>You must declare each prebuilt library you use as a <em>single</em> independent module. To do
+  so, perform the following steps:
+
+<ol type="1">
+   <li>Give the module a name. This name does not need to be the same as that of the prebuilt
+    library, itself.</li>
+   <li>In the module's <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>
+   file, assign to {@code LOCAL_SRC_FILES} the path to the prebuilt library you are providing.
+   Specify the path relative to the value of your {@code LOCAL_PATH} variable.</p>
+   <p class="note"><strong>Note: </strong> You must make sure to select the version of your prebuilt
+    library appropriate to your target ABI. For more information on ensuring library support for
+    ABIs, see <a href="#sa">Selecting ABIs for Prebuilt Libraries.</a></p></li>
+   <li>Include {@code PREBUILT_SHARED_LIBRARY} or {@code PREBUILT_STATIC_LIBRARY}, depending on
+    whether you are using a shared ({@code .so}) or static {@code .a}) library.</li>
+</ol>
+
+  <p>Here is a trivial example that assumes that the prebuilt library {@code libfoo.so} resides in
+  the same directory as the <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>
+  file that describes it.</p>
+
+<pre>
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := foo-prebuilt
+LOCAL_SRC_FILES := libfoo.so
+include $(PREBUILT_SHARED_LIBRARY)
+</pre>
+
+<p>In this example, the name of the module is the same as that of the prebuilt library.</p>
+
+<p>The build system places a copy of your prebuilt shared library into {@code $PROJECT/obj/local},
+and another copy, stripped of debug information, into {@code $PROJECT/libs/&lt;abi&gt;}. Here,
+{@code $PROJECT} is the root directory of your project.</p>
+
+<h2 id="rp">Referencing the Prebuilt Library from Other Modules</h2>
+<p>To reference a prebuilt library from other modules, specify its name as the value
+of the {@code LOCAL_STATIC_LIBRARIES} or {@code LOCAL_SHARED_LIBRARIES} variable in the
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> files associated with those
+other modules.</p>
+
+<p>For example, the description of a module using {@code libfoo.so} might be as follows:</p>
+
+<pre>
+include $(CLEAR_VARS)
+LOCAL_MODULE := foo-user
+LOCAL_SRC_FILES := foo-user.c
+LOCAL_SHARED_LIBRARIES := foo-prebuilt
+include $(BUILD_SHARED_LIBRARY)
+</pre>
+
+<p>Here, {@code LOCAL_MODULE} is the name of the module referring to the prebuilt; {@code
+  LOCAL_SHARED_LIBRARIES} is the name of the prebuilt, itself.</p>
+
+<h2>Exporting Headers for Prebuilt Libraries</h2>
+<p>The code in {@code foo-user.c} depends on specific declarations that normally
+reside in a header file, such as {@code foo.h}, distributed with the prebuilt library.
+For example, {@code foo-user.c} might have a line like the following:</p>
+
+<pre>
+#include &lt;foo.h&gt;
+</pre>
+
+<p>In such a case, you need to provide the header and its include path to the compiler when you
+build the {@code foo-user} module. A simple way to accomplish this task is to use exports in the
+prebuilt module definition. For example, as long as header {@code foo.h} is located under the
+{@code include} directory associated with the prebuilt module, you can declare it as follows:</p>
+
+<pre>
+include $(CLEAR_VARS)
+LOCAL_MODULE := foo-prebuilt
+LOCAL_SRC_FILES := libfoo.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+</pre>
+
+<p>The {@code LOCAL_EXPORT_C_INCLUDES} definition here ensures that the build system
+exports the path to the prebuilt library's {@code include} directory, prepending that path onto the
+value of the {@code LOCAL_C_INCLUDES} for the module dependent on it.</p>
+
+<p>This operation allows the build system to find the necessary headers.</p>
+
+<h2 id="dp">Debugging Prebuilt Libraries</h2>
+<p>We recommend that you provide prebuilt shared libraries containing debug symbols. The NDK build
+system always strips the symbols from the version of the library that it installs into
+{@code $PROJECT/libs/&lt;abi&gt;/}, but you can use the debug version for debugging with
+{@code ndk-gdb}.</p>
+
+<h2 id="sa">Selecting ABIs for Prebuilt Libraries</h2>
+<p>You must make sure to select the right version of your prebuilt shared library for your targeted
+ABI. The <a href="{@docRoot}ndk/guides/android_mk.html#taa">
+{@code TARGET_ARCH_ABI}</a> variable in the <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file can point the build system at the appropriate version of the library.
+</p>
+
+<p>For example, assume that your project contains two versions of library {@code libfoo.so}:</p>
+
+<pre class="no-pretty-print">
+armeabi/libfoo.so
+x86/libfoo.so
+</pre>
+
+<p>The following snippet shows how to use {@code TARGET_ARCH_ABI} so that the build system selects
+  the appropriate version of the library:</p>
+
+<pre>
+include $(CLEAR_VARS)
+LOCAL_MODULE := foo-prebuilt
+LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libfoo.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+</pre>
+
+<p>If you have specified {@code armeabi} as the value of {@code TARGET_ARCH_ABI}, the build system
+uses the version of {@code libfoo.so} located in the {@code armeabi} directory. If you have
+specified {@code x86} as the value {@code TARGET_ARCH_ABI}, the build system uses the version in the
+{@code x86} directory.</p>

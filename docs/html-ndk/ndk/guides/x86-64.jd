@@ -1,0 +1,52 @@
+page.title=Support for 64-bit x86
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#over">Overview</a></li>
+         <li><a href="#st">Standalone Toolchain</a></li>
+         <li><a href="#comp">Compatibilty</a></li>
+          </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+<p>The Android NDK supports the {@code x86_64} ABI. This ABI allows native code to run on
+Android-based devices using CPUs that support the 64-bit x86 instruction set.</p>
+
+<h2 id="over">Overview</h2>
+<p>To generate 64-bit machine code for x86, add {@code x86_64} to the {@code APP_ABI} definition in
+your {@code Application.mk} file. For example:
+
+<pre>
+APP_ABI := x86_64
+</pre>
+
+For more information on how to specify values for {@code APP_ABI}, see
+<a href="{@docRoot}ndk/guides/application_mk.html">Application.mk</a>.</p>
+
+<p>The build system places libraries generated for the {@code x86_64} ABI into
+{@code $PROJECT/libs/x86_64/} on your host machine, where {@code $PROJECT} is the root directory
+of your project. It also embeds them in your APK, under {@code /lib/x86_64/}.</p>
+
+<p>The Android package manager extracts these libraries when installing your APK on a compatible
+64-bit, x86-powered device, placing them under your app's private data directory.</p>
+
+<p>In the Google Play store, the server filters applications so that a consumer sees only the native
+libraries that run on the CPU powering his or her device.</p>
+
+<h2 id="st">Standalone Toolchain</h2>
+
+<p>It is possible to use the 64-bit x86 toolchain in standalone mode with the NDK. For more
+information about doing so, see <a href="{@docRoot}ndk/guides/standalone_toolchain.html">
+Standalone Toolchain</a>, under the "Advanced method" section.
+
+<h2 id="comp">Compatibility</h2>
+<p>The NDK provides native versions of Android APIs for 64-bit x86 machine code starting from
+Android 5.0 (Android API level 21). If your project files target an older API level, but include
+{@code x86_64} as a targeted platform, the NDK build script automatically selects the right set of
+native platform headers and libraries for you.</p>

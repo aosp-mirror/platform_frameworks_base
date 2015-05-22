@@ -1,0 +1,241 @@
+page.title=ndk-gdb
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#req">Requirements</a></li>
+        <li><a href="#use">Usage</a></li>
+        <li><a href="#thread">Thread Support</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>The NDK includes a helper shell script named {@code ndk-gdb} to easily launch a native debugging
+  session for your NDK-generated machine code.</p>
+
+<h2 id="req">Requirements</h2>
+
+<p>For native debugging to work, you must follow these requirements:</p>
+
+<ul>
+<li>Build your app using the {@code ndk-build} script. The {@code ndk-gdb} script
+does not support using the legacy {@code make APP=&lt;name&gt;} method to build.</p></li>
+<li>Enable app debugging in your {@code AndroidManifest.xml} file by including an
+{@code &lt;application&gt;} element that sets the {@code android:debuggable} attribute to {@code
+true}.</li>
+<li>Build your app to run on Android 2.2 (Android API level 8) or higher.</li>
+<li>Debug on a device or emulator running Android 2.2 or higher. For debugging purposes, the target
+API level that you declare in your {@code AndroidManifest.xml} file does not matter.</li>
+<li>Develop your app in a Unix shell. On Windows, use <a href="https://www.cygwin.com/">Cygwin
+or the experimental {@code ndk-gdb-py} <a href="https://www.python.org/">Python</a>
+implementation.</li>
+<li>Use GNU Make 3.81 or higher.</li>
+<li>If you are building your app from
+<a href="http://developer.android.com/sdk/installing/installing-adt.html">Eclipse</a>, build it
+using version 0.9.7 or higher of the ADT plug-in.</li>
+
+<h2 id="use">Usage</h2>
+  To invoke the {@code ndk-gdb} script, change into the application directory or any directory under
+  it. For example:</p>
+
+<pre class="no-pretty-print">
+cd $PROJECT
+$NDK/ndk-gdb
+</pre>
+
+<p>Here, {@code $PROJECT} points to your project's root directory, and {@code $NDK} points to your
+NDK installation path.</p>
+
+<p>When you invoke {@code ndk-gdb}, it configures the session to look for your source files
+and symbol/debug versions of your generated native libraries. On successfully attaching to your
+application process, {@code ndk-gdb} outputs a long series of error messages, noting that it cannot
+find various system libraries. This is normal, because your host machine does not contain
+symbol/debug versions of these libraries on your target device. You can safely ignore these
+messages.</p>
+
+<p>Next, {@code ndk-gdb} displays a normal GDB prompt.</p>
+
+<p>You interact with {@code ndk-gdb} in the same way as you would with GNU GDB. For example, you can
+use {@code b &lt;location&gt;} to set breakpoints, and {@code c} (for "continue") to
+resume execution. For a comprehensive list of commands, see the
+<a href="http://www.gnu.org/software/gdb/">GDB manual.</a></p>
+
+<p>Note that when you quit the GDB prompt, the application process that you're debugging stops. This
+behavior is a gdb limitation.</p>
+
+<p>{@code ndk-gdb} handles many error conditions, and displays an informative error message if it
+finds a problem. these checks include making sure that the following conditions are satisfied:</p>
+
+<ul>
+<li>Checks that ADB is in your path.</li>
+<li>Checks that your application is declared debuggable in its manifest.</li>
+<li>Checks that, on the device, the installed application with the same package name is also
+debuggable.</li>
+</ul>
+
+<p>By default, {@code ndk-gdb} searches for an already-running application process, and displays an
+error if it doesn't find one. You can, however, use the {@code --start} or
+{@code --launch=&lt;name&gt;} option to automatically start your activity before the debugging
+session. For more information, see <a href="#opt">Options</a>.</p>
+
+
+<h3 id="opt">Options</h3>
+<p>To see a complete list of options, type {@code ndk-gdb --help} on the command line. Table 1
+shows a number of the more commonly used ones, along with brief descriptions.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> Common ndk-gdb options and their descriptions.</p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description></th>
+<tr>
+
+<tr>
+<td>{@code --verbose}</td>
+<td><p>This option tells the build system to print verbose information about the native-debugging
+session setup. It is necessary only for debugging problems when the debugger can't connect to the
+app, and the error messages that {@code ndk-gdb} displays are not enough.</p></td>
+</tr>
+
+<tr>
+<td>{@code --force}</td>
+<td>By default, {@code ndk-gdb} aborts if it finds that another native debugging session is already
+ running on the same device. This option kills the other session, and replaces it with a new one.
+ Note that this option does not kill the actual app being debugged, which you must kill
+ separately.</td>
+</tr>
+
+<tr>
+<td>{@code --start}</td>
+<td><p>When you start {@code ndk-gdb}, it tries by default to attach to an existing running instance of
+your app on the target device. You can override this default behavior by using {@code --start} to
+explicitly launch the application on the target device before the debugging session.</p></td>
+
+<p>Starting {@code ndk-gdb} with this option specified launches the first launchable activity listed
+in your application manifest. Use {@code --launch=&lt;name&gt;} to start the next launchable
+activity. To dump the list of launchable activities, run {@code --launch-list} from the command
+line.</p>
+</tr>
+
+<tr>
+<td>{@code --launch=&lt;name&gt;}</td>
+<td><p>This option is similar to {@code --start}, except that it allows you to start a specific
+ activity from your application. This feature is only useful if your manifest defines multiple
+ launchable activities.</p></td>
+</tr>
+
+<tr>
+<td>{@code --launch-list}</td>
+<td><p>This convenience option prints the list of all launchable activity names found in your
+ app manifest. {@code --start} uses the first activity name.</p></td>
+</tr>
+
+<tr>
+<td>{@code --project=&lt;path&gt;}</td>
+<td>This option specifies the app project directory. It is useful if you want to launch the
+ script without first having to change to the project directory.</p></td>
+</tr>
+
+<tr>
+<td>{@code --port=&lt;port&gt;}</td>
+<td> <p>By default, {@code ndk-gdb} uses local TCP port 5039 to communicate with the app it
+ is debugging on the target device. Using a different port allows you to natively debug programs
+ running on different devices or emulators connected to the same host machine.</p></td>
+</tr>
+
+<tr>
+<td>{@code --adb=&lt;file&gt;}</td>
+<td><p>This option specifies the <a href="http://developer.android.com/tools/help/adb.html">adb</a>
+tool executable. It is only necessary if you have not set your path to include that executable.</p>
+</td>
+</tr>
+
+<tr>
+<td>
+<li>{@code -d}</li>
+<li>{@code -e}</li>
+<li>{@code -s &lt;serial&gt;}</li></td>
+<td><p>These flags are similar to the adb commands with the same names. Set these flags if you have
+several devices or emulators connected to your host machine. Their meanings are as follows:</p>
+<dl>
+   <dt>{@code -d}</dt>
+   <dd>Connect to a single physical device.</dd>
+   <dt>{@code -e}</dt>
+   <dd>Connect to a single emulator device.</dd>
+   <dt>{@code -s &lt;serial&gt;}</dt>
+   <dd>Connect to a specific device or emulator. Here, {@code &lt;serial&gt;} is the device's name
+   as listed by the {@code adb devices} command.</dd>
+</dl>
+
+<p>Alternatively, you can define the {@code ADB_SERIAL} environment variable to list a specific
+device, without the need for a specific option.</p></td>
+</tr>
+
+<tr>
+<td>
+<li>{@code --exec=&lt;file&gt;}</li>
+<li>{@code -x &lt;file&gt;}</li>
+</td>
+<td><p>This option tells {@code ndk-gdb} to run the GDB initialization commands found in
+{@code &lt;file&gt;} after connecting to the process it is debugging. This is a useful feature if
+you want to do something repeatedly, such as setting up a list of breakpoints, and then resuming
+execution automatically.</p></td>
+</tr>
+
+<tr>
+<td>{@code --nowait}</td>
+<td><p>Disable pausing the Java code until GDB connects. Passing this option may cause the debugger
+ to miss early breakpoints.</p>
+</tr>
+
+<tr>
+<td>{@code --tui}
+{@code -t}</td>
+<td><p>Enable Text User Interface if it is available.</p></td>
+</tr>
+
+<tr>
+<td>{@code --gnumake-flag=&lt;flag&gt;}</td>
+<td><p>This option is an extra flag (or flags) to pass to the
+{@code ndk-build} system when
+querying it for project information. You can use multiple instances of this option in the
+same command.</p></td>
+</tr>
+
+<tr>
+<td>{@code --stdcxx-py-pr={auto|none|gnustdcxx[-GCCVER]|stlport}}</td>
+<td><p>Use specified Python pretty-printers for displaying types in the Standard C++ Library.
+ {@code auto} mode works by looking at the {@code .so} files for a {@code libstdc++} library,
+ and as such only works for a shared library. When linking statically to a {@code libstdc++} library,
+ you must specify the required printers. The default is {@code none}.</p></td>
+</tr>
+</table>
+
+<p class="note"><strong>Note: </strong>The final three options in this table are only for the
+Python version of {@code ndk-gdb}.</p></td>
+
+<h2 id="thread">Thread Support</h2>
+<p>If your app runs on a platform older than Android 2.3 (API level 9), {@code ndk-gdb}
+cannot debug native threads properly. The debugger can only debug the main thread, abd completely
+ignores the execution of other threads.</p>
+
+<p>Using a version of Android prior to 2.3 causes {@code ndk-gdb} to display the following message
+prior to showing the GDB prompt:</p>
+
+<pre class="no-pretty-print">
+Thread debugging is unsupported on this Android platform!
+</pre>
+
+
+<p>If you place a breakpoint on a function executed on a non-main thread, the program exits, and
+GDB displays the following message:</p>
+
+<pre class="no-pretty-print">
+Program terminated with signal SIGTRAP, Trace/breakpoint trap.
+      The program no longer exists.
+</pre>
