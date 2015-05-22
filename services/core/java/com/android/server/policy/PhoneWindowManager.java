@@ -208,6 +208,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build();
 
+    // The panic gesture may become active only after the keyguard is dismissed and the immersive
+    // app shows again. If that doesn't happen for 30s we drop the gesture.
+    private static final long PANIC_GESTURE_EXPIRATION = 30000;
+
     /**
      * Keyguard stuff
      */
@@ -456,6 +460,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we last reported to system UI about whether the compatibility
     // menu needs to be displayed.
     boolean mLastFocusNeedsMenu = false;
+    // If nonzero, a panic gesture was performed at that time in uptime millis and is still pending.
+    private long mPendingPanicGestureUptime;
 
     InputConsumer mInputConsumer = null;
 
@@ -864,7 +870,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean panic = mImmersiveModeConfirmation.onPowerKeyDown(interactive,
                 SystemClock.elapsedRealtime(), isImmersiveMode(mLastSystemUiFlags));
         if (panic) {
-            mHandler.post(mRequestTransientNav);
+            mHandler.post(mHiddenNavPanic);
         }
 
         // Latch power key state to detect screenshot chord.
@@ -5210,10 +5216,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    private final Runnable mRequestTransientNav = new Runnable() {
+    private final Runnable mHiddenNavPanic = new Runnable() {
         @Override
         public void run() {
-            requestTransientBars(mNavigationBar);
+            synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
+                if (!isUserSetupComplete()) {
+                    // Swipe-up for navigation bar is disabled during setup
+                    return;
+                }
+                mPendingPanicGestureUptime = SystemClock.uptimeMillis();
+                mNavigationBarController.showTransient();
+            }
         }
     };
 
@@ -6377,6 +6390,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean transientNavBarAllowed =
                 mNavigationBar != null &&
                 hideNavBarSysui && immersiveSticky;
+
+        final long now = SystemClock.uptimeMillis();
+        final boolean pendingPanic = mPendingPanicGestureUptime != 0
+                && now - mPendingPanicGestureUptime <= PANIC_GESTURE_EXPIRATION;
+        if (pendingPanic && hideNavBarSysui && !isStatusBarKeyguard() && mKeyguardDrawComplete) {
+            // The user performed the panic gesture recently, we're about to hide the bars,
+            // we're no longer on the Keyguard and the screen is ready. We can now request the bars.
+            mPendingPanicGestureUptime = 0;
+            mStatusBarController.showTransient();
+            mNavigationBarController.showTransient();
+        }
 
         boolean denyTransientStatus = mStatusBarController.isTransientShowRequested()
                 && !transientStatusBarAllowed && hideStatusBarSysui;
