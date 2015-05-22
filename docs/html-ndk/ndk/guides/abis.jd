@@ -1,0 +1,493 @@
+page.title=ABI Management
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#sa">Supported ABIs</a></li>
+        <li><a href="#gc">Generating Code for a Specific ABI</a></li>
+        <li><a href="#am">ABI Management on the Android Platform</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>Different Android handsets use different CPUs, which in turn support different instruction sets.
+Each combination of CPU and instruction set(s) has its own Application Binary Interface, or
+<i>ABI</i>. The ABI defines, with great precision, how an application's machine code is supposed to
+interact with the system at runtime. You must specify an ABI for each CPU architecture you want
+your app to work with.</p>
+
+<p>A typical ABI includes the following information:</p>
+
+<ul>
+<li>The CPU instruction set(s) that the machine code should use.</li>
+<li>The endianness of memory stores and loads at runtime.</li>
+<li>The format of executable binaries, such as programs and shared libraries, and
+the types of content they support.</li>
+<li>Various conventions for passing data between your code and the system.
+These conventions include alignment constraints, as well as how the system uses the stack and
+registers when it calls functions.</li>
+<li>The list of function symbols available to your machine code at runtime,
+generally from very specific sets of libraries.</li>
+</ul>
+
+<p>This page enumerates the ABIs that the NDK supports, and provides information about how each ABI
+works.</p>
+
+<h2 id="sa">Supported ABIs</h2>
+
+<p>Each ABI supports one or more instruction sets. Table 1 provides an at-a-glance overview of
+the instruction sets each ABI supports.</p>
+
+<p class="table-caption" id="abi-table">
+  <strong>Table 1.</strong> ABIs and supported instruction sets.</p>
+
+<table>
+<tr>
+<th>ABI</th>
+<th>Supported Instruction Set(s)</th>
+<th>Notes</th>
+</tr>
+
+<tr>
+<td><a href="#armeabi">{@code armeabi}</a> </td>
+<td><li>ARMV5TE and later</li>
+<li>Thumb-1</li></td>
+<td>No hard float.</td>
+</tr>
+
+<tr>
+<td><a href="#v7a">{@code armeabi-v7a}</a></td>
+<td>
+<li>armeabi</li>
+<li>Thumb-2</li>
+<li>VFPv3-D16</li>
+<li>Other, optional</li></td>
+<td>Hard float when specified as {@code armeabi-v7a-hard}.
+Incompatible with ARMv5, v6 devices.</td>
+</tr>
+
+<tr>
+<td><a href="#arm64-v8a">{@code arm64-v8a}</a></td>
+<td><li>AArch-64</li></td>
+</tr>
+
+<tr>
+<td>
+<a href="#x86">{@code x86}</a></td>
+<td><li>x86 (IA-32)</li>
+<li>MMX</li>
+<li>SSE/2/3</li>
+<li>SSSE3</li></td>
+<td>No support for MOVBE or SSE4.</td>
+</tr>
+
+<tr>
+<td><a href="#86-64">{@code x86_64}</a> </td>
+<td>
+<li>x86-64</li>
+<li>MMX</li>
+<li>SSE/2/3</li>
+<li>SSSE3</li>
+<li>SSE4.1, 4.2</li>
+<li>POPCNT</li></td>
+</tr>
+
+<tr>
+<td><a href="#mips">{@code mips}</a></td>
+<td><li>MIPS32r1 and later</li></td>
+<td>Uses hard-float, and assumes a CPU:FPU clock ratio of 2:1 for maximum
+compatibility. Provides neither micromips nor MIPS16.</td>
+</tr>
+
+<tr>
+<td><a href="#mips64">{@code mips64}</a></td>
+<td><li>MIPS64r6</li></td><td>
+</td>
+</tr>
+</table>
+
+<p>More detailed information about each ABI appears below.</p>
+
+<h3 id="armeabi">armeabi</h3>
+<p>This ABI is for ARM-based CPUs that support at least
+the ARMv5TE instruction set. Please refer to the following documentation for
+more details:</p>
+
+<ul>
+<li><a href="https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf">ARM Architecture
+Reference Manual</a></li>
+<li><a
+href="http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042e/IHI0042E_aapcs.pdf">
+Procedure Call Standard for the ARM Architecture</a></li>
+<li><a
+href="http://infocenter.arm.com/help/topic/com.arm.doc.dui0101a/DUI0101A_Elf.pdf">
+ARM ELF File Format</a></li>
+<li><a
+href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.subset.swdev.abi/index.html">Application Binary Interface (ABI) for the ARM Architecture</a></li>
+<li><a
+href="http://infocenter.arm.com/help/topic/com.arm.doc.ihi0037c/IHI0037C_bpabi.pdf">
+Base Platform ABI for the ARM Architecture</a></li>
+<li><a
+href="http://infocenter.arm.com/help/topic/com.arm.doc.ihi0039c/IHI0039C_clibabi.pdf">
+C Library ABI for the ARM Architecture</a></li>
+<li><a
+href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ihi0041d/index.html">
+C++ ABI for the ARM Architecture</a></li>
+<li><a
+href="http://infocenter.arm.com/help/topic/com.arm.doc.ihi0043d/IHI0043D_rtabi.pdf">
+Run-time ABI for the ARM Architecture</a></li>
+<li><a href="http://www.sco.com/developers/gabi/2001-04-24/contents.html">ELF
+System V Application Binary Interface</a></li>
+<li><a href="http://mentorembedded.github.com/cxx-abi/abi.html">Generic/Itanium C++
+ABI</a></li>
+</ul>
+
+<p>The AAPCS standard defines EABI as a family of similar
+but distinct ABIs. Also, Android follows the little-endian
+<a href="http://sourcery.mentor.com/sgpp/lite/arm/portal/kbattach142/arm_gnu_linux_ abi.pdf">
+ARM GNU/Linux ABI</a>.</p>
+
+<p>This ABI does not support hardware-assisted floating point
+computations. Instead, all floating-point operations use software helper
+functions from the compiler's {@code libgcc.a} static library.</p>
+
+<p>The armeabi ABI supports ARM’s
+<a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/CACBCAAE.html">
+Thumb (a.k.a. Thumb-1) instruction set</a>. The NDK generates Thumb
+code by default unless you specify different behavior using the
+<code>LOCAL_ARM_MODE</code> variable in your <a href="android_mk.html"><code>Android.mk</code></a>
+file.</p>
+
+<h3 id="v7a">armeabi-v7a (armeabi-v7a-hard)</h3>
+<p>This ABI extends armeabi to include several
+<a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0406c/index.html">
+CPU instruction set extensions</a>. The instruction extensions that this Android-specific
+ABI supports are:</p>
+
+<ul>
+<li>The Thumb-2 instruction set extension, which provides performance comparable to 32-bit ARM
+instructions with similar compactness to Thumb-1.</li>
+<li>The VFP hardware-FPU instructions. More specifically, VFPv3-D16, which
+includes 16 dedicated 64-bit floating point registers, in addition to another
+16 32-bit registers from the ARM core.</li>
+</ul>
+
+<p>Other extensions that the v7-a ARM spec describes, including
+<a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0388f/Beijfcja.html">
+Advanced SIMD</a> (a.k.a. NEON), VFPv3-D32, and ThumbEE, are optional
+to this ABI. Since their presence is not guaranteed, the system should check at runtime
+whether the extensions are available. If they are not, you must use alternative code paths. This
+check is similar to the one that the system typically performs to check or use
+<a href="http://en.wikipedia.org/wiki/MMX_%28instruction_set%29">MMX</a>,
+<a href="http://en.wikipedia.org/wiki/SSE2">SSE2</a>, and other specialized
+instruction sets on x86 CPUs.</p>
+
+<p>For information about how to perform these runtime checks, refer to
+<a href="{@docRoot}ndk/guides/cpu-features.html">CPU Features</a>.
+Also, for information about the NDK's support for building
+machine code for NEON, see
+<a href="{@docRoot}ndk/guides/cpu-arm-neon.html">NEON Support</a>.</p>
+
+<p>The {@code armeabi-v7a} ABI uses the {@code -mfloat-abi=softfp} switch to
+enforce the rule that the compiler must pass all double values in core register pairs during
+function calls, instead of dedicated floating-point ones. The system can perform all internal
+computations using the FP registers. Doing so speeds up the computations greatly.</p>
+
+<p>Although the requirement to use core register pairs produces a modest performance hit, it ensures
+compatibility with all existing armeabi binaries. If you need the additional
+performance, you can specify your ABI as {@code armeabi-v7a-hard} instead. Doing so
+allows you to use hard floats, while still linking with Android native APIs
+that use {@code softfp}. For more information, refer to the comments in
+{@code $NDK/tests/device/hard-float/jni/android.mk}.</p>
+
+<p class="note"><strong>Note:</strong> You cannot specify {@code APP_ABI} as both
+{@code armeabi-v7a} and {@code armeabi-v7a-hard}. In either case, the build system places the
+shared libraries in the {@code armeabi-v7a/} directory.</p>
+
+<h3 id="hard">armeabi-v7a-hard</h3>
+<p>This variant of the {@code armeabi-v7a} ABI is unique to the NDK. The NDK build
+system adds the following flags in addition to those that it uses for the
+{@code armeabi-v7a} ABI:</p>
+
+<pre class="no-pretty-print">
+TARGET_CFLAGS += -mhard-float -D_NDK_MATH_NO_SOFTFP=1
+TARGET_LDFLAGS += -Wl,--no-warn-mismatch -lm_hard
+</pre>
+
+<p>The compiler compiles all code with hard-float, and links it with {@code libm_hard.a}.
+This math library is the same one as {@code libm.a}, except that it follows hard-float ABI
+conventions. In the APK, the generated shared libraries reside in {@code /lib/armeabi-v7a/}.</p>
+
+<h3 id="arm64-v8a">arm64-v8a</h3>
+<p>This ABI is for ARMv8-based CPUs that support AArch64. It also includes the NEON and
+VFPv4 instruction sets.</p>
+
+<p>For more information, see the
+<a href="http://www.arm.com/files/downloads/ARMv8_Architecture.pdf">ARMv8
+Technology Preview</a>, and contact ARM for further details.</p>
+
+<h3 id="x86">x86</h3>
+<p>This ABI is for CPUs supporting the instruction set commonly
+referred to as "x86" or "IA-32". Characteristics of this ABI include:</p>
+
+<ul>
+<li>Instructions normally generated by GCC with compiler flags such as the following:
+
+<pre class="no-pretty-print">
+-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32
+</pre>
+
+<p>These flags target the the Pentium Pro instruction set, along with the
+the <a href="http://en.wikipedia.org/wiki/MMX_%28instruction_set%29">MMX</a>,
+<a href="http://en.wikipedia.org/wiki/Streaming_SIMD_Extensions">SSE</a>,
+<a href="http://en.wikipedia.org/wiki/SSE2">SSE2</a>,
+<a href="http://en.wikipedia.org/wiki/SSE3">SSE3</a>, and
+<a href="http://en.wikipedia.org/wiki/SSSE3">SSSE3</a> instruction set extensions.
+The generated code is an optimization balanced across the top Intel 32-bit
+CPUs.</p>
+<p> For more information on compiler flags, particularly related to performance optimization,
+refer to <a href="http://software.intel.com/blogs/2012/09/26/gcc-x86-performance-hints">GCC
+x86 Performance</a>.</p>
+</li>
+<li>Use of the standard Linux x86 32-bit calling convention, as opposed to the one for SVR. For
+more information, see section 6, "Register Usage", of
+<a href="http://www.agner.org/optimize/calling_conventions.pdf">Calling conventions for different
+C++ compilers and operating systems</a>.</li>
+</ul>
+
+<p>The ABI does not include any other optional IA-32 instruction set
+extensions, such as:</p>
+<ul>
+<li>MOVBE</li>
+<li>Any variant of SSE4.</li>
+</ul>
+<p>You can still use these extensions, as long as you use runtime feature-probing to
+enable them, and provide fallbacks for devices that do not support them.</p>
+<p>The NDK toolchain assumes 16-byte stack alignment before a function call. The default tools and
+options enforce this rule. If you are writing assembly code, you must make sure to maintain stack
+alignment, and ensure that other compilers also obey this rule.</p>
+
+<p>Refer to the following documents for more details:</p>
+<ul>
+<li>
+<a href="https://gcc.gnu.org/onlinedocs/gcc-4.9.2/gcc/i386-and-x86-64-Options.html">
+GCC online documentation: Intel 386 and AMD x86-64 Options</a></li>
+<li><a href="http://www.agner.org/optimize/calling_conventions.pdf">Calling
+conventions for different C++ compilers and operating systems</a></li>
+<li><a
+href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-instruction-set-reference-manual-325383.pdf"
+>Intel IA-32 Intel Architecture Software Developer's Manual, Volume 2:
+Instruction Set Reference</a></li>
+<li><a
+href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-system-programming-manual-325384.pdf">Intel
+IA-32 Intel Architecture Software Developer's Manual, Volume 3: System
+Programming Guide</a></li>
+<li><a href="http://www.sco.com/developers/devspecs/abi386-4.pdf">System V Application Binary
+Interface: Intel386 Processor Architecture Supplement</a></li>
+</ul>
+
+<h3 id="86-64">x86_64</h3>
+<p>This ABI is for CPUs supporting the instruction set commonly referred to as
+"x86-64." It supports instructions that GCC typically generates with the following
+compiler flags:</p>
+<pre class="no-pretty-print">
+-march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel
+</pre>
+
+<p>These flags target the x86-64 instruction set, according to the GCC
+documentation. along with the
+<a href="http://en.wikipedia.org/wiki/MMX_%28instruction_set%29">MMX</a>,
+<a href="http://en.wikipedia.org/wiki/Streaming_SIMD_Extensions">SSE</a>,
+<a href="http://en.wikipedia.org/wiki/SSE2">SSE2</a>,
+<a href="http://en.wikipedia.org/wiki/SSE3">SSE3</a>,
+<a href="http://en.wikipedia.org/wiki/SSSE3">SSSE3</a>,
+<a href="http://en.wikipedia.org/wiki/SSE4#SSE4.1">SSE4.1</a>,
+<a href="http://en.wikipedia.org/wiki/SSE4#SSE4.2">SSE4.2</a>, and
+<a href="https://software.intel.com/en-us/node/512035">POPCNT</a>
+instruction-set extensions. The generated code is an optimization balanced
+across the top Intel 64-bit CPUs.</p>
+
+<p> For more information on compiler flags, particularly related to performance optimization,
+refer to <a href="http://software.intel.com/blogs/2012/09/26/gcc-x86-performance-hints">GCC
+x86 Performance</a>.</p>
+
+<p>This ABI does not include any other optional x86-64 instruction set
+extensions, such as:</p>
+
+<ul>
+<li>MOVBE</li>
+<li>SHA</li>
+<li>AVX</li>
+<li>AVX2</li>
+</ul>
+
+<p>You can still use these extensions, as long as you use runtime feature probing to
+enable them, and provide fallbacks for devices that do not support them.</p>
+<p>Refer to the following documents for more details:</p>
+
+<ul>
+<li><a href="http://www.agner.org/optimize/calling_conventions.pdf">Calling conventions for
+different C++ compilers and operating systems</a></li>
+<li>
+<a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html?iid=tech_vt_tech+64-32_manuals">
+Intel64 and IA-32 Architectures Software Developer's Manual, Volume 2: Instruction Set
+Reference</a></li>
+<li>
+<a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html?iid=tech_vt_tech+64-32_manuals">
+Intel64 and IA-32 Intel Architecture Software Developer's Manual Volume 3: System Programming</a>
+</li>
+</ul>
+
+<h3 id="mips">mips</h3>
+<p>This ABI is for MIPS-based CPUs that support at least the MIPS32r1 instruction set. It includes
+the following features:</p>
+
+<ul>
+<li>MIPS32 revision 1 ISA</li>
+<li>Little-endian</li>
+<li>O32</li>
+<li>Hard-float</li>
+<li>No DSP application-specific extensions</li>
+</ul>
+
+<p>For more information, please refer to the following documentation:</p>
+
+<ul>
+<li>Architecture for Programmers ("MIPSARCH")</li>
+<li><a href="https://refspecs.linuxbase.org/elf/gabi4+/contents.html">ELF
+System V Application Binary Interface</a></li>
+<li><a href="http://sourcery.mentor.com/public/cxx-abi/abi.html">Itanium/Generic C++
+ABI</a></li>
+</ul>
+
+<p>The MIPS-specific documentation is available
+<a href="http://www.imgtec.com/mips/architectures/mips32.asp">here</a>, with
+further information
+<a href="https://sourcery.mentor.com/sgpp/lite/mips/portal/target_arch?@action=faq&amp;target_arch=MIPS">here</a>.</p>
+</li>
+</ul>
+
+<h3 id="mips64">mips64</h3>
+<p>This ABI is for MIPS64 R6. For more information, see
+<a href="http://www.imgtec.com/mips/architectures/mips64.asp">MIPS Architecture</a>.</p>
+
+<h2 id="gc">Generating Code for a Specific ABI</h2>
+<p>By default, the NDK generates machine code for the armeabi ABI. You can
+generate ARMv7-a-compatible machine code, instead, by adding the following line
+to your <a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file.</p>
+<pre class="no-pretty-print">
+APP_ABI := armeabi-v7a
+</pre>
+
+<p>To build machine code for two or more distinct ABIs, using spaces as delimiters. For
+example:</p>
+
+<pre class="no-pretty-print">
+APP_ABI := armeabi armeabi-v7a
+</pre>
+
+<p>This setting tells the NDK to build two versions of your machine code: one
+for each ABI listed on this line. For more information on the values you can specify for the
+{@code APP_ABI} variable, see <a href="{docRoot}ndk/guides/android_mk.html">Android.mk</a>.
+</p>
+
+<p>When you build multiple machine-code versions, the build system copies the libraries to your
+application project path, and ultimately packages them into your APK, so creating
+a <a href="http://en.wikipedia.org/wiki/Fat_binary"><i>fat binary</i></a>. A fat binary
+is larger than one containing only the machine code for a single system; the tradeoff is
+gaining wider compatibility, but at the expense of a larger APK.</p>
+
+<p>At installation time, the package manager unpacks only the most appropriate
+machine code for the target device. For details, see <a href="#aen">Automatic
+extraction of native code at install time</a>.</p>
+
+
+<h2 id="am">ABI Management on the Android Platform</h2>
+<p>This section provides details about how the Android platform manages native
+code in APKs.</p>
+
+<h3>Native code in app packages</h3>
+<p>Both the Play Store and Package Manager expect to find NDK-generated
+libraries on filepaths inside the APK matching the following pattern:</p>
+
+<pre class="no-pretty-print">
+/lib/&lt;abi&gt;/lib&lt;name&gt;.so
+</pre>
+
+<p>Here, {@code &lt;abi&gt;} is one of the ABI names listed under <a href="#sa">Supported ABIs</a>,
+and {@code &lt;name&gt;} is the name of the library as you defined it for the {@code LOCAL_MODULE}
+variable in the <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file. Since
+APK files are just zip files, it is trivial to open them and confirm that the shared native
+libraries are where they belong.</p>
+
+<p>If the system does not find the native shared libraries where it expects them, it cannot use
+them. In such a case, the app itself has to copy the libraries over, and then
+perform <code>dlopen()</code>.</p>
+
+<p>In a fat binary, each library resides under a directory whose name matches a corresponding ABI.
+For example, a fat binary may contain:</p>
+
+<pre class="no-pretty-print">
+/lib/armeabi/libfoo.so
+/lib/armeabi-v7a/libfoo.so
+/lib/arm64-v8a/libfoo.so
+/lib/x86/libfoo.so
+/lib/x86_64/libfoo.so
+/lib/mips/libfoo.so
+/lib/mips64/libfoo.so
+</pre>
+
+<p class="note"><strong>Note:</strong> ARMv7-based Android devices running 4.0.3 or earlier
+install native libraries from the {@code armeabi} directory instead of the {@code armeabi-v7a}
+directory if both directories exist. This is because {@code /lib/armeabi/} comes after
+{@code /lib/armeabi-v7a/} in the APK. This issue is fixed from 4.0.4.</p>
+
+<h3>Android Platform ABI support</h3>
+<p>The Android system knows at runtime which ABI(s) it supports, because build-specific system
+properties indicate:</p>
+
+<ul>
+<li>The primary ABI for the device, corresponding to the machine code used in
+the system image itself.</li>
+<li>An optional, secondary ABI, corresponding to another ABI that the system image also supports.
+</li>
+</ul>
+
+<p>This mechanism ensures that the system extracts the best machine code from
+the package at installation time.</p>
+
+<p>For best performance, you should compile directly for the primary ABI. For example, a
+typical ARMv5TE-based device would only define the primary ABI: {@code armeabi}. By contrast, a
+typical, ARMv7-based device would define the primary ABI as {@code armeabi-v7a} and the secondary
+one as {@code armeabi}, since it can run application native binaries generated for each of them.</p>
+
+<p>Many x86-based devices can also run {@code armeabi-v7a} and {@code armeabi} NDK binaries. For
+such devices, the primary ABI would be {@code x86}, and the second one, {@code armeabi-v7a}.</p>
+
+<p>A typical MIPS-based device only defines a primary abi: {@code mips}.</p>
+
+<h3 id="aen">Automatic extraction of native code at install time</h3>
+
+<p>When installing an application, the package manager service scans the APK, and looks for any
+shared libraries of the form:</p>
+
+<pre class="no-pretty-print">
+lib/&lt;primary-abi&gt;/lib&lt;name&gt;.so
+</pre>
+
+<p>If none is found, and you have defined a secondary ABI, the service scans for shared libraries of
+the form:</p>
+
+<pre class="no-pretty-print">
+lib/&lt;secondary-abi&gt;/lib&lt;name&gt;.so
+</pre>
+
+<p>When it finds the libraries that it's looking for, the package manager
+copies them to <code>/lib/lib&lt;name&gt;.so</code>, under the application's
+{@code data} directory ({@code data/data/&lt;package_name&gt;/lib/}).</p>
+
+<p>If there is no shared-object file at all, the application builds and installs, but crashes at
+runtime.</p>

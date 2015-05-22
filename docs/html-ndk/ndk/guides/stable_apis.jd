@@ -1,0 +1,501 @@
+page.title=Android NDK Native APIs
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#purpose">Overview</a></li>
+        <li><a href="#mnu">Major Native API Updates</a><li>
+          <ol>
+        <li><a href="#a3">Android API level 3</a></li>
+        <li><a href="#a4">Android API level 4</a></li>
+        <li><a href="#a5">Android API level 5</a></li>
+        <li><a href="#a8">Android API level 8</a></li>
+        <li><a href="#a9">Android API level 9</a></li>
+        <li><a href="#a14">Android API level 14</a></li>
+        <li><a href="#a18">Android API level 18</a></li>
+          </ol>
+      </ol>
+    </div>
+  </div>
+
+<p>The Android NDK provides a set of native headers and shared library files that has gradually
+increased with successive releases of new Android API levels. This page explains these headers and
+files, and maps them to specific
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels"> Android API levels</a>.
+</p>
+
+<h2 id="purpose">Overview</h2>
+<p>There are two basic steps to enable your app to use the libraries that the NDK provides:
+</p>
+
+<ol type ="1">
+<li>Include in your code the headers associated with the libraries you wish to use.</li>
+
+<li>Tell the build system that your native module needs to link against the libraries at load time.
+For example, to link against  {@code /system/lib/libfoo.so}, add the following line to your
+<a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a> file:</li>
+
+<pre>
+LOCAL_LDLIBS := -lfoo
+</pre>
+
+<p>To list multiple libraries, use a space as a delimiter. For more information about using the
+{@code LOCAL_LDLIBS} variable, see <a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a>.
+</p>
+
+</ol>
+
+<p>For all API levels, the build system automatically links the standard C libraries, the
+standard C++ libraries, real-time extensions, and {@code pthread}; you do not need
+to include them when defining your {@code LOCAL_LDLIBS} variable. For more information about
+the C and C++ libraries, see <a href="#a3">Android API level 3</a>.</p>
+
+<p>The NDK often provides new headers and libraries for new Android releases. These files reside
+under {@code $NDK/platforms/android-&lt;level&gt;/&lt;abi&gt;/usr/include}. When the NDK does not
+have a specific new group of headers and libraries for an Android API level, it means that
+an app targeting that level should use the most recently released NDK assets. For example,
+there was no new release of NDK headers or libraries for Android API levels 6 and 7. Therefore,
+when developing an app targeting Android API level 7, you would use the headers and libraries
+located under {@code android-5/}.</p>
+
+<p>Table 1 shows the correspondence between NDK-supported API levels and Android releases.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> NDK-supported API levels and corresponding Android releases.</p>
+<table>
+  <tr>
+    <th scope="col">NDK-supported API level</th>
+    <th scope="col">Android release</th>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>1.5</td>
+  </tr>
+    <tr>
+    <td>4</td>
+    <td>1.6</td>
+  </tr>
+    <tr>
+    <td>5</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>2.2</td>
+  </tr>
+    <tr>
+    <td>9</td>
+    <td>2.3 through 3.0.x</td>
+  </tr>
+  <tr>
+    <td>12</td>
+    <td>3.1.x</td>
+  </tr>
+  <tr>
+    <td>13</td>
+    <td>3.2</td>
+  </tr>
+  <tr>
+    <td>14</td>
+    <td>4.0 through 4.0.2</td>
+  </tr>
+  <tr>
+    <td>15</td>
+    <td>4.0.3 and 4.0.4</td>
+  </tr>
+    <tr>
+    <td>16</td>
+    <td>4.1 and 4.1.1</td>
+  </tr>
+    <tr>
+    <td>17</td>
+    <td>4.2 and 4.2.2</td>
+  </tr>
+    <tr>
+    <td>18</td>
+    <td>4.3</td>
+  </tr>
+    <tr>
+    <td>19</td>
+    <td>4.4</td>
+  </tr>
+    <tr>
+    <td>21</td>
+    <td>4.4W and 5.0</td>
+</table>
+
+<p>Each new release of NDK headers and libraries for a given Android API level is cumulative; you
+are nearly always safe if you use the most recently released headers when building your app. For
+example, you can use the NDK headers for Android API level 21 for an app targeting API level 16. By doing so, however, you increase your APK's footprint.</p>
+
+<p>
+For more information about Android API levels, see
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API Level?</a>.
+</p>
+
+<h2 id="mnu">Major Native API Updates</h2>
+
+<h3 id="a3">Android API level 3</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 1.5 system
+images and above.</p>
+
+<h4>C library</h4>
+<p>The C library headers for Android 1.5 are available through their standard names, such as
+{@code stdlib.h} and {@code stdio.h}. If a header is missing at build time, it's because the
+header is not available on the 1.5 system image.</p>
+
+<h4>C++ library</h4>
+<p>An <em>extremely</em> minimal C++ support API is available. For more
+information on C++ library support, see
+<a href="{@docRoot}ndk/guides/cpp-support.html">C++ Library Support</a>.</p>
+
+<h4>Android-specific log support</h4>
+
+<p>{@code &lt;android/log.h&gt;} contains various definitions that an app can use to send log
+messages to the kernel from native code. For more information about these definitions, see the
+comments in {@code $NDK/platforms/android-3/arch-arm/usr/include/android/log.h}, where {@code $NDK}
+is the root of your NDK installation.</p>
+
+<p>You can write your own wrapper macros to access this functionality. If you wish to perform
+logging, your native module should link to {@code /system/lib/liblog.so}. Implement this
+linking by including the following line in your <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS := -llog
+</pre>
+
+<h4>ZLib compression library</h4>
+<p>You can use the <a href="http://www.zlib.net/manual.html">Zlib compression library</a>
+by including {@code zlib.h} and {@code zconf.h}. You must also link your native
+module against {@code /system/lib/libz.so} by including the following line in your
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS := -lz
+</pre>
+
+<h4>Dynamic linker library</h4>
+<p>You can access the Android dynamic linker's {@code dlopen()}, {@code dlsym()}, and
+{@code dlclose()} functions by including {@code dlfcn.h}. You must also link against
+{@code /system/lib/libdl.so} by including the following line in your
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS := -ldl
+</pre>
+
+<h3 id="a4">Android API level 4</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 1.6 system
+images and above.</p>
+
+<h4>OpenGL ES 1.x Library</h4>
+<p>The standard OpenGL ES headers {@code gl.h} and {@code glext.h} contain
+the declarations necessary for performing OpenGL ES 1.x rendering calls from native code.</p>
+
+<p>To use these headers, link your native module to {@code /system/lib/libGLESv1_CM.so} by
+including the following line in your <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+</p>
+
+<pre>
+LOCAL_LDLIBS := -lGLESv1_CM
+</pre>
+<p>All Android-based devices support OpenGL ES 1.0, because Android provides an Open GL 1.0-capable
+software renderer that can be used on devices without GPUs.</p>
+<p>Only Android devices that have the necessary GPU fully support OpenGL ES 1.1. An app can
+query the OpenGL ES version string and extension string to determine whether the current device
+supports the features it needs. For information on how to perform this query, see the description of
+<a href="http://www.khronos.org/opengles/sdk/1.1/docs/man/glGetString.xml">{@code glGetString()}</a>
+in the OpenGL specification.</p>
+
+<p>Additionally, you must put a
+<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> tag in your manifest file to indicate the version of
+<a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>
+that your application requires.</p>
+
+<p>The <a href="#egl">EGL APIs</a> are only available starting from API level 9. You can, however,
+use the VM to perform some of the operations that you would get from those APIS. These operations
+include surface creation and flipping. For an example of how to use {@code GLSurfaceView}, see
+<a href="http://android-developers.blogspot.com/2009/04/introducing-glsurfaceview.html">
+Introducing GLSurfaceView</a>.</p>
+
+<p>The san-angeles sample application provides an example of how to perform these operations,
+rendering each frame in native code. This sample is a small Android port of the excellent
+<a href="http://jet.ro/visuals/san-angeles-observation/">San Angeles Observation</a> demo
+program.</p>
+
+<h3 id="a5">Android API level 5</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 2.0 system
+images and above.</p>
+
+<h4>OpenGL ES 2.0 library:</h4>
+<p>The standard OpenGL ES 2.0 headers {@code &lt;GLES2/gl2.h&gt;} and {@code &lt;GLES2/gl2ext.h&gt;}
+contain the declarations needed for performing OpenGL ES 2.0 rendering calls from native code.
+These rendering calls provide the ability to use the GLSL language to define and use vertex and
+fragment shaders.</p>
+
+<p>To use OpenGL ES 2.0, link your native module to {@code /system/lib/libGLESv2.so} by
+including the following line in your <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS := -lGLESv2
+</pre>
+
+<p>Not all devices support OpenGL ES 2.0. An app can query the OpenGL
+ES version string and extension string to determine whether the current device
+supports the features it needs. For information on how to perform this query, see the description of
+<a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml">
+{@code glGetString()}</a> in the OpenGL specification.</p>
+
+<p>Additionally, you must put a
+<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> tag in your manifest file to indicate which version of OpenGL ES your
+application requires. For more information about the OpenGL ES settings for
+{@code &lt;uses-feature&gt;}, see
+<a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>.</p>
+
+<p>The hello-gl2 sample application provies a basic example of how to use OpenGL ES 2.0 with the
+NDK.</p>
+
+<p>The <a href="#egl">EGL APIs</a> are only available starting from API level 9. You can, however,
+use the VM to perform some of the operations that you would get from those APIs. These operations
+include surface creation and flipping. For an example of how to use {@code GLSurfaceView}, see
+<a href="http://android-developers.blogspot.com/2009/04/introducing-glsurfaceview.html">
+Introducing GLSurfaceView</a>.</p>
+
+<p class="note"><strong>Note:</strong> The Android emulator does not support OpenGL ES 2.0 hardware
+emulation. Running and testing code that uses this API requires a real device with hardware that can
+support OpenGL ES 2.0.</p>
+
+<h3 id="a8">Android API level 8</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 2.2 system
+images and above.</p>
+
+<h4>jnigraphics</h4>
+<p>The {@code jnigraphics} library exposes a C-based interface that allows native code to reliably access
+the pixel buffers of Java bitmap objects. The workflow for using {@code jnigraphics} is as follows:
+</p>
+
+<ol type="1">
+<li>Use {@code AndroidBitmap_getInfo()} to retrieve information from JNI, such as width and height,
+about a given bitmap handle.</li>
+
+<li>Use {@code AndroidBitmap_lockPixels()} to lock the pixel buffer and retrieve a pointer to it.
+Doing so ensures that the pixels do not move until the app calls
+{@code AndroidBitmap_unlockPixels()}.</li>
+
+<li>In native code, modify the pixel buffer as appropriate for its pixel format, width, and other
+characteristics.</li>
+
+<li>Call {@code AndroidBitmap_unlockPixels()} to unlock the buffer.</li>
+</ol>
+
+<p>To use {@code jnigraphics}, include the {@code &lt;bitmap.h&gt;} header in your source code, and
+link against {@code jnigraphics} by including the following line in your
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS += -ljnigraphics
+</pre>
+
+<p>Additional details about this feature are in the comments of the {@code bitmap.h} file.
+
+<h3 id="a9">Android API level 9</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 2.3 system
+images and above.</p>
+
+<h4 id="egl"> EGL</h4>
+<p>EGL provides a native platform interface for allocating and managing OpenGLES surfaces.
+For more information about its features, see <a href="http://www.khronos.org/egl">
+EGL Native Platform Interface</a>.</p>
+
+<p>EGL allows you to perform the following operations from native code:</p>
+
+<ul>
+<li>List supported EGL configurations.</li>
+<li>Allocate and release OpenGLES surfaces.</li>
+<li>Swap or flip surfaces.</li>
+</ul>
+
+<p>The following headers provide EGL functionality:</p>
+<ul>
+   <li>{@code EGL/egl.h}: the main EGL API definitions.</li>
+   <li>{@code EGL/eglext.h}: EGL extension-related definitions.</li>
+</ul>
+
+<p>To link against the system's EGL library, add the following line to your
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS += -lEGL
+</pre>
+
+<h4 id="osl">OpenSL ES</h4>
+<p>Android native audio handling is based on the Khronos Group OpenSL ES 1.0.1 API.</p>
+
+<p>The standard OpenSL ES headers {@code OpenSLES.h} and {@code OpenSLES_Platform.h} contain
+the declarations necessary for performing audio input and output from the native side of Android.
+The NDK distribution of the OpenSL ES also provides Android-specific extensions. For information
+about these extensions, see the comments in {@code OpenSLES_Android.h} and
+{@code OpenSLES_AndroidConfiguration.h}.</p>
+
+
+<p>The system library {@code libOpenSLES.so} implements the public native audio functions. Link
+against it by adding the following line to your <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS += -lOpenSLES
+</pre>
+
+<p>For more information about the OpenSL ES API, refer to
+{@code $NDK/docs/Additional_library_docs/opensles/index.html}, where {@code $NDK} is your NDK
+installation root directory.</p>
+
+<h4>Android native application APIs</h4>
+<p>Starting from API level 9, you can write an entire Android app with native code, without using
+any Java.</p>
+
+<p class="note"><strong>Note: </strong>Writing your app in native code is not, in itself, enough
+for your app to run in the VM. Moreover, your app must still access most features of the Android
+platform via JNI.</p>
+
+<p>This release provides the following native headers:</p>
+<ul>
+<li>{@code &lt;native_activity.h&gt;}</li>
+<li>{@code &lt;looper.h&gt;}</li>
+<li>{@code &lt;input.h&gt;}</li>
+<li>{@code &lt;keycodes.h&gt;}</li>
+<li>{@code &lt;sensor.h&gt;}</li>
+<li>{@code &lt;rect.h&gt;}</li>
+<li>{@code &lt;window.h&gt;}</li>
+<li>{@code &lt;native_window.h&gt;}</li>
+<li>{@code &lt;native_window_jni.h&gt;}</li>
+<li>{@code &lt;configuration.h&gt;}</li>
+<li>{@code &lt;asset_manager.h&gt;}</li>
+<li>{@code &lt;storage_manager.h&gt;}</li>
+<li>{@code &lt;obb.h&gt;}</li>
+</ul>
+
+<p>For more information about these headers, see the
+<a href="{@docRoot}ndk/reference/index.html">NDK API Reference documentation</a>, as well as
+the comments in the headers, themselves. Also, for more information about the larger topic of
+writing native apps, see <a href="{@docRoot}ndk/guides/concepts.html#naa">
+Native Activities and Applications</a>.
+
+<p>When you include one or more of these headers, you must also link against the
+{@code libandroid.so} library. To link against {@code libandroid.so}, include the following line in
+your <a href="{@docRoot}ndk/guides/android_mk.html"> {@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS += -landroid
+</pre>
+
+<h3 id="a14">Android API level 14</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 4.0 system
+images and above.</p>
+
+<h4>OpenMAX AL</h4>
+<p>Android native multimedia handling is based on Khronos Group OpenMAX AL 1.0.1 API.</p>
+<p>The standard OpenMAX AL headers {@code &lt;OMXAL/OpenMAXAL.h&gt;} and
+{@code &lt;OMXAL/OpenMAXAL_Platform.h&gt;} contain the declarations necessary for performing
+multimedia output from the native side of Android.</p>
+
+<p>The NDK distribution of OpenMAX AL also provides Android-specific extensions. For information
+about these extensions, see the comments in {@code OpenMAXAL_Android.h}.</p>
+
+<p>The system library {@code libOpenMAXAL.so} implements the public native multimedia functions.
+To link against this library, include the following line in your
+<a href="{@docRoot}ndk/guides/android_mk.html"> {@code Android.mk}</a> file:</p>
+
+<pre class="fragment">    LOCAL_LDLIBS += -lOpenMAXAL
+</pre><p>For more information about this topic, see {@code $NDK/docs/openmaxal/index.html},
+where {@code $NDK} is the root directory of your NDK installation.</p>
+
+<h4>OpenSL ES</h4>
+<p>OpenSL ES support for this Android API level adds PCM support. For more information about
+OpenSL ES support in the NDK, see <a href="#osl">OpenSL ES</a>.</p>
+
+<h3 id="a18">Android API level 18</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 4.3 system
+images and above.</p>
+
+<h4>OpenGL ES 3.0</h4>
+
+<p>The standard OpenGL ES 3.0 headers {@code gl3.h} and {@code gl3ext.h} contain the declarations
+needed for performing OpenGL ES 3.0 rendering calls from native code. These rendering calls provide
+the ability to use the GLSL language to define and use vertex and fragment shaders.
+
+<p>To use OpenGL ES 3.0, link your native module against {@code /system/lib/libGLESv3.so} by
+including the following line in your <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS := -lGLESv3
+</pre>
+
+<p>Not all devices support OpenGL ES 3.0. An app can query the OpenGL
+ES version string and extension string to determine whether the current device
+supports the features it needs. For information on how to perform this query, see the description of
+<a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml">
+{@code glGetString()}</a> in the OpenGL specification.</p>
+
+<p>Additionally, you must put a
+<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> tag in your manifest file to indicate which version of OpenGL ES your
+application requires. For more information about the OpenGL ES settings for
+{@code &lt;uses-feature&gt;}, see
+<a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>.</p>
+
+<p>The gles3jni sample application provides a basic example of how to use OpenGL ES 3.0 with the
+NDK.</p>
+
+<p class="note"><strong>Note:</strong> The Android emulator does not support OpenGL ES 3.0 hardware
+emulation. Running and testing code that uses this API requires a real device with hardware that can
+support OpenGL ES 3.0.</p>
+
+
+<h3 id="a18">Android API level 21</h3>
+<p>The NDK provides the following APIs for developing native code that runs on Android 4.3 system
+images and above.</p>
+
+<h4>OpenGL ES 3.1</h4>
+
+<p>The standard OpenGL ES 3.1 headers {@code gl31.h} and {@code gl3ext.h} contain the declarations
+needed for performing OpenGL ES 3.1 rendering calls from native code. These rendering calls provide
+the ability to use the GLSL language to define and use vertex and fragment shaders.
+
+<p>To use OpenGL ES 3.1, link your native module against {@code /system/lib/libGLESv3.so} by
+including the following line in your <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> file:</p>
+
+<pre>
+LOCAL_LDLIBS := -lGLESv3
+</pre>
+
+<p>Not all devices support OpenGL ES 3.1. An app can query the OpenGL
+ES version string and extension string to determine whether the current device
+supports the features it needs. For information on how to perform this query, see the description of
+<a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml">
+{@code glGetString()}</a> in the OpenGL specification.</p>
+
+<p>Additionally, you must put a
+<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> tag in your manifest file to indicate which version of OpenGL ES your
+application requires. For more information about the OpenGL ES settings for
+{@code &lt;uses-feature&gt;}, see
+<a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>.</p>
+
+<p>The gles3jni sample application provides a basic example of how to use OpenGL ES 3.1 with the
+NDK.</p>
+
+<p class="note"><strong>Note:</strong> The Android emulator does not support OpenGL ES 3.1 hardware
+emulation. Running and testing code that uses this API requires a real device with hardware that can
+support OpenGL ES 3.1.</p>
+

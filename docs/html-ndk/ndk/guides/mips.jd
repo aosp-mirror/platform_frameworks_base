@@ -1,0 +1,43 @@
+page.title=MIPS Support
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#over">Overview</a></li>
+        <li><a href="#comp">Compatibility</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>The NDK supports the {@code mips} ABI, which allows native code to run on Android-based devices
+that have CPUs supporting the MIPS32 instruction set.</p>
+
+<h2 id="over">Overview</h2>
+<p>To generate MIPS machine code, include {@code mips} in your
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file's
+{@code APP_ABI} definition. For example: </p>
+
+<pre class="no-pretty-print">
+APP_ABI := mips
+</pre>
+
+<p>For more information about defining the {@code APP_ABI} variable, see
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a>.</p>
+
+<p>The build system places generated libraries into {@code $PROJECT/libs/mips/}, where
+{@code $PROJECT} represents your project's root directory, and embeds them in your APK under
+{@code /lib/mips/}.</p>
+
+<p>The Android package manager extracts these libraries when installing your APK on a compatible
+MIPS-based device, placing them under your app's private data directory.</p>
+
+<p>In the Google Play store, the server filters applications so that a consumer sees only the native
+libraries that run on the CPU powering his or her device.</p>
+
+<h2 id="comp">Compatibility</h2>
+<p>MIPS support requires, at minimum, Android 2.3 (Android API level 9). If your project files
+target an older API level, but include MIPS as a targeted platform, the NDK build script
+automatically selects the right set of native platform headers/libraries for you.</p>
