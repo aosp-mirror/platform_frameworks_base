@@ -113,7 +113,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -397,6 +397,7 @@ type="text/css">
                 <li><a href="../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -412,19 +413,6 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
         
-        
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card" 
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=dac&utm_medium=banner&utm_campaign=android_provider_banner3" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help Android Wear and TV developers<br/>
-                    <span id="helpoutsLinkText" class="link-color" 
-                    style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
         
         
 
@@ -527,6 +515,10 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../reference/android/support/wearable/companion/package-summary.html">android.support.wearable.companion</a></li>
     <li class="api apilevel-">
+  <a href="../../../../reference/android/support/wearable/input/package-summary.html">android.support.wearable.input</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../reference/android/support/wearable/media/package-summary.html">android.support.wearable.media</a></li>
+    <li class="api apilevel-">
   <a href="../../../../reference/android/support/wearable/provider/package-summary.html">android.support.wearable.provider</a></li>
     <li class="api apilevel-">
   <a href="../../../../reference/android/support/wearable/view/package-summary.html">android.support.wearable.view</a></li>
@@ -547,12 +539,16 @@ type="text/css">
     <li><h2>Classes</h2>
       <ul>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.html">R</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.anim.html">R.anim</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.animator.html">R.animator</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.attr.html">R.attr</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.color.html">R.color</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.dimen.html">R.dimen</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.drawable.html">R.drawable</a></li>
           <li class="selected api apilevel-"><a href="../../../../reference/android/support/wearable/R.id.html">R.id</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.interpolator.html">R.interpolator</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.layout.html">R.layout</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.string.html">R.string</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.style.html">R.style</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.styleable.html">R.styleable</a></li>
       </ul>
@@ -718,7 +714,6 @@ Summary:
 
 
 
-
 </div><!-- jd-descr -->
 
 
@@ -769,7 +764,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#action_error">action_error</a></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#alertTitle">alertTitle</a></td>
           <td class="jd-descrcol" width="100%">
             
             
@@ -780,22 +775,6 @@ Summary:
       
     
       <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#action_success">action_success</a></td>
-          <td class="jd-descrcol" width="100%">
-            
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -811,13 +790,29 @@ Summary:
       </tr>
       
     
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#animatedWrapperContainer">animatedWrapperContainer</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#animation">animation</a></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#bottom">bottom</a></td>
           <td class="jd-descrcol" width="100%">
             
             
@@ -833,7 +828,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#bottom">bottom</a></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#buttonPanel">buttonPanel</a></td>
           <td class="jd-descrcol" width="100%">
             
             
@@ -897,6 +892,38 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#clip_horizontal">clip_horizontal</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#clip_vertical">clip_vertical</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
           <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#dismiss_overlay_button">dismiss_overlay_button</a></td>
           <td class="jd-descrcol" width="100%">
             
@@ -929,7 +956,71 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#error_message">error_message</a></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#end">end</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#fill">fill</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#fill_horizontal">fill_horizontal</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#fill_vertical">fill_vertical</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#fit">fit</a></td>
           <td class="jd-descrcol" width="100%">
             
             
@@ -977,7 +1068,39 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#parentPanel">parentPanel</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
           <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#right">right</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.id.html#start">start</a></td>
           <td class="jd-descrcol" width="100%">
             
             
@@ -1317,7 +1440,7 @@ From class
 
 
 
-<A NAME="action_error"></A>
+<A NAME="alertTitle"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1327,38 +1450,7 @@ From class
          
         int
       </span>
-        action_error
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="action_success"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        action_success
+        alertTitle
     </h4>
       <div class="api-level">
         
@@ -1410,7 +1502,7 @@ From class
 
 
 
-<A NAME="animation"></A>
+<A NAME="animatedWrapperContainer"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1420,7 +1512,7 @@ From class
          
         int
       </span>
-        animation
+        animatedWrapperContainer
     </h4>
       <div class="api-level">
         
@@ -1452,6 +1544,37 @@ From class
         int
       </span>
         bottom
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="buttonPanel"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        buttonPanel
     </h4>
       <div class="api-level">
         
@@ -1565,6 +1688,68 @@ From class
 
 
 
+<A NAME="clip_horizontal"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        clip_horizontal
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="clip_vertical"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        clip_vertical
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
 <A NAME="dismiss_overlay_button"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1627,7 +1812,7 @@ From class
 
 
 
-<A NAME="error_message"></A>
+<A NAME="end"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1637,7 +1822,131 @@ From class
          
         int
       </span>
-        error_message
+        end
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="fill"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        fill
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="fill_horizontal"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        fill_horizontal
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="fill_vertical"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        fill_vertical
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="fit"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        fit
     </h4>
       <div class="api-level">
         
@@ -1720,6 +2029,37 @@ From class
 
 
 
+<A NAME="parentPanel"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        parentPanel
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
 <A NAME="right"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1731,6 +2071,37 @@ From class
         int
       </span>
         right
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="start"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        start
     </h4>
       <div class="api-level">
         
