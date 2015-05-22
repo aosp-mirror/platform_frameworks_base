@@ -1506,6 +1506,7 @@ public class Instrumentation {
                         requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
         return null;
     }
@@ -1563,6 +1564,7 @@ public class Instrumentation {
                         token, options, userId);
             checkStartActivityResult(result, intents[0]);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1622,6 +1624,7 @@ public class Instrumentation {
                         token, target, requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
         return null;
     }
@@ -1682,6 +1685,7 @@ public class Instrumentation {
                         requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
         return null;
     }
@@ -1719,6 +1723,7 @@ public class Instrumentation {
                         requestCode, 0, null, options, userId);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
         return null;
     }
@@ -1753,6 +1758,7 @@ public class Instrumentation {
                     intent, intent.resolveTypeIfNeeded(who.getContentResolver()), options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
         return;
     }
