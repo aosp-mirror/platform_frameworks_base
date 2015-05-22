@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 #
 # Copyright (C) 2011 The Android Open Source Project
 #
