@@ -426,6 +426,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private int mLastFocusedUserId;
 
     /**
+     * If non-null, we are tracking the time the user spends in the currently focused app.
+     */
+    private AppTimeTracker mCurAppTimeTracker;
+
+    /**
      * List of intents that were used to start the most recent tasks.
      */
     private final RecentTasks mRecentTasks;
@@ -1330,7 +1335,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 51;
     static final int DELETE_DUMPHEAP_MSG = 52;
     static final int FOREGROUND_PROFILE_CHANGED_MSG = 53;
-    static final int DISPATCH_UIDS_CHANGED = 54;
+    static final int DISPATCH_UIDS_CHANGED_MSG = 54;
+    static final int REPORT_TIME_TRACKER_MSG = 55;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1563,7 +1569,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dispatchProcessDied(pid, uid);
                 break;
             }
-            case DISPATCH_UIDS_CHANGED: {
+            case DISPATCH_UIDS_CHANGED_MSG: {
                 dispatchUidsChanged();
             } break;
             }
@@ -1987,6 +1993,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case FOREGROUND_PROFILE_CHANGED_MSG: {
                 dispatchForegroundProfileChanged(msg.arg1);
+            } break;
+            case REPORT_TIME_TRACKER_MSG: {
+                AppTimeTracker tracker = (AppTimeTracker)msg.obj;
+                tracker.deliverResult(mContext);
             } break;
             }
         }
@@ -2573,6 +2583,27 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
             ActivityRecord last = mFocusedActivity;
             mFocusedActivity = r;
+            if (r.task.taskType != ActivityRecord.HOME_ACTIVITY_TYPE
+                    && r.task.taskType != ActivityRecord.RECENTS_ACTIVITY_TYPE) {
+                if (mCurAppTimeTracker != r.appTimeTracker) {
+                    // We are switching app tracking.  Complete the current one.
+                    if (mCurAppTimeTracker != null) {
+                        mCurAppTimeTracker.stop();
+                        mHandler.obtainMessage(REPORT_TIME_TRACKER_MSG,
+                                mCurAppTimeTracker).sendToTarget();
+                        mStackSupervisor.clearOtherAppTimeTrackers(r.appTimeTracker);
+                        mCurAppTimeTracker = null;
+                    }
+                    if (r.appTimeTracker != null) {
+                        mCurAppTimeTracker = r.appTimeTracker;
+                        startTimeTrackingFocusedActivityLocked();
+                    }
+                } else {
+                    startTimeTrackingFocusedActivityLocked();
+                }
+            } else {
+                r.appTimeTracker = null;
+            }
             if (r.task != null && r.task.voiceInteractor != null) {
                 startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
             } else {
@@ -10132,14 +10163,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void startTimeTrackingFocusedActivityLocked() {
+        if (!mSleeping && mCurAppTimeTracker != null && mFocusedActivity != null) {
+            mCurAppTimeTracker.start(mFocusedActivity.packageName);
+        }
+    }
+
     void updateSleepIfNeededLocked() {
         if (mSleeping && !shouldSleepLocked()) {
             mSleeping = false;
+            startTimeTrackingFocusedActivityLocked();
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
             mStackSupervisor.comeOutOfSleepIfNeededLocked();
             updateOomAdjLocked();
         } else if (!mSleeping && shouldSleepLocked()) {
             mSleeping = true;
+            if (mCurAppTimeTracker != null) {
+                mCurAppTimeTracker.stop();
+            }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
             updateOomAdjLocked();
@@ -13341,6 +13382,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " mDebugTransient=" + mDebugTransient
                         + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
             }
+        }
+        if (mCurAppTimeTracker != null) {
+            mCurAppTimeTracker.dumpWithHeader(pw, "  ", true);
         }
         if (mMemWatchProcesses.getMap().size() > 0) {
             pw.println("  Mem watch processes:");
@@ -18460,7 +18504,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mPendingUidChanges.size() == 0) {
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                         "*** Enqueueing dispatch uid changed!");
-                mUiHandler.obtainMessage(DISPATCH_UIDS_CHANGED).sendToTarget();
+                mUiHandler.obtainMessage(DISPATCH_UIDS_CHANGED_MSG).sendToTarget();
             }
             final int NA = mAvailUidChanges.size();
             if (NA > 0) {
