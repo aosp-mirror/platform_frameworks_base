@@ -7,7 +7,7 @@ page.image=wear/images/10_uilib.png
 <div id="tb">
   <h2>Dependencies and Prerequisites</h2>
   <ul>
-    <li>Android Studio 0.8 or later and Gradle 0.12 or later</li>
+    <li>Android 4.4W (API level 20) or higher on the wearable device</li>
   </ul>
 </div>
 </div>
