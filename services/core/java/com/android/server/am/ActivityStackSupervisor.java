@@ -2658,7 +2658,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityRecord getHomeActivity() {
-        return getHomeActivityForUser(UserHandle.USER_ALL);
+        return getHomeActivityForUser(mCurrentUser);
     }
 
     ActivityRecord getHomeActivityForUser(int userId) {
