@@ -2919,11 +2919,13 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT";
     /**
-     * The name of the extra used to define the text to be processed.
+     * The name of the extra used to define the text to be processed, as a
+     * CharSequence. Note that this may be a styled CharSequence, so you must use
+     * {@link Bundle#getCharSequence(String) Bundle.getCharSequence()} to retrieve it.
      */
     public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     /**
-     * The name of the extra used to define if the processed text will be used as read-only.
+     * The name of the boolean extra used to define if the processed text will be used as read-only.
      */
     public static final String EXTRA_PROCESS_TEXT_READONLY =
             "android.intent.extra.PROCESS_TEXT_READONLY";
