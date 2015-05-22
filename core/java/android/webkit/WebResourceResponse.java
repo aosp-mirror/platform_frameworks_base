@@ -27,7 +27,7 @@ import android.annotation.SystemApi;
  * class from {@link WebViewClient#shouldInterceptRequest} to provide a custom
  * response when the WebView requests a particular resource.
  */
-public class WebResourceResponse extends WebResourceResponseBase {
+public class WebResourceResponse {
     private boolean mImmutable;
     private String mMimeType;
     private String mEncoding;
