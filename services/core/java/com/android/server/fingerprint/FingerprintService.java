@@ -30,6 +30,7 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.util.Slog;
 
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -432,7 +434,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         public void destroy() {
             if (token != null) {
-                token.unlinkToDeath(this, 0);
+                try {
+                    token.unlinkToDeath(this, 0);
+                } catch (NoSuchElementException e) {
+                    // TODO: remove when duplicate call bug is found
+                    Slog.e(TAG, "destroy(): " + this + ":", new Exception("here"));
+                }
                 token = null;
             }
             receiver = null;
@@ -717,6 +724,13 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 if (!fpDir.exists()) {
                     if (!fpDir.mkdir()) {
                         Slog.v(TAG, "Cannot make directory: " + fpDir.getAbsolutePath());
+                        return;
+                    }
+                    // Calling mkdir() from this process will create a directory with our
+                    // permissions (inherited from the containing dir). This command fixes
+                    // the label.
+                    if (!SELinux.restorecon(fpDir)) {
+                        Slog.w(TAG, "Restorecons failed. Directory will have wrong label.");
                         return;
                     }
                 }
