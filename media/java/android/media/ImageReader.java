@@ -23,6 +23,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.view.Surface;
 
+import dalvik.system.VMRuntime;
+
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -148,6 +150,13 @@ public class ImageReader implements AutoCloseable {
         nativeInit(new WeakReference<ImageReader>(this), width, height, format, maxImages);
 
         mSurface = nativeGetSurface();
+
+        // Estimate the native buffer allocation size and register it so it gets accounted for
+        // during GC. Note that this doesn't include the buffers required by the buffer queue
+        // itself and the buffers requested by the producer.
+        mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(width, height, format,
+                maxImages);
+        VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
     /**
@@ -467,6 +476,10 @@ public class ImageReader implements AutoCloseable {
         setOnImageAvailableListener(null, null);
         if (mSurface != null) mSurface.release();
         nativeClose();
+        if (mEstimatedNativeAllocBytes > 0) {
+            VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
+            mEstimatedNativeAllocBytes = 0;
+        }
     }
 
     @Override
@@ -606,6 +619,7 @@ public class ImageReader implements AutoCloseable {
     private final int mMaxImages;
     private final int mNumPlanes;
     private final Surface mSurface;
+    private int mEstimatedNativeAllocBytes;
 
     private final Object mListenerLock = new Object();
     private OnImageAvailableListener mListener;
