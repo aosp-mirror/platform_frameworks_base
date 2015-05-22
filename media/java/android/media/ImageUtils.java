@@ -119,4 +119,60 @@ class ImageUtils {
             dstBuffer.rewind();
         }
     }
+
+    /**
+     * Return the estimated native allocation size in bytes based on width, height, format,
+     * and number of images.
+     *
+     * <p>This is a very rough estimation and should only be used for native allocation
+     * registration in VM so it can be accounted for during GC.</p>
+     *
+     * @param width The width of the images.
+     * @param height The height of the images.
+     * @param format The format of the images.
+     * @param numImages The number of the images.
+     */
+    public static int getEstimatedNativeAllocBytes(int width, int height, int format,
+            int numImages) {
+        double estimatedBytePerPixel;
+        switch (format) {
+            // 10x compression from RGB_888
+            case ImageFormat.JPEG:
+            case ImageFormat.DEPTH_POINT_CLOUD:
+                estimatedBytePerPixel = 0.3;
+                break;
+            case ImageFormat.Y8:
+                estimatedBytePerPixel = 1.0;
+                break;
+            case ImageFormat.RAW10:
+                estimatedBytePerPixel = 1.25;
+                break;
+            case ImageFormat.YV12:
+            case ImageFormat.YUV_420_888:
+            case ImageFormat.NV21:
+            case ImageFormat.PRIVATE: // A really rough estimate because the real size is unknown.
+                estimatedBytePerPixel = 1.5;
+                break;
+            case ImageFormat.NV16:
+            case PixelFormat.RGB_565:
+            case ImageFormat.YUY2:
+            case ImageFormat.Y16:
+            case ImageFormat.RAW_SENSOR:
+            case ImageFormat.DEPTH16:
+                estimatedBytePerPixel = 2.0;
+                break;
+            case PixelFormat.RGB_888:
+                estimatedBytePerPixel = 3.0;
+                break;
+            case PixelFormat.RGBA_8888:
+            case PixelFormat.RGBX_8888:
+                estimatedBytePerPixel = 4.0;
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Invalid format specified %d", format));
+        }
+
+        return (int)(width * height * estimatedBytePerPixel * numImages);
+    }
 }
