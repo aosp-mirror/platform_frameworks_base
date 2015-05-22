@@ -8795,8 +8795,9 @@ package android.content {
     ctor public RestrictionEntry(java.lang.String, boolean);
     ctor public RestrictionEntry(java.lang.String, java.lang.String[]);
     ctor public RestrictionEntry(java.lang.String, int);
-    ctor public RestrictionEntry(java.lang.String, android.content.RestrictionEntry[], boolean);
     ctor public RestrictionEntry(android.os.Parcel);
+    method public static android.content.RestrictionEntry createBundleArrayEntry(java.lang.String, android.content.RestrictionEntry[]);
+    method public static android.content.RestrictionEntry createBundleEntry(java.lang.String, android.content.RestrictionEntry[]);
     method public int describeContents();
     method public java.lang.String[] getAllSelectedStrings();
     method public java.lang.String[] getChoiceEntries();
