@@ -1038,7 +1038,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-hdf android.hasSamples true \
 		-samplesdir $(samples_dir)
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-ndk
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
 include $(BUILD_DROIDDOC)
 
