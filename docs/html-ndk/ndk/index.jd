@@ -1,15 +1,68 @@
+page.title=Android NDK
+page.tags="ndk, native, c, c++", 
+meta.tags="ndk, native, c++"
 fullpage=true
-page.viewport_width=970
-excludeFromSuggestions=true
-page.metaDescription=The official Android NDK developer web site.
-page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
-
+section.landing=true
+header.hide=1
+footer.hide=1
 @jd:body
 
+<section class="dac-expand dac-hero dac-dark dac-invert" style="background-repeat:no-repeat;">
+  <div class="wrap">
+    <div class="cols dac-hero-content" style="margin-top:32px">
+      <div class="col-7of16 cdol-push-1of16">
+        <h1 class="dac-hero-title">Android NDK</h1>
+        <p class="dac-hero-description">
+        The Android NDK is a toolset that lets you implement parts of your app using native code languages such as C and C++. For certain types of apps, this can help you reuse existing code libraries written in those languages.
+        </p>
 
-<h1>SUPER FANCY NDK LANDING PAGE<h1>
+        <a class="dac-hero-cta" href="/ndk/guides/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Get Started
+        </a><br>
+      </div>
+      <div class="col-8of16 col-push-1of16" style="margin-top:48px">
 
-<p>Welcome to the placeholder text for the NDK. Here, you'll find all of the details you need to
-combine the power of native code with Android flexibility and compatibility. The documents here
-help you get started, introduce some key concepts that you should know when using the NDK, and then
-provide a variety of other information that you'll find helpful while developing your app.</p>
+        <span style="color:#00e5ff;font-family:'Roboto Mono', monospace;font-weight:400">public class <span
+        style="color:#eee">MyActivity</span> extends Activity {<br>
+              <span style="color:#ccc">&nbsp;&nbsp;/**<br>
+                &nbsp;&nbsp;* Native method implemented in C/C++<br>
+                &nbsp;&nbsp;*/</span><br>
+                &nbsp;&nbsp;public <span style="color:#1DE9B6;font-weight:700">native</span> void <span style="color:#eee">computerFoo()</span>;<br>
+              }</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+  <h2 class="norule">Latest</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="type:blog+tag:featured+tag:preview"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
+
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">Something else</h1>
+  <div class="dac-section-subtitle">
+    Placeholder
+  </div>
+
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Overview and Usage
+    </a></li>
+    <li class="dac-section-link"><a href="/google/play/filters.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      User Guide
+    </a></li>
+
+  </ul>
+</div></section>
