@@ -1600,6 +1600,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (mBackdrop == null) return; // called too early
 
+        if (mLaunchTransitionFadingAway) {
+            mBackdrop.setVisibility(View.INVISIBLE);
+            return;
+        }
+
         if (DEBUG_MEDIA) {
             Log.v(TAG, "DEBUG_MEDIA: updating album art for notification " + mMediaNotificationKey
                     + " metadata=" + mMediaMetadata
@@ -3186,9 +3191,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void showKeyguard() {
         if (mLaunchTransitionFadingAway) {
             mNotificationPanel.animate().cancel();
-            mNotificationPanel.setAlpha(1f);
-            runLaunchTransitionEndRunnable();
-            mLaunchTransitionFadingAway = false;
+            onLaunchTransitionFadingEnded();
         }
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         setBarState(StatusBarState.KEYGUARD);
@@ -3207,6 +3210,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDraggedDownRow.notifyHeightChanged(false  /* needsAnimation */);
             mDraggedDownRow = null;
         }
+    }
+
+    private void onLaunchTransitionFadingEnded() {
+        mNotificationPanel.setAlpha(1.0f);
+        runLaunchTransitionEndRunnable();
+        mLaunchTransitionFadingAway = false;
+        mScrimController.forceHideScrims(false /* hide */);
+        updateMediaMetaData(true /* metaDataChanged */);
     }
 
     public boolean isCollapsing() {
@@ -3240,6 +3251,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (beforeFading != null) {
                     beforeFading.run();
                 }
+                mScrimController.forceHideScrims(true /* hide */);
+                updateMediaMetaData(false);
                 mNotificationPanel.setAlpha(1);
                 mNotificationPanel.animate()
                         .alpha(0)
@@ -3249,9 +3262,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         .withEndAction(new Runnable() {
                             @Override
                             public void run() {
-                                mNotificationPanel.setAlpha(1);
-                                runLaunchTransitionEndRunnable();
-                                mLaunchTransitionFadingAway = false;
+                                onLaunchTransitionFadingEnded();
                             }
                         });
                 mIconController.appTransitionStarting(SystemClock.uptimeMillis(),

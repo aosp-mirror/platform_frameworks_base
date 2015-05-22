@@ -83,6 +83,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private int mPinnedHeadsUpCount;
     private float mTopHeadsUpDragAmount;
     private View mDraggedHeadsUpView;
+    private boolean mForceHideScrims;
 
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
             boolean scrimSrcEnabled) {
@@ -176,7 +177,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void updateScrims() {
-        if (mAnimateKeyguardFadingOut) {
+        if (mAnimateKeyguardFadingOut || mForceHideScrims) {
             setScrimInFrontColor(0f);
             setScrimBehindColor(0f);
         } else if (!mKeyguardShowing && !mBouncerShowing) {
@@ -439,5 +440,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         float expandFactor = (1.0f - mFraction);
         expandFactor = Math.max(expandFactor, 0.0f);
         return alpha * expandFactor;
+    }
+
+    public void forceHideScrims(boolean hide) {
+        mForceHideScrims = hide;
+        mAnimateChange = false;
+        scheduleUpdate();
     }
 }
