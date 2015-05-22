@@ -1,0 +1,20 @@
+page.title=Libraries
+@jd:body
+
+<div class="contents">
+<div class="textblock"><p>This section discusses libraries included with the NDK, as well as how to use other people's libraries and modules in your own application. It discusses:</p>
+<ul>
+<li><a href="./md_3__key__topics__libraries__s_t_a_b_l_e-_a_p_i_s.html">Stable APIs</a><ul>
+<li>This section discusses the stable APIs exposed by the NDK.</li>
+</ul>
+</li>
+<li><a href="./md_3__key__topics__libraries__p_r_e_b_u_i_l_t_s.html">Prebuilt Libraries</a><ul>
+<li>How to include and use prebuilt libraries in your own application.</li>
+</ul>
+</li>
+<li><a href="./md_3__key__topics__libraries__c_p_l_u_s_p_l_u_s-_s_u_p_p_o_r_t.html">C++ Support</a><br/>
+<ul>
+<li>Information about the NDK's C++ runtime support library and corresponding header files. </li>
+</ul>
+</li>
+</ul>
