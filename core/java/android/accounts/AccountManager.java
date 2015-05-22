@@ -2326,7 +2326,8 @@ public class AccountManager {
      * shown. If not specified then this field will not limit the displayed accounts.
      * @param allowableAccountTypes an optional string array of account types. These are used
      * both to filter the shown accounts and to filter the list of account types that are shown
-     * when adding an account.
+     * when adding an account. If not specified then this field will not limit the displayed
+     * account types when adding an account.
      * @param alwaysPromptForAccount if set the account chooser screen is always shown, otherwise
      * it is only shown when there is more than one account from which to choose
      * @param descriptionOverrideText if non-null this string is used as the description in the
