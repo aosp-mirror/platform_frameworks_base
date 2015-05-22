@@ -10,7 +10,6 @@ startpage=true
   <h2>Dependencies and Prerequisites</h2>
   <ul>
     <li>Android 5.0 (API level 21) or higher</li>
-    <li>Android Studio 0.8 or later and Gradle 0.12 or later</li>
   </ul>
 </div>
 </div>
