@@ -113,7 +113,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="../../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -397,6 +397,7 @@ type="text/css">
                 <li><a href="../../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -412,19 +413,6 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
         
-        
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card" 
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=dac&utm_medium=banner&utm_campaign=android_provider_banner3" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help Android Wear and TV developers<br/>
-                    <span id="helpoutsLinkText" class="link-color" 
-                    style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
         
         
 
@@ -526,6 +514,10 @@ type="text/css">
   <a href="../../../../../reference/android/support/wearable/activity/package-summary.html">android.support.wearable.activity</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/companion/package-summary.html">android.support.wearable.companion</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/input/package-summary.html">android.support.wearable.input</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/media/package-summary.html">android.support.wearable.media</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/provider/package-summary.html">android.support.wearable.provider</a></li>
     <li class="api apilevel-">
@@ -740,9 +732,8 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">A style descriptor for watch faces.
 
- Parameters here affect how IWatchFaceService will draw the system UI over a watch face.
- An instance of this class should be passed in to setStyle(WatchFaceStyle) in the
- <code>onCreate</code> method of your watch face activity.
+ Parameters here affect how the system UI will be drawn over a watch face. An instance of this
+ class should be passed in to <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#setWatchFaceStyle(android.support.wearable.watchface.WatchFaceStyle)">setWatchFaceStyle(WatchFaceStyle)</a></code> in the <code>onCreate</code> method of your <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onCreate(android.view.SurfaceHolder)">onCreate(SurfaceHolder)</a></code> override.
 
  To construct a WatchFaceStyle use <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.Builder.html">WatchFaceStyle.Builder</a></code>.
 </p>
@@ -1104,14 +1095,14 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getAmbientPeekMode()">getAmbientPeekMode</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Controls how the first, peeking card will be displayed while the watch is in ambient,
+          <div class="jd-descrdiv">
+            Controls how the first, peeking card will be displayed while the watch is in ambient,
  black & white mode.
-          
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1128,13 +1119,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getBackgroundVisibility()">getBackgroundVisibility</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Controls displaying background of the first, peeking card.
-          
+          <div class="jd-descrdiv">
+            Controls displaying background of the first, peeking card.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1151,13 +1142,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getCardPeekMode()">getCardPeekMode</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Controls how far into the screen the first card will peek while the watch face is displayed.
-          
+          <div class="jd-descrdiv">
+            Controls how far into the screen the first card will peek while the watch face is displayed.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1174,13 +1165,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getComponent()">getComponent</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          The component of the watch face activity whose style is being specified.
-          
+          <div class="jd-descrdiv">
+            The component of the watch face activity whose style is being specified.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1197,13 +1188,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getHotwordIndicatorGravity()">getHotwordIndicatorGravity</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Controls position of hotword (OK Google) on the screen.
-          
+          <div class="jd-descrdiv">
+            Controls position of hotword (OK Google) on the screen.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1220,13 +1211,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getPeekOpacityMode()">getPeekOpacityMode</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Controls whether the first, peeking card should be opaque when the watch face is displayed.
-          
+          <div class="jd-descrdiv">
+            Controls whether the first, peeking card should be opaque when the watch face is displayed.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1243,13 +1234,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getShowSystemUiTime()">getShowSystemUiTime</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          If true, the system will draw the system-style time over the watch face.
-          
+          <div class="jd-descrdiv">
+            If true, the system will draw the system-style time over the watch face.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1266,13 +1257,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getShowUnreadCountIndicator()">getShowUnreadCountIndicator</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Whether to add an indicator of how many unread cards there are in the stream.
-          
+          <div class="jd-descrdiv">
+            Whether to add an indicator of how many unread cards there are in the stream.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1289,13 +1280,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getStatusBarGravity()">getStatusBarGravity</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Controls position of status icons (battery state, lack of connection) on the screen.
-          
+          <div class="jd-descrdiv">
+            Controls position of status icons (battery state, lack of connection) on the screen.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1312,14 +1303,14 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html#getViewProtectionMode()">getViewProtectionMode</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Allows adding background color to UI elements of the home screen, so they are readable on
+          <div class="jd-descrdiv">
+            Allows adding background color to UI elements of the home screen, so they are readable on
  the watch face.
-          
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
