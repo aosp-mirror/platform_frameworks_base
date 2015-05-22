@@ -1,0 +1,891 @@
+page.title=Android.mk
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#over">Overview</a></li>
+        <li><a href="#basics">Basics</a></li>
+        <li><a href="#var">Variables and Macros</a></li>
+        <li><a href="#npv">NDK-provided variables</a></li>
+        <li><a href="#npfm">NDK-provided function macros</a></li>
+        <li><a href="#mdv">Module-description variables</a></li>
+      </ol>
+    </div>
+  </div>
+
+
+<p>This page describes the syntax of the {@code Android.mk} build file,
+which glues your C and C++ source files to the Android NDK.</p>
+
+<h2 id="over">Overview</h2>
+<p>The {@code Android.mk} file resides in a subdirectory of your project's {@code jni/} directory,
+and describes your sources and shared libraries to the build system. It is really a tiny GNU
+makefile fragment that the build system parses once or more. The {@code Android.mk} file is useful
+for defining project-wide settings that {@code Application.mk}, the build system, and your
+environment variables leave undefined. It can also override project-wide settings for specific
+<i>modules</i>.</p>
+
+<p>The syntax of the {@code Android.mk} allows you to group your sources into
+<em>modules</em>. A module is either a static library, a shared library, or a standalone
+executable. You can define one or more modules in each {@code Android.mk} file, and
+you can use the same source file in multiple modules. The build system only places shared libraries
+into your application package. In addition, static libraries can generate shared libraries.</p>
+
+<p>In addition to packaging libraries, the build system handles a variety of other details for you.
+For example, you don't need to list header files or explicit dependencies between generated files in
+your {@code Android.mk} file. The NDK build system computes these relationships automatically for
+you. As a result, you should be able to benefit from new toolchain/platform support in future NDK
+releases without having to touch your {@code Android.mk} file.</p>
+
+<p>The syntax of this file is very close to that used in the {@code Android.mk} files distributed with
+the full <a href="https://source.android.com">Android Open Source Project</a>. While the
+build system implementation that uses them is different, their similarity is an
+intentional design decision aimed at making it easier for application
+developers to reuse source code for external libraries.</p>
+
+<h2 id="basics">Basics</h2>
+<p>Before exploring the syntax in detail, it is useful to start by understanding the basics
+of what a {@code Android.mk} file contains. This section uses the {@code Android.mk} file in the
+Hello-JNI sample toward that end, explaining the role that each line in the file plays.</p>
+
+
+<p>An {@code Android.mk} file must begin by defining the {@code LOCAL_PATH} variable:
+
+<pre class="no-pretty-print">
+LOCAL_PATH := $(call my-dir)
+</pre>
+
+<p>This variable indicates the location of the source files in the development tree. Here, the macro
+function {@code my-dir}, provided by the build system, returns the path of the current directory
+(the directory containing the {@code Android.mk} file itself).</p>
+
+<p>The next line declares the {@code CLEAR_VARS} variable, whose value the build system provides.
+
+<pre class="no-pretty-print">
+include $(CLEAR_VARS)
+</pre>
+
+<p>The {@code CLEAR_VARS} variable points to a special GNU Makefile that clears many
+{@code LOCAL_XXX} variables for you, such as {@code LOCAL_MODULE}, {@code LOCAL_SRC_FILES}, and
+{@code LOCAL_STATIC_LIBRARIES}. Note that it does not clear {@code LOCAL_PATH}. This variable must
+retain its value because the system parses all build control files in a single GNU Make execution
+context where all variables are global. You must (re-)declare this variable before describing each
+module.</p>
+
+<p>Next, the {@code LOCAL_MODULE} variable stores the name of the module that you wish to build.
+Use this variable once per module in your application.</p>
+
+<pre class="no-pretty-print">
+LOCAL_MODULE := hello-jni
+</pre>
+
+<p>Each module name must be unique and not contain any spaces. The build system, when it
+generates the final shared-library file, automatically adds the proper prefix and suffix to
+the name that you assign to {@code LOCAL_MODULE|. For example, the example that appears above
+results in generation of a library called {@code libhello-jni.so}.</p>
+
+<p class="note"><strong>Note:</strong> If your module's name already starts with {@code lib}, the
+build system does not prepend an additional {@code lib} prefix; it takes the module name as-is, and
+adds the {@code .so} extension. So a source file originally called, for example, {@code libfoo.c}
+still produces a shared-object file called {@code libfoo.so}. This behavior is to support libraries
+that the Android platform sources generate from {@code Android.mk} files; the names of all such
+libraries start with {@code lib}.</p>
+
+<p>The next line enumerates the source files, with spaces delimiting multiple files:</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES := hello-jni.c
+</pre>
+
+<p>The {@code LOCAL_SRC_FILES} variable must contain a list of C and/or C++ source files to build
+into a module.</p>
+
+<p>The last line helps the system tie everything together:</p>
+
+<pre class="no-pretty-print">
+include $(BUILD_SHARED_LIBRARY)
+</pre>
+
+<p>The {@code BUILD_SHARED_LIBRARY} variable points to a GNU Makefile script that collects all the
+information you defined in {@code LOCAL_XXX} variables since the most recent {@code include}. This
+script determines what to build, and how to do it.</p>
+
+<p>There are more complex examples in the samples directories, with commented
+{@code Android.mk} files that you can look at. In addition, the
+<a href="{@docRoot}ndk/guides/native-activity.html">walkthrough</a> of the native-activity sample
+disucsses that sample's {@code Android.mk} file in some detail. Finally, the next section explains
+the variables from this section in a bit more detail.
+
+
+<h2 id="var">Variables and Macros</h2>
+<p>The build system provides many possible variables for use in the the {@code Android.mk} file.
+Many of these variables come with preassigned values. Others, you assign.</p>
+
+<p>In addition to these variables, you can also define your own arbitrary ones. If you do so, keep
+in mind that the NDK build system reserves the following variable names:</p>
+<ul>
+<li>Names that begin with {@code LOCAL_}, such as {@code LOCAL_MODULE}.</li>
+<li>Names that begin with {@code PRIVATE_}, {@code NDK_}, or {@code APP}. The build system uses
+these internally.</li>
+<li>Lower-case names, such as {@code my-dir}. The build system uses these internally, as well.</li>
+</ul>
+<p>If you need to define your own convenience variables in an {@code Android.mk} file, we
+recommend prepending {@code MY_} to their names.
+
+
+<h3 id="npv">NDK-defined variables</h3>
+<p>This section discusses the GNU Make variables that the build system defines before parsing your
+{@code Android.mk} file. Under certain circumstances, the NDK might parse your {@code Android.mk}
+file several times, using a different definition for some of these variables each time.</p>
+
+<h4>CLEAR_VARS</h4>
+<p>This variable points to a build script that undefines nearly all {@code LOCAL_XXX} variables
+listed in the "Developer-defined variables" section below. Use this variable to include
+this script before describing a new module. The syntax for using it is:</p>
+
+<pre class="no-pretty-print">
+include $(CLEAR_VARS)
+</pre>
+
+<h4>BUILD_SHARED_LIBRARY</h4>
+<p>This variable points to a build script that collects all the information about the module
+you provided in your {@code LOCAL_XXX} variables, and determines how to build a target shared
+library from the sources you listed. Note that using this script requires that you have already
+assigned values to {@code LOCAL_MODULE} and {@code LOCAL_SRC_FILES}, at a minimum (for more
+information about these variables, see <a href = "#mdv">Module-description variables</a>).</p>
+
+<p>The syntax for using this variable is:</p>
+
+<pre class="no-pretty-print">
+include $(BUILD_SHARED_LIBRARY)
+</pre>
+
+<p>A shared-library variable causes the build system to generate a library file with a {@code .so}
+extension.</p>
+
+<h4>BUILD_STATIC_LIBRARY</h4>
+<p>A variant of {@code BUILD_SHARED_LIBRARY} that is used to build a static library. The build
+system does not copy static libraries into your project/packages, but it can use them to build
+shared libraries (see {@code LOCAL_STATIC_LIBRARIES} and {@code LOCAL_WHOLE_STATIC_LIBRARIES},
+below). The syntax for using this variable is:</p>
+
+<pre class="no-pretty-print">
+include $(BUILD_STATIC_LIBRARY)
+</pre>
+
+<p>A static-library variable causes the build system to generate a library with a {@code .a}
+extension.</p>
+
+<h4>PREBUILT_SHARED_LIBRARY</h4>
+<p>Points to a build script used to specify a prebuilt shared library. Unlike in the case of
+{@code BUILD_SHARED_LIBRARY} and {@code BUILD_STATIC_LIBRARY}, here the value of
+{@code LOCAL_SRC_FILES} cannot be a source file. Instead, it must be a single path to a prebuilt
+shared library, such as {@code foo/libfoo.so}. The syntax for using this variable is:</p>
+
+<pre class="no-pretty-print">
+include $(PREBUILT_SHARED_LIBRARY)
+</pre>
+
+<p>You can also reference a prebuilt library in another module by using the
+{@code LOCAL_PREBUILTS} variable. The following example shows an example of using
+{@code LOCAL_PREBUILTS}:
+
+<!--
+<pre class="no-pretty-print">
+(TODO: Example of referencing prebuilt library from another, using LOCAL_PREBUILTS.)
+</pre>
+-->
+
+<p>For more information about using prebuilts, see <a href="{@docRoot}ndk/guides/prebuilts.html">
+NDK Prebuilt Library Support</a>.</p>
+
+
+<h4>PREBUILT_STATIC_LIBRARY</h4>
+<p>The same as {@code PREBUILT_SHARED_LIBRARY}, but for a prebuilt static library. For more
+information about using prebuilts, see <a href="{@docRoot}ndk/guides/prebuilts.html">NDK Prebuilt
+Library Support</a>.</p>
+
+<h4>TARGET_ARCH</h4>
+<p>The name of the target CPU architecture as the Android Open Source Project specifies it.
+For any ARM-compatible build, use {@code arm}, independent of the CPU architecture revision or
+ABI (see TARGET_ARCH_ABI, below).</p>
+
+<p>The value of this variable is taken from the APP_ABI variable that you define in the
+<a href="{docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file, which the system
+reads ahead of parsing the {@code Android.mk} file.</p>
+
+<h4>TARGET_PLATFORM</h4>
+<p>The Android API level number for the build system to target.
+For example, the Android 5.1 system images correspond to Android API level 22: {@code android-22}.
+For a complete list of platform names and corresponding Android system
+images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Stable APIs</a>.
+The following example shows the syntax for using this variable:</p>
+
+<pre class="no-pretty-print">
+TARGET_PLATFORM := android-22
+</pre>
+
+<h4>TARGET_ARCH_ABI</h4>
+<p>This variable stores the name of the CPU and architecture to target when the build system
+parses this {@code Android.mk} file. You can specify one or more of the following values, using
+a space as a delimiter between multiple targets. Table 1 shows the ABI setting to use for each
+supported CPU and architecture.
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> ABI settings for different CPUs and architectures.</p>
+<table>
+  <tr>
+    <th scope="col">CPU and architecture</th>
+    <th scope="col">Setting</th>
+  </tr>
+  <tr>
+    <th scope="col">ARMv5TE</th>
+    <th scope="col">{@code armeabi}</th>
+  </tr>
+  <tr>
+    <th scope="col">ARMv7</th>
+    <th scope="col">{@code armeabi-v7a}</th>
+  </tr>
+  <tr>
+    <th scope="col">ARMv8 AArch64</th>
+    <th scope="col">{@code arm64-v8a}</th>
+  </tr>
+  <tr>
+    <th scope="col">i686</th>
+    <th scope="col">{@code x86}</th>
+  </tr>
+  <tr>
+    <th scope="col">x86-64</th>
+    <th scope="col">{@code x86_64}</th>
+  </tr>
+  <tr>
+    <th scope="col">mips32 (r1)</th>
+    <th scope="col">{@code mips}</th>
+  </tr>
+  <tr>
+    <th scope="col">mips64 (r6)</th>
+    <th scope="col">{@code mips64}</th>
+  </tr>
+  <tr>
+    <th scope="col">All</th>
+    <th scope="col">{@code all}</th>
+  </tr>
+</table>
+
+<p>The following example shows how to set ARMv8 AArch64 as the target CPU-and-ABI combination:</p>
+
+<pre class="no-pretty-print">
+TARGET_ARCH_ABI := arm64-v8a
+</pre>
+
+<p class="note"><strong>Note: </strong> Up to Android NDK 1.6_r1, this variable is defined as
+{@code arm}.</p>
+
+<p>For more details about architecture ABIs and associated compatibility
+issues, refer to
+<a href="{@docRoot}ndk/guides/md_3__key__topics__c_p_u__support__chapter_1-section_8__a_b_is.html">
+Android Native CPU ABI Management</a></p>
+
+<p>New target ABIs in the future will have different values.</p>
+
+<h4>TARGET_ABI</h4>
+<p>A concatenation of target Android API level and ABI, it is especially useful when you want to test against
+a specific target system image for a real device. For example, to specify a 64-bit ARM device
+running on Android API level 22:</p>
+
+<pre class="no-pretty-print">
+TARGET_ABI := android-22-arm64-v8a
+</pre>
+
+<p class="note"><strong>Note:</strong> Up to Android NDK 1.6_r1, the default value was
+{@code android-3-arm}.</p>
+
+<h2 id="mdv">Module-description variables</h2>
+<p>The variables in this section describe your module to the build system. Each module description
+should follow this basic flow:
+<ul>
+<ol type = "1">
+<li>Initialize or undefine the variables associated with the module, using the {@code CLEAR_VARS}
+  variable.</li>
+<li>Assign values to the variables used to describe the module.
+<li>Set the NDK build system to use the appropriate build script for the module, using the
+  {@code BUILD_XXX} variable.</li>
+</ol>
+</ul>
+
+<h4>LOCAL_PATH</h4>
+<p>This variable is used to give the path of the current file. You must define
+it at the start of your {@code Android.mk} file. The following example shows how to do so:</p>
+
+<pre class="no-pretty-print">
+LOCAL_PATH := $(call my-dir)
+</pre>
+
+<p>The script to which {@code CLEAR_VARS} points does not clear this variable. Therefore, you only need
+to define it a single time, even if your {@code Android.mk} file describes multiple modules.</p>
+
+<h4>LOCAL_MODULE</h4>
+<p>This variable stores the name of your module. It must be unique among all module names,
+and must not contain any spaces. You must define it before including any scripts (other than
+the one for {@code CLEAR_VARS}). You need not add either the {@code lib} prefix
+or the {@code .so} or {@code .a} file extension; the build system makes these modifications
+automatically. Throughout your {@code Android.mk} and {@code Application.mk} files, refer to
+your module by its unmodified name. For example, the following line results in the generation of a
+shared library module called {@code libfoo.so}:</p>
+
+<pre class="no-pretty-print">
+LOCAL_MODULE := "foo"
+</pre>
+
+<p>If you want the generated module to have a name other than {@code lib} + the value of
+{@code LOCAL_MODULE}, you can use the {@code LOCAL_MODULE_FILENAME} variable to give the
+generated module a name of your own choosing, instead.</p>
+
+<h4>LOCAL_MODULE_FILENAME</h4>
+<p>This optional variable allows you to override the names that the build system
+uses by default for files that it generates. For example, if the name of your {@code LOCAL_MODULE}
+is {@code foo}, you can force the system to call the file it generates {@code libnewfoo}. The
+following example shows how to accomplish this:</p>
+
+<pre class="no-pretty-print">
+LOCAL_MODULE := foo
+LOCAL_MODULE_FILENAME := libnewfoo
+</pre>
+
+<p>For a shared library module, this example would generate a file called {@code libnewfoo.so}.</p>
+
+<p class="note"><strong>Note:</strong> You cannot override filepath or file extension.</p>
+
+<h4>LOCAL_SRC_FILES</h4>
+<p>This variable contains the list of source files that the build system uses to generate the
+module. Only list the files that the build system actually passes to the compiler, since the build
+system automatically computes any associated depencies.</p>
+<p>Note that you can use both relative (to {@code LOCAL_PATH}) and absolute file paths.
+
+<p>We recommend avoiding absolute file paths; relative paths make your
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file more
+portable.</p>
+
+<p class="note"><strong>Note: </strong> Always use Unix-style forward slashes (/) in build files.
+The build system does not handle Windows-style backslashes (\) properly.</p>
+
+<h4>LOCAL_CPP_EXTENSION</h4>
+<p>You can use this optional variable to indicate a file extension other than {@code .cpp} for your
+C++ source files. For example, the following line changes the extension to {@code .cxx}.
+(The setting must include the dot.)
+
+<pre class="no-pretty-print">
+LOCAL_CPP_EXTENSION := .cxx
+</pre>
+
+<p>From NDK r7, you can use this variable to specify multiple extensions. For instance:</p>
+
+<pre class="no-pretty-print">
+LOCAL_CPP_EXTENSION := .cxx .cpp .cc
+</pre>
+
+<h4>LOCAL_CPP_FEATURES</h4>
+
+<p>You can use this optional variable to indicate that your code relies on specific C++ features.
+It enables the right compiler and linker flags during the build process. For prebuilt binaries,
+this variable also declares which features the binary depends on, thus helping ensure the final
+linking works correctly. We recommend that you use this variable instead of enabling
+{@code -frtti} and {@code -fexceptions} directly in your {@code LOCAL_CPPFLAGS} definition.</p>
+
+<p>Using this variable allows the build system to use the appropriate flags for each module. Using
+{@code LOCAL_CPPFLAGS} causes the compiler to use all specified flags for all modules, regardless
+of actual need.</p>
+
+For example, to indicate that your code uses RTTI (RunTime Type Information), write: </p>
+
+<pre class="no-pretty-print">
+LOCAL_CPP_FEATURES := rtti
+</pre>
+
+<p>To indicate that your code uses C++ exceptions, write:</p>
+
+<pre class="no-pretty-print">
+LOCAL_CPP_FEATURES := exceptions
+</pre>
+
+<p>You can also specify multiple values for this variable. For example:</p>
+
+<pre class="no-pretty-print">
+LOCAL_CPP_FEATURES := rtti features
+</pre>
+
+The order in which you describe the values does not matter.
+
+
+<h4>LOCAL_C_INCLUDES</h4>
+<p>You can use this optional variable to specify a list of paths, relative to the
+NDK {@code root} directory, to add to the include search path when compiling all sources
+(C, C++ and Assembly). For example: </p>
+
+<pre class="no-pretty-print">
+LOCAL_C_INCLUDES := sources/foo
+</pre>
+
+<p>Or even: </p>
+
+<pre class="no-pretty-print">
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/<subdirectory>/foo
+</pre>
+
+<p>Define this variable before setting any corresponding inclusion flags via {@code LOCAL_CFLAGS}
+or {@code LOCAL_CPPFLAGS}.</p>
+
+<p>The build system also uses {@code LOCAL_C_INCLUDES} paths automatically when launching native
+debugging with ndk-gdb.</p>
+
+
+<h4>LOCAL_CFLAGS</h4>
+
+<p>This optional variable sets compiler flags for the build system to pass when building C
+<em>and</em> C++ source files. The ability to do so can be useful for specifying additional macro
+definitions or compile options.</p>
+
+<p>Try not to change the optimization/debugging level in your {@code Android.mk} file.
+The build system can handle this setting automatically for you, using the relevant information
+in the {@code Application.mk} file. Doing it this way allows the build system to generate useful
+data files used during debugging.</p>
+
+<p class="note"><strong>Note: </strong>In android-ndk-1.5_r1, the corresponding flags only applied
+to C source files, not C++ ones. They now match the full Android build system behavior.
+(You can now use {@code LOCAL_CPPFLAGS} to specify flags for C++ sources only.)</p>
+
+<p>It is possible to specify additional include paths by writing:
+
+<pre class="no-pretty-print">
+LOCAL_CFLAGS += -I&lt;path&gt;,
+</pre>
+
+It is better, however, to use {@code LOCAL_C_INCLUDES} for this purpose, since
+doing so also makes it possible to use the paths available for native debugging with ndk-gdb.</p>
+
+
+<h4>LOCAL_CPPFLAGS</h4>
+<p>An optional set of compiler flags that will be passed when building C++
+source files <em>only</em>. They will appear after the LOCAL_CFLAGS on the
+compiler's command-line.</p>
+
+
+<p class="note"><strong>Note: </strong>In android-ndk-1.5_r1, the corresponding flags applied to
+both C and C++ sources. This has been corrected to match the full Android build system.
+To specify flags for both C and C++ sources, use {@code LOCAL_CFLAGS}.</p>
+
+
+<h4>LOCAL_STATIC_LIBRARIES</h4>
+
+<p>This variable stores the list of static libraries modules on which the current module depends.</p>
+
+<p>If the current module is a shared library or an executable, this variable will force
+these libraries to be linked into the resulting binary.</p>
+
+<p>If the current module is a static library, this variable simply indicates that other
+modules depending on the current one will also depend on the listed
+libraries.</p>
+
+<h4>LOCAL_SHARED_LIBRARIES</h4>
+
+<p>This variable is the list of shared libraries <em>modules</em> on which this module depends at
+runtime. This information is necessary at link time, and to embed the corresponding information
+in the generated file.</p>
+
+<h4>LOCAL_WHOLE_STATIC_LIBRARIES</h4>
+<p>This variable is a variant of {@code LOCAL_STATIC_LIBRARIES}, and expresses that the linker
+should treat the associated library modules as <em>whole archives</em>. For more information
+on whole archives, see the GNU linker's
+<a href="http://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_node/ld_3.html">documentation</a> for the
+{@code --whole-archive} flag.</p>
+
+<p>This variable is useful when there are circular dependencies among
+several static libraries. When you use this variable to build a shared library, it will force
+the build system to add all object files from your static libraries to the final binary. The same
+is not true, however, when generating executables.</p>
+
+
+<h4>LOCAL_LDLIBS</h4>
+
+<p>This variable contains the list of additional linker flags for use in building your shared
+library or executable. It enables you to use the {@code -l} prefix to pass the name of specific
+system libraries. For example, the following example tells the linker to generate a module that
+links to {@code /system/lib/libz.so} at load time: </p>
+
+<pre class="no-pretty-print">
+LOCAL_LDLIBS := -lz
+</pre>
+
+<p>For the list of exposed system libraries against which you can link in this NDK release, see
+<a href="stable_apis.html">Android NDK Stable APIs</a>.</p>
+
+<p class="note"><strong>Note: </strong> If you define this variable for a static library,
+the build system ignores it, and {@code ndk-build} prints a warning.</p>
+
+<h4>LOCAL_LDFLAGS</h4>
+
+<p>The list of other linker flags for the build system to use when building your shared library
+or executable. For example, the following example uses the {@code ld.bfd} linker on ARM/X86 GCC
+4.6+, on which {@code ld.gold} is the default </p>
+
+<pre class="no-pretty-print">
+LOCAL_LDFLAGS += -fuse-ld=bfd
+</pre>
+
+<p class="note"><strong>Note: </strong>If you define this variable for a static library, the build
+system ignores it, and ndk-build prints a warning.</p>
+
+<h4>LOCAL_ALLOW_UNDEFINED_SYMBOLS</h4>
+
+<p>By default, when the build system encounters an undefined reference encountered while trying to
+build a shared, it will throw an <em>undefined symbol</em> error. This error can help you catch
+catch bugs in your source code.</p>
+
+<p>To disable this check, set this variable to {@code true}. Note that this setting may cause the
+shared library to load at runtime.</p>
+
+<p class="note"><strong>Note: </strong> If you define this variable for a static library,
+the build system ignores it, and ndk-build prints a warning.</p>
+
+<h4>LOCAL_ARM_MODE</h4
+>
+<p>By default, the build system generates ARM target binaries in <em>thumb</em> mode, where each
+instruction is 16 bits wide and linked with the STL libraries in the {@code thumb/} directory.
+Defining this variable as {@code arm} forces the build system to generate the module's object
+files in 32-bit {@code arm} mode. The following example shows how to do this:</p>
+
+<pre class="no-pretty-print">
+LOCAL_ARM_MODE := arm
+</pre>
+
+<p>You can also instruct the build system to only build specific sources in {@code arm} mode by
+appending {@code .arm} suffix to the the source filenames. For example, the following example
+tells the build system to always compile {@code bar.c} in ARM mode, but to build
+{@code foo.c} according to the value of {@code LOCAL_ARM_MODE}.</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES := foo.c bar.c.arm
+</pre>
+
+<p></p>
+
+<p class="note"><strong>Note: </strong> You can also force the build system to generate ARM binaries
+by setting {@code APP_OPTIM} in your
+<a href="{@docRoot}ndk/guides/application_mk.html>{@code Application.mk}</a> file to {@code debug}.
+Specifying {@code debug} forces an ARM build because the toolchain debugger does not handle thumb
+code properly.</p>
+
+
+<h4>LOCAL_ARM_NEON</h4>
+<p>This variable only matters when you are targetting the {@code armeabi-v7a} ABI. It allows the
+use of ARM Advanced SIMD (NEON) GCC intrinsics in your C and C++ sources, as well as NEON
+instructions in Assembly files.</p>
+
+<p>Note that not all ARMv7-based CPUs support the NEON instruction set extensions. For this reason,
+you must perform runtime detection to be able to safely use this code at runtime. For more
+information, please see <a href="{@docRoot}ndk/guides/cpu_support.html">Android
+NDK &amp; ARM NEON Instruction Set Extension Support</a> and <a
+href="{@docRoot}ndk/guides/cpu_features.html">Android
+NDK CPU Features Detection Library</a>.</p>
+
+<p>Alternatively, you can use the {@code .neon} suffix to specify that the build system only
+compile specific source files with NEON support. In the following example, the build system compiles
+{@code foo.c} with thumb and neon support, {@code bar.c} with thumb support, and
+{@code zoo.c} with support for ARM and NEON:</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES = foo.c.neon bar.c zoo.c.arm.neon
+</pre>
+
+
+<p>If you use both suffixes, {@code .arm} must precede {@code .neon}.</p>
+
+<h4>LOCAL_DISABLE_NO_EXECUTE</h4>
+
+<p>Android NDK r4 added support for the "NX bit" security feature. It is
+enabled by default, but you can disable it by setting this variable to {@code true}. We do not
+recommend doing so without a compelling reason.</p>
+
+<p>This feature does not modify the ABI, and is only enabled on kernels
+targeting ARMv6+ CPU devices. Machine code with this feature enabled
+will run unmodified on devices running earlier CPU architectures.</p>
+<p>For more information, see <a href="http://en.wikipedia.org/wiki/NX_bit">Wikipedia: NX bit</a>
+and <a href="http://www.gentoo.org/proj/en/hardened/gnu-stack.xml">The GNU stack kickstart</a>.
+
+<h4>LOCAL_DISABLE_RELRO</h4>
+
+<p>By default, the NDK compiles code with read-only relocations and GOT
+protection. This variable instructs the runtime linker to mark certain regions of memory
+as read-only after relocation, making certain security exploits (such as GOT overwrites)
+more difficult. Note that these protections are only effective on Android API level 16 and higher.
+On lower API levels, the code will still run, but without memory protections.</p>
+
+<p>This variable is turned on by default, but you can disable it by setting its value to
+{@code true}. We do not recommend doing so without a compelling reason.</p>
+
+<p>For more information, see
+<a href="http://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/">RELRO:
+RELocation Read-Only</a> and <a href="http://www.akkadia.org/drepper/nonselsec.pdf">Security
+enhancements in RedHat Enterprise Linux (section 6)</a>.</p>
+
+<h4>LOCAL_DISABLE_FORMAT_STRING_CHECKS</h4>
+
+<p>By default, the build system compiles code with format string protection. Doing so forces a
+compiler error if a non-constant format string is used in a {@code printf}-style function.</p>
+<p>This protection is off by default, but you can disable it by setting its value to
+{@code true}. We do not recommend doing so without a compelling reason.</p>
+
+
+<h4>LOCAL_EXPORT_CFLAGS</h4>
+
+<p>This variable records a set of C/C++ compiler flags to add to the {@code LOCAL_CFLAGS} definition
+of any other module that uses this one via the {@code LOCAL_STATIC_LIBRARIES} or
+{@code LOCAL_SHARED_LIBRARIES} variables.</p>
+
+<p>For example, consider the following pair of modules: {@code foo} and {@code bar}, which depends
+on {@code foo}:</p>
+
+<pre class="no-pretty-print">
+include $(CLEAR_VARS)
+LOCAL_MODULE := foo
+LOCAL_SRC_FILES := foo/foo.c
+LOCAL_EXPORT_CFLAGS := -DFOO=1
+include $(BUILD_STATIC_LIBRARY)
+
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := bar
+LOCAL_SRC_FILES := bar.c
+LOCAL_CFLAGS := -DBAR=2
+LOCAL_STATIC_LIBRARIES := foo
+include $(BUILD_SHARED_LIBRARY)
+</pre>
+
+<p>Here, the build system passes the flags {@code -DFOO=1} and {@code -DBAR=2} to the compiler when
+building {@code bar.c}. It also prepends exported flags to your your module's {@code LOCAL_CFLAGS}
+so you can easily override them.</p>
+
+In addition, the relationship among modules is transitive: If {@code zoo} depends on
+{@code bar}, which in turn depends on {@code foo}, then {@code zoo} also inherits all flags
+exported from {@code foo}.</p>
+
+<p>Finally, the build system does not use exported flags when building locally (i.e., building the
+module whose flags it is exporting). Thus, in the example above, it does not pass {@code -DFOO=1}
+to the compiler when building {@code foo/foo.c}. To build locally, use {@code LOCAL_CFLAGS}
+instead.</p>
+
+<h4>LOCAL_EXPORT_CPPFLAGS</h4>
+<p>This variable is the same as {@code LOCAL_EXPORT_CFLAGS}, but for C++ flags only.</p>
+
+<h4>LOCAL_EXPORT_C_INCLUDES</h4>
+<p>This variable is the same as {@code LOCAL_EXPORT_CFLAGS}, but for C include paths. It is useful
+in cases where, for example, {@code bar.c} needs to include headers from module {@code foo}.</p>
+
+<h4>LOCAL_EXPORT_LDFLAGS</h4>
+<p>This variable is the same as {@code LOCAL_EXPORT_CFLAGS}, but for linker flags.</p>
+
+<h4>LOCAL_EXPORT_LDLIBS</h4>
+<p>This variable is the same as {@code LOCAL_EXPORT_CFLAGS}, telling the build system to pass names
+of specific system libraries to the compiler. Prepend {@code -l} to the name of each library you
+specify.</p>
+
+<p>Note that the build system appends imported linker flags to the value of your module's
+{@code LOCAL_LDLIBS} variable. It does this due to the way Unix linkers work.</p>
+
+<p>This variable is typically useful when module {@code foo} is a static library
+and has code that depends on a system library. You can then use {@code LOCAL_EXPORT_LDLIBS} to
+to export the dependency. For example: </p>
+
+<pre class="no-pretty-print">
+include $(CLEAR_VARS)
+LOCAL_MODULE := foo
+LOCAL_SRC_FILES := foo/foo.c
+LOCAL_EXPORT_LDLIBS := -llog
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := bar
+LOCAL_SRC_FILES := bar.c
+LOCAL_STATIC_LIBRARIES := foo
+include $(BUILD_SHARED_LIBRARY)
+</pre>
+
+<p>In this example, the build system puts {@code -llog} at the end of the linker command when it
+builds {@code libbar.so}. Doing so tells the linker that, because {@code libbar.so} depends
+on {@code foo}, it also depends on the system logging library.</p>
+
+<h4>LOCAL_SHORT_COMMANDS</h4>
+<p>Set this variable to {@code true} when your module has a very high
+number of sources and/or dependent static or shared libraries. Doing so forces the
+build system to use {@code @} syntax for archives containing intermediate object files
+or linking libraries.</p>
+
+<p>This feature can be useful on Windows, where the command line accepts a maximum of only
+of 8191 characters, which can be too small for complex projects. It also impacts the compilation of
+individual source files, placing nearly all compiler flags inside list files, too.</p>
+
+<p>Note that any value other than {@code true} will revert to the
+default behaviour. You can also define {@code APP_SHORT_COMMANDS} in your
+<a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file to force this
+behavior for all modules in your project.</p>
+
+<p>We do not recommend enabling this feature by default, since it makes the build slower.</p>
+
+
+<h4>LOCAL_THIN_ARCHIVE</h4>
+
+<p>Set this variable to {@code true} when building static libraries.
+Doing so will generate a <strong>thin archive</strong>, a library file that does not contain
+object files, but instead just file paths to the actual objects that it would normally
+contain.</p>
+<p>This is useful to reduce the size of your build output. The drawback is that
+such libraries <em>cannot</em> be moved to a different location (all paths
+inside them are relative).</p>
+<p>Valid values are {@code true}, {@code false} or empty. A
+default value can be set in your {@code Application.mk} file through the {@code APP_THIN_ARCHIVE}
+
+variable.</p>
+<p class="note"><strong>Note:</strong> This is ignored for non-static library modules, or prebuilt
+static library ones.</p>
+
+<h4>LOCAL_FILTER_ASM</h4>
+<p>Define this variable as a shell command that the build system will use to filter the
+assembly files extracted or generated from the files you specified for {@code LOCAL_SRC_FILES}.</p>
+<p>Defining this variable causes the following things to occur:</p>
+
+<ul>
+<ol type = "1">
+<li>The build system generates a temporary assembly file from any C or C++ source file, instead of compiling them into an object file.</li>
+<li>The build system executes the shell command in {@code LOCAL_FILTER_ASM}
+on any temporary assembly file and on any assembly file
+listed in {@code LOCAL_SRC_FILES}, thus generating another temporary assembly
+file.</li>
+<li>The build system compiles these filtered assembly files into an object file.</li>
+</ol>
+</ul>
+<p>For example:</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES  := foo.c bar.S
+LOCAL_FILTER_ASM :=
+
+foo.c --1--&gt; $OBJS_DIR/foo.S.original --2--&gt; $OBJS_DIR/foo.S --3--&gt; $OBJS_DIR/foo.o
+bar.S                                 --2--&gt; $OBJS_DIR/bar.S --3--&gt; $OBJS_DIR/bar.o
+</pre>
+
+<p>"1" corresponds to the compiler, "2" to the filter, and "3" to the assembler. The filter must
+be a standalone shell command that takes the name of the input file as its first argument, and the
+name of the output file as the second one. For example:</p>
+
+<pre class="no-pretty-print">
+myasmfilter $OBJS_DIR/foo.S.original $OBJS_DIR/foo.S
+myasmfilter bar.S $OBJS_DIR/bar.S
+</pre>
+
+<h3 id="npfm">NDK-Provided Function Macros</h2>
+<p>This section explains GNU Make function macros that the NDK provides. Use
+{@code $(call &lt;function&gt;)} to evaluate them; they return textual information.</p>
+
+<h4>my-dir</h4>
+
+<p>This macro returns the path of the last included makefile, which typically is the
+current {@code Android.mk}'s directory. {@code my-dir} is useful for defining
+{@code LOCAL_PATH} at the start of your {@code Android.mk} file. For example:</p>
+
+<pre class="no-pretty-print">
+LOCAL_PATH := $(call my-dir)
+</pre>
+
+<p>Due to the way GNU Make works, what this macro really returns is the
+path of the last makefile that the build system included when parsing the build scripts. For this
+reason, you should not call {@code my-dir} after including another file.</p>
+
+<p>For example, consider the following example: </p>
+
+<pre class="no-pretty-print">
+LOCAL_PATH := $(call my-dir)
+
+# ... declare one module
+
+include $(LOCAL_PATH)/foo/`Android.mk`
+
+LOCAL_PATH := $(call my-dir)
+
+# ... declare another module
+</pre>
+
+<p>The problem here is that the second call to {@code my-dir} defines
+{@code LOCAL_PATH} as {@code $PATH/foo} instead of {@code $PATH}, because that was where its
+most recent include pointed.</p>
+
+<p>You can avoid this problem by putting additional includes after everything
+else in the {@code Android.mk} file. For example:</p>
+
+<pre class="no-pretty-print">
+LOCAL_PATH := $(call my-dir)
+
+# ... declare one module
+
+LOCAL_PATH := $(call my-dir)
+
+# ... declare another module
+
+# extra includes at the end of the Android.mk file
+include $(LOCAL_PATH)/foo/Android.mk
+
+</pre>
+
+<p>If it is not feasible to structure the file in this way, save the value of the first
+{@code my-dir} call into another variable. For example: </p>
+
+<pre class="no-pretty-print">
+MY_LOCAL_PATH := $(call my-dir)
+
+LOCAL_PATH := $(MY_LOCAL_PATH)
+
+# ... declare one module
+
+include $(LOCAL_PATH)/foo/`Android.mk`
+
+LOCAL_PATH := $(MY_LOCAL_PATH)
+
+# ... declare another module
+</pre>
+
+<h4>all-subdir-makefiles</h4>
+
+<p>Returns the list of {@code Android.mk} files located in all subdirectories of
+the current {@code my-dir} path.
+
+<p>You can use this function to provide deep-nested source directory hierarchies to the build
+system. By default, the NDK only looks for files in the directory containing the
+{@code Android.mk} file.</p>
+
+<h4>this-makefile</h4>
+<p>Returns the path of the current makefile (from which the build system called the function).</p>
+
+<h4>parent-makefile</h4>
+<p>Returns the path of the parent makefile in the inclusion tree (the path of the makefile that
+included the current one).</p>
+
+<h4>grand-parent-makefile</h4>
+<p>Returns the path of the grandparent makefile in the inclusion tree (the path of the makefile that
+included the current one).</p>
+
+<h4>import-module</h4>
+<p>A function that allows you to find and include the {@code Android.mk}
+of another module by name. A typical example is as follows: </p>
+
+<pre class="no-pretty-print">
+$(call import-module,&lt;name&gt;)
+</pre>
+
+<p>In this example, the build system looks for the module tagged &lt;name&gt; in the list of
+directories referenced that your {@code NDK_MODULE_PATH} environment variable references, and
+includes its {@code Android.mk} file automatically for you.</p>
+
+<p>For more information, see <a href="import_module.html">Android Module Paths (Sharing Code)</a>.
+</p>

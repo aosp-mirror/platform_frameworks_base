@@ -1,0 +1,194 @@
+page.title=ndk-build
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#int">Internals</a></li>
+         <li><a href="#ifc">Invoking from the Command Line</a></li>
+         <li><a href="#ife">Invoking from Eclipse</a></li>
+         <li><a href="#6432">64-bit and 32-bit toolchains</a></li>
+         <li><a href="#req">Requirements</a></li>
+          </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+<p>ndk-build is a tiny shell script introduced in Android NDK r4. Its purpose
+is simply to invoke the right NDK build script.
+
+<h2 id="int">Internals</h2>
+
+ndk-build is equivalent to: </p>
+
+<pre class="no-pretty-print">
+$GNUMAKE -f &lt;ndk&gt;/build/core/build-local.mk
+&lt;parameters&gt;
+</pre>
+
+<p><code>$GNUMAKE</code> points to GNU Make 3.81 or later, and
+<code>&lt;ndk&gt;</code> points to your NDK installation directory. You can use
+this information to invoke ndk-build from other shell scripts, or even your own
+make files.</p>
+
+<h2 id="ifc">Invoking from the Command Line</h2>
+<p>ndk-build lives in the top level the NDK installation directory. To run it from the
+command line, invoke it while in or under your application project directory.
+For example: </p>
+
+<pre class="no-pretty-print">
+cd &lt;project&gt;
+$ &lt;ndk&gt;/ndk-build
+</pre>
+
+<p>In this example, <code>&lt;project&gt;</code> points to your
+project’s root directory, and <code>&lt;ndk&gt;</code> is the directory where
+you installed the NDK. As noted in <a
+href="{@docRoot}ndk/guides/setup.html#install">Setup</a>, you can add {@code $NDK} to your
+{@code PATH} to avoid having to type the whole filepath every time you use ndk-build.
+Alternatively, you can create an alias.</p>
+<p><a class="anchor" id="options"></a> </p>
+<h3>Options</h3>
+<p>All parameters to ndk-build are passed directly to the underlying GNU {@code make}
+command that runs the NDK build scripts. Combine <code>ndk-build</code> and
+options in the form <code>ndk-build &lt;option&gt;</code>. For example: </p>
+
+<pre class="no-pretty-print">
+$ ndk-build clean
+</pre>
+
+<p>The following options are available:</p>
+<dl>
+  <dt>{@code clean}</dt>
+  <dd>Remove any previously generated binaries.</dd>
+  <dt>{@code V=1}</dt>
+  <dd>Launch build, and display build commands.<dd>
+  <dt>{@code -B}</dt>
+  <dd>Force a complete rebuild.</dd>
+  <dt>{@code -B V=1}</dt>
+  <dd>Force a complete rebuild, and display build commands.</dd>
+  <dt>{@code NDK_LOG=1}</dd>
+  <dd>Display internal NDK log messages (used for debugging the NDK itself).</dd>
+  <dt>{@code NDK_DEBUG=1}</dt>
+  <dd>Force a debuggable build (see <a href="#dvr">Table 1</a>).</dd>
+  <dt>{@code NDK_DEBUG=0}</dt>
+  <dd>Force a release build (see <a href="#dvr">Table 1</a>).</dd>
+  <dt>{@code NDK_HOST_32BIT=1}</dt>
+  <dd>Always use the toolchain in 32-bit mode (see <a href="#6432">64-bit and 32-bit
+  Toolchains</a>).</dd>
+  <dt>{@code NDK_APPLICATION_MK=&lt;file&gt;}</dt>
+  <dd>Build, using a specific <code>Application.mk</code> file pointed to by the
+  {@code NDK_APPLICATION_MK} variable.</dd>
+  <dt>{@code -C &lt;project&gt;}</dt>
+  <dd>Build the native code for the project path located at {@code &lt;project&gt;}. Useful if you
+  don't want to {@code cd} to it in your terminal.</dd>
+</dl>
+
+<h2 id="ife">Invoking from Eclipse</h2>
+<p>To build from Eclipse, make sure that you have configured it as described in
+<a href="{@docRoot}ndk/guides/setup.html#configure">Setup</a>. If you
+wish to build using the default <code>ndk-build</code> command, with no
+options, you can just build your project just as you would any Android project.
+To get Eclipse to add any of the options described above, follow these steps:</p>
+<ol type="1">
+<li>In the <em>Project Explorer</em> pane, right-click your project name.</li>
+<li>Select <strong>Properties</strong>.</li>
+<li>Click <strong>C/C++ Build</strong>.</li>
+<li>Under the <em>Builder Settings</em> tab, uncheck <strong>Use default build command</strong>.</li>
+<li>In the <em>Build command</em> field, enter the entire build string as if you were typing it on
+the command line.</li>
+<li>Click <strong>OK</strong>.</li>
+</ol>
+Figure 1 shows an example of an entered string.<br>
+<br>
+<img src="./images/NDK_build_string.png"
+    srcset="./images/NDK_build_string@2x.png 2x"
+    alt="enter the build string next to 'Build command'"
+    height="152" width="501">
+<p style="clear:both"><b>Figure 1.</b> Specifying a debug build from within
+Eclipse</p>
+<p><a class="anchor" id="dvr"></a> </p>
+<h3>Debuggable versus Release builds</h3>
+<p>Use the <code>NDK_DEBUG</code> option and, in certain cases,
+{@code AndroidManifest.xml} to specify debug or release build,
+optimization-related behavior, and inclusion of symbols. Table 1 shows the
+results of each possible combination of settings.</p>
+<p><em>Table 1.</em> Results of <code>NDK_DEBUG</code> (command line) and
+<code>android:debuggable</code> (manifest) combinations.</p>
+<table>
+<tr>
+<th></th><th>NDK_DEBUG=0 </th><th>NDK_DEBUG=1</th><th>NDK_DEBUG not specified
+</th></tr>
+<tr>
+<td>android:debuggble="true" </td><td>Debug; Symbols; Optimized*1
+</td><td>Debug; Symbols; Not optimized*2 </td><td>(same as NDK_DEBUG=1)
+</td></tr>
+<tr>
+<td>android:debuggable="false"</td><td>Release; Symbols; Optimized
+</td><td>Release; Symbols; Not optimized</td><td>Release; No symbols;
+Optimized*3 </td></tr>
+</table>
+*1: Useful for profiling.<br>
+*2: Default for running <a href="{@docRoot}ndk/guides/"ndk-gdb.html">ndk-gdb</a>.<br>
+*3: Default mode.<br>
+<br>
+<p class="note"><strong>Note:</strong> {@code NDK_DEBUG=0} is the equivalent of
+{@code APP_OPTIM=release}, and complies with the GCC {@code -O2} option. {@code NDK_DEBUG=1} is the
+equivalent of {@code APP_OPTIM=debug} in {@code Application.mk}, and complies with the GCC
+{@code -O0} option. For more information about {@code APP_OPTIM}, see
+<a href="{@docRoot}ndk/guides/application_mk.html">Application.mk</a>.</p>
+<p>The syntax on the command line is, for example: </p>
+
+<pre class="no-pretty-print">
+$ ndk-build NDK_DEBUG=1
+</pre>
+
+<p>If you are using build tools from prior to SDK r8, you must also modify your
+{@code AndroidManifest.xml} file to specify debug mode. The syntax for doing so resembles the
+following:</p>
+
+<pre class="no-pretty-print">&lt;application android:label="@string/app_name"
+android:debuggable="true"&gt;
+</pre>
+
+From SDK r8 onward, you do not need to touch {@code AndroidManifest.xml}. Building a debug package
+(e.g. with ant debug or the corresponding option of the ADT plugin) causes the tool automatically to
+pick the native debug files generated with {@code NDK_DEBUG=1}.
+
+
+<h2 id="6432">64-bit and 32-bit toolchains</h2>
+<p>Some toolchains come with both 64-bit and 32-bit versions. For example,
+directories {@code &lt;ndk&gt;/toolchain/&lt;name&gt;/prebuilt/} and
+{@code &lt;ndk&gt;/prebuilt/} may contain both {@code linux-x86} and
+{@code linux-x86_64} folders for Linux tools in 32-bit and 64-bit modes,
+respectively. The ndk-build script automatically chooses a 64-bit version of
+the toolchain if the host OS supports it. You can force the use of a 32-bit
+toolchain by using {@code NDK_HOST_32BIT=1} either in your environment or
+on the ndk-build command line.</p>
+<p>Note that 64-bit tools utilize host resources better (for instance, they are faster, and handle
+larger programs), and they can still generate 32-bit binaries for Android.</p>
+
+<h2 id="req">Requirements</h2>
+<p>You need GNU Make 3.81 or later to use ndk-build or the NDK in general.
+The build scripts will detect a non-compliant Make tool, and generate an error
+message.</p>
+<p>If you have GNU Make 3.81 installed, but the default <code>make</code>
+command doesn’t launch it, define {@code GNUMAKE} in your environment to point to it
+before launching ndk-build. For example: </p>
+
+<pre class="no-pretty-print">
+$ export GNUMAKE=/usr/local/bin/gmake
+$ ndk-build
+</pre>
+
+<p>You can override other host prebuilt tools in {@code $NDK/prebuilt/&lt;OS&gt;/bin/}
+with the following environment variables: </p>
+
+<pre class="no-pretty-print">
+$ export NDK_HOST_AWK=&lt;path-to-awk&gt;
+$ export NDK_HOST_ECHO=&lt;path-to-echo&gt;
+$ export NDK_HOST_CMP=&lt;path-to-cmp&gt;
+</pre>

@@ -1,0 +1,23 @@
+page.title=Building
+@jd:body
+
+<div class="contents">
+<div class="textblock"><p>This section explains, in detail, how to use the NDK to build your project. It comprises the following topics:</p>
+<ul>
+<li><a href="./md_3__key__topics__building__chapter_1-section_8_ndk-build.html">ndk-build</a><ul>
+<li>How to use the shell script that invokes the tools to build your shared libraries.</li>
+</ul>
+</li>
+<li><a href="./md_3__key__topics__building__chapter_1-section_8__android_8mk.html">Android.mk</a><ul>
+<li>Syntax for the file that describes your build sources to the build system.</li>
+</ul>
+</li>
+<li><a href="./md_3__key__topics__building__a_p_p_l_i_c_a_t_i_o_n-_m_k.html">Application.mk</a><ul>
+<li>Syntax for the file that describes the native modules that your application requires.</li>
+</ul>
+</li>
+<li><a href="./md_3__key__topics__building__s_t_a_n_d_a_l_o_n_e-_t_o_o_l_c_h_a_i_n.html">Standalone Toolchain</a><ul>
+<li>How to integrate the NDK into your existing build system. </li>
+</ul>
+</li>
+</ul>

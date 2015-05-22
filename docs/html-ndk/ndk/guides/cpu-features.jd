@@ -1,0 +1,210 @@
+page.title=The cpufeatures Library
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#usage">Usage</a></li>
+        <li><a href="#functions">Functions</a></li>
+        <li><a href="#ch">Change History</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>The NDK provides a small library named {@code cpufeatures} that your app can use at runtime to
+detect the target device's CPU family and the optional features it supports. It is designed to work
+as-is on all official Android platform versions.</p>
+
+<h2 id="usage">Usage</h2>
+<p>The {@code cpufeatures} library is available as an import module. To use it, follow the procedure
+below:</p>
+
+<ol>
+<li>List {@code cpufeatures} in your list of static library dependencies. For example:
+
+<pre class="no-pretty-print">
+LOCAL_STATIC_LIBRARIES := cpufeatures
+</pre>
+</li>
+
+<li>In your source code, include the {@code &lt;cpu-features.h&gt;} header file.</li>
+
+<li>At the end of your <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file,
+insert an instruction to import the {@code android/cpufeatures} module. For example:
+
+<pre class="no-pretty-print">
+$(call import-module,android/cpufeatures)
+</pre>
+
+<p>Here is a simple example of an {@code Android.mk} file that imports the {@code cpufeatures}
+library:</p>
+
+<pre class="no-pretty-print">
+&lt;project-path&gt;/jni/Android.mk:
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := &lt;your-module-name&gt;
+LOCAL_SRC_FILES := &lt;your-source-files&gt;
+LOCAL_STATIC_LIBRARIES := cpufeatures
+include $(BUILD_SHARED_LIBRARY)
+
+$(call import-module,android/cpufeatures)
+</pre>
+</li>
+</ol>
+
+<h2 id="functions">Functions</h2>
+<p>The {@code cpufeatures} library provides two functions. The first function returns the family to
+which the device's CPU belongs. Declare it as follows:</p>
+
+<pre class="no-pretty-print">
+AndroidCpuFamily android_getCpuFamily();
+</pre>
+
+<p>The function returns one of the following enums, representing the CPU family/architecture that
+the device supports.</p>
+<ul>
+<li>{@code ANDROID_CPU_FAMILY_ARM}</li>
+<li>{@code ANDROID_CPU_FAMILY_X86}</li>
+<li>{@code ANDROID_CPU_FAMILY_MIPS}</li>
+<li>{@code ANDROID_CPU_FAMILY_ARM64}</li>
+<li>{@code ANDROID_CPU_FAMILY_X86_64}</li>
+<li>{@code ANDROID_CPU_FAMILY_MIPS64}</li>
+</ul>
+
+<p>For a 32-bit executable on a 64-bit system, this function returns only the 32-bit value.</p>
+
+<p>The second function returns the set of optional features that the device's CPU supports. Declare
+it as follows:
+
+<pre class="no-pretty-print">
+uint64_t android_getCpuFeatures();
+</pre>
+
+<p>The return value takes the form of a set of bit flags, each flag representing one
+CPU-family-specific feature. The rest of this section provides information on features for
+the respective families.</p>
+
+<h4>32-bit ARM CPU family</h4>
+
+<p>The following flags are available for the 32-bit ARM CPU family:</p>
+<dl>
+<dt>{@code ANDROID_CPU_ARM_FEATURE_VFPv2}</dt>
+<dd>Indicates that the device's CPU supports the VFPv2 instruction set. Most ARMv6 CPUs support
+this instruction set.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_ARMv7}</dt>
+<dd>Indicates that the device's CPU supports the ARMv7-A instruction set as supported by the
+<a href="{@docRoot}ndk/guides/abis.html">armeabi-v7a</a> ABI. This instruction set supports both
+Thumb-2 and VFPv3-D16 instructions. This return value also indicates support for the VFPv3 hardware
+FPU instruction-set extension.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_VFPv3}</dt>
+<dd>Indicates that the device's CPU supports the VFPv3 hardware FPU instruction-set extension.
+<p>This value is equivalent to the {@code VFPv3-D16} instruction set, which provides provides only
+16 hardware double-precision FP registers.</p></dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_VFP_D32}</dt>
+<dd> Indicates that the device's CPU supports 32 hardware double-precision FP registers instead of
+16. Even when there are 32 hardware double-precision FP registers, there are still only 32
+single-precision registers mapped to the same register banks.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_NEON}</dt>
+<dd>Indicates that the device's CPU supports the ARM Advanced SIMD (NEON) vector instruction set
+extension. Note that ARM mandates that such CPUs also implement VFPv3-D32, which provides 32
+hardware FP registers (shared with the NEON unit).</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_VFP_FP16}</dt>
+<dd>Indicates that the device's CPU supports instructions to perform floating-point operations on
+16-bit registers. This feature is part of the VFPv4 specification.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_VFP_FMA}</dt>
+<dd>Indicates that the device's CPU supports the fused multiply-accumulate extension for the VFP
+instruction set. Also part of the VFPv4 specification.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_NEON_FMA}</dt>
+<dd>Indicates that the device's CPU supports the fused multiply-accumulate extension for the NEON
+instruction set. Also part of the VFPv4 specification.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_IDIV_ARM}</dt>
+<dd>Indicates that the device's CPU supports integer division in ARM mode. Only available on later-
+model CPUs, such as Cortex-A15.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_IDIV_THUMB2}</dt>
+<dd>Indicates that the device's CPU supports Integer division in Thumb-2 mode. Only available on
+later-model CPUs, such as Cortex-A15.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_iWMMXt}</dt>
+<dd>Indicates that the device's CPU supports an instruction-set extension that adds MMX registers
+and instructions. This feature is only available on a few XScale- based CPUs.</dd>
+
+<dt>{@code ANDROID_CPU_ARM_FEATURE_LDREX_STREX}</dt>
+<dd>Indicates that the device's CPU supports LDREX and STREX instructions available since ARMv6.
+Together, these instructions provide atomic updates on memory with the help of exclusive
+monitor.</dd>
+</dl>
+
+<h4>64-bit ARM CPU family</h4>
+
+<p>The following flags are available for the 64-bit ARM CPU family:</p>
+<dl>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_FP}</dt>
+<dd>Indicates that the device's CPU has a Floating Point Unit (FPU). All Android ARM64 devices must
+support this feature.</dd>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_ASIMD}</dt>
+<dd>Indicates that the device's CPU has an Advanced SIMD (ASIMD) unit. All Android ARM64 devices
+must support this feature.</dd>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_AES}</dt>
+<dd>Indicates that the device's CPU supports {@code AES} instructions.</dd>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_CRC32}</dt>
+<dd>Indicates that the device's CPU supports {@code CRC32} instructions.</dd>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_SHA1}</dt>
+<dd>Indicates that the device's CPU supports {@code SHA1} instructions.</dd>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_SHA2}</dt>
+<dd>Indicates that the device's CPU supports {@code SHA2} instructions.</dd>
+<dt>{@code ANDROID_CPU_ARM64_FEATURE_PMULL}</dt>
+<dd>Indicates that the device's CPU supports 64-bit {@code PMULL} and {@code PMULL2}
+instructions.</dd>
+</dl>
+
+<h4>32-bit x86 CPU family</h4>
+
+<p>The following flags are available for the 32-bit x86 CPU family.<p>
+<dl>
+<dt>{@code ANDROID_CPU_X86_FEATURE_SSSE3}</dt>
+Indicates that the device's CPU supports the SSSE3 instruction extension set.</dd>
+
+<dt>{@code ANDROID_CPU_X86_FEATURE_POPCNT}</dt>
+<dd>Indicates that the device's CPU supports the {@code POPCNT} instruction.</dd>
+
+<dt>{@code ANDROID_CPU_X86_FEATURE_MOVBE}</dt>
+<dd>Indicates that the device's CPU supports the {@code MOVBE} instruction. This instruction is
+specific to some Intel IA-32 CPUs, such as Atom.</dd>
+<dl>
+
+<p>{@code android_getCpuFeatures()} returns {@code 0} for CPU families for which there are no
+listed extensions.</p>
+
+<p>The following function returns the maximum number of CPU cores on the target device: </p>
+
+<pre class="no-pretty-print">
+int  android_getCpuCount(void);
+</pre>
+
+<h4>MIPS CPU family</h4>
+
+<dl>
+<dt>{@code ANDROID_CPU_MIPS_FEATURE_R6}</dt>
+<dd>Indicates that the CPU executes MIPS Release 6 instructions natively, and supports obsoleted R1..R5 instructions only via kernel traps.</dd>
+
+<dt>{@code ANDROID_CPU_MIPS_FEATURE_MSA}</dt>
+<dd>Indicates that the CPU supports MIPS SIMD Architecture instructions.</dd>
+</dl>
+
+<h2 id="ch">Change History</h2>
+<p>For the complete change history of this library, see the comments in
+{@code $NDK/sources/android/cpufeatures/cpu-features.c}, where {@code $NDK} is the root of your
+NDK installation.</p>
