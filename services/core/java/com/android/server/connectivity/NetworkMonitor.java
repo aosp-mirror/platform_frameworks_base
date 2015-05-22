@@ -16,6 +16,10 @@
 
 package com.android.server.connectivity;
 
+import static android.net.CaptivePortal.APP_RETURN_DISMISSED;
+import static android.net.CaptivePortal.APP_RETURN_UNWANTED;
+import static android.net.CaptivePortal.APP_RETURN_WANTED_AS_IS;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -23,7 +27,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
+import android.net.ICaptivePortal;
 import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
@@ -160,12 +166,12 @@ public class NetworkMonitor extends StateMachine {
 
     /**
      * Message to self indicating captive portal app finished.
-     * arg1 = one of: CAPTIVE_PORTAL_APP_RETURN_DISMISSED,
-     *                CAPTIVE_PORTAL_APP_RETURN_UNWANTED,
-     *                CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS
+     * arg1 = one of: APP_RETURN_DISMISSED,
+     *                APP_RETURN_UNWANTED,
+     *                APP_RETURN_WANTED_AS_IS
      * obj = mCaptivePortalLoggedInResponseToken as String
      */
-    public static final int CMD_CAPTIVE_PORTAL_APP_FINISHED = BASE + 9;
+    private static final int CMD_CAPTIVE_PORTAL_APP_FINISHED = BASE + 9;
 
     /**
      * Request ConnectivityService display provisioning notification.
@@ -234,7 +240,6 @@ public class NetworkMonitor extends StateMachine {
     private final State mLingeringState = new LingeringState();
 
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
-    private String mCaptivePortalLoggedInResponseToken = null;
 
     private final LocalLog validationLogs = new LocalLog(20); // 20 lines
 
@@ -267,8 +272,6 @@ public class NetworkMonitor extends StateMachine {
 
         mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
-
-        mCaptivePortalLoggedInResponseToken = String.valueOf(new Random().nextLong());
 
         start();
     }
@@ -314,22 +317,18 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_CAPTIVE_PORTAL_APP_FINISHED:
-                    if (!mCaptivePortalLoggedInResponseToken.equals((String)message.obj))
-                        return HANDLED;
                     log("CaptivePortal App responded with " + message.arg1);
-                    // Previous token was sent out, come up with a new one.
-                    mCaptivePortalLoggedInResponseToken = String.valueOf(new Random().nextLong());
                     switch (message.arg1) {
-                        case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_DISMISSED:
+                        case APP_RETURN_DISMISSED:
                             sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */, 0);
                             break;
-                        case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS:
+                        case APP_RETURN_WANTED_AS_IS:
                             mDontDisplaySigninNotification = true;
                             // TODO: Distinguish this from a network that actually validates.
                             // Displaying the "!" on the system UI icon may still be a good idea.
                             transitionTo(mValidatedState);
                             break;
-                        case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_UNWANTED:
+                        case APP_RETURN_UNWANTED:
                             mDontDisplaySigninNotification = true;
                             mUserDoesNotWant = true;
                             mConnectivityServiceHandler.sendMessage(obtainMessage(
@@ -380,8 +379,18 @@ public class NetworkMonitor extends StateMachine {
                     final Intent intent = new Intent(
                             ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
                     intent.putExtra(ConnectivityManager.EXTRA_NETWORK, mNetworkAgentInfo.network);
-                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_TOKEN,
-                            mCaptivePortalLoggedInResponseToken);
+                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
+                            new CaptivePortal(new ICaptivePortal.Stub() {
+                                @Override
+                                public void appResponse(int response) {
+                                    if (response == APP_RETURN_WANTED_AS_IS) {
+                                        mContext.enforceCallingPermission(
+                                                android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                                                "CaptivePortal");
+                                    }
+                                    sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
+                                }
+                            }));
                     intent.setFlags(
                             Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivityAsUser(intent, UserHandle.CURRENT);
