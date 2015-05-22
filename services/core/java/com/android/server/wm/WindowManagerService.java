@@ -739,8 +739,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final float newX = motionEvent.getRawX();
                     final float newY = motionEvent.getRawY();
                     final boolean isStylusButtonDown =
-                            (motionEvent.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS)
-                            && (motionEvent.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0;
+                            (motionEvent.getButtonState() & MotionEvent.BUTTON_STYLUS_PRIMARY) != 0;
 
                     if (mIsStartEvent) {
                         if (isStylusButtonDown) {
