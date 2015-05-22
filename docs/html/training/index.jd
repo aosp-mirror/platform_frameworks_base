@@ -15,8 +15,8 @@ Classes are organized into several groups you can see at the top-level of the le
 <div>
 <div style="float:left; width:40%; margin-right:30px">
 
-    <p>If you think you might prefer to learn the basics through interactive video training,
-    check out this trailer for a course in the fundamentals of Android development.</p>
+    <p>If you prefer to learn through interactive video training,
+    check out this trailer for a course about the fundamentals of Android development.</p>
     <p><a href="https://www.udacity.com/course/ud853" class="button">
     Start the video course</a></p>
 </div>
@@ -27,3 +27,15 @@ Classes are organized into several groups you can see at the top-level of the le
 </div>
 
 <div style="clear:left"></div>
+
+  <div><h2 class="norule">Online video courses</h2>
+  <p>If you prefer to learn through interactive video training,
+    check out these free courses.</p>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/courses"
+       data-sortOrder="random"
+       data-cardSizes="6x6"
+       data-maxResults="9"
+       data-initial-results="3"></div>
+</div>
+</div>

@@ -1383,11 +1383,15 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "preview/overview.html",
-      "preview/api-overview.html",
+      "preview/download.html",
       "preview/setup-sdk.html",
       "preview/samples.html",
-      "preview/reference.html",
-      "preview/support.html"
+      "preview/support.html",
+      "preview/api-overview.html",
+      "preview/features/runtime-permissions.html",
+      "preview/api-changes.html",
+      "preview/api-overview.html",
+      "preview/backup/index.html",
     ]
   },
   "autolanding": {
