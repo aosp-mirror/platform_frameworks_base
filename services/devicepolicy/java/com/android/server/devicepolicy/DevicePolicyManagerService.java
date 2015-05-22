@@ -121,6 +121,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -1305,7 +1306,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             stream = new FileOutputStream(journal.chooseForWrite(), false);
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, "utf-8");
+            out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
             out.startTag(null, "policies");
@@ -1403,7 +1404,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             stream = new FileInputStream(file);
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
 
             int type;
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT

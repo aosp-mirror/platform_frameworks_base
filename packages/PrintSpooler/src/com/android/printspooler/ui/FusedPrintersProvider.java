@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -562,7 +563,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 try {
                     List<PrinterInfo> printers = new ArrayList<>();
                     XmlPullParser parser = Xml.newPullParser();
-                    parser.setInput(in, null);
+                    parser.setInput(in, StandardCharsets.UTF_8.name());
                     parseState(parser, printers);
                     // Take a note which version of the history was read.
                     mLastReadHistoryTimestamp = mStatePersistFile.getBaseFile().lastModified();
@@ -686,7 +687,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                     out = mStatePersistFile.startWrite();
 
                     XmlSerializer serializer = new FastXmlSerializer();
-                    serializer.setOutput(out, "utf-8");
+                    serializer.setOutput(out, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.startTag(null, TAG_PRINTERS);
 

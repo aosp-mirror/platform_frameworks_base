@@ -94,6 +94,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -307,7 +308,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         try {
             fis = mSessionsFile.openRead();
             final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, null);
+            in.setInput(fis, StandardCharsets.UTF_8.name());
 
             int type;
             while ((type = in.next()) != END_DOCUMENT) {
@@ -398,7 +399,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             fos = mSessionsFile.startWrite();
 
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, TAG_SESSIONS);
             final int size = mSessions.size();
