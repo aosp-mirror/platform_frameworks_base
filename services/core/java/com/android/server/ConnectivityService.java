@@ -4602,27 +4602,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void factoryReset() {
         enforceConnectivityInternalPermission();
+
+        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_NETWORK_RESET)) {
+            return;
+        }
+
         final int userId = UserHandle.getCallingUserId();
 
         // Turn airplane mode off
         setAirplaneMode(false);
 
-        // Untether
-        for (String tether : getTetheredIfaces()) {
-            untether(tether);
+        if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING)) {
+            // Untether
+            for (String tether : getTetheredIfaces()) {
+                untether(tether);
+            }
         }
 
-        // Turn VPN off
-        VpnConfig vpnConfig = getVpnConfig(userId);
-        if (vpnConfig != null) {
-            if (vpnConfig.legacy) {
-                prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN, userId);
-            } else {
-                // Prevent this app (packagename = vpnConfig.user) from initiating VPN connections
-                // in the future without user intervention.
-                setVpnPackageAuthorization(vpnConfig.user, userId, false);
+        if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN)) {
+            // Turn VPN off
+            VpnConfig vpnConfig = getVpnConfig(userId);
+            if (vpnConfig != null) {
+                if (vpnConfig.legacy) {
+                    prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN, userId);
+                } else {
+                    // Prevent this app (packagename = vpnConfig.user) from initiating VPN connections
+                    // in the future without user intervention.
+                    setVpnPackageAuthorization(vpnConfig.user, userId, false);
 
-                prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN, userId);
+                    prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN, userId);
+                }
             }
         }
     }
