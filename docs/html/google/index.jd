@@ -11,7 +11,7 @@ footer.hide=1
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/design/media/hero-material-design.png">
+        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png">
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Build better apps with Google</h1>
@@ -44,7 +44,8 @@ footer.hide=1
   <div class="resource-widget resource-flow-layout col-16"
        data-query="type:blog+tag:googleservices+tag:featured+tag:develop"
        data-cardSizes="6x6"
-       data-maxResults="3"></div>
+       data-maxResults="9"
+       data-initial-results="3"></div>
   </div>
 </section>
 

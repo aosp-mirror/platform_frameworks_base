@@ -7,9 +7,11 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 <!-- <div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
 </div> -->
+<section class="dac-hero-carousel">
 
-<article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);">
-<a class="dac-hero-carousel-action" href="{@docRoot}preview/index.html">
+<!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
+<article class="dac-expand dac-hero dac-invert active" style="background-color: #455A64;">
+<a href="/preview/index.html">
   <div class="wrap" style="max-width:1100px;">
     <div class="cols dac-hero-content">
       <div class="col-10of16 col-push-6of16 dac-hero-figure">
@@ -30,7 +32,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
     </div>
   </div>
 </a>
-</article>
+</article></section>
 
 <div class="actions-bar dac-expand dac-invert">
   <div class="wrap dac-offset-parent">
