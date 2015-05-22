@@ -1806,12 +1806,18 @@ public class Editor {
         }
         if (selectionStart == selectionEnd) {
             // Spans overlap the cursor.
-            return true;
+            for (int i = 0; i < suggestionSpans.length; i++) {
+                if (suggestionSpans[i].getSuggestions().length > 0) {
+                    return true;
+                }
+            }
+            return false;
         }
         int minSpanStart = mTextView.getText().length();
         int maxSpanEnd = 0;
         int unionOfSpansCoveringSelectionStartStart = mTextView.getText().length();
         int unionOfSpansCoveringSelectionStartEnd = 0;
+        boolean hasValidSuggestions = false;
         for (int i = 0; i < suggestionSpans.length; i++) {
             final int spanStart = spannable.getSpanStart(suggestionSpans[i]);
             final int spanEnd = spannable.getSpanEnd(suggestionSpans[i]);
@@ -1821,10 +1827,15 @@ public class Editor {
                 // The span doesn't cover the current selection start point.
                 continue;
             }
+            hasValidSuggestions =
+                    hasValidSuggestions || suggestionSpans[i].getSuggestions().length > 0;
             unionOfSpansCoveringSelectionStartStart =
                     Math.min(unionOfSpansCoveringSelectionStartStart, spanStart);
             unionOfSpansCoveringSelectionStartEnd =
                     Math.max(unionOfSpansCoveringSelectionStartEnd, spanEnd);
+        }
+        if (!hasValidSuggestions) {
+            return false;
         }
         if (unionOfSpansCoveringSelectionStartStart >= unionOfSpansCoveringSelectionStartEnd) {
             // No spans cover the selection start point.
