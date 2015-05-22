@@ -58,7 +58,8 @@ excludeFromSuggestions=true
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/latest"
        data-cardSizes="6x6"
-       data-maxResults="3"></div>
+       data-maxResults="9"
+       data-initial-results="3"></div>
 </div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
@@ -125,5 +126,6 @@ excludeFromSuggestions=true
        data-query="collection:develop/landing/courses"
        data-sortOrder="random"
        data-cardSizes="6x6"
-       data-maxResults="6"></div>
+       data-initial-results="6"
+       data-maxResults="12"></div>
 </div></section>
