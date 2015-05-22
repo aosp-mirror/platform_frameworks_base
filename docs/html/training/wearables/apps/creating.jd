@@ -14,10 +14,6 @@ helpoutsWidget=true
   <li><a href="#CreateProject">Create a Project</a></li>
   <li><a href="#Libraries">Include the Correct Libraries</a></li>
 </ol>
-<h2>Dependencies and Prerequisites</h2>
-  <ul>
-    <li>Android Studio 0.8.12 or later and Gradle 0.12 or later</li>
-  </ul>
 </div>
 </div>
 
