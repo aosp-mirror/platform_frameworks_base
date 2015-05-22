@@ -21020,6 +21020,7 @@ package android.net.wifi {
     field public static final java.lang.String EXTRA_NEW_RSSI = "newRssi";
     field public static final java.lang.String EXTRA_NEW_STATE = "newState";
     field public static final java.lang.String EXTRA_PREVIOUS_WIFI_STATE = "previous_wifi_state";
+    field public static final java.lang.String EXTRA_RESULTS_UPDATED = "resultsUpdated";
     field public static final java.lang.String EXTRA_SUPPLICANT_CONNECTED = "connected";
     field public static final java.lang.String EXTRA_SUPPLICANT_ERROR = "supplicantError";
     field public static final java.lang.String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
