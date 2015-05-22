@@ -5494,7 +5494,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final String path = scanFile.getPath();
-        final String codePath = pkg.applicationInfo.getCodePath();
         final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
         if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) {
             setBundledAppAbisAndRoots(pkg, pkgSetting);
@@ -5520,127 +5519,27 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             setNativeLibraryPaths(pkg);
         } else {
-            // TODO: We can probably be smarter about this stuff. For installed apps,
-            // we can calculate this information at install time once and for all. For
-            // system apps, we can probably assume that this information doesn't change
-            // after the first boot scan. As things stand, we do lots of unnecessary work.
+            if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
+                deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
+            } else {
+                // Verify the ABIs haven't changed since we last deduced them.
+                String oldPrimaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
+                String oldSecondaryCpuAbi = pkg.applicationInfo.secondaryCpuAbi;
 
-            // Give ourselves some initial paths; we'll come back for another
-            // pass once we've determined ABI below.
-            setNativeLibraryPaths(pkg);
-
-            final boolean isAsec = pkg.isForwardLocked() || isExternal(pkg);
-            final String nativeLibraryRootStr = pkg.applicationInfo.nativeLibraryRootDir;
-            final boolean useIsaSpecificSubdirs = pkg.applicationInfo.nativeLibraryRootRequiresIsa;
-
-            NativeLibraryHelper.Handle handle = null;
-            try {
-                handle = NativeLibraryHelper.Handle.create(scanFile);
-                // TODO(multiArch): This can be null for apps that didn't go through the
-                // usual installation process. We can calculate it again, like we
-                // do during install time.
-                //
-                // TODO(multiArch): Why do we need to rescan ASEC apps again ? It seems totally
-                // unnecessary.
-                final File nativeLibraryRoot = new File(nativeLibraryRootStr);
-
-                // Null out the abis so that they can be recalculated.
-                pkg.applicationInfo.primaryCpuAbi = null;
-                pkg.applicationInfo.secondaryCpuAbi = null;
-                if (isMultiArch(pkg.applicationInfo)) {
-                    // Warn if we've set an abiOverride for multi-lib packages..
-                    // By definition, we need to copy both 32 and 64 bit libraries for
-                    // such packages.
-                    if (pkg.cpuAbiOverride != null
-                            && !NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(pkg.cpuAbiOverride)) {
-                        Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
-                    }
-
-                    int abi32 = PackageManager.NO_NATIVE_LIBRARIES;
-                    int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
-                    if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-                        if (isAsec) {
-                            abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
-                        } else {
-                            abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                    nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        }
-                    }
-
-                    maybeThrowExceptionForMultiArchCopy(
-                            "Error unpackaging 32 bit native libs for multiarch app.", abi32);
-
-                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-                        if (isAsec) {
-                            abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
-                        } else {
-                            abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                    nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        }
-                    }
-
-                    maybeThrowExceptionForMultiArchCopy(
-                            "Error unpackaging 64 bit native libs for multiarch app.", abi64);
-
-                    if (abi64 >= 0) {
-                        pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
-                    }
-
-                    if (abi32 >= 0) {
-                        final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
-                        if (abi64 >= 0) {
-                            pkg.applicationInfo.secondaryCpuAbi = abi;
-                        } else {
-                            pkg.applicationInfo.primaryCpuAbi = abi;
-                        }
-                    }
-                } else {
-                    String[] abiList = (cpuAbiOverride != null) ?
-                            new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
-
-                    // Enable gross and lame hacks for apps that are built with old
-                    // SDK tools. We must scan their APKs for renderscript bitcode and
-                    // not launch them if it's present. Don't bother checking on devices
-                    // that don't have 64 bit support.
-                    boolean needsRenderScriptOverride = false;
-                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && cpuAbiOverride == null &&
-                            NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
-                        abiList = Build.SUPPORTED_32_BIT_ABIS;
-                        needsRenderScriptOverride = true;
-                    }
-
-                    final int copyRet;
-                    if (isAsec) {
-                        copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
-                    } else {
-                        copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
-                    }
-
-                    if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Error unpackaging native libs for app, errorCode=" + copyRet);
-                    }
-
-                    if (copyRet >= 0) {
-                        pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
-                    } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && cpuAbiOverride != null) {
-                        pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
-                    } else if (needsRenderScriptOverride) {
-                        pkg.applicationInfo.primaryCpuAbi = abiList[0];
-                    }
+                // TODO: The only purpose of this code is to update the native library paths
+                // based on the final install location. We can simplify this and avoid having
+                // to scan the package again.
+                deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, false /* extract libs */);
+                if (!TextUtils.equals(oldPrimaryCpuAbi, pkg.applicationInfo.primaryCpuAbi)) {
+                    throw new IllegalStateException("unexpected abi change for " + pkg.packageName + " ("
+                            + oldPrimaryCpuAbi + "-> " + pkg.applicationInfo.primaryCpuAbi);
                 }
-            } catch (IOException ioe) {
-                Slog.e(TAG, "Unable to get canonical file " + ioe.toString());
-            } finally {
-                IoUtils.closeQuietly(handle);
-            }
 
-            // Now that we've calculated the ABIs and determined if it's an internal app,
-            // we will go ahead and populate the nativeLibraryPath.
-            setNativeLibraryPaths(pkg);
+                if (!TextUtils.equals(oldSecondaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi)) {
+                    throw new IllegalStateException("unexpected abi change for " + pkg.packageName + " ("
+                            + oldSecondaryCpuAbi + "-> " + pkg.applicationInfo.secondaryCpuAbi);
+                }
+            }
 
             if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
             final int[] userIds = sUserManager.getUserIds();
@@ -5670,9 +5569,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
         }
 
+        // If there's a mismatch between the abi-override in the package setting
+        // and the abiOverride specified for the install. Warn about this because we
+        // would've already compiled the app without taking the package setting into
+        // account.
+        if ((scanFlags & SCAN_NO_DEX) == 0 && (scanFlags & SCAN_NEW_INSTALL) != 0) {
+            if (cpuAbiOverride == null && pkgSetting.cpuAbiOverrideString != null) {
+                Slog.w(TAG, "Ignoring persisted ABI override " + cpuAbiOverride +
+                        " for package: " + pkg.packageName);
+            }
+        }
+
         pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
         pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         pkgSetting.cpuAbiOverrideString = cpuAbiOverride;
+
         // Copy the derived override back to the parsed package, so that we can
         // update the package settings accordingly.
         pkg.cpuAbiOverride = cpuAbiOverride;
@@ -6173,6 +6084,144 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return pkg;
+    }
+
+    /**
+     * Derive the ABI of a non-system package located at {@code scanFile}. This information
+     * is derived purely on the basis of the contents of {@code scanFile} and
+     * {@code cpuAbiOverride}.
+     *
+     * If {@code extractLibs} is true, native libraries are extracted from the app if required.
+     */
+    public void deriveNonSystemPackageAbi(PackageParser.Package pkg, File scanFile,
+                                          String cpuAbiOverride, boolean extractLibs)
+            throws PackageManagerException {
+        // TODO: We can probably be smarter about this stuff. For installed apps,
+        // we can calculate this information at install time once and for all. For
+        // system apps, we can probably assume that this information doesn't change
+        // after the first boot scan. As things stand, we do lots of unnecessary work.
+
+        // Give ourselves some initial paths; we'll come back for another
+        // pass once we've determined ABI below.
+        setNativeLibraryPaths(pkg);
+
+        // We would never need to extract libs for forward-locked and external packages,
+        // since the container service will do it for us.
+        if (pkg.isForwardLocked() || isExternal(pkg)) {
+            extractLibs = false;
+        }
+
+        final String nativeLibraryRootStr = pkg.applicationInfo.nativeLibraryRootDir;
+        final boolean useIsaSpecificSubdirs = pkg.applicationInfo.nativeLibraryRootRequiresIsa;
+
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = NativeLibraryHelper.Handle.create(scanFile);
+            // TODO(multiArch): This can be null for apps that didn't go through the
+            // usual installation process. We can calculate it again, like we
+            // do during install time.
+            //
+            // TODO(multiArch): Why do we need to rescan ASEC apps again ? It seems totally
+            // unnecessary.
+            final File nativeLibraryRoot = new File(nativeLibraryRootStr);
+
+            // Null out the abis so that they can be recalculated.
+            pkg.applicationInfo.primaryCpuAbi = null;
+            pkg.applicationInfo.secondaryCpuAbi = null;
+            if (isMultiArch(pkg.applicationInfo)) {
+                // Warn if we've set an abiOverride for multi-lib packages..
+                // By definition, we need to copy both 32 and 64 bit libraries for
+                // such packages.
+                if (pkg.cpuAbiOverride != null
+                        && !NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(pkg.cpuAbiOverride)) {
+                    Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
+                }
+
+                int abi32 = PackageManager.NO_NATIVE_LIBRARIES;
+                int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
+                if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
+                    if (extractLibs) {
+                        abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                                nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
+                                useIsaSpecificSubdirs);
+                    } else {
+                        abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
+                    }
+                }
+
+                maybeThrowExceptionForMultiArchCopy(
+                        "Error unpackaging 32 bit native libs for multiarch app.", abi32);
+
+                if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
+                    if (extractLibs) {
+                        abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                                nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
+                                useIsaSpecificSubdirs);
+                    } else {
+                        abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
+                    }
+                }
+
+                maybeThrowExceptionForMultiArchCopy(
+                        "Error unpackaging 64 bit native libs for multiarch app.", abi64);
+
+                if (abi64 >= 0) {
+                    pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
+                }
+
+                if (abi32 >= 0) {
+                    final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
+                    if (abi64 >= 0) {
+                        pkg.applicationInfo.secondaryCpuAbi = abi;
+                    } else {
+                        pkg.applicationInfo.primaryCpuAbi = abi;
+                    }
+                }
+            } else {
+                String[] abiList = (cpuAbiOverride != null) ?
+                        new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
+
+                // Enable gross and lame hacks for apps that are built with old
+                // SDK tools. We must scan their APKs for renderscript bitcode and
+                // not launch them if it's present. Don't bother checking on devices
+                // that don't have 64 bit support.
+                boolean needsRenderScriptOverride = false;
+                if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && cpuAbiOverride == null &&
+                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                    abiList = Build.SUPPORTED_32_BIT_ABIS;
+                    needsRenderScriptOverride = true;
+                }
+
+                final int copyRet;
+                if (extractLibs) {
+                    copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                            nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
+                } else {
+                    copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
+                }
+
+                if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Error unpackaging native libs for app, errorCode=" + copyRet);
+                }
+
+                if (copyRet >= 0) {
+                    pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
+                } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && cpuAbiOverride != null) {
+                    pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
+                } else if (needsRenderScriptOverride) {
+                    pkg.applicationInfo.primaryCpuAbi = abiList[0];
+                }
+            }
+        } catch (IOException ioe) {
+            Slog.e(TAG, "Unable to get canonical file " + ioe.toString());
+        } finally {
+            IoUtils.closeQuietly(handle);
+        }
+
+        // Now that we've calculated the ABIs and determined if it's an internal app,
+        // we will go ahead and populate the nativeLibraryPath.
+        setNativeLibraryPaths(pkg);
     }
 
     /**
@@ -10425,6 +10474,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!forwardLocked && pkg.applicationInfo.isInternal()) {
             // Enable SCAN_NO_DEX flag to skip dexopt at a later stage
             scanFlags |= SCAN_NO_DEX;
+            try {
+                deriveNonSystemPackageAbi(pkg, new File(pkg.codePath), args.abiOverride,
+                        true /* extract libs */);
+            } catch (PackageManagerException pme) {
+                Slog.e(TAG, "Error deriving application ABI", pme);
+                res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error ");
+                return;
+            }
+
             // Run dexopt before old package gets removed, to minimize time when app is unavailable
             int result = mPackageDexOptimizer
                     .performDexOpt(pkg, null /* instruction sets */, true /* forceDex */,
