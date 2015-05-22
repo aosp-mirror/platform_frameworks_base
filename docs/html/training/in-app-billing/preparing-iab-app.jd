@@ -47,7 +47,7 @@ next.link=list-iab-products.html
 <p>The Google Play Developer Console is where you publish your In-app Billing application and  manage the various digital goods that are available for purchase from your application. When you create a new application entry in the Developer Console, it automatically generates a public license key for your application. You will need this key to establish a trusted connection from your application to the Google Play servers. You only need to generate this key once per application, and don’t need to repeat these steps when you update the APK file for your application.</p>
 <p>To add your application to the Developer Console:</p>
 <ol>
-<li>Go to the <a href="http://play.google.com/apps/publish">Google Play Developer Console</a> site and log in. You will need to register for a new developer account, if you have not registered previously. To sell in-app items, you also need to have a <a href="http://www.google.com/wallet/merchants.html">Google Wallet</a> merchant account.</li>
+<li>Go to the <a href="http://play.google.com/apps/publish">Google Play Developer Console</a> site and log in. You will need to register for a new developer account, if you have not registered previously. To sell in-app items, you also need to have a <a href="http://www.google.com/wallet/merchants.html">Google payments</a> merchant account.</li>
 <li>Click on <strong>Try the new design</strong> to access the preview version of the Developer Console, if you are not already logged on to that version. </li>
 <li>In the <strong>All Applications</strong> tab, add a new application entry.
 <ol type="a">

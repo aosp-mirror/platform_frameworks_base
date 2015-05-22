@@ -11,7 +11,7 @@ footer.hide=1
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png">
+        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png" style="padding-bottom:1em">
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Build better apps with Google</h1>
@@ -106,87 +106,3 @@ footer.hide=1
     </a></li>
   </ul>
 </div></section>
-
-<!--
-
-<section class="dac-section dac-light"><div class="wrap">
-  <h1 class="dac-section-title">More</h1>
-  <div class="dac-section-subtitle">
-    Design around Android's capabilities and conventions to give users the best experience.
-  </div>
-  <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:google/landing/more"
-       data-cardSizes="6x6"
-       data-maxResults="6"></div>
-</div></section>
-
-
-
-
-Google Play services
-video video
-
-
-Google Play Publishing Tools
-
-
-
-Distribute your app on Google Play to all devices running Android 2.3
-  or higher, and some services support even more devices.</p>
-
-
-Google Maps
-
-Include the power of Google Maps in your app
-    with an embeddable map view. You can customize the map with
-    markers and overlays, control the user's perspective, draw lines
-    and shapes, and much more.
-
-Google+</a></h4>
-
-Allow users to sign in with their Google account,
-    customize the user experience with Google+ info,
-    pull people into your app with interactive posts,
-    and add +1 buttons so users can recommend your content.</p>
-
-
-Google Cloud Platform
-
-Build and host the backend for your Android app at Google-scale. With an infrastructure
-    that is managed automatically, you can focus on your app. Then, scale to support
-    millions of users.
-
-
-
-
-
-More
-
-Google Play In-App Billing
-
-Build an app with a steady revenue stream that keeps users engaged
-    by offering new content or virtual goods directly in your app. All transactions are handled
-    by Google Play Store for a simple user experience.
-
-
-Android Pay
-
-Provide fast and easy checkout in your app when selling physical goods and services.
-    Increase conversions by streamlining your purchase flow and reducing the amount of
-    information your customers need to enter.
-
-Google Analytics
-
-Measure your success and gain insights into how users engage with your app content
-by integrating Google Analytics. You can track in-app purchases, the number of active users,
-interaction patterns, and much more.
-
-
-Google Mobile Ads
-
-Display ads from Google Mobile Ads offer you an alternative revenue opportunity that leverages
-    multiple ad networks with targeted ads and several display formats.
-
-
-
--->
