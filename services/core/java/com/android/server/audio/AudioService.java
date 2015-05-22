@@ -5512,7 +5512,7 @@ public class AudioService extends IAudioService.Stub {
         // - STREAM_NOTIFICATION on tablets during this period after a notification stopped
         // - STREAM_MUSIC on phones during this period after music or talkback/voice search prompt
         // stopped
-        private static final int DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS = 5000;
+        private static final int DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS = 0;
         private static final int TOUCH_EXPLORE_STREAM_TYPE_OVERRIDE_DELAY_MS = 1000;
 
         static int sDelayMs;
