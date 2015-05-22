@@ -81,6 +81,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
     private final View mStatusBarWindowView;
     private final int mStatusBarHeight;
+    private final int mNotificationsTopPadding;
     private PhoneStatusBar mBar;
     private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
@@ -128,6 +129,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mStatusBarWindowView = statusBarWindowView;
         mStatusBarHeight = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
+        mNotificationsTopPadding = context.getResources()
+                .getDimensionPixelSize(R.dimen.notifications_top_padding);
     }
 
     private void updateTouchableRegionListener() {
@@ -379,7 +382,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             }
 
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-            info.touchableRegion.set(minX, minY, maxX, maxY);
+            info.touchableRegion.set(minX, minY, maxX, maxY + mNotificationsTopPadding);
         } else if (mHeadsUpGoingAway || mWaitingOnCollapseWhenGoingAway) {
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);

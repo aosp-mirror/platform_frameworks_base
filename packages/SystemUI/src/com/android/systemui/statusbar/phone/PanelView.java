@@ -58,6 +58,7 @@ public abstract class PanelView extends FrameLayout {
     private float mHintDistance;
     private int mEdgeTapAreaWidth;
     private float mInitialOffsetOnTouch;
+    private boolean mCollapsedAndHeadsUpOnDown;
     private float mExpandedFraction = 0;
     protected float mExpandedHeight = 0;
     private boolean mPanelClosedOnDown;
@@ -258,6 +259,8 @@ public abstract class PanelView extends FrameLayout {
                 mMotionAborted = false;
                 mPeekTouching = mPanelClosedOnDown;
                 mTouchAboveFalsingThreshold = false;
+                mCollapsedAndHeadsUpOnDown = isFullyCollapsed()
+                        && mHeadsUpManager.hasPinnedHeadsUp();
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -270,7 +273,7 @@ public abstract class PanelView extends FrameLayout {
                             || mPeekPending || mPeekAnimator != null;
                     onTrackingStarted();
                 }
-                if (isFullyCollapsed()) {
+                if (isFullyCollapsed() && !mHeadsUpManager.hasPinnedHeadsUp()) {
                     schedulePeek();
                 }
                 break;
@@ -302,7 +305,7 @@ public abstract class PanelView extends FrameLayout {
                         && (Math.abs(h) > Math.abs(x - mInitialTouchX)
                                 || mIgnoreXTouchSlop)) {
                     mTouchSlopExceeded = true;
-                    if (mGestureWaitForTouchSlop && !mTracking) {
+                    if (mGestureWaitForTouchSlop && !mTracking && !mCollapsedAndHeadsUpOnDown) {
                         if (!mJustPeeked && mInitialOffsetOnTouch != 0f) {
                             startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                             h = 0;
@@ -477,6 +480,7 @@ public abstract class PanelView extends FrameLayout {
                 mJustPeeked = false;
                 mMotionAborted = false;
                 mPanelClosedOnDown = isFullyCollapsed();
+                mCollapsedAndHeadsUpOnDown = false;
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mTouchAboveFalsingThreshold = false;
