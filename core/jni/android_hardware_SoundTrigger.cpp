@@ -711,7 +711,7 @@ android_hardware_SoundTrigger_startRecognition(JNIEnv *env, jobject thiz,
                                     (struct sound_trigger_recognition_config *)memory->pointer();
     config->data_size = dataSize;
     config->data_offset = sizeof(struct sound_trigger_recognition_config);
-    config->capture_requested = env->GetIntField(jConfig,
+    config->capture_requested = env->GetBooleanField(jConfig,
                                                  gRecognitionConfigFields.captureRequested);
 
     config->num_phrases = 0;
