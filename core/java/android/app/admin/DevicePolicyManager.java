@@ -4448,4 +4448,31 @@ public class DevicePolicyManager {
             return false;
         }
     }
+
+    /**
+     * Returns the current grant state of a runtime permission for a specific application.
+     *
+     * @param admin Which profile or device owner this request is associated with.
+     * @param packageName The application to check the grant state for.
+     * @param permission The permission to check for.
+     * @return the current grant state specified by device policy. If the profile or device owner
+     * has not set a grant state, the return value is {@link #PERMISSION_GRANT_STATE_DEFAULT}.
+     * This does not indicate whether or not the permission is currently granted for the package.
+     *
+     * <p/>If a grant state was set by the profile or device owner, then the return value will
+     * be one of {@link #PERMISSION_GRANT_STATE_DENIED} or {@link #PERMISSION_GRANT_STATE_GRANTED},
+     * which indicates if the permission is currently denied or granted.
+     *
+     * @see #setPermissionGrantState(ComponentName, String, String, int)
+     * @see PackageManager#checkPermission(String, String)
+     */
+    public int getPermissionGrantState(ComponentName admin, String packageName,
+            String permission) {
+        try {
+            return mService.getPermissionGrantState(admin, packageName, permission);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return PERMISSION_GRANT_STATE_DEFAULT;
+        }
+    }
 }
