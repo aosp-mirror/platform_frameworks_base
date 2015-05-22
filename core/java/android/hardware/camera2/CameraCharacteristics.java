@@ -2447,8 +2447,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      */
     @PublicKey
-    public static final Key<byte[]> STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES =
-            new Key<byte[]>("android.statistics.info.availableLensShadingMapModes", byte[].class);
+    public static final Key<int[]> STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES =
+            new Key<int[]>("android.statistics.info.availableLensShadingMapModes", int[].class);
 
     /**
      * <p>Maximum number of supported points in the
