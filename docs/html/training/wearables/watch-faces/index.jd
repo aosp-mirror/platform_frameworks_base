@@ -6,7 +6,6 @@ page.title=Creating Watch Faces
 <div id="tb">
   <h2>Dependencies and Prerequisites</h2>
   <ul>
-    <li>Android Studio 1.0.0 or later and Gradle 1.0 or later</li>
     <li>Android 4.3 (API level 18) or higher on the handheld device</li>
     <li>Android 5.0 (API level 21) or higher on the wearable device</li>
   </ul>
