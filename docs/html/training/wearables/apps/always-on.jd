@@ -18,7 +18,7 @@ helpoutsWidget=true
   </ul>
 <h2>Related Samples</h2>
   <ul>
-    <li><a href="//github.com/googlesamples/android-AlwaysOn">AlwaysOn</a></li>
+    <li><a href="{@docRoot}samples/AlwaysOn/index.html">AlwaysOn</a></li>
   </ul>
 </div>
 </div>
@@ -361,7 +361,7 @@ public void onUpdateAmbient() {
 
 <p class="note"><b>Note:</b> In this example, the <code>refreshDisplayAndSetNextUpdate()</code>
 method is called whenever the screen needs to be updated. For more examples of when to call this
-method, see the <a href="//github.com/googlesamples/android-AlwaysOn">AlwaysOn</a> sample.
+method, see the <a href="{@docRoot}samples/AlwaysOn/index.html">AlwaysOn</a> sample.
 </p>
 
 <h4 id="CancelAlarm">Cancel the alarm</h4>
