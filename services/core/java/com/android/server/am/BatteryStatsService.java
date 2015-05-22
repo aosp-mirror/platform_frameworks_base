@@ -83,11 +83,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SYNC_EXTERNAL_STATS:
-                    updateExternalStats((String)msg.obj);
+                    updateExternalStats((String)msg.obj, false);
                     break;
 
                 case MSG_WRITE_TO_DISK:
-                    updateExternalStats("write");
+                    updateExternalStats("write", true);
                     synchronized (mStats) {
                         mStats.writeAsyncLocked();
                     }
@@ -137,7 +137,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
 
-        updateExternalStats("shutdown");
+        updateExternalStats("shutdown", true);
         synchronized (mStats) {
             mStats.shutdownLocked();
         }
@@ -237,7 +237,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        updateExternalStats("get-stats");
+        updateExternalStats("get-stats", true);
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
         }
@@ -252,7 +252,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        updateExternalStats("get-stats");
+        updateExternalStats("get-stats", true);
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
         }
@@ -779,7 +779,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         // Sync external stats first as the battery has changed states. If we don't sync
         // immediately here, we may not collect the relevant data later.
-        updateExternalStats("battery-state");
+        updateExternalStats("battery-state", false);
         synchronized (mStats) {
             mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
         }
@@ -933,9 +933,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }
-                    updateExternalStats("dump");
+                    updateExternalStats("dump", true);
                 } else if ("--write".equals(arg)) {
-                    updateExternalStats("dump");
+                    updateExternalStats("dump", true);
                     synchronized (mStats) {
                         mStats.writeSyncLocked();
                         pw.println("Battery stats written.");
@@ -999,7 +999,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
             }
             // Fetch data from external sources and update the BatteryStatsImpl object with them.
-            updateExternalStats("dump");
+            updateExternalStats("dump", true);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1142,8 +1142,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      *
      * We first grab a lock specific to this method, then once all the data has been collected,
      * we grab the mStats lock and update the data.
+     *
+     * TODO(adamlesinski): When we start distributing bluetooth data to apps, we'll want to
+     * separate these external stats so that they can be collected individually and on different
+     * intervals.
+     *
+     * @param reason The reason why this collection was requested. Useful for debugging.
+     * @param force If false, some stats may decide not to be collected for efficiency as their
+     *              results aren't needed immediately. When true, collect all stats unconditionally.
      */
-    void updateExternalStats(String reason) {
+    void updateExternalStats(String reason, boolean force) {
         synchronized (mExternalStatsLock) {
             if (mContext == null) {
                 // We haven't started yet (which means the BatteryStatsImpl object has
@@ -1152,7 +1160,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
 
             final WifiActivityEnergyInfo wifiEnergyInfo = pullWifiEnergyInfoLocked();
-            final BluetoothActivityEnergyInfo bluetoothEnergyInfo = pullBluetoothEnergyInfoLocked();
+            final BluetoothActivityEnergyInfo bluetoothEnergyInfo;
+            if (force) {
+                // We only pull bluetooth stats when we have to, as we are not distributing its
+                // use amongst apps and the sampling frequency does not matter.
+                bluetoothEnergyInfo = pullBluetoothEnergyInfoLocked();
+            } else {
+                bluetoothEnergyInfo = null;
+            }
+
             synchronized (mStats) {
                 if (mStats.mRecordAllHistory) {
                     final long elapsedRealtime = SystemClock.elapsedRealtime();
