@@ -36,10 +36,10 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -212,6 +212,25 @@ public class ImmersiveModeConfirmation {
             }
         };
 
+        private ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener =
+                new ViewTreeObserver.OnComputeInternalInsetsListener() {
+                    private final int[] mTmpInt2 = new int[2];
+
+                    @Override
+                    public void onComputeInternalInsets(
+                            ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+                        // Set touchable region to cover the cling layout.
+                        mClingLayout.getLocationInWindow(mTmpInt2);
+                        inoutInfo.setTouchableInsets(
+                                ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+                        inoutInfo.touchableRegion.set(
+                                mTmpInt2[0],
+                                mTmpInt2[1],
+                                mTmpInt2[0] + mClingLayout.getWidth(),
+                                mTmpInt2[1] + mClingLayout.getHeight());
+                    }
+                };
+
         private BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -237,6 +256,8 @@ public class ImmersiveModeConfirmation {
             DisplayMetrics metrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(metrics);
             float density = metrics.density;
+
+            getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
 
             // create the confirmation cling
             mClingLayout = (ViewGroup)
