@@ -282,7 +282,8 @@ public final class MediaDrm {
          * @param md the MediaDrm object on which the event occurred
          * @param sessionId the DRM session ID on which the event occurred
          * @param expirationTime the new expiration time for the keys in the session.
-         *     The time is in milliseconds, relative to the Unix epoch.
+         *     The time is in milliseconds, relative to the Unix epoch.  A time of
+         *     0 indicates that the keys never expire.
          */
         void onExpirationUpdate(
                 @NonNull MediaDrm md, @NonNull byte[] sessionId, long expirationTime);
