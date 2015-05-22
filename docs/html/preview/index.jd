@@ -1,32 +1,29 @@
-page.title=M Developer Preview
-page.tags=preview
-meta.tags="preview"
+page.title=Android M Developer Preview
+page.tags="preview", 
+meta.tags="preview, M preview"
 fullpage=true
-page.viewport_width=970
 section.landing=true
 header.hide=1
 footer.hide=1
 @jd:body
 
-<section class="dac-expand dac-hero dac-light">
+<section class="dac-expand dac-hero dac-light" style="background-repeat:no-repeat">
   <div class="wrap">
     <div class="cols dac-hero-content">
-      <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/design/media/hero-material-design.png">
+      <div class="col-9of16 col-push-7of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png">
       </div>
-      <div class="col-1of2 col-pull-1of2">
-        <h1 class="dac-hero-title">M Developer Preview</h1>
+      <div class="col-7of16 col-pull-9of16">
+        <h1 class="dac-hero-title">Android M Developer Preview</h1>
         <p class="dac-hero-description">
-          Get ready for the next official release of the platform. The preview program gives
-          you an advance look at new APIs, features, and behaviors coming to Android.
-          Test your apps and give us feedback!
+          Get ready for the next version of Android. Test your apps on Nexus 5, 6, 9, and
+          Player. Explore what's new &mdash; a runtime permissions model, power saving Volta features, and new assist technology.
         </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/setup-sdk.html">
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Get started
+          Get Started!
         </a><br>
-
       </div>
     </div>
 
@@ -38,6 +35,7 @@ footer.hide=1
     </div>
   </div>
 </section>
+
 <div class="wrap dac-offset-parent">
   <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
     <i class="dac-sprite dac-arrow-down-gray"></i>
