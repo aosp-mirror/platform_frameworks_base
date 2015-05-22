@@ -20,6 +20,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.app.ActivityManager.TaskDescription;
+import android.app.PendingIntent;
 import android.os.PersistableBundle;
 import android.os.Trace;
 
@@ -142,6 +143,7 @@ final class ActivityRecord {
     ArrayList<ReferrerIntent> newIntents; // any pending new intents for single-top mode
     ActivityOptions pendingOptions; // most recently given options
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
+    AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.
     ProcessRecord app;      // if non-null, hosting application
@@ -261,6 +263,9 @@ final class ActivityRecord {
         }
         if (pendingOptions != null) {
             pw.print(prefix); pw.print("pendingOptions="); pw.println(pendingOptions);
+        }
+        if (appTimeTracker != null) {
+            appTimeTracker.dumpWithHeader(pw, prefix, false);
         }
         if (uriPermissions != null) {
             uriPermissions.dump(pw, prefix);
@@ -463,6 +468,10 @@ final class ActivityRecord {
         if (options != null) {
             pendingOptions = new ActivityOptions(options);
             mLaunchTaskBehind = pendingOptions.getLaunchTaskBehind();
+            PendingIntent usageReport = pendingOptions.getUsageTimeReport();
+            if (usageReport != null) {
+                appTimeTracker = new AppTimeTracker(usageReport);
+            }
         }
 
         // This starts out true, since the initial state of an activity

@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -409,6 +410,20 @@ public class ActivityTestMain extends Activity {
         menu.add("Spam!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 scheduleSpam(false);
+                return true;
+            }
+        });
+        menu.add("Track time").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, "We are sharing this with you!");
+                ActivityOptions options = ActivityOptions.makeBasic();
+                Intent receiveIntent = new Intent(ActivityTestMain.this, TrackTimeReceiver.class);
+                receiveIntent.putExtra("something", "yeah, this is us!");
+                options.requestUsageTimeReport(PendingIntent.getBroadcast(ActivityTestMain.this,
+                        0, receiveIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                startActivity(Intent.createChooser(intent, "Who do you love?"), options.toBundle());
                 return true;
             }
         });
