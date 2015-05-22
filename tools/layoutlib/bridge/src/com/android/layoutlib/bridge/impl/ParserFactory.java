@@ -17,11 +17,11 @@
 package com.android.layoutlib.bridge.impl;
 
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

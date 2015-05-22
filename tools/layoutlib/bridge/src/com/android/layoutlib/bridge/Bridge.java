@@ -19,7 +19,6 @@ package com.android.layoutlib.bridge;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
-import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.Capability;
 import com.android.ide.common.rendering.api.DrawableParams;
 import com.android.ide.common.rendering.api.Features;
@@ -39,6 +38,7 @@ import com.android.util.Pair;
 import com.ibm.icu.util.ULocale;
 import libcore.io.MemoryMappedFile_Delegate;
 
+import android.annotation.NonNull;
 import android.content.res.BridgeAssetManager;
 import android.graphics.Bitmap;
 import android.graphics.FontFamily_Delegate;
