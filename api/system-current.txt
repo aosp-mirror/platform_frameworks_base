@@ -25500,6 +25500,7 @@ package android.os {
 
   public class TransactionTooLargeException extends android.os.RemoteException {
     ctor public TransactionTooLargeException();
+    ctor public TransactionTooLargeException(java.lang.String);
   }
 
   public final class UserHandle implements android.os.Parcelable {

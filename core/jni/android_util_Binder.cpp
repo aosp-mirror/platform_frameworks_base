@@ -635,7 +635,7 @@ void set_dalvik_blockguard_policy(JNIEnv* env, jint strict_policy)
 }
 
 void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
-        bool canThrowRemoteException)
+        bool canThrowRemoteException, int parcelSize)
 {
     switch (err) {
         case UNKNOWN_ERROR:
@@ -680,8 +680,10 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
         case UNKNOWN_TRANSACTION:
             jniThrowException(env, "java/lang/RuntimeException", "Unknown transaction code");
             break;
-        case FAILED_TRANSACTION:
-            ALOGE("!!! FAILED BINDER TRANSACTION !!!");
+        case FAILED_TRANSACTION: {
+            ALOGE("!!! FAILED BINDER TRANSACTION !!!  (parcel size = %d)", parcelSize);
+            char msg[128];
+            snprintf(msg, sizeof(msg)-1, "data parcel size %d bytes", parcelSize);
             // TransactionTooLargeException is a checked exception, only throw from certain methods.
             // FIXME: Transaction too large is the most common reason for FAILED_TRANSACTION
             //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
@@ -690,8 +692,9 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             //        to enable us to distinguish these cases in the future.
             jniThrowException(env, canThrowRemoteException
                     ? "android/os/TransactionTooLargeException"
-                            : "java/lang/RuntimeException", NULL);
-            break;
+                            : "java/lang/RuntimeException",
+                    parcelSize > 0 ? msg : NULL);
+        } break;
         case FDS_NOT_ALLOWED:
             jniThrowException(env, "java/lang/RuntimeException",
                     "Not allowed to write file descriptors here");
@@ -1121,7 +1124,7 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     }
 
-    signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/);
+    signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/, data->dataSize());
     return JNI_FALSE;
 }
 
