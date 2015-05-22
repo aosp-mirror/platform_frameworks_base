@@ -1316,6 +1316,168 @@ public final class StreamConfigurationMap {
         return false;
     }
 
+    /**
+     * Return this {@link StreamConfigurationMap} as a string representation.
+     *
+     * <p>{@code "StreamConfigurationMap(Outputs([w:%d, h:%d, format:%s(%d), min_duration:%d,
+     * stall:%d], ... [w:%d, h:%d, format:%s(%d), min_duration:%d, stall:%d]), Inputs([w:%d, h:%d,
+     * format:%s(%d)], ... [w:%d, h:%d, format:%s(%d)]), ValidOutputFormatsForInput(
+     * [in:%d, out:%d, ... %d], ... [in:%d, out:%d, ... %d]), HighSpeedVideoConfigurations(
+     * [w:%d, h:%d, min_fps:%d, max_fps:%d], ... [w:%d, h:%d, min_fps:%d, max_fps:%d]))"}.</p>
+     *
+     * <p>{@code Outputs([w:%d, h:%d, format:%s(%d), min_duration:%d, stall:%d], ...
+     * [w:%d, h:%d, format:%s(%d), min_duration:%d, stall:%d])}, where
+     * {@code [w:%d, h:%d, format:%s(%d), min_duration:%d, stall:%d]} represents an output
+     * configuration's width, height, format, minimal frame duration in nanoseconds, and stall
+     * duration in nanoseconds.</p>
+     *
+     * <p>{@code Inputs([w:%d, h:%d, format:%s(%d)], ... [w:%d, h:%d, format:%s(%d)])}, where
+     * {@code [w:%d, h:%d, format:%s(%d)]} represents an input configuration's width, height, and
+     * format.</p>
+     *
+     * <p>{@code ValidOutputFormatsForInput([in:%s(%d), out:%s(%d), ... %s(%d)],
+     * ... [in:%s(%d), out:%s(%d), ... %s(%d)])}, where {@code [in:%s(%d), out:%s(%d), ... %s(%d)]}
+     * represents an input fomat and its valid output formats.</p>
+     *
+     * <p>{@code HighSpeedVideoConfigurations([w:%d, h:%d, min_fps:%d, max_fps:%d],
+     * ... [w:%d, h:%d, min_fps:%d, max_fps:%d])}, where
+     * {@code [w:%d, h:%d, min_fps:%d, max_fps:%d]} represents a high speed video output
+     * configuration's width, height, minimal frame rate, and maximal frame rate.</p>
+     *
+     * @return string representation of {@link StreamConfigurationMap}
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("StreamConfiguration(");
+        appendOutputsString(sb);
+        sb.append(", ");
+        appendInputsString(sb);
+        sb.append(", ");
+        appendValidOutputFormatsForInputString(sb);
+        sb.append(", ");
+        appendHighSpeedVideoConfigurationsString(sb);
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    private void appendOutputsString(StringBuilder sb) {
+        sb.append("Outputs(");
+        int[] formats = getOutputFormats();
+        for (int format : formats) {
+            Size[] sizes = getOutputSizes(format);
+            for (Size size : sizes) {
+                long minFrameDuration = getOutputMinFrameDuration(format, size);
+                long stallDuration = getOutputStallDuration(format, size);
+                sb.append(String.format("[w:%d, h:%d, format:%s(%d), min_duration:%d, " +
+                        "stall:%d], ", size.getWidth(), size.getHeight(), formatToString(format),
+                        format, minFrameDuration, stallDuration));
+            }
+        }
+        // Remove the pending ", "
+        if (sb.charAt(sb.length() - 1) == ' ') {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        sb.append(")");
+    }
+
+    private void appendInputsString(StringBuilder sb) {
+        sb.append("Inputs(");
+        int[] formats = getInputFormats();
+        for (int format : formats) {
+            Size[] sizes = getInputSizes(format);
+            for (Size size : sizes) {
+                sb.append(String.format("[w:%d, h:%d, format:%s(%d)], ", size.getWidth(),
+                        size.getHeight(), formatToString(format), format));
+            }
+        }
+        // Remove the pending ", "
+        if (sb.charAt(sb.length() - 1) == ' ') {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        sb.append(")");
+    }
+
+    private void appendValidOutputFormatsForInputString(StringBuilder sb) {
+        sb.append("ValidOutputFormatsForInput(");
+        int[] inputFormats = getInputFormats();
+        for (int inputFormat : inputFormats) {
+            sb.append(String.format("[in:%s(%d), out:", formatToString(inputFormat), inputFormat));
+            int[] outputFormats = getValidOutputFormatsForInput(inputFormat);
+            for (int i = 0; i < outputFormats.length; i++) {
+                sb.append(String.format("%s(%d)", formatToString(outputFormats[i]),
+                        outputFormats[i]));
+                if (i < outputFormats.length - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("], ");
+        }
+        // Remove the pending ", "
+        if (sb.charAt(sb.length() - 1) == ' ') {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        sb.append(")");
+    }
+
+    private void appendHighSpeedVideoConfigurationsString(StringBuilder sb) {
+        sb.append("HighSpeedVideoConfigurations(");
+        Size[] sizes = getHighSpeedVideoSizes();
+        for (Size size : sizes) {
+            Range<Integer>[] ranges = getHighSpeedVideoFpsRangesFor(size);
+            for (Range<Integer> range : ranges) {
+                sb.append(String.format("[w:%d, h:%d, min_fps:%d, max_fps:%d], ", size.getWidth(),
+                        size.getHeight(), range.getLower(), range.getUpper()));
+            }
+        }
+        // Remove the pending ", "
+        if (sb.charAt(sb.length() - 1) == ' ') {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        sb.append(")");
+    }
+
+    private String formatToString(int format) {
+        switch (format) {
+            case ImageFormat.YV12:
+                return "YV12";
+            case ImageFormat.YUV_420_888:
+                return "YUV_420_888";
+            case ImageFormat.NV21:
+                return "NV21";
+            case ImageFormat.NV16:
+                return "NV16";
+            case PixelFormat.RGB_565:
+                return "RGB_565";
+            case PixelFormat.RGBA_8888:
+                return "RGBA_8888";
+            case PixelFormat.RGBX_8888:
+                return "RGBX_8888";
+            case PixelFormat.RGB_888:
+                return "RGB_888";
+            case ImageFormat.JPEG:
+                return "JPEG";
+            case ImageFormat.YUY2:
+                return "YUY2";
+            case ImageFormat.Y8:
+                return "Y8";
+            case ImageFormat.Y16:
+                return "Y16";
+            case ImageFormat.RAW_SENSOR:
+                return "RAW_SENSOR";
+            case ImageFormat.RAW10:
+                return "RAW10";
+            case ImageFormat.DEPTH16:
+                return "DEPTH16";
+            case ImageFormat.DEPTH_POINT_CLOUD:
+                return "DEPTH_POINT_CLOUD";
+            case ImageFormat.PRIVATE:
+                return "PRIVATE";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     // from system/core/include/system/graphics.h
     private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
     private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
