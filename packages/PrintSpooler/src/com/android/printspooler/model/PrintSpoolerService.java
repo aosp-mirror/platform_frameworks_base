@@ -63,6 +63,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -756,7 +757,7 @@ public final class PrintSpoolerService extends Service {
                 out = mStatePersistFile.startWrite();
 
                 XmlSerializer serializer = new FastXmlSerializer();
-                serializer.setOutput(out, "utf-8");
+                serializer.setOutput(out, StandardCharsets.UTF_8.name());
                 serializer.startDocument(null, true);
                 serializer.startTag(null, TAG_SPOOLER);
 
@@ -947,7 +948,7 @@ public final class PrintSpoolerService extends Service {
             }
             try {
                 XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(in, null);
+                parser.setInput(in, StandardCharsets.UTF_8.name());
                 parseState(parser);
             } catch (IllegalStateException ise) {
                 Slog.w(LOG_TAG, "Failed parsing ", ise);

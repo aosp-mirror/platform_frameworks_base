@@ -58,6 +58,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -559,7 +560,7 @@ class UsbSettingsManager {
             try {
                 fis = new FileInputStream(sSingleUserSettingsFile);
                 XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(fis, null);
+                parser.setInput(fis, StandardCharsets.UTF_8.name());
 
                 XmlUtils.nextElement(parser);
                 while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -595,7 +596,7 @@ class UsbSettingsManager {
         try {
             stream = mSettingsFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
 
             XmlUtils.nextElement(parser);
             while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -624,7 +625,7 @@ class UsbSettingsManager {
             fos = mSettingsFile.startWrite();
 
             FastXmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(fos, "utf-8");
+            serializer.setOutput(fos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startTag(null, "settings");

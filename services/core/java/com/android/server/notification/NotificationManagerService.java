@@ -112,6 +112,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -377,7 +378,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 infile = mPolicyFile.openRead();
                 final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(infile, null);
+                parser.setInput(infile, StandardCharsets.UTF_8.name());
 
                 int type;
                 String tag;
@@ -435,7 +436,7 @@ public class NotificationManagerService extends SystemService {
 
             try {
                 final XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, "utf-8");
+                out.setOutput(stream, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
                 out.startTag(null, TAG_BODY);
                 out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));

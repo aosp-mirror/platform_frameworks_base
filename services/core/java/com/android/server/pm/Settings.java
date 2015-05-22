@@ -76,6 +76,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1083,7 +1084,7 @@ final class Settings {
                 str = new FileInputStream(userPackagesStateFile);
             }
             final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(str, null);
+            parser.setInput(str, StandardCharsets.UTF_8.name());
 
             int type;
             while ((type=parser.next()) != XmlPullParser.START_TAG
@@ -1297,7 +1298,7 @@ final class Settings {
             final BufferedOutputStream str = new BufferedOutputStream(fstr);
 
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(str, "utf-8");
+            serializer.setOutput(str, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -1538,7 +1539,7 @@ final class Settings {
 
             //XmlSerializer serializer = XmlUtils.serializerInstance();
             XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(str, "utf-8");
+            serializer.setOutput(str, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -1987,7 +1988,7 @@ final class Settings {
                 str = new FileInputStream(mSettingsFilename);
             }
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(str, null);
+            parser.setInput(str, StandardCharsets.UTF_8.name());
 
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
