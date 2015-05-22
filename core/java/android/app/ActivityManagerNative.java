@@ -2307,14 +2307,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case GET_HOME_ACTIVITY_TOKEN_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder homeActivityToken = getHomeActivityToken();
-            reply.writeNoException();
-            reply.writeStrongBinder(homeActivityToken);
-            return true;
-        }
-
         case START_LOCK_TASK_BY_TASK_ID_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int taskId = data.readInt();
@@ -5529,19 +5521,6 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return displayId;
-    }
-
-    @Override
-    public IBinder getHomeActivityToken() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(GET_HOME_ACTIVITY_TOKEN_TRANSACTION, data, reply, 0);
-        reply.readException();
-        IBinder res = reply.readStrongBinder();
-        data.recycle();
-        reply.recycle();
-        return res;
     }
 
     @Override
