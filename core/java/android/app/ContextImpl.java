@@ -689,7 +689,8 @@ class ContextImpl extends Context {
                 intent.resolveTypeIfNeeded(getContentResolver()),
                 null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
                 user.getIdentifier());
-        } catch (RemoteException re) {
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -754,6 +755,7 @@ class ContextImpl extends Context {
             }
             Instrumentation.checkStartActivityResult(result, null);
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -768,6 +770,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, false, false,
                 getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -782,6 +785,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE,
                 false, false, getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -796,6 +800,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, receiverPermission, appOp, false, false,
                 getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -811,6 +816,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE, true, false,
                 getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -854,6 +860,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, receiverPermission, appOp,
                     true, false, getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -866,6 +873,7 @@ class ContextImpl extends Context {
                     intent, resolvedType, null, Activity.RESULT_OK, null, null, null,
                     AppOpsManager.OP_NONE, false, false, user.getIdentifier());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -886,6 +894,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermission, appOp, false, false,
                     user.getIdentifier());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -927,6 +936,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, receiverPermission,
                     appOp, true, false, user.getIdentifier());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -942,6 +952,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, false, true,
                 getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -977,6 +988,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, null,
                     AppOpsManager.OP_NONE, true, true, getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -993,6 +1005,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, getUserId());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1006,6 +1019,7 @@ class ContextImpl extends Context {
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, false, true, user.getIdentifier());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1040,6 +1054,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, null,
                     AppOpsManager.OP_NONE, true, true, user.getIdentifier());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1056,6 +1071,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, user.getIdentifier());
         } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1171,7 +1187,7 @@ class ContextImpl extends Context {
             }
             return cn;
         } catch (RemoteException e) {
-            return null;
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1193,7 +1209,7 @@ class ContextImpl extends Context {
             }
             return res != 0;
         } catch (RemoteException e) {
-            return false;
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1242,7 +1258,7 @@ class ContextImpl extends Context {
             }
             return res != 0;
         } catch (RemoteException e) {
-            return false;
+            throw new RuntimeException("Failure from system", e);
         }
     }
 
@@ -1274,9 +1290,8 @@ class ContextImpl extends Context {
                     className, profileFile, 0, arguments, null, null, getUserId(),
                     null /* ABI override */);
         } catch (RemoteException e) {
-            // System has crashed, nothing we can do.
+            throw new RuntimeException("Failure from system", e);
         }
-        return false;
     }
 
     @Override
