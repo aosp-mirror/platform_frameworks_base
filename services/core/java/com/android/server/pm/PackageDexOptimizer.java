@@ -199,7 +199,8 @@ final class PackageDexOptimizer {
     @Nullable
     private String createOatDirIfSupported(PackageParser.Package pkg, String dexInstructionSet)
             throws IOException {
-        if (pkg.isSystemApp() && !pkg.isUpdatedSystemApp()) {
+        if ((pkg.isSystemApp() && !pkg.isUpdatedSystemApp()) || pkg.isForwardLocked()
+                || (!pkg.applicationInfo.isInternal())) {
             return null;
         }
         File codePath = new File(pkg.codePath);

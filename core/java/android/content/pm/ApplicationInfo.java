@@ -916,6 +916,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
+    /** @hide */
+    public boolean isInternal() {
+        return (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0;
+    }
+
     /**
      * @hide
      */
