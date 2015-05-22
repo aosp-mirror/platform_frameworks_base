@@ -1,0 +1,575 @@
+page.title=Standalone Toolchain
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#syt">Selecting Your Toolchain</a></li>
+        <li><a href="#sys">Selecting Your Sysroot</a></li>
+        <li><a href="#itc">Invoking the Compiler</a></li>
+        <li><a href="#wwc">Working with Clang</a></li>
+        <li><a href="#abi">ABI Compatibility</a></li>
+        <li><a href="#war">Warnings and Limitations</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>You can use the toolchains provided with the Android NDK independently, or as plug-ins
+with an existing IDE, such as Eclipse. This flexibility
+can be useful if you already have your own build system, and only need the ability to invoke the
+cross-compiler in order to add support to Android for it.</p>
+
+<p>A typical use case is invoking the configure script of an open-source library that expects a
+cross-compiler in the {@code CC} environment variable.</p>
+
+<p class="note"><strong>Note:</strong> This page assumes significant understanding of
+compiling, linking, and low-level architecture. In addition, the techniques it describes are
+unnecessary for most use cases. In most cases, we recommend that you forego using a standalone
+toolchain, and instead stick to the NDK build system.</p>
+
+<h2 id="syt">Selecting your Toolchain</h2>
+<p>Before anything else, you need to decide which processing architecture your standalone toolchain
+is going to target. Each architecture corresponds to a different toolchain name, as Table 1
+shows.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> {@code APP_ABI} settings for different instruction sets.</p>
+<table>
+  <tr>
+    <th scope="col">Architecture</th>
+    <th scope="col">Toolchain name</th>
+  </tr>
+  <tr>
+    <td>ARM-based</td>
+    <td>{@code arm-linux-androideabi-&lt;gcc-version&gt;}</td>
+  </tr>
+  <tr>
+    <td>x86-based</td>
+    <td>{@code x86-&lt;gcc-version&gt;}</td>
+  </tr>
+  <tr>
+    <td>MIPS-based</td>
+    <td>{@code mipsel-linux-android-&lt;gcc-version&gt;}</td>
+  </tr>
+  <tr>
+    <td>ARM64-based</td>
+    <td>{@code aarch64-linux-android-&lt;gcc-version&gt;}</td>
+  </tr>
+  <tr>
+    <td>X86-64-based</td>
+    <td>{@code x86_64-&lt;gcc-version&gt;}</td>
+  </tr>
+  <tr>
+    <td>MIPS64-based</td>
+    <td>{@code mips64el-linux-android--&lt;gcc-version&gt;}</td>
+  </tr>
+</table>
+
+
+
+<h2 id="sys">Selecting your Sysroot</h2>
+<p>The next thing you need to do is define your <i>sysroot</i> (A sysroot is a directory containing
+the system headers and libraries for your target). To define the sysroot, you must must know the
+Android API level you want to target for native support; available native APIs vary by Android API
+level.</p>
+
+<p>Native APIs for the respective <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">
+Android API levels</a> reside under {@code $NDK/platforms/}; each API-level
+directory, in turn, contains subdirectories for the various CPUs and architectures. The
+following example shows how to define a <em>sysroot</em> for a build targeting Android 5.1
+(API level 22), for ARM architecture:</p>
+
+<pre class="no-pretty-print">
+SYSROOT=$NDK/platforms/android-22/arch-arm
+</pre>
+
+For more detail about the Android API levels and the respective native APIs they support, see
+<a href={docRoot}ndk/guides/stable_apis.html>Stable APIs</a>.
+
+<h2 id="itc">Invoking the Compiler</h2>
+
+<p>There are two ways to invoke the compiler. One method is simple, and leaves most of the lifting
+to the build system. The other is more advanced, but provides more flexibility.</p>
+
+<h3 id="sm">Simple method</h3>
+<p>The simplest way to build is by invoking the appropriate compiler directly from the command
+line, using the {@code --sysroot} option to indicate the location of the system files for the
+platform you're targeting. For example:</p>
+
+<pre class="no-pretty-print">
+export CC="$NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/ \
+linux-x86/bin/arm-linux-androideabi-gcc-4.8 --sysroot=$SYSROOT"
+$CC -o foo.o -c foo.c
+</pre>
+
+<p>While this method is simple, it lacks in flexibility: It does not allow you to use any C++ STL
+(STLport, libc++, or the GNU libstdc++) with it. It also does not support exceptions or RTTI.</p>
+
+<p>For Clang, you need to perform an additional two steps:</p>
+<ul>
+<ol type="1">
+<li>Add the appropriate {@code -target} for the target architecture, as Table 2 shows.</li>
+
+<p class="table-caption" id="table2">
+  <strong>Table 2.</strong> Architectures and corresponding values for {@code -target}.</p>
+   <table>
+  <tr>
+    <th scope="col">Architecture</th>
+    <th scope="col">Value</th>
+  </tr>
+  <tr>
+    <td>armeabi-v7a</td>
+    <td>{@code -target armv7-none-linux-androideabi}</td>
+  </tr>
+  <tr>
+    <td>armeabi</td>
+    <td>{@code -target armv5te-none-linux-androideabi}</td>
+  </tr>
+    <tr>
+    <td>x86</td>
+    <td>{@code -target i686-none-linux-android}</td>
+  </tr>
+    <tr>
+    <td>MIPS</td>
+    <td>{@code -target mipsel-none-linux-android}</td>
+  </tr>
+</table>
+
+<li>Add assembler and linker support by adding the {@code -gcc-toolchain} option, as in the
+following example:</li>
+<pre class="no-pretty-print">
+-gcc-toolchain $NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64
+</pre>
+</ol>
+
+Ultimately, a command to compile using Clang might look like this:
+
+<pre class="no-pretty-print">
+export CC="export CC="$NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/ \
+linux-x86/bin/arm-linux-androideabi-gcc-4.8 --sysroot=$SYSROOT" -target \
+armv7-none-linux-androideabi \
+-gcc-toolchain $NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64"
+$CC -o foo.o -c foo.c
+</pre>
+</ul>
+
+<h3>Advanced method</h3>
+<p>The NDK provides the {@code make-standalone-toolchain.sh} shell script to allow you to perform a
+customized toolchain installation from the command line. This approach affords you more flexibility
+than the procedure described in <a href="#sm">Simple method</a>.</p>
+
+<p>The script is located in the {@code $NDK/build/tools/} directory, where {@code $NDK} is the
+installation root for the NDK. An example of the use of this script appears below:</p>
+
+<pre class="no-pretty-print">
+$NDK/build/tools/make-standalone-toolchain.sh \
+--arch=arm --platform=android-22 --install-dir=/tmp/my-android-toolchain
+</pre>
+
+<p>This command creates a directory named {@code /tmp/my-android-toolchain/}, containing a copy of
+the {@code android-22/arch-arm} sysroot, and of the toolchain binaries for a 32-bit ARM
+architecture.</p>
+
+<p>Note that the toolchain binaries do not depend on or contain host-specific paths, in other words,
+you can install them in any location, or even move them if you need to.</p>
+
+<p>By default, the build system uses the 32-bit, ARM-based GCC 4.8 toolchain. You can specify a
+different value, however, by specifying {@code --arch=&lt;toolchain&gt;} as an option.
+Table 3 shows the values to use for other toolchains:
+
+<p class="table-caption" id="table3">
+  <strong>Table 3.</strong> Toolchains and corresponding values, using {@code --arch}.</p>
+   <table>
+  <tr>
+    <th scope="col">Toolchain</th>
+    <th scope="col">Value</th>
+  </tr>
+  <tr>
+    <td>x86 GCC 4.8 compiler</td>
+    <td>{@code --arch=x86}</td>
+  </tr>
+  <tr>
+    <td>x86_64 GCC 4.8 compiler</td>
+    <td>{@code --arch=x86_64}</td>
+  </tr>
+  <tr>
+    <td>MIPS GCC 4.8 compiler</td>
+    <td>{@code --arch=mips}</td>
+  </tr>
+</table>
+
+<p>Alternatively, you can use the {@code --toolchain=&lt;toolchain&gt;} option. Table 4 shows the
+values you can specify for {@code &lt;toolchain&gt;}:</p>
+
+<p class="table-caption" id="table4">
+  <strong>Table 4.</strong> Toolchains and corresponding values, using {@code --toolchain}.</p>
+   <table>
+  <tr>
+    <th scope="col">Toolchain</th>
+    <th scope="col">Value</th>
+  </tr>
+
+  <tr>
+    <td>arm</td>
+    <td>
+       <li>{@code --toolchain=arm-linux-android-4.6}</li>
+       <li>{@code --toolchain=arm-linux-android-4.7}</li>
+       <li>{@code --toolchain=arm-linux-android-4.8}</li>
+       <li>{@code --toolchain=arm-linux-android-4.9}</li>
+       <li>{@code --toolchain=arm-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=arm-linux-android-clang3.5}</li>
+    </td>
+  </tr>
+  <tr>
+    <td>x86</td>
+    <td>
+       <li>{@code --toolchain=x86-linux-android-4.6}</li>
+       <li>{@code --toolchain=x86-linux-android-4.7}</li>
+       <li>{@code --toolchain=x86-linux-android-4.8}</li>
+       <li>{@code --toolchain=x86-linux-android-4.9}</li>
+       <li>{@code --toolchain=x86-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=x86-linux-android-clang3.5}</li>
+    </td>
+  </tr>
+  <tr>
+    <td>mips</td>
+    <td>
+       <li>{@code --toolchain=mips-linux-android-4.6}</li>
+       <li>{@code --toolchain=mips-linux-android-4.7}</li>
+       <li>{@code --toolchain=mips-linux-android-4.8}</li>
+       <li>{@code --toolchain=mips-linux-android-4.9}</li>
+       <li>{@code --toolchain=mips-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=mips-linux-android-clang3.5}</li>
+    </td>
+  </tr>
+
+  <tr>
+    <td>arm64</td>
+    <td>
+       <li>{@code --toolchain=aarch64-linux-android-4.9}</li>
+       <li>{@code --toolchain=aarch64-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=aarch64-linux-android-clang3.5}</li>
+    </td>
+  </tr>
+  <tr>
+    <td>x86_64</td>
+    <td>
+       <li>{@code --toolchain=x86_64-linux-android-4.9}</li>
+       <li>{@code --toolchain=x86_64-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=x86_64-linux-android-clang3.5}</li>
+    </td>
+  </tr>
+  <tr>
+    <td>mips64</td>
+    <td>
+       <li>{@code --toolchain=mips64el-linux-android-4.9}</li>
+       <li>{@code --toolchain=mips64el-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=mips64el-linux-android-clang3.5}</li>
+    </td>
+  </tr>
+</table>
+
+<p class="note"<strong>Note: </strong> Table 4 is not an exhaustive list. Other combinations may
+also be valid, but are unverified.</p>
+
+<p>You can also copy Clang/LLVM 3.3, using one of two methods: You can append {@code -clang3.3} to
+the {@code --toolchain} option, so that the {@code --toolchain} option looks like the following
+example:
+
+<pre class="no-pretty-print">
+--toolchain=arm-linux-androideabi-clang3.3
+</pre>
+
+<p>Alternatively, you can add {@code -llvm-version=3.3} as a separate option on the command
+line.</p>
+
+<p>By default, the build system builds for a 32-bit host toolchain. You can specify a 64-bit
+host toolchain instead. Table 5 shows the value to use with {@code -system} for different
+platforms.</p>
+
+<p class="table-caption" id="table5">
+  <strong>Table 5.</strong> Host toolchains and corresponding values, using {@code -system}.</p>
+   <table>
+  <tr>
+    <th scope="col">Host toolchain</th>
+    <th scope="col">Value</th>
+  </tr>
+  <tr>
+    <td>64-bit Linux</td>
+    <td>{@code -system=linux-x86_64}</td>
+  </tr>
+  <tr>
+    <td>64-bit MacOSX</td>
+    <td>{@code -system=darwin-x86_64}</td>
+  </tr>
+</table>
+
+For more information on specifying a 32- or 64-bit instruction host toolchain, see
+<a href="{@docRoot}/ndk/guides/ndk-build.html#6432">ndk-build</a>.
+
+<p>You may specify {@code stl=stlport} to copy {@code libstlport} instead of the default
+{@code libgnustl}. If you do so, and you wish to link against the shared library, you must
+explicitly use {@code -lstlport_shared}. This requirement is similar to having to use
+{@code -lgnustl_shared} for GNU {@code libstdc++}.</p>
+
+<p>Similarly, you can specify {@code -stl=libc++} to copy the LLVM libc++ headers and libraries.
+To link against the shared library, you must explicitly use -lc++_shared.</p>
+
+<p>You can make these settings directly, as in the following example:</p>
+
+<pre class="no-pretty-print">
+export PATH=/tmp/my-android-toolchain/bin:$PATH
+export CC=arm-linux-androideabi-gcc   # or export CC=clang
+export CXX=arm-linux-androideabi-g++  # or export CXX=clang++
+</pre>
+
+<p>Note that if you omit the {@code -install-dir} option, the {@code make-standalone-toolchain.sh}
+shell script creates a tarball in {@code tmp/ndk/&lt;toolchain-name&gt;.tar.bz2}. This tarball makes
+it easy to archive, as well as to redistribute the binaries.</p>
+
+<p>This standalone toolchain provides an additional benefit, as well, in that it contains a working
+copy of a C++ STL library, with working exceptions and RTTI support.</p>
+
+<p>For more options and details, use {@code --help}.</p>
+
+<h2>Working with Clang</h2>
+<p>You can install Clang binaries in the standalone installation by using the
+{@code --llvm-version=&lt;version&gt;} option. {@code &lt;version&gt;} is a LLVM/Clang version
+number, such as {@code 3.4} or {@code 3.5}. For example:
+
+<pre class="no-pretty-print">
+build/tools/make-standalone-toolchain.sh \
+--install-dir=/tmp/mydir \
+--toolchain=arm-linux-androideabi-4.7 \
+--llvm-version=3.5
+</pre>
+
+<p>Note that Clang binaries are copied along with the GCC ones, because they rely on the same
+assembler, linker, headers, libraries, and C++ STL implementation.</p>
+
+<p>This operation also installs two scripts, named {@code clang} and {@code clang++}, under
+{@code &lt;install-dir&gt;/bin/@}. These scripts invoke the real {@code clang} binary with default
+target architecture flags. In other words, they should work without any modification, and you should
+be able to use them in your own builds by just setting the {@code CC} and {@code CXX} environment
+variables to point to them.</p>
+
+<h4>Invoking Clang</h4>
+<p>In an ARM standalone installation built with {@code llvm-version=3.3}, invoking
+<a href="http://clang.llvm.org/">Clang</a> on a Unix system takes the form of a single line. For
+instance:</p>
+
+<pre class="no-pretty-print">
+dirname $0 /clang31 -target armv5te-none-linux-androideabi "$@"
+</pre>
+
+<p><code>clang++</code> invokes <code>clang++31</code> in the same way.</p>
+
+<h4>Clang targets with ARM</h4>
+
+<p>When building for ARM, Clang changes the target based on the presence of the
+{@code -march=armv7-a} and/or {@code -mthumb} options:</p>
+
+<p class="table-caption" id="table5">
+  <strong>Table 5.</strong> Specifiable {@code -march} values and their resulting targets.</p>
+   <table>
+  <tr>
+    <th scope="col">{@code -march} value</th>
+    <th scope="col">Resulting target</th>
+  </tr>
+  <tr>
+    <td>{@code -march=armv7-a}</td>
+    <td>{@code armv7-none-linux-androideabi}</td>
+  </tr>
+  <tr>
+    <td>{@code -mthumb}</td>
+    <td>{@code thumb-none-linux-androideabi}</td>
+  </tr>
+  <tr>
+    <td>Both {@code -march=armv7-a} and {@code -mthumb}</td>
+    <td>{@code thumbv7-none-linux-androideabi}</td>
+  </tr>
+</table>
+
+<p>You may also override with your own {@code -target} if you wish.</p>
+
+<p>The {@code -gcc-toolchain} option is unnecessary because, in a standalone package,
+Clang locates {@code as} and {@code ld} in a predefined relative location. <p>
+
+<p>{@code clang} and {@code clang++} should be easy drop-in replacements for {@code gcc} and
+{@code g++} in a makefile. When in doubt, add the following options to verify that they are
+working properly:</p>
+
+<ul>
+<li>{@code -v} to dump commands associated with compiler driver issues</li>
+<li>{@code -###} to dump command line options, including implicitly predefined ones.</li>
+<li>{@code -x c /dev/null -dM -E} to dump predefined preprocessor definitions</li>
+<li>{@code -save-temps} to compare {@code *.i} or {@code *.ii} preprocessed files.</li>
+</ul>
+
+<p>For more information about Clang, see
+<a href="http://clang.llvm.org/">http://clang.llvm.org/</a>, especially the GCC compatibility
+section.</p>
+
+
+<h2>ABI Compatibility</h2>
+<p>The machine code that the ARM toolchain generates should be compatible with the official Android
+<a href="{docRoot}/ndk/guides/cpu-arch-abis.html">armeabi ABI</a> by default.</p>
+
+<p>We recommend use of the {@code -mthumb} compiler flag to force the generation of 16-bit Thumb-1
+instructions (the default being 32-bit ARM instructions).</p>
+
+<p>If you want to target the armeabi-v7a ABI, you must set the following flags: </p>
+
+<pre class="no-pretty-print">
+CFLAGS= -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16
+</pre>
+
+<p>The first flag enables Thumb-2 instructions. The second flag enables hardware-FPU instructions
+while ensuring that the system passes floating-point parameters in core registers, which is critical
+for ABI compatibility.</p>
+
+<p class="note"><strong>Note: </strong>In versions of the NDK prior to r9b, do not use these flags
+separately. You must set all or none of them. Otherwise, unpredictable behavior and crashes may
+result.</p>
+
+<p>To use NEON instructions, you must change the {@code -mfpu} compiler flag:</p>
+
+<pre class="no-pretty-print">
+CFLAGS= -march=armv7-a -mfloat-abi=softfp -mfpu=neon
+</pre>
+
+<p>Note that this setting forces the use of {@code VFPv3-D32}, per the ARM specification.</p>
+
+<p>Also, make sure to provide the following two flags to the linker:</p>
+
+<pre class="no-pretty-print">
+LDFLAGS= -march=armv7-a -Wl,--fix-cortex-a8
+</pre>
+
+<p>The first flag instructs the linker to pick {@code libgcc.a}, {@code libgcov.a}, and
+{@code crt*.o}, which are tailored for armv7-a. The 2nd flag is required as a workaround for a CPU
+bug in some Cortex-A8 implementations.</p>
+
+<p>Since NDK version r9b, all Android native APIs taking or returning double or float values have
+{@code attribute((pcs("aapcs")))} for ARM. This makes it possible to compile user code in
+{@code -mhard-float} (which implies {@code -mfloat-abi=hard}), and still link with the Android
+native APIs that comply with the softfp ABI. For more information on this, see the comments in
+{@code $NDK/tests/device/hard-float/jni/Android.mk}.</p>
+
+<p>If you want to use NEON intrinsics on x86, the build system can translate them to the native x86
+SSE intrinsics using a special C/C++ language header with the same name, {@code arm_neon.h}, as the
+standard ARM NEON intrinsics header.</p>
+
+<p>By default, the x86 ABI supports SIMD up to SSSE3, and the header covers ~93% of (1869 of 2009)
+NEON functions.</p>
+
+<p>You don't have to use any specific compiler flag when targeting the MIPS ABI.</p>
+
+<p>To learn more about ABI support, see <a href="{@docRoot}/ndk/guides/x86.html">x86</a>.</p>
+
+<h2>Warnings and Limitations</h2>
+<h3>Windows support</h3>
+<p>The Windows binaries do not depend on Cygwin. This lack of dependency makes them faster. The
+cost, however, is that they do not understand Cygwin path specifications like
+{@code cygdrive/c/foo/bar}, as opposed to {@code C:/foo/bar}.</p>
+
+<p>The NDK build system ensures that all paths passed to the compiler from Cygwin are automatically
+translated, and manages other complexities, as well. If you have a custom build system,
+you may need to resolve these complexities yourself.</p>
+
+<p>For information on contributing to support for Cygwin/MSys, visit the android-ndk
+<a href="https://groups.google.com/forum/#!forum/android-ndk">forum</a>.</p>
+
+<h3>wchar_t support</h3>
+
+<p>The Android platform did not really support {@code wchar_t} until Android 2.3 (API level 9). This
+fact has several ramifications:</p>
+<ul>
+<li>If you target platform Android 2.3 or higher, the size of {@code wchar_t} is 4 bytes, and most
+{@code wide-char} functions are available in the C library (with the exception of multi-byte
+encoding/decoding functions and {@code wsprintf}/{@code wsscanf}).</li>
+
+<li>If you target any lower API level, the size of {@code wchar_t} is 1 byte, and none of the
+wide-char functions works.</li>
+</ul>
+
+<p>We recommend that you get rid of any dependencies on the {@code wchar_t} type, and switch to
+better representations. The support provided in Android is only there to help you migrate existing
+code.</p>
+
+<h3>Exceptions, RTTI, and STL</h3>
+<p>The toolchain binaries support C++ exceptions and RTTI by default. To disable C++ exceptions
+and RTTI when building sources (to generate lighter-weight machine code, for example), use
+{@code -fno-exceptions} and {@code -fno-rtti}.</p>
+
+<p>To use these features in conjunction with GNU libstdc++, you must explicitly link with libsupc++.
+To do so, use {@code -lsupc++} when linking binaries. For example:</p>
+
+<pre class="no-pretty-print">
+arm-linux-androideabi-g++ .... -lsupc++
+</pre>
+
+<p>You do not need to do this when using the STLport or libc++ library.</p>
+
+<h3>C++ STL support</h3>
+<p>The standalone toolchain includes a copy of a C++ Standard Template Library implementation. This
+implementation is either for GNU libstdc++, STLport, or libc++, depending on what you specify for the
+{@code -stl=&lt;name&gt;} option described previously. To use this implementation of STL, you need
+to link your project with the proper library:</p>
+
+<ul>
+<li>
+Use {@code -lstdc++} to link against the static library version of any implementation. Doing so
+ensures that all required C++ STL code is included into your final binary. This method is ideal if
+you are only generating a single shared library or executable.</p>
+
+<p>This is the method that we recommend.</p>
+</li>
+
+<li>Alternatively, use {@code -lgnustl_shared} to link against the shared library version of GNU
+{@code libstdc++}. If you use this option, you must also make sure to copy
+{@code libgnustl_shared.so} to your device in order for your code to load properly. Table 6 shows
+where this file is for each toolchain type.
+</li>
+
+<p class="note"><strong>Note: </strong>GNU libstdc++ is licensed under the GPLv3 license, with a
+linking exception. If you cannot comply with its requirements, you cannot redistribute the
+shared library in your project.</p>
+
+
+<li>Use {@code -lstlport_shared} to link against the shared library version of STLport. When you do
+so, you need to make sure that you also copy {@code libstlport_shared.so} to your device in order
+for your code to load properly. Table 6 shows where this file is for each toolchain:</li>
+
+<p class="table-caption" id="table6">
+  <strong>Table 6.</strong> Specifiable {@code -march} values and their resulting targets.</p>
+   <table>
+  <tr>
+    <th scope="col">Toolchain</th>
+    <th scope="col">Location</th>
+  </tr>
+  <tr>
+    <td>ARM</td>
+    <td>{@code $TOOLCHAIN/arm-linux-androideabi/lib/}</td>
+  </tr>
+  <tr>
+    <td>x86</td>
+    <td>{@code $TOOLCHAIN/i686-linux-android/lib/}</td>
+  </tr>
+  <tr>
+    <td>MIPS</td>
+    <td>{@code $TOOLCHAIN/mipsel-linux-android/lib/}</td>
+  </tr>
+</table>
+
+<p class="note"><strong>Note: </strong>If your project contains multiple shared libraries or
+executables, you must link against a shared-library STL implementation. Otherwise, the build
+system does not define certain global uniquely, which can result in unpredictable runtime behavior.
+This behavior may include crashes and failure to properly catch exceptions.</p>
+
+<p>The reason the shared version of the libraries is not simply called {@code libstdc++.so} is that
+this name would conflict at runtime with the system's own minimal C++ runtime. For this reason,
+the build system enforces a new name for the GNU ELF library. The static library does not have
+this problem.</p>

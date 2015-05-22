@@ -1,0 +1,241 @@
+page.title=Application.mk
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#over">Overview</a></li>
+        <li><a href="#var">Variables</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>This document explains the syntax of the {@code Application.mk} build file, which describes the
+native <em>modules</em> that your app requires. A module can be a static library, a shared library,
+or an executable.</p>
+
+<p>We recommend that you read the <a href="{@docRoot}ndk/guides/concepts.html">Concepts</a> and
+<a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a> pages before this one. Doing so will
+help maximize your understanding of the material on this page. </p>
+
+<h2 id="over">Overview</h2>
+The {@code Application.mk} file is really a tiny GNU Makefile fragment that defines several
+variables for compilation. It usually resides under {@code $PROJECT/jni/}, where {@code $PROJECT}
+points to your application's project directory. Another alternative is to place it under a
+sub-directory of the top-level {@code $NDK/apps/} directory. For example:</p>
+
+<pre>
+$NDK/apps/&lt;myapp&gt;/Application.mk
+</pre>
+
+<p>Here, {@code &lt;myapp&gt;} is a short name used to describe your app to the NDK build system. It
+doesn't actually go into your generated shared libraries or your final packages.</p>
+
+<h2 id="var">Variables</h2>
+<h4>APP_PROJECT_PATH</h4>
+<p>This variable stores the absolute path to your app's project-root directory. The build system
+uses this information to place stripped-down versions of the generated JNI shared libraries
+into a specific location known to the APK-generating tools.</p>
+
+<p>If you place your {@code Application.mk} file under {@code $NDK/apps/&lt;myapp&gt;/}, you must
+define this variable. If you place it under {@code $PROJECT/jni/}, it is optional.
+
+<h4>APP_OPTIM</h4>
+<p>Define this optional variable as either {@code release} or {@code debug}. You use it to
+alter the optimization level when building your application's modules.</p>
+
+<p>Release mode is the default, and generates highly optimized binaries. Debug mode generates
+unoptimized binaries that are much easier to debug.</p>
+
+<p>Note that you can debug either release or debug binaries. Release binaries, however, provide less
+information during debugging. For example, the build system optimizes out some variables,
+preventing you from inspecting them. Also, code re-ordering can make it more difficult to step
+through the code; stack traces may not be reliable.</p>
+
+<p>Declaring {@code android:debuggable} in your application manifest's {@code &lt;application&gt;}
+tag will cause this variable to default to {@code debug} instead of {@code release}. Override this
+default value by setting {@code APP_OPTIM} to {@code release}.</p>
+
+
+<h4>APP_CFLAGS</h4>
+<p>This variable stores a set of C compiler flags that the build system passes to the compiler
+when compiling any C or C++ source code for any of the modules. You can use this variable to change
+the build of a given module according to the application that needs it, instead of having to modify
+the {@code Android.mk} file itself. </p>
+
+
+<p>All paths in these flags should be relative to the top-level NDK directory. For example, if you
+have the following setup:</p>
+
+<pre>
+sources/foo/Android.mk
+sources/bar/Android.mk
+</pre>
+
+<p>To specify in {@code foo/Android.mk} that you want to add the path to the {@code bar} sources
+during compilation, you should use:
+
+<pre>
+APP_CFLAGS += -Isources/bar
+</pre>
+
+<p>Or, alternatively:</p>
+
+<pre>
+APP_CFLAGS += -I$(LOCAL_PATH)/../bar
+</pre>
+
+<p>{@code -I../bar} will not work since it is equivalent to
+{@code -I$NDK_ROOT/../bar}.</p>
+
+<p class="note"><strong>Note: </strong>This variable only works on C, not C++, sources in
+android-ndk-1.5_r1. In all versions after that one, {@code APP_CFLAGS} matches the full Android
+build system.</p>
+
+<h4>APP_CPPFLAGS</h4>
+<p>This variable contains a set of C++ compiler flags that the build system passes to the compiler
+when building only C++ sources.</p>
+
+<p class="note"><strong>Note: </strong> In android-ndk-1.5_r1, this variable works on both C and
+C++ sources. In all subsequent versions of the NDK, {@code APP_CPPFLAGS} now matches the full
+Android build system. For flags that apply to both C and C++ sources, use {@code APP_CFLAGS}.</p>
+
+<h4>APP_LDFLAGS</h4>
+<p>A set of linker flags that the build system passes when linking the application. This variable
+is only relevant when the build system is building shared libraries and executables. When the
+build system builds static libraries, it ignores these flags.</p>
+
+<h4>APP_BUILD_SCRIPT</h4>
+<p>By default, the NDK build system looks under {@code jni/} for a file named
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>.</p>
+
+<p>If you want to override this behavior, you can define {@code APP_BUILD_SCRIPT} to point to an
+alternate build script. The build system always interprets a non-absolute path as relative to the
+NDK's top-level directory.</p>
+
+<h4>APP_ABI</h4>
+<p>By default, the NDK build system generates machine code for the
+<a href="{docRoot}ndk/guides/abis.html">{@code armeabi}</a> ABI. This machine code
+corresponds to an ARMv5TE-based CPU with software floating point operations. You can use
+{@code APP_ABI} to select a different ABI. Table 1 shows the {@code APP_ABI}
+settings for different instruction sets.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> {@code APP_ABI} settings for different instruction sets.</p>
+<table>
+  <tr>
+    <th scope="col">Instruction set</th>
+    <th scope="col">Value</th>
+  </tr>
+  <tr>
+    <td>Hardware FPU instructions on ARMv7 based devices</td>
+    <td>{@code APP_ABI := armeabi-v7a}</td>
+  </tr>
+  <tr>
+    <td>ARMv8 AArch64</td>
+    <td>{@code APP_ABI := arm64-v8a}</td>
+  </tr>
+    <tr>
+    <td>IA-32</td>
+    <td>{@code APP_ABI := x86}</td>
+  </tr>
+    <tr>
+    <td>Intel64</td>
+    <td>{@code APP_ABI := x86_64}</td>
+  </tr>
+    <tr>
+    <td>MIPS32</td>
+    <td>{@code APP_ABI := mips}</td>
+  </tr>
+    <tr>
+    <td>MIPS64 (r6)</td>
+    <td>{@code APP_ABI := mips64}</td>
+  </tr>
+    <tr>
+    <td>All supported instruction sets</td>
+    <td>{@code APP_ABI := all}</td>
+  </tr>
+</table>
+
+<p class="note"><strong>Note:</strong> {@code all} is available starting from NDKr7.</p>
+
+<p>You can also specify multiple values by placing them on the same line, delimited by spaces.
+For example:</p>
+
+<pre>
+APP_ABI := armeabi armeabi-v7a x86 mips
+</pre>
+
+<p>For the list of all supported ABIs and details about their usage and limitations, refer to
+<a href="{@docRoot}ndk/guides/abis.html">Android Native CPU ABI Management</a>.</p>
+
+<h4>APP_PLATFORM</h4>
+<p>This variable contains the name of the target Android platform. For example, {@code android-3}
+specifies the Android 1.5 system images. For a complete list of platform names and corresponding
+Android system images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Stable APIs
+</a>.</p>
+
+<h4>APP_STL</h4>
+<p>By default, the NDK build system provides C++ headers for the minimal C++ runtime library
+({@code system/lib/libstdc++.so}) provided by the Android system. In addition, it comes with
+alternative C++ implementations that you can use or link to in your own applications.
+Use {@code APP_STL} to select one of them. Table 2 shows the {@code APP_STL} values to specify
+support for different libraries.</p>
+
+<p class="table-caption" id="table2">
+  <strong>Table 2.</strong> {@code APP_STL} settings to support different libraries.</p>
+<table>
+  <tr>
+    <th scope="col">Library</th>
+    <th scope="col">Value</th>
+  </tr>
+  <tr>
+    <td>Static STLport</td>
+    <td>{@code APP_STL := stlport_static}</td>
+  </tr>
+  <tr>
+    <td>Shared STLport</td>
+    <td>{@code APP_STL := stlport_shared}</td>
+  </tr>
+  <tr>
+    <td>Default C++ runtime</td>
+    <td>{@code APP_STL := system}</td>
+  </tr>
+</table>
+
+<p>For more information on this subject, see <a href="{@docRoot}ndk/guides/cpp_support.html">C++
+Support</a>.</p>
+
+
+<h4>APP_SHORT_COMMANDS</h4>
+<p>The equivalent of {@code LOCAL_SHORT_COMMANDS} in {@code Application.mk} for your whole project.
+For more information, see the documentation for this variable on
+<a href="{docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>.</p>
+
+<h4>NDK_TOOLCHAIN_VERSION</h4>
+<p>Define this variable as either {@code 4.9} or {@code 4.8} to select a version of the GCC
+compiler. Version 4.9 is the default for 64-bit ABIs, and 4.8 is the default for 32-bit ABIs.
+To select a version of Clang, define this variable as {@code clang3.4}, {@code clang3.5}, or
+{@code clang}. Specifying {@code clang} chooses the most recent version of Clang.</p>
+
+<h4>APP_PIE</h4>
+<p>Starting from Android 4.1 (API level 16), Android's dynamic linker supports position-independent
+executables (PIE). Use the {@code -fPIE} flag to build them. This flag makes it harder to exploit
+memory corruption bugs by randomizing code location. By default, {@code ndk-build} automatically
+sets this value to {@code true} if your project targets {@code android-16} or higher. You may set
+it manually to either {@code true} or {@code false}.</p>
+
+<p>This flag applies only to executables. It has no effect when building shared or static
+libraries.</p>
+
+<p class="note"><strong>Note: </strong> PIE executables cannot run on Android releases prior to 4.1.
+<p>This restriction only applies to executables. It has no effect when building shared or static
+libraries.</p>
+
+<h4>APP_THIN_ARCHIVE</h4>
+<p>Sets the default value of {@code LOCAL_THIN_ARCHIVE} in the {@code Android.mk} file for all
+static library modules in this project. For more information, see the documentation for
+{@code LOCAL_THIN_ARCHIVE} on <a href="{docRoot}ndk/guides/android_mk.html">{@code Android.mk}.</a>
+</p>
