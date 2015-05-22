@@ -16,8 +16,6 @@
 
 package com.android.layoutlib.bridge.intensive;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
@@ -38,6 +36,9 @@ import com.android.utils.ILogger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileFilter;
