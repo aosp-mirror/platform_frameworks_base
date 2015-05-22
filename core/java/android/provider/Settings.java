@@ -7393,12 +7393,21 @@ public final class Settings {
         public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
 
         /**
-         * Whether the Volte/VT is enabled
+         * Whether the Volte is enabled
          * <p>
          * Type: int (0 for false, 1 for true)
          * @hide
          */
         public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
+
+        /**
+         * Whether VT (Video Telephony over IMS) is enabled
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String VT_IMS_ENABLED = "vt_ims_enabled";
 
         /**
          * Whether WFC is enabled
