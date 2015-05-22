@@ -41124,7 +41124,7 @@ package android.webkit {
 
   public abstract class WebResourceError {
     ctor public WebResourceError();
-    method public java.lang.CharSequence getDescription();
+    method public abstract java.lang.CharSequence getDescription();
     method public abstract int getErrorCode();
   }
 
@@ -41136,7 +41136,7 @@ package android.webkit {
     method public abstract boolean isForMainFrame();
   }
 
-  public class WebResourceResponse extends android.webkit.WebResourceResponseBase {
+  public class WebResourceResponse {
     ctor public WebResourceResponse(java.lang.String, java.lang.String, java.io.InputStream);
     ctor public WebResourceResponse(java.lang.String, java.lang.String, int, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.io.InputStream);
     ctor public WebResourceResponse(boolean, java.lang.String, java.lang.String, int, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.io.InputStream);
@@ -41151,10 +41151,6 @@ package android.webkit {
     method public void setMimeType(java.lang.String);
     method public void setResponseHeaders(java.util.Map<java.lang.String, java.lang.String>);
     method public void setStatusCodeAndReasonPhrase(int, java.lang.String);
-  }
-
-  public abstract class WebResourceResponseBase {
-    ctor public WebResourceResponseBase();
   }
 
   public abstract class WebSettings {
@@ -41530,7 +41526,6 @@ package android.webkit {
     method public deprecated void onReceivedError(android.webkit.WebView, int, java.lang.String, java.lang.String);
     method public void onReceivedError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceError);
     method public void onReceivedHttpAuthRequest(android.webkit.WebView, android.webkit.HttpAuthHandler, java.lang.String, java.lang.String);
-    method public void onReceivedHttpError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceResponseBase);
     method public void onReceivedHttpError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceResponse);
     method public void onReceivedLoginRequest(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String);
     method public void onReceivedSslError(android.webkit.WebView, android.webkit.SslErrorHandler, android.net.http.SslError);
