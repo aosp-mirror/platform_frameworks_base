@@ -284,6 +284,10 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   to flash the image onto your device.</li>
 </ol>
 
+<p class="note">
+  <strong>Note:</strong> Once you have flashed a development device the preview system image,
+  it is upgraded automatically with the next preview release through over-the-air (OTA) updates.
+</p>
 
 <h3 id="revertDevice">Revert a Device to Factory Specifications</h3>
 
