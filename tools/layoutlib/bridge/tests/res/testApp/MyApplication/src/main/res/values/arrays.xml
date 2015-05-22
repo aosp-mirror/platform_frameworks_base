@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="array">
+        <item>first</item>
+        <item>second</item>
+    </array>
+    <integer-array name="int_array">
+        <item>1</item>
+        <item>0xaB</item>  <!-- hex entry (decimal 171) -->
+        <item>010</item>   <!-- octal entry -->
+        <item>@integer/ten</item>  <!-- value reference -->
+        <item>?attr/myattr</item>  <!-- theme attr reference -->
+    </integer-array>
+    <string-array name="string_array">
+        <item>mystring</item>
+        <item>@string/hello_world</item>   <!-- string ref in appNs -->
+        <!-- theme ref in android NS. value = @string/candidates_style = <u>candidates</u> -->
+        <item>?android:attr/candidatesTextStyleSpans</item>
+        <item>@android:string/unknownName</item>  <!-- value = Unknown -->
+    </string-array>
+
+    <!-- resources that the above array can refer to -->
+    <integer name="ten">10</integer>
+    <integer name="twelve">12</integer>
+</resources>
