@@ -1,4 +1,17 @@
-page.title=Concepts
+page.title=Getting Started
 @jd:body
 
-<p>To use the NDK, you must download it and install it separately from the SDK. To do so, follow these directions.
+<p>This section provides the information you need to get up and running
+with the NDK.</p>
+<ul>
+   <li><a href="setup.html">Setup</a></li>
+   <ul>
+      <li>Learn how to set up the NDK, and verify that it's integrated into
+      your toolchain.</li>
+   </ul>
+   <li><a href="concepts.html">Concepts</a></li>
+   <ul>
+      <li>Learn some basics about how the NDK works and its components, and about how to use it.
+      </li>
+   </ul>
+</ul>

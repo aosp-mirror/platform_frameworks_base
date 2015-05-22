@@ -1,0 +1,11 @@
+page.title=Sample Walkthroughs
+@jd:body
+
+<div class="contents">
+<div class="textblock"><p>This section explains several of the sample apps provided with the NDK. It assumes that you already have a working knowledge of programming in Java and native code, and focuses on issues particular to working with the NDK.</p>
+<p>It discusses the following samples:</p>
+<ul>
+<li><a href="./md_2__samples_sample--hellojni.html">hello-jni</a>: A very basic app that illustrates core workings of the NDK.</li>
+<li><a href="./md_2__samples_sample--nativeactivity.html">native-activity</a>: An app that shows the fundamentals of how to construct a purely native app. It places particular emphasis on the android_native_app_glue library.</li>
+<li><a href="./md_2__samples_samples-teapot.html">Teapot</a>: A simple OpenGL demo, showcasing the <code>ndk_helper</code> class. </li>
+</ul>

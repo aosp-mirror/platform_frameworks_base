@@ -1,0 +1,122 @@
+page.title=Sample: HelloJNI
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#an">Android.mk</a></li>
+        <li><a href="#ap">Application.mk</a></li>
+        <li><a href="#ji">Java-side Implementation</a></li>
+        <li><a href="#ci">C-side Implementation</a></li>
+          </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+<p>This sample provides a bare-bones look at a minimal
+application built with the NDK.</p>
+
+<h2 id="an">Android.mk</h2>
+
+<p>The following two lines provide the name of the native source file, along
+with the name of the shared library to build. The full name of the built
+library is {@code libhello-jni.so}, but you should omit the
+{@code lib} prefix and the {@code .so} extension.</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES := hello-jni.c
+LOCAL_MODULE    := hello-jni
+</pre>
+
+<p>For more information on what this file does, and how to use it, see
+<a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a>.</p>
+
+<h2 id="ap">Application.mk</h2>
+<p>This line tells the build system the architecture against which to build. If
+you don't specify anything, the build system defaults to {@code armeabi}.</p>
+
+<pre class="no-pretty-print">
+APP_ABI := all
+</pre>
+
+<p>For more information on what this file does, and how to use it, see
+<a href="{@docRoot}ndk/guides/application_mk.html">Application.mk</a>.</p>
+
+<h2 id="ji">Java-side implementation</h2>
+<p>This file calls a function to retrieve a string from the native side, then
+displays it on the screen.</p>
+
+<p>The source code contains three lines of particular interest to the NDK user.
+They are presented here in the order in which they are used, rather than by
+line order.</p>
+
+<p>This function call loads the {@code .so} file upon application startup.</p>
+
+<pre class="no-pretty-print">
+System.loadLibrary("hello-jni");
+</pre>
+
+<p>The {@code native} keyword in this method declaration tells the
+virtual machine that the function is in the shared library (i.e., implemented on the native side).
+</p>
+
+<pre class="no-pretty-print">
+public native String stringFromJNI();
+</pre>
+
+<p>The Android framework calls the function loaded and declared in the
+previous steps, displaying the string on the screen.</p>
+
+<pre class="no-pretty-print">
+tv.setText( stringFromJNI() );
+</pre>
+
+<h2 id="ci">C-side implementation</h2>
+<p>This file contains a function that returns a string that the Java side
+requested (see <a href="#ji">Java-side implementation</a>). The function declaration is as
+follows:</p>
+
+<pre>
+jstring Java_com_example_hellojni_HelloJni_stringFromJNI(
+JNIEnv* env,
+                                              jobject x )
+</pre>
+
+<p>This declaration corresponds to the native function declared in the
+Java source code. The return type, {@code jstring}, is a data type defined
+in the
+<a href="http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html">Java Native
+Interface Specification</a>. It is not actually a string, but a
+pointer to a Java string.</p>
+
+<p>After {@code jstring} comes the function name, which is based on the
+Java function name and and the path to the file containing it. Construct it
+according to the following rules:</p>
+
+<ul>
+<li>Prepend {@code Java_} to it.</li>
+<li>Describe the filepath relative to the top-level source directory.</li>
+<li>Use underscores in place of forward slashes.</li>
+<li>Omit the {@code .java} file extension.</li>
+<li>After the last underscore, append the function name.</li>
+</ul>
+
+<p>Based on these rules, in this example, the function name
+{@code Java_com_example_hellojni_HelloJni_stringFromJNI} refers to a Java
+function called {@code stringFromJNI()}, which resides in
+{@code hellojni/src/com/example/hellojni/HelloJni.java}.</p>
+
+<p>Finally, {@code JNIEnv*} is the pointer to the VM, and
+{@code jobject} is a pointer to the implicit {@code this} object passed from
+the Java side.</p>
+
+<p>The following line calls the VM API {@code (*env)}, and passes it a return value:
+that is, the string that the function on the Java side had requested.</p>
+
+<pre class="no-pretty-print">
+return (*env)-&gt;NewStringUTF(env, "Hello from JNI !
+Compiled with ABI " ABI ".");
+</pre>
