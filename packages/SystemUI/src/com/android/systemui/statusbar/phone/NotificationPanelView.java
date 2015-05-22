@@ -190,6 +190,7 @@ public class NotificationPanelView extends PanelView implements
     private int mOldLayoutDirection;
     private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private boolean mIsExpansionFromHeadsUp;
+    private boolean mListenForHeadsUp;
     private int mNavigationBarBottomHeight;
     private boolean mExpandingFromHeadsUp;
     private boolean mCollapsedOnDown;
@@ -649,6 +650,7 @@ public class NotificationPanelView extends PanelView implements
             mQsTouchAboveFalsingThreshold = mQsFullyExpanded;
             mDozingOnDown = isDozing();
             mCollapsedOnDown = isFullyCollapsed();
+            mListenForHeadsUp = mCollapsedOnDown && mHeadsUpManager.hasPinnedHeadsUp();
         }
     }
 
@@ -709,6 +711,12 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
+        if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
+                && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
+            mIsExpansionFromHeadsUp = true;
+            MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
+            MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_PEEK, 1);
+        }
         if ((!mIsExpanding || mHintAnimationRunning)
                 && !mQsExpanded
                 && mStatusBar.getBarState() != StatusBarState.SHADE) {
