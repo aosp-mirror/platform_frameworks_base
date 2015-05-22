@@ -1,4 +1,4 @@
-page.title=Sample: HelloJNI
+page.title=Sample: hello-jni
 @jd:body
 
 <div id="qv-wrapper">
@@ -16,14 +16,15 @@ page.title=Sample: HelloJNI
     </div>
   </div>
 
-<p>This sample provides a bare-bones look at a minimal
-application built with the NDK.</p>
+<p>This sample provides a bare-bones look at HelloJNI, a minimal
+application built with the NDK. This sample is in the {@code samples/hello-jni/} directory
+under the root directory of your NDK installation.</p>
 
 <h2 id="an">Android.mk</h2>
 
 <p>The following two lines provide the name of the native source file, along
 with the name of the shared library to build. The full name of the built
-library is {@code libhello-jni.so}, but you should omit the
+library is {@code libhello-jni.so}, once the build system adds the
 {@code lib} prefix and the {@code .so} extension.</p>
 
 <pre class="no-pretty-print">
@@ -31,23 +32,23 @@ LOCAL_SRC_FILES := hello-jni.c
 LOCAL_MODULE    := hello-jni
 </pre>
 
-<p>For more information on what this file does, and how to use it, see
+<p>For more information about what the {@code Android.mk} file does, and how to use it, see
 <a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a>.</p>
 
 <h2 id="ap">Application.mk</h2>
-<p>This line tells the build system the architecture against which to build. If
-you don't specify anything, the build system defaults to {@code armeabi}.</p>
+<p>This line tells the build system the CPU and architecture against which to build. In this
+example, the build system builds for all supported architectures.</p>
 
 <pre class="no-pretty-print">
 APP_ABI := all
 </pre>
 
-<p>For more information on what this file does, and how to use it, see
+<p>For more information about the {@code Application.mk} file, and how to use it, see
 <a href="{@docRoot}ndk/guides/application_mk.html">Application.mk</a>.</p>
 
-<h2 id="ji">Java-side implementation</h2>
-<p>This file calls a function to retrieve a string from the native side, then
-displays it on the screen.</p>
+<h2 id="ji">Java-side Implementation</h2>
+<p>The {@code helloJNI.java} file is located in {@code hellojni/src/com/example/hellojni/}. It calls
+a function to retrieve a string from the native side, then displays it on the screen.</p>
 
 <p>The source code contains three lines of particular interest to the NDK user.
 They are presented here in the order in which they are used, rather than by
@@ -60,8 +61,8 @@ System.loadLibrary("hello-jni");
 </pre>
 
 <p>The {@code native} keyword in this method declaration tells the
-virtual machine that the function is in the shared library (i.e., implemented on the native side).
-</p>
+virtual machine that the function is in the shared library (that is, implemented on the native
+side).</p>
 
 <pre class="no-pretty-print">
 public native String stringFromJNI();
@@ -74,15 +75,15 @@ previous steps, displaying the string on the screen.</p>
 tv.setText( stringFromJNI() );
 </pre>
 
-<h2 id="ci">C-side implementation</h2>
-<p>This file contains a function that returns a string that the Java side
-requested (see <a href="#ji">Java-side implementation</a>). The function declaration is as
+<h2 id="ci">C-side Implementation</h2>
+<p>The {@code hello-jni.c} file is located in {@code hello-jni/jni/}. It contains a function that
+returns a string that <a href="#ji">the Java side requested</a>). The function declaration is as
 follows:</p>
 
 <pre>
-jstring Java_com_example_hellojni_HelloJni_stringFromJNI(
-JNIEnv* env,
-                                              jobject x )
+jstring
+Java_com_example_hellojni_HelloJni_stringFromJNI( JNIEnv* env,
+                                                  jobject thiz )
 </pre>
 
 <p>This declaration corresponds to the native function declared in the
@@ -104,12 +105,12 @@ according to the following rules:</p>
 <li>After the last underscore, append the function name.</li>
 </ul>
 
-<p>Based on these rules, in this example, the function name
-{@code Java_com_example_hellojni_HelloJni_stringFromJNI} refers to a Java
+<p>Following these rules, this example uses the function name
+{@code Java_com_example_hellojni_HelloJni_stringFromJNI}. This name refers to a Java
 function called {@code stringFromJNI()}, which resides in
 {@code hellojni/src/com/example/hellojni/HelloJni.java}.</p>
 
-<p>Finally, {@code JNIEnv*} is the pointer to the VM, and
+<p>{@code JNIEnv*} is the pointer to the VM, and
 {@code jobject} is a pointer to the implicit {@code this} object passed from
 the Java side.</p>
 
