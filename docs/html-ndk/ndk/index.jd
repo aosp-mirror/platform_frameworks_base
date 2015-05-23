@@ -28,7 +28,7 @@ footer.hide=1
               <span style="color:#ccc">&nbsp;&nbsp;/**<br>
                 &nbsp;&nbsp;* Native method implemented in C/C++<br>
                 &nbsp;&nbsp;*/</span><br>
-                &nbsp;&nbsp;public <span style="color:#1DE9B6;font-weight:700">native</span> void <span style="color:#eee">computerFoo()</span>;<br>
+                &nbsp;&nbsp;public <span style="color:#1DE9B6;font-weight:700">native</span> void <span style="color:#eee">computeFoo()</span>;<br>
               }</span>
       </div>
     </div>
