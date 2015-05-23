@@ -8,7 +8,11 @@
 
 
 <ul id="nav">
-  <li><a href="/ndk/samples/index.html"><span class="en">Stuff</span></a></li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/ndk/samples/index.html"><span class="en">
+      Samples</span></a></div>
+  </li>
 </ul>
 
 
