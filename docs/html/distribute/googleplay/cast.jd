@@ -4,10 +4,15 @@ page.tags=cast, video, chromecast
 @jd:body
 
 <p>
-  With Google Cast
-  you make it easy for users to include your content as part of their viewing
-  on TV and listening on audio systems. All they need is an Android TV, a TV with a Chromecast plugged in,
-  or a Cast for audio device connected to their audio system.
+With Google Cast you make it easy for users to include your content as part of
+their viewing on TV and listening on audio systems. All they need is a TV with a
+Chromecast plugged in, an Android TV or a Cast for audio device connected to their
+audio system.</p>
+
+<p>Cast Remote Display lets you cast a second display directly to the TV while running
+a primary display on the sender. Native games can provide real-time interaction on
+the TV and user control on the hand-held device. Graphics-intensive apps can now
+take full advantage of multiscreen experiences via Cast.
 </p>
 
 <div>
