@@ -1529,7 +1529,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_PERMISSIONS =
             "android.intent.action.MANAGE_APP_PERMISSIONS";
@@ -1545,7 +1544,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_PERMISSIONS =
             "android.intent.action.MANAGE_PERMISSIONS";
@@ -1554,7 +1552,7 @@ public class Intent implements Parcelable, Cloneable {
      * Intent extra: An app package name.
      * <p>
      * Type: String
-     * </p>S
+     * </p>
      *
      * @hide
      */
@@ -1575,7 +1573,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_PERMISSION_APPS =
             "android.intent.action.MANAGE_PERMISSION_APPS";
