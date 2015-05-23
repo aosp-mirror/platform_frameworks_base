@@ -2623,7 +2623,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["mobile","ux","design"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud849.jpg",
+    "image":"images/cards/course-ud849_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2635,7 +2635,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["start","firstapp","sdk"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud853.jpg",
+    "image":"images/cards/course-ud853_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2647,19 +2647,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["performance","battery"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud825.png",
+    "image":"images/cards/course-ud825_2x.png",
     "lang":"en",
     "type":"online course"
   },
   {
     "title":"Enroll in the Android Nanodegree",
     "titleFriendly":"",
-    "summary":"Sign up to learn about Android and receive a certification of your efforts.",
-    "url":"https://www.udacity.com/android-nanodegree",
+    "summary":"Enroll in the Android Nanodegree to build the skills to work as an Android developer.",
+    "url":"https://www.udacity.com/android",
     "group":"",
     "keywords": ["nanodegree"],
     "tags": ["courses"],
-    "image":"images/cards/course-nanodegree-lg.jpg",
+    "image":"images/cards/course-nanodegree_2x.png",
     "lang":"en",
     "type":"online course"
   },
@@ -2671,7 +2671,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["android, experts"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud855.jpg",
+    "image":"images/cards/course-ud855_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2683,7 +2683,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["wear, tv, auto"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud875.jpg",
+    "image":"images/cards/course-ud875_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2695,7 +2695,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["google, play services, google services"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud876.jpg",
+    "image":"images/cards/course-ud876_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2707,7 +2707,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["design, pure, material"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud862.jpg",
+    "image":"images/cards/course-ud862_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2719,7 +2719,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["firstapp",],
     "tags": ["courses"],
-    "image":"images/cards/course-ud837.jpg",
+    "image":"images/cards/course-ud837_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
@@ -2731,7 +2731,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["gradle","studio", "sdk"],
     "tags": ["courses"],
-    "image":"images/cards/course-ud867.jpg",
+    "image":"images/cards/course-ud867_2x.jpg",
     "lang":"en",
     "type":"online course"
   },
