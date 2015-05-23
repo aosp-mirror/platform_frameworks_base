@@ -267,7 +267,6 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingVisibleInsets = new Rect();
     final Rect mPendingStableInsets = new Rect();
     final Rect mPendingContentInsets = new Rect();
-    final Rect mPendingOutsets = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1267,12 +1266,6 @@ public final class ViewRootImpl implements ViewParent,
                 contentInsets = mPendingContentInsets;
                 stableInsets = mPendingStableInsets;
             }
-            Rect outsets = mAttachInfo.mOutsets;
-            if (outsets.left > 0 || outsets.top > 0 || outsets.right > 0 || outsets.bottom > 0) {
-                contentInsets = new Rect(contentInsets.left + outsets.left,
-                        contentInsets.top + outsets.top, contentInsets.right + outsets.right,
-                        contentInsets.bottom + outsets.bottom);
-            }
             mLastWindowInsets = new WindowInsets(contentInsets,
                     null /* windowDecorInsets */, stableInsets,
                     mContext.getResources().getConfiguration().isScreenRound());
@@ -1430,9 +1423,6 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Visible insets changing to: "
                             + mAttachInfo.mVisibleInsets);
-                }
-                if (!mPendingOutsets.equals(mAttachInfo.mOutsets)) {
-                    insetsChanged = true;
                 }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
@@ -1607,7 +1597,6 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mVisibleInsets);
                 final boolean stableInsetsChanged = !mPendingStableInsets.equals(
                         mAttachInfo.mStableInsets);
-                final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
                 if (contentInsetsChanged) {
                     if (mWidth > 0 && mHeight > 0 && lp != null &&
                             ((lp.systemUiVisibility|lp.subtreeSystemUiVisibility)
@@ -1691,11 +1680,9 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
                         mAttachInfo.mSystemUiVisibility || mApplyInsetsRequested
-                        || mLastOverscanRequested != mAttachInfo.mOverscanRequested
-                        || outsetsChanged) {
+                        || mLastOverscanRequested != mAttachInfo.mOverscanRequested) {
                     mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
                     mLastOverscanRequested = mAttachInfo.mOverscanRequested;
-                    mAttachInfo.mOutsets.set(mPendingOutsets);
                     mApplyInsetsRequested = false;
                     dispatchApplyInsets(host);
                 }
@@ -3269,7 +3256,6 @@ public final class ViewRootImpl implements ViewParent,
                         && mPendingContentInsets.equals(args.arg2)
                         && mPendingStableInsets.equals(args.arg6)
                         && mPendingVisibleInsets.equals(args.arg3)
-                        && mPendingOutsets.equals(args.arg7)
                         && args.arg4 == null) {
                     break;
                 }
@@ -3288,7 +3274,6 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingContentInsets.set((Rect) args.arg2);
                     mPendingStableInsets.set((Rect) args.arg6);
                     mPendingVisibleInsets.set((Rect) args.arg3);
-                    mPendingOutsets.set((Rect) args.arg7);
 
                     args.recycle();
 
@@ -5399,7 +5384,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
-                mPendingStableInsets, mPendingOutsets, mPendingConfiguration, mSurface);
+                mPendingStableInsets, mPendingConfiguration, mSurface);
         //Log.d(TAG, "<<<<<< BACK FROM relayout");
         if (restore) {
             params.restore();
@@ -5668,8 +5653,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
-            Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig) {
+            Rect visibleInsets, Rect stableInsets, boolean reportDraw, Configuration newConfig) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -5689,7 +5673,6 @@ public final class ViewRootImpl implements ViewParent,
         args.arg4 = sameProcessCall && newConfig != null ? new Configuration(newConfig) : newConfig;
         args.arg5 = sameProcessCall ? new Rect(overscanInsets) : overscanInsets;
         args.arg6 = sameProcessCall ? new Rect(stableInsets) : stableInsets;
-        args.arg7 = sameProcessCall ? new Rect(outsets) : outsets;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -6649,12 +6632,12 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
-                Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
+                Rect visibleInsets, Rect stableInsets, boolean reportDraw,
                 Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
-                        visibleInsets, stableInsets, outsets, reportDraw, newConfig);
+                        visibleInsets, stableInsets, reportDraw, newConfig);
             }
         }
 
