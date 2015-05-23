@@ -1,0 +1,328 @@
+page.title=C++ Library Support
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#hr">Helper Runtimes</a></li>
+        <li><a href="#rc">Runtime Characteristics</a></li>
+        <li><a href="#ic">Important Considerations</a></li>
+        <li><a href="#li">Licensing</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>The Android platform provides a very minimal C++ runtime support library ({@code libstdc++}).
+This minimal support does not include, for example:</p>
+
+<ul>
+   <li>Standard C++ Library support (except a few trivial headers).</li>
+   <li>C++ exceptions support</li>
+   <li>RTTI support</li>
+</ul>
+
+<p>The NDK provides headers for use with this default library. In addition, the NDK provides a
+number of helper runtimes that provide additional features. This page provides information about
+these helper runtimes, their characteristics, and how to use them.
+</p>
+
+<h2 id="hr">Helper Runtimes</h2>
+
+<p>Table 1 provides names, brief explanations, and features of runtimes available inthe NDK.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> NDK Runtimes and Features.</p>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Explanation>
+<th>Features
+</tr>
+
+<tr>
+<td><a href="#system">{@code libstdc++} (default)</a> </td>
+<td>The default minimal system C++ runtime library.</td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td><a href="#ga">{@code gabi++_static}</a> </td>
+<td>The GAbi++ runtime (static).</td>
+<td>C++ Exceptions and RTTI</td>
+</tr>
+
+<tr>
+<td><a href="#ga">{@code gabi++_shared}</a> </td>
+<td>The GAbi++ runtime (shared).</td>
+<td>C++ Exceptions and RTTI</td>
+</tr>
+
+<tr>
+<td><a href="#stl">{@code stlport_static}</a> </td>
+<td>The STLport runtime (static).</td>
+<td> C++ Exceptions and RTTI; Standard Library</td>
+</tr>
+
+<tr>
+<td><a href="#stl">{@code stlport_shared}</a> </td>
+<td>The STLport runtime (shared).</td>
+<td> C++ Exceptions and RTTI; Standard Library</td>
+</tr>
+
+<tr>
+<td><a href="#gn">{@code gnustl_static}</a> </td>
+<td>The GNU STL (static).</td>
+<td> C++ Exceptions and RTTI; Standard Library</td>
+</tr>
+
+<tr>
+<td><a href="#gn">{@code gnustl_shared}</a> </td>
+<td>The GNU STL (shared).</td>
+<td> C++ Exceptions and RTTI; Standard Library</td>
+</tr>
+
+<tr>
+<td><a href="#cs">{@code c++_static}</a> </td>
+<td>The LLVM libc++ runtime (static).</td>
+<td> C++ Exceptions and RTTI; Standard Library</td>
+</tr>
+
+<tr>
+<td><a href="#cs">{@code c++_shared}</a> </td>
+<td>The LLVM libc++ runtime (shared).</td>
+<td> C++ Exceptions and RTTI; Standard Library</td>
+</tr>
+</table>
+
+<h3>How to set your runtime</h3>
+
+<p>Use the {@code APP_STL} variable in your <a href="{@docRoot}ndk/guides/application_mk.html">
+{@code Application.mk}</a> file to specify the runtime you wish to use. Use the values in
+the "Name" column in Table 1 as your setting. For example:</p>
+
+<pre>
+APP_STL := gnustl_static
+</pre>
+
+<p>You may only select one runtime for your app, and can only do in
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a>.</p>
+
+<p>Even if you do not use the NDK build system, you can still use STLport, libc++ or GNU STL.
+For more information on how to use these runtimes with your own toolchain, see <a href="{@docRoot}ndk/guides/standalone_toolchain.html">Standalone Toolchain</a>.</p>
+
+<h2 id="rc">Runtime Characteristics</h2>
+<h3 id="system">System runtime</h3>
+
+<p>This runtime only provides the following headers, with no support beyond them:</p>
+<ul>
+   <li>{@code cassert}</li>
+   <li>{@code cctype}</li>
+   <li>{@code cerrno}</li>
+   <li>{@code cfloat}</li>
+   <li>{@code climits}</li>
+   <li>{@code cmath}</li>
+   <li>{@code csetjmp}</li>
+   <li>{@code csignal}</li>
+   <li>{@code cstddef}</li>
+   <li>{@code cstdint}</li>
+   <li>{@code cstdio}</li>
+   <li>{@code cstdlib}</li>
+   <li>{@code cstring}</li>
+   <li>{@code ctime}</li>
+   <li>{@code cwchar}</li>
+   <li>{@code new}</li>
+   <li>{@code stl_pair.h}</li>
+   <li>{@code typeinfo}</li>
+   <li>{@code utility}</li>
+</ul>
+
+<h3 id="ga">GAbi++ runtime</h3>
+<p>This runtime provides the same headers as the default runtime, but adds support for RTTI
+(RunTime Type Information) and exception handling.</p>
+
+
+<h3 id="stl">STLport runtime</h3>
+<p>This runtime is an Android port of STLport
+(<a href="http://www.stlport.org">http://www.stlport.org</a>). It provides a complete set of C++
+standard library headers. It also, by embedding its own instance of GAbi++, provides support for
+RTTI and exception handling.</p>
+
+<p>While shared and static versions of this runtime are avilable, we recommend using the shared
+version. For more information, see <a href="#sr">Static runtimes</a>.</p>
+
+<p>The shared library file is named {@code libstlport_shared.so} instead of {@code libstdc++.so}
+as is common on other platforms.</p>
+
+<p>In addition to the static- and shared-library options, you can also force the NDK to
+build the library from sources by adding the following line to your {@code Application.mk}
+file, or setting it in your environment prior to building: </p>
+
+<pre>
+STLPORT_FORCE_REBUILD := true
+</pre>
+
+
+<h3 id="gn">GNU STL runtime</h3>
+<p>This runtime is the GNU Standard C++ Library, ({@code libstdc++-v3}). Its shared library file is
+named {@code libgnustl_shared.so}.</p>
+
+
+<h3 id="cs">libC++ runtime:</h3>
+<p>This runtime is an Android port of <a href="http://libcxx.llvm.org/">LLVM libc++</a>. Its
+shared library file is named {@code libc++_shared.so}.</p>
+
+<p>By default, this runtime compiles with {@code -std=c++11}. As with GNU {@code libstdc++}, you
+need to explicitly turns on exceptions or rtti support. For information on how to do this, see
+<a href="#xp">C++ Exceptions</a> and <a href="#rt">RTTI</a>.</p>
+
+<p>The NDK provides prebuilt static and shared libraries for {@code libc++} compiled by Clang 3.4,
+but you can force the NDK to rebuild {@code libc++} from sources by adding the following line to
+your {@code Application.mk} file, or setting it in your environment prior to building: </p>
+
+<pre>
+LIBCXX_FORCE_REBUILD := true
+</pre>
+
+<h4>atomic support</h4>
+
+<p>If you include {@code &lt;atomic&gt;}, it's likely that you also need {@code libatomic}.
+If you are using {@code ndk-build}, add the following line:</p>
+
+<pre>
+LOCAL_LDLIBS += -latomic
+</pre>
+
+<p>If you are using your own toolchain, use:</p>
+
+<pre>
+-latomic
+</pre>
+
+<p class="note"><strong>Note: </strong>{@code -latomic} is only available for GCC 4.8.
+Because Clang 3.5 and Clang 3.6 use GCC 4.8's headers and libraries, as well as its
+{@code as} and {@code ld} options, those versions of Clang also get {@code -latomic}.</p>
+
+
+<h4>Compatibility</h4>
+
+<p>Around 99% of tests pass when compiling {@code libc++} with Clang 3.4 for all supported ABIs.
+The failures are mostly in the areas of {@code wchar_t} and locales that Android bionic
+doesn't support. Switching locale from the default produces the following warning in
+{@code logcat}:</p>
+
+<pre>
+newlocale() WARNING: Trying to set locale to en_US.UTF-8 other than "", "C" or "POSIX"
+</pre>
+
+<p>We do not recommend using {@code libc++} with GCC 4.6 because of GCC 4.6's limited c++11
+support.</p>
+
+<p>For information on {@code libc++} tests that fail to compile, {@code black_list*} in
+{@code $NDK/tests/device/test-libc++-shared-full/jni/Android.mk}. For information about tests
+that fail to run correctly, see {@code $NDK/tests/device/test-libc++-shared-full/BROKEN_RUN}.
+{@code $NDK}, here, is the your NDK installation's root directory.</p>
+
+
+<h2 id="ic">Important Considerations</h2>
+
+<h3 id="xp">C++ Exceptions</h3>
+<p>In all versions of the NDK later than NDKr5, the NDK toolchain allows you to use C++ runtimes
+that support exception handling. However, to ensure compatibility with earlier releases, it
+compiles all C++ sources with {@code -fno-exceptions} support by default. You can enable C++
+exceptions either for your entire app, or for individual modules.
+
+<p>To enable exception-handling support for your entire app, add the following line to
+your <a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file.
+To enable exception-handling support for individual modules', add the following line to
+their respective <a href="{docRoot}ndk/guides/android.html">{@code Android.mk}</a> files.</p>
+
+<pre>
+APP_CPPFLAGS += -fexceptions
+</pre>
+
+<h3 id="rt">RTTI</h3>
+<p>In all versions of the NDK later than NDKr5, the NDK toolchain allows you to use C++ runtimes
+that support RTTI. However, to ensure compatibility with earlier releases, it compiles all C++
+sources with {@code -fno-rtti} by default.
+
+<p>To enable RTTI support for your entire app for your entire application, add the following line to
+your <a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file:
+
+<pre>
+APP_CPPFLAGS += -frtti
+</pre>
+
+To enable RTTI support for individual modules, add the following line to
+their respective <a href="{docRoot}ndk/guides/android.html">{@code Android.mk}</a> files:
+
+<pre>
+LOCAL_CPP_FEATURES += rtti
+</pre>
+
+Alternatively, you can use:
+
+<pre>
+LOCAL_CPPFLAGS += -frtti
+</pre>
+
+<h3 id="sr">Static runtimes</h3>
+<p>Linking the static library variant of a C++ runtime to more than one binary may result in
+unexpected behavior. For example, you may experience:</p>
+
+<ul>
+<li>Memory allocated in one library, and freed in the other, causing memory leakage or heap
+corruption.</li>
+<li>Exceptions raised in {@code libfoo.so} going uncaught in {@code libbar.so}, causing your app
+to crash.</li>
+<li>Buffering of {@code std::cout} not working properly</li>
+</ul>
+
+<p>In addition, if you link two shared libraries&ndash;or a shared library and an executable&ndash;
+against the same static runtime, the final binary image of each shared library includes a copy of
+the runtime's code. Having multiple instances of runtime code is problematic because of duplication
+of certain global variables that the runtime uses or provides internally.</p>
+
+<p>This problem does not apply to a project comprising a single shared library. For example,
+you can link against {@code stlport_static}, and expect your app to behave correctly. If your
+project requires several shared library modules, we recommend that you use the shared library
+variant of your C++ runtime.</p>
+
+<h3>Shared runtimes</h3>
+<p>If your app targets a version of Android earlier than Android 4.3 (Android API level 18),
+and you use the shared library variant of a given C++ runtime, you must load the shared library
+before any other library that depends on it.</p>
+
+<p>For example, an app may have the following modules:</p>
+
+<ul>
+<li>libfoo.so</li>
+<li>libbar.so which is used by libfoo.so</li>
+<li>libstlport_shared.so, used by both libfoo and libbar</li>
+</ul>
+
+<p>You must need to load the libraries in reverse dependency order: </p>
+<pre>
+    static {
+      System.loadLibrary("stlport_shared");
+      System.loadLibrary("bar");
+      System.loadLibrary("foo");
+    }
+</pre>
+
+<p class="note"><strong>Note: </strong>Do not use the {@code lib} prefix when calling
+{@code System.loadLibrary()}.</p>
+
+<h2 id="li">Licensing</h2>
+
+<p>STLport is licensed under a BSD-style open-source license. See
+{@code $NDK/sources/cxx-stl/stlport/README} for more details about STLport.</p>
+
+<p>GNU libstdc++ is covered by the GPLv3 license, and <em>not</em> the LGPLv2 or LGPLv3. For
+more information, see <a href="http://gcc.gnu.org/onlinedocs/libstdc++/manual/license.html">
+License</a> on the GCC website.</p>
+
+<p><a href="https://llvm.org/svn/llvm-project/libcxx/trunk/LICENSE.TXT">LLVM {@code libc++}</a>
+is dual-licensed under both the University of Illinois "BSD-Like" license and the MIT license.</p>
