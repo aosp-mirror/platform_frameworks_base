@@ -23,15 +23,32 @@ page.image=images/cards/card-samples_2x.png
 
 <p><a href="https://github.com/googlesamples/android-RuntimePermissions">Get it on GitHub</a></p>
 
-<h3 id="RuntimePermissionsCompat">Runtime Permissions Compat</h3>
+<h3 id="ConfirmCredentials">Confirm Device Credentials</h3>
 
 <p>
- To support devices on previous versions of Android, this sample demonstrates how to work with the
- new permissions system introduced in Android M by using a support library.
+ This sample demonstrates how to use device credentials as an authentication method in your app.
 </p>
 
-<p><a href="https://github.com/googlesamples/android-RuntimePermissionsCompat">Get it on
+<p><a href="https://github.com/googlesamples/android-ConfirmDeviceCredentials">Get it on
 GitHub</a></p>
+
+<h3 id="FingerprintDialog">Fingerprint Dialog</h3>
+
+<p>
+ This sample demonstrates how to recognize registered fingerprints to authenticate the user
+ in your app.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-FingerprintDialog">Get it on GitHub</a></p>
+
+<h3 id="AutomaticBackup">Automatic Backup</h3>
+
+<p>
+ Android M introduces automatic backup for app settings. This sample demonstrates how to add
+ filtering rules to an app in order to manage settings backup.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-AutomaticBackup">Get it on GitHub</a></p>
 
 <h3 id="VoiceCamera">Voice Camera</h3>
 
@@ -42,25 +59,14 @@ GitHub</a></p>
 
 <p><a href="https://github.com/googlesamples/android-VoiceCamera">Get it on GitHub</a></p>
 
-
-<h3 id="DeepLinkSharing">Deep Link Sharing</h3>
-
-<p>
-  This sample shows how to handle content shared via deep links in your app. It demonstrates how to
-  implement the <code>ChooserTargetService</code>.
-</p>
-
-<p><a href="https://github.com/googlesamples/android-DeepLinkSharing">Get it on GitHub</a></p>
-
-<h3 id="NotificationBuilder">Notification Builder</h3>
+<h3 id="CameraRaw">Camera 2 Raw</h3>
 
 <p>
-  This sample demonstrates the improved
-  <a href="{@docRoot}reference/android/app/Notification.html"><code>Notification</code></a>
-  memory footprint and simplified creation of notifications with custom views.
+  Demonstrates how to use the <code>Camera2</code> API to capture RAW camera buffers and save
+  them as <code>DNG</code> files.
 </p>
 
-<p><a href="https://github.com/googlesamples/android-NotificationBuilder">Get it on GitHub</a></p>
+<p><a href="https://github.com/googlesamples/android-Camera2Raw">Get it on GitHub</a></p>
 
 <h3 id="ActiveNotification">Active Notification</h3>
 
