@@ -23,10 +23,109 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * The AudioFormat class is used to access a number of audio format and
+ * The <code>AudioFormat</code> class is used to access a number of audio format and
  * channel configuration constants. They are for instance used
- * in {@link AudioTrack} and {@link AudioRecord}.
+ * in {@link AudioTrack} and {@link AudioRecord}, as valid values in individual parameters of
+ * constructors like {@link AudioTrack#AudioTrack(int, int, int, int, int, int)}, where the fourth
+ * parameter is one of the <code>AudioFormat.ENCODING_*</code> constants.
+ * <p>The {@link AudioFormat.Builder} class can be used to create instances of
+ * the <code>AudioFormat</code> format class.
+ * Refer to
+ * {@link AudioFormat.Builder} for documentation on the mechanics of the configuration and building
+ * of such instances. Here we describe the main concepts that the <code>AudioFormat</code> class
+ * allow you to convey in each instance, they are:
+ * <ol>
+ * <li><a href="#sampleRate">sample rate</a>
+ * <li><a href="#encoding">encoding</a>
+ * <li><a href="#channelMask">channel masks</a>
+ * </ol>
  *
+ * <h4 id="sampleRate">Sample rate</h4>
+ * <p>Expressed in Hz, the sample rate in an <code>AudioFormat</code> instance expresses the number
+ * of audio samples for each channel per second in the content you are playing or recording. It is
+ * not the sample rate
+ * at which content is rendered or produced. For instance a sound at a media sample rate of 8000Hz
+ * can be played on a device operating at a sample rate of 48000Hz; the sample rate conversion is
+ * automatically handled by the platform, it will not play at 6x speed.
+ * (more to be added...)
+ *
+ * <h4 id="encoding">Encoding</h4>
+ * <p>To Be Added... stay tuned
+ *
+ * <h4 id="channelMask">Channel mask</h4>
+ * <p>Channel masks are used in <code>AudioTrack</code> and <code>AudioRecord</code> to describe
+ * the samples and their arrangement in the audio frame. They are also used in the endpoint (e.g.
+ * a USB audio interface, a DAC connected to headphones) to specify allowable configurations of a
+ * particular device.
+ * <br>As of API {@link android.os.Build.VERSION_CODES#MNC}, there are two types of channel masks:
+ * channel position masks and channel index masks.
+ *
+ * <h5 id="channelPositionMask">Channel position masks</h5>
+ * Channel position masks are the original Android channel masks, and are used since API
+ * {@link android.os.Build.VERSION_CODES#BASE}.
+ * For input and output, they imply a positional nature - the location of a speaker or a microphone
+ * for recording or playback.
+ * <br>For a channel position mask, each allowed channel position corresponds to a bit in the
+ * channel mask. If that channel position is present in the audio frame, that bit is set,
+ * otherwise it is zero. The order of the bits (from lsb to msb) corresponds to the order of that
+ * position's sample in the audio frame.
+ * <br>The canonical channel position masks by channel count are as follows:
+ * <br><table>
+ * <tr><td>channel count</td><td>channel position mask</td></tr>
+ * <tr><td>1</td><td>{@link #CHANNEL_OUT_MONO}</td></tr>
+ * <tr><td>2</td><td>{@link #CHANNEL_OUT_STEREO}</td></tr>
+ * <tr><td>3</td><td>{@link #CHANNEL_OUT_STEREO} | {@link #CHANNEL_OUT_FRONT_CENTER}</td></tr>
+ * <tr><td>4</td><td>{@link #CHANNEL_OUT_QUAD}</td></tr>
+ * <tr><td>5</td><td>{@link #CHANNEL_OUT_QUAD} | {@link #CHANNEL_OUT_FRONT_CENTER}</td></tr>
+ * <tr><td>6</td><td>{@link #CHANNEL_OUT_5POINT1}</td></tr>
+ * <tr><td>7</td><td>{@link #CHANNEL_OUT_5POINT1} | {@link #CHANNEL_OUT_BACK_CENTER}</td></tr>
+ * <tr><td>8</td><td>{@link #CHANNEL_OUT_7POINT1_SURROUND}</td></tr>
+ * </table>
+ * <br>These masks are an ORed composite of individual channel masks. For example
+ * {@link #CHANNEL_OUT_STEREO} is composed of {@link #CHANNEL_OUT_FRONT_LEFT} and
+ * {@link #CHANNEL_OUT_FRONT_RIGHT}.
+ *
+ * <h5 id="channelIndexMask">Channel index masks</h5>
+ * Channel index masks are introduced in API {@link android.os.Build.VERSION_CODES#MNC}. They allow
+ * the selection of a particular channel from the source or sink endpoint by number, i.e. the first
+ * channel, the second channel, and so forth. This avoids problems with artificially assigning
+ * positions to channels of an endpoint, or figuring what the i<sup>th</sup> position bit is within
+ * an endpoint's channel position mask etc.
+ * <br>Here's an example where channel index masks address this confusion: dealing with a 4 channel
+ * USB device. Using a position mask, and based on the channel count, this would be a
+ * {@link #CHANNEL_OUT_QUAD} device, but really one is only interested in channel 0
+ * through channel 3. The USB device would then have the following individual bit channel masks:
+ * {@link #CHANNEL_OUT_FRONT_LEFT},
+ * {@link #CHANNEL_OUT_FRONT_RIGHT}, {@link #CHANNEL_OUT_BACK_LEFT}
+ * and {@link #CHANNEL_OUT_BACK_RIGHT}. But which is channel 0 and which is
+ * channel 3?
+ * <br>For a channel index mask, each channel number is represented as a bit in the mask, from the
+ * lsb (channel 0) upwards to the msb, numerically this bit value is
+ * <code>1 << channelNumber</code>.
+ * A set bit indicates that channel is present in the audio frame, otherwise it is cleared.
+ * The order of the bits also correspond to that channel number's sample order in the audio frame.
+ * <br>For the previous 4 channel USB device example, the device would have a channel index mask
+ * <code>0xF</code>. Suppose we wanted to select only the first and the third channels; this would
+ * correspond to a channel index mask <code>0x5</code> (the first and third bits set). If an
+ * <code>AudioTrack</code> uses this channel index mask, the audio frame would consist of two
+ * samples, the first sample of each frame routed to channel 0, and the second sample of each frame
+ * routed to channel 2.
+ * The canonical channel index masks by channel count are given by the formula
+ * <code>(1 << channelCount) - 1</code>.
+ *
+ * <h5>Use cases</h5>
+ * <ul>
+ * <li><i>Channel position mask for an endpoint:</i> <code>CHANNEL_OUT_FRONT_LEFT</code>,
+ *  <code>CHANNEL_OUT_FRONT_CENTER</code>, etc. for HDMI home theater purposes.
+ * <li><i>Channel position mask for an audio stream:</i> Creating an <code>AudioTrack</code>
+ *  to output movie content, where 5.1 multichannel output is to be written.
+ * <li><i>Channel index mask for an endpoint:</i> USB devices for which input and output do not
+ *  correspond to left or right speaker or microphone.
+ * <li><i>Channel index mask for an audio stream:</i> An <code>AudioRecord</code> may only want the
+ *  third and fourth audio channels of the endpoint (i.e. the second channel pair), and not care the
+ *  about position it corresponds to, in which case the channel index mask is <code>0xC</code>.
+ *  Multichannel <code>AudioRecord</code> sessions should use channel index masks.
+ * </ul>
  */
 public class AudioFormat {
 
@@ -379,6 +478,8 @@ public class AudioFormat {
 
     /**
      * Return the encoding.
+     * See the section on <a href="#encoding">encodings</a> for more information about the different
+     * types of supported audio encoding.
      * @return one of the values that can be set in {@link Builder#setEncoding(int)} or
      * {@link AudioFormat#ENCODING_INVALID} if not set.
      */
@@ -403,6 +504,9 @@ public class AudioFormat {
 
     /**
      * Return the channel mask.
+     * See the section on <a href="#channelMask">channel masks</a> for more information about
+     * the difference between index-based masks(as returned by {@link #getChannelIndexMask()}) and
+     * the position-based mask returned by this function.
      * @return one of the values that can be set in {@link Builder#setChannelMask(int)} or
      * {@link AudioFormat#CHANNEL_INVALID} if not set.
      */
@@ -415,6 +519,9 @@ public class AudioFormat {
 
     /**
      * Return the channel index mask.
+     * See the section on <a href="#channelMask">channel masks</a> for more information about
+     * the difference between index-based masks, and position-based masks (as returned
+     * by {@link #getChannelMask()}).
      * @return one of the values that can be set in {@link Builder#setChannelIndexMask(int)} or
      * {@link AudioFormat#CHANNEL_INVALID} if not set or an invalid mask was used.
      */
@@ -451,7 +558,8 @@ public class AudioFormat {
      * Use this class to configure and create an AudioFormat instance. By setting format
      * characteristics such as audio encoding, channel mask or sample rate, you indicate which
      * of those are to vary from the default behavior on this device wherever this audio format
-     * is used.
+     * is used. See {@link AudioFormat} for a complete description of the different parameters that
+     * can be used to configure an <code>AudioFormat</code> instance.
      * <p>{@link AudioFormat} is for instance used in
      * {@link AudioTrack#AudioTrack(AudioAttributes, AudioFormat, int, int, int)}. In this
      * constructor, every format characteristic set on the <code>Builder</code> (e.g. with
@@ -541,7 +649,8 @@ public class AudioFormat {
          * with named endpoint channels. The samples in the frame correspond to the
          * named set bits in the channel position mask, in ascending bit order.
          * See {@link #setChannelIndexMask(int)} to specify channels
-         * based on endpoint numbered channels.
+         * based on endpoint numbered channels. This <a href="#channelPositionMask>description of
+         * channel position masks</a> covers the concept in more details.
          * @param channelMask describes the configuration of the audio channels.
          *    <p> For output, the channelMask can be an OR-ed combination of
          *    channel position masks, e.g.
@@ -586,7 +695,8 @@ public class AudioFormat {
          * with numbered endpoint channels. The i-th bit in the channel index
          * mask corresponds to the i-th endpoint channel.
          * For example, an endpoint with four channels is represented
-         * as index mask bits 0 through 3.
+         * as index mask bits 0 through 3. This <a href="#channelIndexMask>description of channel
+         * index masks</a> covers the concept in more details.
          * See {@link #setChannelMask(int)} for a positional mask interpretation.
          * <p> Both {@link AudioTrack} and {@link AudioRecord} support
          * a channel index mask.
