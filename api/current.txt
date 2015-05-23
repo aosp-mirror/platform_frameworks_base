@@ -5726,6 +5726,7 @@ package android.app.admin {
     method public int getPasswordMinimumSymbols(android.content.ComponentName);
     method public int getPasswordMinimumUpperCase(android.content.ComponentName);
     method public int getPasswordQuality(android.content.ComponentName);
+    method public int getPermissionGrantState(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int getPermissionPolicy(android.content.ComponentName);
     method public java.util.List<java.lang.String> getPermittedAccessibilityServices(android.content.ComponentName);
     method public java.util.List<java.lang.String> getPermittedInputMethods(android.content.ComponentName);
