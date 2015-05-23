@@ -208,7 +208,7 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   <tr>
     <td>{@code orderId}</td>
     <td>A unique order identifier for the transaction. This identifier
-      corresponds to the Google Wallet Order ID.</td>
+      corresponds to the Google payments order ID.</td>
   </tr>
   <tr>
     <td>{@code packageName}</td>
