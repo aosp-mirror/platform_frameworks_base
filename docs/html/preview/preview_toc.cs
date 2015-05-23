@@ -16,31 +16,30 @@
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/api-overview.html">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>preview/testing/guide.html">
+      Testing Guide</a></div>
+      <ul>
+        <li><a href="<?cs var:toroot ?>preview/testing/performance.html">
+          Performance Testing</a></li>
+      </ul>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>preview/api-overview.html">
       API Overview</a></div>
+      <ul>
+        <li><a href="<?cs var:toroot ?>preview/features/runtime-permissions.html">
+          Runtime Permissions</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/app-linking.html">
+          App Linking</a></li>
+        <li><a href="<?cs var:toroot ?>preview/backup/index.html">
+          Automatic Backups</a></li>
+      </ul>
   </li>
 
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/api-changes.html">
       Behavior Changes</a></div>
-  </li>
-
-  <li class="nav-section">
-    <div class="nav-section-header empty">
-    <a href="<?cs var:toroot ?>preview/features/runtime-permissions.html">
-      Runtime Permissions</a></div>
-  </li>
-
-  <li class="nav-section">
-    <div class="nav-section-header empty">
-    <a href="<?cs var:toroot ?>preview/backup/index.html">
-      Automatic Backups</a></div>
-  </li>
-
-  <li class="nav-section">
-    <div class="nav-section-header empty">
-    <a href="<?cs var:toroot ?>preview/data-binding/guide.html">
-      Data Binding</a></div>
   </li>
 
   <li class="nav-section">
