@@ -86,7 +86,7 @@ responses. Inside the requests and responses are two new fields described below.
 token, a string value that uniquely identifies (and associates) a user ID and a
 subscription ID. Google Play generates the purchase token when the user
 completes the purchase of a subscription product (and payment is approved by
-Google Wallet) and then sends it to the purchasing app on the device through the
+Google) and then sends it to the purchasing app on the device through the
 In-app Billing API. </p>
 
 <p>At the conclusion of a <code>PURCHASE_REQUEST</code> message flow, your app

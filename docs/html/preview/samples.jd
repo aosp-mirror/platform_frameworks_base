@@ -1,5 +1,5 @@
 page.title=Samples
-page.image=images/cards/card-samples_2x.png
+page.image=images/cards/card-samples_16-9_2x.png
 @jd:body
 
 <p>
@@ -7,6 +7,7 @@ page.image=images/cards/card-samples_2x.png
   Android SDK Manager under the <b>SDK Samples</b> component for the M Developer Preview.
 </p>
 
+<img src="{@docRoot}images/cards/card-google-cloud-messaging_16-9_2x" class="figure">
 <p class="note">
   <strong>Note:</strong> These downloadable projects are designed
    for use with Gradle and Android Studio.

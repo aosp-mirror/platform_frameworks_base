@@ -255,7 +255,7 @@ are No Longer Supported</a>.</p>
     List</a>.</p>
     <p class="note"><strong>Note:</strong> You must publish the items in your product
     list (<code>sword_001</code> and <code>potion_001</code>) even though you are not publishing the
-    sample application. Also, you must have a Google Wallet merchant account to add items to the
+    sample application. Also, you must have a Google payments merchant account to add items to the
     sample application's product list.</p>
   </li>
 </ol>
@@ -268,7 +268,7 @@ onto a device to run it. To run the sample application, do the following:</p>
 <ol>
   <li><strong>Make sure you have at least one test account registered under your Google Play
   publisher account.</strong>
-    <p>You cannot purchase items from yourself (Google Wallet prohibits this), so you need to
+    <p>You cannot purchase items from yourself, so you need to
     create at least one test account that you can use to purchase items in the sample application.
     To learn how to set up a test account, see <a
     href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-setup">Setting up Test
@@ -307,7 +307,7 @@ onto a device to run it. To run the sample application, do the following:</p>
   </li>
   <li><strong>Run the application and purchase the sword or the potion.</strong>
     <p>When you use a test account to purchase items, the test account is billed through Google
-    Wallet and your Google Wallet merchant account receives a payout for the purchase.
+    payments and your Google payments merchant account receives a payout for the purchase.
     Therefore, you may want to refund purchases that are made with test accounts, otherwise the
     purchases will show up as actual payouts to your merchant account.</p>
 </ol>

@@ -173,7 +173,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "http://www.youtube.com/watch?v=Pd49vTkvu0U",
       "http://www.youtube.com/watch?v=ekxABqJeRBc",
-      "http://www.youtube.com/watch?v=MPnH7h12h0U",
+     "http://www.youtube.com/watch?v=MPnH7h12h0U",
       "http://www.youtube.com/watch?v=700gYRkhkLM"
     ]
   },
@@ -345,7 +345,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html",
       "distribute/engage/intents.html",
-      "distribute/engage/appindexing.html",
+      "distribute/engage/deep-linking.html",
       "distribute/engage/analytics.html",
       "distribute/engage/game-services.html",
       "distribute/engage/app-updates.html",
@@ -659,7 +659,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://developers.google.com/app-indexing/",
       "https://developers.google.com/app-indexing/webmasters/details",
-      "distribute/engage/appindexing.html"
+      "distribute/engage/deep-linking.html"
     ]
   },
   "distribute/users/otas": {
@@ -924,7 +924,7 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "distribute/engage/intents.html",
-      "distribute/engage/appindexing.html",
+      "distribute/engage/deep-linking.html",
       "distribute/users/appindexing.html"
     ]
   },
@@ -932,7 +932,7 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "guide/components/intents-filters.html",
-      "distribute/engage/appindexing.html",
+      "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html"
     ]
   },

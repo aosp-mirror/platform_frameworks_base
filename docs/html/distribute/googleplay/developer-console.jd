@@ -121,8 +121,8 @@ Xnonavpage=true
 </div>
 
 <p>
-  If you want to sell apps or in-app products, link your Google Wallet Merchant
-  Account to your developer profile. Google Play uses the linked merchant
+  If you want to sell apps or in-app products, link your Google payments merchant
+  account to your developer profile. Google Play uses the linked merchant
   account for financial and tax identification, as well as for monthly payouts
   from sales.
 </p>
