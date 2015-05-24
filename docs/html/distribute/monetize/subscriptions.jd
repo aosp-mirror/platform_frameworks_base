@@ -1,5 +1,5 @@
 page.title=Monetize with Subscriptions
-page.image=/distribute/images/subscription.jpg
+page.image=images/cards/card-monetize_subscriptions_16-9_2x.png
 page.metaDescription=Sell subscriptions to your products to create continuing revenue streams.
 page.tags="in-app", "iap", "monetizing", "free", "trials"
 @jd:body
@@ -21,8 +21,8 @@ page.tags="in-app", "iap", "monetizing", "free", "trials"
 <p>
   When users purchase subscriptions in your apps, Google Play handles all
   checkout details so your apps never have to directly process any financial
-  transactions. Google Play processes all payments for subscriptions through
-  Google Wallet, just as it does for standard in-app products and app
+  transactions. Google Play processes all payments for subscriptions
+  just as it does for standard in-app products and app
   purchases. This ensures a consistent and familiar purchase flow for your
   users and reduces cart abandonment rates.
 </p>
@@ -43,7 +43,7 @@ page.tags="in-app", "iap", "monetizing", "free", "trials"
 </p>
 
 <p>
-  To get started with subscriptions you need to set-up a Google Wallet <a href=
+  To get started with subscriptions you need to set-up a Google payments <a href=
   "{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant
   Account</a> from the Developer Console. You then define subscriptions for
   published or draft apps in the <a href=

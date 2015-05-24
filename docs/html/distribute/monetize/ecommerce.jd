@@ -1,22 +1,22 @@
 page.title=E-commerce
-page.image=/distribute/images/ecommerce.jpg
+page.image=/images/cards/card-ecommerce_16-9_2x.png
 page.metaImage=With Instant Buy you can sell physical goods and services from your web pages.
-page.tags="monetizing", "physical goods", "wallet"
+page.tags="monetizing", "physical goods", "payments"
 @jd:body
 
 <div class="figure">
   <img src="{@docRoot}images/gp-ecom-0.png" style="width:300px;">
   <p class="img-caption">
-    Product Purchase with Instant Buy
+    Product Purchase with Android Pay
   </p>
 </div>
 
 <p>
-  With Google Wallet Instant Buy, you've the added flexibility of selling
+  With Android Pay, you've the added flexibility of selling
   physical goods and services, such as clothing or movie tickets, through your
   apps using <a href=
-  "https://developers.google.com/wallet/instant-buy/">Instant Buy for
-  Android</a> <strong>(US Only)</strong>.
+  "https://developers.google.com/wallet/instant-buy/">the Android Pay API</a>
+  <strong>(US Only)</strong>.
 </p>
 
 <p>
@@ -28,14 +28,14 @@ page.tags="monetizing", "physical goods", "wallet"
 </p>
 
 <p>
-  Your customers purchase goods and services with any Google Wallet payment
-  method &mdash; credit card, gift card, or Wallet balance. Google Wallet
-  Instant Buy helps you minimize user data entry by enabling your payment flow
+  Your customers purchase goods and services with any payment
+  method &mdash; credit card, gift card, or Wallet balance. Android Pay
+  helps you minimize user data entry by enabling your payment flow
   to retrieve information directly from the user’s wallet.
 </p>
 
 <p>
-  You also keep your existing payment infrastructure and leverage Google Wallet
+  You also keep your existing payment infrastructure and leverage Android Pay
   to optimize your payment flow &mdash; users can make purchases in as a few as
   two clicks and the flow is simplified with features to retrieve information
   directly from the user’s wallet and intelligent auto-completion of addresses.

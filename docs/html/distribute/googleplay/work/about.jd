@@ -1,33 +1,35 @@
 page.title=Google Play for Work
 page.metaDescription=Distribute your apps directly to enterprises and business users.
-page.tags="enterprise", "emm", "business", "administrator"
-page.image=images/distribute/android-work.jpg
+page.tags="enterprise", "emm", "business", "administrator", "profile"
+page.image=images/distribute/gpfw.jpg
 @jd:body
 
 <p>Google Play for Work is an extension of Google Play that lets Android for Work users browse and install apps. IT admins in a business using Android for Work choose which public and private apps are made available to users in their business. Businesses can use Google Play for Work to securely bulk deploy free apps to their employees or bulk purchase paid apps depending on their needs.</p>
+<img src="{@docRoot}images/distribute/gpfw.jpg">
+
 
 <p>As a Google Play developer, your free apps are automatically ready to be selected by Android for Work customers and made available to their workforces on Google Play for Work. However, to allow businesses access to bulk purchase your paid apps, you must opt-in and agree to the <a href="https://play.google.com/about/work/developer-distribution-agreement-addendum.html">Google Play for Work Addendum</a> to the Developer Distribution Agreement.</p>
 
-<p>Find out more about <a href="">distributing to Google Play for Work</a>.</p>
+<p>Find out more about <a href="https://support.google.com/googleplay/work/answer/6137711">distributing to Google Play for Work</a>.</p>
 
 <div class="wrap">
   <div class="cols" style="margin-top:2em;">
     <div class="col-6of12">
-      <h2 id="maximize_your_ad_revenue">For developers</h2>
+      <h2 id="developer">For developers</h2>
       <img src="{@docRoot}images/distribute/gpfw_developer.png">
       <h5>Get discovered</h5>
       <p>Get your business related apps listed in a business specific gateway so they stand out from consumer apps.</p>
       <h5>Get volume</h5>
       <p>Reach new audiences at scale because businesses will be able to deploy your free apps in bulk. Bulk purchasing also allows businesses to buy your paid app at scale.</p>
-      <h5>Generate revenue from extended support</h5>
-      <p>Businesses will often look for extended support for business critical apps, and you have the opportunity to offer that support for a fee.</p>
       <h5>Continue to offer in app-purchases</h5>
       <p>You can continue to offer free apps with in-app purchases. Business employees will be able to make purchases just as they would if they personally installed your app. </p>
+      <h5>New monetization opportunities</h5>
+      <p>Businesses will often look for extended support for business critical apps, and you have the opportunity to offer that support for a fee.</p>
     </div>
 
 
     <div class="col-6of12">
-      <h2 id="maximize_your_ad_revenue">For businesses</h2>
+      <h2 id="business">For businesses</h2>
       <img src="{@docRoot}images/distribute/gpfw_business.png">
       <h5>Free to businesses</h5>
       <p>Google Play for Work is available free of charge to Android for Work customers.</p>
@@ -47,13 +49,13 @@ page.image=images/distribute/android-work.jpg
 
 <p>Keep these best practices in mind as you build a great enterprise-ready app.</p>
 
-<h3 id="design">Build a great app for business</h3>
+<h3 id="design">Develop a great app for business</h3>
 
 <ul>
   <li>Follow best practices for security and manage user data properly. Businesses
   are more conscious of data security and employee productivity, especially when it
   comes to features that share information with other services.</li>
-  <li>Support the Work App Configuration framework to let an administrator remotely configure app settings such as:
+  <li>Support the <a href="{@docRoot}training/enterprise/app-restrictions.html">App Configuration framework to let an administrator remotely configure app settings such as:
     <ul>
       <li>Server address and protocol settings</li>
       <li>The ability to switch features on and off</li>
@@ -64,19 +66,9 @@ page.image=images/distribute/android-work.jpg
   <li>Request the minimum permissions that your app needs.</li>
   <li>Make sure communication to your backend and data in your backend is secure.</li>
   <li>Implement authorization policies that will minimize the number of your employees that can access user data.</li>
-  <li><a href={@docRoot}training/enterprise/app-compatibility.html">Offer compatibility with managed profile</a> and test that with the <a href="{@docRoot}samples/BasicManagedProfile/index.html">BasicManagedProfile sample app</a>.</li>
+  <li><a href={@docRoot}training/enterprise/app-compatibility.html">Offer compatibility with work profile</a> and test that with the <a href="{@docRoot}samples/BasicManagedProfile/index.html">BasicManagedProfile sample app</a>.</li>
   <li>Support <a href="{@docRoot}training/enterprise/app-restrictions.html">app restrictions</a> so that IT admins can remotely configure your app through leading EMM solutions.</li>
 </ul>
-
-<!--<h3 id="distribute">Distribute</h3>
-
-<p>Free to install apps are automatically made available through Google Play for Work, but for paid apps:</p>
-
-<ul>
-<li>When you <a href="https://support.google.com/googleplay/android-developer/answer/113469">publish your app through the Developer Console</a>, opt in to distribute through Google Play for Work, so you agree to your app’s licenses being transferrable within a single business customer.</li>
-<li>Use the <a href="{@docRoot}}google/play/licensing/index.html">Licensing API to track which users have licenses assigned.</li>
-</ul> -->
-
 
 <h3 id="support">Provide support and maintenance</h3>
 
