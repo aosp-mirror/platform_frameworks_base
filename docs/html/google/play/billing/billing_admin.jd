@@ -29,14 +29,14 @@ few administrative tasks, including setting up and maintaining your product list
 Developer Console, registering test accounts, and handling refunds when necessary.</p>
 
 <p>You must have a Google Play publisher account to register test accounts. And you must have a
-Google Wallet merchant account to create a product list and issue refunds to your users. If you
+Google payments merchant account to create a product list and issue refunds to your users. If you
 already have a publisher account on Google Play, you can use your existing account. You do not
 need to register for a new account to support in-app billing.</p>
 
 <p>If you do not have a publisher account, you can register as a Google Play
 developer and set up a publisher account at the <a
 href="http://play.google.com/apps/publish">Google Play Developer Console</a>. If you do not
-have a Google Wallet merchant account, you can register for one through the
+have a Google payments merchant account, you can register for one through the
 Developer Console.</p>
 
 <h2 id="billing-list-setup">Creating a Product List</h2>
@@ -48,7 +48,7 @@ items that are listed in another application's product list.</p>
 
 <p>You can access an application's product list by clicking the <strong>In-App Products</strong>
 link in applications listed in your developer account (see
-figure 1). The <strong>In-App Products</strong> link appears only if you have a Google Wallet
+figure 1). The <strong>In-App Products</strong> link appears only if you have a Google payments
 merchant account and the application's manifest includes the <code>com.android.vending.BILLING</code>
 permission.</p>
 
@@ -68,7 +68,7 @@ storing and delivering the digital content that you sell in your applications.</
 
 <p>You can create a product list for any published application, or any
 application in the alpha or beta channels, that's been
-uploaded and saved to the Developer Console. However, you must have a Google Wallet merchant
+uploaded and saved to the Developer Console. However, you must have a Google payments merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
 existing items in the product list but you will not be able to add new items to the list. For more
@@ -408,22 +408,22 @@ Billing Version 2</a>.
 
 <p>In-app billing does not allow users to send a refund request to Google Play. Refunds for
 in-app purchases must be directed to you (the application developer). You can then process the
-refund through your Google Wallet merchant account. When you do this, Google Play receives a
-refund notification from Google Wallet, and Google Play sends a refund message to your
+refund through your Google payments merchant account. When you do this, Google Play receives a
+refund notification from Google payments, and Google Play sends a refund message to your
 application. For more information, see <a
 href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a
 href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-app Billing
 Pricing</a>.</p>
 
-<p class="caution"><strong>Important:</strong> You cannot use the Google Wallet API to issue
+<p class="caution"><strong>Important:</strong> You cannot use the API to issue
 refunds or cancel In-app Billing transactions. You must do this manually through your Google
-Wallet merchant account. However, you can use the Google Wallet API to retrieve order
+payments merchant account. However, you can use the API to retrieve order
 information.</p>
 
 <h2 id="orderId">Working with Order Numbers</h2>
 
-<p>When a user purchases an in-app item, Google Wallet assigns the transaction
+<p>When a user purchases an in-app item, Google assigns the transaction
 a unique and permanent order number. Google Play provides that order number to
 you at the conclusion of the purchase flow, as the value of the
 <code>orderId</code> field of the <code>PURCHASE_STATE_CHANGED</code>
@@ -435,9 +435,9 @@ number as a means of tracking the transaction in reconciliation reports and for
 customer support.</p>
 
 <p>The order number itself is a string consisting of numbers only, with a format
-assigned and managed by Google Wallet.</p>
+assigned and managed by Google.</p>
 
-<p>For transactions dated 5 December 2012 or later, Google Wallet assigns a
+<p>For transactions dated 5 December 2012 or later, Google payments assigns a
 Merchant Order Number (rather than a Google Order Number) and reports the Merchant
 Order Number as the value of <code>orderID</code>. Here's an
 example:</p>
