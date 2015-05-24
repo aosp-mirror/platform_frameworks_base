@@ -1,33 +1,10 @@
 page.title=Build Community
 page.metaDescription=Build a loyal following with great support and communication.
 page.tags="users, growth, community"
+page.image=/images/cards/card-build-community_16-9_2x.png
 
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-  <h2>
-    Contents
-  </h2>
-
-  <ol>
-    <li>
-    <a href="#starting-your-community">Starting Your Community</a>
-    </li>
-
-    <li>
-    <a href="#tools-to-build-your-community">Tools to Build Your Community</a>
-    </li>
-
-    <li>
-    <a href="#managing-your-community">Managing Your Community</a>
-    </li>
-    <li>
-    <a href="#related-resources">Related Resources</a>
-    </li>
-  </ol>
-  </div>
-</div>
 
 <p>
   Fans of your apps love to help others, turn newer users into fans, and bring
@@ -35,6 +12,10 @@ page.tags="users, growth, community"
   tap into those influencers to help you improve your app and provide support
   to others.
 </p>
+
+<div class="figure">
+  <img src="{@docRoot}images/cards/card-build-community_16-9_2x.png">
+</div>
 
 <p>
   Building your own community can help you bring content that will delight

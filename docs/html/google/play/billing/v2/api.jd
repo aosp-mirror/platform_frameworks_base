@@ -463,7 +463,7 @@ about the item that has been purchased. This applies only to items that have the
 set to "managed per user account."</p>
 
 <p>In the second case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
-when Google Play receives a refund notification from Google Wallet. In this case, Google
+when Google Play receives a refund notification from Google. In this case, Google
 Play sends an <code>IN_APP_NOTIFY</code> message to your application. Your application can handle
 this message the same way it handles responses from an application-initiated
 <code>REQUEST_PURCHASE</code> message so that ultimately your application receives a
@@ -472,9 +472,9 @@ refunded. The refund information is included in the JSON string that accompanies
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent. Also, the <code>purchaseState</code> field in
 the JSON string is set to 2.</p>
 
-<p class="caution"><strong>Important:</strong> You cannot use the Google Wallet API to
+<p class="caution"><strong>Important:</strong> You cannot use the API to
 issue refunds or cancel in-app billing transactions. You must do this manually through your
-Google Wallet merchant account. However, you can use the Google Wallet API to retrieve order
+Google payments merchant account. However, you can use the API to retrieve order
 information.</p>
 
 <h2 id="billing-security">Security Controls</h2>
@@ -512,7 +512,7 @@ limitations.</p>
 <ul>
   <li>In-app billing can be implemented only in applications that you publish through Google
   Play.</li>
-  <li>You must have a Google Wallet Merchant account to use Google Play In-app Billing.</li>
+  <li>You must have a Google payments Merchant account to use Google Play In-app Billing.</li>
   <li>To support subscriptions, version 3.5 or higher of the Google Play app is required. </li>
   <li>In-app Billing requires Android 1.6 (API level 4) or higher.</li>
   <li>You can use in-app billing to sell only digital content. You cannot use in-app billing to sell

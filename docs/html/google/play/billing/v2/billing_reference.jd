@@ -103,7 +103,7 @@ codes returned by Google Play.</p>
   <td><code>RESULT_ERROR</code></td>
   <td>6</td>
   <td>Indicates an unexpected server error. For example, this error is triggered if you try to
-purchase an item from yourself, which is not allowed by Google Wallet.</td>
+purchase an item from yourself, which is not allowed.</td>
 </tr>
 </table>
 </p>
@@ -392,7 +392,7 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 </tr>
 <tr>
   <td>orderId</td>
-  <td>A unique order identifier for the transaction. This corresponds to the Google Wallet Order
+  <td>A unique order identifier for the transaction. This corresponds to the Google payments order
   ID.</td>
 </tr>
 <tr>

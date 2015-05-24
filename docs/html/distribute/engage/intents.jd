@@ -1,6 +1,6 @@
-page.title=Drive Discovery through Intents
-page.metaDescription=Make your app available to users as they perform tasks in other apps through Intents. 
-page.tags="engagement"
+page.title=Increase Usage with Android Intents
+page.metaDescription=Use Android Intents to make your app available to users as they perform tasks in other apps. 
+page.tags="engagement, intents"
 @jd:body
 
 <p>Let the user choose <em>your app</em> to handle specific tasks from another app,
@@ -16,8 +16,9 @@ actions it can perform for other apps. And in addition to making it easy for
 your users to make full use of your app’s features, it can help them discover
 features they didn’t know it supported.</p>
 
-<p>To learn about all the ways you can use Intents, check out <a
-href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.</p>
+<p>Get started with <a
+href="{@docRoot}training/basics/intents/index.html">Interacting with Other Apps</a>
+training.</p>
 
 <h2 id=tips>Tips</h2>
 

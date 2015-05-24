@@ -6,7 +6,7 @@ page.tags="families"
 
 @jd:body
 
-<p>
+    <p>
   If you got great apps targeting kids and/or families, the family-focused experience
   on Google Play is a great way to make them discoverable by parents.
 </p>
@@ -28,67 +28,62 @@ page.tags="families"
   store.
 </p>
 
+
 <h2 id="benefits">Benefits</h2>
 
+    <div class="figure" style="width:300px;">
+
+     <img src="{@docRoot}images/distribute/dff-browse.png" style="width:300px">
+     <p class="figure-caption" style="text-align:center">Browse gives you improved visibility to families.</p>
+   </div>
+   
 <p>
   By opting-in to Designed for Families, parents can easily find your family-friendly
   content on the Google Play store however they are accessing it.
 </p>
 
-<h3>Search</h3> 
 
-<p>
-  Only content opted-in to the Designed for Families program will show up in search results
-  from any of the family sections. This is a huge boost to this content as a majority of
-  searches on the Play Store containing the terms “apps for” or “games for” are related to
-  kids.
-</p>
 
-<h3>Browse</h3>
+      <h3>Search</h3>
+        <p>Only apps and games opted-in to the Designed for Families program will show up in searches initiated from the Family section in Apps Home. They’ll also be more visible when users search for family or kid related content from anywhere in the Play store.</p>
+  
+      <h3>Browse</h3>
+        <p>The Family star button on Apps and Games Home points to an enhanced discovery experience for parents looking for family appropriate content. The new Family section includes uniquely merchandised content, new categories, and age-based browsing. Participating apps will receive this additional visibility on top of their existing categories, rankings, and reviews elsewhere on the Google Play store.</p>
 
-<p>
-  Family sections within Apps, Games, Movies & TV and Music provide enhanced discovery for
-  parents. These sections act as true home pages and contain unique categories tailored to kids
-  content, specific age-based categories, and merchandised content.
-</p>
 
-<h3>Character pages</h3>
 
-<p>
-  All content for particular popular characters can now be found in one place on character pages,
-  including apps, games, movies, tv, and books. It’s a powerful way to promote children’s brands
-  across content, and allows you to reach a highly relevant and targeted audience. Character
-  pages are also a way to alleviate concerns around IP protection, since only properly licensed
-  content is on these pages. 
-</p>
 
-<h3>Merchandising</h3>
+      <h3>Character pages</h3>
 
-<p>
-  The family sections have their own merchandised content, with new opportunities for featuring
-  on the home pages of the family sections and and within the age-specific home pages. The pages
-  are curated to ensure quality and limited to only content opted-in to Designed for Families
-  and appropriate for specific age ranges.
-</p>
 
-<h3>Badging</h3>
+    <div class="figure" style="width:300px;">
 
-<p>
-  Apps opted-in to Designed for Families will receive family-friendly badges, which are a marker
-  of quality and signal to parents that apps are suitable for users of specific ages groups.
-  Clicking on a badge also leads you to other apps and games with that badge. 
-</p>
+     <img src="{@docRoot}images/distribute/dff-character.png" style="width:300px">
+     <p class="figure-caption" style="text-align:center">Character pages let parents disover your content based on familiar brands and characters.</p>
+   </div>
+
+
+      <p>Parents can now discover content for popular characters from around the globe in one place, including apps, games, movies, tv shows, books, and even music. This provides a powerful way for parents to discover content from familiar  brands and beloved characters, and allows you to reach a highly relevant and targeted audience. </p>
+
+      <h3>Merchandising</h3>
+        <p>The family sections include their own merchandised collections. The themed collections on these pages are curated to ensure quality and limited only to content accepted into the Designed for Families program.</p>
+
+      <h3>Badging</h3>
+        <p>Apps participating in Designed for Families are marked with the family star badge, which reflects the target age you select for your apps and serves as a signal of quality for parents.</p>
+
+
+    <div class="figure" style="width:300px;">
+
+     <img src="{@docRoot}images/distribute/dff-badging.png" style="width:300px">
+     <p class="figure-caption" style="text-align:center">Participating apps are marked with the family star badge.</p>
+   </div>
+
 
 <h2 id="elibibility">Eligibility</h2>
 
 <p>
-  Apps in the family-friendly experience on Google Play are more
-  discoverable by parents and families, who expect the apps to appeal to kids under 13 and be age
-  appropriate. The Designed for Families program is designed to be inclusive of
-  apps that are made for kids as well as those that can be enjoyed by the
-  entire family. To address this audience, there are specific guidelines and
-  policies your apps need to meet, which will be assessed in an app content
-  review.
+The Designed for Families program is designed to be inclusive of apps that are made for kids as well as those that can be enjoyed by the entire family. General audience apps that have no specific benefit or relevance for audiences under the age of thirteen will not be accepted into the program. To participate, there are specific guidelines and policies your apps need to meet, which are assessed in an app content review.
+
 </p>
 
 <p>
@@ -105,11 +100,16 @@ page.tags="families"
 <p>
   Your app must also meet the <a href=
   "https://support.google.com/googleplay/android-developer/answer/6184502">Designed
-  for Families program requirements</a> listed in the Google Play Developer
-  Help Center.
+  for Families program requirements</a>.
 </p>
 
-<div class="paging-links" style="padding-top:.75em;">
-  <a href="{@docRoot}distribute/googleplay/families/start.html" class=
-  "next-class-link">Next: Opt-In</a>
-</div>
+<p>
+To learn how to opt-in and find more details about the program, visit the Google Play Developer <a href="https://support.google.com/googleplay/android-developer/answer/6231938">Help Center</a>.
+
+<h2 id="contact">Stay in Touch</h2>
+
+<p>If you'd like to receive occasional emails with news relating to the Designed for Families
+program and Google Play opportunities, sign up using the <a
+href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform">Dssigned
+for Families Interest Form</a>
+</p>
