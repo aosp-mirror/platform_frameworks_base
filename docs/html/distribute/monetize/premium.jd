@@ -1,5 +1,5 @@
 page.title=Monetize Premium Apps
-page.image=/distribute/images/premium.jpg
+page.image=/images/cards/card-monetize-premium_16-9_2x.png
 page.metaDescription=Charging users to download your apps is a simple, convenient monetization model.
 page.tags="monetizing", "paid"
 
@@ -11,12 +11,13 @@ page.tags="monetizing", "paid"
 <p>
   Charging users to download your apps is a simple, convenient monetization
   model. After creating your <a href=
-  "/distribute/googleplay/start.html#merchant-account">Merchant
-  Account</a>, you <a href=
-  "/distribute/googleplay/developer-console.html#selling-pricing-your-products">set prices for your
-  apps</a> in the Developer Console. You can optionally include advertising or use
-  <a href="{@docRoot}google/play/billing/index.html">In-app
-  Billing</a> to sell additional features or content.
+  "/distribute/googleplay/start.html#merchant-account">Merchant Account</a>,
+  you <a href=
+  "/distribute/googleplay/developer-console.html#selling-pricing-your-products">
+  set prices for your apps</a> in the Developer Console. You can optionally
+  include advertising or use <a href=
+  "{@docRoot}google/play/billing/index.html">In-app Billing</a> to sell
+  additional features or content.
 </p>
 
 <p>

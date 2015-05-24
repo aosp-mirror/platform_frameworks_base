@@ -1,12 +1,12 @@
 page.title=Integrate Google Cloud Messaging
 page.metaDescription=Keep your users in sync with your latest content by delivering lightweight messages over Google's infrastructure.
 page.tags="gcm"
-page.image=/images/gcm/gcm-logo.png
+page.image=/images/cards/card-google-cloud-messaging_16-9_2x.png
 
 @jd:body
 
-<div class="figure" style="width:330px">
-  <img src="{@docRoot}images/gcm/gcm-logo.png">
+<div class="figure">
+  <img src="{@docRoot}images/cards/card-google-cloud-messaging_16-9_2x.png">
 </div>
 
 <p>

@@ -25,7 +25,7 @@ excludeFromSuggestions=true
           <span class="dac-sprite dac-auto-chevron"></span>
           Set up Android Studio
         </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}training/basics/training/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}training/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Build your first app
         </a><br>

@@ -49,26 +49,15 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cardboard.html">
-          <span class="en"><span style="white-space:nowrap">Build VR with Google Cardboard</span></span>
+          <span class="en">Build VR with <span style="white-space:nowrap">Google Cardboard</span></span>
         </a>
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/families/about.html">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/families/about.html">
           <span class="en">Designed for Families</span>
         </a>
     </div>
-    <ul>
-      <li><a href="<?cs var:toroot?>distribute/googleplay/families/start.html">
-          <span class="en">Opt-In</span>
-        </a></li>
-      <li><a href="<?cs var:toroot?>distribute/googleplay/families/faq.html">
-          <span class="en">FAQ</span>
-        </a></li>
-      <li><a href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform">
-          <span class="en">Stay in Touch »</span>
-        </a></li>
-    </ul>
   </li>
   <li class="nav-section">
     <div class="nav-section-header" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/edu/about.html">

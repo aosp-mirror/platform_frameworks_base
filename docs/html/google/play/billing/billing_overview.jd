@@ -10,7 +10,7 @@ parent.link=index.html
     <li>Use In-app Billing to sell digital goods, including one-time items and
 recurring subscriptions.</li>
     <li>Supported for any app published on Google Play. You only need a Google
-Play Developer Console account and a Google Wallet merchant account.</li>
+Play Developer Console account and a Google payments merchant account.</li>
     <li>Checkout processing is automatically handled by Google Play, with the
 same look-and-feel as for app purchases.</li>
   </ul>
@@ -129,7 +129,7 @@ In-app Billing</a>.</p>
 <h2 id="checkout">Google Play Purchase Flow</h2>
 <p>Google Play uses the same checkout backend service as is used for application
 purchases, so your users experience a consistent and familiar purchase flow.</p>
-<p class="note"><strong>Important:</strong> You must have a Google Wallet
+<p class="note"><strong>Important:</strong> You must have a Google payments
 merchant account to use the In-app Billing service on Google Play.</p>
 <p>To initiate a purchase, your application sends a billing request for a
 specific in-app product. Google Play then handles all of the checkout details for
