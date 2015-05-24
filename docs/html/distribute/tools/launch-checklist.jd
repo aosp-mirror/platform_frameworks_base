@@ -431,9 +431,9 @@ data-maxresults="6">
 
 <p>
   If your app is be priced, or if you'll be selling in-app products, you need
-  <a href=
-  "https://developers.google.com/wallet/digital/training/getting-started/merchant-setup">
-  set up a Google Wallet Merchant Account</a> before you can publish.
+  to <a href=
+  "{@docRoot}distribute/googleplay/start.html">
+  set up a Google payments merchant account</a> before you can publish.
 </p>
 
 <h3 class="rel-resources clearfloat">Related resources</h3>
@@ -855,7 +855,7 @@ data-maxresults="6">
   <li>
     <p>
       Your developer profile has the correct information and is linked to the
-      proper Google Wallet merchant account (if you’re selling products).
+      proper Google payments merchant account (if you’re selling products).
     </p>
   </li>
 

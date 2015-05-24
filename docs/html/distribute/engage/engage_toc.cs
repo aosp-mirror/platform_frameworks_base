@@ -32,13 +32,13 @@
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/ads.html">
-        <span class="en">Drive engagement with Ads</span></a>
+        <span class="en">Drive Engagement with Ads</span></a>
     </div>
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/intents.html">
-        <span class="en">Use the Power of Intents</span></a>
+        <span class="en">Increase Usage through Intents</span></a>
     </div>
   </li>
   <li class="nav-section">

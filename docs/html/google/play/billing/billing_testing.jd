@@ -128,8 +128,8 @@ testing. For canceling purchases, you have these options:</p>
 <ul>
 <li>Wait for the transactions to expire&mdash;Google Play clears completed test
 purchases 14 days after their purchase date. </li>
-<li>Cancel purchases manually&mdash;you can go to the Google Wallet Merchant
-Center, look up the transaction, and then cancel it. You can find transactions
+<li>Cancel purchases manually&mdash;you can go to the Google payments merchant
+center, look up the transaction, and then cancel it. You can find transactions
 by looking up their order numbers.</li>
 </ul>
 
@@ -162,7 +162,7 @@ product ID android.test.purchased.</p>
 
 <img src="{@docRoot}images/billing_test_flow.png" height="381" id="figure1" />
 <p class="img-caption">
-  <strong>Figure 1.</strong>Wallet flow for the special reserved item android.test.purchased.
+  <strong>Figure 1.</strong>Purchase flow for the special reserved item android.test.purchased.
 </p>
 
 <p>You do not need to list the reserved products in your application's product list. Google Play
@@ -197,8 +197,8 @@ href="#draft_apps">Draft Apps are No Longer Supported</a>.
     <p>When you make an In-app Billing request with this product ID, Google Play responds as
     though the purchase was refunded. Refunds cannot be initiated through Google Play's in-app
     billing service. Refunds must be initiated by you (the merchant). After you process a refund
-    request through your Google Wallet merchant account, a refund message is sent to your application by
-    Google Play. This occurs only when Google Play gets notification from Google Wallet that
+    request through your Google payments merchant account, a refund message is sent to your application by
+    Google Play. This occurs only when Google Play gets notification from Google payments that
     a refund has been made. For more information about refunds, see <a href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-app Billing
 Pricing</a>.</p>
@@ -267,7 +267,7 @@ users will experience in your application.</p>
 
 <p>To test your In-app Billing implementation with actual in-app purchases, you will need to
 register at least one test account on the Google Play Developer Console. You cannot use your
-developer account to test the complete in-app purchase process because Google Wallet does not let
+developer account to test the complete in-app purchase process because Google payments does not let
 you buy items from yourself. If you have not set up test accounts before, see <a
 href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">Setting up test
 accounts</a>.</p>

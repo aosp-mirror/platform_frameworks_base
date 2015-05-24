@@ -140,7 +140,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["push","gcm"],
     "tags": [],
-    "image":"images/gcm/gcm-logo.png",
+    "image":"images/cards/card-google-cloud-messaging_16-9_2x.png",
     "type":"Guide"
   },
   {
@@ -485,9 +485,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "summary":"Tools to offer a better game experience.",
     "url":"google/play-services/games.html",
     "group":"",
-    "keywords": [],
+    "keywords": ["games","play games"],
     "tags": [],
-    "image":"",
+    "image":"images/google/gps-play_games_logo.png",
     "type":"google"
   },
 
@@ -1006,8 +1006,8 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://developers.google.com/wallet/instant-buy/",
     "timestamp": 1194884220000,
-    "image": "distribute/images/payment-method.jpg",
-    "title": "Google Wallet Instant Buy APIs",
+    "image": "",
+    "title": "Android Pay APIs",
     "summary": "Developer documentation describing Instant Buy and how to support it in your apps.",
     "keywords": [],
     "type": "guide",
@@ -3231,21 +3231,21 @@ var CAROUSEL_OVERRIDE = {
     "title": "Designed for Families",
     "summary": "Introducing a new Google Play section to promote family friendly apps. Your apps in the program can benefit from enhanced discoverability in addition to maintaining their existing categories, rankings, and reviews elsewhere on the Google Play store."
   },
-  "http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "https://www.youtube.com/watch?v=Pd49vTkvu0U": {
     "image": "images/distribute/hero-jelly-button.jpg",
     "title": "How Jelly Button Games are growing globally through data",
     "summary": "To really understand their users, Jelly Button Games analyses over 3 billion events each month using Google Analytics and Google BigQuery."
   },
-  "http://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "http://www.youtube.com/watch?v=700gYRkhkLM%26list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-outfit7.jpg",
     "title": "Outfit7 — Building an entertainment company with Google",
     "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories...."
   },
-  "http://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "http://www.youtube.com/watch?v=MPnH7h12h0U%26list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-haystack.jpg",
     "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen."
   },
-  "http://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "http://www.youtube.com/watch?v=ekxABqJeRBc%26list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-ginlemon.jpg",
     "title": "How GinLemon is breaking through with Google Play",
     "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy."
