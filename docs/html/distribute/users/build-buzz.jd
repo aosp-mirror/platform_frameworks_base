@@ -5,49 +5,8 @@ page.tags="users, growth, promotion"
 
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>
-      Contents
-    </h2>
-
-    <ol>
-      <li>
-        <a href="#link-to-your-apps">Link to Your Apps</a>
-      </li>
-      <li>
-        <a href="#use-the-google-play-badge">Use the Badge</a>
-      </li>
-      <li>
-        <a href="#cross-promote-from-your-other-apps">Cross-Promote Your Apps</a>
-      </li>
-      <li>
-        <a href="#hold-a-contest">Hold a Contest</a>
-      </li>
-      <li>
-        <a href="#leverage-pr">Leverage PR</a>
-      </li>
-      <li>
-        <a href="#use-social-media">Use Social Media</a>
-      </li>
-      <li>
-        <a href="#publish-youtube-videos">Publish YouTube Videos</a>
-      </li>
-      <li>
-        <a href="#advertise">Advertise</a>
-      </li>
-      <li>
-        <a href="#maximize-your-marketing-spend">Maximize Your Marketing
-        spend</a>
-      </li>
-      <li><a href="#related-resources">Related Resources</a></li>
-    </ol>
-  </div>
-</div>
-
-<div style="float:right;border 2px solid #ddd;">
-  <img src="{@docRoot}distribute/images/build-buzz.jpg" style=
-  "width:240px;margin:0 0 1.5em 1em;">
+<div class="figure">
+  <img src="{@docRoot}distribute/images/build-buzz.jpg">
 </div>
 
 <p>
@@ -64,7 +23,7 @@ page.tags="users, growth, promotion"
   dividends.
 </p>
 
-<div class="headerLine">
+
   <h2 id="link-to-your-apps">
     Link to Your Apps in Google Play
   </h2>
@@ -101,7 +60,6 @@ page.tags="users, growth, promotion"
   </li>
 </ul>
 
-<div class="headerLine">
   <h2 id="use-the-google-play-badge">
     Use the Google Play Badge
   </h2>

@@ -1,5 +1,5 @@
 page.title=Monetize Freemium Apps
-page.image=/distribute/images/freemium.jpg
+page.image=images/cards/card-monetize-freemium_16-9_2x.png
 page.metaDescription=Use Google Play In-app Billing and other tools to monetize your free apps.
 page.tags="in-app", "billing", "iap", "monetizing"
 @jd:body
@@ -57,7 +57,7 @@ page.tags="in-app", "billing", "iap", "monetizing"
 </p>
 
 <p>
-  To get started with In-app Billing you need to set-up a Google Wallet
+  To get started with In-app Billing you need to set-up a Google payments
   <a href="{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant
   Account</a> from Developer Console. You then define <a href=
   "{@docRoot}distribute/googleplay/developer-console.html#in-app-products">in-app

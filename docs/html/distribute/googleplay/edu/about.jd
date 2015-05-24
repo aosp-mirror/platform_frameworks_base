@@ -3,7 +3,6 @@ page.image=/distribute/images/about-play-education.jpg
 page.metaDescription=Distribute your educational app directly to educators and schools.
 meta.tags="gpfe, googleplay, distribution, edu"
 page.tags="education"
-Xnonavpage=true
 
 @jd:body
 
@@ -13,6 +12,10 @@ Xnonavpage=true
   as well as educational videos and a collection of classic books for their
   classroom.
 </p>
+
+
+<img src="{@docRoot}distribute/images/about-play-education.jpg">
+
 
 <p>
   Teachers can search for approved apps by grade, subject and standard,
@@ -27,76 +30,124 @@ Xnonavpage=true
   visibility with the right audiences, without having to knock on school doors.
 </p>
 
-<div style="margin:30px 0 20px 0;" class="clearfloat dynamic-grid">
-  <div style="width:48%; margin-right:2%; float:left;">
-    <div class="centered-full-image">
-      <img src="{@docRoot}images/gpfe-developer.png">
-    </div>
-
-
-
 <div class="wrap">
   <div class="cols" style="margin-top:2em;">
     <div class="col-6of12">
-      <h2 id="maximize_your_ad_revenue">For developers</h2>
+      <h2 id="developers">
+        For developers
+      </h2>
       <img src="{@docRoot}images/gpfe-developer.png">
-      <h5>Get discovered</h5>
-      <p>With Google Play for Education, teachers and administrators can browse
-      content by curriculum, grade, and standard &mdash; discovering the right
-      content for their students. If your app offers an exciting new way to
-      learn sixth grade algebra, math educators will be able to find, purchase,
-      and distribute your app to their classes in a few clicks.</p>
-      <h5>Reach more schools and students</h5>
-    <p>
-      Millions of students, faculty, and staff are using Google Apps for
-      Education and other Google services. Many of these schools are excited to
-      take advantage of tablets with Google Play for Education and they are
-      looking to bring your apps into their classrooms, especially apps using
-      Google sign-on.
-    </p>
-      <h5>Monetize effectively</h5>
-    <p>
-      With Google Play for Education, educators are able to make high-volume
-      purchases using standard institutional payment mechanisms and then
-      distribute apps to the students who need them — whether it’s a class of
-      20 or a district of 20,000.
-    </p>
+      <h5>
+        Get discovered
+      </h5>
+
+      <p>
+        With Google Play for Education, teachers and administrators can browse
+        content by curriculum, grade, and standard &mdash; discovering the
+        right content for their students. If your app offers an exciting new
+        way to learn sixth grade algebra, math educators will be able to find,
+        purchase, and distribute your app to their classes in a few clicks.
+      </p>
+
+      <h5>
+        Reach more schools and students
+      </h5>
+
+      <p>
+        Millions of students, faculty, and staff are using Google Apps for
+        Education and other Google services. Many of these schools are excited
+        to take advantage of tablets with Google Play for Education and they
+        are looking to bring your apps into their classrooms, especially apps
+        using Google sign-on.
+      </p>
+
+      <h5>
+        Monetize effectively
+      </h5>
+
+      <p>
+        With Google Play for Education, educators are able to make high-volume
+        purchases using standard institutional payment mechanisms and then
+        distribute apps to the students who need them — whether it’s a class of
+        20 or a district of 20,000.
+      </p>
+
+      <h5>
+        Continue to offer in app-purchases
+      </h5>
+
+      <p>
+        You can continue to offer free apps with in-app purchases. Business
+        employees will be able to make purchases just as they would if they
+        personally installed your app.
+      </p>
+
+      <h5>
+        New monetization opportunities
+      </h5>
+
+      <p>
+        Businesses will often look for extended support for business critical
+        apps, and you have the opportunity to offer that support for a fee.
+      </p>
     </div>
 
-
     <div class="col-6of12">
-      <h2 id="maximize_your_ad_revenue">For educators</h2>
+      <h2 id="educators">
+        For educators
+      </h2>
       <img src="{@docRoot}images/gpfe-educator.png">
-      <h5>    <b>Android tablets in the classroom</h5>
-    <p>
-      Google Play for Education brings the innovation of Android technology
-      into classrooms. School districts can set up and deploy large numbers of
-      devices in just minutes or hours, rather than days.
-    </p>
-      <h5>Curriculum-based discovery</h5>
-    <p>
-      Powerful browsing tools let educators quickly discover apps, videos, and
-      other content—with many recommended by teachers and categorized according
-      to familiar Core Curriculum standards.
-    </p>
-      <h5>Bulk purchase with institutional payment</h5>
-    <p>
-      Convenient purchasing and delivery tools let educators buy apps in bulk,
-      using purchase orders and other payment methods that are easy for schools
-      to manage.
-    </p>
-      <h5>Over-the-air delivery to student devices</h5>
-    <p>
-      After finding apps they want, educators can push them instantly to
-      student devices over the air. They can send the apps to individuals or
-      groups of any size, across classrooms, schools, or even districts.
-    </p>
-      <h5>Business-wide licensing</h5>
-      <p>Paid apps are licensed to your organization, enabling you to move paid apps between users as users needs change and staff turns over. </p>
+      <h5>
+        Android tablets in the classroom
+      </h5>
+
+      <p>
+        Google Play for Education brings the innovation of Android technology
+        into classrooms. School districts can set up and deploy large numbers
+        of devices in just minutes or hours, rather than days.
+      </p>
+
+      <h5>
+        Curriculum-based discovery
+      </h5>
+
+      <p>
+        Powerful browsing tools let educators quickly discover apps, videos,
+        and other content—with many recommended by teachers and categorized
+        according to familiar Core Curriculum standards.
+      </p>
+
+      <h5>
+        Bulk purchase with institutional payment
+      </h5>
+
+      <p>
+        Convenient purchasing and delivery tools let educators buy apps in
+        bulk, using purchase orders and other payment methods that are easy for
+        schools to manage.
+      </p>
+
+      <h5>
+        Over-the-air delivery to student devices
+      </h5>
+
+      <p>
+        After finding apps they want, educators can push them instantly to
+        student devices over the air. They can send the apps to individuals or
+        groups of any size, across classrooms, schools, or even districts.
+      </p>
+
+      <h5>
+        Business-wide licensing
+      </h5>
+
+      <p>
+        Paid apps are licensed to your organization, enabling you to move paid
+        apps between users as users needs change and staff turns over.
+      </p>
     </div>
   </div>
 </div>
-
 
 <h2 id="related-resources">Related Resources</h2>
 
