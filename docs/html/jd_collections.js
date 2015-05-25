@@ -284,14 +284,14 @@ var RESOURCE_COLLECTIONS = {
   },
   "distribute/gp/gpfelanding": {
     "resources": [
-      "distribute/googleplay/auto.html",
-      "distribute/googleplay/tv.html",
       "distribute/googleplay/wear.html",
-      "distribute/googleplay/cardboard.html",
-      "distribute/googleplay/cast.html",
-      "distribute/googleplay/edu/about.html",
+      "distribute/googleplay/tv.html",
+      "distribute/googleplay/auto.html",
       "distribute/googleplay/families/about.html",
-      "distribute/googleplay/work/about.html"
+      "distribute/googleplay/work/about.html",
+      "distribute/googleplay/edu/about.html",
+      "distribute/googleplay/cast.html",
+      "distribute/googleplay/cardboard.html",
     ]
   },
   "distribute/googleplay/gpfw": {
@@ -324,30 +324,31 @@ var RESOURCE_COLLECTIONS = {
   "distribute/users": {
     "title": "",
     "resources": [
-      "distribute/users/know-your-user.html",
       "distribute/users/your-listing.html",
-      "distribute/users/expand-to-new-markets.html",
       "distribute/users/promote-with-ads.html",
       "distribute/users/appindexing.html",
+      "distribute/googleplay/index.html#opportunities",
+      "distribute/analyze/improve-roi.html",
+      "distribute/users/expand-to-new-markets.html",
+      "distribute/users/promote-with-ads.html",
+      "distribute/analyze/index.html",
+      "distribute/users/app-invites.html",
       "distribute/users/ota-installs.html",
-      "distribute/users/house-ads.html",
       "distribute/users/youtube.html",
-      "distribute/users/build-buzz.html",
-      "distribute/users/build-community.html"
+      "distribute/users/house-ads.html",
     ]
   },
   "distribute/engagelanding": {
     "resources": [
+      "distribute/engage/intents.html",
       "distribute/engage/widgets.html",
       "distribute/engage/notifications.html",
-      "distribute/engage/gcm.html",
-      "distribute/engage/easy-signin.html",
       "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html",
-      "distribute/engage/intents.html",
-      "distribute/engage/deep-linking.html",
-      "distribute/engage/analytics.html",
       "distribute/engage/game-services.html",
+      "distribute/engage/easy-signin.html",
+      "distribute/analyze/build-better-apps.html",
+      "distribute/engage/gcm.html",
       "distribute/engage/app-updates.html",
       "distribute/engage/community.html",
       "distribute/engage/video.html"
@@ -358,9 +359,10 @@ var RESOURCE_COLLECTIONS = {
       "distribute/monetize/premium.html",
       "distribute/monetize/freemium.html",
       "distribute/monetize/subscriptions.html",
-      "distribute/monetize/ecommerce.html",
       "distribute/monetize/ads.html",
-      "distribute/monetize/payments.html"
+      "distribute/monetize/ecommerce.html",
+      "distribute/monetize/payments.html",
+      "distribute/analyze/understand-user-value.html",
     ]
   },
   "distribute/analyzelanding": {
@@ -427,6 +429,31 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/admob/answer/3508177",
       "https://support.google.com/analytics/answer/2956981",
       "https://support.google.com/tagmanager/answer/6003007"
+    ]
+  },
+  "distribute/essentials/guidelines": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/quality/core.html",
+      "distribute/essentials/quality/tablets.html",
+      "distribute/essentials/quality/wear.html",
+      "distribute/essentials/quality/tv.html",
+      "distribute/essentials/quality/auto.html",
+      "https://developers.google.com/edu/guidelines"
+    ]
+  },
+  "distribute/essentials/tools": {
+    "title": "",
+    "resources": [
+      "distribute/tools/launch-checklist.html",
+      "distribute/tools/localization-checklist.html",
+      "https://support.google.com/googleplay/android-developer",
+      "distribute/tools/promote/brand.html",
+      "distribute/tools/promote/device-art.html",
+      "distribute/tools/promote/badges.html",
+      "distribute/tools/promote/linking.html",
+      "distribute/tools/open-distribution.html",
+      "about/dashboards/index.html"
     ]
   },
   "distribute/tools/checklists": {
@@ -608,12 +635,12 @@ var RESOURCE_COLLECTIONS = {
       "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html"
      ]
   },
-  "distribute/users/knowyouruser": {
+  "distribute/users/appinvites": {
     "title": "",
     "resources": [
-      "distribute/essentials/optimizing-your-app.html",
-      "http://www.youtube.com/watch?v=RRelFvc6Czo",
-      "distribute/stories/localization.html"
+      "https://developers.google.com/app-invites/",
+      "https://developers.google.com/identity/sign-in/android/",
+      "https://developers.google.com/app-indexing/"
     ]
   },
   "distribute/users/promotewithads": {
@@ -1365,11 +1392,8 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "https://support.google.com/admob/topic/2784623",
-      "https://developers.google.com/mobile-ads-sdk/download",
+      "http://admob.blogspot.com/",
       "http://analyticsacademy.withgoogle.com/mobile-app",
-      "http://support.google.com/googleplay/android-developer/topic/2985714",
-      "https://support.google.com/admob/answer/2753860",
-      "https://support.google.com/admob/"
     ]
   },
   "distribute/monetize/paymentmethods": {
@@ -1386,12 +1410,8 @@ var RESOURCE_COLLECTIONS = {
       "preview/download.html",
       "preview/setup-sdk.html",
       "preview/samples.html",
-      "preview/support.html",
       "preview/api-overview.html",
-      "preview/features/runtime-permissions.html",
-      "preview/api-changes.html",
-      "preview/api-overview.html",
-      "preview/backup/index.html",
+      "preview/support.html"
     ]
   },
   "autolanding": {
