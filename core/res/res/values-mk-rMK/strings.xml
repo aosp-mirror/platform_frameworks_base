@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се дрижеше пребрзо. Обидете се повторно."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хардвер за отпечаток од прст не е достапен."</string>

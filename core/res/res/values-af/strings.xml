@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kon nie vingerafdruk verwerk nie. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Vingerafdruksensor is vuil. Maak dit skoon en probeer weer."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vinger is te vinnig beweer. Probeer weer."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Vinger is te stadig beweeg. Probeer asseblief weer."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vinger is te stadig beweer. Probeer asseblief weer."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Vingerafdrukhardeware is nie beskikbaar nie."</string>
