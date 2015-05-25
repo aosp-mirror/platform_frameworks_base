@@ -37,8 +37,7 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"‏SD کارڈ چھپائیں"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"فائل سائز دکھائیں"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"فائل سائز چھپائیں"</string>
-    <!-- no translation found for button_select (527196987259139214) -->
-    <skip />
+    <string name="button_select" msgid="527196987259139214">"منتخب کریں"</string>
     <string name="button_copy" msgid="8706475544635021302">"کاپی کریں"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> کو منتخب کیا گیا"</string>
     <string name="sort_name" msgid="9183560467917256779">"نام کے لحاظ سے"</string>
