@@ -40,8 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"ファイルサイズを表示"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ファイルサイズを非表示"</string>
     <string name="button_copy" msgid="8706475544635021302">"コピー"</string>
-    <!-- no translation found for button_move (2202666023104202232) -->
-    <skip />
+    <string name="button_move" msgid="2202666023104202232">"移動"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g>件選択済み"</string>
     <string name="sort_name" msgid="9183560467917256779">"名前順"</string>
     <string name="sort_date" msgid="586080032956151448">"更新日順"</string>

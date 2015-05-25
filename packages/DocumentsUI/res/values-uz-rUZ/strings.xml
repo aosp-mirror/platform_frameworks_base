@@ -40,8 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"Fayl hajmini ko‘rsatish"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayl hajmini berkitish"</string>
     <string name="button_copy" msgid="8706475544635021302">"Nusxalash"</string>
-    <!-- no translation found for button_move (2202666023104202232) -->
-    <skip />
+    <string name="button_move" msgid="2202666023104202232">"Ko‘chirib o‘tkazish"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ta tanlandi"</string>
     <string name="sort_name" msgid="9183560467917256779">"Nomi bo‘yicha"</string>
     <string name="sort_date" msgid="586080032956151448">"Tahrir sanasi bo‘yicha"</string>

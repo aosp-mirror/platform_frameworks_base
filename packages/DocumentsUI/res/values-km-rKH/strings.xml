@@ -40,8 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"បង្ហាញទំហំឯកសារ"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"លាក់ទំហំឯកសារ"</string>
     <string name="button_copy" msgid="8706475544635021302">"ចម្លង"</string>
-    <!-- no translation found for button_move (2202666023104202232) -->
-    <skip />
+    <string name="button_move" msgid="2202666023104202232">"ផ្លាស់ទី"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"បាន​ជ្រើស <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"តាម​ឈ្មោះ"</string>
     <string name="sort_date" msgid="586080032956151448">"តាម​កាលបរិច្ឆេទ​បាន​កែប្រែ"</string>

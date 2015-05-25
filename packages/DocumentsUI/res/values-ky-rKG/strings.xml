@@ -32,8 +32,7 @@
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" тандоо"</string>
     <string name="menu_select_all" msgid="4320518282375109902">"Бардыгын тандоо"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Төмөнкүгө көчүрүү…"</string>
-    <!-- no translation found for menu_move (1828090633118079817) -->
-    <skip />
+    <string name="menu_move" msgid="1828090633118079817">"Төмөнкүгө жылдыруу..."</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ички сактагычты көрсөтүү"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD картаны көрсөтүү"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ички эстутумду жашыруу"</string>
@@ -41,8 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"Файл өлчөмүн көрсөтүү"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Файл өлчөмүн жашыруу"</string>
     <string name="button_copy" msgid="8706475544635021302">"Көчүрүү"</string>
-    <!-- no translation found for button_move (2202666023104202232) -->
-    <skip />
+    <string name="button_move" msgid="2202666023104202232">"Жылдыруу"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> тандалды"</string>
     <string name="sort_name" msgid="9183560467917256779">"Аты боюнча"</string>
     <string name="sort_date" msgid="586080032956151448">"Өзгөртүлгөн күнү боюнча"</string>
@@ -68,7 +66,10 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файл көчүрүлүүдө.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл көчүрүлүүдө.</item>
     </plurals>
-    <!-- no translation found for move_begin (8430330882138871643) -->
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="other">Жылдырылууда<xliff:g id="COUNT_1">%1$d</xliff:g> файлдар.</item>
+      <item quantity="one">Жылдырылууда<xliff:g id="COUNT_0">%1$d</xliff:g> файл.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Көчүрүүгө даярдалууда…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файл көчүрүлбөй койду</item>

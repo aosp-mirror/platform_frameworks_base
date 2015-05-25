@@ -40,8 +40,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"显示文件大小"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"隐藏文件大小"</string>
     <string name="button_copy" msgid="8706475544635021302">"复制"</string>
-    <!-- no translation found for button_move (2202666023104202232) -->
-    <skip />
+    <string name="button_move" msgid="2202666023104202232">"移动"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"已选择<xliff:g id="COUNT">%1$d</xliff:g>项"</string>
     <string name="sort_name" msgid="9183560467917256779">"按名称"</string>
     <string name="sort_date" msgid="586080032956151448">"按修改日期"</string>
