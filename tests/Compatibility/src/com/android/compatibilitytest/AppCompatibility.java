@@ -18,7 +18,7 @@ package com.android.compatibilitytest;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
-import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -30,7 +30,6 @@ import android.util.Log;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,7 +39,7 @@ import java.util.List;
  */
 public class AppCompatibility extends InstrumentationTestCase {
 
-    private static final String TAG = "AppCompability";
+    private static final String TAG = AppCompatibility.class.getSimpleName();
     private static final String PACKAGE_TO_LAUNCH = "package_to_launch";
     private static final String APP_LAUNCH_TIMEOUT_MSECS = "app_launch_timeout_ms";
     private static final String WORKSPACE_LAUNCH_TIMEOUT_MSECS = "workspace_launch_timeout_ms";
@@ -188,8 +187,7 @@ public class AppCompatibility extends InstrumentationTestCase {
             // ignore
         }
 
-        // See if there are any errors. We wait until down here to give ANRs as
-        // much time as
+        // See if there are any errors. We wait until down here to give ANRs as much time as
         // possible to occur.
         final Collection<ProcessErrorStateInfo> postErr =
                 mActivityManager.getProcessesInErrorState();
@@ -205,13 +203,6 @@ public class AppCompatibility extends InstrumentationTestCase {
         return null;
     }
 
-    private boolean ensureForegroundActivity(RunningAppProcessInfo info) {
-        Log.d(TAG, String.format("ensureForegroundActivity: proc=%s, pid=%d, state=%d",
-                info.processName, info.pid, info.processState));
-        return info.processState == ActivityManager.PROCESS_STATE_TOP
-            || info.processState == ActivityManager.PROCESS_STATE_TOP_SLEEPING;
-    }
-
     /**
      * Determine if a given package is still running.
      *
@@ -219,35 +210,13 @@ public class AppCompatibility extends InstrumentationTestCase {
      * @return True if package is running, false otherwise.
      */
     private boolean processStillUp(String packageName) {
-        String processName = getProcessName(packageName);
-        List<RunningAppProcessInfo> runningApps = mActivityManager.getRunningAppProcesses();
-        List<RunningAppProcessInfo> relatedProcs = new ArrayList<>();
-        for (RunningAppProcessInfo app : runningApps) {
-            if (app.processName.equalsIgnoreCase(processName)) {
-                if (!ensureForegroundActivity(app)) {
-                    Log.w(TAG, "Found process but it's not top activity.");
-                    return false;
-                }
+        @SuppressWarnings("deprecation")
+        List<RunningTaskInfo> infos = mActivityManager.getRunningTasks(100);
+        for (RunningTaskInfo info : infos) {
+            if (info.baseActivity.getPackageName().equals(packageName)) {
                 return true;
             }
-            for (String relatedPackage : app.pkgList) {
-                if (relatedPackage.equalsIgnoreCase(packageName)) {
-                    relatedProcs.add(app);
-                }
-            }
         }
-        // now that we are here, we've found no RAPI's directly matching processName, but
-        // potentially a List of them with one of related packages being processName
-        if (!relatedProcs.isEmpty()) {
-            for (RunningAppProcessInfo app : relatedProcs) {
-                if (ensureForegroundActivity(app)) {
-                    return true;
-                }
-            }
-            Log.w(TAG, "Found related processes, but none has top activity.");
-        }
-        Log.w(TAG, "Failed to find process " + processName + " with package name "
-                + packageName);
         return false;
     }
 }
