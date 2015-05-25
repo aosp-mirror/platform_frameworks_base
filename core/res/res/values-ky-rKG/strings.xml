@@ -554,7 +554,8 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Манжа изи иштелбей койду. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Манжа изинин сенсору кирдеп калган. Тазалап, кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Манжа өтө тез жылдырылды. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Манжа өтө жай жылдырылды. Кайра аракет кылыңыз."</string>
+    <!-- no translation found for fingerprint_acquired_too_slow (59250885689661653) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Манжа изинин аппараттык камсыздоосу жеткиликтүү эмес."</string>
@@ -634,10 +635,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Колдонмого DRM тастыктамаларын алып салуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордун билдирүү кызматына байланышуу"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
-    <!-- no translation found for permlab_bindCarrierServices (3233108656245526783) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierServices (1391552602551084192) -->
-    <skip />
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"байланыш операторунун кызматтарына туташуу"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Колдонмо байланыш операторлорунун кызматтарына туташа алат. Бул мүмкүнчүлүктү кадимки колдонмолор пайдалана алышпайт."</string>
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>

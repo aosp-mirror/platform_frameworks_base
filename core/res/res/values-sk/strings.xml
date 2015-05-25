@@ -429,7 +429,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Snímač odtlačkov je špinavý. Vyčistite ho a skúste to znova."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Pohli ste prstom príliš rýchlo. Skúste to znova."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardvér na snímanie odtlačku prsta nie je k dispozícii"</string>

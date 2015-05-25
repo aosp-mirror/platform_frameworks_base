@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"無法處理指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋感應器不乾淨。請清潔後再試一次。"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"手指移動太快。請再試一次。"</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"手指移動太慢。請再試一次。"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"手指移動太慢，請重試。"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"無法使用指紋軟件。"</string>
@@ -501,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允許應用程式移除 DRM 憑證 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"繫結至流動網絡供應商短訊服務"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式繫結至流動網絡供應商短訊服務的頂層介面　(不建議一般應用程式使用)。"</string>
-    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"綁定流動網絡供應商服務"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允許擁有者綁定流動網絡供應商服務，此功能不適用於正常的應用程式。"</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"繫結至流動網絡供應商服務"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允許擁有者繫結至流動網絡供應商服務 (不建議一般應用程式使用)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制螢幕鎖定密碼和 PIN 所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監控螢幕解鎖嘗試次數"</string>

@@ -427,7 +427,8 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"El sensor d\'empremtes digitals està brut. Neteja\'l i torna-ho a provar."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"El dit s\'ha mogut massa ràpid. Torna-ho a provar."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
+    <!-- no translation found for fingerprint_acquired_too_slow (59250885689661653) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"El maquinari per a empremtes digitals no està disponible."</string>
@@ -872,7 +873,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Suprimeix"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'introducció de text"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
-    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"S\'està acabant l\'espai d\'emmagatzematge"</string>
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"L\'espai d\'emmagatzematge s\'està esgotant"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"És possible que algunes funcions del sistema no funcionin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hi ha prou espai d\'emmagatzematge per al sistema. Comprova que tinguis 250 MB d\'espai lliure i reinicia."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> s\'està executant"</string>

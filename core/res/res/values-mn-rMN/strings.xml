@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Хурууны хээ мэдрэгч бохирдсон байна. Та цэвэрлэсний дараагаар дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Хуруугаа хэт хурдан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Хурууг хэт удаан уншуулсан байна. Та дахин уншуулна уу."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Хуруу хэт удаан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хурууны хээний тоног төхөөрөмж бэлэн бус байна."</string>
@@ -501,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Аппликешнд DRM сертификатыг устгахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"зөөгч зурвасын үйлчилгээнд холбох"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Эзэмшигчид зөөгч зурвасын үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"Зөөгч үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Зөөгч үйлчилгээтэй эзэмшигчийг холбодог. Энгийн апп-д хэрэглэхгүй."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"Үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбогдох"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Аливаа эзэмшигчийг үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбодог. Энгийн аппд шаардлагагүй."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Дэлгэц тайлах оролдлогыг хянах"</string>

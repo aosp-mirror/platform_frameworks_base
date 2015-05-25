@@ -429,7 +429,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. נקה אותו ונסה שוב."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"הזזת את האצבע מהר מדי. נסה שוב."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"האצבע זזה לאט מדי, נסה שוב."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"הזזת את האצבע לאט מדי. נסה שוב."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"החומרה בשביל טביעת אצבע אינה זמינה."</string>

@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не можа да се обработи. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Отместихте пръста си твърде бързо. Моля, опитайте отново."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хардуерът за отпечатъци не е налице."</string>
