@@ -398,6 +398,6 @@
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Жұмыс профиліндесіз"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Жүйе интерфейсінің тюнері"</string>
     <string name="quick_settings" msgid="10042998191725428">"Жылдам параметрлер"</string>
-    <string name="add_tile" msgid="2995389510240786221">"Тор қосу"</string>
-    <string name="broadcast_tile" msgid="3894036511763289383">"Трансляция торы"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Тақтайша қосу"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Трансляция тақтайшасы"</string>
 </resources>
