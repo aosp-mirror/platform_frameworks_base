@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Саусақ ізі сенсоры лас. Тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Саусағыңызды тым жылдам қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Саусақ тым баяу қозғалды. Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Саусақ ізі жабдығы қолжетімді емес."</string>
@@ -501,8 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Қолданбаға DRM сертификаттарын жоюға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордың хабар алмасу қызметіне байластыру"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"жабдықтаушы қызметтеріне байластыру"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ұстаушы жабдықтаушы қызметтеріне байластыруға мүмкіндік береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"оператор қызметтеріне қосылу"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Кілтсөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Экранды ашу әркеттерін бақылау"</string>

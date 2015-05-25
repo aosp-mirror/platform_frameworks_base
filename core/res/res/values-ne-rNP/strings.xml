@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"औँठाछाप सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"औंला धेरै छिटो चलाइयो। पुन: प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"औंला निकै ढिला सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"औँठाछाप हार्डवेयर उपलब्ध छैन।"</string>

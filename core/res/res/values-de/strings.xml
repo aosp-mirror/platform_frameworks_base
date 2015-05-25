@@ -123,7 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-Banner ein"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-Banner aus"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WLAN-Telefonie"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Anrufe über WLAN"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
@@ -427,7 +427,8 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingerabdruck konnte nicht verarbeitet werden. Versuchen Sie es erneut."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingerabdrucksensor ist verschmutzt. Reinigen Sie ihn und versuchen Sie es erneut."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Finger zu schnell bewegt. Versuchen Sie es erneut."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Finger zu langsam bewegt. Versuchen Sie es erneut."</string>
+    <!-- no translation found for fingerprint_acquired_too_slow (59250885689661653) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Fingerabdruckhardware nicht verfügbar"</string>

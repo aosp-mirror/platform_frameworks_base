@@ -427,7 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फिंगरप्रिंटवर प्रक्रिया करणे शक्य झाले नाही. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फिंगरप्रिंट सेन्सर खराब आहे. कृपया साफ करा आणि पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"बोट खूप जलद हलविले. कृपया पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"बोट हळू हलविले. कृपया पुन्हा प्रयत्न करा."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
