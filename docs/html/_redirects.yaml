@@ -326,6 +326,15 @@ redirects:
 - from: /shareables/training/BitmapFun.zip
   to: /downloads/samples/DisplayingBitmaps.zip
 
+- from: /shareables/auto/AndroidAuto-audio-apps.pdf
+  to: http://google.com/design/spec-auto/audio-apps/design-principles.html
+
+- from: /shareables/auto/AndroidAuto-messaging-apps.pdf
+  to: http://google.com/design/spec-auto/messaging-apps/voice-based-messaging.html
+
+- from: /shareables/auto/AndroidAuto-custom-colors.pdf
+  to: http://google.com/design/spec-auto/colors-branding/color-themes.html
+
 - from: /shareables/...
   to: http://commondatastorage.googleapis.com/androiddevelopers/shareables/...
 
@@ -399,5 +408,5 @@ redirects:
   to: /training/building-wearables.html
 
 # ---------- DISTRIBUTE ------------------
-- from /distribute/tools/promote/badge-files.html
+- from: /distribute/tools/promote/badge-files.html
   to: /distribute/tools/promote/badges.html
