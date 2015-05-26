@@ -1,15 +1,52 @@
-page.title=Android M Preview Runtime Permissions
+page.title=Runtime Permissions
 
 @jd:body
 
 
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Quickview</h2>
+    <ul>
+      <li>If your app targets the M Preview SDK, it prompts users to grant
+        permissions at runtime, instead of install time.</li>
+      <li>Users can revoke permissions at any time from the app Settings
+        screen.</li>
+      <li>Your app needs to check that it has the permissions it needs every
+        time it runs.</li>
+    </ul>
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#coding">Coding for Runtime Permissions</a></li>
+      <li><a href="#testing">Testing Runtime Permissions</a></li>
+      <li><a href="#best-practices">Best Practices</a></li>
+    </ol>
+
+<!--
+  <h2>Related Samples</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+
+<!--
+  <h2>See also</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+  </div> <!-- qv -->
+</div> <!-- qv-wrapper -->
+
+
 <p>
-  The M Developer Preview introduces a new app permissions model which makes it
-  less frustrating for users to install and upgrade apps. If an app running on
-  M supports the new permissions model, the user does not have to grant any
-  permissions when they install or upgrade the app. Instead, the app requests
-  permissions as they are needed, and the system shows a dialog to the user
-  asking for the permission.
+  The M Developer Preview introduces a new app permissions model which
+  streamlines the process for users to install and upgrade apps. If an app
+  running on the M Preview supports the new permissions model, the user does not have to
+  grant any permissions when they install or upgrade the app. Instead, the app
+  requests permissions as it needs them, and the system shows a dialog to the
+  user asking for the permission.
 </p>
 
 <p>
@@ -18,70 +55,122 @@ page.title=Android M Preview Runtime Permissions
   model on those devices.
 </p>
 
-<h2>
+<h2 id="overview">
   Overview
 </h2>
 
 <p>
-  If an app's target SDK version is the M developer preview, that indicates
-  that the app uses the new permissions model:
+  With the M Developer Preview, the platform introduces a new app permissions
+  model. Here's a summary of the key components of this new model:
 </p>
 
 <ul>
-  <li>Permissions are divided into <em>permission groups</em>, based on their
-  functionality. For example, all permissions relating to the camera and photo
-  roll are grouped in the Camera permission group,
-  [link]android.permission-group.CAMERA[/link].
+  <li>
+    <strong>Declaring Permissions:</strong> The app declares all the
+    permissions it needs in the manifest, as in earlier Android platforms.
   </li>
 
-  <li>The app declares all the permissions it needs in the manifest, as in
-  earlier Android platforms.
+  <li>
+    <strong>Permission Groups:</strong> Permissions are divided into
+    <em>permission groups</em>, based on their functionality. For example, the
+    <code>CONTACTS</code> permission group contains permissions to read and
+    write the user's contacts and profile information.
   </li>
 
-  <li>When the user installs or updates the app, the app is granted just those
-  permissions it requests that fall under <a href=
-  "https://android-preview.googleplex.com/reference/android/content/pm/PermissionInfo.html#PROTECTION_NORMAL">
-    <code>PROTECTION_NORMAL</code></a>, as well as signature and system permissions, as
-    described below. The user is <em>not</em> prompted to grant any permissions
-    at this time.
+  <li>
+    <p><strong>Limited Permissions Granted at Install Time:</strong> When the
+    user installs or updates the app, the system grants the app all
+    permissions that the app requests that fall under {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}.
+    For example, alarm clock and internet permissions fall under {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}, so
+    they are automatically granted at install time.
+    </p>
+
+    <p>The system may also grant the app signature and system permissions, as
+    described in <a href="#system-apps">System apps and signature
+    permissions</a>. The user is <em>not</em> prompted to grant any permissions
+    at install time.</p>
   </li>
 
-  <li>When the app needs to perform any action that requires a permission, it
-  first checks whether it has that permission already. If it does not, it
-  requests to be granted that permission.
+  <li>
+    <strong>User Grants Permissions at Run-Time:</strong> When the app requests
+    a permission, the system shows a dialog to the user, then calls the app's
+    callback function to notify it whether the permission was granted. If a
+    user grants a permission, the app is given all permissions in that
+    permission's functional area that were declared in the app manifest.
   </li>
 
-  <li>When the app requests a permission, the system shows a dialog box to the
-  user, then calls the app's callback function to notify it whether the
-  permission was granted. If a user grants a permission, the app is given all
-  permissions in that permission's functional area that were declared in the
-  app manifest.
+</ul>
+
+<p>
+  This permission model changes the way your app behaves for features that
+  require permissions. Here's a summary of the development practices you should
+  follow to adjust to this model:
+</p>
+
+<ul>
+
+  <li>
+    <strong>Always Check for Permissions:</strong> When the app needs to
+    perform any action that requires a permission, it should first check
+    whether it has that permission already. If it does not, it requests to be
+    granted that permission.
   </li>
 
-  <li>If the app is not granted an appropriate permission, it should handle the
-  failure cleanly. For example, if the permission is just needed for an added
-  feature, the app can disable that feature. If the permission is essential for
-  the app to function, the app might disable all its functionality and inform
-  the user that they need to grant that permission.
+  <li>
+    <strong>Handle Lack of Permissions Gracefully:</strong> If the app is not
+    granted an appropriate permission, it should handle the failure cleanly.
+    For example, if the permission is just needed for an added feature, the app
+    can disable that feature. If the permission is essential for the app to
+    function, the app might disable all its functionality and inform the user
+    that they need to grant that permission.
   </li>
 
-  <li>Users can always go to the app's <b>Settings</b> screen and turn on or
-  off any of the app's permissions.
-  <!-- insert screenshot of settings screen-->
-  If a user turns off an app's permissions, the app is
-  <em>not</em> notified.
+  <div class="figure" style="width:220px">
+    <img src="images/app-permissions-screen.png" srcset=
+    "images/app-permissions-screen@2x.png 2x" alt="" width="220" height=
+    "375">
+    <p class="img-caption">
+      <strong>Figure 2.</strong> Permission screen in the app's Settings.
+    </p>
+  </div>
+
+  <li>
+    <strong>Permissions are Revocable:</strong> Users can revoke an app's
+    permissions at any time. If a user turns off an app's permissions, the app
+    is <em>not</em> notified. Once again, your app should verify that it has
+    needed permissions before performing any restricted actions.
   </li>
 </ul>
 
-<h3>
-  System Apps and Signature Permissions
+<p class="note">
+  <strong>Note:</strong> If an app targets the M Developer Preview, it
+  <em>must</em> use the new permissions model.
+</p>
+
+<p>
+  As of the launch of the M Developer Preview, not all Google apps fully
+  implement the new permissions model. Google is updating these apps over
+  the course of the M Developer Preview to properly respect Permissions toggle
+  settings.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If your app has its own API surface, do not proxy
+  permissions without first ensuring the caller has the requisite permissions
+  to access that data.
+</p>
+
+<h3 id="system-apps">
+  System apps and signature permissions
 </h3>
 
 <p>
-  Ordinarily, an app is just granted the <a href=
-  "https://android-preview.googleplex.com/reference/android/content/pm/PermissionInfo.html#PROTECTION_NORMAL">
-  <code>PROTECTION_NORMAL</code></a> permissions when it is installed. However,
-  under some circumstances the app is granted more permissions:
+  Ordinarily, when the user installs an app, the system only grants the app the
+  {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL
+  PROTECTION_NORMAL}. However, under some circumstances the system grants the
+  app more permissions:
 </p>
 
 <ul>
@@ -89,37 +178,130 @@ page.title=Android M Preview Runtime Permissions
   the permissions listed in its manifest.
   </li>
 
-  <li>Apps are granted all permissions listed in the manifest that fall under
-  <a href=
-  "https://android-preview.googleplex.com/reference/android/content/pm/PermissionInfo.html#PROTECTION_SIGNATURE">
-    PROTECTION_SIGNATURE</a>, if the app's signature matches the signature of
-    the app that declares the permissions.
+  <li>If the app requests permissions in the manifest that fall under {@link
+  android.content.pm.PermissionInfo#PROTECTION_SIGNATURE PROTECTION_SIGNATURE},
+  and the app is signed with the same certificate as the app that declared
+  those permissions, the system grants the requesting app those permissions on
+  installation.
   </li>
 </ul>
 
 <p>
   In both cases, the user can still revoke permissions at any time by going to
-  the app's <b>Settings</b> screen, so the app should continue to check for
-  permissions at run time and request them if necessary.
+  the system's <strong>Settings</strong> screen and choosing <strong>Apps
+  &gt;</strong> <i>app_name</i> <strong>&gt; Permissions</strong>. The app
+  should continue to check for permissions at run time and request them if
+  necessary.
 </p>
 
-<h3>
-  Forwards and Backwards Compatibility
+<h3 id="compatibility">
+  Forwards and backwards compatibility
 </h3>
 
 <p>
-  If an app does not target the M developer preview, it continues to use the
-  old permissions model even on M devices. When the app is installed, the
-  system asks the user to grant all permissions listed in the app's manifest.
+  If an app does not target the M Developer Preview, the app continues to use
+  the old permissions model even on M Preview devices. When the user installs
+  the app, the system asks the user to grant all permissions listed in the
+  app's manifest.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> On devices running the M Developer Preview, a user can
+  turn off permissions for any app (including legacy apps) from the app's
+  Settings screen. If a user turns off permissions for a legacy app, the system
+  silently disables the appropriate functionality. When the app attempts to
+  perform an operation that requires that permission, the operation will not
+  necessarily cause an exception. Instead, it might return an empty data set,
+  signal an error, or otherwise exhibit unexpected behavior. For example, if you
+  query a calendar without permission, the method returns an empty data set.
 </p>
 
 <p>
-  If an app using the new permissions model is run on a pre-M device, the
-  system treats it the same as any other app. Once again, the system asks the
-  user to grant all declared permissions at install time.
+  If you install an app using the new permissions model on a device that is not
+  running the M Preview,
+  the system treats it the same as any other app: the system asks
+  the user to grant all declared permissions at install time.
 </p>
 
-<h2 id="">Coding for Runtime Permissions</h2>
+<p class="note">
+  <strong>Note:</strong> For the preview release, you must set the minimum SDK
+  version to the M Preview SDK to compile with the preview SDK. This means you
+  will not be able to test such apps on older platforms during the developer
+  preview.
+</p>
+
+<h3 id="perms-vs-intents">Permissions versus intents</h3>
+
+<p>
+  In many cases, you can choose between two ways for your app to perform a
+  task. You can have your app ask for permission to perform the operation
+  itself. Alternatively, you can have the app use an intent to have another app
+  perform the task.
+</p>
+
+<p>
+  For example, suppose your app needs to be able to take pictures with the
+  device camera. Your app can request the
+  <code>android.permission.CAMERA</code> permission, which allows your app to
+  access the camera directly. Your app would then use the camera APIs
+  to control the camera and take a picture. This approach gives your app full
+  control over the photography process, and lets you incorporate the camera UI
+  into your app.
+</p>
+
+<p>
+  However, if you don't need such control, you can just use an {@link
+  android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} intent
+  to request an image. When you start the intent, the user is prompted to
+  choose a camera app (if there isn't already a default camera app), and that
+  app takes the picture. The camera app returns the picture to your app's {@link
+  android.app.Activity#onActivityResult onActivityResult()} method.
+</p>
+
+<p>
+  Similarly, if you need to make a phone call, access the user's contacts, and
+  so on, you can do that by creating an appropriate intent, or you can request
+  the permission and access the appropriate objects directly. There are
+  advantages and disadvantages to each approach.
+</p>
+
+<p>
+  If you use permissions:
+</p>
+
+<ul>
+  <li>Your app has full control over the user experience when you perform the
+  operation. However, such broad control adds to the complexity of your task,
+  since you need to design an appropriate UI.
+  </li>
+
+  <li>The user is prompted to give permission once, the first time you perform
+  the operation. After that, your app can perform the operation without
+  requiring additional interaction from the user. However, if the user doesn't
+  grant the permission (or revokes it later on), your app becomes unable to
+  perform the operation at all.
+  </li>
+</ul>
+
+<p>
+  If you use an intent:
+</p>
+
+<ul>
+  <li>You do not have to design the UI for the operation. The app that handles
+  the intent provides the UI. However, this means you have
+  no control over the user experience. The user could be interacting with an
+  app you've never seen.
+  </li>
+
+  <li>If the user does not have a default app for the operation, the system
+  prompts the user to choose an app. If the user does not designate a default
+  handler, they may have to go
+  through an extra dialog every time they perform the operation.
+  </li>
+</ul>
+
+<h2 id="coding">Coding for Runtime Permissions</h2>
 
 <p>
   If your app targets the new M Developer Preview, you must use the new
@@ -129,44 +311,47 @@ page.title=Android M Preview Runtime Permissions
   have them.
 </p>
 
-<h3>
-  Enabling the New Permissions Model
+<h3 id="enabling">
+  Enabling the new permissions model
 </h3>
 
 <p>
   To enable the new M Developer Preview permissions model, set the app's
-  <a href=
-  "http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#target">
-  targetSdkVersion</a> attribute to "M". Doing this enables all the new
-  permissions features.
+  <code>targetSdkVersion</code> attribute to <code>"MNC"</code>, and
+  <code>compileSdkVersion</code> to <code>"android-MNC"</code>. Doing so
+  enables all the new permissions features.
 </p>
 
-<!-- TODO: Insert manifest snippet -->
+<p>
+  For the preview release, you must set <code>minSdkVersion</code> to
+  <code>"MNC"</code> to compile with the preview SDK.
+</p>
 
-<h3>
-  Designating a Permission for M Only
+<h3 id="m-only-perm">
+  Designating a permission for the M Preview only
 </h3>
 
 <p>
-  You can use the new <code>&lt;uses-permission-sdk-m&gt;</code> element in the
-  app manifest to indicate that a permission is only needed on the M platform.
-  If you declare a permission this way, then whenever the app is installed on
-  an older device, the user is not prompted to grant the permission and the
-  permission is not granted to the app. This allows you to add new permissions
+  You can use the new <code>&lt;uses-permission-sdk-m&gt;</code> element in the app manifest
+  to indicate that a permission is only needed on the M Developer Preview. If
+  you declare a permission this way, then whenever the app is installed on an
+  older device, the system does not prompt the user or grant the
+  permission to the app. By using the <code>&lt;uses-permission-sdk-m&gt;</code>
+  element, you can add new permissions
   to updated versions of your app without forcing users to grant permissions
   when they install the update.
 </p>
 
 <p>
-  If the app is running on a device with the M developer preview,
+  If the app is running on a device with the M Developer Preview,
   <code>&lt;uses-permission-sdk-m&gt;</code> behaves the same as
-  <code>&lt;uses-permission&gt;</code>. The user is not prompted to grant any
-  permissions when the app is installed, and the app requests permissions as
-  they are needed.
+  <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>.
+  The system does not prompt the user to grant any permissions when they install
+  the app, and the app requests permissions as they are needed.
 </p>
 
 <h3 id="prompting">
-  Prompting for Permissions on the M Preview
+  Prompting for permissions
 </h3>
 
 <p>
@@ -178,73 +363,348 @@ page.title=Android M Preview Runtime Permissions
 </p>
 
 <p>
-  An app should follow this workflow to request permissions on an Android M
-  device. The device can check what platform it's running on by checking the
-  value of {@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT}. If
-  the device is running the M Developer Preview, {@link
-  android.os.Build.VERSION#SDK_INT SDK_INT} is 23.
-  <!-- TODO: Confirm this number -->
-</p>
-<ol>
-  <li>When the user tries to do something that requires a permission, the app
-  checks to see if it currently has permission to perform this operation. To do
-  this, the app calls
-   <a href="https://android-preview.googleplex.com/reference/android/content/Context.html#checkSelfPermission(java.lang.String)"><code>Context.CheckSelfPermission(<em>permission_name</em>)</code></a> . The
-  app should do this even if it knows the user has already granted that
-  permission, since the user can revoke an app's permissions at any time. For
-  example, if a user wants to use an app to take a picture, the app calls
-  <a href="https://android-preview.googleplex.com/reference/android/content/Context.html#checkSelfPermission(java.lang.String)"><code>Context.CheckSelfPermission(Manifest.permission.CAMERA)</code></a>.
-  </li>
-
-<!-- TODO: Full list of permissions (or link to that list),
-  and how they break down by functional area]-->
-
-  <li>If the permission is not already granted to the app, the app calls
-  <a href=
-  "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-    <code>requestPermissions()</code></a> to request the
-    appropriate permission or permissions. This method functions
-    asynchronously.
-    <!-- TODO: insert code snippet showing permission check and request -->
-  </li>
-
-  <li>The system presents a dialog box to the user.
-  <!-- TODO: insert screenshot of permissions dialog box -->
-    When the user responds, the system calls <a href=
-    "https://android-preview.googleplex.com/reference/android/app/Activity.html#onRequestPermissionsResult(int,%20java.lang.String[],%20int[])">
-    <code>Activity.onRequestPermissionsResult()</code></a> with the
-    results; your app needs to override that method. The callback is passed the
-    same request code you passed to <a href=
-    "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-    <code>requestPermissions()</code></a>.
-    <!-- TODO: Insert code snippet of callback method -->
-  </li>
-
-  <li>If the user grants a permission, the app is given all permissions
-  in that functional area that are listed in the app manifest.
-  If the request is denied, you should take appropriate action. For
-  example, you might disable any menu actions that depend on this permission.
-  </li>
-</ul>
-
-<p>
-  When the system asks the user to grant a permission, the user has the option
-  of telling the system not to ask for that permission again. In that case,
-  when an app asks for that permission with <a href=
-    "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-    <code>requestPermissions()</code></a>, the
-  system immediately denies the request. For this reason, your app cannot
-  assume that any direct interaction with the user has taken place.
-</p>
-
-<p>
   If your app runs on a device that has SDK 22 or lower, the app uses the old
   permissions model. When the user installs the app, they are prompted to grant
   all the permissions your app requests in its manifest, except for those
   permissions which are labeled with <code>&lt;uses-permission-sdk-m&gt;</code>.
 </p>
 
-<h2 id="">Best Practices</h2>
+<h4 id="check-platform">Check what platform the app is running on</h4>
+
+<p>
+  This permissions model is only supported on devices running the M Developer
+  Preview. Before calling any of these methods, the app should verify
+  what platform it's running on
+  by checking the value of {@link android.os.Build.VERSION#CODENAME
+  Build.VERSION.CODENAME}. If the device is running the M Developer Preview,
+  {@link android.os.Build.VERSION#CODENAME CODENAME} is <code>"MNC"</code>.
+</p>
+
+<h4 id="check-for-permission">Check if the app has the needed permission</h4>
+
+<p>When the user tries to do something that requires a permission, the app
+  checks to see if it currently has permission to perform this operation. To do
+  this, the app calls
+  <code>Context.checkSelfPermission(<i>permission_name</i>)</code>. The app
+  should perform this check even if it knows the user has already granted that
+  permission,
+  since the user can revoke an app's permissions at any time. For example, if a
+  user wants to use an app to take a picture, the app calls
+  <code>Context.checkSelfPermission(Manifest.permission.CAMERA)</code>.</p>
+
+<p class="table-caption" id="permission-groups">
+  <strong>Table 1.</strong> Permissions and permission groups.</p>
+<table>
+  <tr>
+    <th scope="col">Permission Group</th>
+    <th scope="col">Permissions</th>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CALENDAR</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CALENDAR</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.WRITE_CALENDAR</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CAMERA</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.CAMERA</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CONTACTS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_PROFILE</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_PROFILE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.LOCATION</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.ACCESS_FINE_LOCATION</code>
+        </li>
+        <li>
+          <code>android.permission.ACCESS_COARSE_LOCATION</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.MICROPHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.RECORD_AUDIO</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.PHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_PHONE_STATE</code>
+        </li>
+        <li>
+          <code>android.permission.CALL_PHONE</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CALL_LOG</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CALL_LOG</code>
+        </li>
+        <li>
+          <code>com.android.voicemail.permission.ADD_VOICEMAIL</code>
+        </li>
+        <li>
+          <code>android.permission.USE_SIP</code>
+        </li>
+        <li>
+          <code>android.permission.PROCESS_OUTGOING_CALLS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SENSORS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.BODY_SENSORS</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.USE_FINGERPRINT</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SMS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.SEND_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_WAP_PUSH</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_MMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CELL_BROADCASTS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+</table>
+
+<h4 id="request-permissions">Request permissions if necessary</h4>
+
+<p>If the app doesn't already have the permission it needs, the app calls the
+  <code>Activity.requestPermissions(String[], int)</code> method to
+  request the appropriate permission or permissions. The app passes the
+  permission or permissions it wants, and also an integer "request code".
+  This method functions asynchronously: it returns right away, and after
+  the user responds to the dialog box, the system calls the app's callback
+  method with the results, passing the same "request code" that the app passed
+  to <code>requestPermissions()</code>.</p>
+
+  <p>The following code code checks if the app has permission to read the
+    user's contacts, and requests the permission if necessary:</p>
+
+<pre>
+if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+        != PackageManager.PERMISSION_GRANTED) {
+    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+    // app-defined int constant
+
+    return;
+}
+</pre>
+
+<h4 id="handle-response">Handle the permissions request response</h4>
+
+<p>
+  When an app requests permissions, the system presents a dialog box to the
+  user. When the user responds, the system invokes your app's
+  <code>Activity.onRequestPermissionsResult(int, String[], int[])</code>
+  passing it the user response. Your app needs to override that method. The
+  callback is passed the same request code you passed to
+  <code>requestPermissions()</code>. For example, if an app requests
+  <code>READ_CONTACTS</code> access it might have the following callback
+  method:
+</p>
+
+<pre>
+&#64;Override
+public void onRequestPermissionsResult(int requestCode,
+        String permissions[], int[] grantResults) {
+    switch (requestCode) {
+        case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // permission was granted, yay! do the
+                // calendar task you need to do.
+
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+            }
+            return;
+        }
+
+        // other 'switch' lines to check for other
+        // permissions this app might request
+    }
+}
+</pre>
+
+  <p>If the user grants a permission, the system gives the app all permissions
+  that the app manifest lists for that functional area. If the user denies the
+  request, you should take appropriate action. For example, you might disable
+  any menu actions that depend on this permission.
+  </li>
+</p>
+
+<p>
+  When the system asks the user to grant a permission, the user has the option
+  of telling the system not to ask for that permission again. In that case,
+  when an app uses <code>requestPermissions()</code> to ask for that permission,
+  the system immediately denies the request. In this case, the system calls
+  your <code>onRequestPermissionsResult()</code> the same way it would if the
+  user had explicitly rejected your request again. For this reason, your app
+  cannot assume that any direct interaction with the user has taken place.
+</p>
+
+<h2 id="testing">Testing Runtime Permissions</h2>
+
+
+<p>
+  If your app targets the M Developer Preview, you must test that it
+  handles permissions properly. You cannot assume that your app has any
+  particular permissions when it runs. When the app is first launched, it is
+  likely to have no permissions, and the user can revoke or restore permissions
+  at any time.
+</p>
+
+<p>
+  You should test your app to make sure it behaves properly under all
+  permission situations. With the M Preview SDK, we have provided new
+  <a href="{@docRoot}tools/help/adb.html">Android
+  Debug Bridge (adb)</a> commands to enable you to test your app with whatever
+  permissions settings you need to try.
+</p>
+
+<h3>
+  New adb commands and options
+</h3>
+
+<p>
+  The M Preview SDK Platform-tools provides several new commands to let you test
+  how your app handles permissions.
+</p>
+
+<h4>
+  Install with permissions
+</h4>
+
+<p>
+  You can use the <a href="{@docRoot}tools/help/adb.html#move"><code>adb
+  install</code></a> command's new <code>-g</code> option, which installs the
+  app and grants all permissions listed in its manifest:
+</p>
+
+<pre class="no-pretty-print">
+$ adb install -g &lt;path_to_apk&gt;
+</pre>
+
+<h4>
+  Grant and revoke permissions
+</h4>
+
+<p>
+  You can use new ADB <a href="{@docRoot}tools/help/adb.html#pm">package manager
+  (pm)</a> commands to grant and revoke permissions to an installed app.
+  This functionality can be useful for automated testing.
+</p>
+
+<p>
+  To grant a permission, use the package manager's <code>grant</code> command:
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<p>
+  For example, to grant the com.example.myapp package permission to record
+  audio, use this command:
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
+</pre>
+
+<p>
+  To revoke a permission, use the package manager's <code>revoke</code> command:
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<h2 id="best-practices">Best Practices</h2>
 
 <p>
   The new permissions model gives users a smoother experience, and makes it
@@ -253,12 +713,32 @@ page.title=Android M Preview Runtime Permissions
   the new model.
 </p>
 
-<h3>
-  Don't Overwhelm the User
+
+<h3 id="bp-what-you-need">Only ask for permissions you need</h3>
+
+<p>
+  Every time you ask for a permission, you force the user to make a decision.
+  If the user turns down the request, that reduces your app's functionality.
+  You should minimize the number of times you make these requests.
+</p>
+
+<p>
+  For example, quite often your app can get needed functionality by using an
+  <a href="{@docRoot}guide/components/intents-filters.html">intent</a> instead
+  of asking for permissions. If your app needs to take pictures with the
+  phone's camera, your app can use a {@link
+  android.provider.MediaStore#ACTION_IMAGE_CAPTURE
+  MediaStore.ACTION_IMAGE_CAPTURE} intent. When your app executes the intent, the
+  system prompts the user to choose an already-installed camera app to take the
+  picture.
+</p>
+
+<h3 id="bp-dont-overwhelm">
+  Don't overwhelm the user
 </h3>
 
 <p>
-  If you confront the user with a lot of permissions requests at once, you may
+  If you confront the user with a lot of requests for permissions at once, you may
   overwhelm the user and cause them to quit your app. Instead, you should ask
   for permissions as you need them.
 </p>
@@ -266,35 +746,30 @@ page.title=Android M Preview Runtime Permissions
 <p>
   In some cases, one or more permissions might be absolutely essential to your
   app. In that case, it might make sense to ask for all the permissions as soon
-  as the app launches.
-  <!-- TODO: insert screenshot of dialog box asking for several permissions -->
-  For example, if you make a photography app, the app would
-  need access to the device camera. When the user launches the app for the
-  first time, they won't be surprised to be asked to give permission to use the
-  camera. But if the same app also had a feature to share photos with the
+  as the app launches. For example, if you make a photography app, the app
+  would need access to the device camera. When the user launches the app for
+  the first time, they won't be surprised to be asked for permission to use
+  the camera. But if the same app also had a feature to share photos with the
   user's contacts, you probably should <em>not</em> ask for that permission at
   first launch. Instead, wait until the user tries to use the "sharing" feature
   and ask for the permission then.
 </p>
 
 <p>
-  If your app provides a tutorial, it may make sense to request app's essential
+  If your app provides a tutorial, it may make sense to request the app's essential
   permissions at the end of the tutorial sequence.
 </p>
 
-<h3>
-  Explain Why You Need Permissions
+<h3 id="bp-explain">
+  Explain why you need permissions
 </h3>
 
 <p>
-  The permissions screen shown by the system when you call <a href=
-  "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-  <code>requestPermissions()</code></a> says what permission your app wants,
-  but doesn't say why you want it. In some cases, the user may find that
-  puzzling. It's a good idea to explain to the user why your app wants the
-  permissions before you call <a href=
-  "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-  <code>requestPermissions()</code></a>.
+  The permissions dialog shown by the system when you call
+  <code>requestPermissions()</code> says what permission your app wants, but
+  doesn't say why. In some cases, the user may find that puzzling.
+  It's a good idea to explain to the user why your app wants the permissions
+  before calling <code>requestPermissions()</code>.
 </p>
 
 <p>
@@ -303,50 +778,17 @@ page.title=Android M Preview Runtime Permissions
   contain location information, and would be puzzled why their photography app
   wanted to know the location. So in this case, it's a good idea for the app to
   tell the user about this feature <em>before</em> calling
-  <a href=
-  "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-  <code>requestPermissions()</code></a>.
+  <code>requestPermissions()</code>.
 </p>
 
 <p>
-  As noted, one way to do this is to incorporate these requests into an app
-  tutorial. The tutorial can show each of the app's features in turn, and as it
-  does this, it can explain what permissions are needed. For example, the
-  photography app's tutorial demonstrate its "share photos with your contacts"
-  feature, then tell the user that they'll need to give permission for the app
-  to see the user's contacts, and <em>then</em> call <a href=
-  "https://android-preview.googleplex.com/reference/android/app/Activity.html#requestPermissions(java.lang.String[],%20int)">
-  <code>requestPermissions()</code></a>
-  to get that access. Of course, some users will want to skip the tutorial, so
-  you'll still need to check for and request permissions during the app's
-  normal operation.
-</p>
-
-<h3>
-  Opt Out If Necessary
-</h3>
-
-<p>
-  Until you are ready to use the new permissions model, you can opt out simply
-  by setting your app's <a href=
-  "http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#target">
-  targetSdkVersion</a> to 22 or less. If you do this, the system will use the
-  old permissions model. When the user downloads the app, they will be prompted
-  to grant all the permissions listed in the manifest.
-</p>
-
-<p>
-  With the M Developer Preview, users can turn off permissions for <em>any</em>
-  app from the app's Settings page, regardless of what SDK version the app
-  targets. For this reason, it's a good idea to follow the steps described in
-  <a href="#prompting">"Prompting for Permissions on the M Preview"</a> even if
-  your app doesn't fully support the new permissions model.
-</p>
-
-<p class="note">
-  <strong>Note:</strong> If a user turns off permissions for a legacy app, the system
-  silently disables the appropriate functionality. When the app attempts to
-  perform an operation that requires that permission, the operation will not
-  necessarily cause an exception. Instead, it might return an empty data set or
-  otherwise signal an error.
+  One way to do this is to incorporate these requests into an app tutorial. The
+  tutorial can show each of the app's features in turn, and as it does this, it
+  can explain what permissions are needed. For example, the photography app's
+  tutorial can demonstrate its "share photos with your contacts" feature, then
+  tell the user that they need to give permission for the app to see the user's
+  contacts. The app can then call <code>requestPermissions()</code> to ask the
+  user for that access. Of course, not every user is going to follow the
+  tutorial, so you still need to check for and request permissions during the
+  app's normal operation.
 </p>
