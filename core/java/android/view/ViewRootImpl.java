@@ -66,6 +66,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.accessibility.AccessibilityManager.HighTextContrastChangeListener;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
@@ -6354,16 +6355,18 @@ public final class ViewRootImpl implements ViewParent,
      *              {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}
      */
     private void handleWindowContentChangedEvent(AccessibilityEvent event) {
-        // No virtual view focused, nothing to do here.
-        if (mAccessibilityFocusedHost == null || mAccessibilityFocusedVirtualView == null) {
+        final View focusedHost = mAccessibilityFocusedHost;
+        if (focusedHost == null || mAccessibilityFocusedVirtualView == null) {
+            // No virtual view focused, nothing to do here.
             return;
         }
 
-        // If we have a node but no provider, abort.
-        final AccessibilityNodeProvider provider =
-                mAccessibilityFocusedHost.getAccessibilityNodeProvider();
+        final AccessibilityNodeProvider provider = focusedHost.getAccessibilityNodeProvider();
         if (provider == null) {
-            // TODO: Should we clear the focused virtual view?
+            // Error state: virtual view with no provider. Clear focus.
+            mAccessibilityFocusedHost = null;
+            mAccessibilityFocusedVirtualView = null;
+            focusedHost.clearAccessibilityFocusNoCallbacks();
             return;
         }
 
@@ -6410,10 +6413,23 @@ public final class ViewRootImpl implements ViewParent,
         final Rect oldBounds = mTempRect;
         mAccessibilityFocusedVirtualView.getBoundsInScreen(oldBounds);
         mAccessibilityFocusedVirtualView = provider.createAccessibilityNodeInfo(focusedChildId);
-        final Rect newBounds = mAccessibilityFocusedVirtualView.getBoundsInScreen();
-        if (!oldBounds.equals(newBounds)) {
-            oldBounds.union(newBounds);
+        if (mAccessibilityFocusedVirtualView == null) {
+            // Error state: The node no longer exists. Clear focus.
+            mAccessibilityFocusedHost = null;
+            focusedHost.clearAccessibilityFocusNoCallbacks();
+
+            // This will probably fail, but try to keep the provider's internal
+            // state consistent by clearing focus.
+            provider.performAction(focusedChildId,
+                    AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS.getId(), null);
             invalidateRectOnScreen(oldBounds);
+        } else {
+            // The node was refreshed, invalidate bounds if necessary.
+            final Rect newBounds = mAccessibilityFocusedVirtualView.getBoundsInScreen();
+            if (!oldBounds.equals(newBounds)) {
+                oldBounds.union(newBounds);
+                invalidateRectOnScreen(oldBounds);
+            }
         }
     }
 
