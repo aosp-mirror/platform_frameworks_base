@@ -225,17 +225,18 @@ public class DhcpClient extends BaseDhcpStateMachine {
      * {@code CONNECTIVITY_INTERNAL} permission.
      *
      * @param cmdName the name of the command. The intent's action will be
-     *         {@code android.net.dhcp.DhcpClient.<cmdName>}
+     *         {@code android.net.dhcp.DhcpClient.<mIfaceName>.<cmdName>}
      * @param cmd the command to send to the state machine when the PendingIntent is triggered.
      * @return the PendingIntent
      */
     private PendingIntent createStateMachineCommandIntent(final String cmdName, final int cmd) {
-        String action = DhcpClient.class.getName() + "." + cmdName;
+        String action = DhcpClient.class.getName() + "." + mIfaceName + "." + cmdName;
 
-        // TODO: figure out what values to pass to intent.setPackage() and intent.setClass() that
-        // result in the Intent being received by this class and nowhere else, and use them.
         Intent intent = new Intent(action, null)
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        // TODO: The intent's package covers the whole of the system server, so it's pretty generic.
+        // Consider adding some sort of token as well.
+        intent.setPackage(mContext.getPackageName());
         PendingIntent pendingIntent =  PendingIntent.getBroadcast(mContext, cmd, intent, 0);
 
         mContext.registerReceiver(
