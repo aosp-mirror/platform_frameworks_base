@@ -439,13 +439,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
             renderer.translate(0.0f, bitmap->height());
             renderer.scale(1.0f, -1.0f);
 
-            mat4 texTransform(layer->getTexTransform());
-
-            mat4 invert;
-            invert.translate(0.0f, 1.0f);
-            invert.scale(1.0f, -1.0f, 1.0f);
-            layer->getTexTransform().multiply(invert);
-
             if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
             {
@@ -459,7 +452,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
                 if ((error = glGetError()) != GL_NO_ERROR) goto error;
             }
 
-            layer->getTexTransform().load(texTransform);
             status = true;
         }
 
