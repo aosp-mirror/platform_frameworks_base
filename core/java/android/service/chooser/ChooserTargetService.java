@@ -44,7 +44,7 @@ import java.util.List;
  * the {@link android.Manifest.permission#BIND_CHOOSER_TARGET_SERVICE} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
  * <pre>
- *     &lt;service android:name=".ChooserTargetService"
+ *     &lt;service android:name=".MyChooserTargetService"
  *             android:label="&#64;string/service_name"
  *             android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE">
  *         &lt;intent-filter>
@@ -69,7 +69,7 @@ import java.util.List;
  *             &lt;action android:name="android.intent.action.SEND" />
  *         &lt;/intent-filter>
  *         &lt;meta-data android:name="android.service.chooser.chooser_target_service"
- *                 android:value=".ChooserTargetService" />
+ *                 android:value=".MyChooserTargetService" />
  *     &lt;/activity>
  * </pre>
  */
