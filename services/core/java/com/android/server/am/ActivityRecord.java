@@ -72,11 +72,11 @@ import java.util.Objects;
  */
 final class ActivityRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
+    private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_THUMBNAILS = TAG + POSTFIX_THUMBNAILS;
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
-    static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
     final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
     private static final String ATTR_ID = "id";
@@ -1093,7 +1093,7 @@ final class ActivityRecord {
 
     static void activityResumedLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
+        if (DEBUG_SAVED_STATE) Slog.i(TAG_STATES, "Resumed activity; dropping state of: " + r);
         r.icicle = null;
         r.haveState = false;
     }
