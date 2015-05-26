@@ -16,7 +16,6 @@
 
 package android.content.res;
 
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AttrResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
@@ -33,6 +32,7 @@ import com.android.resources.ResourceType;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.Nullable;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
