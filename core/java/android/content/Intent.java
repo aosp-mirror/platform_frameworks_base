@@ -1560,6 +1560,42 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
 
     /**
+     * Broadcast action that requests current permission granted information.  It will respond
+     * to the request by sending a broadcast with action defined by
+     * {@link #EXTRA_GET_PERMISSIONS_RESPONSE_INTENT}. The response will contain
+     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT} with contents described below or a null upon
+     * failure.
+     *
+     * <p>If {@link #EXTRA_PACKAGE_NAME} is included then the number of permissions granted and the
+     * number of permissions requested by that package will be calculated and included as the first
+     * and second elements respectively of an int[] in the response as
+     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}.
+     *
+     * <p>If {@link #EXTRA_PACKAGE_NAME} is not included then the number of apps granted any runtime
+     * permissions and the total number of apps requesting runtime permissions will be the first
+     * and second elements respectively of an int[] in the response as
+     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}.
+     *
+     * @hide
+     */
+    public static final String ACTION_GET_PERMISSIONS_COUNT
+            = "android.intent.action.GET_PERMISSIONS_COUNT";
+
+    /**
+     * Extra included in response to {@link #ACTION_GET_PERMISSIONS_COUNT}.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_COUNT_RESULT
+            = "android.intent.extra.GET_PERMISSIONS_COUNT_RESULT";
+
+    /**
+     * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_COUNT} broadcast.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_RESPONSE_INTENT
+            = "android.intent.extra.GET_PERMISSIONS_RESONSE_INTENT";
+
+    /**
      * Activity action: Launch UI to manage which apps have a given permission.
      * <p>
      * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission access
