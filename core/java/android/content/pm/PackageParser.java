@@ -2047,8 +2047,9 @@ public class PackageParser {
             String tagName = parser.getName();
             if (tagName.equals("key-set")) {
                 if (currentKeySet != null) {
-                    Slog.w(TAG, "Improperly nested 'key-set' tag at "
-                            + parser.getPositionDescription());
+                    outError[0] = "Improperly nested 'key-set' tag at "
+                            + parser.getPositionDescription();
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
                 }
                 final TypedArray sa = res.obtainAttributes(attrs,
@@ -2061,8 +2062,9 @@ public class PackageParser {
                 sa.recycle();
             } else if (tagName.equals("public-key")) {
                 if (currentKeySet == null) {
-                    Slog.w(TAG, "Improperly nested 'public-key' tag at "
-                            + parser.getPositionDescription());
+                    outError[0] = "Improperly nested 'key-set' tag at "
+                            + parser.getPositionDescription();
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
                 }
                 final TypedArray sa = res.obtainAttributes(attrs,
@@ -2072,8 +2074,9 @@ public class PackageParser {
                 final String encodedKey = sa.getNonResourceString(
                             com.android.internal.R.styleable.AndroidManifestPublicKey_value);
                 if (encodedKey == null && publicKeys.get(publicKeyName) == null) {
-                    Slog.w(TAG, "'public-key' " + publicKeyName + " must define a public-key value"
-                            + " on first use at " + parser.getPositionDescription());
+                    outError[0] = "'public-key' " + publicKeyName + " must define a public-key value"
+                            + " on first use at " + parser.getPositionDescription();
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     sa.recycle();
                     return false;
                 } else if (encodedKey != null) {
@@ -2093,9 +2096,10 @@ public class PackageParser {
                         /* public-key first definition, or matches old definition */
                         publicKeys.put(publicKeyName, currentKey);
                     } else {
-                        Slog.w(TAG, "Value of 'public-key' " + publicKeyName
+                        outError[0] = "Value of 'public-key' " + publicKeyName
                                + " conflicts with previously defined value at "
-                               + parser.getPositionDescription());
+                               + parser.getPositionDescription();
+                        mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                         sa.recycle();
                         return false;
                     }
@@ -2112,9 +2116,10 @@ public class PackageParser {
                 sa.recycle();
                 XmlUtils.skipCurrentTag(parser);
             } else if (RIGID_PARSER) {
-                Slog.w(TAG, "Bad element under <key-sets>: " + parser.getName()
+                outError[0] = "Bad element under <key-sets>: " + parser.getName()
                         + " at " + mArchiveSourcePath + " "
-                        + parser.getPositionDescription());
+                        + parser.getPositionDescription();
+                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return false;
             } else {
                 Slog.w(TAG, "Unknown element under <key-sets>: " + parser.getName()
@@ -2126,8 +2131,9 @@ public class PackageParser {
         }
         Set<String> publicKeyNames = publicKeys.keySet();
         if (publicKeyNames.removeAll(definedKeySets.keySet())) {
-            Slog.w(TAG, "Package" + owner.packageName + " AndroidManifext.xml "
-                   + "'key-set' and 'public-key' names must be distinct.");
+            outError[0] = "Package" + owner.packageName + " AndroidManifext.xml "
+                    + "'key-set' and 'public-key' names must be distinct.";
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return false;
         }
         owner.mKeySetMapping = new ArrayMap<String, ArraySet<PublicKey>>();
@@ -2152,8 +2158,9 @@ public class PackageParser {
         if (owner.mKeySetMapping.keySet().containsAll(upgradeKeySets)) {
             owner.mUpgradeKeySets = upgradeKeySets;
         } else {
-            Slog.w(TAG, "Package" + owner.packageName + " AndroidManifext.xml "
-                   + "does not define all 'upgrade-key-set's .");
+            outError[0] ="Package" + owner.packageName + " AndroidManifext.xml "
+                   + "does not define all 'upgrade-key-set's .";
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return false;
         }
         return true;
