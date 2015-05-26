@@ -28387,7 +28387,6 @@ package android.security {
   }
 
   public final deprecated class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
-    method public android.content.Context getContext();
     method public boolean isEncryptionRequired();
   }
 
