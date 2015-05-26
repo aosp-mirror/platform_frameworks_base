@@ -45,7 +45,7 @@ footer.hide=1
   <div class="resource-widget resource-flow-layout col-16"
        data-query="type:blog+tag:ndk"
        data-cardSizes="6x6"
-       data-maxResults="6"
+       data-maxResults="9"
        data-initial-results="3"></div>
 </div></section>
 

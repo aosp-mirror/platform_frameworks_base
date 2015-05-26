@@ -1,16 +1,15 @@
 page.title=E-commerce
 page.image=/images/cards/card-ecommerce_16-9_2x.png
-page.metaImage=With Instant Buy you can sell physical goods and services from your web pages.
-page.tags="monetizing", "physical goods", "payments"
+page.metaImage=Enable easy and secure purchases of physical goods and services, such as clothing or movie tickets, using the Android Pay API.
+page.tags="monetizing", "physical goods", "payments", "androidpay"
 @jd:body
 
 <div class="figure">
-  <img src="{@docRoot}images/gp-ecom-0.png" style="width:300px;">
-  <p class="img-caption">
-    Product Purchase with Android Pay
+  <img src="{@docRoot}images/distribute/android-pay-checkout.png" style="width:300px;">
+  <p class="figure-caption" style="text-align:center">
+    Product purchase with Android Pay
   </p>
 </div>
-
 <p>
   With Android Pay, you've the added flexibility of selling
   physical goods and services, such as clothing or movie tickets, through your
@@ -18,7 +17,6 @@ page.tags="monetizing", "physical goods", "payments"
   "https://developers.google.com/wallet/instant-buy/">the Android Pay API</a>
   <strong>(US Only)</strong>.
 </p>
-
 <p>
   You can use this option where your app is the store-front for retail or
   webtail operations. However, you can also combine it with your <a href=
@@ -26,23 +24,19 @@ page.tags="monetizing", "physical goods", "payments"
   "{@docRoot}distribute/monetize/freemium.html">freemium</a> apps by offering
   related products.
 </p>
-
 <p>
-  Your customers purchase goods and services with any payment
-  method &mdash; credit card, gift card, or Wallet balance. Android Pay
-  helps you minimize user data entry by enabling your payment flow
-  to retrieve information directly from the user’s wallet.
+  Your customers purchase goods and services with credit or debit card payment
+  methods. Android Pay helps you minimize user data entry by enabling your payment flow
+  to retrieve information directly from the user's Google account.
 </p>
-
 <p>
   You also keep your existing payment infrastructure and leverage Android Pay
   to optimize your payment flow &mdash; users can make purchases in as a few as
   two clicks and the flow is simplified with features to retrieve information
-  directly from the user’s wallet and intelligent auto-completion of addresses.
-  To get started, set up a <a href=
-  "{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant
-  Account</a>.
-</p>
+  directly from the user’s wallet and intelligent auto-completion of addresses.</p>
+
+  <p><a href=
+  "https://developers.google.com/android-pay/">Get started with Android Pay</a></p>
 
 <p style="clear:both">
 </p>
