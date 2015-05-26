@@ -248,6 +248,12 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     void shutdownLocked() {
+        // If there is an active session, cancel it to allow it to clean up its window and other
+        // state.
+        if (mActiveSession != null) {
+            mActiveSession.cancel();
+            mActiveSession = null;
+        }
         try {
             if (mService != null) {
                 mService.shutdown();
