@@ -294,6 +294,15 @@ class="en">Support Library</span></a></div>
     </ul>
   </li><!-- end of support library -->
 
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/data-binding/index.html"><span
+class="en">Data Binding Library</span></a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/data-binding/overview.html">Overview</a></li>
+      <li><a href="<?cs var:toroot ?>tools/data-binding/guide.html">Guide</a></li>
+    </ul>
+  </li><!-- end of support library -->
+
 
 <!-- Revision menu-->
 
@@ -326,7 +335,7 @@ class="en">Support Library</span></a></div>
     </div>
   </li>
 
-  <li class="nav-section">
+<!--  <li class="nav-section">
     <div class="nav-section-header">
     <a href="<?cs var:toroot ?>tools/adk/index.html">
       <span class="en">ADK</span></a>
@@ -335,7 +344,7 @@ class="en">Support Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/adk/adk2.html">ADK 2012 Guide</a></li>
       <li><a href="<?cs var:toroot ?>tools/adk/adk.html">ADK 2011 Guide</a></li>
     </ul>
-  </li>
+  </li> -->
 
 
 <!-- Eclipse ADT menu-->
