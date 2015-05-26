@@ -568,6 +568,9 @@
              preference fragment. -->
         <attr name="detailsElementBackground" format="reference" />
 
+        <!-- Drawable that should be used to indicate that an app is waiting for a fingerprint scan. -->
+        <attr name="fingerprintDrawable" format="reference" />
+
         <!-- ============ -->
         <!-- Panel styles -->
         <!-- ============ -->
