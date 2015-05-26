@@ -1,0 +1,177 @@
+page.title=Heap Viewer Walkthrough
+meta.tags="android, performance, profiling, tools, memory, memoryleaks, memoryheap"
+page.tags="android", "performance", "profiling", "tools", "memory", "memoryleaks", "memoryheap"
+page.metaDescription=Report in real-time how many objects of what types and sizes your application is allocating and find memory leaks.
+page.image=tools/performance/thumbnails/tools_heap_viewer.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#WorkingWithHeapViewer">Working with Heap Viewer</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/memory-monitor/index.html">
+    Memory Monitor Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/allocation-tracker/index.html">
+    Allocation Tracker Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/comparison.html">
+    Comparison: Memory Monitor, Heap Viewer, Allocation Tracker</a>
+  <li><a href="{@docRoot}tools/performance/traceview/index.html">
+    Traceview Walkthrough</a></li>
+</ul>
+
+</div>
+
+
+  <p>This walkthrough shows the basic usage and workflow for the Heap Viewer tool. Heap Viewer
+  reports in real-time what <i>types</i> of objects your application has allocated, how many, and
+  their sizes on the heap.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Getting a sense of how your app allocates and frees memory.</li>
+
+    <li>Identifying memory leaks.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device running Android 5.0 or higher with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled.</li>
+
+    <li>Application code. Use your own code, or the <a href=
+    "https://github.com/udacity/Sunshine-Version-2">Sunshine</a> sample app from the <a href=
+    "https://www.udacity.com/course/ud853">Android Fundamentals Udacity course</a>.</li>
+  </ul>
+
+  <h2 id="WorkingWithHeapViewer">Working with Heap Viewer</h2>
+
+  <ul class="no-bullet">
+  <!-- this also hides bullet, by default outside box -->
+  <li><div style="overflow:hidden">
+  <ol class="padded">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/heap-viewer/gettingstarted_image01.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Starting Android Device Monitor.
+      </p>
+    </div>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+
+    <li>Start the Android Device Monitor from Android Studio: <b>Tools -&gt; Android -&gt; Android
+    Device</b> <b>Monitor</b>.
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="4">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/heap-viewer/gettingstarted_image02.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Steps for Using Heap Viewer.
+      </p>
+    </div>
+
+    <li>Make sure your device and application are showing in the <b>Devices</b> tab.</li>
+
+    <li>Click the <b>DDMS</b> button, because the Heap Viewer is one of the DDMS tools.</li>
+
+    <li>Click the <b>Heap</b> tab, which is where your data will appear.</li>
+
+    <li>In the <b>Devices</b> tab, select the app you want to monitor.</li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="8">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/heap-viewer/gettingstarted_image03.png"
+         alt=""
+         width="300px"  />
+      <p class="img-caption">
+        <strong>Figure 3. </strong>Update Heap button.
+      </p>
+    </div>
+
+    <li>To start monitoring, click the Update Heap button, which looks like a green can.</li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="9">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/heap-viewer/gettingstarted_image04.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 4. </strong>Triggering GC (Garbage Collection).
+      </p>
+    </div>
+
+    <li>Note the <em>Heap updates will happen
+      after every GC for this client.</em> message.</li>
+
+    <li>Press the <strong>Cause CG</strong> button to
+      trigger a garbage collection event.
+    </li>
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="11">
+
+   <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/heap-viewer/gettingstarted_image05.png"
+         alt=""
+         width="480px" />
+      <p class="img-caption">
+        <strong>Figure 5. </strong>Example Heap Viewer output.
+      </p>
+    </div>
+
+    <li>Click a data type to see detailed information on its current allocations on the
+      heap.</li>
+
+ </ol>
+</div></li>
+
+  <p class="note"><b>Note:</b> To visualize allocation changes over time, combine
+    several snapshots of the bar graph into an animated gif or video.</p>
+ </ul>

@@ -1654,20 +1654,11 @@ results."
     </ul>
   </li> <!-- end of Background Jobs -->
 
-  <li class="nav-section">
-    <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>training/best-performance.html">
-      <span class="small">Best Practices for</span><br/>
-              Performance
-      </a>
-    </div>
-    <ul>
-
       <li>
         <a href="<?cs var:toroot ?>training/articles/memory.html"
-           description=
-           "How to keep your app's memory footprint small in order to improve performance
-           on a variety of mobile devices."
+          description=
+          "How to keep your app's memory footprint small in order to improve performance
+          on a variety of mobile devices."
           >Managing Your App's Memory</a>
       </li>
 
