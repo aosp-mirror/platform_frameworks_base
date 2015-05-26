@@ -429,6 +429,12 @@ app should play its default content. If playback was paused with
 {@link android.media.session.MediaSession.Callback#onPause onPause()}, your
 app should resume playback.</dd>
 
+<p class="note">
+  <strong>Note:</strong> Google Play requires your app not to play music immediately when it
+  launches. For more information on this and other requirements, see
+<a href="{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a>.
+</p>
+
 <dt>{@link android.media.session.MediaSession.Callback#onPlayFromMediaId
 onPlayFromMediaId()}</dt>
 <dd>Invoked when the user chooses to play a specific item. The method is passed
