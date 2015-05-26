@@ -22,6 +22,8 @@ page.title=Support Library Features
       <li><a href="#v8">v8 Support Library</a></li>
       <li><a href="#v13">v13 Support Library</a></li>
       <li><a href="#v17-leanback">v17 Leanback Library</a></li>
+      <li><a href="#annotations">Annotations Support Library</a></li>
+      <li><a href="#design">Design Support Library</a></li>
     </ol>
 
     <h2>See also</h2>
@@ -131,11 +133,11 @@ page.title=Support Library Features
   API reference.
 </p>
 
-<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v4/} directory after
-  you download the Android Support Libraries. The library does not contain user interface
-  resources. To include it in your application project, follow the instructions for
-  <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
-  resources</a>.</p>
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v4/} directory. The library does not contain user
+interface resources. To include it in your application project, follow the instructions for
+<a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+resources</a>.</p>
 
 <p class="caution"><strong>Caution:</strong> Using dynamic dependencies, especially for higher version
 numbers, can cause unexpected version updates and regression incompatibilities.</p>
@@ -158,10 +160,11 @@ com.android.support:support-v4:21.0.0
 </p>
 
 <p>
-  This library is located in the {@code &lt;sdk&gt;/extras/android/support/multidex/} directory
-  after you download the Android Support Libraries. The library does not contain user interface
-  resources. To include it in your application project, follow the instructions for <a href=
-  "{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+  After you download the Android Support Libraries, this library is located in the
+  {@code &lt;sdk&gt;/extras/android/support/multidex/} directory. The library does not contain
+  user interface resources. To include it in your application project, follow the instructions
+  for
+  <a href= "{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
   resources</a>.
 </p>
 
@@ -218,11 +221,11 @@ com.android.support:multidex:1.0.0
   </li>
 </ul>
 
-<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v7/appcompat/}
-  directory after you download the Android Support Libraries. The library contains user
-  interface resources. To include it in your application project, follow the instructions for
-  <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries with
-  resources</a>.</p>
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v7/appcompat/} directory. The library contains user
+interface resources. To include it in your application project, follow the instructions for
+<a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries with
+resources</a>.</p>
 
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
@@ -239,9 +242,8 @@ widget, which lets you show information inside cards that have a consistent look
 on any app. These cards are useful for material design
 implementations, and are used extensively in layouts for TV apps.</p>
 
-<p>This library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/cardview/} directory after you
-download the Android Support Libraries. The library contains user interface
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v7/cardview/} directory. The library contains user interface
 resources. To include it in your application project, follow the instructions
 for <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding
 libraries with resources</a>.</p>
@@ -256,13 +258,14 @@ com.android.support:cardview-v7:21.0.0
 
 <h3 id="v7-gridlayout">v7 gridlayout library</h3>
 
-<p>This library adds support for the {@link android.support.v7.widget.GridLayout} class, which
-  allows you to arrange user interface elements using a grid of rectangular cells.
-  For detailed information about the v7 gridlayout library APIs, see the
-  {@link android.support.v7.widget android.support.v7.widget} package in the API reference.</p>
+<p>After you download the Android Support Libraries, this library adds support for the
+{@link android.support.v7.widget.GridLayout} class, which
+allows you to arrange user interface elements using a grid of rectangular cells.
+For detailed information about the v7 gridlayout library APIs, see the
+{@link android.support.v7.widget android.support.v7.widget} package in the API reference.</p>
 
 <p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v7/gridlayout/}
-  directory after you download the Android Support Libraries. The library contains user
+  directory . The library contains user
   interface resources. To include it in your application project, follow the instructions for
   <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries with
   resources</a>.</p>
@@ -323,12 +326,11 @@ prominent colors from an image. For example, a music app could use a
 from an album cover, and use those colors to build a color-coordinated song
 title card.</p>
 
-<p>This library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/palette/} directory after
-  you download the Android Support Libraries. The library does not contain user interface
-  resources. To include it in your application project, follow the instructions for
-  <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
-  resources</a>.</p>
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v7/palette/} directory. The library does not contain
+user interface resources. To include it in your application project, follow the instructions for
+<a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+resources</a>.</p>
 
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
@@ -346,10 +348,9 @@ class. This class provides support for the
 widget</a>, a view for efficiently displaying large data sets by providing a
 limited window of data items.</p>
 
-<p>This library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/recyclerview/} directory after you
-download the Android Support Libraries. The library contains user interface
-resources. To include it in your application project, follow the instructions
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v7/recyclerview/} directory. The library contains
+user interface resources. To include it in your application project, follow the instructions
 for <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding
 libraries with resources</a>.</p>
 
@@ -363,6 +364,12 @@ com.android.support:recyclerview-v7:21.0.0
 
 <h2 id="v8">v8 Support Library</h2>
 
+<p>This library is designed to be used with Android 2.2 (API level 8) and higher.
+  This library provides specific feature sets and can be included in your application
+  independently from other libraries.</p>
+
+<h3 id="v8-renderscript">v8 renderscript library</h3>
+
 <p>This library is designed to be used with Android (API level 8) and higher. It adds support for
   the <a href="{@docRoot}guide/topics/renderscript/compute.html">RenderScript</a> computation
   framework. These APIs are included in the {@link android.support.v8.renderscript} package. You
@@ -374,8 +381,19 @@ com.android.support:recyclerview-v7:21.0.0
 
 <p class="note">
   <strong>Note:</strong> Use of RenderScript with the support library is supported with Android
-  Studio and Gradle-based builds, as well as the Eclipse plugin and Ant build tools.
+  Studio and Gradle-based builds, as well as the Eclipse plugin and Ant build tools. The
+  renderscript library is located in the <code>build-tools/$VERSION/renderscript/</code> folder. 
 </p>
+
+<p>The following example shows the Gradle build script properties for this library:</p>
+
+<pre>
+defaultConfig {
+    renderscriptTargetApi 18
+    renderscriptSupportModeEnabled true
+}
+</pre>
+
 
 
 <h2 id="v13">v13 Support Library</h2>
@@ -389,11 +407,11 @@ com.android.support:recyclerview-v7:21.0.0
   android.support.v13} package in the API reference.
 </p>
 
-<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v13/} directory after
-  you download the Android Support Libraries. The library does not contain user interface
-  resources. To include it in your application project, follow the instructions for
-  <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
-  resources</a>.</p>
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v13/} directory. The library does not contain user
+interface resources. To include it in your application project, follow the instructions for
+<a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+resources</a>.</p>
 
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
@@ -429,9 +447,8 @@ com.android.support:support-v13:18.0.0
     into a {@link android.support.v17.leanback.app.RowsFragment}.</li>
 </ul>
 
-<p>This library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v17/leanback} directory after
-you download the Android Support Libraries. For more information
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v17/leanback} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -442,5 +459,50 @@ with resources</a>. </p>
 com.android.support:leanback-v17:21.0.0
 </pre>
 
+
+
+<h2 id="annotations">Annotations Support Library</h2>
+
+<p>The <a href="{@docRoot}reference/android/support/annotation/package-summary.html">Annotation</a>
+package provides APIs to support adding annotation metadata to your apps. </p>
+
+<p></p>
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/annotations} directory. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
+with resources</a>. </p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:support-annotations:22.0.0
+</pre>
+
+
+
+<h2 id="design">Design Support Library</h2>
+
+<p>The
+<a href="{@docRoot}reference/android/support/design/package-summary.html">Design</a> package
+provides APIs to support adding material design components and patterns to your apps. </p>
+
+<p>The Design Support library adds support for various material design components and patterns for
+app developers to build upon, such as navigation drawers, floating action buttons (<i>FAB</i>),
+snackbars, and <a href="{@docRoot}design/building-blocks/tabs.html">tabs</a>.  </p>
+
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/design} directory. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
+with resources</a>. </p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:support-design:22.0.0
+</pre>
 
 
