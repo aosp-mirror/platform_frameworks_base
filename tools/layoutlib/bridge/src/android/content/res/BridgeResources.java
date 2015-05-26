@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import com.android.SdkConstants;
+import com.android.ide.common.rendering.api.ArrayResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceValue;
@@ -32,6 +34,8 @@ import com.android.util.Pair;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -42,6 +46,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  *
@@ -241,6 +246,145 @@ public final class BridgeResources extends Resources {
     }
 
     @Override
+    public CharSequence[] getTextArray(int id) throws NotFoundException {
+        ResourceValue resValue = getArrayResourceValue(id);
+        if (resValue == null) {
+            // Error already logged by getArrayResourceValue.
+            return new CharSequence[0];
+        } else if (!(resValue instanceof ArrayResourceValue)) {
+            return new CharSequence[]{
+                    resolveReference(resValue.getValue(), resValue.isFramework())};
+        }
+        ArrayResourceValue arv = ((ArrayResourceValue) resValue);
+        return fillValues(arv, new CharSequence[arv.getElementCount()]);
+    }
+
+    @Override
+    public String[] getStringArray(int id) throws NotFoundException {
+        ResourceValue resValue = getArrayResourceValue(id);
+        if (resValue == null) {
+            // Error already logged by getArrayResourceValue.
+            return new String[0];
+        } else if (!(resValue instanceof ArrayResourceValue)) {
+            return new String[]{
+                    resolveReference(resValue.getValue(), resValue.isFramework())};
+        }
+        ArrayResourceValue arv = ((ArrayResourceValue) resValue);
+        return fillValues(arv, new String[arv.getElementCount()]);
+    }
+
+    /**
+     * Resolve each element in resValue and copy them to {@code values}. The values copied are
+     * always Strings. The ideal signature for the method should be &lt;T super String&gt;, but java
+     * generics don't support it.
+     */
+    private <T extends CharSequence> T[] fillValues(ArrayResourceValue resValue, T[] values) {
+        int i = 0;
+        for (Iterator<String> iterator = resValue.iterator(); iterator.hasNext(); i++) {
+            @SuppressWarnings("unchecked")
+            T s = (T) resolveReference(iterator.next(), resValue.isFramework());
+            values[i] = s;
+        }
+        return values;
+    }
+
+    @Override
+    public int[] getIntArray(int id) throws NotFoundException {
+        ResourceValue rv = getArrayResourceValue(id);
+        if (rv == null) {
+            // Error already logged by getArrayResourceValue.
+            return new int[0];
+        } else if (!(rv instanceof ArrayResourceValue)) {
+            // This is an older IDE that can only give us the first element of the array.
+            String firstValue = resolveReference(rv.getValue(), rv.isFramework());
+            try {
+                return new int[]{getInt(firstValue)};
+            } catch (NumberFormatException e) {
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
+                        "Integer resource array contains non-integer value: " +
+                                firstValue, null);
+                return new int[1];
+            }
+        }
+        ArrayResourceValue resValue = ((ArrayResourceValue) rv);
+        int[] values = new int[resValue.getElementCount()];
+        int i = 0;
+        for (Iterator<String> iterator = resValue.iterator(); iterator.hasNext(); i++) {
+            String element = resolveReference(iterator.next(), resValue.isFramework());
+            try {
+                values[i] = getInt(element);
+            } catch (NumberFormatException e) {
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
+                        "Integer resource array contains non-integer value: " + element, null);
+            }
+        }
+        return values;
+    }
+
+    /**
+     * Try to find the ArrayResourceValue for the given id.
+     * <p/>
+     * If the ResourceValue found is not of type {@link ResourceType#ARRAY}, the method logs an
+     * error and return null. However, if the ResourceValue found has type {@code
+     * ResourceType.ARRAY}, but the value is not an instance of {@link ArrayResourceValue}, the
+     * method returns the ResourceValue. This happens on older versions of the IDE, which did not
+     * parse the array resources properly.
+     * <p/>
+     * @throws NotFoundException if no resource if found
+     */
+    @Nullable
+    private ResourceValue getArrayResourceValue(int id) throws NotFoundException {
+        Pair<String, ResourceValue> v = getResourceValue(id, mPlatformResourceFlag);
+
+        if (v != null) {
+            ResourceValue resValue = v.getSecond();
+
+            assert resValue != null;
+            if (resValue != null) {
+                final ResourceType type = resValue.getResourceType();
+                if (type != ResourceType.ARRAY) {
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
+                            String.format(
+                                    "Resource with id 0x%1$X is not an array resource, but %2$s",
+                                    id, type == null ? "null" : type.getDisplayName()),
+                            null);
+                    return null;
+                }
+                if (!(resValue instanceof ArrayResourceValue)) {
+                    Bridge.getLog().warning(LayoutLog.TAG_UNSUPPORTED,
+                            "Obtaining resource arrays via getTextArray, getStringArray or getIntArray is not fully supported in this version of the IDE.",
+                            null);
+                }
+                return resValue;
+            }
+        }
+
+        // id was not found or not resolved. Throw a NotFoundException.
+        throwException(id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+    @NonNull
+    private String resolveReference(@NonNull String ref, boolean forceFrameworkOnly) {
+        if (ref.startsWith(SdkConstants.PREFIX_RESOURCE_REF) || ref.startsWith
+                (SdkConstants.PREFIX_THEME_REF)) {
+            ResourceValue rv =
+                    mContext.getRenderResources().findResValue(ref, forceFrameworkOnly);
+            rv = mContext.getRenderResources().resolveResValue(rv);
+            if (rv != null) {
+                return rv.getValue();
+            } else {
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
+                        "Unable to resolve resource " + ref, null);
+            }
+        }
+        // Not a reference.
+        return ref;
+    }
+
+    @Override
     public XmlResourceParser getLayout(int id) throws NotFoundException {
         Pair<String, ResourceValue> v = getResourceValue(id, mPlatformResourceFlag);
 
@@ -430,13 +574,8 @@ public final class BridgeResources extends Resources {
             if (resValue != null) {
                 String v = resValue.getValue();
                 if (v != null) {
-                    int radix = 10;
-                    if (v.startsWith("0x")) {
-                        v = v.substring(2);
-                        radix = 16;
-                    }
                     try {
-                        return Integer.parseInt(v, radix);
+                        return getInt(v);
                     } catch (NumberFormatException e) {
                         // return exception below
                     }
@@ -609,7 +748,6 @@ public final class BridgeResources extends Resources {
         }
     }
 
-
     @Override
     public InputStream openRawResource(int id) throws NotFoundException {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
@@ -690,7 +828,7 @@ public final class BridgeResources extends Resources {
             resourceInfo = mLayoutlibCallback.resolveResourceId(id);
         }
 
-        String message = null;
+        String message;
         if (resourceInfo != null) {
             message = String.format(
                     "Could not find %1$s resource matching value 0x%2$X (resolved name: %3$s) in current configuration.",
@@ -701,5 +839,16 @@ public final class BridgeResources extends Resources {
         }
 
         throw new NotFoundException(message);
+    }
+
+    private int getInt(String v) throws NumberFormatException {
+        int radix = 10;
+        if (v.startsWith("0x")) {
+            v = v.substring(2);
+            radix = 16;
+        } else if (v.startsWith("0")) {
+            radix = 8;
+        }
+        return Integer.parseInt(v, radix);
     }
 }

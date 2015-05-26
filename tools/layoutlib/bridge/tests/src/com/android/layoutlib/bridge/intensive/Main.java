@@ -296,6 +296,11 @@ public class Main {
         renderAndVerify("allwidgets.xml", "allwidgets.png");
     }
 
+    @Test
+    public void testArrayCheck() throws ClassNotFoundException {
+        renderAndVerify("array_check.xml", "array_check.png");
+    }
+
     @AfterClass
     public static void tearDown() {
         sLayoutLibLog = null;
@@ -347,7 +352,7 @@ public class Main {
         ResourceResolver resourceResolver =
                 ResourceResolver.create(sProjectResources.getConfiguredResources(config),
                         sFrameworkRepo.getConfiguredResources(config),
-                        "Theme.Material.Light.DarkActionBar", false);
+                        "AppTheme", true);
 
         return new SessionParams(
                 layoutParser,
