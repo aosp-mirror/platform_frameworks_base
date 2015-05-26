@@ -272,8 +272,9 @@ page.image=/images/cards/android-auto_2x.png
                    />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/umano.png"
-                   width="160" height="160" class="img-logo" />
+              <img src="{@docRoot}auto/images/logos/apps/skype.png"
+                   width="160" height="70" class="img-logo" style="margin-top:40px"
+                   />
             </div>
             <div class="col-4">
               <img src="/auto/images/logos/apps/spotify.png"
@@ -293,14 +294,13 @@ page.image=/images/cards/android-auto_2x.png
                    />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/skype.png"
-                   width="160" height="70" class="img-logo" style="margin-top:40px; margin-left:160px"
-                   />
-            </div>
-            <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/textme.png"
                    width="80" height="80" class="img-logo" style="margin-top:30px;margin-left:200px"
                    />
+            </div>
+            <div class="col-4">
+              <img src="{@docRoot}auto/images/logos/apps/whatsapp.png"
+                   width="120" height="120" class="img-logo" style="margin-top:10px;margin-left:180px" />
             </div>
           </div>
 
