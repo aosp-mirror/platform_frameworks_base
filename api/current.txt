@@ -567,6 +567,7 @@ package android {
     field public static final int fillViewport = 16843130; // 0x101017a
     field public static final int filter = 16843035; // 0x101011b
     field public static final int filterTouchesWhenObscured = 16843460; // 0x10102c4
+    field public static final int fingerprintDrawable = 16844025; // 0x10104f9
     field public static final int finishOnCloseSystemDialogs = 16843431; // 0x10102a7
     field public static final int finishOnTaskLaunch = 16842772; // 0x1010014
     field public static final int firstDayOfWeek = 16843581; // 0x101033d
