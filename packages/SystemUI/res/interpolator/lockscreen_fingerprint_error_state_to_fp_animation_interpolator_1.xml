@@ -14,13 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<set
-    xmlns:android="http://schemas.android.com/apk/res/android" >
-    <objectAnimator
-        android:duration="150"
-        android:propertyName="trimPathStart"
-        android:valueFrom="0.0"
-        android:valueTo="1.0"
-        android:valueType="floatType"
-        android:interpolator="@android:interpolator/linear" />
-</set>
+<pathInterpolator
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:pathData="M 0.0,0.0 c 0.4,0.0 0.83333333333,1.0 1.0,1.0" />
