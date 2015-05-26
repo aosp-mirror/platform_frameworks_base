@@ -1,0 +1,51 @@
+page.title=Smarter App Invites
+page.metaDescription=Tap into your existing user base to increase downloads and increase conversions.
+page.tags="google", "identity", "signin"
+page.image=distribute/images/advertising.jpg
+
+@jd:body
+
+<p>By combining the power of word-of-mouth with optimized discovery, App Invites helps drive your app installs. </p>
+
+<p>Personal recommendations can be one of the strongest motivators for a user installing your app. With this in mind, App Invites helps you organically find valuable users to download and use your app. With intelligent friend recommendations, smart invite delivery, and the ability to add offers or incentives, new users will get immediate access to your app and can be deep linked to a personalized onboarding flow.</p>
+
+<p><a href="https://developers.google.com/app-invites/">Get started with App Invites</a></p>
+
+<div class="wrap">
+  <div class="cols" style="margin:1em auto;">
+    <div class="col-1of2">
+      <div style="width:300px;">
+        <img src="{@docRoot}images/distribute/app_invites_1.png" style="width:300px">
+        <p class="figure-caption" style="text-align:center">You can create special offers that your user can deliver through a App Invite, to make installing your app more appealing.</p>
+      </div>
+    </div>
+    <div class="col-1of2">
+       <div style="width:300px;">
+         <img src="{@docRoot}images/distribute/app_invites_2.png" style="width:300px">
+         <p class="figure-caption" style="text-align:center">App Invites presents your user with a list of suggested contacts most likely to take advantage of any recommendation and determines the best delivery channel (notification, SMS, or email).</p>
+       </div>
+    </div>
+  </div>
+</div>
+
+
+<h2>Tips</h2>
+
+<ul>
+  <li>Invites can include graphics or videos to make them more appealing to recipients.</li>
+  <li>You can personalise the invite flow by deep linking to app content and in-app purchases,
+  so the user is taken straight to checkout. Use Google Sign-In and Wallet to make any order
+  friction free.</li>
+</ul>
+
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/appinvites"
+  data-sortorder="-timestamp"
+  data-cardsizes="6x3"
+  data-maxresults="6">
+</div>
+
+

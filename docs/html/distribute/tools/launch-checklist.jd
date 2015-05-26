@@ -445,7 +445,7 @@ data-maxresults="6">
 
 <div class="headerLine">
   <h2 id="consider-billing">
-    9. Consider using In-app Billing
+    9. Consider using In-app Billing or Android Pay
   </h2>
 
 
@@ -460,12 +460,15 @@ data-maxresults="6">
   subscriptions from inside your app. This can help you to monetize the app
   over its installed lifetime.
 </p>
-
+<p>
+  Android Pay enables simple and secure purchases of physical goods and services
+  in your app, such as clothing, food delivery or movie tickets
+</p>
 <p>
   If your are looking for more ways to monetize your app and build engagement,
-  you should consider In-app Billing or Instant Buy. These services have become
-  very popular with both users and developers. To use In-app Billing or Instant
-  Buy, you need to make changes to your app binary, so you will need to
+  you should consider In-app Billing or Android Pay. These services have become
+  very popular with both users and developers. To use In-app Billing or Android
+  Pay, you need to make changes to your app binary, so you will need to
   complete and test your implementation before creating your release-ready APK.
 </p>
 
