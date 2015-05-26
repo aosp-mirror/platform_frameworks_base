@@ -1,0 +1,89 @@
+page.title=Device Setup for Hierarchy Viewer
+meta.tags="android, performance, profiling, tools, rendering, hierarchyviewer"
+page.tags="android", "performance", "profiling", "tools", "rendering", "hierarchyviewer"
+page.metaDescription=Set up your mobile device to work with Hierarchy Viewer.
+page.image=tools/performance/thumbnails/tools_hierarchy_viewer.png
+page.article=true
+
+@jd:body
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/index.html">
+    Hierarchy Viewer Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/profiling.html">
+    Profiling with Hierarchy Viewer</a></li>
+</ul>
+
+</div>
+
+    <p>To run Hierarchy Viewer, you must enable Developer Options on your mobile device and perform
+      some setup on your computer.</p>
+
+    <h2>Configuring Devices</h2>
+
+    <ol>
+      <li><p>Enable <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    on your mobile device.</p></li>
+
+    <li>Depending on the type of device you have, do one of the following:
+      <ul>
+        <li>If you have a locked device running Android 4.0 or lower, follow the instructions
+          for <a href=
+               "https://github.com/romainguy/ViewServer">installing and configuring ViewServer</a>.
+        </li>
+        <li>If you have an unlocked device running Android 4.0 or lower,
+          no further configuration is needed.</li>
+        <li>If you have a device running Android 4.1 or higher, you must set an environment
+          variable on your development machine. For more information,
+          see <a href="#hvproto-variable">Setting the ANDROID_HVPROTO variable</a>
+      </ul>
+    </li>
+    </ol>
+
+
+    <h2 id="hvproto-variable">Setting the ANDROID_HVPROTO variable</h2>
+
+    <h3>Windows</h3>
+
+    <ol>
+      <li>Click <b>My Computer &gt; Property &gt; Advanced &gt; Environment Variables.</b></li>
+
+      <li>Click <b>New.</b></li>
+
+      <li>In variables name put: <code>ANDROID_HVPROTO</code></li>
+
+      <li>In variable value put: <code>ddm</code></li>
+
+      <li>Click <b>OK</b><./li>
+    </ol>
+
+    <h3>Mac</h3>
+
+    <ol>
+      <li>Edit <code>~/.bash_profile</code></li>
+
+      <li>Add:
+        <br><code>#Hierarchy Viewer Variable
+        <br>export ANDROID_HVPROTO=ddm</code>
+      </li>
+
+      <li><code>source ~/.bash_profile</code></li>
+    </ol>
+
+    <h3>Linux</h3>
+
+    <ol>
+      <li>Edit <code>~/.bash_profile</code></li>
+
+      <li>Add:
+
+        <br><code>#Hierarchy Viewer Variable
+        <br>export ANDROID_HVPROTO=ddm</code>
+      </li>
+
+    <li><code>source ~/.bash_profile</code></li>
+  </ol>

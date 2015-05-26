@@ -194,10 +194,70 @@ class="en">Tools Help</span></a></div>
       </ul>
   </li><!-- end of build system -->
 
+<!-- Performance Tools menu-->
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>tools/performance/index.html">Peformance Tools</a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/performance/debug-gpu-overdraw/index.html">
+        Overdraw Debugger</a>
+      </li>
+      <li><a href="<?cs var:toroot ?>tools/performance/profile-gpu-rendering/index.html">
+        Rendering Profiler</a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/performance/hierarchy-viewer/index.html">
+          Hierarchy Viewer</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/performance/hierarchy-viewer/setup.html"><span
+            class="en">Setup</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/performance/hierarchy-viewer/profiling.html"><span
+            class="en">Profiling</span></a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/performance/comparison.html">
+          Memory Profilers</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/performance/memory-monitor/index.html"><span
+            class="en">Memory Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/performance/heap-viewer/index.html"><span
+            class="en">Heap Viewer</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/performance/allocation-tracker/index.html"><span
+            class="en">Allocation Tracker</span></a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>tools/performance/traceview/index.html">
+        Traceview</a>
+      </li>
+      <li><a href="<?cs var:toroot ?>tools/performance/systrace/index.html">
+        Systrace</a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/performance/batterystats-battery-historian/index.html">
+          Battery Profilers</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/performance/batterystats-battery-historian/charts.html"><span
+            class="en">Historian Charts</span></a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li><!-- End Performance Tools menu-->
+
   <!-- Testing Tools menu-->
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/testing-tools.html""><span class="en">Testing Tools</span></a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/testing-tools.html"><span class="en">Testing Tools</span></a></div>
     <ul>
       <li class="nav-section">
          <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing-support-library/index.html"><span

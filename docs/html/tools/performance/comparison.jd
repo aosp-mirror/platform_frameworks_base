@@ -1,0 +1,133 @@
+page.title=Memory Profilers
+meta.tags="android, performance, profiling, tools, memory, memoryleaks, garbagecollection"
+page.tags="android", "performance", "profiling", "tools", "memory", "memoryleaks", "garbagecollection"
+page.metaDescription=Heap Viewer, Memory Monitor, and Allocation Tracker are complementary tools that visualize the memory your app uses.
+page.image=tools/performance/thumbnails/tools_memory_monitor.png
+page.article=true
+
+@jd:body
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#MemoryMonitor">Memory Monitor</a></li>
+  <li><a href="#HeapViewer">Heap Viewer</a></li>
+  <li><a href="#AllocationTracker">Allocation Tracker</a></li>
+
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/memory-monitor/index.html">
+    Memory Monitor Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/heap-viewer/index.html">
+    Heap Viewer Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/allocation-tracker/index.html">
+    Allocation Tracker Walkthrough</a></li>
+</ul>
+
+</div>
+
+  <p>Heap Viewer, Memory Monitor, and Allocation Tracker are complementary tools that visualize the
+  memory your app uses.</p>
+
+  <ol>
+    <li>Use the
+    <a href="{@docRoot}tools/performance/memory-monitor/index.html">
+    Memory Monitor Tool</a> to find out whether undesirable garbage collection (GC) event patterns might
+    be causing your performance problems.</li>
+
+    <li>Run
+    <a href="{@docRoot}tools/performance/heap-viewer/index.html">
+    Heap Viewer</a> to identify object types that get or stay allocated
+    unexpectedely or unecessarily.</li>
+
+    <li>Use
+    <a href="{@docRoot}tools/performance/allocation-tracker/index.html">
+    Allocation Tracker</a> to identify where in your code the problem might be.</li>
+  </ol>
+
+  <h2 id="MemoryMonitor">Memory Monitor</h2>
+
+<div>
+  <div class="figure" style="">
+    <img src="{@docRoot}images/tools/performance/compare_MemoryMonitor.png"
+         alt=""
+         height="" />
+    <p class="img-caption">
+      <strong>Figure 1. </strong>Memory Monitor.
+    </p>
+  </div>
+
+  <ul>
+    <li>Shows available and used memory as they both change over time <i>for your app</i> in a
+    graph, with dips indicating Garbage Collection (GC) events.</li>
+
+    <li>Provides a quick way to test whether app slowness might be related
+    to excessive GC events.</li>
+
+    <li>Provides a quick way to see whether app crashes might be related
+    to running out of memory.</li>
+
+    <li>Runs live on your application and updates about once a second.</li>
+
+    <li>Helps quickly identify the potential of memory leaks.</li>
+
+    <li>Helps identify GC patterns for your application and determine whether
+      they are healthy and what you expect.</li>
+
+    <li>Is easy to use, and it is easy to interpret what you see.</li>
+
+    <li>However, Memory Monitor does not tell you which objects are the cause
+      of your problems, or where in your code it might be.</li>
+  </ul>
+
+    <h2 id="HeapViewer">Heap Viewer</h2>
+
+  <div class="figure" style="">
+    <img src="{@docRoot}images/tools/performance/compare_HeapViewer.png"
+         alt=""
+         height="" />
+    <p class="img-caption">
+      <strong>Figure 2. </strong>Heap Viewer.
+    </p>
+  </div>
+
+  <ul>
+    <li>Shows snapshots of a number of objects allocated by type.</li>
+
+    <li>Samples data every time a garbage collection event occurs
+      naturally or triggered by you.</li>
+
+    <li>Helps identify which object types might be involved in memory leaks.</li>
+
+    <li>However, you have to look for changes over time yourself by tracking what's
+    happening in the graph.</li>
+    <br><br><br><br>
+  </ul>
+
+    <h2 id="AllocationTracker">Allocation Tracker</h2>
+
+  <div class="figure" style="">
+    <img src="{@docRoot}images/tools/performance/compare_AllocationTracker.png"
+         alt=""ge
+         height="" />
+    <p class="img-caption">
+      <strong>Figure 3. </strong>Allocation Tracker.
+    </p>
+  </div>
+
+  <ul>
+    <li>Shows when and where your code allocates object types, their size, allocating thread, and
+    stack traces.</li>
+
+    <li>Helps recognize memory churn through recurring allocation/deallocation patterns.</li>
+
+    <li>Can be used in combination with Heap Viewer to track down memory leaks. For example, if you
+    see a bitmap object resident on the heap, you can find its allocation location with Allocation
+    Tracker.</li>
+
+    <li>However, it takes time and experience to learn to interpret the output from this tool.</li>
+
+  </ul>
