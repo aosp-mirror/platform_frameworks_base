@@ -17,14 +17,14 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/monetize/ecommerce.html">
-          <span class="en">E-commerce</span>
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/monetize/ads.html">
+          <span class="en">AdMob Ads</span>
         </a>
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/monetize/ads.html">
-          <span class="en">AdMob Ads</span>
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/monetize/ecommerce.html">
+          <span class="en">E-commerce</span>
         </a>
     </div>
   </li>

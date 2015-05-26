@@ -12,10 +12,20 @@ nonavpage=true
   process of monitoring feedback and making improvement after launch.
 </p>
 
+<h2 id="guidelines">Quality Guidelines</h2>
+
 <div class="resource-widget resource-flow-layout landing col-16"
-  data-query="collection:distribute/essentials"
+  data-query="collection:distribute/essentials/guidelines"
   data-cardSizes="6x6"
-  data-maxResults="6">
+  data-maxResults="9">
+</div>
+
+<h2 id="tools">Tools &amp; Resources</h2>
+
+<div class="resource-widget resource-flow-layout landing col-16"
+  data-query="collection:distribute/essentials/tools"
+  data-cardSizes="6x6"
+  data-maxResults="9">
 </div>
 
 <!-- <h2>Related resources</h2>

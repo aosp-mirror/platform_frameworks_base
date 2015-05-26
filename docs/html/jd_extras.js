@@ -443,7 +443,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": [],
     "tags": [],
-    "image":"images/play_dev.jpg",
+    "image":"images/cards/google-play_2x.png",
     "type":"google"
   },
   {
@@ -1596,6 +1596,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
+    "url": "http://admob.blogspot.com/",
+    "timestamp": null,
+    "image": "images/cards/analytics-mobile_2x.jpg",
+    "title": "Inside Admob",
+    "summary": "Google’s official blog for news, tips, and information on the AdMob developer platform.",
+    "keywords": ["ads, analytics, monetize"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
     "url": "https://support.google.com/admob/answer/3111064",
     "timestamp": null,
     "image": "distribute/images/advertising.jpg",
@@ -2518,6 +2531,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "distribute",
     "titleFriendly": ""
   },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/app-invites/",
+    "timestamp": 1383243492000,
+    "image": "images/cards/google-search_2x.png",
+    "title": "Set up App Invites",
+    "summary": "Bring new users to your apps with personal recommendations, incentives, and offers.",
+    "keywords": ["invites", "appinvites", "engagement", "getusers"],
+    "type": "guide",
+    "titleFriendly": ""
+  },
 
   {
     "lang": "en",
@@ -3231,21 +3257,25 @@ var CAROUSEL_OVERRIDE = {
     "title": "Designed for Families",
     "summary": "Introducing a new Google Play section to promote family friendly apps. Your apps in the program can benefit from enhanced discoverability in addition to maintaining their existing categories, rankings, and reviews elsewhere on the Google Play store."
   },
-  "https://www.youtube.com/watch?v=Pd49vTkvu0U": {
+  "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
+    "url":"http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-jelly-button.jpg",
     "title": "How Jelly Button Games are growing globally through data",
-    "summary": "To really understand their users, Jelly Button Games analyses over 3 billion events each month using Google Analytics and Google BigQuery."
+    "summary": "To really understand their users, Jelly Button Games analyzes over 3 billion events each month using Google Analytics and Google BigQuery."
   },
-  "http://www.youtube.com/watch?v=700gYRkhkLM%26list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "http://www.youtube.com/watch?v=700gYRkhkLM": {
+    "url":"http://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-outfit7.jpg",
     "title": "Outfit7 — Building an entertainment company with Google",
     "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories...."
   },
-  "http://www.youtube.com/watch?v=MPnH7h12h0U%26list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "http://www.youtube.com/watch?v=MPnH7h12h0U": {
+    "url":"http://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-haystack.jpg",
     "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen."
   },
-  "http://www.youtube.com/watch?v=ekxABqJeRBc%26list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
+  "http://www.youtube.com/watch?v=ekxABqJeRBc": {
+    "url":"http://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-ginlemon.jpg",
     "title": "How GinLemon is breaking through with Google Play",
     "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy."
