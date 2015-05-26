@@ -1281,5 +1281,38 @@ var RESOURCE_COLLECTIONS = {
       "training/enterprise/work-policy-ctrl.html",
       "samples/BasicManagedProfile/index.html"
     ]
+  },
+  "tools/performance/rendering": {
+    "title": "",
+    "resources": [
+       "tools/performance/debug-gpu-overdraw/index.html",
+       "tools/performance/profile-gpu-rendering/index.html",
+       "tools/performance/hierarchy-viewer/setup.html",
+       "tools/performance/hierarchy-viewer/index.html",
+       "tools/performance/hierarchy-viewer/profiling.html"
+    ]
+  },
+  "tools/performance/memory": {
+    "title": "",
+    "resources": [
+       "tools/performance/memory-monitor/index.html",
+       "tools/performance/heap-viewer/index.html",
+       "tools/performance/allocation-tracker/index.html",
+       "tools/performance/comparison.html"
+    ]
+  },
+  "tools/performance/cpu": {
+    "title": "",
+    "resources": [
+       "tools/performance/traceview/index.html",
+       "tools/performance/systrace/index.html"
+    ]
+  },
+  "tools/performance/battery": {
+    "title": "",
+    "resources": [
+       "tools/performance/batterystats-battery-historian/index.html",
+       "tools/performance/batterystats-battery-historian/charts.html"
+    ]
   }
 }

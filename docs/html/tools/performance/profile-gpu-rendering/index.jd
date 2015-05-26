@@ -1,0 +1,181 @@
+page.title=Profiling GPU Rendering Walkthrough
+meta.tags="android, performance, profiling, tools, rendering, gpu"
+page.tags="android", "performance", "profiling", "tools", "rendering", "gpu"
+page.metaDescription=Overlay a graph on your device, showing how long it takes to render UI elements relative to the 16-ms-per-frame benchmark.
+page.image=tools/performance/thumbnails/tools_profile_gpu_rendering.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#ProfileGPURendering">Profile GPU Rendering</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/debug-gpu-overdraw/index.html">
+    Debug GPU Overdraw Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/index.html">
+    Hierarchy Viewer Walkthrough</a></li>
+</ul>
+
+</div>
+
+  <p>This walkthrough shows how to use Profile GPU Rendering on your mobile device.</p>
+
+  <p>Profile GPU Rendering gives you a quick visual representation of how much time it takes to
+  render the frames of a UI window relative to the 16-ms-per-frame benchmark.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Quickly seeing how a UI window performs against the 16-ms-per-frame target.</li>
+
+    <li>Identifying whether any part of the rendering pipeline stands out in using processing
+    time.</li>
+
+    <li>Looking for spikes in frame rendering time associated with user or program actions.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device running at least Android 4.1 with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled.</li>
+  </ul>
+
+<h2 id="ProfileGPURendering">Working with Profile GPU Rendering</h2>
+
+<ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+  <ol class="padded">
+
+  <div class="figure" style="">
+      <img
+src="{@docRoot}images/tools/performance/profile-gpu-rendering/gettingstarted_image001.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Turning on Profile GPU Rendering.
+      </p>
+    </div>
+
+    <li>On your mobile device, go to <b>Settings &gt;</b> <b>Developer Options</b>.</li>
+
+    <li>In the <em>Monitoring</em> section, select <b>Profile GPU Rendering</b>.</li>
+
+    <li>In the Profile GPU Rendering popup, choose <b>On screen as bars</b> to overlay the graphs
+    on the screen of your mobile device.</li>
+
+    <li>Go to the app that you want to profile.</li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+
+  <div class="figure" style="">
+    <img
+src="{@docRoot}images/tools/performance/profile-gpu-rendering/gettingstarted_image002.png"
+         alt=""
+         width="400px" />
+    <p class="img-caption">
+      <strong>Figure 2. </strong>Screen when Profile GPU Rendering is on.
+    </p>
+  </div>
+
+  <h3>What you see:</h3>
+
+    <ul>
+      <li>For each visible application, the tool displays a graph.</li>
+
+      <li>The horizontal axis shows time elapsing, and the vertical axis time per frame in
+        milliseconds.</li>
+
+      <li>As you interact with your application, vertical bars show up on your screen, appearing
+        from left to right, graphing frame performance over time.</li>
+
+      <li>Each vertical bar represents one frame of rendering.
+        The taller the bar, the longer it took to render.</li>
+
+      <li>The green line marks the 16 millisecond target. Every time a frame crosses the green line,
+        your app is missing a frame, and your users may see this as stuttering images.
+    </ul>
+
+</div></li>
+
+<li style="list-style-type:none;><!-- fix issue with visible disc -->
+<div style="overflow:hidden">
+<hr>
+
+  <h3>The Profile GPU Rendering Graph</h3>
+
+    <img
+src="{@docRoot}images/tools/performance/profile-gpu-rendering/gettingstarted_image003.png"
+         alt=""
+         height="" />
+    <p class="img-caption">
+      <strong>Figure 3. </strong>Enlarged Annotated Profile GPU Rendering graph.
+    </p>
+
+  <p>In this enlarged image of the Profile GPU Rending graph you can see the colored sections
+    of the graph, and what phase of the rendering pipeline each color represents.</p>
+
+  <ul>
+    <li>The <b>green line</b> represents 16 milliseconds. To achieve 60 frames per second,
+      the vertical bar for each frame needs
+      to stay below this 16 ms mark. Any time a bar pushes above this line, there may be pauses in
+      the animations.</li>
+
+    <li>Each bar has a blue, purple (only for Android version 4.0 and higher),
+      red, and orange component.</p>
+
+    <li>The <b>blue</b> section of the bar represents the time used to create and update the
+      View's display lists. If this part of the bar is tall, there may be a
+      lot of custom view drawing, or a lot of work in onDraw methods.</li>
+
+    <li>Android 4.0 and higher: The <b>purple</b> section of the bar represents the time spent
+      transferring resources to the render thread.</li>
+
+    <li>The <b>red</b> section of the bar represents the time spent by
+      Android's 2D renderer issuing commands to OpenGL to draw and redraw
+      display lists. The height of this bar is directly proportional to the sum of the time it takes each
+      display list to execute&mdash;more display lists equals a taller red bar.</li>
+
+    <li>The <b>orange</b> section of the bar represents the time the CPU is waiting for the GPU to
+      finish its work. If this bar gets tall, it means the app is doing too much work on the GPU.
+    </li>
+  </ul>
+
+  <p class="note"><strong>Note:</strong>
+    While this tool is named Profile GPU Rendering, all monitored processes actually
+    occur in the CPU. Rendering happens by submitting commands to the GPU, and the GPU renders the
+    screen asynchronously. In certain situations, the GPU can have too much work to do,
+    and your CPU will have to wait before it can submit new commands.
+    When this happens, you'll see spikes in the Process (orange bar) and Execute (red bar)
+    stages, and the sommand submission will block until more room is made on the
+    GPU command queue.
+  </p>
+
+  </div></li>
+</ul>
+
+
+
+
