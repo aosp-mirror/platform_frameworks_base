@@ -30,16 +30,12 @@ import java.util.regex.Pattern;
  * <p> We may add other kinds in the future.
  *
  * <p> The detail field is a lowercase alphanumeric string with underscores and periods allowed
- * (matching the regex [a-z0-9_.]+), but otherwise unstructured. It is also possible to specify '*'
- * (the wildcard character) as the detail if the relation applies to any detail in the specified
- * kind.
+ * (matching the regex [a-z0-9_.]+), but otherwise unstructured.
  */
 public final class Relation {
 
     private static final Pattern KIND_PATTERN = Pattern.compile("^[a-z0-9_.]+$");
-    private static final Pattern DETAIL_PATTERN = Pattern.compile("^([a-z0-9_.]+|[*])$");
-
-    private static final String MATCH_ALL_DETAILS = "*";
+    private static final Pattern DETAIL_PATTERN = Pattern.compile("^([a-z0-9_.]+)$");
 
     private final String mKind;
     private final String mDetail;
@@ -92,12 +88,10 @@ public final class Relation {
     }
 
     /**
-     * Returns true if {@code relation} has the same kind and detail. If {@code
-     * relation.getDetail()} is wildcard (*) then returns true if the kind is the same.
+     * Returns true if {@code relation} has the same kind and detail.
      */
     public boolean matches(Relation relation) {
-        return getKind().equals(relation.getKind()) && (getDetail().equals(MATCH_ALL_DETAILS)
-                || getDetail().equals(relation.getDetail()));
+        return getKind().equals(relation.getKind()) && getDetail().equals(relation.getDetail());
     }
 
     /**
