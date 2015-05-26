@@ -16,6 +16,7 @@
   -->
 <view xmlns:android="http://schemas.android.com/apk/res/android"
         class="com.android.systemui.statusbar.policy.KeyguardUserSwitcher$Container"
+        android:visibility="gone"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
     <com.android.keyguard.AlphaOptimizedLinearLayout
