@@ -38,10 +38,9 @@
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/api-changes.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/behavior-changes.html">
       Behavior Changes</a></div>
   </li>
-
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/samples.html">
       Samples</a></div>
