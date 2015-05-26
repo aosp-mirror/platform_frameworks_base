@@ -50,7 +50,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             mConditionProviders.addSystemProvider(new ScheduleConditionProvider());
         }
         if (mConditionProviders.isSystemProviderEnabled(ZenModeConfig.EVENT_PATH)) {
-            mConditionProviders.addSystemProvider(new EventConditionProvider());
+            mConditionProviders.addSystemProvider(new EventConditionProvider(helper.getLooper()));
         }
         mConditionProviders.setCallback(this);
     }
