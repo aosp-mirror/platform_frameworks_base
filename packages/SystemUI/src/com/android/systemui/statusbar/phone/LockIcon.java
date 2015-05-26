@@ -35,6 +35,11 @@ import com.android.systemui.statusbar.policy.AccessibilityController;
  */
 public class LockIcon extends KeyguardAffordanceView {
 
+    /**
+     * Delay animations a bit when the screen just turned on as a heuristic to start them after
+     * the screen has actually turned on.
+     */
+    private static final long ANIM_DELAY_AFTER_SCREEN_ON = 250;
 
     private static final int STATE_LOCKED = 0;
     private static final int STATE_LOCK_OPEN = 1;
@@ -43,7 +48,9 @@ public class LockIcon extends KeyguardAffordanceView {
     private static final int STATE_FINGERPRINT_ERROR = 4;
 
     private int mLastState = 0;
+    private boolean mLastScreenOn;
     private boolean mTransientFpError;
+    private boolean mScreenOn;
     private final TrustDrawable mTrustDrawable;
     private final UnlockMethodCache mUnlockMethodCache;
     private AccessibilityController mAccessibilityController;
@@ -76,6 +83,11 @@ public class LockIcon extends KeyguardAffordanceView {
         update();
     }
 
+    public void setScreenOn(boolean screenOn) {
+        mScreenOn = screenOn;
+        update();
+    }
+
     public void update() {
         boolean visible = isShown() && KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         if (visible) {
@@ -89,16 +101,18 @@ public class LockIcon extends KeyguardAffordanceView {
         // TODO: Real icon for facelock.
         int state = getState();
         boolean anyFingerprintIcon = state == STATE_FINGERPRINT || state == STATE_FINGERPRINT_ERROR;
-        if (state != mLastState) {
-            int iconRes = getAnimationResForTransition(mLastState, state);
+        if (state != mLastState || mScreenOn != mLastScreenOn) {
+            int iconRes = getAnimationResForTransition(mLastState, state, mLastScreenOn, mScreenOn);
+            if (iconRes == R.drawable.lockscreen_fingerprint_draw_off_animation) {
+                anyFingerprintIcon = true;
+            }
             if (iconRes == -1) {
                 iconRes = getIconForState(state);
             }
             Drawable icon = mContext.getDrawable(iconRes);
-            AnimatedVectorDrawable animation = null;
-            if (icon instanceof AnimatedVectorDrawable) {
-                animation = (AnimatedVectorDrawable) icon;
-            }
+            final AnimatedVectorDrawable animation = icon instanceof AnimatedVectorDrawable
+                    ? (AnimatedVectorDrawable) icon
+                    : null;
             int iconHeight = getResources().getDimensionPixelSize(
                     R.dimen.keyguard_affordance_icon_height);
             int iconWidth = getResources().getDimensionPixelSize(
@@ -115,14 +129,27 @@ public class LockIcon extends KeyguardAffordanceView {
                     anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
             setImageDrawable(icon);
             if (animation != null) {
-                animation.start();
+
+                // If we play the draw on animation, delay it by one frame when the screen is
+                // actually turned on.
+                if (iconRes == R.drawable.lockscreen_fingerprint_draw_on_animation) {
+                    postOnAnimationDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            animation.start();
+                        }
+                    }, ANIM_DELAY_AFTER_SCREEN_ON);
+                } else {
+                    animation.start();
+                }
             }
+            mLastState = state;
+            mLastScreenOn = mScreenOn;
         }
 
         // Hide trust circle when fingerprint is running.
         boolean trustManaged = mUnlockMethodCache.isTrustManaged() && !anyFingerprintIcon;
         mTrustDrawable.setTrustManaged(trustManaged);
-        mLastState = state;
         updateClickability();
     }
 
@@ -161,9 +188,16 @@ public class LockIcon extends KeyguardAffordanceView {
         }
     }
 
-    private int getAnimationResForTransition(int oldState, int newState) {
+    private int getAnimationResForTransition(int oldState, int newState, boolean oldScreenOn,
+            boolean screenOn) {
         if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_ERROR) {
-            return R.drawable.lockscreen_fingerprint_error_state_animation;
+            return R.drawable.lockscreen_fingerprint_fp_to_error_state_animation;
+        } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_FINGERPRINT) {
+            return R.drawable.lockscreen_fingerprint_error_state_to_fp_animation;
+        } else if (oldState == STATE_FINGERPRINT && newState == STATE_LOCK_OPEN) {
+            return R.drawable.lockscreen_fingerprint_draw_off_animation;
+        } else if (newState == STATE_FINGERPRINT && !oldScreenOn && screenOn) {
+            return R.drawable.lockscreen_fingerprint_draw_on_animation;
         } else {
             return -1;
         }
