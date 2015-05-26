@@ -957,6 +957,29 @@ public class LockPatternUtils {
     }
 
     /**
+     * Set whether the visible password is enabled for cryptkeeper screen.
+     */
+    public void setVisiblePasswordEnabled(boolean enabled, int userId) {
+        // Update for crypto if owner
+        if (userId != UserHandle.USER_OWNER) {
+            return;
+        }
+
+        IBinder service = ServiceManager.getService("mount");
+        if (service == null) {
+            Log.e(TAG, "Could not find the mount service to update the user info");
+            return;
+        }
+
+        IMountService mountService = IMountService.Stub.asInterface(service);
+        try {
+            mountService.setField(StorageManager.PASSWORD_VISIBLE_KEY, enabled ? "1" : "0");
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error changing password visible state", e);
+        }
+    }
+
+    /**
      * @return Whether tactile feedback for the pattern is enabled.
      */
     public boolean isTactileFeedbackEnabled() {
