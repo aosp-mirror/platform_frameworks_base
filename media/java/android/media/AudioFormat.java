@@ -47,10 +47,11 @@ import java.util.Arrays;
  * at which content is rendered or produced. For instance a sound at a media sample rate of 8000Hz
  * can be played on a device operating at a sample rate of 48000Hz; the sample rate conversion is
  * automatically handled by the platform, it will not play at 6x speed.
- * (more to be added...)
  *
  * <h4 id="encoding">Encoding</h4>
- * <p>To Be Added... stay tuned
+ * <p>For PCM audio, audio encoding is used to describe the bit representation of an audio data
+ * sample; for example, the size as 8 bit, 16 bit, and the representation as integer or float.
+ * <br>For compressed formats, audio encoding is used to describe the compression scheme being used.
  *
  * <h4 id="channelMask">Channel mask</h4>
  * <p>Channel masks are used in <code>AudioTrack</code> and <code>AudioRecord</code> to describe
