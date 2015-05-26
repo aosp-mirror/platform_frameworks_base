@@ -19,35 +19,18 @@
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="16"
-            android:propertyName="trimPathEnd"
-            android:valueFrom="0.0"
-            android:valueTo="0.0"
-            android:valueType="floatType"
-            android:interpolator="@android:interpolator/linear" />
-        <objectAnimator
             android:duration="216"
-            android:propertyName="trimPathEnd"
-            android:valueFrom="0.0"
-            android:valueTo="1.0"
-            android:valueType="floatType"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-    </set>
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="133"
             android:propertyName="trimPathStart"
-            android:valueFrom="0.0"
-            android:valueTo="0.0"
+            android:valueFrom="1.0"
+            android:valueTo="1.0"
             android:valueType="floatType"
             android:interpolator="@android:interpolator/linear" />
         <objectAnimator
-            android:duration="266"
+            android:duration="400"
             android:propertyName="trimPathStart"
-            android:valueFrom="0.0"
-            android:valueTo="1.0"
+            android:valueFrom="1.0"
+            android:valueTo="0.0"
             android:valueType="floatType"
-            android:interpolator="@interpolator/lockscreen_fingerprint_error_state_animation_interpolator_2" />
+            android:interpolator="@interpolator/lockscreen_fingerprint_draw_on_animation_interpolator_1" />
     </set>
 </set>
