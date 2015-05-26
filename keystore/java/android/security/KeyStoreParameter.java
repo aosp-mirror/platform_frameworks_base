@@ -19,7 +19,6 @@ package android.security;
 import android.annotation.NonNull;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProtection;
 
 import java.security.KeyPairGenerator;
@@ -49,25 +48,11 @@ import java.security.KeyStore.ProtectionParameter;
  */
 @Deprecated
 public final class KeyStoreParameter implements ProtectionParameter {
-    private final Context mContext;
     private final int mFlags;
 
     private KeyStoreParameter(
-            Context context,
             int flags) {
-        if (context == null) {
-            throw new IllegalArgumentException("context == null");
-        }
-
-        mContext = context;
         mFlags = flags;
-    }
-
-    /**
-     * Gets the Android context used for operations with this instance.
-     */
-    public Context getContext() {
-        return mContext;
     }
 
     /**
@@ -115,7 +100,6 @@ public final class KeyStoreParameter implements ProtectionParameter {
      */
     @Deprecated
     public final static class Builder {
-        private final Context mContext;
         private int mFlags;
 
         /**
@@ -128,7 +112,6 @@ public final class KeyStoreParameter implements ProtectionParameter {
             if (context == null) {
                 throw new NullPointerException("context == null");
             }
-            mContext = context;
         }
 
         /**
@@ -163,7 +146,6 @@ public final class KeyStoreParameter implements ProtectionParameter {
         @NonNull
         public KeyStoreParameter build() {
             return new KeyStoreParameter(
-                    mContext,
                     mFlags);
         }
     }
