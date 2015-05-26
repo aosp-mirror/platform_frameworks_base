@@ -21,6 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="128dp"
     android:background="#00000000"
+    android:tag="bigMediaNarrow"
     >
     <ImageView android:id="@+id/icon"
         android:layout_width="128dp"

@@ -25,15 +25,23 @@ import android.view.View;
  */
 public abstract class NotificationViewWrapper {
 
+    private static final String TAG_BIG_MEDIA_NARROW = "bigMediaNarrow";
+    private static final String TAG_MEDIA = "media";
+    private static final String TAG_BIG_PICTURE = "bigPicture";
+
     protected final View mView;
 
     public static NotificationViewWrapper wrap(Context ctx, View v) {
-
-        // TODO: Figure out a better way to find out which template the view is.
-        if (v.findViewById(com.android.internal.R.id.media_actions) != null) {
-            return new NotificationMediaViewWrapper(ctx, v);
-        } else if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
-            return new NotificationTemplateViewWrapper(ctx, v);
+        if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
+            if (TAG_BIG_MEDIA_NARROW.equals(v.getTag())) {
+                return new NotificationBigMediaNarrowViewWrapper(ctx, v);
+            } else if (TAG_MEDIA.equals(v.getTag())) {
+                return new NotificationMediaViewWrapper(ctx, v);
+            } else if (TAG_BIG_PICTURE.equals(v.getTag())) {
+                return new NotificationBigMediaNarrowViewWrapper(ctx, v);
+            } else {
+                return new NotificationTemplateViewWrapper(ctx, v);
+            }
         } else {
             return new NotificationCustomViewWrapper(v);
         }
@@ -56,4 +64,12 @@ public abstract class NotificationViewWrapper {
      * Notifies this wrapper that the content of the view might have changed.
      */
     public void notifyContentUpdated() {}
+
+    /**
+     * @return true if this template might need to be clipped with a round rect to make it look
+     *         nice, false otherwise
+     */
+    public boolean needsRoundRectClipping() {
+        return false;
+    }
 }
