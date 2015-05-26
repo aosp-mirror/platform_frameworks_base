@@ -41,4 +41,9 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
             mInvertHelper.update(dark);
         }
     }
+
+    @Override
+    public boolean needsRoundRectClipping() {
+        return true;
+    }
 }

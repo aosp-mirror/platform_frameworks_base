@@ -42,6 +42,10 @@
     <!-- Whether to use cheap, less good looking shadows for recents -->
     <bool name="config_recents_fake_shadows">false</bool>
 
+    <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
+         certain GPU's and thus can be turned off with only minimal visual impact. -->
+    <bool name="config_notifications_round_rect_clipping">true</bool>
+
     <!-- The theme to use for RecentsActivity. -->
     <item type="style" name="config_recents_activity_theme">@style/RecentsTheme.Wallpaper</item>
 
