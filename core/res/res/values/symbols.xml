@@ -2243,11 +2243,14 @@
   <java-symbol type="drawable" name="ic_usb_48dp" />
 
   <!-- Floating toolbar -->
+  <java-symbol type="id" name="floating_toolbar_menu_item_image_button" />
   <java-symbol type="layout" name="floating_popup_container" />
   <java-symbol type="layout" name="floating_popup_menu_button" />
   <java-symbol type="layout" name="floating_popup_open_overflow_button" />
   <java-symbol type="layout" name="floating_popup_close_overflow_button" />
+  <java-symbol type="layout" name="floating_popup_menu_image_button" />
   <java-symbol type="layout" name="floating_popup_overflow_list_item" />
+  <java-symbol type="layout" name="floating_popup_overflow_image_list_item" />
   <java-symbol type="dimen" name="floating_toolbar_height" />
   <java-symbol type="dimen" name="floating_toolbar_menu_button_side_padding" />
   <java-symbol type="dimen" name="floating_toolbar_overflow_side_padding" />
