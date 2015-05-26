@@ -14,8 +14,7 @@ page.image=images/cards/card-key-changes_16-9_2x.png
         <span class="less" style="display:none">show less</span></a></h2>
 
 <ol id="toc44" class="hide-nested">
-  <li><a href="#backup">Auto Backup for Apps</a></li>
-  <li><a href="#notifications">Notifications</a></li>
+  <li><a href="#backup">Automatic App Data Backup</a></li>
   <li><a href="#authentication">Authentication</a>
     <ul>
       <li><a href="#fingerprint-authentication">Fingerprint Authentication</a></li>
@@ -24,14 +23,27 @@ page.image=images/cards/card-key-changes_16-9_2x.png
   </li>
   <li><a href="#direct-share">Direct Share</a></li>
   <li><a href="#voice-interactions">Voice Interactions</a></li>
+  <li><a href="#assist">Assist API</a></li>
+  <li><a href="#notifications">Notifications</a></li>
   <li><a href="#bluetooth-stylus">Bluetooth Stylus Support</a></li>
-  <li><a href="#audio">New Audio Features</a></li>
-  <li><a href="#afw">New Android for Work Features</a></li>
+  <li><a href="#ble-scanning">Improved Bluetooth Low Energy Scanning</a></li>
+  <li><a href="#hotspot">Hotspot 2.0 Release 1 Support</a></li>
+  <li><a href="#4K-display">4K Display Mode</a></li>
+  <li><a href="#behavior-themeable-colorstatelists">Themeable ColorStateLists</a></li>
+  <li><a href="#audio">Audio Features</a></li>
+  <li><a href="#video">Video Features</a></li>
+  <li><a href="#camera">Camera Features</a>
+    <ul>
+      <li><a href="#flashlight">Flashlight API</a></li>
+      <li><a href="#reprocessing">Camera Reprocessing</a></li>
+    </ul>
+  </li>
+  <li><a href="#afw">Android for Work Features</a></li>
 </ol>
 
 <h2>API Differences</h2>
 <ol>
-<li><a href="">API level 22 to M &raquo;</a> </li>
+<li><a href="{@docRoot}preview/download.html">API level 22 to M Preview &raquo;</a> </li>
 </ol>
 
 </div>
@@ -55,40 +67,24 @@ methods that do not yet have reference material available on <a
 href="{@docRoot}">developer.android.com</a>. These API elements are
 formatted in {@code code style} in this document (without hyperlinks). For the
 preliminary API documentation for these elements, download the <a
-href="http://storage.googleapis.com/androiddevelopers/preview/m-developer-preview-reference.zip">
-preview reference</a>.</p>
+href="{@docRoot}preview/download.html#docs"> preview reference</a>.</p>
 
 <h3>Important behavior changes</h3>
 
 <p>If you have previously published an app for Android, be aware that your app might be affected
-by changes in M.</p>
+by changes in the platform.</p>
 
-<p>Please see <a href="api-changes.html">Behavior Changes</a> for complete information.</p>
+<p>Please see <a href="behavior-changes.html">Behavior Changes</a> for complete information.</p>
 
-<h2 id="backup">Auto Backup for Apps</h2>
+<h2 id="backup">Automatic App Data Backup</h2>
 <p>The system now performs automatic full data backup and restore for apps. This behavior is
-enabled by default for apps targeting M; you do not need to add any additional code. If users
-delete their Google account, their backup data is deleted as well.</p>
-<p>To learn how this feature works and how to configure what to back up on the file system,
-see the <a href="">App Backup for Apps guide</a>.</p>
-
-<h2 id="notifications">Notifications</h2>
-<p>M adds the following API changes for notifications:</p>
-<ul>
-  <li>New {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} filter level that
-    corresponds to the new <em>Alarms only</em> do not disturb mode.</li>
-  <li>New {@code Notification.CATEGORY_REMINDER} category value that is used to distinguish
-  user-scheduled reminders from other events
-  ({@link android.app.Notification#CATEGORY_EVENT}) and alarms
-  ({@link android.app.Notification#CATEGORY_ALARM}).</li>
-  <li>New {@code android.graphics.drawable.Icon} class which can be attached to your notifications
-    via the Notification.Builder.setIcon() and Notification.Builder.setLargeIcon() methods.</li>
-  <li>New {@code NotificationManager.getActiveNotifications()} method that allows your apps to
-    find out which of their notifications are currently alive.</li>
-</ul>
+enabled by default for apps targeting M Preview; you do not need to add any additional code. If
+users delete their Google accounts, their backup data is deleted as well. To learn how this feature
+works and how to configure what to back up on the file system, see
+<a href="{@docRoot}preview/backup/index.html">Automatic App Data Backup</a>.</p>
 
 <h2 id="authentication">Authentication</h2>
-<p>The M release offers new APIs to let you authenticate users by using their fingerprint scans on
+<p>This preview offers new APIs to let you authenticate users by using their fingerprint scans on
 supported devices, and check how recently the user was last authenticated using a device unlocking
 mechanism (such as a lockscreen password). Use these APIs in conjunction with
 the <a href="{@docRoot}training/articles/keystore.html">Android Keystore system</a>.</p>
@@ -97,16 +93,14 @@ the <a href="{@docRoot}training/articles/keystore.html">Android Keystore system<
 
 <p>To authenticate users via fingerprint scan, get an instance of the new
 {@code android.hardware.fingerprint.FingerprintManager} class and call the
-{@code FingerprintManager.authenticate()} method. Your app must be running on a device with a
-fingerprint sensor. You must implement the user interface for the fingerprint
-authentication flow on your app, and use the standard fingerprint Android icon in your UI.
-If you are developing multiple apps that use fingerprint authentication, note that each app must
-authenticate the user’s fingerprint independently.
+{@code FingerprintManager.authenticate()} method. Your app must be running on a compatible
+device with a fingerprint sensor. You must implement the user interface for the fingerprint
+authentication flow on your app, and use the standard Android fingerprint icon in your UI.
+The Android fingerprint icon ({@code c_fp_40px.png}) is included in the
+<a href="https://github.com/googlesamples/android-FingerprintDialog"
+class="external-link">sample app</a>. If you are developing multiple apps that use fingerprint
+authentication, note that each app must authenticate the user’s fingerprint independently.
 </p>
-
-<img src="{@docRoot}preview/images/fingerprint-screen_2x.png"
-srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, preview/images/fingerprint-screen_2x.png 2x"
-style="margin:0 0 10px 20px" width="282" height="476" />
 
 <p>To use this feature in your app, first add the {@code USE_FINGERPRINT} permission in your
 manifest.</p>
@@ -116,34 +110,34 @@ manifest.</p>
         android:name="android.permission.USE_FINGERPRINT" /&gt;
 </pre>
 
-<p>The following snippet shows how you might listen for fingerprint events in your
-{@code FingerprintManager.AuthenticationCallback} implementation.</p>
+<img src="{@docRoot}preview/images/fingerprint-screen.png"
+srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x"
+style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 
-<pre>
-// Call this to start listening for fingerprint events
-public void startListening(FingerprintManager.CryptoObject cryptoObject) {
-    if (!isFingerprintAuthAvailable()) {
-        return;
-    }
-    mCancellationSignal = new CancellationSignal();
-    mSelfCancelled = false;
-    mFingerprintManager.authenticate(cryptoObject,
-            mCancellationSignal, this, 0 /* flags */);
-    // Icon to display when prompting users to start a fingerprint scan
-    mIcon.setImageResource(R.drawable.ic_fp_40px);
-}
+<p>To see an app implementation of fingerprint authentication, refer to the
+<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">
+  Fingerprint Dialog sample</a>.</p>
 
-// Helper method to check if the device supports fingerprint
-// scanning and if the user has enrolled at least one fingerprint.
-public boolean isFingerprintAuthAvailable() {
-    return mFingerprintManager.isHardwareDetected()
-        &amp;&amp; mFingerprintManager.hasEnrolledFingerprints();
-}
+<p>If you are testing this feature, follow these steps:</p>
+<ol>
+<li>Enroll a new fingerprint in the emulator by going to
+<strong>Settings > Security > Fingerprint</strong>, then follow the enrollment instructions.</li>
+<li>Install Android SDK Tools Revision 24.3, if you have not done so.</li>
+<li>Use an emulator to emulate fingerprint touch events with the
+following command. Use the same command to emulate fingerprint touch events on the lockscreen or
+in your app.
+<pre class="no-prettyprint">
+adb -e emu finger touch &lt;finger_id&gt;
 </pre>
+<p>On Windows, you may have to run {@code telnet 127.0.0.1 &lt;emulator-id&gt;} followed by
+  {@code finger touch &lt;finger_id&gt;}.
+</p>
+</li>
+</ol>
 
 <h3 id="confirm-credentials">Confirm Credentials</h3>
 <p>Your app can authenticate users based on how recently they last unlocked their device. You can
-use the same public or secret key to authenticate users into multiple apps. This feature frees
+use the same public or secret key to authenticate users. This feature frees
 users from having to remember additional app-specific passwords, and avoids the need for you to
 implement your own authentication user interface.</p>
 
@@ -152,46 +146,14 @@ generating or importing. To set the constraints for using a key, use the
 {@code android.security.KeyPairGeneratorSpec.Builder} and
 {@code android.security.KeyGeneratorSpec.Builder} classes for public key pairs and secret keys
 respectively. If you are importing keys, use the {@link android.security.KeyStoreParameter.Builder}
-class to set your constraints.</p>
+class to set your constraints. You can use the
+{@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence) createConfirmDeviceCredentialIntent()}
+method to re-authenticate the user within your app if the timeout expired.
+</p>
 
-<p>The following example shows how you might create a symmetric key in the Keystore which can only be
-used if the user has successfully unlocked the device within the last 5 minutes.</p>
-
-<pre>
-private void createKey() {
-    // Generate a key to decrypt payment credentials, tokens, etc.
-    // This will most likely be a registration step for the user when
-    // they are setting up your app.
-    try {
-        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-        ks.load(null);
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES",
-                "AndroidKeyStore");
-        keyGenerator.init(new KeyGeneratorSpec.Builder(this)
-                // Alias of the entry in Android KeyStore where the key will appear
-                .setAlias(KEY_NAME)
-                // Key use constraints
-                .setPurposes(KeyStoreKeyProperties.Purpose.ENCRYPT
-                    | KeyStoreKeyProperties.Purpose.DECRYPT)
-                .setBlockModes("CBC")
-                .setUserAuthenticationRequired(true)
-                // Require that the user has unlocked in the last 5 minutes
-                .setUserAuthenticationValidityDurationSeconds(5 * 60)
-                .setEncryptionPaddings("PKCS7Padding")
-                .build());
-        keyGenerator.generateKey();
-    } catch (NoSuchAlgorithmException | NoSuchProviderException
-            | InvalidAlgorithmParameterException | KeyStoreException
-            | CertificateException | IOException e) {
-          throw new RuntimeException(e);
-    }
-}
-</pre>
-
-<p>To determine the last time users logged into their account, call the
-{@code android.accounts.AccountManager.confirmCredentials()} method. If the call is successful, the
-method returns an bundle that includes a {@code KEY_LAST_AUTHENTICATED_TIME} value which indicates
-the last time, in milliseconds, that the credential for that account was validated or created.</p>
+<p>To see an app implementation of this feature, refer to the
+<a href="https://github.com/googlesamples/android-ConfirmDeviceCredentials" class="external-link">
+  Confirm Device Credentials sample</a>.</p>
 
 <h2 id="direct-share">Direct Share</h2>
 
@@ -199,7 +161,7 @@ the last time, in milliseconds, that the credential for that account was validat
 srcset="{@docRoot}preview/images/direct-share-screen.png 1x, preview/images/direct-share-screen_2x.png 2x"
 style="float:right; margin:0 0 20px 30px" width="312" height="385" />
 
-<p>This release provides you with APIs to makes sharing intuitive and quick for users. You can now
+<p>This preview provides you with APIs to makes sharing intuitive and quick for users. You can now
 define <em>deep links</em> that target a specific activity in your app. These deep links are
 exposed to users via the <em>Share</em> menu. This feature allows users to share content to
 targets, such as contacts, within other apps. For example, the deep link might launch an
@@ -214,9 +176,6 @@ friend or community in that app.</p>
 {@code SERVICE_INTERFACE} action.</p>
 <p>The following example shows how you might declare the {@code ChooserTargetService} in your
 manifest.</p>
-<br>
-<br>
-<br>
 <pre>
 &lt;service android:name=".ChooserTargetService"
         android:label="&#64;string/service_name"
@@ -243,37 +202,142 @@ manifest.</p>
         android:value=".ChooserTargetService" /&gt;
 &lt;/activity>
 </pre>
+<p>To see an app implementation of this feature, refer to the
+<a href="https://github.com/googlesamples/android-DeepLinkSharing" class="external-link">
+  Deep Link Sharing sample</a>.</p>
+
 
 <h2 id="voice-interactions">Voice Interactions</h2>
 <p>
-This release provides a new voice interaction API which, together with
+This preview provides a new voice interaction API which, together with
 <a href="https://developers.google.com/voice-actions/" class="external-link">Voice Actions</a>,
 allows you to build conversational voice experiences into your apps. Call the
 {@code android.app.Activity.isVoiceInteraction()} method to determine if your activity was
 started in response to a voice action. If so, your app can use the
 {@code android.app.VoiceInteractor} class to request a voice confirmation from the user, select
-from a list of options, and more.</p>
-<p>To learn more about implementing voice actions, see the voice interaction API
+from a list of options, and more. To learn more about implementing voice actions, see the
 <a href="https://developers.google.com/voice-actions/interaction/"
-class="external-link">guide</a>.
+class="external-link">Voice Actions developer site</a>.
 </p>
 
+<h2 id="assist">Assist API</h2>
+<p>
+This preview offers a new way for users to engage with your apps through an assistant. To use this
+feature, the user must enable the assistant to use the current context. Once enabled, the user
+can summon the assistant within any app, by long-pressing on the <strong>Home</strong> button.</p>
+<p>The platform passes the current context to the assistant. In addition to the standard set of
+information that the platform passes to the assistant, your app can share additional information
+by using the new {@code android.app.Activity.AssistContent} class.</p>
+
+<p>To provide the assistant with additional context from your app, follow these steps:</p>
+
+<ol>
+<li>Implement the {@link android.app.Application.OnProvideAssistDataListener} interface.</li>
+<li>Register this listener by using
+{@link android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener) registerOnProvideAssistDataListener()}.</li>
+<li>In order to provide activity-specific contextual information, override the
+{@link android.app.Activity#onProvideAssistData(android.os.Bundle) onProvideAssistData()}
+callback and, optionally, the new {@code Activity.onProvideAssistContent()} callback.
+</ol>
+
+<h2 id="notifications">Notifications</h2>
+<p>This preview adds the following API changes for notifications:</p>
+<ul>
+  <li>New {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} filter level that
+    corresponds to the new <em>Alarms only</em> do not disturb mode.</li>
+  <li>New {@code Notification.CATEGORY_REMINDER} category value that is used to distinguish
+  user-scheduled reminders from other events
+  ({@link android.app.Notification#CATEGORY_EVENT}) and alarms
+  ({@link android.app.Notification#CATEGORY_ALARM}).</li>
+  <li>New {@code android.graphics.drawable.Icon} class which can be attached to your notifications
+    via the {@code Notification.Builder.setSmallIcon(Icon)} and
+    {@code Notification.Builder.setLargeIcon(Icon)} methods.</li>
+  <li>New {@code NotificationManager.getActiveNotifications()} method that allows your apps to
+    find out which of their notifications are currently alive. To see an app implementation that
+    uses this feature, see the <a href="https://github.com/googlesamples/android-ActiveNotifications"
+    class="external-link">Active Notifications sample</a>.</li>
+</ul>
+
 <h2 id="bluetooth-stylus">Bluetooth Stylus Support</h2>
-<p>The M release provides improved support for user input using a Bluetooth stylus. If the user
-touches a stylus with a button on the screen of your app, the
-{@link android.view.MotionEvent#getToolType(int) getTooltype()} method now returns
-{@code TOOL_TYPE_STYLUS}. The {@link android.view.MotionEvent#getButtonState() getButtonState()}
-method returns {@link android.view.MotionEvent#BUTTON_SECONDARY} when the user
+<p>This preview provides improved support for user input using a Bluetooth stylus. Users can pair
+and connect a compatible Bluetooth stylus with their phone or tablet.  While connected, position
+information from the touch screen is fused with pressure and button information from the stylus to
+provide a greater range of expression than with the touch screen alone. Your app can listen for
+stylus button presses and perform secondary actions, by registering the new
+{@code View.onStylusButtonPressListener} and {@code GestureDetector.OnStylusButtonPressListener}
+callbacks in your activity.</p>
+
+<p>Use the {@link android.view.MotionEvent} methods and constants to detect stylus button
+interactions:</p>
+<ul>
+<li>If the user touches a stylus with a button on the screen of your app, the
+{@link android.view.MotionEvent#getToolType(int) getTooltype()} method returns
+{@link android.view.MotionEvent#TOOL_TYPE_STYLUS}.</li>
+<li>For apps targeting M Preview, the
+{@link android.view.MotionEvent#getButtonState() getButtonState()}
+method returns {@code MotionEvent.STYLUS_BUTTON_PRIMARY} when the user
 presses the primary stylus button. If the stylus has a second button, the same method returns
-{@link android.view.MotionEvent#BUTTON_TERTIARY} when the user presses it. If the user presses
-both buttons simultaneously, the method returns both these values. In addition, the system reports
-the user button-press action to the new {@code View.onStylusButtonPressListener} and
-{@code GestureDetector.OnStylusButtonPressListener} callbacks in your activity, if you have
-registered these listeners in your app.</p>
+{@code MotionEvent.STYLUS_BUTTON_SECONDARY} when the user presses it. If the user presses
+both buttons simultaneously, the method returns both values OR'ed together
+({@code STYLUS_BUTTON_PRIMARY|STYLUS_BUTTON_SECONDARY}).</li>
+<li>
+For apps targeting a lower platform version, the
+{@link android.view.MotionEvent#getButtonState() getButtonState()} method returns
+{@link android.view.MotionEvent#BUTTON_SECONDARY} (for primary stylus button press),
+{@link android.view.MotionEvent#BUTTON_TERTIARY} (for secondary stylus button press), or both.
+</li>
+</ul>
 
-<h2 id="audio">New Audio Features</h2>
+<h2 id="ble-scanning">Improved Bluetooth Low Energy Scanning</h2>
+<p>
+If your app performs performs Bluetooth Low Energy scans, you can use the new
+{@code android.bluetooth.le.ScanSettings.Builder.setCallbackType()} method to specify that
+you want callbacks to only be notified when an advertisement packet matching the set
+{@link android.bluetooth.le.ScanFilter} is first found, and when it is not seen for a period of
+time. This approach to scanning is more power-efficient than what’s provided in the previous
+platform version.
+</p>
 
-<p>This release adds enhancements to audio processing on Android, including: </p>
+<h2 id="hotspot">Hotspot 2.0 Release 1 Support</h2>
+<p>
+This preview adds support for the Hotspot 2.0 Release 1 spec on Nexus 6 and Nexus 9 devices. To
+provision Hotspot 2.0 credentials in your app, use the new methods of the
+{@link android.net.wifi.WifiEnterpriseConfig} class, such as {@code setPlmn()} and
+{@code setRealm()}. In the {@link android.net.wifi.WifiConfiguration} object, you can set the
+{@link android.net.wifi.WifiConfiguration#FQDN} and the {@code providerFriendlyName} fields.
+The new {@code ScanResult.PasspointNetwork} property indicates if a detected
+network represents a Hotspot 2.0 access point.
+</p>
+
+<h2 id="4K-display">4K Display Mode</h2>
+<p>The platform now allows apps to request that the display resolution be upgraded to 4K rendering
+on compatible hardware. To query the current physical resolution, use the new
+{@code android.view.Display.Mode} APIs. If the UI is drawn at a lower logical resolution and is
+upscaled to a larger physical resolution, be aware that the physical resolution the
+{@code Display.Mode.getPhysicalWidth()} method returns may differ from the logical
+resolution reported by {@link android.view.Display#getSize(android.graphics.Point) getSize()}.</p>
+
+<p>You can request the system to change the physical resolution in your app as it runs, by setting
+the {@code WindowManager.LayoutParams.preferredDisplayModeId} property of your app’s window.  This
+feature is useful if you want to switch to 4K display resolution. While in 4K display mode, the
+UI continues to be rendered at the original resolution (such as 1080p) and is upscaled to 4K, but
+{@link android.view.SurfaceView} objects may show content at the native resolution.</p>
+
+<p>To test the new 4K display mode, simulate a secondary display of a larger resolution using the
+<strong>Developer Options</strong> settings.</p>
+
+<h2 id="behavior-themeable-colorstatelists">Themeable ColorStateLists</h2>
+<p>Theme attributes are now supported in
+{@link android.content.res.ColorStateList} for devices running the M Preview. The
+{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} and
+{@link android.content.res.Resources#getColor(int) getColor()} methods have been deprecated. If
+you are calling these APIs, call the new {@code Context.getColorStateList()} or
+{@code Context.getColor()} methods instead. These methods are also available in the
+v4 appcompat library via {@link android.support.v4.content.ContextCompat}.</p>
+
+<h2 id="audio">Audio Features</h2>
+
+<p>This preview adds enhancements to audio processing on Android, including: </p>
 <ul>
   <li>Support for the <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a>
 protocol, with the new {@code android.media.midi} APIs. Use these APIs to send and receive MIDI
@@ -293,8 +357,78 @@ attached source and sink audio devices. You can also specify an
 when an audio device is connected or disconnected.</li>
 </ul>
 
-<h2 id="afw">New Android for Work Features</h2>
-<p>This release includes the following new APIs for Android for Work:</p>
+<h2 id="video">Video Features</h2>
+<p>This preview adds new capabilities to the video processing APIs, including:</p>
+<ul>
+<li>New {@code android.media.MediaSync} class which helps applications to synchronously render
+audio and video streams. The audio buffers are submitted in non-blocking fashion and are
+returned via a callback. It also supports dynamic playback rate.
+</li>
+<li>New {@code MediaDrm.EVENT_SESSION_RECLAIMED} event, which indicates that a session opened by
+the app has been reclaimed by the resource manager. If your app uses DRM sessions, you should
+handle this event and make sure not to use a reclaimed session.
+</li>
+<li>New {@code MediaCodec.CodecException.ERROR_RECLAIMED} error code, which indicates that the
+resource manager reclaimed the media resource used by the codec. With this exception, the codec
+must be released, as it has moved to terminal state.
+</li>
+<li>New {@code MediaCodecInfo.CodecCapabilities.getMaxSupportedInstances()} interface to get a
+hint for the max number of the supported concurrent codec instances.
+</li>
+<li>New {@code MediaPlayer.setPlaybackParams()} method to set the media playback rate for fast or
+slow motion playback. It also stretches or speeds up the audio playback automatically in
+conjunction with the video.</li>
+</ul>
+
+<h2 id="camera">Camera Features</h2>
+<p>This preview includes the following new APIs for accessing the camera’s flashlight and for
+camera reprocessing of images:</p>
+
+<h3 id="flashlight">Flashlight API</h3>
+<p>If a camera device has a flash unit, you can call the {@code CameraManager.setTorchMode()}
+method to switch the flash unit’s torch mode on or off without opening the camera device. The app
+does not have exclusive ownership of the flash unit or the camera device. The torch mode is turned
+off and becomes unavailable whenever the camera device becomes unavailable, or when other camera
+resources keeping the torch on become unavailable. Other apps can also call {@code setTorchMode()}
+to turn off the torch mode. When the last app that turned on the torch mode is closed, the torch
+mode is turned off.</p>
+
+<p>You can register a callback to be notified about torch mode status by calling the
+{@code CameraManager.registerTorchCallback()} method. The first time the callback is registered,
+it is immediately called with the torch mode status of all currently known camera devices with a
+flash unit. If the torch mode is turned on or off successfully, the
+{@code CameraManager.TorchCallback.onTorchModeChanged()} method is invoked.</p>
+
+<h3 id="reprocessing">Reprocessing API</h3>
+<p>The {@link android.hardware.camera2 Camera2} API is extended to support YUV and private
+opaque format image reprocessing. Your app determine if the reprocessing capabilities are available
+via {@code CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES}. If a device supports reprocessing,
+you can create a reprocessable camera capture session by calling
+{@code CameraDevice.createReprocessableCaptureSession()}, and create requests for input
+buffer reprocessing.</p>
+
+<p>Use the {@code ImageWriter} class to connect the input buffer flow to the camera reprocessing
+input. To get an empty buffer, follow this programming model:</p>
+
+<ol>
+<li>Call the {@code ImageWriter.dequeueInputImage()} method.</li>
+<li>Fill the data into the input buffer.</li>
+<li>Send the buffer to the  camera by calling the {@code ImageWriter.queueInputImage()} method.</li>
+</ol>
+
+<p>If you are using a {@code ImageWriter} object together with an
+{@code android.graphics.ImageFormat.PRIVATE} image, your app cannot access the image
+data directly. Instead, pass the {@code ImageFormat.PRIVATE} image directly to the
+{@code ImageWriter} by calling the {@code ImageWriter.queueInputImage()} method without any
+buffer copy.</p>
+
+<p>The {@code ImageReader} class now supports {@code android.graphics.ImageFormat.PRIVATE} format
+image streams. This support allows your app to maintain a circular image queue of
+{@code ImageReader} output images, select one or more images, and send them to the
+{@code ImageWriter} for camera reprocessing.</p>
+
+<h2 id="afw">Android for Work Features</h2>
+<p>This preview includes the following new APIs for Android for Work:</p>
 <ul>
   <li><strong>Enhanced controls for Corporate-Owned, Single-Use devices:</strong> The Device Owner
 can now control the following settings to improve management of
@@ -325,13 +459,13 @@ without user interaction.</li>
 <li><strong>Auto-acceptance of system updates.</strong> By setting a system update policy with
 {@code DevicePolicyManager.setSystemUpdatePolicy()}, a Device Owner can now auto-accept a system
 update, for instance in the case of a kiosk device, or postpone the update and prevent it being
-taken by the user for up to 30 days. Furthermore, an administrator can set a time window in which an
-update must be taken, for example during the hours when a kiosk device is not in use. When a
-system update is available, the system checks if the Work Policy Controller app has set a system
+taken by the user for up to 30 days. Furthermore, an administrator can set a daily time window in
+which an update must be taken, for example during the hours when a kiosk device is not in use. When
+a system update is available, the system checks if the Work Policy Controller app has set a system
 update policy, and behaves accordingly.
 </li>
 <li>
-<strong>Delegated certificate installation.</strong> A Profile or Device Owner can now grant a
+<strong>Delegated certificate installation:</strong> A Profile or Device Owner can now grant a
 third-party app the ability to call these {@link android.app.admin.DevicePolicyManager} certificate
 management APIs:
 <ul>
@@ -349,21 +483,49 @@ uninstallAllUserCaCerts()}</li>
 installKeyPair()}</li>
 </ul>
 </li>
-<li><strong>Enterprise factory reset protection.</strong> When provisioning a Device Owner, you can
-now configure parameters for bypassing Factory Reset Protection (FRP), by setting the
+<li><strong>Enterprise factory reset protection:</strong> When provisioning a Device Owner, you can
+now configure parameters to unlock Factory Reset Protection (FRP) by setting the
 {@code DeviceManagerPolicy.EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS} bundle. An NFC Programmer
-app can provide these parameters after a device has been reset to bypass FRP and provision the device,
+app can provide these parameters after a device has been reset to unlock FRP and provision the device,
 without requiring the previously configured Google account. If you don't modify these parameters,
 FRP remains in-place and prevents the device from being activated without the previously activated
-Google credentials.</li>
-<li><strong>Data usage tracking.</strong> A Profile or Device Owner can now query for the data
-usage statistics visible in <em>Settings > Data</em> usage by using the new
+Google credentials.
+<p>Additionally, by setting app restrictions on Google Play services, Device Owners can specify
+alternative Google accounts for unlocking FRP to replace the ones activated on the device.</p>
+</li>
+<li><strong>Data usage tracking.</strong> A Profile or Device Owner can now query for the
+data usage statistics visible in <strong>Settings > Data</strong> usage by using the new
 {@code android.app.usage.NetworkStatsManager} methods. Profile Owners are automatically granted
 permission to query data on the profile they manage, while Device Owners get access to usage data
 of the managed primary user.</li>
+<li><strong>Runtime permission management:</strong> With the new runtime permissions model, a
+Profile or Device Owner can now silently grant or revoke an app’s permissions by calling
+{@code DevicePolicyManager.setPermissionGranted()}. Granting or revoking a single permission applies
+that setting to all permissions within that runtime permission group; the user is not prompted
+at runtime when any permission from that runtime permission group is required. Furthermore, the
+user cannot modify the selection made by the Profile or Device Owner within the app’s permissions
+screen in <strong>Settings</strong>.
+<img src="{@docRoot}preview/images/work-profile-screen_2x.png"
+srcset="{@docRoot}preview/images/work-profile-screen.png 1x, preview/images/work-profile-screen_2x.png 2x"
+style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+<p>A Profile or Device Owner can also set a permission policy
+for all runtime requests of all applications using
+{@code DevicePolicyManager.setPermissionPolicy()}, to either prompt the user to grant the
+permission as normal or automatically grant or deny the permission silently. If the latter policy
+is set, the user cannot modify the selection made by the Profile or Device Owner within the
+app’s permissions screen in <strong>Settings</strong>.</p></li>
+<li><strong>VPN in Settings:</strong> VPN apps are now visible in
+    <strong>Settings > More > VPN</strong>.
+Additionally, the notifications that accompany VPN usage are now specific to whether that VPN is
+configured for a managed profile or the entire device.</li>
+<li><strong>Work status notification:</strong> A status bar briefcase icon now appears whenever
+an app from the managed profile has an activity in the foreground. Furthermore, if the device is
+unlocked directly to the activity of an app in the managed profile, a toast is displayed notifying
+the user that they are within the work profile.
+</li>
 </ul>
 
 <p class="note">
   For a detailed view of all API changes in the M Developer Preview, see the <a href=
-  "{@docRoot}preview/reference.html">API Differences Report</a>.
+  "{@docRoot}preview/download.html">API Differences Report</a>.
 </p>
