@@ -1,0 +1,292 @@
+page.title=Traceview Walkthrough
+meta.tags="android, performance, profiling, tools, compute, traceview"
+page.tags="android", "performance", "profiling", "tools", "compute", "traceview"
+page.metaDescription=Log method execution over time and inspect execution data, per-thread timelines, and call stacks to track down performance issues in your source code.
+page.image=tools/performance/thumbnails/tools_traceview.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#WorkingWithTraceview">Working with Traceview</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/heap-viewer/index.html">
+    Heap Viewer Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/systrace/index.html">
+    Systrace Walkthrough</a></li>
+</ul>
+
+</div>
+
+  <p>This walkthrough shows the basic usage and workflow for the Traceview tool. Traceview logs
+  method execution over time and shows execution data, per-thread timelines, and call stacks.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Tracking down performance problems in your source code.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled.</li>
+
+    <li>Application code. Use your own code, or the <a href=
+    "https://github.com/udacity/Sunshine-Version-2">Sunshine</a> sample app from the <a href=
+    "https://www.udacity.com/course/ud853">Android Fundamentals Udacity course</a>.</li>
+  </ul>
+
+<h2 id="WorkingWithTraceview">Working with Traceview</h2>
+
+<ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+  <ol class="padded">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image001.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Steps for starting Android Device Monitor.
+      </p>
+    </div>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+
+    <li>Start the Android Device Monitor from Android Studio: <b>Tools -&gt; Android -&gt; Android
+    Device</b> <b>Monitor</b>.
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="4">
+
+      <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image002.png"
+           alt=""
+           width="400px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Steps for starting Traceview.
+      </p>
+    </div>
+
+    <li>Make sure your device
+      and the package for your application are showing in the <b>Devices</b> (DDMS mode) or
+      <b>Windows</b> (Hierarchy Viewer mode) tab.
+
+      <p>If necessary choose <b>Window &gt; Reset
+      Perspective</b> to get back to the default pane arrangement.</p></li>
+
+    <li>Click the <b>DDMS</b> button, because Traceview is one of the DDMS tools.</li>
+
+    <li>Select the app you want to profile.
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="7">
+
+      <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image004.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 3. </strong>Starting profiling.
+      </p>
+    </div>
+
+    <li>Click the Start method profiling
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image003.png">
+        button.
+    </li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="8">
+
+     <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image005.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 4. </strong>Choosing profiling options.
+      </p>
+    </div>
+
+    <li>In the <b>Profiling Options</b> popup:
+
+      <ul>
+        <li>Choose <b>Sample based profiling</b></li>
+
+        <li>Keep the default sampling rate of 1000 microseconds.</li>
+
+        <li>Click <b>OK</b>.</li>
+      </ul>
+    </li>
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="9">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image007.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 5. </strong>Stopping profiling.
+      </p>
+    </div>
+
+
+    <li>Interact with your application. If you are aware of performance issues that
+      your users experience, perform those actions.</li>
+
+    <li>Click the Stop method profiling
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image006.png">
+      button.</li>
+
+    <li>Wait for the trace to load. This may take a few seconds if you recorded for a
+      long time.</li>
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="12">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image008.png"
+         alt=""
+         width="440px" />
+      <p class="img-caption">
+        <strong>Figure 6. </strong>Traceview output panes.
+      </p>
+    </div>
+
+    <li>Traceview has two panels: <b>Timeline</b> pane and <b>Profile</b> pane, which
+      are described below.</li>
+
+    <li>Use the <b>Find</b> box at the bottom to filter your profile results. For
+      example, if you are interested in finding the running time for a function, you can
+      search for it, and the tool will highlight it in the timeline.
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="14">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image009.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 7. </strong>Annotated timeline panel.
+      </p>
+    </div>
+
+    <li>The <b>Timeline</b> pane visualizes how your code executes over time.
+
+      <ul>
+        <li>Each row shows a thread.</li>
+
+        <li>Each bar on the timeline is a method executing.</li>
+
+        <li>Each color is for a different method; every time a method executes, you see
+          a the same color bar.</li>
+
+        <li>The width of its bar indicates how long the method takes to execute.</li>
+      </ul>
+    </li>
+
+    <li>When you are zoomed out, a bar indicates when a method is executing.</li>
+
+ </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="16">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image010.png"
+         alt=""
+         width="300px" />
+       <p class="img-caption">
+        <strong>Figure 8. </strong>Segment for method on the timeline.
+      </p>
+    </div>
+
+    <li>Zoom into the graph, and the bar for each method expands into a colored
+      U-shape, where the left side of the U indicates the start, and the right side
+      the end of the method's execution.</li>
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="17">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/traceview/gettingstarted_image011.png"
+         alt=""
+         width="440px" />
+      <p class="img-caption">
+        <strong>Figure 9. </strong>Traceview Profiling pane with callstack.
+      </p>
+    </div>
+
+    <li>The <b>Profiling</b> pane shows a list of methods.
+
+      <ul>
+        <li>Select a method to see who called it (Parent) and who it's
+          calling (Children).</li>
+
+        <li>The selected method is also highlighted in the <b>Timeline</b> pane.</li>
+
+        <li>The columns show exclusive and inclusive CPU and real times, percentages,
+        ratios, and how often a method was called.</li>
+
+        <li>The <em>exclusive time</em> is the time spent just in the method itself, which can
+        help you find issues within that specific method.</li>
+
+        <li>The <em>inclusive time</em> is for the method and all methods it calls, which
+        can help you find problems with your call tree.</li>
+
+      <li>The <b>Calls+Rec</b> column shows how many times a method was called recursively,
+        which can help you track down performance issues.</li>
+      </ul>
+    </li>
+  </ol>
+</div></li>
+</ul>
