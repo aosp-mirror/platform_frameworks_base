@@ -1,0 +1,330 @@
+page.title=Hierarchy Viewer Walkthrough
+meta.tags="android, performance, profiling, tools, rendering, hierarchyviewer"
+page.tags="android", "performance", "profiling", "tools", "rendering", "hierarchyviewer"
+page.metaDescription=Visualize your app's view hierarchy to help you simplify your layouts.
+page.image=tools/performance/thumbnails/tools_hierarchy_viewer.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#WorkingWithHierarchyViewer">Working with Hierarchy Viewer</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/setup.html">
+    Device Setup for Hierarchy Viewer</a></li>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/profiling.html">
+    Profiling with Hierarchy Viewer</a></li>
+  <li><a href=
+    "http://developer.android.com/tools/debugging/debugging-ui.html#viewhierarchy">Hierarchy Viewer
+    </a></li>
+  <li><a href="/guide/topics/ui/overview.html#Layout">View Hierarchies</a></li>
+  <li><a href="{@docRoot}tools/performance/importing-legacy-apps.html">
+    Importing Legacy Apps into Android Studio<a></li>
+  <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
+</ul>
+
+</div>
+
+  <p>This walkthrough shows the basic usage and workflow for the Hierarchy Viewer tool.</p>
+
+  <p>The Hierarchy Viewer tool visualizes your app's <a href=
+  "http://developer.android.com/guide/topics/ui/overview.html#Layout">view hierarchy</a> and
+  profiles the relative rendering speed for each view.
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Simplifying your view hierarchy to reduce overdraw, and make it easier to manage.</li>
+
+    <li>Finding potential rendering performance bottlenecks related to the structure and shape of your
+    view hierarchy.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device set up to work with Hierarchy Viewer:</li>
+
+    <li style="list-style: none; display: inline">
+      <ol>
+        <li>You must have <a href=
+        "http://developer.android.com/tools/device.html#developer-device-options">Developer
+        Options</a> enabled on your mobile device. You must use a physical device to get
+        accurate measurements.</li>
+
+        <li>Set an {@code ANDROID_HVPROTO} environment variable on the desktop machine
+          that is connected to your device. For more information, see
+          <a href="{@docRoot}tools/performance/hierarchy-viewer/setup.html">Device Setup for Hierarchy Viewer</a>.</li>
+      </ol>
+    </li>
+
+    <li>Debuggable app code with a view hierarchy. Use your own code, or the code for the <a href=
+    "https://github.com/udacity/Sunshine-Version-2">Sunshine</a> sample app from the <a href=
+    "https://www.udacity.com/course/ud853">Android Fundamentals Udacity course</a>.</li>
+  </ul>
+
+  <h2 id="WorkingWithHierarchyViewer">Working with Hierarchy Viewer</h2>
+
+<ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+  <ol class="padded">
+
+     <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image001.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Starting Android Device Monitor.
+      </p>
+    </div>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+
+    <li>From Android Studio, start the Android Device Monitor: <b>Tools &gt; Android &gt;
+    Android Device Monitor</b>.</li>
+
+    <li>Allow <b>USB Debugging</b> on your phone (if asked).</li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="6">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image005.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Android Device Monitor.
+      </p>
+    </div>
+
+    <li>Figure 2 illustrates what is initially shown in the Device Monitor tool. This varies
+      depending on your setup.
+      <p>Make sure your device
+      and the package for your application are showing in the Devices (DDMS mode) or Windows
+      (Hierarchy Viewer mode) tab. You can choose <b>Window &gt; Reset Perspective</b> to get
+      back to the default arrangement.</p>
+      <p>If the app does not appear, make sure you
+      followed the <a href="{@docRoot}tools/performance/hierarchy-viewer/setup.html"> device
+      setup instructions</a>, then start over at step 1.</p></li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="7">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image002.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 3. </strong>Changing Perspective to Hierarchy Viewer.
+     </p>
+    </div>
+
+    <li>In Android Device Monitor (ADM), in the menu bar, choose <b>Window &gt; Open
+    Perspective</b>, and in the popup click <b>Hierarchy View</b>.<br>
+
+    <p>OR</p>
+    <p> Click the <b>Hierarchy View</b> button if it's already visible.<br>
+    <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image003.png">
+    </p></li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="9">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image006.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 4. </strong>Hierarchy Viewer layout.
+     </p>
+    </div>
+
+    <li>If not already open, the Hierarchy View panes open.<br>
+      The example screen in Figure&nbsp;4 shows an example of these panes.</li>
+
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="10">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image004.png"
+         alt=""
+         width="240px" />
+      <p class="img-caption">
+        <strong>Figure 5. </strong>Resetting the Perspective.
+      </p>
+    </div>
+
+    <li>If you see a different window arrangement, in Android Device Manager, use
+    <b>Window &gt; Reset Perspective</b> to return to the default layout for this tutorial.
+
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="11">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image007.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 6. </strong>Populated Hierarchy Viewer.
+      </p>
+    </div>
+
+    <li>Double-click your application in the Windows tab. This populates the panes with the
+      view hierarchy of your application.
+      This display is a static representation of the complete view hierarchy defined for the
+      app.</li>
+
+    <li>You can adjust the sizes of the panes and ADM will preserve your
+      arrangement in future sessions.</li>
+
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="13">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image008.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+      <strong>Figure 7. </strong>Hierarchy Viewer panes.
+      </p>
+    </div>
+
+    <li>If necessary, click the <b>Layout View</b> tab to hide the Console and show a wireframe of
+    your layout. The outline of the currently selected view is red. Click an outline to select
+    it.</li>
+
+    <li>The rest of the panes:
+
+      <ul>
+        <li>The <b>Tree Overview</b> in the upper right gives you a bird's-eye view of your
+        app's complete <a href=
+        "http://developer.android.com/guide/topics/ui/overview.html#Layout">View</a> <a href=
+        "http://developer.android.com/guide/topics/ui/overview.html#Layout">Hierarchy</a>.</li>
+
+        <li>In the <b>Tree Overview</b>, move the gray viewport rectangle to change what section of
+        your hierarchy shows in the <b>Tree View</b> pane (in the center).</li>
+
+        <li>In the <b>Tree View</b>, you can drag and zoom the tree using your mouse.</li>
+      </ul>
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="15">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image009.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 7. </strong>Parts of the View node display.
+      </p>
+    </div>
+
+    <li>Click on a View node to display details. Here is an annotated close-up of a node
+      and its details.</li>
+
+
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="16">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image010.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 8. </strong>Location of View Properties tab.
+      </p>
+    </div>
+
+    <li>Click the <b>View Properties</b> tab at the top right (next to the Windows tab) to see
+        properties of the selected View node.</li>
+
+   </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="17">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image011.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 9. </strong>Rendering a view in a popup.
+      </p>
+    </div>
+
+    <li>Double-click a View node in the Tree View to render it in a popup window.</li>
+
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="18">
+
+  <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image012.png"
+         alt=""
+         width="240px" />
+      <p class="img-caption">
+        <strong>Figure 10. </strong>Node with its type and id.
+      </p>
+    </div>
+
+    <li>Nodes in the Tree View show a Type, which indicates the View class,
+      and an id, which is the view identifier in your code.</li>
+
+  </ol>
+</div></li>
+</ul>

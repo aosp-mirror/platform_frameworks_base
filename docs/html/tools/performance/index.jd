@@ -1,0 +1,73 @@
+page.title=Performance Profiling Tools
+meta.tags="android, develop, performance, profiling, tools, gather"
+page.tags="android", "develop", "performance", "profiling", "tools" "gather"
+page.metaDescription=Android Studio profiling tools for evaluating your app's performance.
+page.article=true
+
+@jd:body
+
+  <p>Putting pixels on the screen involves four primary pieces of hardware.
+  To greatly simplify, the CPU computes display lists, the GPU renders images to
+  the display, the memory stores images and data, and the battery provides
+  electrical power. Each of these pieces of hardware has constraints; pushing
+  or exceeding those constraints causes your app to be slow, have
+  bad display performance, or exhaust the battery.
+
+  <p>To discover what causes your specific performance problems, you need to
+  take a look under the hood, use tools to collect data about your app's
+  execution behavior, surface that data as lists and
+  graphics, understand and analyze what you see, and improve your code.</p>
+
+  <p>Android Studio and your device provide profiling tools to record and
+  visualize the rendering, compute, memory, and battery performance of your
+  app.</p>
+
+<h2 id="rendering-tools">Rendering Analysis Tools</h2>
+
+<p>Visualize the rendering behavior and performance of your app.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/performance/rendering"
+    data-cardSizes="9x3"
+    data-maxResults="6">
+  </div>
+</div>
+
+<h2 id="memory-tools">Memory Analysis Tools</h2>
+
+<p>Visualize the memory behavior and performance of your app.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/performance/memory"
+    data-cardSizes="9x3"
+    data-maxResults="6">
+  </div>
+</div>
+
+<h2 id="cpu-tools">Compute Analysis Tools</h2>
+
+<p>Visualize the CPU behavior and performance of your app.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/performance/cpu"
+    data-cardSizes="9x3"
+    data-maxResults="4">
+  </div>
+</div>
+
+<h2 id="battery-tools">Battery Analysis Tools</h2>
+
+<p>Visualize the battery behavior and performance of your app.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/performance/battery"
+    data-cardSizes="9x3"
+    data-maxResults="4">
+  </div>
+</div>
+
+

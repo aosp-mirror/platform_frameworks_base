@@ -1,0 +1,124 @@
+page.title=Battery Historian Charts
+meta.tags="android, performance, profiling, tools, battery, historian, batterydrain
+page.tags="android", performance", "profiling", "tools", "battery", "historian" "batterydrain"
+page.metaDescription=Examine and interpret the collected battery usage data in your browser.
+page.image=tools/performance/thumbnails/tools_battery_historian.png
+page.article=true
+
+@jd:body
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#BatteryHistorianCharts">Battery Historian Charts</a></li>
+  <li><a href="#FilteringBatterystats">Filtering batterystats output</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/batterystats-battery-historian/index.html">
+    Batterystats &amp; Battery Historian Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/systrace/index.html">
+    Systrace Walkthrough</a></li>
+</ul>
+
+</div>
+
+
+  <p id="BatteryHistorianCharts">
+    The Battery Historian chart graphs power-relevant events over time.</p>
+
+  <p>Each row shows a colored bar segment when a system component is active
+   and thus drawing current from the battery. The chart does <i>not</i> show <i>how much</i> battery was used by the
+  component, only that the app was active. Charts are organized by category.</p>
+
+  <div class="figure" style="">
+  <img src="{@docRoot}images/tools/performance/batterystats-battery-historian/gettingstarted_image02.png"
+         alt=""
+         height="" />
+    <p class="img-caption">
+      <strong>Figure 1. </strong>Example of Battery Historian output.
+    </p>
+  </div>
+
+  <h3>Battery usage categories</h3>
+
+  <ul>
+    <li><b>battery_level</b>: When the battery level was recorded and logged.
+    Reported in percent, where 093 is 93%. Provides an overall measure of how fast the battery
+    is draining.</li>
+
+    <li><b>top</b>: The application running at the top; usually, the application that is visible to
+    the user. If you want to measure battery drain while your app is active, make sure
+    it's the top app. If you want to measure battery drain while your app is in
+    the background, make sure it's <i>not</i> the top app.</li>
+
+    <li><b>wifi_running</b>: Shows that the Wi-Fi network connection was active.</li>
+
+    <li><b>screen</b>: Screen is turned on.</li>
+
+    <li><b>phone_in_call</b>: Recorded when the phone is in a call.</li>
+
+    <li><b>wake_lock</b>: App wakes up, grabs a lock, does small work, then goes back to sleep.
+    This is one of the most important pieces of information. Waking up the phone is expensive, so
+    if you see lots of short bars here, that might be a problem.</li>
+
+    <li><b>running</b>: Shows when the CPU is awake. Check whether it is awake and asleep
+      when you expect it to be.</li>
+
+    <li><b>wake_reason</b>: The last thing that caused the kernel to wake up. If
+    it's your app, determine whether it was necessary.</li>
+
+    <li><b>mobile_radio</b>: Shows when the radio was on. Starting the radio is battery expensive.
+    Many narrow bars close to each other can indicate opportunities for
+    batching and other optimizations.</li>
+
+    <li><b>gps</b>: Indicates when the GPS was on. Make sure this is what you expect.</li>
+
+    <li><b>sync:</b> Shows when an app was syncing with a backend. The sync bar also shows which
+    app did the syncing. For users, this can show apps where they might turn syncing off to save
+    battery. Developers should sync as little as possible and only as often as necessary.</li>
+  </ul>
+
+
+  <p class="note"><strong>Note:</strong>
+    Not every chart will show every category.</p>
+
+  <h2 id="FilteringBatterystats">Filtering batterystats output</h2>
+
+  <p>You can gather additional information from the <code>batterystats.txt</code> file
+    where you saved the output from the batterystats command.</p>
+
+  <div class="figure" style="">
+<img src="{@docRoot}images/tools/performance/batterystats-battery-historian/gettingstarted_image03.png"
+         alt=""
+         width="340px" />
+    <p class="img-caption">
+      <strong>Figure 2.</strong>Example of filtered batterystats output.
+    </p>
+  </div>
+
+  <p>Open the file in a text editor and search for:</p>
+
+  <ol>
+    <li><b><code>Battery History</code></b>: A time series of power-relevant events, such as
+    screen, Wi-Fi, and app launch. These are also visible through Battery Historian.</li>
+
+    <li><b><code>Per-PID Stats</code></b>: How long each process ran.</li>
+
+    <li><b><code>Statistics since last charge</code></b>: System-wide statistics, such as
+    cell signal levels and screen brightness. Provides an overall picture of what's happening
+    with the device. This information is especially useful
+    to make sure no external events are affecting your experiment.</li>
+
+    <li><b><code>Estimated power use (mAh)</code></b> by UID and peripheral: This is currently an
+    extremely rough estimate and should not be considered experiment data.</li>
+
+    <li><b><code>Per-app mobile ms per packet</code></b>: Radio-awake-time divided by packets sent.
+    An efficient app will transfer all its traffic in batches, so the lower this number the
+    better.</li>
+
+    <li><b><code>All partial wake locks</code></b>: All app-held wakelocks, by aggregate
+    duration and count.</li>
+  </ol>
