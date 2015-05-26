@@ -8520,13 +8520,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
 
+        // Find any running services associated with this app and stop if needed.
+        mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
+
         if (!killProcess) {
             return;
         }
 
         // Determine if the process(es) for this task should be killed.
         final String pkg = component.getPackageName();
-        ArrayList<ProcessRecord> procsToKill = new ArrayList<ProcessRecord>();
+        ArrayList<ProcessRecord> procsToKill = new ArrayList<>();
         ArrayMap<String, SparseArray<ProcessRecord>> pmap = mProcessNames.getMap();
         for (int i = 0; i < pmap.size(); i++) {
 
@@ -8555,20 +8558,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
+                if (proc.foregroundServices) {
+                    // Don't kill process(es) with foreground service.
+                    return;
+                }
+
                 // Add process to kill list.
                 procsToKill.add(proc);
             }
         }
 
-        // Find any running services associated with this app and stop if needed.
-        mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
-
         // Kill the running processes.
         for (int i = 0; i < procsToKill.size(); i++) {
             ProcessRecord pr = procsToKill.get(i);
-            if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+            if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
+                    && pr.curReceiver == null) {
                 pr.kill("remove task", true);
             } else {
+                // We delay killing processes that are not in the background or running a receiver.
                 pr.waitingToKill = "remove task";
             }
         }
@@ -18312,8 +18319,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final boolean applyOomAdjLocked(ProcessRecord app,
-            ProcessRecord TOP_APP, boolean doingAll, long now) {
+    private final boolean applyOomAdjLocked(ProcessRecord app, boolean doingAll, long now) {
         boolean success = true;
 
         if (app.curRawAdj != app.setRawAdj) {
@@ -18335,8 +18341,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Setting process group of " + app.processName
                     + " to " + app.curSchedGroup);
-            if (app.waitingToKill != null &&
-                    app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+            if (app.waitingToKill != null && app.curReceiver == null
+                    && app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
                 app.kill(app.waitingToKill, true);
                 success = false;
             } else {
@@ -18566,7 +18572,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         computeOomAdjLocked(app, cachedAdj, TOP_APP, doingAll, now);
 
-        return applyOomAdjLocked(app, TOP_APP, doingAll, now);
+        return applyOomAdjLocked(app, doingAll, now);
     }
 
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
@@ -18784,7 +18790,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                applyOomAdjLocked(app, TOP_APP, true, now);
+                applyOomAdjLocked(app, true, now);
 
                 // Count the number of process types.
                 switch (app.curProcState) {
