@@ -1,4 +1,4 @@
-page.title=Sample: Native Activity
+page.title=Sample: native-activity
 @jd:body
 
 <div id="qv-wrapper">
@@ -6,102 +6,167 @@ page.title=Sample: Native Activity
       <h2>On this page</h2>
 
       <ol>
-        <li><a href="#bb">Before Beginning</a></li>
-        <li><a href="#intro">Introduction</a></li>
-        <li><a href="#hiw">How It Works</a></li>
-        <li><a href="#naa">Native Activities and Applications</a></li>
+        <li><a href="#am">AndroidManifest.xml</a></li>
+        <li><a href="#anm">Android.mk</a></li>
+        <li><a href="#apm">Application.mk</a></li>
+        <li><a href="#mac">main.c</a></li>
           </ol>
         </li>
       </ol>
     </div>
   </div>
 
-<p>This is a very simple example of a purely native
+<p>The native-activity sample resides under the NDK installation root, in
+{@code samples/native-activity}. It is a very simple example of a purely native
 application, with no Java source code. In the absence of any Java source, the
-Java compiler still creates an executable stub for the Dalvik Virtual Machine
-("DVM") to run. The stub serves as a wrapper for the actual, native program,
-which lives in the .so file.</p>
-<p>The application itself simply renders a color onto the entire screen, and
-then changes the color partly in response to detected movement.</p>
-<h3>AndroidManifest.xml</h3>
-<p>Make sure not to specify an Android API level lower than 9.</p>
-<pre class="fragment">&lt;uses-sdk android:minSdkVersion="9" /&gt;
-</pre><p>Because this application has only native code, specify
-<code>android:hasCode</code> as <code>false</code>.</p>
-<pre class="fragment">&lt;application android:label="@string/app_name"
+Java compiler still creates an executable stub for the virtual machine to run.
+The stub serves as a wrapper for the actual, native program, which lives in the {@code .so}
+file.</p>
+
+<p>The app itself simply renders a color onto the entire screen, and
+then changes the color partly in response to movement that it detects.</p>
+
+<h2 id="am">AndroidManifest.xml</h2>
+
+<p>An app with only native code must not specify an Android API level lower than 9, which introduced
+the <a href="{@docRoot}ndk/guides/concepts.html#naa">{@code NativeActivity}</a> framework class.</p>
+
+<pre class="no-pretty-print">
+&lt;uses-sdk android:minSdkVersion="9" /&gt;
+</pre>
+
+<p>The following line declares {@code android:hasCode} as {@code false}, as this app has only
+native code&ndash;no Java.
+</p>
+
+<pre class="no-pretty-print">
+&lt;application android:label="@string/app_name"
 android:hasCode="false"&gt;
-</pre><p>Declare the <code>NativeActivity</code> class.</p>
-<pre class="fragment">    &lt;activity android:name="android.app.NativeActivity"
-</pre><p>For <code>android:value</code>, provide the name of the shared library
-to be built, minus the initial <code>lib</code> and the <code>.so</code>
-extension. This value must be the same as the one you described for
-<code>LOCAL_MODULE</code> in <code>Android.mk</code>.</p>
-<pre class="fragment">        &lt;meta-data android:name="android.app.lib_name"
-                android:value="native-activity" /&gt;
-</pre><h3>Android.mk</h3>
-<p>This file tells the build system the following information:</p>
-<p>The name of the shared library to generate.</p>
-<pre class="fragment">LOCAL_MODULE    := native-activity
-</pre><p>The name of the native source-code file.</p>
-<pre class="fragment">LOCAL_SRC_FILES := main.c
-</pre><p>A list of external libraries that will be used in building the binary,
-each preceded by the <code>-l</code> (link-against) option.</p>
+</pre>
+
+<p>The next line declares the {@code NativeActivity} class.</p>
+
+<pre class="no-pretty-print">
+&lt;activity android:name="android.app.NativeActivity"
+</pre>
+
+<p>Finally, the manifest specifies {@code android:value} as the name of the shared library to be
+built, minus the initial {@code lib} and the {@code .so} extension. This value must be the same as
+the name of {@code LOCAL_MODULE} in {@code Android.mk}.</p>
+
+<pre class="no-pretty-print">
+&lt;meta-data android:name="android.app.lib_name"
+        android:value="native-activity" /&gt;
+</pre>
+
+<h2 id="anm">Android.mk</h2>
+<p>This file begins by providing the name of the shared library to generate.</p>
+
+<pre class="no-pretty-print">
+LOCAL_MODULE    := native-activity
+</pre>
+
+<p>Next, it declares the name of the native source-code file.</p>
+
+<pre class="no-pretty-print">
+LOCAL_SRC_FILES := main.c
+</pre>
+
+<p>Next, it lists the external libraries for the build system to use in building the binary. The
+{@code -l} (link-against) option precedes each library name.</p>
+
 <ul>
-<li>log is a logging library.</li>
-<li>android encompasses the standard Android support APIs for NDK. The <a href="./md_3__key__topics__libraries__s_t_a_b_l_e-_a_p_i_s.html">Stable APIs</a>
-section discusses these in more detail.</li>
-<li>EGL, standardized by Khronos, corresponds to the platform-specific portion
-of the graphics API.</li>
-<li>OpenGL ES, the version of OpenGL for Android, depends on EGL.</li>
+<li>{@code log} is a logging library.</li>
+<li>{@code android} encompasses the standard Android support APIs for NDK. For more information about
+the APIs that Android and the NDK support, see  <a href="stable_apis.html">Android NDK Native
+APIs</a>.</li>
+<li>{@code EGL} corresponds to the platform-specific portion of the graphics API.</li>
+<li>{@code GLESv1_CM} corresponds to OpenGL ES, the version of OpenGL for Android. This library
+depends on EGL.</li>
 </ul>
-<p>Note that, for each library:</p>
+
+<p>For each library:</p>
+
 <ul>
-<li>The actual file name starts with <code>lib</code>, and ends with the
-<code>.so</code> extension. For example, the actual file name for the
-<code>log</code> library is <code>liblog.so</code>.</li>
-<li>The library lives in the following directory, relative to the NDK root:
-<code>&lt;ndk&gt;/platforms/android-&lt;sdk_version&gt;/arch-&lt;abi&gt;/usr/lib/</code>.</li>
+<li>The actual file name starts with {@code lib}, and ends with the
+{@code .so} extension. For example, the actual file name for the
+{@code log} library is {@code liblog.so}.</li>
+<li>The library resides in the following directory, NDK root:
+{@code &lt;ndk&gt;/platforms/android-&lt;sdk_version&gt;/arch-&lt;abi&gt;/usr/lib/}.</li>
 </ul>
-<pre class="fragment">LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
-</pre><p>A static library, <code>android_native_app_glue</code>, that the
-application uses to manage <code>NativeActivity</code> lifecycle events, along
-with touch input.</p>
-<pre class="fragment">LOCAL_STATIC_LIBRARIES := android_native_app_glue
-</pre><p>The final line tells the build system to build this static library.
-<code>ndk-build</code> places the built library
-(<code>libandroid_native_app_glue.a</code>) into the <code>obj</code> directory
-generated during the build process. The next sample discusses the
-android_native_app_glue in more detail.</p>
-<pre class="fragment">$(call import-module,android/native_app_glue)
-</pre><p>For more information about the Application.mk file, consult the <a
-href="./md_3__key__topics__building__a_p_p_l_i_c_a_t_i_o_n-_m_k.html">Application.mk section</a> of this guide.</p>
-<h3><code>Application.mk</code></h3>
+
+<pre class="no-pretty-print">
+LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
+</pre>
+
+<p>The next line provides the name of the static library, {@code android_native_app_glue}, which the
+application uses to manage {@code NativeActivity} lifecycle events and touch input.</p>
+
+<pre class="no-pretty-print">
+LOCAL_STATIC_LIBRARIES := android_native_app_glue
+</pre>
+
+<p>The final line tells the build system to build this static library.
+The {@code ndk-build} script places the built library
+({@code libandroid_native_app_glue.a}) into the {@code obj} directory
+generated during the build process. For more information about the {@code android_native_app_glue}
+library, see its {@code android_native_app_glue.h} header and corresponding {@code .c}source file.
+</p>
+
+
+<pre class="no-pretty-print">
+$(call import-module,android/native_app_glue)
+</pre>
+
+<p>For more information about the {@code Android.mk} file, see
+<a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a>.</p>
+
+
+<h2 id="apm">Application.mk</h2>
+
 <p>This line defines the minimum level of Android API Level support.</p>
-<pre class="fragment">APP_PLATFORM := android-10
-</pre><p>Because there is no ABI definition, the build system defaults to
-building only for armeabi.</p>
-<h3>main.c</h3>
+
+<pre class="no-pretty-print">
+APP_PLATFORM := android-10
+</pre>
+
+<p>Because there is no ABI definition, the build system defaults to building only for
+{@code armeabi}.</p>
+
+<h2 id="mac">main.c</h2>
 <p>This file essentially contains the entire progam.</p>
+
 <p>The following includes correspond to the libraries, both shared and static,
-enumerated in <code>Android.mk</code>.</p>
-<pre class="fragment">#include &lt;EGL/egl.h&gt;
+enumerated in {@code Android.mk}.</p>
+
+<pre class="no-pretty-print">
+#include &lt;EGL/egl.h&gt;
 #include &lt;GLES/gl.h&gt;
 
 
 #include &lt;android/sensor.h&gt;
 #include &lt;android/log.h&gt;
 #include &lt;android_native_app_glue&gt;
-</pre><p><code>android_native_app_glue</code> calls the following function,
+</pre>
+
+<p>The {@code android_native_app_glue} library calls the following function,
 passing it a predefined state structure. It also serves as a wrapper that
-simplifies handling of <code>NativeActivity</code> callbacks.</p>
-<pre class="fragment">void android_main(struct android_app* state) {
-</pre><p>Next, the program handles events queued by the glue library. The event
+simplifies handling of {@code NativeActivity} callbacks.</p>
+
+<pre class="no-pretty-print">
+void android_main(struct android_app* state) {
+</pre>
+
+<p>Next, the program handles events queued by the glue library. The event
 handler follows the state structure.</p>
-<pre class="fragment">struct engine engine;
+
+<pre class="no-pretty-print">
+struct engine engine;
 
 
-// Make sure glue isn't stripped by suppressing link-time optimization that
-removes unreferenced code.
+
+// Suppress link-time optimization that removes unreferenced code
+// to make sure glue isn't stripped.
 app_dummy();
 
 
@@ -110,21 +175,29 @@ state-&gt;userData = &amp;engine;
 state-&gt;onAppCmd = engine_handle_cmd;
 state-&gt;onInputEvent = engine_handle_input;
 engine.app = state;
-</pre><p>The application prepares to start monitoring the sensors, using the
-APIs in <code>sensor.h</code>.</p>
-<pre class="fragment">    engine.sensorManager = ASensorManager_getInstance();
+</pre>
+
+<p>The application prepares to start monitoring the sensors, using the
+APIs in {@code sensor.h}.</p>
+
+<pre class="no-pretty-print">
+    engine.sensorManager = ASensorManager_getInstance();
     engine.accelerometerSensor =
                     ASensorManager_getDefaultSensor(engine.sensorManager,
-                    ASENSOR_TYPE_ACCELEROMETER);
+                        ASENSOR_TYPE_ACCELEROMETER);
     engine.sensorEventQueue =
                     ASensorManager_createEventQueue(engine.sensorManager,
-                    state-&gt;looper, LOOPER_ID_USER, NULL, NULL);
-</pre><p>Now, a loop begins, in which the application polls the system for
+                        state-&gt;looper, LOOPER_ID_USER, NULL, NULL);
+</pre>
+
+<p>Next, a loop begins, in which the application polls the system for
 messages (sensor events). It sends messages to
-<code>android_native_app_glue</code>, which checks to see whether they match
-any <code>onAppCmd</code> events defined in <code>android_main</code>. When a
+{@code android_native_app_glue}, which checks to see whether they match
+any {@code onAppCmd} events defined in {@code android_main}. When a
 match occurs, the message is sent to the handler for execution.</p>
-<pre class="fragment">while (1) {
+
+<pre class="no-pretty-print">
+while (1) {
         // Read all pending events.
         int ident;
         int events;
@@ -135,7 +208,7 @@ match occurs, the message is sent to the handler for execution.</p>
         // If animating, we loop until all events are read, then continue
         // to draw the next frame of animation.
         while ((ident=ALooper_pollAll(engine.animating ? 0 : -1, NULL,
-&amp;events,
+                &amp;events,
                 (void**)&amp;source)) &gt;= 0) {
 
 
@@ -165,9 +238,12 @@ match occurs, the message is sent to the handler for execution.</p>
             return;
         }
     }
-</pre><p>Once the queue is empty, and the program exits the polling loop, the
+</pre>
+
+<p>Once the queue is empty, and the program exits the polling loop, the
 program calls OpenGL to draw the screen.</p>
-<pre class="fragment">    if (engine.animating) {
+<pre class="no-pretty-print">
+    if (engine.animating) {
         // Done with events; draw next animation frame.
         engine.state.angle += .01f;
         if (engine.state.angle &gt; 1) {
@@ -179,16 +255,5 @@ program calls OpenGL to draw the screen.</p>
         // is no need to do timing here.
         engine_draw_frame(&amp;engine);
     }
-} </pre> </div></div><!-- contents -->
-</div><!-- doc-content -->
-<!-- start footer part -->
-<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
-  <ul>
-    <li class="footer">Generated on Wed Jun 25 2014 00:51:19 for NDK
-Programmer&#39;s Guide by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
-  </ul>
-</div>
-</body>
-</html>
+}
+</pre>
