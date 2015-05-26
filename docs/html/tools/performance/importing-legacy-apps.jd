@@ -1,0 +1,149 @@
+page.title=Importing Legacy Apps into Android Studio
+meta.tags="android, performance, profiling, tools"
+page.tags="android", "performance", "profiling", "tools"
+page.metaDescription=Required changes when importing legacy apps into Android Studio.
+page.article=true
+
+@jd:body
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#StepsForImporting">Steps for Importing</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="/tools/device.html">Using Hardware Devices</a></li>
+  <li><a href="/tools/help/index.html">Tools</a></li>
+</ul>
+
+</div>
+
+
+  <p>Importing some pre-Android-1.0 projects into Android 1.0 or newer can trigger a series of
+  errors. This document shows you how to resolve them, using a version of the Sunshine app used in
+  the <a href="https://www.udacity.com/course/ud853">Android Fundamentals Udacity Course</a> as an
+  example.</p>
+
+  <p><b>CAVEAT:</b> As with all documentation of this kind, the details are likely to vary for each
+  application and each update of Android Studio.</p>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>The latest version of <a href="http://developer.android.com/sdk/index.html">Android
+    Studio</a> (this document uses version 1.1).</li>
+
+    <li>It helps to know how to <a href="https://developer.android.com/training/index.html">build
+    and run apps from Android Studio</a> on your device.</li>
+
+    <li>To use Sunshine, you need to download code from <a href=
+    "https://github.com/">github.com</a>. More info at <a href=
+    "https://help.github.com/">help.github.com</a>.</li>
+  </ul>
+
+  <h2 id="StepsForImporting">Steps for Importing Sunshine into Android Studio 1.1.0</h2>
+
+  <ol>
+    <li>Download Sunshine ZIP from GitHub: <a href=
+    "https://github.com/udacity/sunshine/tree/6.10-update-map-intent">https://github.com/udacity/sunshine/tree/6.10-update-map-intent</a>.
+    (If you are having any problems with Android Studio or the app, use the following version, or
+    your own app, to follow along with the example.<a href=
+    "https://github.com/udacity/sunshine/tree/3.13-add-share-action-provider">https://github.com/udacity/sunshine/tree/3.13-add-share-action-provider</a>)
+
+    <li>Unzip the application to extract the code folder.</li>
+
+    <li>Start Android Studio. (This works best if you close all projects, then restart.)</li>
+
+    <li>Click <b>Import</b> <b>project (Eclipse ADT, Gradle, etc.)</b>.
+      <br><img src="{@docRoot}images/tools/performance/import_image001.png">
+    </li>
+
+    <li>In the popup, find and select the Sunshine-6-10-updated-map-intent folder and click
+      <b>OK</b>.
+      <br><img src="{@docRoot}images/tools/performance/import_image002.png">
+    </li>
+
+    <li>If prompted, choose a destination folder for your project. If prompted to choose a build
+    system, choose Gradle. (These prompts vary, depending on your project and Android Studio
+    version.) If you need more guidance, see this <a href=
+    "http://www.lynda.com/articles/eclipse-into-android-studio">Lynda tutorial</a>.</li>
+
+    <li>Wait for the import to complete. If you see no errors, you are now ready to work with your
+    app.
+
+    <p><b>If you get a Gradle error:</b></p>
+
+    <li>If you get a Gradle error, you have some extra work to do.(Because the Import
+    didn&#40t finish, at this point, you may only see the <b>Gradle
+    Scripts</b> directory in your Project view.)</li>
+
+    <li>You may see the link <b>Install missing platform(s) and sync
+    project</b>, or a link to install missing build tools.
+    Click whatever link and
+    proceed.</li>
+
+    <li>The next time through, your build will fail with:
+      <br><img src="{@docRoot}images/tools/performance/import_image003.png">
+    </li>
+
+    <li>Click the <b>Fix plugin version and re-import project</b> link
+    in the error message. This will rebuild the app and present you with new of errors.
+      <br><img src="{@docRoot}images/tools/performance/import_image004.png">
+    </li>
+
+    <li>Click the <b>Gradle Settings</b> link in the error message.</li>
+
+    <li>Check the <b>Use auto-import</b> and click <b>OK</b>.
+      <br><img src="{@docRoot}images/tools/performance/import_image005.png">
+    </li>
+
+    <li>Expand the project hierarchy and find the <b>build.gradle file</b>.The file you are looking
+      for is not the one showing at the top level, but the one inside <b>Sunshine</b> <b>&gt;</b>
+      <b>app &gt; build.gradle</b>, as shown below.
+      <br><img src="{@docRoot}images/tools/performance/import_image006.png">
+   </li>
+
+    <li>Double-click the <code>build.gradle</code> file.</li>
+
+    <li>Make the following changes to the file:</li>
+      <ul>
+        <li>Set <code>compileSdkVersion 21</code></li>
+
+        <li>Set <code>targetSdkVersion 21</code></li>
+
+        <li>Replace <code>runProguard</code> with <code>minifyEnabled</code></li>
+      </ul>
+
+      <p>Your file should look like this: </p>
+        <img src="{@docRoot}images/tools/performance/import_image007.png">
+    </li>
+
+    <li>Save (Ctrl-S).</li>
+
+  <p>For the following two messages (Steps 18/19), what you see might vary. You might see either
+  message or both messages in sequence. Click the appropriate links to continue until the Language
+  Level Changed dialog opens.</p>
+
+    <li>In the code view bar, click the <b>Try again</b> link.
+      <br><img src="{@docRoot}images/tools/performance/import_image008.png">
+    </li>
+
+    <li>If you see these warnings, click the <b>Sync now</b> link.
+      <br><img src="{@docRoot}images/tools/performance/import_image009.png">
+    </li>
+
+    <li>In the Language Level Changed dialog, click <b>Yes</b>. And if you get the Gradle Running
+      dialog, <b>Yes</b> again.
+      <br><img src="{@docRoot}images/tools/performance/import_image010.png">
+    </li>
+
+    <li>After the project reloads, run the app on your device. (If it crashes the first time, try
+    again, and it will run.)
+    <br><img src="{@docRoot}images/tools/performance/import_image011.png">
+    </li>
+  </ol>
+

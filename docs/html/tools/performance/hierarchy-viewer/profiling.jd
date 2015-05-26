@@ -1,0 +1,169 @@
+page.title=Profiling with Hierarchy Viewer
+meta.tags="android, performance, profiling, tools, rendering, hierarchyviewer
+page.tags="android", "performance", "profiling", "tools", "rendering", "hierarchyviewer"
+page.metaDescription=Profile the relative rendering speed for each view.
+page.image=tools/performance/thumbnails/tools_hierarchy_viewer_profiling.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#ProfilingWithHierarchyViewer">Profiling with Hierarchy Viewer</a></li>
+  <li><a href="#InterpretingResults">Interpreting Profiling Results</a></li>
+
+</ul>
+</div>
+
+<p>This walkthrough shows you how to profile your app's view hiearchy with
+  Hierarchy Viewer, and how to interpret the results.</p>
+
+<h2 id="WhatYouNeed">Prerequisites</h2>
+
+<ul>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/setup.html">
+    Device Setup for Hierarchy Viewer</a></li>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/index.html">
+    Hierarchy Viewer Walkthrough</a></li>
+</ul>
+
+<h2 id="ProfilingWithHierarchyViewer">Profiling Steps</h2>
+
+<ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+
+  <ol class="padded">
+
+  <div class="figure" style="">
+<img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image014.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>View hierarchy after profiling.
+      </p>
+    </div>
+
+    <li>Start Hierarchy Viewer for your app.</li>
+
+    <li>In the <b>Tree View</b> or the <b>Layout View</b>, click on the View node whose
+      children you want to profile.</li>
+
+    <li>To start profiling, click the small button with three circles
+<img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image013.png">
+      at the top of the Tree View.
+
+    </li>
+
+    <li>For large view hierarchies, profiling may take a few seconds.</li>
+
+    <li>Each view in your subtree gets three dots, which can be green, yellow, or red.
+
+      <ul>
+        <li>The left dot represents the Draw Process of the rendering pipeline.</li>
+        <li>The middle dot represents the Layout Phase.</li>
+        <li>The right dot represents the Execute Phase.</li>
+      </ul>
+    </li>
+
+</ol></div>
+
+</li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="5">
+
+    <div class="figure" style="">
+<img src="{@docRoot}images/tools/performance/hierarchy-viewer/gettingstarted_image015.png"
+         alt=""
+         width="240px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>How the colored dots relate<br>to the rendering pipeline.
+      </p>
+    </div>
+
+    <li>These dots roughly correspond to the Measure,
+     Layout, and Draw
+      phases of the processing pipeline.</li>
+
+    <li>The color of the dots indicates the relative performance
+      of this node in respect to all other profiled nodes.
+
+      <ul>
+        <li><strong>Green</strong> means the view renders faster than at least
+          half of the other views.</li>
+
+        <li><strong>Yellow</strong> means the view renders faster than the bottom
+          half of the other views.</li>
+
+        <li><strong>Red</strong> means the view is among the slowest
+         half of views.</li>
+      </ul>
+    </li>
+
+    </ol>
+</div></li>
+</ul>
+
+  <h2 id="InterpretingResults">Interpreting Hierarchy Viewer Profiling Results</h2>
+
+    <p>Hierarchy Viewer measures the <em>relative performance</em> of a
+      node</b>, so there are always red nodes in a profile, and it
+      doesn't necessarily mean that view is too slow for the users of
+      your app.</p>
+
+    <p>Hierarchy Viewer software rasterizes your Activity to acquire the timing
+      information. Rasterization is the process of taking a high-level primitive, such as a
+      circle or a vector font, and turning it into pixels on the screen. Typically,
+      rasterization is done by the GPU on your device, but in the case of
+      software rasterization, rendering is done on the CPU with
+      ordinary software. This means that the absolute
+      reported timings are correct relative to each other, but are bloated and vary
+      depending on the overall and changing CPU workload on your device and PC. Profile
+      several times to get a feel for the average measurements.</p>
+
+    <p>The following are guidelines for interpreting Hierarchy Viewer profiling output.</p>
+
+    <p>A red node is a potential problem in any situation where your app has
+      unexpectedly slow performance. In a relative setting, there is always a
+      slowest node; make sure it is the node you expect.
+      The following examples illustrate how to interpret red dots.</p>
+
+      <ul>
+        <li>Look for red dots in leaf nodes or view groups with only a few children. This
+          might point to a problem. Your app may not be slow, or it may not be slow on your
+          device, but you need to be aware of why that dot is red.
+          <a href="{@docRoot}tools/performance/systrace/index.html"> Systrace</a> or
+          <a href="{@docRoot}tools/performance/traceview/index.html"> Traceview</a>
+          can give you additional information. </li>
+
+        <li>If you have a view group with many children and a red measure phase, take a
+          look at the children to see how they are performing.</li>
+
+        <li>A view with yellow or even red dots might not be performing slowly on the
+          device. That's where the actual numbers are helpful.
+          <a href="{@docRoot}tools/performance/systrace/index.html"> Systrace</a> or
+          <a href="{@docRoot}tools/performance/traceview/index.html"> Traceview</a>
+          can give you additional information.</li>
+
+        <li>If the root view of a hierarchy has a red measure phase, red layout phase, and
+          yellow draw phase, this is somewhat typical, because it's the
+          parent of all the other views.</li>
+
+        <li>If a leaf node in a tree with 20+ views has a red draw phase, this <i>is</i> a
+          problem. Check your OnDraw method for code that shouldn't be
+          there.</li>
+       </ul>
