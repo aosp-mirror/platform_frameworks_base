@@ -1861,6 +1861,11 @@
     <!-- default window inset isRound property -->
     <bool name="config_windowIsRound">false</bool>
 
+    <!-- Override this value if the device has a chin, i.e. area that is not actual part of the
+         screen but you would like to be treated as a real display. The value is the height of the
+         chin. -->
+    <integer name="config_windowOutsetBottom">0</integer>
+
     <!-- Package name for default network scorer app; overridden by product overlays. -->
     <string name="config_defaultNetworkScorerPackageName"></string>
 

@@ -3050,7 +3050,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-            Rect outVisibleInsets, Rect outStableInsets, Configuration outConfig,
+            Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Configuration outConfig,
             Surface outSurface) {
         boolean toBeDisplayed = false;
         boolean inTouchMode;
@@ -3338,6 +3338,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
+            outOutsets.set(win.mOutsets);
             if (localLOGV) Slog.v(
                 TAG, "Relayout given client " + client.asBinder()
                 + ", requestedWidth=" + requestedWidth
@@ -9611,6 +9612,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mLastContentInsets.set(w.mContentInsets);
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
                 w.mLastStableInsets.set(w.mStableInsets);
+                w.mLastOutsets.set(w.mOutsets);
                 makeWindowFreezingScreenIfNeededLocked(w);
                 // If the orientation is changing, then we need to
                 // hold off on unfreezing the display until this
