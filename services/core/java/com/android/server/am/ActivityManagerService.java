@@ -5501,8 +5501,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Entire package setting changed
                     enabled = pm.getApplicationEnabledSetting(packageName,
                             (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_OWNER);
-                } catch (RemoteException e) {
-                    // Can't happen...
+                } catch (Exception e) {
+                    // No such package/component; probably racing with uninstall.  In any
+                    // event it means we have nothing further to do here.
+                    return;
                 }
                 packageDisabled = enabled != PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         && enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -5517,8 +5519,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     enabled = pm.getComponentEnabledSetting(
                             new ComponentName(packageName, changedClass),
                             (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_OWNER);
-                } catch (RemoteException e) {
-                    // Can't happen...
+                } catch (Exception e) {
+                    // As above, probably racing with uninstall.
+                    return;
                 }
                 if (enabled != PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         && enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
