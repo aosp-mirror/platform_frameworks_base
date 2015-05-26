@@ -124,37 +124,31 @@ import java.util.Set;
 public final class ActivityStackSupervisor implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+    private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
+    private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
-    private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
+    private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
+    private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
+    private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
+    private static final String TAG_VISIBLE_BEHIND = TAG + POSTFIX_VISIBLE_BEHIND;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
-
-    static final boolean DEBUG = DEBUG_ALL || false;
-    static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
-    static final boolean DEBUG_APP = DEBUG || false;
-    static final boolean DEBUG_CONTAINERS = DEBUG || false;
-    static final boolean DEBUG_IDLE = DEBUG || false;
-    static final boolean DEBUG_RELEASE = DEBUG || false;
-    static final boolean DEBUG_SAVED_STATE = DEBUG || false;
-    static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
-    static final boolean DEBUG_STATES = DEBUG || false;
-    static final boolean DEBUG_VISIBLE_BEHIND = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
 
     /** How long we wait until giving up on the last activity telling us it is idle. */
-    static final int IDLE_TIMEOUT = 10*1000;
+    static final int IDLE_TIMEOUT = 10 * 1000;
 
     /** How long we can hold the sleep wake lock before giving up. */
-    static final int SLEEP_TIMEOUT = 5*1000;
+    static final int SLEEP_TIMEOUT = 5 * 1000;
 
     // How long we can hold the launch wake lock before giving up.
-    static final int LAUNCH_TIMEOUT = 10*1000;
+    static final int LAUNCH_TIMEOUT = 10 * 1000;
 
     static final int IDLE_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG;
     static final int IDLE_NOW_MSG = FIRST_SUPERVISOR_STACK_MSG + 1;
@@ -631,7 +625,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
                 final ActivityRecord resumedActivity = stack.mResumedActivity;
                 if (resumedActivity == null || !resumedActivity.idle) {
-                    if (DEBUG_STATES) Slog.d(TAG, "allResumedActivitiesIdle: stack="
+                    if (DEBUG_STATES) Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
                              + stack.mStackId + " " + resumedActivity + " not idle");
                     return false;
                 }
@@ -691,7 +685,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (!isFrontStack(stack) && stack.mResumedActivity != null) {
-                    if (DEBUG_STATES) Slog.d(TAG, "pauseBackStacks: stack=" + stack +
+                    if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack +
                             " mResumedActivity=" + stack.mResumedActivity);
                     someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,
                             dontWait);
@@ -710,7 +704,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final ActivityRecord r = stack.mPausingActivity;
                 if (r != null && r.state != PAUSED && r.state != STOPPED && r.state != STOPPING) {
                     if (DEBUG_STATES) {
-                        Slog.d(TAG, "allPausedActivitiesComplete: r=" + r + " state=" + r.state);
+                        Slog.d(TAG_STATES,
+                                "allPausedActivitiesComplete: r=" + r + " state=" + r.state);
                         pausing = false;
                     } else {
                         return false;
@@ -1308,8 +1303,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // should look like we asked it to pause+stop (but remain visible),
             // and it has done so and reported back the current icicle and
             // other state.
-            if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r
-                    + " (starting in stopped state)");
+            if (DEBUG_STATES) Slog.v(TAG_STATES,
+                    "Moving to STOPPED: " + r + " (starting in stopped state)");
             r.state = STOPPED;
             r.stopped = true;
         }
@@ -2382,8 +2377,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r != null) {
-            if (DEBUG_IDLE) Slog.d(TAG, "activityIdleInternalLocked: Callers=" +
-                    Debug.getCallers(4));
+            if (DEBUG_IDLE) Slog.d(TAG_IDLE, "activityIdleInternalLocked: Callers="
+                    + Debug.getCallers(4));
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
             if (fromTimeout) {
@@ -2693,7 +2688,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityContainer activityContainer =
                 new VirtualActivityContainer(parentActivity, callback);
         mActivityContainers.put(activityContainer.mStackId, activityContainer);
-        if (DEBUG_CONTAINERS) Slog.d(TAG, "createActivityContainer: " + activityContainer);
+        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
+                "createActivityContainer: " + activityContainer);
         parentActivity.mChildContainers.add(activityContainer);
         return activityContainer;
     }
@@ -2702,8 +2698,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ArrayList<ActivityContainer> childStacks = parentActivity.mChildContainers;
         for (int containerNdx = childStacks.size() - 1; containerNdx >= 0; --containerNdx) {
             ActivityContainer container = childStacks.remove(containerNdx);
-            if (DEBUG_CONTAINERS) Slog.d(TAG, "removeChildActivityContainers: removing " +
-                    container);
+            if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "removeChildActivityContainers: removing "
+                    + container);
             container.release();
         }
     }
@@ -2711,8 +2707,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void deleteActivityContainer(IActivityContainer container) {
         ActivityContainer activityContainer = (ActivityContainer)container;
         if (activityContainer != null) {
-            if (DEBUG_CONTAINERS) Slog.d(TAG, "deleteActivityContainer: ",
-                    new RuntimeException("here").fillInStackTrace());
+            if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
+                    "deleteActivityContainer: callers=" + Debug.getCallers(4));
             final int stackId = activityContainer.mStackId;
             mActivityContainers.remove(stackId);
             mWindowManager.removeStack(stackId);
@@ -3077,17 +3073,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
     boolean requestVisibleBehindLocked(ActivityRecord r, boolean visible) {
         final ActivityStack stack = r.task.stack;
         if (stack == null) {
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: r=" + r + " visible=" +
-                    visible + " stack is null");
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
+                    "requestVisibleBehind: r=" + r + " visible=" + visible + " stack is null");
             return false;
         }
         final boolean isVisible = stack.hasVisibleBehindActivity();
-        if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind r=" + r + " visible=" +
-                visible + " isVisible=" + isVisible);
+        if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
+                "requestVisibleBehind r=" + r + " visible=" + visible + " isVisible=" + isVisible);
 
         final ActivityRecord top = topRunningActivityLocked();
         if (top == null || top == r || (visible == isVisible)) {
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: quick return");
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND, "requestVisibleBehind: quick return");
             stack.setVisibleBehindActivity(visible ? r : null);
             return true;
         }
@@ -3095,16 +3091,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // A non-top activity is reporting a visibility change.
         if (visible && top.fullscreen) {
             // Let the caller know that it can't be seen.
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: returning top.fullscreen="
-                    + top.fullscreen + " top.state=" + top.state + " top.app=" + top.app +
-                    " top.app.thread=" + top.app.thread);
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
+                    "requestVisibleBehind: returning top.fullscreen=" + top.fullscreen
+                    + " top.state=" + top.state + " top.app=" + top.app + " top.app.thread="
+                    + top.app.thread);
             return false;
         } else if (!visible && stack.getVisibleBehindActivity() != r) {
             // Only the activity set as currently visible behind should actively reset its
             // visible behind state.
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: returning visible="
-                    + visible + " stack.getVisibleBehindActivity()=" +
-                    stack.getVisibleBehindActivity() + " r=" + r);
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
+                    "requestVisibleBehind: returning visible=" + visible
+                    + " stack.getVisibleBehindActivity()=" + stack.getVisibleBehindActivity()
+                    + " r=" + r);
             return false;
         }
 
@@ -3179,25 +3177,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
         TaskRecord firstTask = null;
         // Tasks is non-null only if two or more tasks are found.
         ArraySet<TaskRecord> tasks = null;
-        if (DEBUG_RELEASE) Slog.d(TAG, "Trying to release some activities in " + app);
-        for (int i=0; i<app.activities.size(); i++) {
+        if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Trying to release some activities in " + app);
+        for (int i = 0; i < app.activities.size(); i++) {
             ActivityRecord r = app.activities.get(i);
             // First, if we find an activity that is in the process of being destroyed,
             // then we just aren't going to do anything for now; we want things to settle
             // down before we try to prune more activities.
             if (r.finishing || r.state == DESTROYING || r.state == DESTROYED) {
-                if (DEBUG_RELEASE) Slog.d(TAG, "Abort release; already destroying: " + r);
+                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Abort release; already destroying: " + r);
                 return;
             }
             // Don't consider any activies that are currently not in a state where they
             // can be destroyed.
             if (r.visible || !r.stopped || !r.haveState || r.state == RESUMED || r.state == PAUSING
                     || r.state == PAUSED || r.state == STOPPING) {
-                if (DEBUG_RELEASE) Slog.d(TAG, "Not releasing in-use activity: " + r);
+                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
             }
             if (r.task != null) {
-                if (DEBUG_RELEASE) Slog.d(TAG, "Collecting release task " + r.task
+                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + r.task
                         + " from " + r);
                 if (firstTask == null) {
                     firstTask = r.task;
@@ -3211,7 +3209,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         if (tasks == null) {
-            if (DEBUG_RELEASE) Slog.d(TAG, "Didn't find two or more tasks to release");
+            if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Didn't find two or more tasks to release");
             return;
         }
         // If we have activities in multiple tasks that are in a position to be destroyed,
@@ -3546,7 +3544,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void scheduleIdleTimeoutLocked(ActivityRecord next) {
-        if (DEBUG_IDLE) Slog.d(TAG, "scheduleIdleTimeoutLocked: Callers=" + Debug.getCallers(4));
+        if (DEBUG_IDLE) Slog.d(TAG_IDLE,
+                "scheduleIdleTimeoutLocked: Callers=" + Debug.getCallers(4));
         Message msg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG, next);
         mHandler.sendMessageDelayed(msg, IDLE_TIMEOUT);
     }
@@ -3556,7 +3555,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void removeTimeoutsForActivityLocked(ActivityRecord r) {
-        if (DEBUG_IDLE) Slog.d(TAG, "removeTimeoutsForActivity: Callers=" + Debug.getCallers(4));
+        if (DEBUG_IDLE) Slog.d(TAG_IDLE, "removeTimeoutsForActivity: Callers="
+                + Debug.getCallers(4));
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
     }
 
@@ -3858,7 +3858,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case IDLE_TIMEOUT_MSG: {
-                    if (DEBUG_IDLE) Slog.d(TAG, "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);
+                    if (DEBUG_IDLE) Slog.d(TAG_IDLE,
+                            "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);
                     if (mService.mDidDexOpt) {
                         mService.mDidDexOpt = false;
                         Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
@@ -3871,7 +3872,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     activityIdleInternal((ActivityRecord)msg.obj);
                 } break;
                 case IDLE_NOW_MSG: {
-                    if (DEBUG_IDLE) Slog.d(TAG, "handleMessage: IDLE_NOW_MSG: r=" + msg.obj);
+                    if (DEBUG_IDLE) Slog.d(TAG_IDLE, "handleMessage: IDLE_NOW_MSG: r=" + msg.obj);
                     activityIdleInternal((ActivityRecord)msg.obj);
                 } break;
                 case RESUME_TOP_ACTIVITY_MSG: {
