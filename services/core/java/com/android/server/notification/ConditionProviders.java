@@ -130,8 +130,8 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
-    public void onUserSwitched() {
-        super.onUserSwitched();
+    public void onUserSwitched(int user) {
+        super.onUserSwitched(user);
         if (mCallback != null) {
             mCallback.onUserSwitched();
         }
