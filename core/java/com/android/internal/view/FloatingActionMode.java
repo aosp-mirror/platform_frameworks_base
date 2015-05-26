@@ -121,11 +121,7 @@ public class FloatingActionMode extends ActionMode {
     public void updateViewLocationInWindow() {
         checkToolbarInitialized();
         mOriginatingView.getLocationInWindow(mViewPosition);
-        mViewRect.set(
-                mViewPosition[0],
-                mViewPosition[1],
-                mViewPosition[0] + mOriginatingView.getWidth(),
-                mViewPosition[1] + mOriginatingView.getHeight());
+        mOriginatingView.getGlobalVisibleRect(mViewRect);
         repositionToolbar();
     }
 
