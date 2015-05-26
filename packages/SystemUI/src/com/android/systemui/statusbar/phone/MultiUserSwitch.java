@@ -120,12 +120,11 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                         mTmpInt2);
             }
         } else {
-            Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
-                    getContext(), v, ContactsContract.Profile.CONTENT_URI,
-                    ContactsContract.QuickContact.MODE_LARGE, null);
-            getContext().startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
             if (mQsPanel != null) {
-                mQsPanel.getHost().collapsePanels();
+                Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
+                        getContext(), v, ContactsContract.Profile.CONTENT_URI,
+                        ContactsContract.QuickContact.MODE_LARGE, null);
+                mQsPanel.getHost().startActivityDismissingKeyguard(intent);
             }
         }
     }
