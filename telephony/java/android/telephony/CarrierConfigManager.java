@@ -222,15 +222,6 @@ public class CarrierConfigManager {
      */
     public static final String STRING_VVM_TYPE = "string_vvm_type";
 
-    /* Visual voicemail protocols */
-
-    /**
-     * The OMTP protocol.
-     *
-     * @hide
-     */
-    public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
-
     private final static String TAG = "CarrierConfigManager";
 
     /** The default value for every variable. */
@@ -333,7 +324,7 @@ public class CarrierConfigManager {
      * Depending on simState, the config may be cleared or loaded from config app. This is only used
      * by SubscriptionInfoUpdater.
      * </p>
-     * 
+     *
      * @hide
      */
     @SystemApi
