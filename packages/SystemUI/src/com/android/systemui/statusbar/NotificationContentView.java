@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -24,6 +25,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -46,21 +48,26 @@ public class NotificationContentView extends FrameLayout {
     private final Rect mClipBounds = new Rect();
     private final int mSmallHeight;
     private final int mHeadsUpHeight;
+    private final int mRoundRectRadius;
     private final Interpolator mLinearInterpolator = new LinearInterpolator();
+    private final boolean mRoundRectClippingEnabled;
 
     private View mContractedChild;
     private View mExpandedChild;
     private View mHeadsUpChild;
 
     private NotificationViewWrapper mContractedWrapper;
+    private NotificationViewWrapper mExpandedWrapper;
+    private NotificationViewWrapper mHeadsUpWrapper;
     private int mClipTopAmount;
     private int mContentHeight;
+    private int mUnrestrictedContentHeight;
     private int mVisibleType = VISIBLE_TYPE_CONTRACTED;
     private boolean mDark;
     private final Paint mFadePaint = new Paint();
     private boolean mAnimate;
     private boolean mIsHeadsUp;
-    private ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
+    private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
@@ -70,12 +77,25 @@ public class NotificationContentView extends FrameLayout {
         }
     };
 
+    private final ViewOutlineProvider mOutlineProvider = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            outline.setRoundRect(0, 0, view.getWidth(), mUnrestrictedContentHeight,
+                    mRoundRectRadius);
+        }
+    };
+
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
         mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
+        mRoundRectRadius = getResources().getDimensionPixelSize(
+                R.dimen.notification_material_rounded_rect_radius);
+        mRoundRectClippingEnabled = getResources().getBoolean(
+                R.bool.config_notifications_round_rect_clipping);
         reset(true);
+        setOutlineProvider(mOutlineProvider);
     }
 
     @Override
@@ -127,6 +147,7 @@ public class NotificationContentView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateClipping();
+        invalidateOutline();
     }
 
     @Override
@@ -177,6 +198,7 @@ public class NotificationContentView extends FrameLayout {
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
+        updateRoundRectClipping();
     }
 
     public void setExpandedChild(View child) {
@@ -186,7 +208,9 @@ public class NotificationContentView extends FrameLayout {
         }
         addView(child);
         mExpandedChild = child;
+        mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
+        updateRoundRectClipping();
     }
 
     public void setHeadsUpChild(View child) {
@@ -196,7 +220,9 @@ public class NotificationContentView extends FrameLayout {
         }
         addView(child);
         mHeadsUpChild = child;
+        mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
+        updateRoundRectClipping();
     }
 
     @Override
@@ -222,10 +248,11 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void setContentHeight(int contentHeight) {
-        contentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());
-        mContentHeight = contentHeight;
+        mContentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());;
+        mUnrestrictedContentHeight = Math.max(contentHeight, getMinHeight());
         selectLayout(mAnimate /* animate */, false /* force */);
         updateClipping();
+        invalidateOutline();
     }
 
     public int getContentHeight() {
@@ -248,6 +275,27 @@ public class NotificationContentView extends FrameLayout {
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
         updateClipping();
+    }
+
+    private void updateRoundRectClipping() {
+        boolean enabled = needsRoundRectClipping();
+        setClipToOutline(enabled);
+    }
+
+    private boolean needsRoundRectClipping() {
+        if (!mRoundRectClippingEnabled) {
+            return false;
+        }
+        boolean needsForContracted = mContractedChild != null
+                && mContractedChild.getVisibility() == View.VISIBLE
+                && mContractedWrapper.needsRoundRectClipping();
+        boolean needsForExpanded = mExpandedChild != null
+                && mExpandedChild.getVisibility() == View.VISIBLE
+                && mExpandedWrapper.needsRoundRectClipping();
+        boolean needsForHeadsUp = mExpandedChild != null
+                && mExpandedChild.getVisibility() == View.VISIBLE
+                && mExpandedWrapper.needsRoundRectClipping();
+        return needsForContracted || needsForExpanded || needsForHeadsUp;
     }
 
     private void updateClipping() {
@@ -290,6 +338,7 @@ public class NotificationContentView extends FrameLayout {
             mHeadsUpChild.setLayerType(LAYER_TYPE_NONE, null);
         }
         setLayerType(LAYER_TYPE_NONE, null);
+        updateRoundRectClipping();
     }
 
     private void runSwitchAnimation(int visibleType) {
@@ -315,6 +364,7 @@ public class NotificationContentView extends FrameLayout {
                         updateViewVisibilities(mVisibleType);
                     }
                 });
+        updateRoundRectClipping();
     }
 
     /**
@@ -358,6 +408,10 @@ public class NotificationContentView extends FrameLayout {
             mContractedWrapper.notifyContentUpdated();
             mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
         }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.notifyContentUpdated();
+        }
+        updateRoundRectClipping();
     }
 
     public boolean isContentExpandable() {
