@@ -11,7 +11,7 @@ footer.hide=1
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png" style="padding-bottom:1em">
+        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png" style="padding-bottom:2em">
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Build better apps with Google</h1>
@@ -42,9 +42,9 @@ footer.hide=1
 <section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="type:blog+tag:googleservices+tag:featured+tag:develop"
+       data-query="type:blog+tag:googleservices+tag:featured"
        data-cardSizes="6x6"
-       data-maxResults="9"
+       data-maxResults="12"
        data-initial-results="3"></div>
   </div>
 </section>
@@ -75,12 +75,19 @@ footer.hide=1
        data-cardSizes="6x6"
        data-maxResults="3"></div>
   </div>
+    <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Playlist
+    </a></li>
+  </ul>
+
 </section>
 
 <section class="dac-section dac-invert dac-darken-bg" style="background-image: url(/images/distribute/google-play-bg.jpg)"><div class="wrap">
   <h1 class="dac-section-title">Google Play developer tools</h1>
   <div class="dac-section-subtitle">
-    Scale your publishing, manage your catalog, and build revenue using Google Play developer tools. 
+    Scale your publishing, manage your catalog, build revenue using Google Play developer tools. 
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:google/landing/googleplay"

@@ -1,6 +1,12 @@
 <ul id="nav">
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/intents.html">
+        <span class="en">Increase Usage through Intents</span></a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/widgets.html">
         <span class="en">Build Useful Widgets</span></a>
     </div>
@@ -9,18 +15,6 @@
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/notifications.html">
         <span class="en">Use Rich Notifications</span></a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
-        var:toroot?>distribute/engage/gcm.html">
-        <span class="en">Integrate GCM</span></a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
-        var:toroot?>distribute/engage/easy-signin.html">
-        <span class="en">Add Google Sign-in</span></a>
     </div>
   </li>
   <li class="nav-section">
@@ -37,8 +31,8 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
-        var:toroot?>distribute/engage/intents.html">
-        <span class="en">Increase Usage through Intents</span></a>
+        var:toroot?>distribute/engage/game-services.html">
+        <span class="en">Encourage Competition</span></a>
     </div>
   </li>
   <li class="nav-section">
@@ -49,8 +43,14 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
-        var:toroot?>distribute/engage/game-services.html">
-        <span class="en">Encourage Competition</span></a>
+        var:toroot?>distribute/engage/easy-signin.html">
+        <span class="en">Add Google Sign-in</span></a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/gcm.html">
+        <span class="en">Integrate GCM</span></a>
     </div>
   </li>
   <li class="nav-section">
@@ -59,7 +59,6 @@
         <span class="en">Update Regularly</span></a>
     </div>
   </li>
-
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/community.html">
@@ -81,4 +80,3 @@
     changeNavLang(getLangPref());
 //-->
 </script>
-

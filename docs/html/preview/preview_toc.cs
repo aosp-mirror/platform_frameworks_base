@@ -7,7 +7,7 @@
 
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html">
-      Download</a></div>
+      Downloads</a></div>
   </li>
 
   <li class="nav-section">
