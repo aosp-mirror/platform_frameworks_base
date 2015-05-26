@@ -27,7 +27,7 @@ at the same time.</p>
 <p>Not all ARMv7-based Android devices support NEON, but devices that do may benefit significantly
 from its support for scalar/vector instructions. For x86 devices, the NDK can also translate NEON
 instructions into SSE, although with several restrictions. For more information, see
-<a href="{docRoot}ndk/guides/x86.html#an>x86 Support for ARM NEON Intrinsics.</a></p>
+<a href="{@docRoot}ndk/guides/x86.html#an">x86 Support for ARM NEON Intrinsics.</a></p>
 
 <h2 id="ul">Using LOCAL_ARM_NEON</h2>
 <p>To have the NDK build all its source files with NEON support, include the following line in
@@ -58,7 +58,7 @@ ARM instruction set for non-NEON instructions. In such a definition, {@code arm}
 <p>NEON support only works with the {@code armeabi-v7a} and {@code x86} ABIs. If the NDK build
 scripts encounter other ABIs while attempting to build with NEON support, the NDK build scripts
 exit. x86 provides <a href="x86.html">partial NEON support</a> via translation header. It is
-important to use checks like the following in your <a href="{docRoot}ndk/guides/android_mk.html">
+important to use checks like the following in your <a href="{@docRoot}ndk/guides/android_mk.html">
 {@code Android.mk}</a> file:</p>
 
 <pre class="no-pretty-print">
@@ -76,7 +76,7 @@ endif # TARGET_ARCH_ABI == armeabi-v7a || x86
 <p>Your app must perform runtime detection to confirm that NEON-capable machine code can be run on
 the target device. This is because not all ARMv7-based Android devices support NEON. The app can
 perform this check using the
-<a href="{@docRoot}ndk/guides/cpu_features.html">{@code cpufeatures}</a> library that comes with
+<a href="{@docRoot}ndk/guides/cpu-features.html">{@code cpufeatures}</a> library that comes with
 this NDK.</p>
 
 <p>You should explicitly check that {@code android_getCpuFamily()} returns {@code

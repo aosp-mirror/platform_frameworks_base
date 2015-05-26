@@ -13,7 +13,7 @@ footer.hide=1
       <div class="col-7of16 cdol-push-1of16">
         <h1 class="dac-hero-title">Android NDK</h1>
         <p class="dac-hero-description">
-        The Android NDK is a toolset that lets you implement parts of your app using native code languages such as C and C++. For certain types of apps, this can help you reuse existing code libraries written in those languages.
+        The Android NDK is a toolset that lets you implement parts of your app using native-code languages such as C and C++. For certain types of apps, this can help you reuse existing code libraries written in those languages.
         </p>
 
         <a class="dac-hero-cta" href="/ndk/guides/index.html">

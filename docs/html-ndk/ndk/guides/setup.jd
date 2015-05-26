@@ -1,0 +1,94 @@
+page.title=Setup
+@jd:body
+
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#install">Installation</a></li>
+        <li><a href="#configure">Configuring Eclipse</a></li>
+        <li><a href="#verify">Verification</a></li>
+          </ol>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+
+<div class="contents">
+<div class="textblock"><p>This document explains how to:</p>
+<ul>
+<li><a href="#install">Get</a> and install the NDK.</li>
+<li><a href="#configure">Configure</a> your system and the Eclipse and the Android Development Tool
+(ADT) for use with it.</li>
+<li><a href="#verify">Verify</a>, using a simple sample, that everything is working as expected.
+</li>
+</ul>
+<p>This document assumes that you are already familiar with Java-based Android development. For more
+information on that topic, see the
+<a href="{@docRoot}">Android developer site</a>.</p>
+
+<h2 id="install">Installation</h2>
+<p>To install and configure the NDK, follow these steps:</p>
+<ol type="1">
+<li>Get and install the <a href="{@docRoot}sdk/index.html">Android SDK</a>.</li>
+<li><a href="{@docRoot}ndk/downloads/index.html">Download</a> and
+<a href="{@docRoot}ndk/downloads/index.html#extract">extract</a> the NDK,
+making sure to download the correct version for your development platform. You may place the
+unzipped directory anywhere on your local drive.</li>
+<li>Update your {@code PATH} environment variable with the location of the directory that
+contains the NDK.</li>
+</ol>
+
+
+<h2 id="configure">Configuring Eclipse</h2>
+<p>Eclipse must know where the NDK is in order to use it when building your app. Follow these steps
+to set the location of the NDK.</p>
+<ol type="1">
+<li>Launch Eclipse, which is installed as part of the Android SDK.</li>
+<li>Open <b>Window</b> &gt; <b>Preferences</b>.</li>
+<li>In the pane on the left side of the <i>Preferences</i> window, select <i>Android</i>.
+The <i>Android</i> section expands, revealing a number of subsections.</li>
+<li>Select <b>NDK</b>. In the pane on the right side of the <i>Preferences</i> window, browse to
+the directory that contains the NDK.</li>
+<li>Click <b>OK</b> to return to the <i>Package Explorer</i> display.</li>
+</ol>
+
+<h2 id="verify">Verification</h2>
+<h3>Eclipse</h3>
+<p>To confirm that you have installed the NDK, set it up correctly, and properly configured Eclipse,
+follow these steps:</p>
+<ol type="1">
+<li>Import the hello-jni sample from {@code &lt;ndk&gt;/samples/}, as you would any other Android
+project.</li>
+<li>In the <i>Project Explorer</i> pane, right-click the project name (<i>HelloJni</i>). A
+context menu appears.</li>
+<li>From the context menu, select <b>Android Tools</b> &gt; <b>Add Native Support</b>. The
+<i>Add Android Native Support</i> window appears.</li>
+<li>Accept the default library name (“hello-jni”), and click <b>Finish</b>.</li>
+<li>Build and execute the application.</li>
+</ol>
+<h3>Command line</h3>
+<p>Follow these steps to build from the command line:</p>
+<ol type="1">
+<li>Change to the root directory of your project.</li>
+<li>Execute ndk-build to build the native component of your app. do this by
+typing {@code ndk-build} at the command prompt.</li>
+<li>Build and install your project as you would a regular Android app written in Java. For more
+information, see
+<a href="{@docRoot}tools/building/index.html">Building and Running</a> and
+<a href="{@docRoot}tools/building/building-cmdline.html">Building and Running
+from the Command Line</a>.</li>
+</ol>
+
+<p>If you have successfully installed and configured the NDK, the screen on your target device looks
+as shown in Figure 1.</p>
+
+<img src="./images/verification_screen.png" srcset="./images/verification_screen@2x.png 2x"
+alt="Output: Hello from JNI!" id="figure1" />
+
+<p class="img-caption">
+<strong>Figure 1.</strong> Target-device screen after successful launch.
+</p>
