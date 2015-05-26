@@ -605,6 +605,22 @@ public class TelephonyManager {
     @SystemApi
     public static final int SIM_ACTIVATION_RESULT_CANCELED = 4;
 
+    /* Visual voicemail protocols */
+
+    /**
+     * The OMTP protocol.
+     *
+     * @hide
+     */
+    public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
+
+    /**
+     * A flavor of OMTP protocol for Comverse.
+     *
+     * @hide
+     */
+    public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
+
     //
     //
     // Device Info
