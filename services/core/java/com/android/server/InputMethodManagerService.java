@@ -398,6 +398,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurUserActionNotificationSequenceNumber = 0;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
+
+    /**
+     * A set of status bits regarding the active IME.
+     *
+     * <p>This value is a combination of following two bits:</p>
+     * <dl>
+     * <dt>{@link InputMethodService#IME_ACTIVE}</dt>
+     * <dd>
+     *   If this bit is ON, connected IME is ready to accept touch/key events.
+     * </dd>
+     * <dt>{@link InputMethodService#IME_VISIBLE}</dt>
+     * <dd>
+     *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
+     * </dd>
+     * </dl>
+     * <em>Do not update this value outside of setImeWindowStatus.</em>
+     */
     int mImeWindowVis;
 
     private AlertDialog.Builder mDialogBuilder;
@@ -459,12 +476,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final String action = intent.getAction();
             if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = true;
-                refreshImeWindowVisibilityLocked();
+                updateSystemUi(mCurToken, mImeWindowVis, mBackDisposition);
                 updateActive();
                 return;
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mScreenOn = false;
-                setImeWindowVisibilityStatusHiddenLocked();
+                updateSystemUi(mCurToken, 0 /* vis */, mBackDisposition);
                 updateActive();
                 return;
             } else if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
@@ -660,7 +677,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
-                            setImeWindowVisibilityStatusHiddenLocked();
+                            updateSystemUiLocked(mCurToken, 0 /* vis */, mBackDisposition);
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -1003,7 +1020,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
                 mStatusBar = statusBar;
                 statusBar.setIconVisibility("ime", false);
-                updateImeWindowStatusLocked();
+                updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 if (mShowOngoingImeSwitcherForPhones) {
@@ -1027,33 +1044,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
-    }
-
-    private void setImeWindowVisibilityStatusHiddenLocked() {
-        mImeWindowVis = 0;
-        updateImeWindowStatusLocked();
-    }
-
-    private void refreshImeWindowVisibilityLocked() {
-        final Configuration conf = mRes.getConfiguration();
-        final boolean haveHardKeyboard = conf.keyboard
-                != Configuration.KEYBOARD_NOKEYS;
-        final boolean hardKeyShown = haveHardKeyboard
-                && conf.hardKeyboardHidden
-                        != Configuration.HARDKEYBOARDHIDDEN_YES;
-
-        final boolean isScreenLocked = isKeyguardLocked();
-        final boolean inputActive = !isScreenLocked && (mInputShown || hardKeyShown);
-        // We assume the softkeyboard is shown when the input is active as long as the
-        // hard keyboard is not shown.
-        final boolean inputVisible = inputActive && !hardKeyShown;
-        mImeWindowVis = (inputActive ? InputMethodService.IME_ACTIVE : 0)
-                | (inputVisible ? InputMethodService.IME_VISIBLE : 0);
-        updateImeWindowStatusLocked();
-    }
-
-    private void updateImeWindowStatusLocked() {
-        setImeWindowStatus(mCurToken, mImeWindowVis, mBackDisposition);
     }
 
     // ---------------------------------------------------------------------------------------
@@ -1541,7 +1531,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     sessionState.session.finishSession();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Session failed to close due to remote exception", e);
-                    setImeWindowVisibilityStatusHiddenLocked();
+                    updateSystemUiLocked(mCurToken, 0 /* vis */, mBackDisposition);
                 }
                 sessionState.session = null;
             }
@@ -1629,11 +1619,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private boolean shouldShowImeSwitcherLocked() {
+    private boolean shouldShowImeSwitcherLocked(int visibility) {
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
-        if ((mImeWindowVis & InputMethodService.IME_ACTIVE) == 0) return false;
+        if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
         if (mWindowManagerService.isHardKeyboardAvailable()) {
             // When physical keyboard is attached, we show the ime switcher (or notification if
             // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
@@ -1641,7 +1631,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
             return true;
         }
-        if ((mImeWindowVis & InputMethodService.IME_VISIBLE) == 0) return false;
+        if ((visibility & InputMethodService.IME_VISIBLE) == 0) return false;
 
         List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
         final int N = imis.size();
@@ -1690,62 +1680,82 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
     }
 
-    // Caution! This method is called in this class. Handle multi-user carefully
     @SuppressWarnings("deprecation")
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+        if (!calledWithValidToken(token)) {
+            final int uid = Binder.getCallingUid();
+            Slog.e(TAG, "Ignoring setImeWindowStatus due to an invalid token. uid:" + uid
+                    + " token:" + token);
+            return;
+        }
+
+        synchronized (mMethodMap) {
+            mImeWindowVis = vis;
+            mBackDisposition = backDisposition;
+            updateSystemUiLocked(token, vis, backDisposition);
+        }
+    }
+
+    private void updateSystemUi(IBinder token, int vis, int backDisposition) {
+        synchronized (mMethodMap) {
+            updateSystemUiLocked(token, vis, backDisposition);
+        }
+    }
+
+    // Caution! This method is called in this class. Handle multi-user carefully
+    private void updateSystemUiLocked(IBinder token, int vis, int backDisposition) {
+        if (!calledWithValidToken(token)) {
+            final int uid = Binder.getCallingUid();
+            Slog.e(TAG, "Ignoring updateSystemUiLocked due to an invalid token. uid:" + uid
+                    + " token:" + token);
+            return;
+        }
+
+        // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
+        // all updateSystemUi happens on system previlege.
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring setImeWindowStatus due to an invalid token. uid:" + uid
-                        + " token:" + token);
-                return;
+            // apply policy for binder calls
+            if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
+                vis = 0;
             }
-            synchronized (mMethodMap) {
-                // apply policy for binder calls
-                if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
-                    vis = 0;
-                }
-                mImeWindowVis = vis;
-                mBackDisposition = backDisposition;
-                // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
-                final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked();
-                if (mStatusBar != null) {
-                    mStatusBar.setImeWindowStatus(token, vis, backDisposition,
-                            needsToShowImeSwitcher);
-                }
-                final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
-                if (imi != null && needsToShowImeSwitcher) {
-                    // Used to load label
-                    final CharSequence title = mRes.getText(
-                            com.android.internal.R.string.select_input_method);
-                    final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
-                            mContext, imi, mCurrentSubtype);
+            // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
+            final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
+            if (mStatusBar != null) {
+                mStatusBar.setImeWindowStatus(token, vis, backDisposition,
+                        needsToShowImeSwitcher);
+            }
+            final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+            if (imi != null && needsToShowImeSwitcher) {
+                // Used to load label
+                final CharSequence title = mRes.getText(
+                        com.android.internal.R.string.select_input_method);
+                final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
+                        mContext, imi, mCurrentSubtype);
 
-                    mImeSwitcherNotification.color = mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color);
-                    mImeSwitcherNotification.setLatestEventInfo(
-                            mContext, title, summary, mImeSwitchPendingIntent);
-                    if ((mNotificationManager != null)
-                            && !mWindowManagerService.hasNavigationBar()) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "--- show notification: label =  " + summary);
-                        }
-                        mNotificationManager.notifyAsUser(null,
-                                com.android.internal.R.string.select_input_method,
-                                mImeSwitcherNotification, UserHandle.ALL);
-                        mNotificationShown = true;
+                mImeSwitcherNotification.color = mContext.getColor(
+                        com.android.internal.R.color.system_notification_accent_color);
+                mImeSwitcherNotification.setLatestEventInfo(
+                        mContext, title, summary, mImeSwitchPendingIntent);
+                if ((mNotificationManager != null)
+                        && !mWindowManagerService.hasNavigationBar()) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "--- show notification: label =  " + summary);
                     }
-                } else {
-                    if (mNotificationShown && mNotificationManager != null) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "--- hide notification");
-                        }
-                        mNotificationManager.cancelAsUser(null,
-                                com.android.internal.R.string.select_input_method, UserHandle.ALL);
-                        mNotificationShown = false;
+                    mNotificationManager.notifyAsUser(null,
+                            com.android.internal.R.string.select_input_method,
+                            mImeSwitcherNotification, UserHandle.ALL);
+                    mNotificationShown = true;
+                }
+            } else {
+                if (mNotificationShown && mNotificationManager != null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "--- hide notification");
                     }
+                    mNotificationManager.cancelAsUser(null,
+                            com.android.internal.R.string.select_input_method, UserHandle.ALL);
+                    mNotificationShown = false;
                 }
             }
         } finally {
@@ -1912,7 +1922,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
                 if (mCurMethod != null) {
                     try {
-                        refreshImeWindowVisibilityLocked();
+                        updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
                         mCurMethod.changeInputMethodSubtype(newSubtype);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to call changeInputMethodSubtype");
@@ -2074,7 +2084,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         boolean res;
-        if (mInputShown && mCurMethod != null) {
+        if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0 && mCurMethod != null) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                     MSG_HIDE_SOFT_INPUT, mCurMethod, resultReceiver));
             res = true;
@@ -3048,7 +3058,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog.getWindow().getAttributes().privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             mSwitchingDialog.getWindow().getAttributes().setTitle("Select input method");
-            updateImeWindowStatusLocked();
+            updateSystemUi(mCurToken, mImeWindowVis, mBackDisposition);
             mSwitchingDialog.show();
         }
     }
@@ -3107,7 +3117,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog = null;
         }
 
-        updateImeWindowStatusLocked();
+        updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
         mDialogBuilder = null;
         mIms = null;
     }
