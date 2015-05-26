@@ -1,0 +1,112 @@
+page.title=App Linking
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#web-assoc">Declare a Website Association</a></li>
+        <li><a href="#verfy-links">Request App Link Verification</a></li>
+        <li><a href="#user-manage">Managing App Link Settings</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  The Android Intent system is a flexible mechanism to enable apps to handle content and requests.
+  Multiple apps may declare matching URI patterns in their intent filters. When a user clicks on a
+  web link that does not have default launch handler, the platform may show a dialog for the user
+  to select from a list of apps that have declared matching intent filters.
+</p>
+
+<p>
+  The Android M Developer Preview introduces support for app linking, which improves upon existing
+  link handling by allowing app developers to associate an app with a web domain they own. When
+  developers create this association, the platform can automatically determine the default app used
+  to handle a particular web link and skip asking users.
+</p>
+
+
+<h2 id="web-assoc">Declare a Website Association</h2>
+
+<p>
+  Website owners must declare associations with apps to establish an app link. The site owner
+  declares the relationship to an app by hosting a JSON file, named {@code statements.json}, at the
+  well-known location on the domain:
+</p>
+
+<pre>http://&lt;domain&gt;:&lt;optional port&gt;/.well-known/statements.json</pre>
+
+<p class="note">
+  <strong>Note:</strong>
+  During the M Developer Preview period, the JSON file is verified via http protocol. For
+  the official release of the platform, the file is verified over encrypted, https protocol.
+</p>
+
+<p>
+  This JSON file indicates the Android app that should be used as the default handler for the URLs
+  under this domain. It identifies the app based on these fields:
+</p>
+
+<ul>
+  <li>{@code package_name}: The package name declared in the app's manifest.</li>
+
+  <li>{@code sha256_cert_fingerprints}: The SHA256 fingerprint of your app’s signing certificate.
+    You can use the Java keytool to generate the fingerprint using the following command:
+    <pre>keytool -list -v -keystore my-release-key.keystore</pre>
+  </li>
+</ul>
+
+<p>
+  The following file listing shows an example of the contents and format of a
+  {@code statements.json} file:
+</p>
+
+<pre>
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "<strong>&lt;package name&gt;</strong>",
+    "sha256_cert_fingerprints": ["<strong>6C:EC:C5:0E:34:AE....EB:0C:9B</strong>"]
+  }
+}]
+</pre>
+
+
+<h2 id="verfy-links">Request App Link Verification</h2>
+
+<p>
+  An app can indicate to the platform to verify app links against the {@code statements.json} files
+  hosted on the sites defined by the host names in the &lt;data&gt; elements of the intent filters.
+  To do this, add an {@code android:autoVerify} attribute to the appropriate intent filters in the
+  manifest, as shown in the following manifest code snippet:
+</p>
+
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="http" android:host="www.android.com" /&gt;
+        &lt;data android:scheme="https" android:host="www.android.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>
+  When an app is installed, the platform attempts to verify the app links. If the platform cannot
+  successfully verify app links, it falls back to prompting the user the next time they open a link
+  that the app handles, or they will need to explicitly enable the app in the App Info settings UI.
+</p>
+
+<h2 id="user-manage">Managing App Link Settings</h2>
+
+<p>
+  Users can change app link settings so URLs are handled the way they prefer. You can review and
+  manage app links in the system Settings app, under <strong>Settings &gt; Apps &gt; App Info &gt;
+  Open by default</strong>.
+</p>
