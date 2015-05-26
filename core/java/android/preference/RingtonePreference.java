@@ -19,6 +19,7 @@ package android.preference;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.provider.Settings.System;
@@ -169,6 +170,8 @@ public class RingtonePreference extends Preference implements
         ringtonePickerIntent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, mShowSilent);
         ringtonePickerIntent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, mRingtoneType);
         ringtonePickerIntent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, getTitle());
+        ringtonePickerIntent.putExtra(RingtoneManager.EXTRA_RINGTONE_AUDIO_ATTRIBUTES_FLAGS,
+                AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY);
     }
     
     /**
