@@ -37,17 +37,32 @@ page.image=/distribute/images/gp-auto-quality.png
 </p>
 
 <p>
-  Great auto experiences are predictive and predictable.  Apps that support Android Auto
+  Great auto experiences are predictive and predictable. Apps that support Android Auto
   should show timely information to the driver only when it is relevant, and use
   simple, predictable patterns for common tasks.
 </p>
+
+<p>
+  It's important that you test your auto app for the criteria listed on this page prior to
+  submitting to Google Play for review. There are two ways to test your app:
+</p>
+
+<ol>
+  <li> Use the Android Auto simulator to validate each checklist item. The simulator allows you to
+  sideload your app for testing. For more information on the simulator, see
+  <a href="{@docRoot}training/auto/start/index.html#test-it">Run and Test Auto Apps</a>.</li>
+  <li>Test your app in a vehicle by uploading your app to the alpha/beta channel on Google Play.
+  Apps will not work on Auto in vehicles unless they are installed from the Play Store.
+  For more information, see <a
+  href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">Alpha and Beta Testing</a>.
+  </li>
+</ol>
 
 <p class="caution">
   <strong>Important:</strong> The criteria listed in this page apply to your app's user interface
   and behavior when running on devices connected to an Android Auto screen. Apps must meet these
   criteria to qualify as an Android Auto app on Google Play.
 </p>
-
 
 <div class="headerLine">
   <h2 id="core">
@@ -103,8 +118,8 @@ page.image=/distribute/images/gp-auto-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App does not display on the Auto screen animated elements such as animated graphics, games, video, or
-      progress bars.
+      App does not display on the Auto screen animated elements such as animated graphics,
+      video, or progress bars.
     </p>
   </td>
 </tr>
@@ -141,7 +156,9 @@ page.image=/distribute/images/gp-auto-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-    App does not include any features that distract the driver.
+    App does not include games or other features outside of the intended app types supported
+    by Auto.
+    (<a href="{@docRoot}training/auto/start/index.html">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -152,8 +169,9 @@ page.image=/distribute/images/gp-auto-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-    App never presents any form of visual information (notifications, toasts, video, images,
-    advertising, etc.) on the phone screen while the app is active in Android Auto.
+    App never activates the phone screen to present any form of visual information (notifications,
+    toasts, video, images, advertising, etc.) on the phone screen while the app is active in Android
+    Auto.
     </p>
   </td>
 </tr>
@@ -161,7 +179,7 @@ page.image=/distribute/images/gp-auto-quality.png
 
 
 <tr>
-  <td rowspan="3" id="layout">
+  <td rowspan="1" id="layout">
     Layout
   </td>
 
@@ -171,29 +189,6 @@ page.image=/distribute/images/gp-auto-quality.png
   <td>
     <p style="margin-bottom:.5em;">
      App does not display automatically scrolling text.
-    </p>
-  </td>
-</tr>
-
-
-<tr>
-  <td id="AU-FT">
-    AU-FT
-  </td>
-  <td>
-    <p style="margin-bottom:.5em;">
-     App displays all strings using the default Roboto fonts in two approved sizes.
-    </p>
-  </td>
-</tr>
-
-<tr>
-  <td id="AU-ST">
-    AU-ST
-  </td>
-  <td>
-    <p style="margin-bottom:.5em;">
-     App does not display any individual string longer than 120 characters.
     </p>
   </td>
 </tr>
@@ -209,7 +204,7 @@ page.image=/distribute/images/gp-auto-quality.png
   <td>
     <p style="margin-bottom:.5em;">
      App supports day mode, which renders dark text and controls on a light background.
-     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+     (<a href="//google.com/design/spec-auto/colors-branding/day-night-colors.html">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -221,7 +216,7 @@ page.image=/distribute/images/gp-auto-quality.png
   <td>
     <p style="margin-bottom:.5em;">
      App supports night mode, which renders light text and controls on a dark background.
-     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+     (<a href="//google.com/design/spec-auto/colors-branding/day-night-colors.html">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -234,7 +229,7 @@ page.image=/distribute/images/gp-auto-quality.png
     <p style="margin-bottom:.5em;">
      App provides white icon sets that the system colorizes to provide automatic
      contrast compensation.
-     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+     (<a href="//google.com/design/spec-auto/colors-branding/color-themes.html">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -246,7 +241,7 @@ page.image=/distribute/images/gp-auto-quality.png
   <td>
     <p style="margin-bottom:.5em;">
      App provides colors that the system can optimize for easy in-vehicle readability.
-     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+     (<a href="//google.com/design/spec-auto/colors-branding/color-themes.html">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -261,7 +256,8 @@ page.image=/distribute/images/gp-auto-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     App must support voice commands.
+     App must support voice commands in audio apps.
+     (<a href="{@docRoot}training/auto/audio/index.html#support_voice">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -317,7 +313,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </tr>
 
 <tr>
-  <td rowspan="5" id="general">
+  <td rowspan="6" id="general">
    General
   </td>
 
@@ -326,7 +322,18 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     App loads in no more than 10 seconds.
+     App launches in no more than 10 seconds.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-LC">
+    AU-LC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App loads content in no more than 10 seconds.
     </p>
   </td>
 </tr>
@@ -361,6 +368,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <td>
     <p style="margin-bottom:.5em;">
      No tasks in the app take more than six steps to complete.
+     (<a href="//google.com/design/spec-auto/system-overview/drawer.html#drawer-drawer-content-patterns">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -371,42 +379,28 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     Any app button which is non-functional or disabled must be grayed out.
+     Interactive elements that are intentionally grayed-out must be non-functional.
     </p>
   </td>
 </tr>
 
 
 <tr>
-  <td rowspan="2" id="media">
+  <td rowspan="1" id="media">
     Media
   </td>
 
 
-  <td id="AU-PA">
-    AU-PA
+  <td id="AU-MT">
+    AU-MT
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     App has no more than four primary actions plus one optional action overflow toggle (or five if
-     no action overflow is used).
-     (<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Learn How</a>)
+     Media apps do not autoplay or take over media focus when launched.
+     (<a href="{@docRoot}training/auto/audio/index.html#playback-commands">Learn How</a>)
     </p>
   </td>
 </tr>
-
-<tr>
-  <td id="AU-SA">
-    AU-SA
-  </td>
-  <td>
-    <p style="margin-bottom:.5em;">
-     App has no more than four optional secondary actions plus one action overflow toggle.
-     (<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Learn How</a>)
-    </p>
-  </td>
-</tr>
-
 
 <tr>
   <td rowspan="2" id="notifications">
@@ -439,6 +433,70 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
 </tr>
 
+<tr>
+  <td rowspan="5" id="messages">
+    Messaging
+  </td>
+
+  <td id="AU-MI">
+    AU-MI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App is able to successfully receive incoming messages.
+      (<a href="{@docRoot}training/auto/messaging/index.html">Learn How</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-MG">
+    AU-MG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Messages are properly grouped and displayed in the correct order.
+     (<a href="{@docRoot}training/auto/messaging/index.html#build_conversation">Learn How</a>)
+   </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-MR">
+    AU-MR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     User is able to successfully reply to a message.
+     (<a href="{@docRoot}training/auto/messaging/index.html">Learn How</a>)
+   </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-MS">
+    AU-MS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Apps use short-form messaging app design patterns. Traditional long-form messaging apps, such
+     as apps for email, are not permitted.
+   </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-MP">
+    AU-MP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Apps are peer-to-peer messaging services and not notification service apps such as weather,
+     stocks, and sport scores apps.
+   </p>
+  </td>
+</tr>
+
 </table>
 
 <!--
@@ -457,14 +515,18 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </div>
 
 <p style="margin-top:30px;">
-  <strong>After I submit my app, how will find out if my app does not meet all
+  <strong>After submitting my app, how will I find out if my app does not meet all
     the requirements for Android Auto?</strong>
 </p>
-<p>If you are planning to develop apps for Auto, you are encouraged to begin enabling and testing
-  your apps now. However, Auto-enabled apps cannot be published at this time. Join the
- <a href="http://g.co/AndroidAutoDev" class="external-link">Auto
- Developers Google+ community</a> for updates on when you will be able to submit
- your Auto-enabled apps.</p>
+<p>
+  If your app does not meet the usability requirements described on this page, the Play Store team
+  will contact you through the email address specified in the <a href=
+  "https://play.google.com/apps/publish/">Google Play Developer Console</a> account associated with
+  the app.
+</p>
+<p class="note">
+ <strong>Note:</strong> For information about how to publish your Auto app in Google Play, see <a
+ href="{@docRoot}distribute/googleplay/auto.html">Distributing to Android Auto</a>.
 </p>
 
 
@@ -474,11 +536,11 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   tablets?</strong>
 </p>
 <p>
-  No. When Google begins the approval process, your auto app will undergo a driver safety
+  No. When Google begins the approval process, your Auto app will undergo a driver safety
   review, and will not be
   available for distribution until the app is approved. Because this is the same APK as
   for phones and tablets, your Play Store updates for those devices will not be available until the
-  Auto approval process is complete.
+  Auto app approval process is complete.
 </p>
 
 <p class="caution">
