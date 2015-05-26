@@ -6,58 +6,80 @@ page.title=Sample: Teapot
       <h2>On this page</h2>
 
       <ol>
-        <li><a href="#bb">Before Beginning</a></li>
-        <li><a href="#intro">Introduction</a></li>
-        <li><a href="#hiw">How It Works</a></li>
-        <li><a href="#naa">Native Activities and Applications</a></li>
+        <li><a href="#am">AndroidManifest.xml</a></li>
+        <li><a href="#ap">Application.mk</a></li>
+        <li><a href="#ji">Java-side Implementation</a></li>
+        <li><a href="#ni">Native-side Implementation</a></li>
           </ol>
         </li>
       </ol>
     </div>
   </div>
 
-<p>This sample uses the OpenGL library to render the
-iconic <a
-href="http://math.hws.edu/bridgeman/courses/324/s06/doc/opengl.html#basic">Utah
-teapot</a>. It particularly showcases the <code>ndk_helper</code> helper class,
+<p>The Teapot sample is located under in the {@code samples/Teapot/} directory, under the NDK
+installation's root directory. This sample uses the OpenGL library to render the iconic
+<a href="http://math.hws.edu/bridgeman/courses/324/s06/doc/opengl.html#basic">Utah
+teapot</a>. In particular, it showcases the {@code ndk_helper} helper class,
 a collection of native helper functions required for implementing games and
 similar applications as native applications. This class provides:</p>
+
 <ul>
-<li>an abstraction layer that handles certain NDK-specific behaviors (e.g.,
-<code>GLContext</code>).</li>
-<li>some helper functions that are useful but not present in the NDK, itself
-(e.g., tap detection).</li>
-<li>wrappers for JNI calls for certain platform features (e.g., texture
-loading).</li>
+<li>An abstraction layer, {@code GLContext}, that handles certain NDK-specific behaviors.</li>
+<li>Helper functions that are useful but not present in the NDK, such as tap detection.</li>
+<li>Wrappers for JNI calls for platform features such as texture loading.</li>
 </ul>
-<h3>AndroidManifest.xml</h3>
-<p>The activity declaration here is not <code>NativeActivity</code> itself, but
-a subclass: <code>TeapotNativeActivity</code>.</p>
-<pre class="fragment">    &lt;activity
-android:name="com.sample.teapot.TeapotNativeActivity"
+
+<h2 id="am">AndroidManifest.xml</h2>
+<p>The activity declaration here is not {@link android.app.NativeActivity} itself, but
+a subclass of it: {@code TeapotNativeActivity}.</p>
+
+<pre class="no-pretty-print">
+    &lt;activity android:name="com.sample.teapot.TeapotNativeActivity"
             android:label="@string/app_name"
             android:configChanges="orientation|keyboardHidden"&gt;
-</pre><p>The name of the <code>.so</code> file is
-<code>libTeapotNativeActivity.so</code>; the <code>lib</code> and
-<code>.so</code> are stripped off from the value assigned to
-<code>android:value</code>.</p>
-<pre class="fragment">        &lt;meta-data android:name="android.app.lib_name"
-                android:value="TeapotNativeActivity" /&gt;
-</pre><h3><code>Application.mk</code></h3>
-<p>Define the minimum level of Android API Level support.</p>
-<pre class="fragment">APP_PLATFORM := android-9
-</pre><p>Build for all supported architectures.</p>
-<pre class="fragment">APP_ABI := all
-</pre><p>Specify the <a
-href="./md_3__key__topics__libraries__c_p_l_u_s_p_l_u_s-_s_u_p_p_o_r_t.html">C++
- runtime support library</a> to use. </p>
-<pre class="fragment">APP_STL := stlport_static
-</pre><h3>Java-side implementation: TeapotNativeActivity.java</h3>
-<p>This file handles activity lifecycle events, as well as displaying text on
-the screen.</p>
-<pre class="fragment">// Our popup window, you will call it from your C/C++
-code later
+</pre>
 
+<p>Ultimately, the name of the shared-object file that the build system builds is
+{@code libTeapotNativeActivity.so}. The build system adds the {@code lib} prefix and the {@code .so}
+extension; neither is part of the value that the manifest originally assigns to
+{@code android:value}.</p>
+
+<pre class="no-pretty-print">
+        &lt;meta-data android:name="android.app.lib_name"
+                android:value="TeapotNativeActivity" /&gt;
+</pre>
+
+<h2 id="ap">Application.mk</h2>
+<p>An app that uses the {@link android.app.NativeActivity} framework class must not specify an
+Android API level lower than 9, which introduced that class. For more information about the
+{@link android.app.NativeActivity} class, see
+<a href="{@docRoot}ndk/guides/concepts.html#naa">Native Activities and Applications</a>.
+</p>
+
+<pre class="no-pretty-print">
+APP_PLATFORM := android-9
+</pre>
+
+<p>The next line tells the build system to build for all supported architectures.</p>
+<pre class="no-pretty-print">
+APP_ABI := all
+</pre>
+
+<p>Next, the file tells the build system which
+<a href="{@docRoot}ndk/guides/cpp-support.html">C++ runtime support library</a> to use. </p>
+
+<pre class="no-pretty-print">
+APP_STL := stlport_static
+</pre>
+
+<h2 id="ji">Java-side Implementation</h2>
+<p>The {@code TeapotNativeActivity.java} file is located in
+{@code samples/Teapot/src/com/sample/teapot}, under the NDK installation root directory. It handles
+activity lifecycle events, and also enables the app to display text on the screen. The following
+block of code is most important from the perspective of the native-side implementation: The native
+code calls it to display a popup window for text display.</p>
+
+<pre class="no-pretty-print">
 
 void setImmersiveSticky() {
     View decorView = getWindow().getDecorView();
@@ -68,17 +90,19 @@ void setImmersiveSticky() {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 }
-</pre><h3>Native-side implementation</h3>
+</pre>
 
-<p>This section explores the C++ part of the Teapot app.</p>
+<h2 id="ni">Native-side Implementation</h2>
 
-<h4>TeapotRenderer.*</h4>
+<p>This section explores the part of the Teapot app implemented in C++.</p>
 
-<p>This code does the actual rendering of the teapot. It uses
-<code>ndk_helper</code> for matrix calculation, and to reposition the camera
-based on where the user taps:</p>
+<h3>TeapotRenderer.h</h3>
 
-<pre>
+<p>These function calls perform the actual rendering of the teapot. It uses
+{@code ndk_helper} for matrix calculation and to reposition the camera
+based on where the user taps.</p>
+
+<pre class="no-pretty-print">
 ndk_helper::Mat4 mat_projection_;
 ndk_helper::Mat4 mat_view_;
 ndk_helper::Mat4 mat_model_;
@@ -87,50 +111,75 @@ ndk_helper::Mat4 mat_model_;
 ndk_helper::TapCamera* camera_;
 </pre>
 
-<h4>TeapotNativeActivity.cpp</code></h4>
+<h3>TeapotNativeActivity.cpp</h3>
 
-<p>Include <code>ndk_helper</code> in your native source file, and define the
-helper-class name:</p>
-<pre class="fragment">#include "NDKHelper.h"
+<p>The following lines include {@code ndk_helper} in the native source file, and define the
+helper-class name.</p>
 
+<pre class="no-pretty-print">
+
+#include "NDKHelper.h"
 
 //-------------------------------------------------------------------------
 //Preprocessor
 //-------------------------------------------------------------------------
 #define HELPER_CLASS_NAME "com/sample/helper/NDKHelper" //Class name of helper
 function
-</pre><p>The first use of the <code>ndk_helper</code> class is to handle the
+</pre>
+
+<p>The first use of the {@code ndk_helper} class is to handle the
 EGL-related lifecycle, associating EGL context states (created/lost) with
-Android lifecycle events. It enables the application to preserve context
-information so that a destroyed activity can be restored. This is useful, for
+Android lifecycle events. The {@code ndk_helper} class enables the application to preserve context
+information so that the system can restore a destroyed activity. This ability is useful, for
 example, when the target machine is rotated (causing an activity to be
 destroyed, then immediately restored in the new orientation), or when the lock
 screen appears.</p>
-<pre class="fragment">ndk_helper::GLContext* gl_context_; // handles
-EGL-related lifecycle.
-</pre><p>Next, <code>ndk_helper</code> provides touch control.</p>
-<pre class="fragment">ndk_helper::DoubletapDetector doubletap_detector_;
+
+<pre class="no-pretty-print">
+ndk_helper::GLContext* gl_context_; // handles EGL-related lifecycle.
+</pre>
+
+<p>Next, {@code ndk_helper} provides touch control.</p>
+
+<pre class="no-pretty-print">
+ndk_helper::DoubletapDetector doubletap_detector_;
 ndk_helper::PinchDetector pinch_detector_;
 ndk_helper::DragDetector drag_detector_;
 ndk_helper::PerfMonitor monitor_;
-</pre><p>And camera control (openGL view frustum).</p>
-<pre class="fragment">ndk_helper::TapCamera tap_camera_;
-</pre><p>As in the native-activity sample, the application prepares to use the
-sensors, using the native APIs provided in the NDK.</p>
-<pre class="fragment">ASensorManager* sensor_manager_;
+</pre>
+
+<p>It also provides camera control (openGL view frustum).</p>
+
+<pre class="no-pretty-print">
+ndk_helper::TapCamera tap_camera_;
+</pre>
+
+<p>The app then prepares to use the device's sensors, using the native APIs provided in the NDK.</p>
+
+<pre class="no-pretty-print">
+ASensorManager* sensor_manager_;
 const ASensor* accelerometer_sensor_;
 ASensorEventQueue* sensor_event_queue_;
-</pre><p>The following functions are called in response to various Android
+</pre>
+
+<p>The app calls the following functions in response to various Android
 lifecycle events and EGL context state changes, using various functionalities
-provided by <code>ndk_helper</code> via the <code>Engine</code> class.</p>
-<pre class="fragment">void LoadResources();
+provided by {@code ndk_helper} via the {@code Engine} class.</p>
+
+<pre class="no-pretty-print">
+
+void LoadResources();
 void UnloadResources();
 void DrawFrame();
 void TermDisplay();
 void TrimMemory();
 bool IsReady();
-</pre><p>This function calls back to the Java side to update the UI display.</p>
-<pre class="fragment">void Engine::ShowUI()
+</pre>
+
+<p>Then, the following function calls back to the Java side to update the UI display.</p>
+
+<pre class="no-pretty-print">
+void Engine::ShowUI()
 {
     JNIEnv *jni;
     app_-&gt;activity-&gt;vm-&gt;AttachCurrentThread( &amp;jni, NULL );
@@ -145,10 +194,14 @@ bool IsReady();
     app_-&gt;activity-&gt;vm-&gt;DetachCurrentThread();
     return;
 }
-</pre><p>And this one calls back to the Java side to draw a text box
+</pre>
+
+<p>Next, this function calls back to the Java side to draw a text box
 superimposed on the screen rendered on the native side, and showing frame
 count.</p>
-<pre class="fragment">void Engine::UpdateFPS( float fFPS )
+
+<pre class="no-pretty-print">
+void Engine::UpdateFPS( float fFPS )
 {
     JNIEnv *jni;
     app_-&gt;activity-&gt;vm-&gt;AttachCurrentThread( &amp;jni, NULL );
@@ -163,74 +216,145 @@ count.</p>
     app_-&gt;activity-&gt;vm-&gt;DetachCurrentThread();
     return;
 }
-</pre><p>The application gets the system clock and supplies it to the renderer
-for time-based animation based on real-time clock. For example, calculating
-momentum, where speed declines as a function of time.</p>
-<pre class="fragment">renderer_.Update( monitor_.GetCurrentTime() );
-</pre><p>Having earlier been set up to preserve context information, the
-application now checks whether <code>GLcontext</code> is still valid. If not,
-<code>ndk-helper</code> swaps the buffer, reinstantiating the GL context.</p>
-<pre class="fragment">if( EGL_SUCCESS != gl_context_-&gt;Swap() )  // swaps
-buffer.
-</pre><p>The program passes touch-motion events to the gesture detector defined
-in the <code>ndk_helper</code> class. The gesture detector tracks multitouch
-gestures, such as pinch-and-drag, and sends a notification when triggered by
-any of these events.</p>
-<pre class="fragment">if( AInputEvent_getType( event ) ==
-AINPUT_EVENT_TYPE_MOTION )
-{
-    ndk_helper::GESTURE_STATE doubleTapState =
-eng-&gt;doubletap_detector_.Detect( event );
-    ndk_helper::GESTURE_STATE dragState = eng-&gt;drag_detector_.Detect( event
-);
-    ndk_helper::GESTURE_STATE pinchState = eng-&gt;pinch_detector_.Detect(
-event );
-
-
-    //Double tap detector has a priority over other detectors
-    if( doubleTapState == ndk_helper::GESTURE_STATE_ACTION )
-    {
-        //Detect double tap
-        eng-&gt;tap_camera_.Reset( true );
-    }
-    else
-    {
-        //Handle pinch state
-        if( pinchState &amp; ndk_helper::GESTURE_STATE_START )
-        {
-            //Start new pinch
-            ndk_helper::Vec2 v1;
-            ndk_helper::Vec2 v2;
-            eng-&gt;pinch_detector_.GetPointers( v1, v2 );
-</pre><p><code>ndk_helper</code> also provides access to a vector-math library
-(<code>vecmath.h</code>), using it here to transform touch coordinates.</p>
-<pre class="fragment">void Engine::TransformPosition( ndk_helper::Vec2&amp; vec
-) { vec = ndk_helper::Vec2( 2.0f, 2.0f ) * vec / ndk_helper::Vec2(
-gl_context_-&gt;GetScreenWidth(), gl_context_-&gt;GetScreenHeight() )
-
-ndk_helper::Vec2( 1.f, 1.f ); }</li></pre>
-</ul>
-<p><code>HandleCmd()</code> handles commands posted from the
-android_native_app_glue library. For more information about what the messages
-mean, refer to the comments in the <code>android_native_app_glue.h</code> and
-<code>.c</code> source files.</p>
-
-<pre>
-void Engine::HandleCmd( struct android_app* app, int32_t
-cmd ) { Engine* eng = (Engine*) app-&gt;userData; switch( cmd ) { case
-APP_CMD_SAVE_STATE: break; case APP_CMD_INIT_WINDOW: // The window is being
-shown, get it ready. if( app-&gt;window != NULL )
 </pre>
 
-<p><code>ndk_helper</code> posts APP_CMD_INIT_WINDOW when android_app_glue
-receives an <code>onNativeWindowCreated()</code> callback from the system.
+<p>The application gets the system clock and supplies it to the renderer
+for time-based animation based on real-time clock. This information is used, for example, in
+calculating momentum, where speed declines as a function of time.</p>
+
+<pre class="no-pretty-print">
+renderer_.Update( monitor_.GetCurrentTime() );
+</pre>
+
+<p>The application now checks whether the context information that {@code GLcontext} holds is still
+valid. If not, {@code ndk-helper} swaps the buffer, reinstantiating the GL context.</p>
+
+<pre class="no-pretty-print">
+if( EGL_SUCCESS != gl_context_-&gt;Swap() )  // swaps
+buffer.
+</pre>
+
+<p>The program passes touch-motion events to the gesture detector defined
+in the {@code ndk_helper} class. The gesture detector tracks multitouch
+gestures, such as pinch-and-drag, and sends a notification when triggered by
+any of these events.</p>
+
+<pre class="no-pretty-print">
+    if( AInputEvent_getType( event ) == AINPUT_EVENT_TYPE_MOTION )
+    {
+        ndk_helper::GESTURE_STATE doubleTapState =
+            eng->doubletap_detector_.Detect( event );
+        ndk_helper::GESTURE_STATE dragState = eng->drag_detector_.Detect( event );
+        ndk_helper::GESTURE_STATE pinchState = eng->pinch_detector_.Detect( event );
+
+        //Double tap detector has a priority over other detectors
+        if( doubleTapState == ndk_helper::GESTURE_STATE_ACTION )
+        {
+            //Detect double tap
+            eng->tap_camera_.Reset( true );
+        }
+        else
+        {
+            //Handle drag state
+            if( dragState & ndk_helper::GESTURE_STATE_START )
+            {
+                //Otherwise, start dragging
+                ndk_helper::Vec2 v;
+                eng->drag_detector_.GetPointer( v );
+                eng->TransformPosition( v );
+                eng->tap_camera_.BeginDrag( v );
+            }
+           // ...else other possible drag states...
+
+            //Handle pinch state
+            if( pinchState & ndk_helper::GESTURE_STATE_START )
+            {
+                //Start new pinch
+                ndk_helper::Vec2 v1;
+                ndk_helper::Vec2 v2;
+                eng->pinch_detector_.GetPointers( v1, v2 );
+                eng->TransformPosition( v1 );
+                eng->TransformPosition( v2 );
+                eng->tap_camera_.BeginPinch( v1, v2 );
+            }
+            // ...else other possible pinch states...
+        }
+        return 1;
+    }
+</pre>
+
+<p>The {@code ndk_helper} class also provides access to a vector-math library
+({@code vecmath.h}), using it here to transform touch coordinates.</p>
+
+<pre class="no-pretty-print">
+void Engine::TransformPosition( ndk_helper::Vec2& vec )
+{
+    vec = ndk_helper::Vec2( 2.0f, 2.0f ) * vec
+            / ndk_helper::Vec2( gl_context_->GetScreenWidth(),
+            gl_context_->GetScreenHeight() ) - ndk_helper::Vec2( 1.f, 1.f );
+}
+</pre>
+</ul>
+
+<p>The {@code HandleCmd()} method handles commands posted from the
+android_native_app_glue library. For more information about what the messages
+mean, refer to the comments in the {@code android_native_app_glue.h} and
+{@code .c} source files.</p>
+
+<pre class="no-pretty-print">
+void Engine::HandleCmd( struct android_app* app,
+        int32_t cmd )
+{
+    Engine* eng = (Engine*) app->userData;
+    switch( cmd )
+    {
+    case APP_CMD_SAVE_STATE:
+        break;
+    case APP_CMD_INIT_WINDOW:
+        // The window is being shown, get it ready.
+        if( app->window != NULL )
+        {
+            eng->InitDisplay();
+            eng->DrawFrame();
+        }
+        break;
+    case APP_CMD_TERM_WINDOW:
+        // The window is being hidden or closed, clean it up.
+        eng->TermDisplay();
+        eng->has_focus_ = false;
+        break;
+    case APP_CMD_STOP:
+        break;
+    case APP_CMD_GAINED_FOCUS:
+        eng->ResumeSensors();
+        //Start animation
+        eng->has_focus_ = true;
+        break;
+    case APP_CMD_LOST_FOCUS:
+        eng->SuspendSensors();
+        // Also stop animating.
+        eng->has_focus_ = false;
+        eng->DrawFrame();
+        break;
+    case APP_CMD_LOW_MEMORY:
+        //Free up GL resources
+        eng->TrimMemory();
+        break;
+    }
+}
+</pre>
+
+<p>The {@code ndk_helper} class posts {@code APP_CMD_INIT_WINDOW} when {@code android_app_glue}
+receives an {@code onNativeWindowCreated()} callback from the system.
 Applications can normally perform window initializations, such as EGL
 initialization. They do this outside of the activity lifecycle, since the
 activity is not yet ready.</p>
-<pre class="fragment">ndk_helper::JNIHelper::Init( state-&gt;activity,
-HELPER_CLASS_NAME );
 
+<pre class="no-pretty-print">
+    //Init helper functions
+    ndk_helper::JNIHelper::Init( state->activity, HELPER_CLASS_NAME );
 
-state-&gt;userData = &amp;g_engine;
-state-&gt;onAppCmd = Engine::HandleCmd;
-state-&gt;onInputEvent = Engine::HandleInput; </pre>
+    state->userData = &g_engine;
+    state->onAppCmd = Engine::HandleCmd;
+    state->onInputEvent = Engine::HandleInput;
+</pre>
