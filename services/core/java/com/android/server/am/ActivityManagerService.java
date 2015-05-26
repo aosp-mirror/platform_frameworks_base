@@ -281,6 +281,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final String TAG_UID_OBSERVERS = TAG + POSTFIX_UID_OBSERVERS;
     private static final String TAG_URI_PERMISSION = TAG + POSTFIX_URI_PERMISSION;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+    private static final String TAG_VISIBLE_BEHIND = TAG + POSTFIX_VISIBLE_BEHIND;
 
     /** Control over CPU and battery monitoring */
     // write battery stats every 30 minutes.
@@ -10838,7 +10839,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 final ActivityStack stack = ActivityRecord.getStackLocked(token);
                 final boolean visible = stack == null ? false : stack.hasVisibleBehindActivity();
-                if (ActivityStackSupervisor.DEBUG_VISIBLE_BEHIND) Slog.d(TAG,
+                if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
                         "isBackgroundVisibleBehind: stack=" + stack + " visible=" + visible);
                 return visible;
             }
