@@ -27,7 +27,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -42,6 +41,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -60,6 +60,7 @@ import java.util.ArrayList;
 
 final class TaskRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
+    private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
@@ -561,8 +562,9 @@ final class TaskRecord {
      * Reorder the history stack so that the passed activity is brought to the front.
      */
     final void moveActivityToFrontLocked(ActivityRecord newTop) {
-        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + newTop
-            + " to stack at top", new RuntimeException("here").fillInStackTrace());
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
+                "Removing and adding activity " + newTop
+                + " to stack at top callers=" + Debug.getCallers(4));
 
         mActivities.remove(newTop);
         mActivities.add(newTop);
