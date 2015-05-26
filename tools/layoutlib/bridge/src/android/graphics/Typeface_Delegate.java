@@ -16,10 +16,10 @@
 
 package android.graphics;
 
-import com.android.annotations.NonNull;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.NonNull;
 import android.graphics.FontFamily_Delegate.FontVariant;
 
 import java.awt.Font;

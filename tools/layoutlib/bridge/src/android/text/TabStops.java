@@ -16,7 +16,7 @@
 
 package android.text;
 
-import com.android.annotations.Nullable;
+import android.annotation.Nullable;
 
 // Based on the native implementation of TabStops in
 // frameworks/base/core/jni/android_text_StaticLayout.cpp revision b808260
