@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -36,6 +35,7 @@ import com.android.util.Pair;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;

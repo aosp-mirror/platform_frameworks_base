@@ -16,8 +16,6 @@
 
 package com.android.layoutlib.bridge.android.support;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.SessionParams;
@@ -25,6 +23,8 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.View;
 

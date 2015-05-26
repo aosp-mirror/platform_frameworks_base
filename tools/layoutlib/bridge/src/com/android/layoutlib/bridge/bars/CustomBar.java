@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
@@ -32,6 +31,7 @@ import com.android.resources.ResourceType;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;

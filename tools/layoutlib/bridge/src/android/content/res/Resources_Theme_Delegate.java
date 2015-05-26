@@ -16,7 +16,6 @@
 
 package android.content.res;
 
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -25,6 +24,7 @@ import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
 import android.content.res.Resources.ThemeKey;

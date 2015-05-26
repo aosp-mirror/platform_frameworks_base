@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.ActionBarCallback.HomeButtonStyle;
 import com.android.ide.common.rendering.api.RenderResources;
@@ -24,6 +23,7 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.android.BridgeContext;
 
+import android.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
