@@ -52,9 +52,8 @@ page.image=auto/images/assets/icons/messaging_app_notifications.png
 
 <p>
   Staying connected through messages is important to many drivers. Chat apps can let users
-  know if a child need to be picked up, or if a dinner location has been changed. Apps that provide
-  sports information might tell the user who just won the big game, and let the user ask questions
-  about other games being played. The Android framework enables messaging apps to extend their
+  know if a child need to be picked up, or if a dinner location has been changed.
+  The Android framework enables messaging apps to extend their
   services into car dashboards using a standard user interface that lets drivers keep their eyes
   on the road.
 </p>
@@ -79,7 +78,7 @@ page.image=auto/images/assets/icons/messaging_app_notifications.png
 
 <p>
   Messaging apps do not run directly on the Android dashboard hardware. They are installed on
-  separate, Android mobile device. When the mobile device is plugged into a dashboard,
+  a separate Android mobile device. When the mobile device is plugged into a dashboard,
   the installed messaging apps can offer services for viewing and responding to messages
   through the Auto user interface.
 </p>
@@ -98,7 +97,7 @@ page.image=auto/images/assets/icons/messaging_app_notifications.png
     has read or replied to a message.
 </ul>
 
-<h3 id="#concepts">Concepts and Objects</h3>
+<h3 id="concepts">Concepts and objects</h3>
 
 <p>Before you start designing your app, it's helpful to understand how Auto
 handles messaging.</p>
@@ -106,23 +105,19 @@ handles messaging.</p>
 <p>Each individual chunk of communication is a <em>message</em>. A message is a
 short length of text, suitable for the Auto device to read aloud. In a chat app,
 this might be a single message from one person to another: <code>"Fitzy -- Jane
-can't come to the ball, her youngest has the croup. :-( --Liz"</code> In a
-sports app, a message might be a single bit of news about a game: <code>"Granger
-scores for Harpies at 7 minutes in."</code></p>
+can't come to the ball, her youngest has the croup. :-( --Liz"</code>.</p>
 
 <p>A <em>conversation</em> is a group of messages that are all grouped together
 in some way. Auto uses the conversation information to group the messages
 together when presenting them to the user. In a chat app, a conversation might
 be all the messages between the user and another person (for example, all
-the messages back and forth between Darcy and Elizabeth). In a sports app, a
-conversation might be all the messages about a particular game. Every message
+the messages back and forth between Darcy and Elizabeth). Every message
 belongs to a conversation, even if it's the only message in that conversation.
 Each conversation has a <em>conversation name</em>.
 The conversation name is used by Android Auto to
 present the messages; it's up to your app to choose an appropriate conversation
 name. In a chat app, the conversation name is usually the person your user is
-talking to.
-In a sports app, this might be the name of the teams playing in the game.</p>
+talking to.</p>
 
 <p>The v4 support library defines an {@link
 android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation
@@ -177,9 +172,7 @@ contained in those objects have been heard by the user.</li>
 <li>If the user sends a reply, Auto triggers the app's "message reply" intent and
 attaches a transcript of the user's response.  The app can take appropriate
 action, based on the app's logic. For example, a chat app might interpret the
-reply as a message to go to the other conversation participants, while a sports
-app might try to interpret the "reply" as a request for other information
-("What's the score in the Sharks game?").</li>
+reply as a message to go to the other conversation participants.</li>
 
 </ol>
 
