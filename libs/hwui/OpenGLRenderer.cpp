@@ -841,7 +841,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
 }
 
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
-    bool snap = !layer->getForceFilter()
+    const bool tryToSnap = !layer->getForceFilter()
             && layer->getWidth() == (uint32_t) rect.getWidth()
             && layer->getHeight() == (uint32_t) rect.getHeight();
     Glop glop;
@@ -849,7 +849,7 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
             .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
             .setFillTextureLayer(*layer, getLayerAlpha(layer))
             .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-            .setModelViewMapUnitToRectOptionalSnap(snap, rect)
+            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, rect)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
     renderGlop(glop);
@@ -865,7 +865,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
         Blend::ModeOrderSwap modeUsage = swap ?
                 Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap;
         const Matrix4& transform = swap ? Matrix4::identity() : *currentTransform();
-        bool snap = !swap
+        const bool tryToSnap = !swap
                 && layer->getWidth() == static_cast<uint32_t>(rect.getWidth())
                 && layer->getHeight() == static_cast<uint32_t>(rect.getHeight());
         Glop glop;
@@ -873,7 +873,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
                 .setMeshTexturedUvQuad(nullptr, layer->texCoords)
                 .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), modeUsage)
                 .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
-                .setModelViewMapUnitToRectOptionalSnap(snap, rect)
+                .setModelViewMapUnitToRectOptionalSnap(tryToSnap, rect)
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
         renderGlop(glop);
@@ -1654,14 +1654,17 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
             fmin(1.0f, src.right / texture->width),
             fmin(1.0f, src.bottom / texture->height));
 
-    int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+    const int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
             ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    const bool tryToSnap = MathUtils::areEqual(src.getWidth(), dst.getWidth())
+            && MathUtils::areEqual(src.getHeight(), dst.getHeight());
+
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedUvQuad(texture->uvMapper, uv)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
             .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-            .setModelViewMapUnitToRectSnap(dst)
+            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, dst)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
     renderGlop(glop);
