@@ -94,6 +94,7 @@
   <item type="id" name="redo" />
   <item type="id" name="replaceText" />
   <item type="id" name="shareText" />
+  <item type="id" name="floating_toolbar_menu_item_image_button" />
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
   <item type="id" name="accessibilityActionShowOnScreen" />
