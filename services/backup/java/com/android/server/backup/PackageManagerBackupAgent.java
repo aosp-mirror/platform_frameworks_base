@@ -324,14 +324,18 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
             // At this point, the only entries in 'existing' are apps that were
             // mentioned in the saved state file, but appear to no longer be present
-            // on the device.  Write a deletion entity for them.
-            for (String app : mExisting) {
-                if (DEBUG) Slog.v(TAG, "- removing metadata for deleted pkg " + app);
-                try {
-                    data.writeEntityHeader(app, -1);
-                } catch (IOException e) {
-                    Slog.e(TAG, "Unable to write package deletions!");
-                    return;
+            // on the device.  We want to preserve the entry for them, however,
+            // because we want the right thing to happen if the user goes through
+            // a backup / uninstall / backup / reinstall sequence.
+            if (DEBUG) {
+                if (mExisting.size() > 0) {
+                    StringBuilder sb = new StringBuilder(64);
+                    sb.append("Preserving metadata for deleted packages:");
+                    for (String app : mExisting) {
+                        sb.append(' ');
+                        sb.append(app);
+                    }
+                    Slog.v(TAG, sb.toString());
                 }
             }
         } catch (IOException e) {
