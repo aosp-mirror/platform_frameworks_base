@@ -98,6 +98,10 @@ public class ZenModeHelper {
         mConditions = new ZenModeConditions(this, conditionProviders);
     }
 
+    public Looper getLooper() {
+        return mHandler.getLooper();
+    }
+
     @Override
     public String toString() {
         return TAG;

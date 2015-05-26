@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.app.ActivityManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -728,6 +730,7 @@ public class ZenModeConfig implements Parcelable {
         return new Uri.Builder().scheme(Condition.SCHEME)
                 .authority(SYSTEM_AUTHORITY)
                 .appendPath(EVENT_PATH)
+                .appendQueryParameter("userId", Long.toString(event.userId))
                 .appendQueryParameter("calendar", Long.toString(event.calendar))
                 .appendQueryParameter("reply", Integer.toString(event.reply))
                 .build();
@@ -745,6 +748,7 @@ public class ZenModeConfig implements Parcelable {
                 && conditionId.getPathSegments().get(0).equals(EVENT_PATH);
         if (!isEvent) return null;
         final EventInfo rt = new EventInfo();
+        rt.userId = tryParseInt(conditionId.getQueryParameter("userId"), UserHandle.USER_NULL);
         rt.calendar = tryParseLong(conditionId.getQueryParameter("calendar"),
                 EventInfo.ANY_CALENDAR);
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
@@ -758,6 +762,7 @@ public class ZenModeConfig implements Parcelable {
         public static final int REPLY_YES_OR_MAYBE = 1;
         public static final int REPLY_YES = 2;
 
+        public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
         public long calendar = ANY_CALENDAR;  // CalendarContract.Calendars._ID, or ANY_CALENDAR
         public int reply;
 
@@ -770,15 +775,22 @@ public class ZenModeConfig implements Parcelable {
         public boolean equals(Object o) {
             if (!(o instanceof EventInfo)) return false;
             final EventInfo other = (EventInfo) o;
-            return calendar == other.calendar
+            return userId == other.userId
+                    && calendar == other.calendar
                     && reply == other.reply;
         }
 
         public EventInfo copy() {
             final EventInfo rt = new EventInfo();
+            rt.userId = userId;
             rt.calendar = calendar;
             rt.reply = reply;
             return rt;
+        }
+
+        public static int resolveUserId(int userId) {
+            return userId == UserHandle.USER_NULL ? ActivityManager.getCurrentUser() : userId;
+
         }
     }
 

@@ -46,4 +46,14 @@ public abstract class SystemConditionProviderService extends ConditionProviderSe
         TimeUtils.formatDuration(millis, sb);
         return sb.toString();
     }
+
+    protected static void dumpUpcomingTime(PrintWriter pw, String var, long time, long now) {
+        pw.print("      "); pw.print(var); pw.print('=');
+        if (time > 0) {
+            pw.printf("%s, in %s, now=%s", ts(time), formatDuration(time - now), ts(now));
+        } else {
+            pw.print(time);
+        }
+        pw.println();
+    }
 }
