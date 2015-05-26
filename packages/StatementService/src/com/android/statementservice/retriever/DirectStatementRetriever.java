@@ -167,7 +167,7 @@ import java.util.List;
                                 .getStatements());
             }
             return Result.create(statements, webContent.getExpireTimeMillis());
-        } catch (JSONException e) {
+        } catch (JSONException | IOException e) {
             return Result.create(statements, DO_NOT_CACHE_RESULT);
         }
     }
@@ -202,7 +202,7 @@ import java.util.List;
             }
 
             return Result.create(statements, DO_NOT_CACHE_RESULT);
-        } catch (JSONException | NameNotFoundException e) {
+        } catch (JSONException | IOException | NameNotFoundException e) {
             Log.w(DirectStatementRetriever.class.getSimpleName(), e);
             return Result.create(Collections.<Statement>emptyList(), DO_NOT_CACHE_RESULT);
         }

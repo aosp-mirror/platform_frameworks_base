@@ -16,7 +16,6 @@
 
 package com.android.statementservice.retriever;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -29,25 +28,11 @@ import org.json.JSONObject;
     private AssetFactory() {}
 
     /**
-     * Creates a new Asset object from its JSON string representation.
-     *
-     * @throws AssociationServiceException if the assetJson is not well formatted.
-     */
-    public static AbstractAsset create(String assetJson) throws AssociationServiceException {
-        try {
-            return create(new JSONObject(assetJson));
-        } catch (JSONException e) {
-            throw new AssociationServiceException(
-                    "Input is not a well formatted asset descriptor.");
-        }
-    }
-
-    /**
      * Checks that the input is a valid asset with purposes.
      *
      * @throws AssociationServiceException if the asset is not well formatted.
      */
-    private static AbstractAsset create(JSONObject asset)
+    public static AbstractAsset create(JSONObject asset)
             throws AssociationServiceException {
         String namespace = asset.optString(Utils.NAMESPACE_FIELD, null);
         if (namespace == null) {
