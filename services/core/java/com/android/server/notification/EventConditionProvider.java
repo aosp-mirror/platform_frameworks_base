@@ -23,7 +23,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
@@ -31,6 +36,7 @@ import android.service.notification.ZenModeConfig.EventInfo;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.server.notification.CalendarTracker.CheckEventResult;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
@@ -51,17 +57,21 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private static final String ACTION_EVALUATE = SIMPLE_NAME + ".EVALUATE";
     private static final int REQUEST_CODE_EVALUATE = 1;
     private static final String EXTRA_TIME = "time";
+    private static final long CHANGE_DELAY = 2 * 1000;  // coalesce chatty calendar changes
 
     private final Context mContext = this;
     private final ArraySet<Uri> mSubscriptions = new ArraySet<Uri>();
-    private final CalendarTracker mTracker = new CalendarTracker(mContext);
+    private final SparseArray<CalendarTracker> mTrackers = new SparseArray<>();
+    private final Handler mWorker;
 
     private boolean mConnected;
     private boolean mRegistered;
     private boolean mBootComplete;  // don't hammer the calendar provider until boot completes.
+    private long mNextAlarmTime;
 
-    public EventConditionProvider() {
+    public EventConditionProvider(Looper worker) {
         if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
+        mWorker = new Handler(worker);
     }
 
     @Override
@@ -80,13 +90,17 @@ public class EventConditionProvider extends SystemConditionProviderService {
         pw.print("      mConnected="); pw.println(mConnected);
         pw.print("      mRegistered="); pw.println(mRegistered);
         pw.print("      mBootComplete="); pw.println(mBootComplete);
+        dumpUpcomingTime(pw, "mNextAlarmTime", mNextAlarmTime, System.currentTimeMillis());
         pw.println("      mSubscriptions=");
         for (Uri conditionId : mSubscriptions) {
             pw.print("        ");
             pw.println(conditionId);
         }
-        pw.println("      mTracker=");
-        mTracker.dump("        ", pw);
+        pw.println("      mTrackers=");
+        for (int i = 0; i < mTrackers.size(); i++) {
+            pw.print("        user="); pw.println(mTrackers.keyAt(i));
+            mTrackers.valueAt(i).dump("          ", pw);
+        }
     }
 
     @Override
@@ -94,7 +108,16 @@ public class EventConditionProvider extends SystemConditionProviderService {
         if (DEBUG) Slog.d(TAG, "onBootComplete");
         if (mBootComplete) return;
         mBootComplete = true;
-        evaluateSubscriptions();
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                reloadTrackers();
+            }
+        }, filter);
+        reloadTrackers();
     }
 
     @Override
@@ -146,14 +169,39 @@ public class EventConditionProvider extends SystemConditionProviderService {
         return (IConditionProvider) onBind(null);
     }
 
+    private void reloadTrackers() {
+        if (DEBUG) Slog.d(TAG, "reloadTrackers");
+        for (int i = 0; i < mTrackers.size(); i++) {
+            mTrackers.valueAt(i).setCallback(null);
+        }
+        mTrackers.clear();
+        for (UserHandle user : UserManager.get(mContext).getUserProfiles()) {
+            final Context context = user.isOwner() ? mContext : getContextForUser(mContext, user);
+            if (context == null) {
+                Slog.w(TAG, "Unable to create context for user " + user.getIdentifier());
+                continue;
+            }
+            mTrackers.put(user.getIdentifier(), new CalendarTracker(mContext, context));
+        }
+        evaluateSubscriptions();
+    }
+
     private void evaluateSubscriptions() {
-        if (DEBUG) Log.d(TAG, "evaluateSubscriptions");
+        if (!mWorker.hasCallbacks(mEvaluateSubscriptionsW)) {
+            mWorker.post(mEvaluateSubscriptionsW);
+        }
+    }
+
+    private void evaluateSubscriptionsW() {
+        if (DEBUG) Slog.d(TAG, "evaluateSubscriptions");
         if (!mBootComplete) {
-            if (DEBUG) Log.d(TAG, "Skipping evaluate before boot complete");
+            if (DEBUG) Slog.d(TAG, "Skipping evaluate before boot complete");
             return;
         }
         final long now = System.currentTimeMillis();
-        mTracker.setCallback(mSubscriptions.isEmpty() ? null : mTrackerCallback);
+        for (int i = 0; i < mTrackers.size(); i++) {
+            mTrackers.valueAt(i).setCallback(mSubscriptions.isEmpty() ? null : mTrackerCallback);
+        }
         setRegistered(!mSubscriptions.isEmpty());
         long reevaluateAt = 0;
         for (Uri conditionId : mSubscriptions) {
@@ -162,7 +210,30 @@ public class EventConditionProvider extends SystemConditionProviderService {
                 notifyCondition(conditionId, Condition.STATE_FALSE, "badConditionId");
                 continue;
             }
-            final CheckEventResult result = mTracker.checkEvent(event, now);
+            CheckEventResult result = null;
+            if (event.calendar == EventInfo.ANY_CALENDAR) {
+                // event could exist on any tracker
+                for (int i = 0; i < mTrackers.size(); i++) {
+                    final CalendarTracker tracker = mTrackers.valueAt(i);
+                    final CheckEventResult r = tracker.checkEvent(event, now);
+                    if (result == null) {
+                        result = r;
+                    } else {
+                        result.inEvent |= r.inEvent;
+                        result.recheckAt = Math.min(result.recheckAt, r.recheckAt);
+                    }
+                }
+            } else {
+                // event should exist on one tracker
+                final int userId = EventInfo.resolveUserId(event.userId);
+                final CalendarTracker tracker = mTrackers.get(userId);
+                if (tracker == null) {
+                    Slog.w(TAG, "No calendar tracker found for user " + userId);
+                    notifyCondition(conditionId, Condition.STATE_FALSE, "badUserId");
+                    continue;
+                }
+                result = tracker.checkEvent(event, now);
+            }
             if (result.recheckAt != 0 && (reevaluateAt == 0 || result.recheckAt < reevaluateAt)) {
                 reevaluateAt = result.recheckAt;
             }
@@ -172,11 +243,12 @@ public class EventConditionProvider extends SystemConditionProviderService {
             }
             notifyCondition(conditionId, Condition.STATE_TRUE, "inEventNow");
         }
-        updateAlarm(now, reevaluateAt);
-        if (DEBUG) Log.d(TAG, "evaluateSubscriptions took " + (System.currentTimeMillis() - now));
+        rescheduleAlarm(now, reevaluateAt);
+        if (DEBUG) Slog.d(TAG, "evaluateSubscriptions took " + (System.currentTimeMillis() - now));
     }
 
-    private void updateAlarm(long now, long time) {
+    private void rescheduleAlarm(long now, long time) {
+        mNextAlarmTime = time;
         final AlarmManager alarms = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext,
                 REQUEST_CODE_EVALUATE,
@@ -196,8 +268,8 @@ public class EventConditionProvider extends SystemConditionProviderService {
     }
 
     private void notifyCondition(Uri conditionId, int state, String reason) {
-        if (DEBUG) Slog.d(TAG, "notifyCondition " + Condition.stateToString(state)
-                + " reason=" + reason);
+        if (DEBUG) Slog.d(TAG, "notifyCondition " + conditionId + " "
+                + Condition.stateToString(state) + " reason=" + reason);
         notifyCondition(createCondition(conditionId, state));
     }
 
@@ -223,19 +295,35 @@ public class EventConditionProvider extends SystemConditionProviderService {
         }
     }
 
+    private static Context getContextForUser(Context context, UserHandle user) {
+        try {
+            return context.createPackageContextAsUser(context.getPackageName(), 0, user);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+    }
+
     private final CalendarTracker.Callback mTrackerCallback = new CalendarTracker.Callback() {
         @Override
         public void onChanged() {
-            if (DEBUG) Log.d(TAG, "mTrackerCallback.onChanged");
-            evaluateSubscriptions();
+            if (DEBUG) Slog.d(TAG, "mTrackerCallback.onChanged");
+            mWorker.removeCallbacks(mEvaluateSubscriptionsW);
+            mWorker.postDelayed(mEvaluateSubscriptionsW, CHANGE_DELAY);
         }
     };
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Slog.d(TAG, "onReceive " + intent.getAction());
             evaluateSubscriptions();
+        }
+    };
+
+    private final Runnable mEvaluateSubscriptionsW = new Runnable() {
+        @Override
+        public void run() {
+            evaluateSubscriptionsW();
         }
     };
 }

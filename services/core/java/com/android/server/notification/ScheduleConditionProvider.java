@@ -85,12 +85,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             pw.print(meetsSchedule(conditionId, now) ? "* " : "  ");
             pw.println(conditionId);
         }
-        pw.print("      mNextAlarmTime="); pw.print(mNextAlarmTime);
-        if (mNextAlarmTime > 0) {
-            pw.printf(" (%s, in %s, now=%s)", ts(mNextAlarmTime),
-                    formatDuration(mNextAlarmTime - now), ts(now));
-        }
-        pw.println();
+        dumpUpcomingTime(pw, "mNextAlarmTime", mNextAlarmTime, now);
     }
 
     @Override

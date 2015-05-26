@@ -799,12 +799,13 @@ public class NotificationManagerService extends SystemService {
                 mNotificationLight.turnOff();
                 mStatusBar.notificationLightOff();
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 // reload per-user settings
                 mSettingsObserver.update(null);
                 mUserProfiles.updateCache(context);
                 // Refresh managed services
-                mConditionProviders.onUserSwitched();
-                mListeners.onUserSwitched();
+                mConditionProviders.onUserSwitched(user);
+                mListeners.onUserSwitched(user);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 mUserProfiles.updateCache(context);
             }

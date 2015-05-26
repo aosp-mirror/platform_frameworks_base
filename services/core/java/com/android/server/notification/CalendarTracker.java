@@ -26,8 +26,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.CalendarContract.Attendees;
+import android.provider.CalendarContract.Calendars;
+import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Instances;
 import android.service.notification.ZenModeConfig.EventInfo;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.io.PrintWriter;
@@ -63,13 +66,15 @@ public class CalendarTracker {
     private static final String ATTENDEE_SELECTION = Attendees.EVENT_ID + " = ? AND "
             + Attendees.ATTENDEE_EMAIL + " = ?";
 
-    private final Context mContext;
+    private final Context mSystemContext;
+    private final Context mUserContext;
 
     private Callback mCallback;
     private boolean mRegistered;
 
-    public CalendarTracker(Context context) {
-        mContext = context;
+    public CalendarTracker(Context systemContext, Context userContext) {
+        mSystemContext = systemContext;
+        mUserContext = userContext;
     }
 
     public void setCallback(Callback callback) {
@@ -81,11 +86,12 @@ public class CalendarTracker {
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mCallback="); pw.println(mCallback);
         pw.print(prefix); pw.print("mRegistered="); pw.println(mRegistered);
+        pw.print(prefix); pw.print("u="); pw.println(mUserContext.getUserId());
     }
 
     public void dumpContent(Uri uri) {
         Log.d(TAG, "dumpContent: " + uri);
-        final Cursor cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+        final Cursor cursor = mUserContext.getContentResolver().query(uri, null, null, null, null);
         try {
             int r = 0;
             while (cursor.moveToNext()) {
@@ -126,36 +132,61 @@ public class CalendarTracker {
         }
     }
 
-
+    private ArraySet<Long> getPrimaryCalendars() {
+        final long start = System.currentTimeMillis();
+        final ArraySet<Long> rt = new ArraySet<>();
+        final String primary = "\"primary\"";
+        final String[] projection = { Calendars._ID,
+                "(" + Calendars.ACCOUNT_NAME + "=" + Calendars.OWNER_ACCOUNT + ") AS " + primary };
+        final String selection = primary + " = 1";
+        Cursor cursor = null;
+        try {
+            cursor = mUserContext.getContentResolver().query(Calendars.CONTENT_URI, projection,
+                    selection, null, null);
+            while (cursor != null && cursor.moveToNext()) {
+                rt.add(cursor.getLong(0));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        if (DEBUG) Log.d(TAG, "getPrimaryCalendars took " + (System.currentTimeMillis() - start));
+        return rt;
+    }
 
     public CheckEventResult checkEvent(EventInfo filter, long time) {
         final Uri.Builder uriBuilder = Instances.CONTENT_URI.buildUpon();
         ContentUris.appendId(uriBuilder, time);
         ContentUris.appendId(uriBuilder, time + EVENT_CHECK_LOOKAHEAD);
         final Uri uri = uriBuilder.build();
-        final Cursor cursor = mContext.getContentResolver().query(uri, INSTANCE_PROJECTION, null,
-                null, INSTANCE_ORDER_BY);
+        final Cursor cursor = mUserContext.getContentResolver().query(uri, INSTANCE_PROJECTION,
+                null, null, INSTANCE_ORDER_BY);
         final CheckEventResult result = new CheckEventResult();
         result.recheckAt = time + EVENT_CHECK_LOOKAHEAD;
         try {
-            while (cursor.moveToNext()) {
+            final ArraySet<Long> primaryCalendars = getPrimaryCalendars();
+            while (cursor != null && cursor.moveToNext()) {
                 final long begin = cursor.getLong(0);
                 final long end = cursor.getLong(1);
                 final String title = cursor.getString(2);
-                final boolean visible = cursor.getInt(3) == 1;
+                final boolean calendarVisible = cursor.getInt(3) == 1;
                 final int eventId = cursor.getInt(4);
                 final String owner = cursor.getString(5);
                 final long calendarId = cursor.getLong(6);
                 final int availability = cursor.getInt(7);
-                if (DEBUG) Log.d(TAG, String.format("%s %s-%s v=%s a=%s eid=%s o=%s cid=%s", title,
-                        new Date(begin), new Date(end), visible, availabilityToString(availability),
-                        eventId, owner, calendarId));
+                final boolean calendarPrimary = primaryCalendars.contains(calendarId);
+                if (DEBUG) Log.d(TAG, String.format("%s %s-%s v=%s a=%s eid=%s o=%s cid=%s p=%s",
+                        title,
+                        new Date(begin), new Date(end), calendarVisible,
+                        availabilityToString(availability), eventId, owner, calendarId,
+                        calendarPrimary));
                 final boolean meetsTime = time >= begin && time < end;
-                final boolean meetsCalendar = visible
-                        && (filter.calendar == ANY_CALENDAR || filter.calendar == calendarId)
-                        && availability != Instances.AVAILABILITY_FREE;
-                if (meetsCalendar) {
-                    if (DEBUG) Log.d(TAG, "  MEETS CALENDAR");
+                final boolean meetsCalendar = calendarVisible && calendarPrimary
+                        && (filter.calendar == ANY_CALENDAR || filter.calendar == calendarId);
+                final boolean meetsAvailability = availability != Instances.AVAILABILITY_FREE;
+                if (meetsCalendar && meetsAvailability) {
+                    if (DEBUG) Log.d(TAG, "  MEETS CALENDAR & AVAILABILITY");
                     final boolean meetsAttendee = meetsAttendee(filter, eventId, owner);
                     if (meetsAttendee) {
                         if (DEBUG) Log.d(TAG, "    MEETS ATTENDEE");
@@ -172,19 +203,22 @@ public class CalendarTracker {
                 }
             }
         } finally {
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return result;
     }
 
     private boolean meetsAttendee(EventInfo filter, int eventId, String email) {
+        final long start = System.currentTimeMillis();
         String selection = ATTENDEE_SELECTION;
         String[] selectionArgs = { Integer.toString(eventId), email };
         if (DEBUG_ATTENDEES) {
             selection = null;
             selectionArgs = null;
         }
-        final Cursor cursor = mContext.getContentResolver().query(Attendees.CONTENT_URI,
+        final Cursor cursor = mUserContext.getContentResolver().query(Attendees.CONTENT_URI,
                 ATTENDEE_PROJECTION, selection, selectionArgs, null);
         try {
             if (cursor.getCount() == 0) {
@@ -208,18 +242,25 @@ public class CalendarTracker {
             return rt;
         } finally {
             cursor.close();
+            if (DEBUG) Log.d(TAG, "meetsAttendee took " + (System.currentTimeMillis() - start));
         }
     }
 
     private void setRegistered(boolean registered) {
         if (mRegistered == registered) return;
-        final ContentResolver cr = mContext.getContentResolver();
+        final ContentResolver cr = mSystemContext.getContentResolver();
+        final int userId = mUserContext.getUserId();
         if (mRegistered) {
+            if (DEBUG) Log.d(TAG, "unregister content observer u=" + userId);
             cr.unregisterContentObserver(mObserver);
         }
         mRegistered = registered;
+        if (DEBUG) Log.d(TAG, "mRegistered = " + registered + " u=" + userId);
         if (mRegistered) {
-            cr.registerContentObserver(Instances.CONTENT_URI, false, mObserver);
+            if (DEBUG) Log.d(TAG, "register content observer u=" + userId);
+            cr.registerContentObserver(Instances.CONTENT_URI, true, mObserver, userId);
+            cr.registerContentObserver(Events.CONTENT_URI, true, mObserver, userId);
+            cr.registerContentObserver(Calendars.CONTENT_URI, true, mObserver, userId);
         }
     }
 
@@ -260,7 +301,8 @@ public class CalendarTracker {
     private final ContentObserver mObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean selfChange, Uri u) {
-            if (DEBUG) Log.d(TAG, "onChange selfChange=" + selfChange + " uri=" + u);
+            if (DEBUG) Log.d(TAG, "onChange selfChange=" + selfChange + " uri=" + u
+                    + " u=" + mUserContext.getUserId());
             mCallback.onChanged();
         }
 
