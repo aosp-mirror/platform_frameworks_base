@@ -6386,8 +6386,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         immersiveSticky = (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
         final boolean navAllowedHidden = immersive || immersiveSticky;
 
-        if (!navAllowedHidden
-                && windowTypeToLayerLw(type) > windowTypeToLayerLw(TYPE_INPUT_CONSUMER)) {
+        if (hideNavBarSysui && !navAllowedHidden && windowTypeToLayerLw(win.getBaseType())
+                > windowTypeToLayerLw(TYPE_INPUT_CONSUMER)) {
             // We can't hide the navbar from this window otherwise the input consumer would not get
             // the input events.
             vis = (vis & ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);

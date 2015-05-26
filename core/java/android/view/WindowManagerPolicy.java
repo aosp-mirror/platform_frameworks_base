@@ -274,11 +274,18 @@ public interface WindowManagerPolicy {
          * Get the layer at which this window's surface will be Z-ordered.
          */
         public int getSurfaceLayer();
-        
+
         /**
-         * Return the token for the application (actually activity) that owns 
-         * this window.  May return null for system windows. 
-         * 
+         * Retrieve the type of the top-level window.
+         *
+         * @return the base type of the parent window if attached or its own type otherwise
+         */
+        public int getBaseType();
+
+        /**
+         * Return the token for the application (actually activity) that owns
+         * this window.  May return null for system windows.
+         *
          * @return An IApplicationToken identifying the owning activity.
          */
         public IApplicationToken getAppToken();

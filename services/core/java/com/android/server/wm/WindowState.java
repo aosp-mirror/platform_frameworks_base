@@ -781,6 +781,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
+    public int getBaseType() {
+        WindowState win = this;
+        while (win.mAttachedWindow != null) {
+            win = win.mAttachedWindow;
+        }
+        return win.mAttrs.type;
+    }
+
+    @Override
     public IApplicationToken getAppToken() {
         return mAppToken != null ? mAppToken.appToken : null;
     }
