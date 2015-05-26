@@ -580,8 +580,8 @@ static long get_allocated_vmalloc_memory() {
             break;
         }
 
-        if (!strstr(line, "ioremap")) {
-            // Ignore ioremap regions, since they don't actually consume memory
+        if (!strstr(line, "ioremap") && !strstr(line, "map_lowmem")) {
+            // Ignore ioremap and map_lowmem regions, since they don't actually consume memory
             if (sscanf(line, "%*x-%*x %ld", &size) == 1) {
                 vmalloc_allocated_size += size;
             }
