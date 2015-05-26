@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="649 8 519 357" width="519pt" height="357pt" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <defs>
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="#ea8008">
+            <g>
+                <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+            </g>
+        </marker>
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_2" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="#274ecc">
+            <g>
+                <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+            </g>
+        </marker>
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_3" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="#d02e2a">
+            <g>
+                <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+            </g>
+        </marker>
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_4" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="#262626">
+            <g>
+                <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+            </g>
+        </marker>
+        <font-face font-family="Roboto" font-size="20" panose-1="2 0 0 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-73.242188" underline-thickness="48.828125" slope="0" x-height="538.08594" cap-height="720.70312" ascent="927.7344" descent="-244.14062" font-weight="500">
+            <font-face-src>
+                <font-face-name name="Roboto-Regular"/>
+            </font-face-src>
+        </font-face>
+        <font-face font-family="Roboto Condensed" font-size="16" panose-1="0 0 4 6 0 0 0 0 0 0" units-per-em="1000" underline-position="-73.242188" underline-thickness="48.828125" slope="0" x-height="538.08594" cap-height="720.70312" ascent="927.7344" descent="-244.14062" font-weight="300" font-stretch="condensed">
+            <font-face-src>
+                <font-face-name name="RobotoCondensed-Light"/>
+            </font-face-src>
+        </font-face>
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_5" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="#126f33">
+            <g>
+                <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+            </g>
+        </marker>
+    </defs>
+    <g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1">
+        <title>MediaCodec state diagram</title>
+        <g>
+            <line x1="740" y1="120" x2="740" y2="82.9" marker-end="url(#FilledArrow_Marker)" stroke="#ea8008" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="740" y1="210" x2="740" y2="172.9" marker-end="url(#FilledArrow_Marker_2)" stroke="#274ecc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="763.33333" y1="70" x2="763.33333" y2="107.1" marker-end="url(#FilledArrow_Marker_2)" stroke="#274ecc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="920" y1="153.5" x2="822.9" y2="153.35288" marker-end="url(#FilledArrow_Marker_2)" stroke="#274ecc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="920" y1="229" x2="822.89947" y2="229.88273" marker-end="url(#FilledArrow_Marker_3)" stroke="#d02e2a" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="919.5" y1="140" x2="822.9" y2="140" marker-end="url(#FilledArrow_Marker)" stroke="#ea8008" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="827.11573" y1="286.33365" x2="843.6129" y2="313.47642" marker-end="url(#FilledArrow_Marker_4)" stroke="#262626" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="922.88427" y1="286.33365" x2="904.22416" y2="313.82635" marker-end="url(#FilledArrow_Marker_4)" stroke="#262626" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 927.5 11.5 L 1092.5 11.5 C 1095.8137 11.5 1098.5 14.1862915 1098.5 17.5 L 1098.5 282.5 C 1098.5 285.8137 1095.8137 288.5 1092.5 288.5 L 927.5 288.5 C 924.1863 288.5 921.5 285.8137 921.5 282.5 L 921.5 17.5 C 921.5 14.1862915 924.1863 11.5 927.5 11.5 Z" fill="#178f46"/>
+            <path d="M 927.5 11.5 L 1092.5 11.5 C 1095.8137 11.5 1098.5 14.1862915 1098.5 17.5 L 1098.5 282.5 C 1098.5 285.8137 1095.8137 288.5 1092.5 288.5 L 927.5 288.5 C 924.1863 288.5 921.5 285.8137 921.5 282.5 L 921.5 17.5 C 921.5 14.1862915 924.1863 11.5 927.5 11.5 Z" stroke="#178f46" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+            <text transform="translate(926.5 260)" fill="#aadbc2">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#aadbc2" x="40.091797" y="19" textLength="21.279297">Ex</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#aadbc2" x="61.17578" y="19" textLength="65.73242">ecuting</tspan>
+            </text>
+            <path d="M 657.5 11.5 L 822.5 11.5 C 825.8137 11.5 828.5 14.1862915 828.5 17.5 L 828.5 282.5 C 828.5 285.8137 825.8137 288.5 822.5 288.5 L 657.5 288.5 C 654.1863 288.5 651.5 285.8137 651.5 282.5 L 651.5 17.5 C 651.5 14.1862915 654.1863 11.5 657.5 11.5 Z" stroke="#d02e2a" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <text transform="translate(656.5 260)" fill="#d02e2a">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#d02e2a" x="46.53711" y="19" textLength="18.398438">St</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#d02e2a" x="64.740234" y="19" textLength="55.722656">opped</tspan>
+            </text>
+            <text transform="translate(1130.1743 91)" fill="#262626">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#262626" x=".64453125" y="15" textLength="30.710938">flush</tspan>
+            </text>
+            <text transform="translate(968 78.5)" fill="#262626">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#262626" x=".859375" y="15" textLength="122.78125">dequeueInputBuffer</tspan>
+            </text>
+            <text transform="translate(846.272 20.5)" fill="#126f33">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#126f33" x="14.255245" y="15" textLength="24.148438">star</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#126f33" x="38.794307" y="15" textLength="4.640625">t</tspan>
+            </text>
+            <text transform="translate(848.3963 116.5)" fill="#eb8007">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#eb8007" x="11.621094" y="15" textLength="11.78125">st</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#eb8007" x="23.246094" y="15" textLength="15.6328125">op</tspan>
+            </text>
+            <text transform="translate(858.68587 232.88521)" fill="#b6251f">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#b6251f" x=".21875" y="15" textLength="16.992188">err</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#b6251f" x="17.054688" y="15" textLength="12.6875">or</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#b6251f" x="28.78125" y="15" textLength="9">…</tspan>
+            </text>
+            <text transform="translate(857.8257 157.930055)" fill="#274ecd">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#274ecd" x=".4453125" y="15" textLength="4.8359375">r</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#274ecd" x="5.1328125" y="15" textLength="26.421875">eset</tspan>
+            </text>
+            <text transform="translate(768.33333 78.12302)" fill="#274ecd">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#274ecd" x=".4453125" y="15" textLength="4.8359375">r</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#274ecd" x="5.1328125" y="15" textLength="26.421875">eset</tspan>
+            </text>
+            <text transform="translate(744 182.62)" fill="#274ecd">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#274ecd" x=".4453125" y="15" textLength="4.8359375">r</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#274ecd" x="5.1328125" y="15" textLength="26.421875">eset</tspan>
+            </text>
+            <text transform="translate(675 91)" fill="#eb8007">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#eb8007" x="2.8125" y="15" textLength="30.382812">confi</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#eb8007" x="33.195312" y="15" textLength="20.320312">gur</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#eb8007" x="53.367187" y="15" textLength="7.3203125">e</tspan>
+            </text>
+            <path d="M 676 30 L 804 30 C 807.3137 30 810 32.686292 810 36 L 810 64 C 810 67.31371 807.3137 70 804 70 L 676 70 C 672.6863 70 670 67.31371 670 64 L 670 36 C 670 32.686292 672.6863 30 676 30 Z" fill="#f0a608"/>
+            <text transform="translate(675 38)" fill="#fbe4a3">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#fbe4a3" x="16.381836" y="19" textLength="46.533203">Confi</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#fbe4a3" x="62.91504" y="19" textLength="29.013672">gur</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#fbe4a3" x="91.743164" y="19" textLength="21.875">ed</tspan>
+            </text>
+            <path d="M 946 120 L 1074 120 C 1077.3137 120 1080 122.68629 1080 126 L 1080 154 C 1080 157.31371 1077.3137 160 1074 160 L 946 160 C 942.6863 160 940 157.31371 940 154 L 940 126 C 940 122.68629 942.6863 120 946 120 Z" fill="#f8f8f8"/>
+            <path d="M 946 120 L 1074 120 C 1077.3137 120 1080 122.68629 1080 126 L 1080 154 C 1080 157.31371 1077.3137 160 1074 160 L 946 160 C 942.6863 160 940 157.31371 940 154 L 940 126 C 940 122.68629 942.6863 120 946 120 Z" stroke="#49b077" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <text transform="translate(945 128)" fill="#178f46">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#178f46" x="28.740234" y="19" textLength="72.51953">Running</tspan>
+            </text>
+            <path d="M 676 120 L 804 120 C 807.3137 120 810 122.68629 810 126 L 810 154 C 810 157.31371 807.3137 160 804 160 L 676 160 C 672.6863 160 670 157.31371 670 154 L 670 126 C 670 122.68629 672.6863 120 676 120 Z" fill="#346df1"/>
+            <text transform="translate(675 128)" fill="#bad0fb">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#bad0fb" x="10.825195" y="19" textLength="86.63086">Uninitializ</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#bad0fb" x="97.299805" y="19" textLength="21.875">ed</tspan>
+            </text>
+            <path d="M 676 210 L 804 210 C 807.3137 210 810 212.68629 810 216 L 810 244 C 810 247.31371 807.3137 250 804 250 L 676 250 C 672.6863 250 670 247.31371 670 244 L 670 216 C 670 212.68629 672.6863 210 676 210 Z" fill="#d02e2a"/>
+            <text transform="translate(675 218)" fill="white">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="white" x="43.55957" y="19" textLength="24.902344">Err</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="white" x="68.2666" y="19" textLength="18.173828">or</tspan>
+            </text>
+            <path d="M 946 30 L 1074 30 C 1077.3137 30 1080 32.686292 1080 36 L 1080 64 C 1080 67.31371 1077.3137 70 1074 70 L 946 70 C 942.6863 70 940 67.31371 940 64 L 940 36 C 940 32.686292 942.6863 30 946 30 Z" fill="#f8f8f8"/>
+            <path d="M 946 30 L 1074 30 C 1077.3137 30 1080 32.686292 1080 36 L 1080 64 C 1080 67.31371 1077.3137 70 1074 70 L 946 70 C 942.6863 70 940 67.31371 940 64 L 940 36 C 940 32.686292 942.6863 30 946 30 Z" stroke="#de6560" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <text transform="translate(945 38)" fill="#178f46">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#178f46" x="29.93164" y="19" textLength="70.13672">Flushed</tspan>
+            </text>
+            <path d="M 946 210 L 1074 210 C 1077.3137 210 1080 212.68629 1080 216 L 1080 244 C 1080 247.31371 1077.3137 250 1074 250 L 946 250 C 942.6863 250 940 247.31371 940 244 L 940 216 C 940 212.68629 942.6863 210 946 210 Z" fill="#f8f8f8"/>
+            <path d="M 946 210 L 1074 210 C 1077.3137 210 1080 212.68629 1080 216 L 1080 244 C 1080 247.31371 1077.3137 250 1074 250 L 946 250 C 942.6863 250 940 247.31371 940 244 L 940 216 C 940 212.68629 942.6863 210 946 210 Z" stroke="#f4c23d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <text transform="translate(945 218)" fill="#178f46">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#178f46" x="2.0410156" y="19" textLength="87.09961">End of Str</tspan>
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#178f46" x="88.95508" y="19" textLength="39.003906">eam</tspan>
+            </text>
+            <line x1="810" y1="50" x2="927.1" y2="50" marker-end="url(#FilledArrow_Marker_5)" stroke="#126f33" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="963.33333" y1="70" x2="963.33333" y2="107.1" marker-end="url(#FilledArrow_Marker_4)" stroke="#262626" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <line x1="963.33333" y1="160" x2="963.33333" y2="197.1" marker-end="url(#FilledArrow_Marker_4)" stroke="#262626" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 1080 133.33333 C 1080 133.33333 1106 115.83135 1106 96 C 1106 84.961065 1097.9439 76.089842 1090.80046 70.39346" marker-end="url(#FilledArrow_Marker_4)" stroke="#262626" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M 1056.66667 210 C 1056.66667 210 1110.38955 160.3288 1117 115 C 1121.4143 84.73063 1103.434 65.902535 1090.9997 56.733113" marker-end="url(#FilledArrow_Marker_4)" stroke="#262626" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <text transform="translate(968.25 162)" fill="#262626">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#262626" x="2.171875" y="15" textLength="111.25">queueInputBuffer</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#262626" x="38.46875" y="34" textLength="35.0625">(EOS)</tspan>
+            </text>
+            <path d="M 809.6463 324.5 L 937.6463 324.5 C 940.96 324.5 943.6463 327.1863 943.6463 330.5 L 943.6463 358.5 C 943.6463 361.8137 940.96 364.5 937.6463 364.5 L 809.6463 364.5 C 806.3326 364.5 803.6463 361.8137 803.6463 358.5 L 803.6463 330.5 C 803.6463 327.1863 806.3326 324.5 809.6463 324.5 Z" fill="#535353"/>
+            <text transform="translate(808.6463 332.5)" fill="#d5d5d5">
+                <tspan font-family="Roboto" font-size="20" font-weight="500" fill="#d5d5d5" x="24.28711" y="19" textLength="81.42578">Released</tspan>
+            </text>
+            <text transform="translate(852.18587 294.5)" fill="#262626">
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#262626" x=".15625" y="15" textLength="4.8359375">r</tspan>
+                <tspan font-family="Roboto Condensed" font-size="16" font-weight="300" font-stretch="condensed" fill="#262626" x="4.84375" y="15" textLength="40">elease</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
