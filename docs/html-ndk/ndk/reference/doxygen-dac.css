@@ -1,0 +1,53 @@
+#jd-content td {
+}
+
+#jd-content table {
+    background-color: transparent;
+    width: 100%;
+}
+
+#jd-content tr.heading td {
+    background-color: #999;
+    padding: 0px 12px;
+}
+
+#jd-content tr.heading h2 {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Roboto, sans-serif;
+    margin: 0px;
+    color: #fff;
+}
+
+#jd-content tr.heading hr, #jd-content td.memSeparator, #jd-content div.headertitle {
+    display: none;
+}
+
+
+#jd-content table td.memItemLeft {
+    text-align: right;
+    width: 20%;
+}
+
+#jd-content table td.memItemRight {
+}
+
+#jd-content div.memproto {
+    font-size: 1.15em;
+    background-color: #e2e2e2;
+    padding: 3px;    
+}
+
+#jd-content div.memproto table {
+    margin: 0px;
+    width: auto;
+}
+
+#jd-content table.memname td {
+    border: none;
+    padding: 2px;
+}
+
+#jd-content div.memdoc {
+    margin: 7px 18px;
+}
