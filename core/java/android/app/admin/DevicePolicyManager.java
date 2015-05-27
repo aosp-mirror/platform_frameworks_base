@@ -3071,12 +3071,12 @@ public class DevicePolicyManager {
     public void setProfileName(ComponentName who, String profileName) {
         if (mService != null) {
             try {
-            mService.setProfileName(who, profileName);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+                mService.setProfileName(who, profileName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
         }
     }
-}
 
     /**
      * Used to determine if a particular package is registered as the profile owner for the
