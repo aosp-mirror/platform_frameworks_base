@@ -1480,8 +1480,8 @@ class AlarmManagerService extends SystemService {
      */
     public static class IncreasingTimeOrder implements Comparator<Alarm> {
         public int compare(Alarm a1, Alarm a2) {
-            long when1 = a1.when;
-            long when2 = a2.when;
+            long when1 = a1.whenElapsed;
+            long when2 = a2.whenElapsed;
             if (when1 - when2 > 0) {
                 return 1;
             }
