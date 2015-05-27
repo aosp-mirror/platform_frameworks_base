@@ -31,6 +31,7 @@ import android.graphics.PorterDuff.Mode;
 import android.os.SystemClock;
 import android.util.LayoutDirection;
 import android.util.SparseArray;
+import android.view.View;
 
 import java.util.Collection;
 
@@ -337,7 +338,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean onLayoutDirectionChange(int layoutDirection) {
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
         // Let the container handle setting its own layout direction. Otherwise,
         // we're accessing potentially unused states.
         return mDrawableContainerState.setLayoutDirection(layoutDirection, getCurrentIndex());
