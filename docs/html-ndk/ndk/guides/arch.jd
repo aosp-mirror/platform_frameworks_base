@@ -1,31 +1,19 @@
-page.title=Architectures and CPUs
+page.title=CPUs and Architectures
 @jd:body
 
-<div class="contents">
-<div class="textblock"><p>This section includes detailed information about ABIs and detailed information on support for respective instruction sets. It includes these topics:</p>
-<ul>
-<li><a href="./md_3__key__topics__c_p_u__support__chapter_1-section_8__a_b_is.html">ABI Management</a><ul>
-<li>Different ABIs support different CPUs and processing capabilities.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__c_p_u__support__c_p_u-_a_r_m-_n_e_o_n.html">Neon</a><ul>
-<li>Details about targeting devices whose CPUs support Neon, or Advanced SIMD. Neon is an optional extension of the armv7 architecture.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__c_p_u__support__c_p_u-_m_i_p_s.html">Mips</a><ul>
-<li>Details about targeting devices with CPUs supporting the MIPS32 instruction set.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__c_p_u__support__c_p_u-_x86.html">x86</a><ul>
-<li>Details about targeting devices with CPUs supporting the IA-32 instruction set.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__c_p_u__support__c_p_u-_x86-64.html">x86-64</a><ul>
-<li>Details about targeting devices whose CPUs support the x86-64 instruction set.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__c_p_u__support__c_p_u-_f_e_a_t_u_r_e_s.html">CPU Features</a><ul>
-<li>A small library that detects the target device's CPU family and supported features. </li>
-</ul>
-</li>
-</ul>
+<p>When you're working with native code, hardware matters. The NDK lets you ensure you're compiling
+for the right architectures and CPUs by giving you a variety of ABIs from which
+to choose.</p>
+
+<p>This section begins by explaining how to target specific
+<a href="{@docRoot}ndk/guides/abis.html">architectures and CPUs</a>. It then
+provides information you need to know when targeting the
+<a href="{@docRoot}ndk/guides/abis.html">ARM</a>
+family of CPUs and architectures. Next, it provides information about  the other CPUs and
+architectures that it supports: <a href="{@docRoot}ndk/guides/cpu-arm-neon.html">NEON</a>, x86
+(<a href="{@docRoot}ndk/guides/x86.html">32-bit</a> and
+<a href="{@docRoot}ndk/guides/x86-64.html">64-bit</a>), and
+<a href="{@docRoot}ndk/guides/mips.html">MIPS</a>. Finally, it explains how to use the
+<a href="{@docRoot}ndk/guides/cpu-features.html">{@code cpufeatures}</a>
+library, which your app can use to query a given CPU and architecture about the optional
+features they support.</p>

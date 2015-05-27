@@ -29,7 +29,7 @@ compiling, linking, and low-level architecture. In addition, the techniques it d
 unnecessary for most use cases. In most cases, we recommend that you forego using a standalone
 toolchain, and instead stick to the NDK build system.</p>
 
-<h2 id="syt">Selecting your Toolchain</h2>
+<h2 id="syt">Selecting Your Toolchain</h2>
 <p>Before anything else, you need to decide which processing architecture your standalone toolchain
 is going to target. Each architecture corresponds to a different toolchain name, as Table 1
 shows.</p>
@@ -69,7 +69,7 @@ shows.</p>
 
 
 
-<h2 id="sys">Selecting your Sysroot</h2>
+<h2 id="sys">Selecting Your Sysroot</h2>
 <p>The next thing you need to do is define your <i>sysroot</i> (A sysroot is a directory containing
 the system headers and libraries for your target). To define the sysroot, you must must know the
 Android API level you want to target for native support; available native APIs vary by Android API
@@ -86,7 +86,7 @@ SYSROOT=$NDK/platforms/android-22/arch-arm
 </pre>
 
 For more detail about the Android API levels and the respective native APIs they support, see
-<a href={docRoot}ndk/guides/stable_apis.html>Stable APIs</a>.
+<a href={@docRoot}ndk/guides/stable_apis.html>Android NDK Native APIs</a>.
 
 <h2 id="itc">Invoking the Compiler</h2>
 
@@ -307,7 +307,7 @@ platforms.</p>
 </table>
 
 For more information on specifying a 32- or 64-bit instruction host toolchain, see
-<a href="{@docRoot}/ndk/guides/ndk-build.html#6432">ndk-build</a>.
+<a href="{@docRoot}ndk/guides/ndk-build.html#6432">ndk-build</a>.
 
 <p>You may specify {@code stl=stlport} to copy {@code libstlport} instead of the default
 {@code libgnustl}. If you do so, and you wish to link against the shared library, you must
@@ -334,7 +334,7 @@ copy of a C++ STL library, with working exceptions and RTTI support.</p>
 
 <p>For more options and details, use {@code --help}.</p>
 
-<h2>Working with Clang</h2>
+<h2 id="wwc">Working with Clang</h2>
 <p>You can install Clang binaries in the standalone installation by using the
 {@code --llvm-version=&lt;version&gt;} option. {@code &lt;version&gt;} is a LLVM/Clang version
 number, such as {@code 3.4} or {@code 3.5}. For example:
@@ -413,9 +413,9 @@ working properly:</p>
 section.</p>
 
 
-<h2>ABI Compatibility</h2>
+<h2 id="abi">ABI Compatibility</h2>
 <p>The machine code that the ARM toolchain generates should be compatible with the official Android
-<a href="{docRoot}/ndk/guides/cpu-arch-abis.html">armeabi ABI</a> by default.</p>
+{@code armeabi} <a href="{@docRoot}ndk/guides/abis.html">ABI</a> by default.</p>
 
 <p>We recommend use of the {@code -mthumb} compiler flag to force the generation of 16-bit Thumb-1
 instructions (the default being 32-bit ARM instructions).</p>
@@ -467,9 +467,9 @@ NEON functions.</p>
 
 <p>You don't have to use any specific compiler flag when targeting the MIPS ABI.</p>
 
-<p>To learn more about ABI support, see <a href="{@docRoot}/ndk/guides/x86.html">x86</a>.</p>
+<p>To learn more about ABI support, see <a href="{@docRoot}ndk/guides/x86.html">x86</a>.</p>
 
-<h2>Warnings and Limitations</h2>
+<h2 id="war">Warnings and Limitations</h2>
 <h3>Windows support</h3>
 <p>The Windows binaries do not depend on Cygwin. This lack of dependency makes them faster. The
 cost, however, is that they do not understand Cygwin path specifications like

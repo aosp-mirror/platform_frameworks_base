@@ -323,25 +323,58 @@ injunctive remedies (or an equivalent type of urgent legal relief) in any jurisd
 </div>
 
  <div id="qv-wrapper">
-    <div id="qv">
-      <h2>In this document</h2>
 
-      <ol>
-        <li><a href="#Downloads">Downloads</a></li>
-        <li><a href="#rel">Release Notes</a></li>
-      </ol>
-    </div>
   </div>
 
-  <p>Select, from the table below, the NDK package suitable for your development platform.</p>
+  <p>Select, from the table below, the NDK package for your development platform. For information
+  about the changes in the newest version of the NDK, see <a href="#rel">Release Notes</a>. For
+  information about earlier revisions, see <a href="{@docRoot}ndk/downloads/revision_history.html">
+  NDK Revision History.</a></p>
 
 
-<h2 id="Downloads">Downloads</h2>
+<h2 id="Downloads">Downloading</h2>
 
 
 <script>
 $('#Downloads').after($('#download-table'));
 </script>
+
+  <h2 id="extract">Extraction</h2>
+  <p>The NDK package is a self-extracting binary. To unpack it, follow the procedure for your
+  development platform:</p>
+       <ul>
+       <li>On Linux and Mac OS X (Darwin):
+          <ul>
+          <ol>
+          <li>Download the appropriate package from this page.</li>
+          <li>Open a terminal window.</li>
+          <li>Go to the directory to which you downloaded the package.</li>
+          <li>Run <code>chmod a+x</code> on the downloaded package.</li>
+          <li>Execute the package. For example:
+          <pre class="no-pretty-print">
+ndk$ chmod a+x android-ndk-r10c-darwin-x86_64.bin
+ndk$ ./android-ndk-r10c-darwin-x86_64.bin
+          </pre></li>
+          <p>The folder containing the NDK extracts itself.</p>
+          <p>You can also use a program like 7z to extract the package.</p>
+          </ol>
+          </ul>
+       </li>
+    <li>On Windows:</li>
+       <ul>
+       <ol>
+       <li>Download the appropriate package from this page.</li>
+       <li>Navigate to the folder to which you downloaded the package.</li>
+       <li>Double-click the downloaded file. The folder containing the NDK extracts itself.</li>
+       </ol>
+       </ul>
+     </ul>When uncompressed, the NDK files are contained in a directory called
+    <code>android-ndk-&lt;version&gt;</code>. You can rename the NDK directory if necessary and you
+    can move it to any location on your computer. This documentation refers to the NDK directory as
+    <code>&lt;ndk&gt;</code>.
+
+
+  <p>You are now ready to start working with the NDK.</p>
 
 <h2 id="rel">Release Notes</h2>
 

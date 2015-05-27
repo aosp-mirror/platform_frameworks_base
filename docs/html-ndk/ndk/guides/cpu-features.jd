@@ -98,7 +98,7 @@ this instruction set.</dd>
 
 <dt>{@code ANDROID_CPU_ARM_FEATURE_ARMv7}</dt>
 <dd>Indicates that the device's CPU supports the ARMv7-A instruction set as supported by the
-<a href="{@docRoot}ndk/guides/abis.html">armeabi-v7a</a> ABI. This instruction set supports both
+<a href="{@docRoot}ndk/guides/abis.html#v7a">armeabi-v7a</a> ABI. This instruction set supports both
 Thumb-2 and VFPv3-D16 instructions. This return value also indicates support for the VFPv3 hardware
 FPU instruction-set extension.</dd>
 
