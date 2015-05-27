@@ -9,9 +9,7 @@ page.title=Android.mk
         <li><a href="#over">Overview</a></li>
         <li><a href="#basics">Basics</a></li>
         <li><a href="#var">Variables and Macros</a></li>
-        <li><a href="#npv">NDK-provided variables</a></li>
-        <li><a href="#npfm">NDK-provided function macros</a></li>
-        <li><a href="#mdv">Module-description variables</a></li>
+        <li><a href="#mdv">Module-Description Variables</a></li>
       </ol>
     </div>
   </div>
@@ -24,7 +22,8 @@ which glues your C and C++ source files to the Android NDK.</p>
 <p>The {@code Android.mk} file resides in a subdirectory of your project's {@code jni/} directory,
 and describes your sources and shared libraries to the build system. It is really a tiny GNU
 makefile fragment that the build system parses once or more. The {@code Android.mk} file is useful
-for defining project-wide settings that {@code Application.mk}, the build system, and your
+for defining project-wide settings that <a href="{@docRoot}ndk/guides/application_mk.html">{@code
+Application.mk}</a>, the build system, and your
 environment variables leave undefined. It can also override project-wide settings for specific
 <i>modules</i>.</p>
 
@@ -84,7 +83,7 @@ LOCAL_MODULE := hello-jni
 
 <p>Each module name must be unique and not contain any spaces. The build system, when it
 generates the final shared-library file, automatically adds the proper prefix and suffix to
-the name that you assign to {@code LOCAL_MODULE|. For example, the example that appears above
+the name that you assign to {@code LOCAL_MODULE}. For example, the example that appears above
 results in generation of a library called {@code libhello-jni.so}.</p>
 
 <p class="note"><strong>Note:</strong> If your module's name already starts with {@code lib}, the
@@ -114,10 +113,10 @@ information you defined in {@code LOCAL_XXX} variables since the most recent {@c
 script determines what to build, and how to do it.</p>
 
 <p>There are more complex examples in the samples directories, with commented
-{@code Android.mk} files that you can look at. In addition, the
-<a href="{@docRoot}ndk/guides/native-activity.html">walkthrough</a> of the native-activity sample
-disucsses that sample's {@code Android.mk} file in some detail. Finally, the next section explains
-the variables from this section in a bit more detail.
+{@code Android.mk} files that you can look at. In addition,
+<a href="{@docRoot}ndk/guides/sample_na.html">Sample: native-activity</a> provides
+a detailed explanation of that sample's {@code Android.mk} file. Finally, <a href="#var">
+Variables and Macros</a> provides further information on the variables from this section.
 
 
 <h2 id="var">Variables and Macros</h2>
@@ -155,7 +154,7 @@ include $(CLEAR_VARS)
 you provided in your {@code LOCAL_XXX} variables, and determines how to build a target shared
 library from the sources you listed. Note that using this script requires that you have already
 assigned values to {@code LOCAL_MODULE} and {@code LOCAL_SRC_FILES}, at a minimum (for more
-information about these variables, see <a href = "#mdv">Module-description variables</a>).</p>
+information about these variables, see <a href = "#mdv">Module-Description Variables</a>).</p>
 
 <p>The syntax for using this variable is:</p>
 
@@ -190,23 +189,14 @@ include $(PREBUILT_SHARED_LIBRARY)
 </pre>
 
 <p>You can also reference a prebuilt library in another module by using the
-{@code LOCAL_PREBUILTS} variable. The following example shows an example of using
-{@code LOCAL_PREBUILTS}:
-
-<!--
-<pre class="no-pretty-print">
-(TODO: Example of referencing prebuilt library from another, using LOCAL_PREBUILTS.)
-</pre>
--->
-
-<p>For more information about using prebuilts, see <a href="{@docRoot}ndk/guides/prebuilts.html">
-NDK Prebuilt Library Support</a>.</p>
+{@code LOCAL_PREBUILTS} variable. For more information about using prebuilts, see
+<a href="{@docRoot}ndk/guides/prebuilts.html">Using Prebuilt Libraries</a>.</p>
 
 
 <h4>PREBUILT_STATIC_LIBRARY</h4>
 <p>The same as {@code PREBUILT_SHARED_LIBRARY}, but for a prebuilt static library. For more
-information about using prebuilts, see <a href="{@docRoot}ndk/guides/prebuilts.html">NDK Prebuilt
-Library Support</a>.</p>
+information about using prebuilts, see <a href="{@docRoot}ndk/guides/prebuilts.html">Using Prebuilt
+Libraries</a>.</p>
 
 <h4>TARGET_ARCH</h4>
 <p>The name of the target CPU architecture as the Android Open Source Project specifies it.
@@ -214,14 +204,13 @@ For any ARM-compatible build, use {@code arm}, independent of the CPU architectu
 ABI (see TARGET_ARCH_ABI, below).</p>
 
 <p>The value of this variable is taken from the APP_ABI variable that you define in the
-<a href="{docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file, which the system
-reads ahead of parsing the {@code Android.mk} file.</p>
+{@code Android.mk} file, which the system reads ahead of parsing the {@code Android.mk} file.</p>
 
 <h4>TARGET_PLATFORM</h4>
 <p>The Android API level number for the build system to target.
 For example, the Android 5.1 system images correspond to Android API level 22: {@code android-22}.
 For a complete list of platform names and corresponding Android system
-images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Stable APIs</a>.
+images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Native APIs</a>.
 The following example shows the syntax for using this variable:</p>
 
 <pre class="no-pretty-print">
@@ -242,36 +231,36 @@ supported CPU and architecture.
     <th scope="col">Setting</th>
   </tr>
   <tr>
-    <th scope="col">ARMv5TE</th>
-    <th scope="col">{@code armeabi}</th>
+    <td>ARMv5TE</td>
+    <td>{@code armeabi}</td>
   </tr>
   <tr>
-    <th scope="col">ARMv7</th>
-    <th scope="col">{@code armeabi-v7a}</th>
+    <td>ARMv7</td>
+    <td>{@code armeabi-v7a}</td>
   </tr>
   <tr>
-    <th scope="col">ARMv8 AArch64</th>
-    <th scope="col">{@code arm64-v8a}</th>
+    <td>ARMv8 AArch64</td>
+    <td>{@code arm64-v8a}</td>
   </tr>
   <tr>
-    <th scope="col">i686</th>
-    <th scope="col">{@code x86}</th>
+    <td>i686</td>
+    <td>{@code x86}</td>
   </tr>
   <tr>
-    <th scope="col">x86-64</th>
-    <th scope="col">{@code x86_64}</th>
+    <td>x86-64</td>
+    <td>{@code x86_64}</td>
   </tr>
   <tr>
-    <th scope="col">mips32 (r1)</th>
-    <th scope="col">{@code mips}</th>
+    <td>mips32 (r1)</td>
+    <td>{@code mips}</td>
   </tr>
   <tr>
-    <th scope="col">mips64 (r6)</th>
-    <th scope="col">{@code mips64}</th>
+    <td>mips64 (r6)</td>
+    <td>{@code mips64}</td>
   </tr>
   <tr>
-    <th scope="col">All</th>
-    <th scope="col">{@code all}</th>
+    <td>All</td>
+    <td>{@code all}</td>
   </tr>
 </table>
 
@@ -286,8 +275,7 @@ TARGET_ARCH_ABI := arm64-v8a
 
 <p>For more details about architecture ABIs and associated compatibility
 issues, refer to
-<a href="{@docRoot}ndk/guides/md_3__key__topics__c_p_u__support__chapter_1-section_8__a_b_is.html">
-Android Native CPU ABI Management</a></p>
+<a href="{@docRoot}ndk/guides/abis.html">ABI Management</a>.</p>
 
 <p>New target ABIs in the future will have different values.</p>
 
@@ -303,7 +291,7 @@ TARGET_ABI := android-22-arm64-v8a
 <p class="note"><strong>Note:</strong> Up to Android NDK 1.6_r1, the default value was
 {@code android-3-arm}.</p>
 
-<h2 id="mdv">Module-description variables</h2>
+<h2 id="mdv">Module-Description Variables</h2>
 <p>The variables in this section describe your module to the build system. Each module description
 should follow this basic flow:
 <ul>
@@ -332,7 +320,8 @@ to define it a single time, even if your {@code Android.mk} file describes multi
 and must not contain any spaces. You must define it before including any scripts (other than
 the one for {@code CLEAR_VARS}). You need not add either the {@code lib} prefix
 or the {@code .so} or {@code .a} file extension; the build system makes these modifications
-automatically. Throughout your {@code Android.mk} and {@code Application.mk} files, refer to
+automatically. Throughout your {@code Android.mk} and
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> files, refer to
 your module by its unmodified name. For example, the following line results in the generation of a
 shared library module called {@code libfoo.so}:</p>
 
@@ -365,8 +354,7 @@ module. Only list the files that the build system actually passes to the compile
 system automatically computes any associated depencies.</p>
 <p>Note that you can use both relative (to {@code LOCAL_PATH}) and absolute file paths.
 
-<p>We recommend avoiding absolute file paths; relative paths make your
-<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file more
+<p>We recommend avoiding absolute file paths; relative paths make your {@code Android.mk} file more
 portable.</p>
 
 <p class="note"><strong>Note: </strong> Always use Unix-style forward slashes (/) in build files.
@@ -450,8 +438,8 @@ definitions or compile options.</p>
 
 <p>Try not to change the optimization/debugging level in your {@code Android.mk} file.
 The build system can handle this setting automatically for you, using the relevant information
-in the {@code Application.mk} file. Doing it this way allows the build system to generate useful
-data files used during debugging.</p>
+in the <a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file. Doing it
+this way allows the build system to generate useful data files used during debugging.</p>
 
 <p class="note"><strong>Note: </strong>In android-ndk-1.5_r1, the corresponding flags only applied
 to C source files, not C++ ones. They now match the full Android build system behavior.
@@ -520,7 +508,7 @@ LOCAL_LDLIBS := -lz
 </pre>
 
 <p>For the list of exposed system libraries against which you can link in this NDK release, see
-<a href="stable_apis.html">Android NDK Stable APIs</a>.</p>
+<a href="stable_apis.html">Android NDK Native APIs</a>.</p>
 
 <p class="note"><strong>Note: </strong> If you define this variable for a static library,
 the build system ignores it, and {@code ndk-build} prints a warning.</p>
@@ -574,22 +562,20 @@ LOCAL_SRC_FILES := foo.c bar.c.arm
 
 <p class="note"><strong>Note: </strong> You can also force the build system to generate ARM binaries
 by setting {@code APP_OPTIM} in your
-<a href="{@docRoot}ndk/guides/application_mk.html>{@code Application.mk}</a> file to {@code debug}.
-Specifying {@code debug} forces an ARM build because the toolchain debugger does not handle thumb
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file to {@code debug}.
+Specifying {@code debug} forces an ARM build because the toolchain debugger does not handle Thumb
 code properly.</p>
 
 
 <h4>LOCAL_ARM_NEON</h4>
-<p>This variable only matters when you are targetting the {@code armeabi-v7a} ABI. It allows the
+<p>This variable only matters when you are targeting the {@code armeabi-v7a} ABI. It allows the
 use of ARM Advanced SIMD (NEON) GCC intrinsics in your C and C++ sources, as well as NEON
 instructions in Assembly files.</p>
 
 <p>Note that not all ARMv7-based CPUs support the NEON instruction set extensions. For this reason,
 you must perform runtime detection to be able to safely use this code at runtime. For more
-information, please see <a href="{@docRoot}ndk/guides/cpu_support.html">Android
-NDK &amp; ARM NEON Instruction Set Extension Support</a> and <a
-href="{@docRoot}ndk/guides/cpu_features.html">Android
-NDK CPU Features Detection Library</a>.</p>
+information, see <a href="{@docRoot}ndk/guides/cpu-arm-neon.html">NEON Support</a> and <a
+href="{@docRoot}ndk/guides/cpu-features.html">The {@code cpufeatures} Library</a>.</p>
 
 <p>Alternatively, you can use the {@code .neon} suffix to specify that the build system only
 compile specific source files with NEON support. In the following example, the build system compiles
@@ -635,8 +621,8 @@ enhancements in RedHat Enterprise Linux (section 6)</a>.</p>
 
 <p>By default, the build system compiles code with format string protection. Doing so forces a
 compiler error if a non-constant format string is used in a {@code printf}-style function.</p>
-<p>This protection is off by default, but you can disable it by setting its value to
-{@code true}. We do not recommend doing so without a compelling reason.</p>
+<p>This protection is on by default, but you can disable it by setting the value of
+this variable to {@code true}. We do not recommend doing so without a compelling reason.</p>
 
 
 <h4>LOCAL_EXPORT_CFLAGS</h4>
@@ -729,7 +715,7 @@ individual source files, placing nearly all compiler flags inside list files, to
 
 <p>Note that any value other than {@code true} will revert to the
 default behaviour. You can also define {@code APP_SHORT_COMMANDS} in your
-<a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file to force this
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file to force this
 behavior for all modules in your project.</p>
 
 <p>We do not recommend enabling this feature by default, since it makes the build slower.</p>
@@ -745,7 +731,8 @@ contain.</p>
 such libraries <em>cannot</em> be moved to a different location (all paths
 inside them are relative).</p>
 <p>Valid values are {@code true}, {@code false} or empty. A
-default value can be set in your {@code Application.mk} file through the {@code APP_THIN_ARCHIVE}
+default value can be set in your <a href="{@docRoot}ndk/guides/application_mk.html">
+{@code Application.mk}</a> file through the {@code APP_THIN_ARCHIVE}
 
 variable.</p>
 <p class="note"><strong>Note:</strong> This is ignored for non-static library modules, or prebuilt
@@ -785,7 +772,7 @@ myasmfilter $OBJS_DIR/foo.S.original $OBJS_DIR/foo.S
 myasmfilter bar.S $OBJS_DIR/bar.S
 </pre>
 
-<h3 id="npfm">NDK-Provided Function Macros</h2>
+<h3 id="npfm">NDK-provided function macros</h2>
 <p>This section explains GNU Make function macros that the NDK provides. Use
 {@code $(call &lt;function&gt;)} to evaluate them; they return textual information.</p>
 
@@ -876,16 +863,16 @@ included the current one).</p>
 included the current one).</p>
 
 <h4>import-module</h4>
-<p>A function that allows you to find and include the {@code Android.mk}
-of another module by name. A typical example is as follows: </p>
+<p>A function that allows you to find and include a module's {@code Android.mk} file by the name of
+the module. A typical example is as follows: </p>
 
 <pre class="no-pretty-print">
 $(call import-module,&lt;name&gt;)
 </pre>
 
-<p>In this example, the build system looks for the module tagged &lt;name&gt; in the list of
+<p>In this example, the build system looks for the module tagged {@code &lt;name&gt;} in the list of
 directories referenced that your {@code NDK_MODULE_PATH} environment variable references, and
 includes its {@code Android.mk} file automatically for you.</p>
 
-<p>For more information, see <a href="import_module.html">Android Module Paths (Sharing Code)</a>.
+<p>For more information, see <a href="import.html">Android Module Paths (Sharing Code)</a>.
 </p>

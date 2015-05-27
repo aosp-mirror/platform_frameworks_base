@@ -117,7 +117,7 @@ NDK's top-level directory.</p>
 
 <h4>APP_ABI</h4>
 <p>By default, the NDK build system generates machine code for the
-<a href="{docRoot}ndk/guides/abis.html">{@code armeabi}</a> ABI. This machine code
+<a href="{@docRoot}ndk/guides/abis.html">{@code armeabi}</a> ABI. This machine code
 corresponds to an ARMv5TE-based CPU with software floating point operations. You can use
 {@code APP_ABI} to select a different ABI. Table 1 shows the {@code APP_ABI}
 settings for different instruction sets.</p>
@@ -169,12 +169,12 @@ APP_ABI := armeabi armeabi-v7a x86 mips
 </pre>
 
 <p>For the list of all supported ABIs and details about their usage and limitations, refer to
-<a href="{@docRoot}ndk/guides/abis.html">Android Native CPU ABI Management</a>.</p>
+<a href="{@docRoot}ndk/guides/abis.html">ABI Management</a>.</p>
 
 <h4>APP_PLATFORM</h4>
 <p>This variable contains the name of the target Android platform. For example, {@code android-3}
 specifies the Android 1.5 system images. For a complete list of platform names and corresponding
-Android system images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Stable APIs
+Android system images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Native APIs
 </a>.</p>
 
 <h4>APP_STL</h4>
@@ -205,14 +205,14 @@ support for different libraries.</p>
   </tr>
 </table>
 
-<p>For more information on this subject, see <a href="{@docRoot}ndk/guides/cpp_support.html">C++
-Support</a>.</p>
+<p>For more information on this subject, see <a href="{@docRoot}ndk/guides/cpp-support.html">
+C++ Library Support</a>.</p>
 
 
 <h4>APP_SHORT_COMMANDS</h4>
 <p>The equivalent of {@code LOCAL_SHORT_COMMANDS} in {@code Application.mk} for your whole project.
 For more information, see the documentation for this variable on
-<a href="{docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>.</p>
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>.</p>
 
 <h4>NDK_TOOLCHAIN_VERSION</h4>
 <p>Define this variable as either {@code 4.9} or {@code 4.8} to select a version of the GCC
@@ -237,5 +237,5 @@ libraries.</p>
 <h4>APP_THIN_ARCHIVE</h4>
 <p>Sets the default value of {@code LOCAL_THIN_ARCHIVE} in the {@code Android.mk} file for all
 static library modules in this project. For more information, see the documentation for
-{@code LOCAL_THIN_ARCHIVE} on <a href="{docRoot}ndk/guides/android_mk.html">{@code Android.mk}.</a>
+{@code LOCAL_THIN_ARCHIVE} on <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}.</a>
 </p>

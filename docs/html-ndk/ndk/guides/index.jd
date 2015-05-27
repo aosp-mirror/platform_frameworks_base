@@ -1,17 +1,25 @@
-page.title=Getting Started
+page.title=Getting Started with the NDK
 @jd:body
 
-<p>This section provides the information you need to get up and running
-with the NDK.</p>
+<p>The Native Development Kit (NDK) is a set of tools that allow you to leverage C and
+C++ code in your Android apps. You can use it either to build from your own source code, or to take
+advantage of existing prebuilt libraries.</p>
+
+<p>The NDK is not appropriate for most novice Android programmers, and has little value for many
+types of Android apps. It is often not worth the additional complexity it inevitably brings to the
+development process. However, it can be useful in cases in which you need to:</p>
+
 <ul>
-   <li><a href="setup.html">Setup</a></li>
-   <ul>
-      <li>Learn how to set up the NDK, and verify that it's integrated into
-      your toolchain.</li>
-   </ul>
-   <li><a href="concepts.html">Concepts</a></li>
-   <ul>
-      <li>Learn some basics about how the NDK works and its components, and about how to use it.
-      </li>
-   </ul>
+   <li>Squeeze extra performance out of a device for computationally intensive applications like
+   games or physics simulations.</li>
+   <li>Reuse your own or other developers' C or C++ libraries.</li>
 </ul>
+
+<p>This guide gives you the information you need to get up and running with the NDK. It starts by
+explaining the <a href="{@docRoot}ndk/guides/concepts.html">concepts</a> underpinning the NDK, and
+how to <a href="{@docRoot}ndk/guides/setup.html">set it up</a>. Next, it explains how to use
+the NDK to <a href="{@docRoot}ndk/guides/build.html">build</a> and
+<a href="{@docRoot}ndk/guides/debug.html">debug</a> your app. Then, it continues with information
+about targeting <a href="{@docRoot}ndk/guides/arch.html">different hardware platforms</a> in your
+builds. Finally, it discusses how to use your own and other prebuilt
+<a href="{@docRoot}ndk/guides/libs.html">libraries</a>.</p>

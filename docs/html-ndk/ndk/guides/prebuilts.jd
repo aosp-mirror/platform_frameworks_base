@@ -42,7 +42,7 @@ use cases for this functionality:</p>
     whether you are using a shared ({@code .so}) or static {@code .a}) library.</li>
 </ol>
 
-  <p>Here is a trivial example that assumes that the prebuilt library {@code libfoo.so} resides in
+  <p>Here is a trivial example that assumes the prebuilt library {@code libfoo.so} resides in
   the same directory as the <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>
   file that describes it.</p>
 
