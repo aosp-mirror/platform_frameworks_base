@@ -25,11 +25,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.content.Context.USER_SERVICE;
 import static android.Manifest.permission.READ_PROFILE;
-
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.IBinder;
@@ -44,6 +42,7 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.security.KeyStore;
+import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -51,6 +50,7 @@ import android.util.Slog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LockSettingsStorage.CredentialHash;
 
 import java.util.Arrays;
@@ -75,6 +75,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     private LockPatternUtils mLockPatternUtils;
     private boolean mFirstCallToVold;
     private IGateKeeperService mGateKeeperService;
+
+    private interface CredentialUtil {
+        void setCredential(String credential, String savedCredential, int userId)
+                throws RemoteException;
+        byte[] toHash(String credential, int userId);
+    }
 
     public LockSettingsService(Context context) {
         mContext = context;
@@ -468,155 +474,163 @@ public class LockSettingsService extends ILockSettings.Stub {
         byte[] toEnrollBytes = toEnroll == null
                 ? null
                 : toEnroll.getBytes();
-        byte[] hash = getGateKeeperService().enroll(userId, enrolledHandle, enrolledCredentialBytes,
-                toEnrollBytes);
+        GateKeeperResponse response = getGateKeeperService().enroll(userId, enrolledHandle,
+                enrolledCredentialBytes, toEnrollBytes);
 
-        if (hash != null) {
-            setKeystorePassword(toEnroll, userId);
+        if (response == null) {
+            return null;
         }
 
+        byte[] hash = response.getPayload();
+        if (hash != null) {
+            setKeystorePassword(toEnroll, userId);
+        } else {
+            // Should not happen
+            Slog.e(TAG, "Throttled while enrolling a password");
+        }
         return hash;
     }
 
     @Override
-    public boolean checkPattern(String pattern, int userId) throws RemoteException {
-        try {
-            doVerifyPattern(pattern, false, 0, userId);
-        } catch (VerificationFailedException ex) {
-            return false;
-        }
-
-        return true;
+    public VerifyCredentialResponse checkPattern(String pattern, int userId) throws RemoteException {
+        return doVerifyPattern(pattern, false, 0, userId);
     }
 
     @Override
-    public byte[] verifyPattern(String pattern, long challenge, int userId)
+    public VerifyCredentialResponse verifyPattern(String pattern, long challenge, int userId)
             throws RemoteException {
-        try {
-            return doVerifyPattern(pattern, true, challenge, userId);
-        } catch (VerificationFailedException ex) {
-            return null;
-        }
+        return doVerifyPattern(pattern, true, challenge, userId);
     }
 
-    private byte[] doVerifyPattern(String pattern, boolean hasChallenge, long challenge,
-            int userId) throws VerificationFailedException, RemoteException {
+    private VerifyCredentialResponse doVerifyPattern(String pattern, boolean hasChallenge, long challenge,
+            int userId) throws RemoteException {
        checkPasswordReadPermission(userId);
-
        CredentialHash storedHash = mStorage.readPatternHash(userId);
+       return verifyCredential(userId, storedHash, pattern, hasChallenge,
+               challenge,
+               new CredentialUtil() {
+                   @Override
+                   public void setCredential(String pattern, String oldPattern, int userId)
+                           throws RemoteException {
+                       setLockPattern(pattern, oldPattern, userId);
+                   }
 
-        if ((storedHash == null || storedHash.hash.length == 0) && TextUtils.isEmpty(pattern)) {
-            // don't need to pass empty passwords to GateKeeper
-            return null;
-        }
-
-        if (TextUtils.isEmpty(pattern)) {
-            throw new VerificationFailedException();
-        }
-
-        if (storedHash.version == CredentialHash.VERSION_LEGACY) {
-            byte[] hash = mLockPatternUtils.patternToHash(
-                    mLockPatternUtils.stringToPattern(pattern));
-            if (Arrays.equals(hash, storedHash.hash)) {
-                unlockKeystore(pattern, userId);
-                // migrate password to GateKeeper
-                setLockPattern(pattern, null, userId);
-                if (!hasChallenge) {
-                    return null;
-                }
-                // Fall through to get the auth token. Technically this should never happen,
-                // as a user that had a legacy pattern would have to unlock their device
-                // before getting to a flow with a challenge, but supporting for consistency.
-            } else {
-                throw new VerificationFailedException();
-            }
-        }
-
-        byte[] token = null;
-        if (hasChallenge) {
-            token = getGateKeeperService()
-                    .verifyChallenge(userId, challenge, storedHash.hash, pattern.getBytes());
-            if (token == null) {
-                throw new VerificationFailedException();
-            }
-        } else if (!getGateKeeperService().verify(userId, storedHash.hash, pattern.getBytes())) {
-            throw new VerificationFailedException();
-        }
-
-        // pattern has matched
-        unlockKeystore(pattern, userId);
-        return token;
-
+                   @Override
+                   public byte[] toHash(String pattern, int userId) {
+                       return mLockPatternUtils.patternToHash(
+                               mLockPatternUtils.stringToPattern(pattern));
+                   }
+               }
+       );
     }
 
     @Override
-    public boolean checkPassword(String password, int userId) throws RemoteException {
-        try {
-            doVerifyPassword(password, false, 0, userId);
-        } catch (VerificationFailedException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public byte[] verifyPassword(String password, long challenge, int userId)
+    public VerifyCredentialResponse checkPassword(String password, int userId)
             throws RemoteException {
-        try {
-            return doVerifyPassword(password, true, challenge, userId);
-        } catch (VerificationFailedException ex) {
-            return null;
-        }
+        return doVerifyPassword(password, false, 0, userId);
     }
 
-    private byte[] doVerifyPassword(String password, boolean hasChallenge, long challenge,
-            int userId) throws VerificationFailedException, RemoteException {
+    @Override
+    public VerifyCredentialResponse verifyPassword(String password, long challenge, int userId)
+            throws RemoteException {
+        return doVerifyPassword(password, true, challenge, userId);
+    }
+
+    private VerifyCredentialResponse doVerifyPassword(String password, boolean hasChallenge,
+            long challenge, int userId) throws RemoteException {
        checkPasswordReadPermission(userId);
-
        CredentialHash storedHash = mStorage.readPasswordHash(userId);
+       return verifyCredential(userId, storedHash, password, hasChallenge, challenge,
+               new CredentialUtil() {
+                   @Override
+                   public void setCredential(String password, String oldPassword, int userId)
+                           throws RemoteException {
+                       setLockPassword(password, oldPassword, userId);
+                   }
 
-        if ((storedHash == null || storedHash.hash.length == 0) && TextUtils.isEmpty(password)) {
-            // don't need to pass empty passwords to GateKeeper
-            return null;
+                   @Override
+                   public byte[] toHash(String password, int userId) {
+                       return mLockPatternUtils.passwordToHash(password, userId);
+                   }
+               }
+       );
+    }
+
+    private VerifyCredentialResponse verifyCredential(int userId, CredentialHash storedHash,
+            String credential, boolean hasChallenge, long challenge, CredentialUtil credentialUtil)
+                throws RemoteException {
+        if ((storedHash == null || storedHash.hash.length == 0) && TextUtils.isEmpty(credential)) {
+            // don't need to pass empty credentials to GateKeeper
+            return VerifyCredentialResponse.OK;
         }
 
-        if (TextUtils.isEmpty(password)) {
-            throw new VerificationFailedException();
+        if (TextUtils.isEmpty(credential)) {
+            return VerifyCredentialResponse.ERROR;
         }
 
         if (storedHash.version == CredentialHash.VERSION_LEGACY) {
-            byte[] hash = mLockPatternUtils.passwordToHash(password, userId);
+            byte[] hash = credentialUtil.toHash(credential, userId);
             if (Arrays.equals(hash, storedHash.hash)) {
-                unlockKeystore(password, userId);
-                // migrate password to GateKeeper
-                setLockPassword(password, null, userId);
+                unlockKeystore(credential, userId);
+                // migrate credential to GateKeeper
+                credentialUtil.setCredential(credential, null, userId);
                 if (!hasChallenge) {
-                    return null;
+                    return VerifyCredentialResponse.OK;
                 }
                 // Fall through to get the auth token. Technically this should never happen,
-                // as a user that had a legacy password would have to unlock their device
+                // as a user that had a legacy credential would have to unlock their device
                 // before getting to a flow with a challenge, but supporting for consistency.
             } else {
-                throw new VerificationFailedException();
+                return VerifyCredentialResponse.ERROR;
             }
         }
 
-        byte[] token = null;
+        VerifyCredentialResponse response;
+        boolean shouldReEnroll = false;;
         if (hasChallenge) {
-            token = getGateKeeperService()
-                    .verifyChallenge(userId, challenge, storedHash.hash, password.getBytes());
-            if (token == null) {
-                throw new VerificationFailedException();
+            byte[] token = null;
+            GateKeeperResponse gateKeeperResponse = getGateKeeperService()
+                    .verifyChallenge(userId, challenge, storedHash.hash, credential.getBytes());
+            int responseCode = gateKeeperResponse.getResponseCode();
+            if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
+                 response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
+            } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
+                token = gateKeeperResponse.getPayload();
+                if (token == null) {
+                    // something's wrong if there's no payload with a challenge
+                    Slog.e(TAG, "verifyChallenge response had no associated payload");
+                    response = VerifyCredentialResponse.ERROR;
+                } else {
+                    shouldReEnroll = gateKeeperResponse.getShouldReEnroll();
+                    response = new VerifyCredentialResponse(token);
+                }
+            } else {
+                response = VerifyCredentialResponse.ERROR;
             }
-        } else if (!getGateKeeperService().verify(userId, storedHash.hash, password.getBytes())) {
-            throw new VerificationFailedException();
+        } else {
+            GateKeeperResponse gateKeeperResponse = getGateKeeperService().verify(
+                    userId, storedHash.hash, credential.getBytes());
+            int responseCode = gateKeeperResponse.getResponseCode();
+            if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
+                response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
+            } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
+                shouldReEnroll = gateKeeperResponse.getShouldReEnroll();
+                response = VerifyCredentialResponse.OK;
+            } else {
+                response = VerifyCredentialResponse.ERROR;
+            }
         }
 
-        // password has matched
-        unlockKeystore(password, userId);
-        return token;
-    }
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            // credential has matched
+            unlockKeystore(credential, userId);
+            if (shouldReEnroll) {
+                credentialUtil.setCredential(credential, credential, userId);
+            }
+        }
 
+        return response;
+    }
 
     @Override
     public boolean checkVoldPassword(int userId) throws RemoteException {
@@ -644,7 +658,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             if (mLockPatternUtils.isLockPatternEnabled(userId)) {
-                if (checkPattern(password, userId)) {
+                if (checkPattern(password, userId).getResponseCode()
+                        == GateKeeperResponse.RESPONSE_OK) {
                     return true;
                 }
             }
@@ -653,7 +668,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             if (mLockPatternUtils.isLockPasswordEnabled(userId)) {
-                if (checkPassword(password, userId)) {
+                if (checkPassword(password, userId).getResponseCode()
+                        == GateKeeperResponse.RESPONSE_OK) {
                     return true;
                 }
             }
@@ -740,7 +756,5 @@ public class LockSettingsService extends ILockSettings.Stub {
         Slog.e(TAG, "Unable to acquire GateKeeperService");
         return null;
     }
-
-    private class VerificationFailedException extends Exception {}
 
 }
