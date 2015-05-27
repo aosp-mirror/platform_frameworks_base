@@ -138,7 +138,6 @@ page.title=Support Library
           </li>
           <li>Added the
 {@link android.support.v4.media.session.PlaybackStateCompat.Builder#addCustomAction addCustomAction()},
-{@link android.support.v4.media.session.PlaybackStateCompat.Builder#addCustomAction addCustomAction()},
 {@link android.support.v4.media.session.PlaybackStateCompat.Builder#setActiveQueueItemId setActiveQueueItemId()},
             and
             {@link android.support.v4.media.session.PlaybackStateCompat.Builder#setExtras setExtras()}
