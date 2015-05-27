@@ -659,11 +659,16 @@ public class ChooserActivity extends ResolverActivity {
             return super.getCount() + mServiceTargets.size() + mCallerTargets.size();
         }
 
-        public int getCallerTargetsCount() {
+        @Override
+        public int getUnfilteredCount() {
+            return super.getUnfilteredCount() + mServiceTargets.size() + mCallerTargets.size();
+        }
+
+        public int getCallerTargetCount() {
             return mCallerTargets.size();
         }
 
-        public int getServiceTargetsCount() {
+        public int getServiceTargetCount() {
             return mServiceTargets.size();
         }
 
@@ -696,6 +701,11 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public TargetInfo getItem(int position) {
+            return targetInfoForPosition(position, true);
+        }
+
+        @Override
+        public TargetInfo targetInfoForPosition(int position, boolean filtered) {
             int offset = 0;
 
             final int callerTargetCount = mCallerTargets.size();
@@ -710,7 +720,8 @@ public class ChooserActivity extends ResolverActivity {
             }
             offset += serviceTargetCount;
 
-            return super.getItem(position - offset);
+            return filtered ? super.getItem(position - offset)
+                    : getDisplayInfoAt(position - offset);
         }
 
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
@@ -764,8 +775,8 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public int getCount() {
             return (int) (
-                    Math.ceil((float) mChooserListAdapter.getCallerTargetsCount() / mColumnCount)
-                    + Math.ceil((float) mChooserListAdapter.getServiceTargetsCount() / mColumnCount)
+                    Math.ceil((float) mChooserListAdapter.getCallerTargetCount() / mColumnCount)
+                    + Math.ceil((float) mChooserListAdapter.getServiceTargetCount() / mColumnCount)
                     + Math.ceil((float) mChooserListAdapter.getStandardTargetCount() / mColumnCount)
             );
         }
@@ -845,14 +856,14 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         int getFirstRowPosition(int row) {
-            final int callerCount = mChooserListAdapter.getCallerTargetsCount();
+            final int callerCount = mChooserListAdapter.getCallerTargetCount();
             final int callerRows = (int) Math.ceil((float) callerCount / mColumnCount);
 
             if (row < callerRows) {
                 return row * mColumnCount;
             }
 
-            final int serviceCount = mChooserListAdapter.getServiceTargetsCount();
+            final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount / mColumnCount);
 
             if (row < callerRows + serviceRows) {
