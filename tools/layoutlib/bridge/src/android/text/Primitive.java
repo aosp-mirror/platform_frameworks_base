@@ -16,7 +16,7 @@
 
 package android.text;
 
-import com.android.annotations.NonNull;
+import android.annotation.NonNull;
 
 // Based on the native implementation of Primitive in
 // frameworks/base/core/jni/android_text_StaticLayout.cpp revision b808260
