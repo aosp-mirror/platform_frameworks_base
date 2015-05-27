@@ -106,8 +106,8 @@ page.keywords=backup, autobackup, preview
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         package="com.my.appexample"&gt;
-    &lt;uses-sdk android:minSdkVersion="9"/&gt;
-    &lt;uses-sdk android:targetSdkVersion="android-MNC"/&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
     &lt;app ...
 <strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
     &lt;/app&gt;
@@ -224,8 +224,8 @@ page.keywords=backup, autobackup, preview
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         package="com.my.appexample"&gt;
-    &lt;uses-sdk android:minSdkVersion="9"/&gt;
-    &lt;uses-sdk android:targetSdkVersion="android-MNC"/&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
     &lt;app ...
 <strong>        android:allowBackup="false"&gt;</strong>
     &lt;/app&gt;
