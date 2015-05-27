@@ -516,37 +516,39 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
 
-            // TODO: Call `getSelectedDocuments` in an AsyncTask to avoid UI jank.
-            List<DocumentInfo> docs = getSelectedDocuments();
+            // ListView returns a reference to its internal selection container,
+            // which will get cleared when we cancel action mode. So we
+            // make a defensive clone here.
+            final SparseBooleanArray selected = mCurrentView.getCheckedItemPositions().clone();
 
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
-                BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
+                openDocuments(selected);
                 mode.finish();
                 return true;
 
             } else if (id == R.id.menu_share) {
-                onShareDocuments(docs);
+                shareDocuments(selected);
                 mode.finish();
                 return true;
 
             } else if (id == R.id.menu_delete) {
-                onDeleteDocuments(docs);
+                deleteDocuments(selected);
                 mode.finish();
                 return true;
 
             } else if (id == R.id.menu_copy_to) {
-                onTransferDocuments(docs, CopyService.TRANSFER_MODE_COPY);
+                transferDocuments(selected, CopyService.TRANSFER_MODE_COPY);
                 mode.finish();
                 return true;
 
             } else if (id == R.id.menu_move_to) {
-                onTransferDocuments(docs, CopyService.TRANSFER_MODE_MOVE);
+                transferDocuments(selected, CopyService.TRANSFER_MODE_MOVE);
                 mode.finish();
                 return true;
 
             } else if (id == R.id.menu_copy_to_clipboard) {
-                copySelectedToClipboard();
+                copySelectionToClipboard(selected);
                 mode.finish();
                 return true;
 
@@ -602,82 +604,103 @@ public class DirectoryFragment extends Fragment {
         }
     };
 
-    private void onShareDocuments(List<DocumentInfo> docs) {
-        Intent intent;
-
-        // Filter out directories - those can't be shared.
-        List<DocumentInfo> docsForSend = Lists.newArrayList();
-        for (DocumentInfo doc: docs) {
-            if (!Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
-                docsForSend.add(doc);
+    private void openDocuments(final SparseBooleanArray selected) {
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                // TODO: Implement support in standalone for opening multiple docs.
+                BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
             }
-        }
-
-        if (docsForSend.size() == 1) {
-            final DocumentInfo doc = docsForSend.get(0);
-
-            intent = new Intent(Intent.ACTION_SEND);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addCategory(Intent.CATEGORY_DEFAULT);
-            intent.setType(doc.mimeType);
-            intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
-
-        } else if (docsForSend.size() > 1) {
-            intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addCategory(Intent.CATEGORY_DEFAULT);
-
-            final ArrayList<String> mimeTypes = Lists.newArrayList();
-            final ArrayList<Uri> uris = Lists.newArrayList();
-            for (DocumentInfo doc : docsForSend) {
-                mimeTypes.add(doc.mimeType);
-                uris.add(doc.derivedUri);
-            }
-
-            intent.setType(findCommonMimeType(mimeTypes));
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-
-        } else {
-            return;
-        }
-
-        intent = Intent.createChooser(intent, getActivity().getText(R.string.share_via));
-        startActivity(intent);
+        }.execute(selected);
     }
 
-    private void onDeleteDocuments(List<DocumentInfo> docs) {
+    private void shareDocuments(final SparseBooleanArray selected) {
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                Intent intent;
+
+                // Filter out directories - those can't be shared.
+                List<DocumentInfo> docsForSend = Lists.newArrayList();
+                for (DocumentInfo doc: docs) {
+                    if (!Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
+                        docsForSend.add(doc);
+                    }
+                }
+
+                if (docsForSend.size() == 1) {
+                    final DocumentInfo doc = docsForSend.get(0);
+
+                    intent = new Intent(Intent.ACTION_SEND);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addCategory(Intent.CATEGORY_DEFAULT);
+                    intent.setType(doc.mimeType);
+                    intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
+
+                } else if (docsForSend.size() > 1) {
+                    intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+                    final ArrayList<String> mimeTypes = Lists.newArrayList();
+                    final ArrayList<Uri> uris = Lists.newArrayList();
+                    for (DocumentInfo doc : docsForSend) {
+                        mimeTypes.add(doc.mimeType);
+                        uris.add(doc.derivedUri);
+                    }
+
+                    intent.setType(findCommonMimeType(mimeTypes));
+                    intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+
+                } else {
+                    return;
+                }
+
+                intent = Intent.createChooser(intent, getActivity().getText(R.string.share_via));
+                startActivity(intent);
+            }
+        }.execute(selected);
+    }
+
+    private void deleteDocuments(final SparseBooleanArray selected) {
         final Context context = getActivity();
         final ContentResolver resolver = context.getContentResolver();
 
-        boolean hadTrouble = false;
-        for (DocumentInfo doc : docs) {
-            if (!doc.isDeleteSupported()) {
-                Log.w(TAG, "Skipping " + doc);
-                hadTrouble = true;
-                continue;
-            }
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                boolean hadTrouble = false;
+                for (DocumentInfo doc : docs) {
+                    if (!doc.isDeleteSupported()) {
+                        Log.w(TAG, "Skipping " + doc);
+                        hadTrouble = true;
+                        continue;
+                    }
 
-            ContentProviderClient client = null;
-            try {
-                client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                        resolver, doc.derivedUri.getAuthority());
-                DocumentsContract.deleteDocument(client, doc.derivedUri);
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to delete " + doc);
-                hadTrouble = true;
-            } finally {
-                ContentProviderClient.releaseQuietly(client);
-            }
-        }
+                    ContentProviderClient client = null;
+                    try {
+                        client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                                resolver, doc.derivedUri.getAuthority());
+                        DocumentsContract.deleteDocument(client, doc.derivedUri);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to delete " + doc);
+                        hadTrouble = true;
+                    } finally {
+                        ContentProviderClient.releaseQuietly(client);
+                    }
+                }
 
-        if (hadTrouble) {
-            Toast.makeText(context, R.string.toast_failed_delete, Toast.LENGTH_SHORT).show();
-        }
+                if (hadTrouble) {
+                    Toast.makeText(
+                            context,
+                            R.string.toast_failed_delete,
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        }.execute(selected);
     }
 
-    private void onTransferDocuments(List<DocumentInfo> docs, int mode) {
-        getDisplayState(this).selectedDocumentsForCopy = docs;
-
+    private void transferDocuments(final SparseBooleanArray selected, final int mode) {
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
         final Intent intent = new Intent(
@@ -685,16 +708,24 @@ public class DirectoryFragment extends Fragment {
                 Uri.EMPTY,
                 getActivity(),
                 DocumentsActivity.class);
-        boolean directoryCopy = false;
-        for (DocumentInfo info : docs) {
-            if (Document.MIME_TYPE_DIR.equals(info.mimeType)) {
-                directoryCopy = true;
-                break;
+
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                getDisplayState(DirectoryFragment.this).selectedDocumentsForCopy = docs;
+
+                boolean directoryCopy = false;
+                for (DocumentInfo info : docs) {
+                    if (Document.MIME_TYPE_DIR.equals(info.mimeType)) {
+                        directoryCopy = true;
+                        break;
+                    }
+                }
+                intent.putExtra(BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, directoryCopy);
+                intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mode);
+                startActivityForResult(intent, REQUEST_COPY_DESTINATION);
             }
-        }
-        intent.putExtra(BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, directoryCopy);
-        intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mode);
-        startActivityForResult(intent, REQUEST_COPY_DESTINATION);
+        }.execute(selected);
     }
 
     private static State getDisplayState(Fragment fragment) {
@@ -1309,43 +1340,26 @@ public class DirectoryFragment extends Fragment {
     }
 
     void copySelectedToClipboard() {
-        // ListView returns a reference to its internal selection container,
-        // which will get cleared when we cancel action mode. So we
-        // make a defensive clone here.
-        //
-        // Furthermore, we don't want to call this from within the async task for
-        // basically the same reason...when mode is cancelled, selection is cleared.
-        final SparseBooleanArray selection = mCurrentView.getCheckedItemPositions().clone();
+        copySelectionToClipboard(mCurrentView.getCheckedItemPositions().clone());
+    }
 
-        new AsyncTask<Void, Void, List<DocumentInfo>>() {
-            protected List<DocumentInfo> doInBackground(Void... params) {
-                List<DocumentInfo> docs = getItemsAsDocuments(selection);
-                if (!docs.isEmpty()) {
-                    mClipper.clipDocuments(docs);
-                }
-                return docs;
-            };
-            protected void onPostExecute(List<DocumentInfo> docs) {
-                if (docs.isEmpty()) {
-                    Log.i(TAG, "Skipped populating clipboard with empty selection.");
-                    return;
-                }
+    void copySelectionToClipboard(SparseBooleanArray selected) {
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                mClipper.clipDocuments(docs);
                 Activity activity = getActivity();
                 Toast.makeText(activity,
                         activity.getResources().getQuantityString(
                                 R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
                                 Toast.LENGTH_SHORT).show();
-            };
-        }.execute();
+            }
+        }.execute(selected);
     }
 
     void pasteFromClipboard() {
         copyFromClipboard();
         getActivity().invalidateOptionsMenu();
-    }
-
-    private ClipboardManager getClipboardManager() {
-        return (ClipboardManager)getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
     }
 
     /**
@@ -1524,6 +1538,26 @@ public class DirectoryFragment extends Fragment {
      */
     private interface FragmentTuner {
         void updateActionMenu(Menu menu, int dirType);
+    }
+
+    /**
+     * Abstract task providing support for loading documents *off*
+     * the main thread. And if it isn't obvious, creating a list
+     * of documents (especially large lists) can be pretty expensive.
+     */
+    private abstract class GetDocumentsTask
+            extends AsyncTask<SparseBooleanArray, Void, List<DocumentInfo>> {
+        @Override
+        protected final List<DocumentInfo> doInBackground(SparseBooleanArray... selected) {
+            return getItemsAsDocuments(selected[0]);
+        }
+
+        @Override
+        protected final void onPostExecute(List<DocumentInfo> docs) {
+            onDocumentsReady(docs);
+        }
+
+        abstract void onDocumentsReady(List<DocumentInfo> docs);
     }
 
     /**
