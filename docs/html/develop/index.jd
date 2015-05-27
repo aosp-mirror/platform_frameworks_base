@@ -97,7 +97,7 @@ excludeFromSuggestions=true
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Ubiquitous computing on Android</h1>
   <div class="dac-section-subtitle">
-    Opening up new stuff.
+    A great experience for your users across devices. 
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/ubicomp"
