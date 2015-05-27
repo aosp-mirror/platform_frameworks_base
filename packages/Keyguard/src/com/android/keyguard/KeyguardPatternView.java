@@ -224,23 +224,30 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mPendingLockCheck.cancel(false);
             }
 
+            if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
+                mLockPatternView.enableInput();
+                onPatternChecked(pattern, false, 0);
+                return;
+            }
+
             mPendingLockCheck = LockPatternChecker.checkPattern(
                     mLockPatternUtils,
                     pattern,
                     KeyguardUpdateMonitor.getCurrentUser(),
                     new LockPatternChecker.OnCheckCallback() {
                         @Override
-                        public void onChecked(boolean matched) {
+                        public void onChecked(boolean matched, int timeoutMs) {
                             mLockPatternView.enableInput();
                             mPendingLockCheck = null;
-                            onPatternChecked(pattern, matched);
+                            onPatternChecked(pattern, matched, timeoutMs);
                         }
                     });
         }
 
-        private void onPatternChecked(List<LockPatternView.Cell> pattern, boolean matched) {
+        private void onPatternChecked(List<LockPatternView.Cell> pattern, boolean matched,
+                int timeoutMs) {
             if (matched) {
-                mCallback.reportUnlockAttempt(true);
+                mCallback.reportUnlockAttempt(true, 0);
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mCallback.dismiss(true);
             } else {
@@ -248,16 +255,11 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     mCallback.userActivity();
                 }
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
-                boolean registeredAttempt =
-                        pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL;
-                if (registeredAttempt) {
-                    mCallback.reportUnlockAttempt(false);
-                }
+                mCallback.reportUnlockAttempt(false, timeoutMs);
                 int attempts = mKeyguardUpdateMonitor.getFailedUnlockAttempts();
-                if (registeredAttempt &&
-                        0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
+                if (timeoutMs > 0) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            KeyguardUpdateMonitor.getCurrentUser());
+                            KeyguardUpdateMonitor.getCurrentUser(), timeoutMs);
                     handleAttemptLockout(deadline);
                 } else {
                     mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern, true);
