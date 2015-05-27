@@ -176,8 +176,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         dialog.show();
     }
 
-    private void showTimeoutDialog() {
-        int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+    private void showTimeoutDialog(int timeoutMs) {
+        int timeoutInSeconds = (int) timeoutMs / 1000;
         int messageId = 0;
 
         switch (mSecurityModel.getSecurityMode()) {
@@ -244,16 +244,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         showDialog(null, message);
     }
 
-    private void showAlmostAtAccountLoginDialog() {
-        final int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
-        final int count = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
-                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
-        String message = mContext.getString(R.string.kg_failed_attempts_almost_at_login,
-                count, LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT, timeoutInSeconds);
-        showDialog(null, message);
-    }
-
-    private void reportFailedUnlockAttempt() {
+    private void reportFailedUnlockAttempt(int timeoutMs) {
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
         final int failedAttempts = monitor.getFailedUnlockAttempts() + 1; // +1 for this time
 
@@ -290,14 +281,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 Slog.i(TAG, "Too many unlock attempts; user " + expiringUser + " will be wiped!");
                 showWipeDialog(failedAttempts, userType);
             }
-        } else {
-            showTimeout =
-                (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
         }
         monitor.reportFailedUnlockAttempt();
         mLockPatternUtils.reportFailedPasswordAttempt(KeyguardUpdateMonitor.getCurrentUser());
-        if (showTimeout) {
-            showTimeoutDialog();
+        if (timeoutMs > 0) {
+            showTimeoutDialog(timeoutMs);
         }
     }
 
@@ -425,14 +413,14 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             return mIsVerifyUnlockOnly;
         }
 
-        public void reportUnlockAttempt(boolean success) {
+        public void reportUnlockAttempt(boolean success, int timeoutMs) {
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
                 monitor.clearFailedUnlockAttempts();
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(
                         KeyguardUpdateMonitor.getCurrentUser());
             } else {
-                KeyguardSecurityContainer.this.reportFailedUnlockAttempt();
+                KeyguardSecurityContainer.this.reportFailedUnlockAttempt(timeoutMs);
             }
         }
 
@@ -448,7 +436,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         @Override
         public void userActivity() { }
         @Override
-        public void reportUnlockAttempt(boolean success) { }
+        public void reportUnlockAttempt(boolean success, int timeoutMs) { }
         @Override
         public boolean isVerifyUnlockOnly() { return false; }
         @Override

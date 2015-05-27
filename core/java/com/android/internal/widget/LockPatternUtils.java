@@ -60,22 +60,10 @@ public class LockPatternUtils {
     private static final boolean DEBUG = false;
 
     /**
-     * The maximum number of incorrect attempts before the user is prevented
-     * from trying again for {@link #FAILED_ATTEMPT_TIMEOUT_MS}.
-     */
-    public static final int FAILED_ATTEMPTS_BEFORE_TIMEOUT = 5;
-
-    /**
      * The number of incorrect attempts before which we fall back on an alternative
      * method of verifying the user, and resetting their lock pattern.
      */
     public static final int FAILED_ATTEMPTS_BEFORE_RESET = 20;
-
-    /**
-     * How long the user is prevented from trying again after entering the
-     * wrong pattern too many times.
-     */
-    public static final long FAILED_ATTEMPT_TIMEOUT_MS = 30000L;
 
     /**
      * The interval of the countdown for showing progress of the lockout.
@@ -109,6 +97,7 @@ public class LockPatternUtils {
     @Deprecated
     public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     public final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
+    public final static String LOCKOUT_ATTEMPT_TIMEOUT_MS = "lockscreen.lockoutattempttimeoutmss";
     public final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     @Deprecated
@@ -143,6 +132,23 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
+
+
+    public static final class RequestThrottledException extends Exception {
+        private int mTimeoutMs;
+        public RequestThrottledException(int timeoutMs) {
+            mTimeoutMs = timeoutMs;
+        }
+
+        /**
+         * @return The amount of time in ms before another request may
+         * be executed
+         */
+        public int getTimeoutMs() {
+            return mTimeoutMs;
+        }
+
+    }
 
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
@@ -239,9 +245,23 @@ public class LockPatternUtils {
      * @param challenge The challenge to verify against the pattern
      * @return the attestation that the challenge was verified, or null.
      */
-    public byte[] verifyPattern(List<LockPatternView.Cell> pattern, long challenge, int userId) {
+    public byte[] verifyPattern(List<LockPatternView.Cell> pattern, long challenge, int userId)
+            throws RequestThrottledException {
         try {
-            return getLockSettings().verifyPattern(patternToString(pattern), challenge, userId);
+            VerifyCredentialResponse response =
+                getLockSettings().verifyPattern(patternToString(pattern), challenge, userId);
+            if (response == null) {
+                // Shouldn't happen
+                return null;
+            }
+
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return response.getPayload();
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return null;
+            }
         } catch (RemoteException re) {
             return null;
         }
@@ -253,9 +273,19 @@ public class LockPatternUtils {
      * @param pattern The pattern to check.
      * @return Whether the pattern matches the stored one.
      */
-    public boolean checkPattern(List<LockPatternView.Cell> pattern, int userId) {
+    public boolean checkPattern(List<LockPatternView.Cell> pattern, int userId)
+            throws RequestThrottledException {
         try {
-            return getLockSettings().checkPattern(patternToString(pattern), userId);
+            VerifyCredentialResponse response =
+                    getLockSettings().checkPattern(patternToString(pattern), userId);
+
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return true;
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return false;
+            }
         } catch (RemoteException re) {
             return true;
         }
@@ -270,9 +300,19 @@ public class LockPatternUtils {
      * @param challenge The challenge to verify against the password
      * @return the attestation that the challenge was verified, or null.
      */
-    public byte[] verifyPassword(String password, long challenge, int userId) {
+    public byte[] verifyPassword(String password, long challenge, int userId)
+            throws RequestThrottledException {
         try {
-            return getLockSettings().verifyPassword(password, challenge, userId);
+            VerifyCredentialResponse response =
+                    getLockSettings().verifyPassword(password, challenge, userId);
+
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return response.getPayload();
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return null;
+            }
         } catch (RemoteException re) {
             return null;
         }
@@ -284,9 +324,17 @@ public class LockPatternUtils {
      * @param password The password to check.
      * @return Whether the password matches the stored one.
      */
-    public boolean checkPassword(String password, int userId) {
+    public boolean checkPassword(String password, int userId) throws RequestThrottledException {
         try {
-            return getLockSettings().checkPassword(password, userId);
+            VerifyCredentialResponse response =
+                    getLockSettings().checkPassword(password, userId);
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return true;
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return false;
+            }
         } catch (RemoteException re) {
             return true;
         }
@@ -992,9 +1040,10 @@ public class LockPatternUtils {
      * pattern until the deadline has passed.
      * @return the chosen deadline.
      */
-    public long setLockoutAttemptDeadline(int userId) {
-        final long deadline = SystemClock.elapsedRealtime() + FAILED_ATTEMPT_TIMEOUT_MS;
+    public long setLockoutAttemptDeadline(int userId, int timeoutMs) {
+        final long deadline = SystemClock.elapsedRealtime() + timeoutMs;
         setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline, userId);
+        setLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, timeoutMs, userId);
         return deadline;
     }
 
@@ -1005,8 +1054,9 @@ public class LockPatternUtils {
      */
     public long getLockoutAttemptDeadline(int userId) {
         final long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L, userId);
+        final long timeoutMs = getLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0L, userId);
         final long now = SystemClock.elapsedRealtime();
-        if (deadline < now || deadline > (now + FAILED_ATTEMPT_TIMEOUT_MS)) {
+        if (deadline < now || deadline > (now + timeoutMs)) {
             return 0L;
         }
         return deadline;
