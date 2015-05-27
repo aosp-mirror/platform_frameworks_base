@@ -11049,9 +11049,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void killUid(int uid, String reason) {
         enforceCallingPermission(Manifest.permission.KILL_UID, "killUid");
         synchronized (this) {
-            killPackageProcessesLocked(null, UserHandle.getAppId(uid), UserHandle.getUserId(uid),
-                    ProcessList.FOREGROUND_APP_ADJ-1, false, true, true, false,
-                    reason != null ? reason : "kill uid");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                killPackageProcessesLocked(null, UserHandle.getAppId(uid),
+                        UserHandle.getUserId(uid),
+                        ProcessList.PERSISTENT_PROC_ADJ, false, true, true, true,
+                        reason != null ? reason : "kill uid");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
