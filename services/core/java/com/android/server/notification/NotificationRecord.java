@@ -288,24 +288,27 @@ public final class NotificationRecord {
     }
 
     /**
-     * Returns the timestamp of the most recent updates, or the post time if none.
+     * @param now this current time in milliseconds.
+     * @returns the number of milliseconds since the most recent update, or the post time if none.
      */
-    public long getUpdateTimeMs() {
-        return mUpdateTimeMs;
+    public int getFreshnessMs(long now) {
+        return (int) (now - mUpdateTimeMs);
     }
 
     /**
-     * Returns the timestamp of the first post, ignoring updates.
+     * @param now this current time in milliseconds.
+     * @returns the number of milliseconds since the the first post, ignoring updates.
      */
-    public long getCreationTimeMs() {
-        return mCreationTimeMs;
+    public int getLifespanMs(long now) {
+        return (int) (now - mCreationTimeMs);
     }
 
     /**
-     * Returns the timestamp of the most recent visibility event, or 0L if hidden.
+     * @param now this current time in milliseconds.
+     * @returns the number of milliseconds since the most recent visibility event, or 0 if never.
      */
-    public long getVisibleSinceMs() {
-        return mVisibleSinceMs;
+    public int getExposureMs(long now) {
+        return mVisibleSinceMs == 0 ? 0 : (int) (now - mVisibleSinceMs);
     }
 
     /**
@@ -313,7 +316,7 @@ public final class NotificationRecord {
      */
     public void setVisibility(boolean visible) {
         final long now = System.currentTimeMillis();
-        mVisibleSinceMs = visible ? now : 0L;
+        mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
         EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
                 (int) (now - mCreationTimeMs),
