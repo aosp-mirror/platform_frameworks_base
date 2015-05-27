@@ -231,8 +231,6 @@
        <item>@drawable/ic_voice_search_api_holo_light</item>
        <item>@drawable/dialog_bottom_holo_dark</item>
        <item>@drawable/dialog_bottom_holo_light</item>
-       <item>@drawable/dialog_full_holo_dark</item>
-       <item>@drawable/dialog_full_holo_light</item>
        <item>@drawable/dialog_middle_holo_dark</item>
        <item>@drawable/dialog_middle_holo_light</item>
        <item>@drawable/dialog_top_holo_dark</item>
@@ -263,13 +261,9 @@
        <item>@drawable/fastscroll_track_holo_dark</item>
        <item>@drawable/fastscroll_track_pressed_holo_dark</item>
        <item>@drawable/fastscroll_track_default_holo_dark</item>
-       <item>@drawable/fastscroll_label_left_holo_dark</item>
-       <item>@drawable/fastscroll_label_right_holo_dark</item>
        <item>@drawable/fastscroll_track_holo_light</item>
        <item>@drawable/fastscroll_track_pressed_holo_light</item>
        <item>@drawable/fastscroll_track_default_holo_light</item>
-       <item>@drawable/fastscroll_label_left_holo_light</item>
-       <item>@drawable/fastscroll_label_right_holo_light</item>
        <item>@drawable/editbox_dropdown_background_dark</item>
        <item>@drawable/textfield_searchview_holo_dark</item>
        <item>@drawable/textfield_searchview_right_holo_dark</item>
@@ -310,7 +304,6 @@
        <item>@drawable/cab_background_bottom_material</item>
        <item>@drawable/cab_background_top_material</item>
        <item>@drawable/dialog_background_material</item>
-       <item>@drawable/dialog_background_shadow_material</item>
        <item>@drawable/edit_text_material</item>
        <item>@drawable/expander_group_material</item>
        <item>@drawable/fastscroll_label_left_material</item>
