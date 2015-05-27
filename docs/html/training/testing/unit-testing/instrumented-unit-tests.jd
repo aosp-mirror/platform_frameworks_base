@@ -76,8 +76,8 @@ and supporting APIs, such as the Android Testing Support Library.
 
         <pre>
 dependencies {
-    androidTestCompile 'com.android.support.test:runner:0.2'
-    androidTestCompile 'com.android.support.test:rules:0.2'
+    androidTestCompile 'com.android.support.test:runner:0.3'
+    androidTestCompile 'com.android.support.test:rules:0.3'
     // Set this dependency if you want to use Hamcrest matching
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
 }
