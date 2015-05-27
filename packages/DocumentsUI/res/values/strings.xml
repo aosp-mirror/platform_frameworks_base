@@ -44,8 +44,6 @@
     <string name="menu_share">Share</string>
     <!-- Menu item title that deletes the selected documents [CHAR LIMIT=24] -->
     <string name="menu_delete">Delete</string>
-    <!-- Menu item title that selects the current directory [CHAR LIMIT=48] -->
-    <string name="menu_select">Select \"<xliff:g id="directory" example="My Directory">^1</xliff:g>\"</string>
     <!-- Menu item title that selects all documents in the current directory [CHAR LIMIT=24] -->
     <string name="menu_select_all">Select All</string>
     <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
@@ -67,6 +65,8 @@
     <!-- Menu item that hides the sizes of displayed files [CHAR LIMIT=24] -->
     <string name="menu_file_size_hide">Hide file size</string>
 
+    <!-- Button label that select the current directory [CHAR LIMIT=24] -->
+    <string name="button_select">Select</string>
     <!-- Button label that copies files to the current directory [CHAR LIMIT=24] -->
     <string name="button_copy">Copy</string>
     <!-- Button label that moves files to the current directory [CHAR LIMIT=24] -->
