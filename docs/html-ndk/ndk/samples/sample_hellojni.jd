@@ -18,7 +18,7 @@ page.title=Sample: hello-jni
 
 <p>This sample guides you through HelloJNI, a minimal
 application built with the NDK. This sample is in the {@code samples/hello-jni/} directory
-under the root directory of your NDK installation.</p>
+under the root directory of your NDK installation.</p> 
 
 <h2 id="an">Android.mk</h2>
 
