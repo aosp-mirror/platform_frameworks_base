@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -78,7 +79,7 @@ public abstract class RecognitionService extends Service {
             switch (msg.what) {
                 case MSG_START_LISTENING:
                     StartListeningArgs args = (StartListeningArgs) msg.obj;
-                    dispatchStartListening(args.mIntent, args.mListener);
+                    dispatchStartListening(args.mIntent, args.mListener, args.mCallingUid);
                     break;
                 case MSG_STOP_LISTENING:
                     dispatchStopListening((IRecognitionListener) msg.obj);
@@ -93,7 +94,8 @@ public abstract class RecognitionService extends Service {
         }
     };
 
-    private void dispatchStartListening(Intent intent, final IRecognitionListener listener) {
+    private void dispatchStartListening(Intent intent, final IRecognitionListener listener,
+            int callingUid) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
             try {
@@ -107,7 +109,7 @@ public abstract class RecognitionService extends Service {
                 Log.e(TAG, "dead listener on startListening");
                 return;
             }
-            mCurrentCallback = new Callback(listener);
+            mCurrentCallback = new Callback(listener, callingUid);
             RecognitionService.this.onStartListening(intent, mCurrentCallback);
         } else {
             try {
@@ -155,10 +157,12 @@ public abstract class RecognitionService extends Service {
         public final Intent mIntent;
 
         public final IRecognitionListener mListener;
+        public final int mCallingUid;
 
-        public StartListeningArgs(Intent intent, IRecognitionListener listener) {
+        public StartListeningArgs(Intent intent, IRecognitionListener listener, int callingUid) {
             this.mIntent = intent;
             this.mListener = listener;
+            this.mCallingUid = callingUid;
         }
     }
 
@@ -227,9 +231,11 @@ public abstract class RecognitionService extends Service {
      */
     public class Callback {
         private final IRecognitionListener mListener;
+        private final int mCallingUid;
 
-        private Callback(IRecognitionListener listener) {
+        private Callback(IRecognitionListener listener, int callingUid) {
             mListener = listener;
+            mCallingUid = callingUid;
         }
 
         /**
@@ -314,6 +320,14 @@ public abstract class RecognitionService extends Service {
         public void rmsChanged(float rmsdB) throws RemoteException {
             mListener.onRmsChanged(rmsdB);
         }
+
+        /**
+         * Return the Linux uid assigned to the process that sent you the current transaction that
+         * is being processed. This is obtained from {@link Binder#getCallingUid()}.
+         */
+        public int getCallingUid() {
+            return mCallingUid;
+        }
     }
 
     /** Binder of the recognition service */
@@ -331,7 +345,7 @@ public abstract class RecognitionService extends Service {
             if (service != null && service.checkPermissions(listener)) {
                 service.mHandler.sendMessage(Message.obtain(service.mHandler,
                         MSG_START_LISTENING, service.new StartListeningArgs(
-                                recognizerIntent, listener)));
+                                recognizerIntent, listener, Binder.getCallingUid())));
             }
         }
 
