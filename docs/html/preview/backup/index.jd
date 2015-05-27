@@ -27,8 +27,8 @@ page.keywords=backup, autobackup, preview
 
 <p>
   Automatic backups are enabled for all apps installed on devices running the Android M Preview. No
-  additional app code is required. The system provides users with the ability opt out of automatic
-  data backups. You can also choose to limit what data from your app is backed up.
+  additional app code is required. The system provides users with the ability to opt out of
+  automatic data backups. You can also choose to limit what data from your app is backed up.
 </p>
 
 <p>
