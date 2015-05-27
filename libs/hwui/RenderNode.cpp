@@ -83,8 +83,9 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
  * display list. This function should remain in sync with the replay() function.
  */
 void RenderNode::output(uint32_t level) {
-    ALOGD("%*sStart display list (%p, %s%s%s%s)", (level - 1) * 2, "", this,
+    ALOGD("%*sStart display list (%p, %s%s%s%s%s)", (level - 1) * 2, "", this,
             getName(),
+            (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : ""),
             (properties().hasShadow() ? ", casting shadow" : ""),
             (isRenderable() ? "" : ", empty"),
             (mLayer != nullptr ? ", on HW Layer" : ""));
