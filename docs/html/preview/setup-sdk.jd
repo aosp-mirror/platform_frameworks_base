@@ -72,8 +72,8 @@ App</a> training lesson first.</a></p>
 
 <ul>
   <li><code>compileSdkVersion</code> is set to <code>'android-MNC'</code></li>
-  <li><code>minSdkVersion</code> is set to <code>'android-MNC'</code></li>
-  <li><code>targetSdkVersion</code> is set to <code>'android-MNC'</code></li>
+  <li><code>minSdkVersion</code> is set to <code>'MNC'</code></li>
+  <li><code>targetSdkVersion</code> is set to <code>'MNC'</code></li>
 </ul>
 
 
