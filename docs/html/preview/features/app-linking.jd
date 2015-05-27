@@ -1,4 +1,4 @@
-page.title=App Linking
+page.title=App Links
 
 @jd:body
 
@@ -22,7 +22,7 @@ page.title=App Linking
 </p>
 
 <p>
-  The Android M Developer Preview introduces support for app linking, which improves upon existing
+  The Android M Developer Preview introduces support for App Links, which improves upon existing
   link handling by allowing app developers to associate an app with a web domain they own. When
   developers create this association, the platform can automatically determine the default app used
   to handle a particular web link and skip asking users.
@@ -79,10 +79,11 @@ page.title=App Linking
 <h2 id="verfy-links">Request App Link Verification</h2>
 
 <p>
-  An app can indicate to the platform to verify app links against the {@code statements.json} files
-  hosted on the sites defined by the host names in the &lt;data&gt; elements of the intent filters.
-  To do this, add an {@code android:autoVerify} attribute to the appropriate intent filters in the
-  manifest, as shown in the following manifest code snippet:
+  An app can request that the platform automatically verify any app links defined by the host names
+  in the data elements of its intent filters against the {@code statements.json} files hosted on
+  the respective web domains. To request app link verification, add an {@code android:autoVerify}
+  attribute to each desired intent filter in the manifest, as shown in the following manifest code
+  snippet:
 </p>
 
 <pre>
@@ -98,10 +99,20 @@ page.title=App Linking
 </pre>
 
 <p>
-  When an app is installed, the platform attempts to verify the app links. If the platform cannot
-  successfully verify app links, it falls back to prompting the user the next time they open a link
-  that the app handles, or they will need to explicitly enable the app in the App Info settings UI.
+  When the (@code android:autoVerify} attribute is present in an app manifest, the platform
+  attempts to verify app links when the app is installed. If the platform cannot successfully
+  verify the app links, the app is not set as the preferred app to handle the web links. The next
+  time a user opens one of the links, the platform falls back to presenting the user with a
+  dialog.
 </p>
+
+<p class="note">
+  <strong>Note:</strong> In testing, there is a potential for a false positive if verfication
+  fails, but the user has explicitly enabled the app to open supported links without asking, using
+  the system Settings app. In this case, no dialog is shown and the link goes directly to your
+  app, but only because of the user setting, and not because verification succeeded.
+</p>
+
 
 <h2 id="user-manage">Managing App Link Settings</h2>
 
