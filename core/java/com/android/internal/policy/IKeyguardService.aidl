@@ -22,6 +22,7 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import android.os.Bundle;
 
 oneway interface IKeyguardService {
+
     /**
      * Sets the Keyguard as occluded when a window dismisses the Keyguard with flag
      * FLAG_SHOW_ON_LOCK_SCREEN.
@@ -36,8 +37,27 @@ oneway interface IKeyguardService {
     void dismiss();
     void onDreamingStarted();
     void onDreamingStopped();
-    void onScreenTurnedOff(int reason);
-    void onScreenTurnedOn(IKeyguardShowCallback callback);
+
+    /**
+     * Called when the device has started going to sleep.
+     *
+     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
+     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    void onStartedGoingToSleep(int reason);
+
+    /**
+     * Called when the device has finished going to sleep.
+     *
+     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
+     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    void onFinishedGoingToSleep(int reason);
+
+    /**
+     * Called when the device has started waking up.
+     */
+    void onStartedWakingUp(IKeyguardShowCallback callback);
     void setKeyguardEnabled(boolean enabled);
     void onSystemReady();
     void doKeyguardTimeout(in Bundle options);

@@ -108,15 +108,21 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onScreenTurnedOff(int reason) {
+        public void onStartedGoingToSleep(int reason) {
             checkPermission();
-            mKeyguardViewMediator.onScreenTurnedOff(reason);
+            mKeyguardViewMediator.onStartedGoingToSleep(reason);
         }
 
         @Override // Binder interface
-        public void onScreenTurnedOn(IKeyguardShowCallback callback) {
+        public void onFinishedGoingToSleep(int reason) {
             checkPermission();
-            mKeyguardViewMediator.onScreenTurnedOn(callback);
+            mKeyguardViewMediator.onFinishedGoingToSleep(reason);
+        }
+
+        @Override // Binder interface
+        public void onStartedWakingUp(IKeyguardShowCallback callback) {
+            checkPermission();
+            mKeyguardViewMediator.onStartedWakingUp(callback);
         }
 
         @Override // Binder interface

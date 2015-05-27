@@ -105,19 +105,28 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
-    @Override // Binder interface
-    public void onScreenTurnedOff(int reason) {
+    @Override
+    public void onStartedGoingToSleep(int reason) {
         try {
-            mService.onScreenTurnedOff(reason);
+            mService.onStartedGoingToSleep(reason);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
     }
 
-    @Override // Binder interface
-    public void onScreenTurnedOn(IKeyguardShowCallback result) {
+    @Override
+    public void onFinishedGoingToSleep(int reason) {
         try {
-            mService.onScreenTurnedOn(result);
+            mService.onFinishedGoingToSleep(reason);
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override
+    public void onStartedWakingUp(IKeyguardShowCallback callback) {
+        try {
+            mService.onStartedWakingUp(callback);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
