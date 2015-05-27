@@ -3521,7 +3521,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the stylus is touching the screen and the button has been pressed, this
      * is false once the stylus has been lifted.
      */
-    private boolean mInStylusButtonPress = false;
+    private boolean mInStylusButtonPress;
+
+    /**
+     * Whether the next up event should be ignored for the purposes of gesture recognition. This is
+     * true after a stylus button press has occured, when the next up event should not be recognized
+     * as a tap.
+     */
+    private boolean mIgnoreNextUpEvent;
 
     /**
      * The minimum height of the view. We'll try our best to have the height
@@ -5215,26 +5222,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             performHapticFeedback(HapticFeedbackConstants.STYLUS_BUTTON_PRESS);
         }
         return handled;
-    }
-
-    /**
-     * Checks for a stylus button press and calls the listener.
-     *
-     * @param event The event.
-     * @return True if the event was consumed.
-     */
-    private boolean performStylusActionOnButtonPress(MotionEvent event) {
-        if (isStylusButtonPressable() && !mInStylusButtonPress && !mHasPerformedLongPress
-                && event.isButtonPressed(MotionEvent.BUTTON_STYLUS_SECONDARY)) {
-            if (performStylusButtonPress()) {
-                mInStylusButtonPress = true;
-                setPressed(true, event.getX(), event.getY());
-                removeTapCallback();
-                removeLongPressCallback();
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -9358,6 +9345,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return true;
         }
 
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_BUTTON_PRESS:
+                if (isStylusButtonPressable() && !mInStylusButtonPress && !mHasPerformedLongPress
+                        && event.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
+                    if (performStylusButtonPress()) {
+                        mInStylusButtonPress = true;
+                        setPressed(true, event.getX(), event.getY());
+                        removeTapCallback();
+                        removeLongPressCallback();
+                        return true;
+                    }
+                }
+                break;
+
+            case MotionEvent.ACTION_BUTTON_RELEASE:
+                if (mInStylusButtonPress
+                        && event.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
+                    mInStylusButtonPress = false;
+                    mIgnoreNextUpEvent = true;
+                }
+                break;
+        }
+
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
         }
@@ -10218,10 +10228,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE) {
             switch (action) {
                 case MotionEvent.ACTION_UP:
-                    if (mInStylusButtonPress) {
-                        mInStylusButtonPress = false;
-                        mHasPerformedLongPress = false;
-                    }
                     boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
                     if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
                         // take focus if we don't have it already and we should in
@@ -10239,7 +10245,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             setPressed(true, x, y);
                        }
 
-                        if (!mHasPerformedLongPress) {
+                        if (!mHasPerformedLongPress && !mIgnoreNextUpEvent) {
                             // This is a tap, so remove the longpress check
                             removeLongPressCallback();
 
@@ -10271,15 +10277,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                         removeTapCallback();
                     }
+                    mIgnoreNextUpEvent = false;
                     break;
 
                 case MotionEvent.ACTION_DOWN:
                     mHasPerformedLongPress = false;
-                    mInStylusButtonPress = false;
-
-                    if (performStylusActionOnButtonPress(event)) {
-                        break;
-                    }
 
                     if (performButtonActionOnTouchDown(event)) {
                         break;
@@ -10309,10 +10311,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setPressed(false);
                     removeTapCallback();
                     removeLongPressCallback();
-                    if (mInStylusButtonPress) {
-                        mInStylusButtonPress = false;
-                        mHasPerformedLongPress = false;
-                    }
+                    mInStylusButtonPress = false;
+                    mHasPerformedLongPress = false;
+                    mIgnoreNextUpEvent = false;
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -10328,9 +10329,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                             setPressed(false);
                         }
-                    } else if (performStylusActionOnButtonPress(event)) {
-                        // Check for stylus button press if we're within the view.
-                        break;
                     }
                     break;
             }
