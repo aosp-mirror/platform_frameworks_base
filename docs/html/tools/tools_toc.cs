@@ -1,12 +1,10 @@
 <ul id="nav">
 
-
-<!-- Downloads menu-->
-
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot?>sdk/index.html"><span class="en">Download</span></a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot
+?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
-            <li><a href="<?cs var:toroot ?>sdk/installing/index.html">
+      <li><a href="<?cs var:toroot ?>sdk/installing/index.html">
           <span class="en">Installing the SDK</span></a></li>
 
       <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
@@ -18,13 +16,15 @@
 <!-- Android Studio menu-->
 
  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot?>tools/studio/index.html"><span class="en">Android Studio</span></a></div>
-       <ul>
-         <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">Tips and Tricks</a> </li>
-       </ul>
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot?>tools/studio/index.html">Android Studio</a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
+          Tips and Tricks</a></li>
+    </ul>
 
- </li><!-- End of Android Studio Basics -->
-
+ </li><!-- End of Android Studio menu -->
 
 
 <!-- Workflow menu-->
@@ -70,6 +70,7 @@
           <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
             <span class="en">From the Command Line</span></a></li>
         </ul>
+      </li>
 
 
   <li class="nav-section">
@@ -81,8 +82,8 @@
             <a href="<?cs var:toroot?>tools/testing/testing_android.html">
             <span class="en">Fundamentals</span></a>
           </li>
-          <li><a href="<?cs var:toroot ?>tools/testing/testing_studio.html">
-            <span class="en">From Android Studio</span></a>
+          <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">
+            <span class="en">From Eclipse</span></a>
           </li>
           <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
             <span class="en">From Other IDEs</span></a>
@@ -143,14 +144,12 @@
         </ul>
       </li>
     </ul>
-  </li><!-- end of debugging -->
+  </li>
 
-
-
-<!-- Tool Help menu-->
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span class="en">Tools Help</span></a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
+class="en">Tools Help</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
@@ -175,6 +174,7 @@
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
     </ul>
   </li>
+
   </li><!-- end of tools help -->
 
 
@@ -294,6 +294,14 @@ class="en">Support Library</span></a></div>
     </ul>
   </li><!-- end of support library -->
 
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/data-binding/index.html"><span
+class="en">Data Binding Library</span></a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/data-binding/overview.html">Overview</a></li>
+      <li><a href="<?cs var:toroot ?>tools/data-binding/guide.html">Guide</a></li>
+    </ul>
+  </li><!-- end of support library -->
 
 
 <!-- Revision menu-->
@@ -305,9 +313,8 @@ class="en">Support Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/revisions/studio.html">
         <span class="en">Android Studio</span>
       </a></li>
-      <li><a href="<?cs var:toroot ?>tools/revisions/sdk/tools-notes.html">
+      <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html">
         <span class="en">SDK Tools</span>
-      </a></li>
       </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/build-tools.html">
         <span class="en">SDK Build Tools</span>
@@ -320,23 +327,15 @@ class="en">Support Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
         <span class="en">ADT Plugin</span></a></li>
     </ul>
-  </li><!-- end of revision -->
-
-
-
-<!-- NDK menu-->
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header empty">
-      <a href="<?cs var:toroot ?>tools/ndk/index.html">NDK</a>
+      <a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">NDK</a>
     </div>
-  </li><!-- end of NDK -->
+  </li>
 
-
-
-<!-- ADK menu-->
-
-  <li class="nav-section">
+<!--  <li class="nav-section">
     <div class="nav-section-header">
     <a href="<?cs var:toroot ?>tools/adk/index.html">
       <span class="en">ADK</span></a>
@@ -345,8 +344,7 @@ class="en">Support Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/adk/adk2.html">ADK 2012 Guide</a></li>
       <li><a href="<?cs var:toroot ?>tools/adk/adk.html">ADK 2011 Guide</a></li>
     </ul>
-  </li><!-- end of ADK -->
-
+  </li> -->
 
 
 <!-- Eclipse ADT menu-->
