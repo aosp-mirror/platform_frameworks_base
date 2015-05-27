@@ -1662,7 +1662,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean onLayoutDirectionChange(int layoutDirection) {
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
         boolean changed = false;
 
         final ChildDrawable[] array = mLayerState.mChildren;
