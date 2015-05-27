@@ -14,7 +14,7 @@ page.title=ABI Management
   </div>
 
 <p>Different Android handsets use different CPUs, which in turn support different instruction sets.
-Each combination of CPU and instruction set(s) has its own Application Binary Interface, or
+Each combination of CPU and instruction sets has its own Application Binary Interface, or
 <i>ABI</i>. The ABI defines, with great precision, how an application's machine code is supposed to
 interact with the system at runtime. You must specify an ABI for each CPU architecture you want
 your app to work with.</p>
@@ -59,7 +59,7 @@ the instruction sets each ABI supports.</p>
 </tr>
 
 <tr>
-<td><a href="#v7a">{@code armeabi-v7a}</a></td>
+<td><a href="#v7a">{@code armeabi-v7a} ({@code armeabi-v7a-hard)}</a></td>
 <td>
 <li>armeabi</li>
 <li>Thumb-2</li>
@@ -158,7 +158,8 @@ functions from the compiler's {@code libgcc.a} static library.</p>
 <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/CACBCAAE.html">
 Thumb (a.k.a. Thumb-1) instruction set</a>. The NDK generates Thumb
 code by default unless you specify different behavior using the
-<code>LOCAL_ARM_MODE</code> variable in your <a href="android_mk.html"><code>Android.mk</code></a>
+<code>LOCAL_ARM_MODE</code> variable in your
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>
 file.</p>
 
 <h3 id="v7a">armeabi-v7a (armeabi-v7a-hard)</h3>
@@ -186,7 +187,7 @@ check is similar to the one that the system typically performs to check or use
 instruction sets on x86 CPUs.</p>
 
 <p>For information about how to perform these runtime checks, refer to
-<a href="{@docRoot}ndk/guides/cpu-features.html">CPU Features</a>.
+<a href="{@docRoot}ndk/guides/cpu-features.html">The {@code cpufeatures} Library</a>.
 Also, for information about the NDK's support for building
 machine code for NEON, see
 <a href="{@docRoot}ndk/guides/cpu-arm-neon.html">NEON Support</a>.</p>
@@ -250,7 +251,7 @@ The generated code is an optimization balanced across the top Intel 32-bit
 CPUs.</p>
 <p> For more information on compiler flags, particularly related to performance optimization,
 refer to <a href="http://software.intel.com/blogs/2012/09/26/gcc-x86-performance-hints">GCC
-x86 Performance</a>.</p>
+x86 performance hints</a>.</p>
 </li>
 <li>Use of the standard Linux x86 32-bit calling convention, as opposed to the one for SVR. For
 more information, see section 6, "Register Usage", of
@@ -377,7 +378,7 @@ further information
 <h2 id="gc">Generating Code for a Specific ABI</h2>
 <p>By default, the NDK generates machine code for the armeabi ABI. You can
 generate ARMv7-a-compatible machine code, instead, by adding the following line
-to your <a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file.</p>
+to your <a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file.</p>
 <pre class="no-pretty-print">
 APP_ABI := armeabi-v7a
 </pre>
@@ -391,7 +392,7 @@ APP_ABI := armeabi armeabi-v7a
 
 <p>This setting tells the NDK to build two versions of your machine code: one
 for each ABI listed on this line. For more information on the values you can specify for the
-{@code APP_ABI} variable, see <a href="{docRoot}ndk/guides/android_mk.html">Android.mk</a>.
+{@code APP_ABI} variable, see <a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a>.
 </p>
 
 <p>When you build multiple machine-code versions, the build system copies the libraries to your
