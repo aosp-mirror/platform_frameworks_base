@@ -51,15 +51,6 @@ GitHub</a></p>
 
 <p><a href="https://github.com/googlesamples/android-AutoBackupForApps">Get it on GitHub</a></p>
 
-<h3 id="VoiceCamera">Voice Camera</h3>
-
-<p>
-  This sample demonstrates how to implement the "OK Google, take a selfie" voice command and confirm
-  the user intent with the <code>VoiceInteraction</code> API.
-</p>
-
-<p><a href="https://github.com/googlesamples/android-VoiceCamera">Get it on GitHub</a></p>
-
 <h3 id="CameraRaw">Camera 2 Raw</h3>
 
 <p>
@@ -69,7 +60,7 @@ GitHub</a></p>
 
 <p><a href="https://github.com/googlesamples/android-Camera2Raw">Get it on GitHub</a></p>
 
-<h3 id="ActiveNotification">Active Notifications</h3>
+<h3 id="ActiveNotification">Active Notification</h3>
 
 <p>
   This sample demonstrates how the
