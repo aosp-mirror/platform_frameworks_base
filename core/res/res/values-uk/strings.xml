@@ -429,8 +429,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ви забрали палець надто швидко. Повторіть спробу."</string>
-    <!-- no translation found for fingerprint_acquired_too_slow (59250885689661653) -->
-    <skip />
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Ви провели пальцем надто повільно. Повторіть спробу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратне забезпечення для сканування відбитка недоступне."</string>
