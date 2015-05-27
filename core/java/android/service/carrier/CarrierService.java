@@ -20,7 +20,7 @@ import android.os.IBinder;
 import android.os.PersistableBundle;
 
 /**
- * A service that sets carrier configuration for telephony services.
+ * A service that exposes carrier-specific functionality to the system.
  * <p>
  * To extend this class, you must declare the service in your manifest file to require the
  * {@link android.Manifest.permission#BIND_CARRIER_SERVICES} permission and include an intent
@@ -28,23 +28,23 @@ import android.os.PersistableBundle;
  * </p>
  *
  * <pre>{@code
- * <service android:name=".MyCarrierConfigService"
+ * <service android:name=".MyCarrierService"
  *       android:label="@string/service_name"
  *       android:permission="android.permission.BIND_CARRIER_SERVICES">
  *  <intent-filter>
- *      <action android:name="android.service.carrier.CarrierConfigService" />
+ *      <action android:name="android.service.carrier.CarrierService" />
  *  </intent-filter>
  * </service>
  * }</pre>
  */
-public abstract class CarrierConfigService extends Service {
+public abstract class CarrierService extends Service {
 
-    public static final String SERVICE_INTERFACE = "android.service.carrier.CarrierConfigService";
+    public static final String SERVICE_INTERFACE = "android.service.carrier.CarrierService";
 
-    private final ICarrierConfigService.Stub mStubWrapper;
+    private final ICarrierService.Stub mStubWrapper;
 
-    public CarrierConfigService() {
-        mStubWrapper = new ICarrierConfigServiceWrapper();
+    public CarrierService() {
+        mStubWrapper = new ICarrierServiceWrapper();
     }
 
     /**
@@ -89,16 +89,16 @@ public abstract class CarrierConfigService extends Service {
     }
 
     /**
-     * A wrapper around ICarrierConfigService that forwards calls to implementations of
-     * {@link CarrierConfigService}.
+     * A wrapper around ICarrierService that forwards calls to implementations of
+     * {@link CarrierService}.
      *
      * @hide
      */
-    private class ICarrierConfigServiceWrapper extends ICarrierConfigService.Stub {
+    private class ICarrierServiceWrapper extends ICarrierService.Stub {
 
         @Override
         public PersistableBundle getCarrierConfig(CarrierIdentifier id) {
-            return CarrierConfigService.this.onLoadConfig(id);
+            return CarrierService.this.onLoadConfig(id);
         }
     }
 }
