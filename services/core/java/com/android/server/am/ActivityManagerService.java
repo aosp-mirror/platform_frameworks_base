@@ -3427,7 +3427,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (preferredComponent != null) {
                     ai = AppGlobals.getPackageManager().getActivityInfo(
                             preferredComponent, flags, userId);
-                } else {
+                }
+                if (ai == null) {
                     ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
                             intent,
                             intent.resolveTypeIfNeeded(mContext.getContentResolver()),
