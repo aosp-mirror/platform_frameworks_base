@@ -67,8 +67,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл көчүрүлүүдө.</item>
     </plurals>
     <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
-      <item quantity="other">Жылдырылууда<xliff:g id="COUNT_1">%1$d</xliff:g> файлдар.</item>
-      <item quantity="one">Жылдырылууда<xliff:g id="COUNT_0">%1$d</xliff:g> файл.</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> файл жылдырылууда.</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> файл жылдырылууда.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Көчүрүүгө даярдалууда…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
