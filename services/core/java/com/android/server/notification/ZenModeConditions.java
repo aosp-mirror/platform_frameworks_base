@@ -63,7 +63,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         mConditionProviders.requestConditions(callback, relevance);
     }
 
-    public void evaluateConfig(ZenModeConfig config, boolean processSubscriptione) {
+    public void evaluateConfig(ZenModeConfig config, boolean processSubscriptions) {
         if (config == null) return;
         if (config.manualRule != null && config.manualRule.condition != null
                 && !config.manualRule.isTrueOrUnknown()) {
@@ -71,16 +71,16 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             config.manualRule = null;
         }
         final ArraySet<Uri> current = new ArraySet<>();
-        evaluateRule(config.manualRule, current, processSubscriptione);
+        evaluateRule(config.manualRule, current, processSubscriptions);
         for (ZenRule automaticRule : config.automaticRules.values()) {
-            evaluateRule(automaticRule, current, processSubscriptione);
+            evaluateRule(automaticRule, current, processSubscriptions);
             updateSnoozing(automaticRule);
         }
         final int N = mSubscriptions.size();
         for (int i = N - 1; i >= 0; i--) {
             final Uri id = mSubscriptions.keyAt(i);
             final ComponentName component = mSubscriptions.valueAt(i);
-            if (processSubscriptione) {
+            if (processSubscriptions) {
                 if (!current.contains(id)) {
                     mConditionProviders.unsubscribeIfNecessary(component, id);
                     mSubscriptions.removeAt(i);
@@ -156,6 +156,11 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             } else {
                 if (DEBUG) Log.d(TAG, "zmc failed to subscribe");
             }
+        }
+        if (rule.condition == null) {
+            rule.condition = mConditionProviders.findCondition(rule.component, rule.conditionId);
+            if (rule.condition != null && DEBUG) Log.d(TAG, "Found existing condition for: "
+                    + rule.conditionId);
         }
     }
 

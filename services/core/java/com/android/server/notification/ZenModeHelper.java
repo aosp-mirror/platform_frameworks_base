@@ -46,6 +46,7 @@ import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.server.LocalServices;
@@ -77,8 +78,10 @@ public class ZenModeHelper {
     private final ZenModeFiltering mFiltering;
     private final RingerModeDelegate mRingerModeDelegate = new RingerModeDelegate();
     private final ZenModeConditions mConditions;
+    private final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
 
     private int mZenMode;
+    private int mUser = UserHandle.USER_OWNER;
     private ZenModeConfig mConfig;
     private AudioManagerInternal mAudioManager;
     private int mPreviousRingerMode = -1;
@@ -92,6 +95,7 @@ public class ZenModeHelper {
         appendDefaultScheduleRules(mDefaultConfig);
         appendDefaultEventRules(mDefaultConfig);
         mConfig = mDefaultConfig;
+        mConfigs.put(UserHandle.USER_OWNER, mConfig);
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
         mFiltering = new ZenModeFiltering(mContext);
@@ -140,6 +144,25 @@ public class ZenModeHelper {
         if (mAudioManager != null) {
             mAudioManager.setRingerModeDelegate(mRingerModeDelegate);
         }
+    }
+
+    public void onUserSwitched(int user) {
+        if (mUser == user || user < UserHandle.USER_OWNER) return;
+        mUser = user;
+        if (DEBUG) Log.d(TAG, "onUserSwitched u=" + user);
+        ZenModeConfig config = mConfigs.get(user);
+        if (config == null) {
+            if (DEBUG) Log.d(TAG, "onUserSwitched: generating default config for user " + user);
+            config = mDefaultConfig.copy();
+            config.user = user;
+        }
+        setConfig(config, "onUserSwitched");
+    }
+
+    public void onUserRemoved(int user) {
+        if (user < UserHandle.USER_OWNER) return;
+        if (DEBUG) Log.d(TAG, "onUserRemoved u=" + user);
+        mConfigs.remove(user);
     }
 
     public void requestZenModeConditions(IConditionListener callback, int relevance) {
@@ -200,8 +223,13 @@ public class ZenModeHelper {
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mZenMode=");
         pw.println(Global.zenModeToString(mZenMode));
-        dump(pw, prefix, "mConfig", mConfig);
         dump(pw, prefix, "mDefaultConfig", mDefaultConfig);
+        final int N = mConfigs.size();
+        for (int i = 0; i < N; i++) {
+            dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
+        }
+        pw.print(prefix); pw.print("mUser="); pw.println(mUser);
+        dump(pw, prefix, "mConfig", mConfig);
         pw.print(prefix); pw.print("mPreviousRingerMode="); pw.println(mPreviousRingerMode);
         pw.print(prefix); pw.print("mEffectsSuppressed="); pw.println(mEffectsSuppressed);
         mFiltering.dump(pw, prefix);
@@ -237,7 +265,10 @@ public class ZenModeHelper {
     }
 
     public void writeXml(XmlSerializer out) throws IOException {
-        mConfig.writeXml(out);
+        final int N = mConfigs.size();
+        for (int i = 0; i < N; i++) {
+            mConfigs.valueAt(i).writeXml(out);
+        }
     }
 
     public Policy getNotificationPolicy() {
@@ -268,10 +299,17 @@ public class ZenModeHelper {
             Log.w(TAG, "Invalid config in setConfig; " + config);
             return false;
         }
+        if (config.user != mUser) {
+            // simply store away for background users
+            mConfigs.put(config.user, config);
+            if (DEBUG) Log.d(TAG, "setConfig: store config for user " + config.user);
+            return true;
+        }
         mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
+        mConfigs.put(config.user, config);
         if (config.equals(mConfig)) return true;
         if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
-        ZenLog.traceConfig(reason, config);
+        ZenLog.traceConfig(reason, mConfig, config);
         final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                 getNotificationPolicy(config));
         mConfig = config;

@@ -262,6 +262,14 @@ public class ConditionProviders extends ManagedServices {
         return null;
     }
 
+    public Condition findCondition(ComponentName component, Uri conditionId) {
+        if (component == null || conditionId == null) return null;
+        synchronized (mMutex) {
+            final ConditionRecord r = getRecordLocked(conditionId, component, false /*create*/);
+            return r != null ? r.condition : null;
+        }
+    }
+
     public void ensureRecordExists(ComponentName component, Uri conditionId,
             IConditionProvider provider) {
         // constructed by convention, make sure the record exists...

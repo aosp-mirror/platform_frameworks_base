@@ -79,6 +79,7 @@ public class ZenModeConfig implements Parcelable {
     private static final int XML_VERSION = 2;
     private static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
+    private static final String ZEN_ATT_USER = "user";
     private static final String ALLOW_TAG = "allow";
     private static final String ALLOW_ATT_CALLS = "calls";
     private static final String ALLOW_ATT_REPEAT_CALLERS = "repeatCallers";
@@ -117,6 +118,7 @@ public class ZenModeConfig implements Parcelable {
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
     public int allowCallsFrom = DEFAULT_SOURCE;
     public int allowMessagesFrom = DEFAULT_SOURCE;
+    public int user = UserHandle.USER_OWNER;
 
     public ZenRule manualRule;
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
@@ -131,6 +133,7 @@ public class ZenModeConfig implements Parcelable {
         allowEvents = source.readInt() == 1;
         allowCallsFrom = source.readInt();
         allowMessagesFrom = source.readInt();
+        user = source.readInt();
         manualRule = source.readParcelable(null);
         final int len = source.readInt();
         if (len > 0) {
@@ -153,6 +156,7 @@ public class ZenModeConfig implements Parcelable {
         dest.writeInt(allowEvents ? 1 : 0);
         dest.writeInt(allowCallsFrom);
         dest.writeInt(allowMessagesFrom);
+        dest.writeInt(user);
         dest.writeParcelable(manualRule, 0);
         if (!automaticRules.isEmpty()) {
             final int len = automaticRules.size();
@@ -173,7 +177,8 @@ public class ZenModeConfig implements Parcelable {
     @Override
     public String toString() {
         return new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
-            .append("allowCalls=").append(allowCalls)
+            .append("user=").append(user)
+            .append(",allowCalls=").append(allowCalls)
             .append(",allowRepeatCallers=").append(allowRepeatCallers)
             .append(",allowMessages=").append(allowMessages)
             .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
@@ -183,6 +188,68 @@ public class ZenModeConfig implements Parcelable {
             .append(",automaticRules=").append(automaticRules)
             .append(",manualRule=").append(manualRule)
             .append(']').toString();
+    }
+
+    private Diff diff(ZenModeConfig to) {
+        final Diff d = new Diff();
+        if (to == null) {
+            return d.addLine("config", "delete");
+        }
+        if (user != to.user) {
+            d.addLine("user", user, to.user);
+        }
+        if (allowCalls != to.allowCalls) {
+            d.addLine("allowCalls", allowCalls, to.allowCalls);
+        }
+        if (allowRepeatCallers != to.allowRepeatCallers) {
+            d.addLine("allowRepeatCallers", allowRepeatCallers, to.allowRepeatCallers);
+        }
+        if (allowMessages != to.allowMessages) {
+            d.addLine("allowMessages", allowMessages, to.allowMessages);
+        }
+        if (allowCallsFrom != to.allowCallsFrom) {
+            d.addLine("allowCallsFrom", allowCallsFrom, to.allowCallsFrom);
+        }
+        if (allowMessagesFrom != to.allowMessagesFrom) {
+            d.addLine("allowMessagesFrom", allowMessagesFrom, to.allowMessagesFrom);
+        }
+        if (allowReminders != to.allowReminders) {
+            d.addLine("allowReminders", allowReminders, to.allowReminders);
+        }
+        if (allowEvents != to.allowEvents) {
+            d.addLine("allowEvents", allowEvents, to.allowEvents);
+        }
+        final ArraySet<String> allRules = new ArraySet<>();
+        addKeys(allRules, automaticRules);
+        addKeys(allRules, to.automaticRules);
+        final int N = allRules.size();
+        for (int i = 0; i < N; i++) {
+            final String rule = allRules.valueAt(i);
+            final ZenRule fromRule = automaticRules != null ? automaticRules.get(rule) : null;
+            final ZenRule toRule = to.automaticRules != null ? to.automaticRules.get(rule) : null;
+            ZenRule.appendDiff(d, "automaticRule[" + rule + "]", fromRule, toRule);
+        }
+        ZenRule.appendDiff(d, "manualRule", manualRule, to.manualRule);
+        return d;
+    }
+
+    public static Diff diff(ZenModeConfig from, ZenModeConfig to) {
+        if (from == null) {
+            final Diff d = new Diff();
+            if (to != null) {
+                d.addLine("config", "insert");
+            }
+            return d;
+        }
+        return from.diff(to);
+    }
+
+    private static <T> void addKeys(ArraySet<T> set, ArrayMap<T, ?> map) {
+        if (map != null) {
+            for (int i = 0; i < map.size(); i++) {
+                set.add(map.keyAt(i));
+            }
+        }
     }
 
     public boolean isValid() {
@@ -249,6 +316,7 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowMessagesFrom == allowMessagesFrom
                 && other.allowReminders == allowReminders
                 && other.allowEvents == allowEvents
+                && other.user == user
                 && Objects.equals(other.automaticRules, automaticRules)
                 && Objects.equals(other.manualRule, manualRule);
     }
@@ -256,7 +324,7 @@ public class ZenModeConfig implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowCallsFrom,
-                allowMessagesFrom, allowReminders, allowEvents, automaticRules, manualRule);
+                allowMessagesFrom, allowReminders, allowEvents, user, automaticRules, manualRule);
     }
 
     private static String toDayList(int[] days) {
@@ -312,6 +380,7 @@ public class ZenModeConfig implements Parcelable {
             final XmlV1 v1 = XmlV1.readXml(parser);
             return migration.migrate(v1);
         }
+        rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
             if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
@@ -357,6 +426,7 @@ public class ZenModeConfig implements Parcelable {
     public void writeXml(XmlSerializer out) throws IOException {
         out.startTag(null, ZEN_TAG);
         out.attribute(null, ZEN_ATT_VERSION, Integer.toString(XML_VERSION));
+        out.attribute(null, ZEN_ATT_USER, Integer.toString(user));
 
         out.startTag(null, ALLOW_TAG);
         out.attribute(null, ALLOW_ATT_CALLS, Boolean.toString(allowCalls));
@@ -915,6 +985,45 @@ public class ZenModeConfig implements Parcelable {
                     .append(']').toString();
         }
 
+        private static void appendDiff(Diff d, String item, ZenRule from, ZenRule to) {
+            if (d == null) return;
+            if (from == null) {
+                if (to != null) {
+                    d.addLine(item, "insert");
+                }
+                return;
+            }
+            from.appendDiff(d, item, to);
+        }
+
+        private void appendDiff(Diff d, String item, ZenRule to) {
+            if (to == null) {
+                d.addLine(item, "delete");
+                return;
+            }
+            if (enabled != to.enabled) {
+                d.addLine(item, "enabled", enabled, to.enabled);
+            }
+            if (snoozing != to.snoozing) {
+                d.addLine(item, "snoozing", snoozing, to.snoozing);
+            }
+            if (!Objects.equals(name, to.name)) {
+                d.addLine(item, "name", name, to.name);
+            }
+            if (zenMode != to.zenMode) {
+                d.addLine(item, "zenMode", zenMode, to.zenMode);
+            }
+            if (!Objects.equals(conditionId, to.conditionId)) {
+                d.addLine(item, "conditionId", conditionId, to.conditionId);
+            }
+            if (!Objects.equals(condition, to.condition)) {
+                d.addLine(item, "condition", condition, to.condition);
+            }
+            if (!Objects.equals(component, to.component)) {
+                d.addLine(item, "component", component, to.component);
+            }
+        }
+
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof ZenRule)) return false;
@@ -1071,6 +1180,36 @@ public class ZenModeConfig implements Parcelable {
 
     public interface Migration {
         ZenModeConfig migrate(XmlV1 v1);
+    }
+
+    public static class Diff {
+        private final ArrayList<String> lines = new ArrayList<>();
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Diff[");
+            final int N = lines.size();
+            for (int i = 0; i < N; i++) {
+                if (i > 0) {
+                    sb.append(',');
+                }
+                sb.append(lines.get(i));
+            }
+            return sb.append(']').toString();
+        }
+
+        private Diff addLine(String item, String action) {
+            lines.add(item + ":" + action);
+            return this;
+        }
+
+        public Diff addLine(String item, String subitem, Object from, Object to) {
+            return addLine(item + "." + subitem, from, to);
+        }
+
+        public Diff addLine(String item, Object from, Object to) {
+            return addLine(item, from + "->" + to);
+        }
     }
 
 }
