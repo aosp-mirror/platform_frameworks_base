@@ -767,14 +767,7 @@ public class NotificationPanelView extends PanelView implements
                 && mQsExpansionEnabled) {
             mTwoFingerQsExpandPossible = true;
         }
-        final int pointerCount = event.getPointerCount();
-        final boolean twoFingerDrag = action == MotionEvent.ACTION_POINTER_DOWN
-                && pointerCount == 2;
-        final boolean stylusClickDrag = action == MotionEvent.ACTION_DOWN
-                && pointerCount == 1 && event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
-                && (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
-                        || event.isButtonPressed(MotionEvent.BUTTON_TERTIARY));
-        if (mTwoFingerQsExpandPossible && (twoFingerDrag || stylusClickDrag)
+        if (mTwoFingerQsExpandPossible && isOpenQsEvent(event)
                 && event.getY(event.getActionIndex()) < mStatusBarMinHeight) {
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_QS, 1);
             mQsExpandImmediate = true;
@@ -791,6 +784,24 @@ public class NotificationPanelView extends PanelView implements
         return (x >= mScrollView.getX() && x <= mScrollView.getX() + mScrollView.getWidth()) &&
                 (y <= mNotificationStackScroller.getBottomMostNotificationBottom()
                 || y <= mQsContainer.getY() + mQsContainer.getHeight());
+    }
+
+    private boolean isOpenQsEvent(MotionEvent event) {
+        final int pointerCount = event.getPointerCount();
+        final int action = event.getActionMasked();
+
+        final boolean twoFingerDrag = action == MotionEvent.ACTION_POINTER_DOWN
+                && pointerCount == 2;
+
+        final boolean stylusButtonClickDrag = action == MotionEvent.ACTION_DOWN
+                && (event.isButtonPressed(MotionEvent.BUTTON_STYLUS_PRIMARY)
+                        || event.isButtonPressed(MotionEvent.BUTTON_STYLUS_SECONDARY));
+
+        final boolean mouseButtonClickDrag = action == MotionEvent.ACTION_DOWN
+                && (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
+                        || event.isButtonPressed(MotionEvent.BUTTON_TERTIARY));
+
+        return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
     }
 
     private void handleQsDown(MotionEvent event) {
