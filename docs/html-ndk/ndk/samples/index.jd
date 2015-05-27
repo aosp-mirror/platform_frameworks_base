@@ -1,4 +1,13 @@
 page.title=Samples
 @jd:body
 
-<p>NDK samples
+<p>Welcome to the NDK samples area. Here, you can
+<a href="{@docRoot}ndk/samples/downloads.html">download</a> a variety of sample apps to help
+deepen your understanding of how to use the NDK. There are also detailed
+<a href="{@docRoot}ndk/samples/walkthroughs.html">walkthroughs</a> of several
+of the apps, providing additional insight into key topics.</p>
+
+<p>These samples are also contained in the NDK installation package. They reside in
+{@code $NDK/samples/}, where {@code $NDK} is the NDK installation root.</p>
+
+

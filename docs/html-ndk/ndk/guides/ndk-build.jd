@@ -9,7 +9,7 @@ page.title=ndk-build
         <li><a href="#int">Internals</a></li>
          <li><a href="#ifc">Invoking from the Command Line</a></li>
          <li><a href="#ife">Invoking from Eclipse</a></li>
-         <li><a href="#6432">64-bit and 32-bit toolchains</a></li>
+         <li><a href="#6432">64-Bit and 32-Bit Toolchains</a></li>
          <li><a href="#req">Requirements</a></li>
           </ol>
         </li>
@@ -17,12 +17,12 @@ page.title=ndk-build
     </div>
   </div>
 
-<p>ndk-build is a tiny shell script introduced in Android NDK r4. Its purpose
-is simply to invoke the right NDK build script.
+<p>The {@code ndk-build} file is a shell script introduced in Android NDK r4. Its purpose
+is to invoke the right NDK build script.
 
 <h2 id="int">Internals</h2>
 
-ndk-build is equivalent to: </p>
+<p>Running the {@code ndk-build} script is equivalent to running the following command:</p>
 
 <pre class="no-pretty-print">
 $GNUMAKE -f &lt;ndk&gt;/build/core/build-local.mk
@@ -35,8 +35,8 @@ this information to invoke ndk-build from other shell scripts, or even your own
 make files.</p>
 
 <h2 id="ifc">Invoking from the Command Line</h2>
-<p>ndk-build lives in the top level the NDK installation directory. To run it from the
-command line, invoke it while in or under your application project directory.
+<p>The {@code ndk-build} file lives in the top level the NDK installation directory. To run it
+from the command line, invoke it while in or under your application project directory.
 For example: </p>
 
 <pre class="no-pretty-print">
@@ -132,7 +132,7 @@ results of each possible combination of settings.</p>
 Optimized*3 </td></tr>
 </table>
 *1: Useful for profiling.<br>
-*2: Default for running <a href="{@docRoot}ndk/guides/"ndk-gdb.html">ndk-gdb</a>.<br>
+*2: Default for running <a href="{@docRoot}ndk/guides/ndk-gdb.html">{@code ndk-gdb}</a>.<br>
 *3: Default mode.<br>
 <br>
 <p class="note"><strong>Note:</strong> {@code NDK_DEBUG=0} is the equivalent of
@@ -159,7 +159,7 @@ From SDK r8 onward, you do not need to touch {@code AndroidManifest.xml}. Buildi
 pick the native debug files generated with {@code NDK_DEBUG=1}.
 
 
-<h2 id="6432">64-bit and 32-bit toolchains</h2>
+<h2 id="6432">64-Bit and 32-Bit Toolchains</h2>
 <p>Some toolchains come with both 64-bit and 32-bit versions. For example,
 directories {@code &lt;ndk&gt;/toolchain/&lt;name&gt;/prebuilt/} and
 {@code &lt;ndk&gt;/prebuilt/} may contain both {@code linux-x86} and

@@ -29,7 +29,7 @@ APP_ABI := mips
 
 <p>The build system places generated libraries into {@code $PROJECT/libs/mips/}, where
 {@code $PROJECT} represents your project's root directory, and embeds them in your APK under
-{@code /lib/mips/}.</p>
+the {@code /lib/mips/} directory.</p>
 
 <p>The Android package manager extracts these libraries when installing your APK on a compatible
 MIPS-based device, placing them under your app's private data directory.</p>

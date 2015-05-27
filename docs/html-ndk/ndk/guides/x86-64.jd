@@ -41,7 +41,7 @@ libraries that run on the CPU powering his or her device.</p>
 
 <h2 id="st">Standalone Toolchain</h2>
 
-<p>It is possible to use the 64-bit x86 toolchain in standalone mode with the NDK. For more
+<p>You can use the 64-bit x86 toolchain in standalone mode with the NDK. For more
 information about doing so, see <a href="{@docRoot}ndk/guides/standalone_toolchain.html">
 Standalone Toolchain</a>, under the "Advanced method" section.
 

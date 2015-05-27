@@ -12,8 +12,10 @@ page.title=ndk-stack
   </div>
 
 <p>The {@code ndk-stack} tool allows you to filter stack traces as they appear in the
-output of {@code adb logcat}, and replace any address inside a shared library with the corresponding
-{@code &lt;source-file&gt;:&lt;line-number&gt;} values.</p>
+output of <a href="{@docRoot}tools/help/logcat.html">{@code adb logcat}</a>. It also replaces any
+address inside a shared library with the corresponding
+{@code &lt;source-file&gt;:&lt;line-number&gt;} values from your source code, making issues easier
+to pinpoint.</p>
 
 <p>For example, it translates something like:</p>
 
@@ -36,7 +38,7 @@ I/DEBUG   (   31):          #06  pc 0000d362  /system/lib/libc.so
 I/DEBUG   (   31):
 </pre>
 
-<p>Into the more readable output: </p>
+<p>into the more readable output: </p>
 
 <pre>
 ********** Crash dump: **********

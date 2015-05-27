@@ -114,7 +114,7 @@ APP_STL := gnustl_static
 For more information on how to use these runtimes with your own toolchain, see <a href="{@docRoot}ndk/guides/standalone_toolchain.html">Standalone Toolchain</a>.</p>
 
 <h2 id="rc">Runtime Characteristics</h2>
-<h3 id="system">System runtime</h3>
+<h3 id="system">libstdc++ (default system runtime)</h3>
 
 <p>This runtime only provides the following headers, with no support beyond them:</p>
 <ul>
@@ -175,7 +175,7 @@ named {@code libgnustl_shared.so}.</p>
 shared library file is named {@code libc++_shared.so}.</p>
 
 <p>By default, this runtime compiles with {@code -std=c++11}. As with GNU {@code libstdc++}, you
-need to explicitly turns on exceptions or rtti support. For information on how to do this, see
+need to explicitly turns on exceptions or RTTI support. For information on how to do this, see
 <a href="#xp">C++ Exceptions</a> and <a href="#rt">RTTI</a>.</p>
 
 <p>The NDK provides prebuilt static and shared libraries for {@code libc++} compiled by Clang 3.4,
@@ -235,9 +235,9 @@ compiles all C++ sources with {@code -fno-exceptions} support by default. You ca
 exceptions either for your entire app, or for individual modules.
 
 <p>To enable exception-handling support for your entire app, add the following line to
-your <a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file.
+your <a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file.
 To enable exception-handling support for individual modules', add the following line to
-their respective <a href="{docRoot}ndk/guides/android.html">{@code Android.mk}</a> files.</p>
+their respective <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> files.</p>
 
 <pre>
 APP_CPPFLAGS += -fexceptions
@@ -249,14 +249,14 @@ that support RTTI. However, to ensure compatibility with earlier releases, it co
 sources with {@code -fno-rtti} by default.
 
 <p>To enable RTTI support for your entire app for your entire application, add the following line to
-your <a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file:
+your <a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file:
 
 <pre>
 APP_CPPFLAGS += -frtti
 </pre>
 
 To enable RTTI support for individual modules, add the following line to
-their respective <a href="{docRoot}ndk/guides/android.html">{@code Android.mk}</a> files:
+their respective <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> files:
 
 <pre>
 LOCAL_CPP_FEATURES += rtti
@@ -303,7 +303,7 @@ before any other library that depends on it.</p>
 <li>libstlport_shared.so, used by both libfoo and libbar</li>
 </ul>
 
-<p>You must need to load the libraries in reverse dependency order: </p>
+<p>You must load the libraries in reverse dependency order: </p>
 <pre>
     static {
       System.loadLibrary("stlport_shared");
