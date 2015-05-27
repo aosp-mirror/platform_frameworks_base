@@ -1,0 +1,11 @@
+page.title=System
+@jd:body
+
+
+<div id="samples" class="system">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>
