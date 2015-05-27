@@ -31,7 +31,7 @@
         <li><a href="<?cs var:toroot ?>preview/features/runtime-permissions.html">
           Runtime Permissions</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/app-linking.html">
-          App Linking</a></li>
+          App Links</a></li>
         <li><a href="<?cs var:toroot ?>preview/backup/index.html">
           Automatic Backups</a></li>
       </ul>
