@@ -34,6 +34,12 @@ interface IBatteryStats {
     void noteStopAudio(int uid);
     void noteResetVideo();
     void noteResetAudio();
+    void noteFlashlightOn(int uid);
+    void noteFlashlightOff(int uid);
+    void noteStartCamera(int uid);
+    void noteStopCamera(int uid);
+    void noteResetCamera();
+    void noteResetFlashlight();
 
     // Remaining methods are only used in Java.
     byte[] getStatistics();
@@ -72,8 +78,6 @@ interface IBatteryStats {
 
     void noteVibratorOn(int uid, long durationMillis);
     void noteVibratorOff(int uid);
-    void noteFlashlightOn();
-    void noteFlashlightOff();
     void noteStartGps(int uid);
     void noteStopGps(int uid);
     void noteScreenState(int state);

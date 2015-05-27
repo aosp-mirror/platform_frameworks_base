@@ -132,6 +132,16 @@ public abstract class BatteryStats implements Parcelable {
     public static final int AUDIO_TURNED_ON = 15;
 
     /**
+     * A constant indicating a flashlight turn on timer
+     */
+    public static final int FLASHLIGHT_TURNED_ON = 16;
+
+    /**
+     * A constant indicating a camera turn on timer
+     */
+    public static final int CAMERA_TURNED_ON = 17;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -208,6 +218,10 @@ public abstract class BatteryStats implements Parcelable {
     private static final String CHARGE_STEP_DATA = "csd";
     private static final String DISCHARGE_TIME_REMAIN_DATA = "dtr";
     private static final String CHARGE_TIME_REMAIN_DATA = "ctr";
+    private static final String FLASHLIGHT_DATA = "fla";
+    private static final String CAMERA_DATA = "cam";
+    private static final String VIDEO_DATA = "vid";
+    private static final String AUDIO_DATA = "aud";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(32);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -381,8 +395,10 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which);
         public abstract int getWifiBatchedScanCount(int csphBin, int which);
         public abstract long getWifiMulticastTime(long elapsedRealtimeUs, int which);
-        public abstract long getAudioTurnedOnTime(long elapsedRealtimeUs, int which);
-        public abstract long getVideoTurnedOnTime(long elapsedRealtimeUs, int which);
+        public abstract Timer getAudioTurnedOnTimer();
+        public abstract Timer getVideoTurnedOnTimer();
+        public abstract Timer getFlashlightTurnedOnTimer();
+        public abstract Timer getCameraTurnedOnTimer();
         public abstract Timer getForegroundActivityTimer();
 
         // Time this uid has any processes in foreground state.
@@ -1106,6 +1122,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_CHARGING_FLAG = 1<<25;
         public static final int STATE2_PHONE_IN_CALL_FLAG = 1<<24;
         public static final int STATE2_BLUETOOTH_ON_FLAG = 1<<23;
+        public static final int STATE2_CAMERA_FLAG = 1<<22;
 
         public static final int MOST_INTERESTING_STATES2 =
             STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_FLAG
@@ -1813,6 +1830,7 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE2_WIFI_SUPPL_STATE_MASK,
                 HistoryItem.STATE2_WIFI_SUPPL_STATE_SHIFT, "wifi_suppl", "Wsp",
                 WIFI_SUPPL_STATE_NAMES, WIFI_SUPPL_STATE_SHORT_NAMES),
+        new BitDescription(HistoryItem.STATE2_CAMERA_FLAG, "camera", "ca"),
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
@@ -2317,10 +2335,10 @@ public abstract class BatteryStats implements Parcelable {
      */
     private static final String printWakeLock(StringBuilder sb, Timer timer,
             long elapsedRealtimeUs, String name, int which, String linePrefix) {
-        
+
         if (timer != null) {
             long totalTimeMillis = computeWakeLock(timer, elapsedRealtimeUs, which);
-            
+
             int count = timer.getCountLocked(which);
             if (totalTimeMillis != 0) {
                 sb.append(linePrefix);
@@ -2336,6 +2354,40 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         return linePrefix;
+    }
+
+    /**
+     *
+     * @param pw a PrintWriter object to print to.
+     * @param sb a StringBuilder object.
+     * @param timer a Timer object contining the wakelock times.
+     * @param rawRealtime the current on-battery time in microseconds.
+     * @param which which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+     * @param prefix a String to be prepended to each line of output.
+     * @param type the name of the timer.
+     */
+    private static final boolean printTimer(PrintWriter pw, StringBuilder sb, Timer timer,
+            long rawRealtime, int which, String prefix, String type) {
+        if (timer != null) {
+            // Convert from microseconds to milliseconds with rounding
+            final long totalTime = (timer.getTotalTimeLocked(
+                    rawRealtime, which) + 500) / 1000;
+            final int count = timer.getCountLocked(which);
+            if (totalTime != 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    ");
+                sb.append(type);
+                sb.append(": ");
+                formatTimeMs(sb, totalTime);
+                sb.append("realtime (");
+                sb.append(count);
+                sb.append(" times)");
+                pw.println(sb.toString());
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -2375,16 +2427,43 @@ public abstract class BatteryStats implements Parcelable {
      */
     private static final void dumpLine(PrintWriter pw, int uid, String category, String type, 
            Object... args ) {
-        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-        pw.print(uid); pw.print(',');
-        pw.print(category); pw.print(',');
+        pw.print(BATTERY_STATS_CHECKIN_VERSION);
+        pw.print(',');
+        pw.print(uid);
+        pw.print(',');
+        pw.print(category);
+        pw.print(',');
         pw.print(type);
-        
-        for (Object arg : args) {  
+
+        for (Object arg : args) {
             pw.print(',');
             pw.print(arg);
         }
         pw.println();
+    }
+
+    /**
+     * Dump a given timer stat for terse checkin mode.
+     *
+     * @param pw the PageWriter to dump log to
+     * @param uid the UID to log
+     * @param category category of data (e.g. "total", "last", "unplugged", "current" )
+     * @param type type of data (e.g. "wakelock", "sensor", "process", "apk" ,  "process", "network")
+     * @param timer a {@link Timer} to dump stats for
+     * @param rawRealtime the current elapsed realtime of the system in microseconds
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
+     */
+    private static final void dumpTimer(PrintWriter pw, int uid, String category, String type,
+                                        Timer timer, long rawRealtime, int which) {
+        if (timer != null) {
+            // Convert from microseconds to milliseconds with rounding
+            final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500)
+                    / 1000;
+            final int count = timer.getCountLocked(which);
+            if (totalTime != 0) {
+                dumpLine(pw, uid, category, type, totalTime, count);
+            }
+        }
     }
 
     /**
@@ -2764,6 +2843,15 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
+            dumpTimer(pw, uid, category, FLASHLIGHT_DATA, u.getFlashlightTurnedOnTimer(),
+                    rawRealtime, which);
+            dumpTimer(pw, uid, category, CAMERA_DATA, u.getCameraTurnedOnTimer(),
+                    rawRealtime, which);
+            dumpTimer(pw, uid, category, VIDEO_DATA, u.getVideoTurnedOnTimer(),
+                    rawRealtime, which);
+            dumpTimer(pw, uid, category, AUDIO_DATA, u.getAudioTurnedOnTimer(),
+                    rawRealtime, which);
+
             final SparseArray<? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
             final int NSE = sensors.size();
             for (int ise=0; ise<NSE; ise++) {
@@ -2781,27 +2869,11 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
-            final Timer vibTimer = u.getVibratorOnTimer();
-            if (vibTimer != null) {
-                // Convert from microseconds to milliseconds with rounding
-                final long totalTime = (vibTimer.getTotalTimeLocked(rawRealtime, which) + 500)
-                        / 1000;
-                final int count = vibTimer.getCountLocked(which);
-                if (totalTime != 0) {
-                    dumpLine(pw, uid, category, VIBRATOR_DATA, totalTime, count);
-                }
-            }
+            dumpTimer(pw, uid, category, VIBRATOR_DATA, u.getVibratorOnTimer(),
+                    rawRealtime, which);
 
-            final Timer fgTimer = u.getForegroundActivityTimer();
-            if (fgTimer != null) {
-                // Convert from microseconds to milliseconds with rounding
-                final long totalTime = (fgTimer.getTotalTimeLocked(rawRealtime, which) + 500)
-                        / 1000;
-                final int count = fgTimer.getCountLocked(which);
-                if (totalTime != 0) {
-                    dumpLine(pw, uid, category, FOREGROUND_DATA, totalTime, count);
-                }
-            }
+            dumpTimer(pw, uid, category, FOREGROUND_DATA, u.getForegroundActivityTimer(),
+                    rawRealtime, which);
 
             final Object[] stateTimes = new Object[Uid.NUM_PROCESS_STATE];
             long totalStateTime = 0;
@@ -3788,6 +3860,15 @@ public abstract class BatteryStats implements Parcelable {
                 uidActivity = true;
             }
 
+            uidActivity |= printTimer(pw, sb, u.getFlashlightTurnedOnTimer(), rawRealtime, which,
+                    prefix, "Flashlight");
+            uidActivity |= printTimer(pw, sb, u.getCameraTurnedOnTimer(), rawRealtime, which,
+                    prefix, "Camera");
+            uidActivity |= printTimer(pw, sb, u.getVideoTurnedOnTimer(), rawRealtime, which,
+                    prefix, "Video");
+            uidActivity |= printTimer(pw, sb, u.getAudioTurnedOnTimer(), rawRealtime, which,
+                    prefix, "Audio");
+
             final SparseArray<? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
             final int NSE = sensors.size();
             for (int ise=0; ise<NSE; ise++) {
@@ -3827,44 +3908,10 @@ public abstract class BatteryStats implements Parcelable {
                 uidActivity = true;
             }
 
-            final Timer vibTimer = u.getVibratorOnTimer();
-            if (vibTimer != null) {
-                // Convert from microseconds to milliseconds with rounding
-                final long totalTime = (vibTimer.getTotalTimeLocked(
-                        rawRealtime, which) + 500) / 1000;
-                final int count = vibTimer.getCountLocked(which);
-                //timer.logState();
-                if (totalTime != 0) {
-                    sb.setLength(0);
-                    sb.append(prefix);
-                    sb.append("    Vibrator: ");
-                    formatTimeMs(sb, totalTime);
-                    sb.append("realtime (");
-                    sb.append(count);
-                    sb.append(" times)");
-                    pw.println(sb.toString());
-                    uidActivity = true;
-                }
-            }
-
-            final Timer fgTimer = u.getForegroundActivityTimer();
-            if (fgTimer != null) {
-                // Convert from microseconds to milliseconds with rounding
-                final long totalTime = (fgTimer.getTotalTimeLocked(rawRealtime, which) + 500)
-                        / 1000;
-                final int count = fgTimer.getCountLocked(which);
-                if (totalTime != 0) {
-                    sb.setLength(0);
-                    sb.append(prefix);
-                    sb.append("    Foreground activities: ");
-                    formatTimeMs(sb, totalTime);
-                    sb.append("realtime (");
-                    sb.append(count);
-                    sb.append(" times)");
-                    pw.println(sb.toString());
-                    uidActivity = true;
-                }
-            }
+            uidActivity |= printTimer(pw, sb, u.getVibratorOnTimer(), rawRealtime, which, prefix,
+                    "Vibrator");
+            uidActivity |= printTimer(pw, sb, u.getForegroundActivityTimer(), rawRealtime, which,
+                    prefix, "Foreground activities");
 
             long totalStateTime = 0;
             for (int ips=0; ips<Uid.NUM_PROCESS_STATE; ips++) {
