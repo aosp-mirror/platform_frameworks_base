@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 
 import com.android.internal.R;
 
@@ -200,7 +201,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     }
 
     @Override
-    public boolean onLayoutDirectionChange(int layoutDirection) {
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
         return mAnimatedVectorState.mVectorDrawable.setLayoutDirection(layoutDirection);
     }
 
