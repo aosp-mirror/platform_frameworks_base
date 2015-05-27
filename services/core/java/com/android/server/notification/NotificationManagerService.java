@@ -555,12 +555,15 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationClick(int callingUid, int callingPid, String key) {
             synchronized (mNotificationList) {
-                EventLogTags.writeNotificationClicked(key);
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r == null) {
                     Log.w(TAG, "No notification with key: " + key);
                     return;
                 }
+                final long now = System.currentTimeMillis();
+                EventLogTags.writeNotificationClicked(key,
+                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
+
                 StatusBarNotification sbn = r.sbn;
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
@@ -573,12 +576,14 @@ public class NotificationManagerService extends SystemService {
         public void onNotificationActionClick(int callingUid, int callingPid, String key,
                 int actionIndex) {
             synchronized (mNotificationList) {
-                EventLogTags.writeNotificationActionClicked(key, actionIndex);
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r == null) {
                     Log.w(TAG, "No notification with key: " + key);
                     return;
                 }
+                final long now = System.currentTimeMillis();
+                EventLogTags.writeNotificationActionClicked(key, actionIndex,
+                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
                 // TODO: Log action click via UsageStats.
             }
         }
@@ -685,11 +690,14 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationExpansionChanged(String key,
                 boolean userAction, boolean expanded) {
-            EventLogTags.writeNotificationExpansion(key, userAction ? 1 : 0, expanded ? 1 : 0);
             synchronized (mNotificationList) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
+                    final long now = System.currentTimeMillis();
+                    EventLogTags.writeNotificationExpansion(key,
+                            userAction ? 1 : 0, expanded ? 1 : 0,
+                            r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
                 }
             }
         }
@@ -2786,10 +2794,8 @@ public class NotificationManagerService extends SystemService {
         mArchive.record(r.sbn);
 
         final long now = System.currentTimeMillis();
-        final int lifespan = (int) (now - r.getCreationTimeMs());
-        final long visibleSinceMs = r.getVisibleSinceMs();
-        final int exposure = visibleSinceMs == 0L ? 0 : (int) (now - visibleSinceMs);
-        EventLogTags.writeNotificationCanceled(canceledKey, reason, lifespan, exposure);
+        EventLogTags.writeNotificationCanceled(canceledKey, reason,
+                r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
     }
 
     /**
