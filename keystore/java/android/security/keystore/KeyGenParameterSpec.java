@@ -743,7 +743,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
-         * <p><b>NOTE: This has currently no effect.</b>
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
@@ -759,7 +759,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the user needs to authenticate for every use of the key.
          *
-         * <p><b>NOTE: This has currently no effect.</b>
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
