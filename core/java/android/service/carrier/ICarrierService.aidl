@@ -20,13 +20,13 @@ import android.os.PersistableBundle;
 import android.service.carrier.CarrierIdentifier;
 
 /**
- * Service used to get carrier config from carrier apps.
+ * Service used to expose carrier-specific functionality to the system.
  *
- * @see android.service.carrier.CarrierConfigService
+ * @see android.service.carrier.CarrierService
  * @hide
  */
-interface ICarrierConfigService {
+interface ICarrierService {
 
-    /** @see android.service.carrier.CarrierConfigService#onLoadConfig */
+    /** @see android.service.carrier.CarrierService#onLoadConfig */
     PersistableBundle getCarrierConfig(in CarrierIdentifier id);
 }
