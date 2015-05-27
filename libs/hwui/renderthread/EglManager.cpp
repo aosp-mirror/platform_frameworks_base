@@ -256,7 +256,7 @@ bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
 #endif
 
 #ifdef EGL_KHR_swap_buffers_with_damage
-    if (CC_UNLIKELY(Properties::swapBuffersWithDamage)) {
+    if (CC_LIKELY(Properties::swapBuffersWithDamage)) {
         SkIRect idirty;
         dirty.roundOut(&idirty);
         /*
@@ -273,11 +273,6 @@ bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
         // layout: {x, y, width, height}
         EGLint rects[4] = { idirty.x(), y, idirty.width(), idirty.height() };
         EGLint numrects = dirty.isEmpty() ? 0 : 1;
-        // TODO: Remove prior to enabling this path by default
-        ALOGD("Swap buffers with damage %d: %d, %d, %d, %d (src="
-                RECT_STRING ")",
-                dirty.isEmpty() ? 0 : 1, rects[0], rects[1], rects[2], rects[3],
-                SK_RECT_ARGS(dirty));
         eglSwapBuffersWithDamageKHR(mEglDisplay, surface, rects, numrects);
     } else {
         eglSwapBuffers(mEglDisplay, surface);
