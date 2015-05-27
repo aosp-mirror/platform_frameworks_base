@@ -315,13 +315,15 @@ public class CopyService extends IntentService {
     private void handleCancel(Intent intent) {
         final String cancelledId = intent.getStringExtra(EXTRA_CANCEL);
         // Do nothing if the cancelled ID doesn't match the current job ID. This prevents racey
-        // cancellation requests from affecting unrelated copy jobs.
-        if (Objects.equals(mJobId, cancelledId)) {
+        // cancellation requests from affecting unrelated copy jobs.  However, if the current job ID
+        // is null, the service most likely crashed and was revived by the incoming cancel intent.
+        // In that case, always allow the cancellation to proceed.
+        if (Objects.equals(mJobId, cancelledId) || mJobId == null) {
             // Set the cancel flag. This causes the copy loops to exit.
             mIsCancelled = true;
             // Dismiss the progress notification here rather than in the copy loop. This preserves
             // interactivity for the user in case the copy loop is stalled.
-            mNotificationManager.cancel(mJobId, 0);
+            mNotificationManager.cancel(cancelledId, 0);
         }
     }
 
