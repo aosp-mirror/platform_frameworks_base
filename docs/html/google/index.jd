@@ -11,7 +11,7 @@ footer.hide=1
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png" style="padding-bottom:2em">
+        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png" style="height:400px">
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Build better apps with Google</h1>

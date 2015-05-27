@@ -80,14 +80,6 @@ page.image=/distribute/images/alt-distribution.jpg
 </p>
 
 <p>
-  <strong>Note:</strong> The <strong>Install Now</strong> button, shown in
-  Figure 1, appears only if the user has configured their device to allow
-  installation from <a href=
-  "{@docRoot}distribute/open.html#unknown-sources">unknown sources</a> and
-  opened your email in the native Gmail app.
-</p>
-
-<p>
   Distributing apps through email is convenient if you’re sending them to a few
   trusted users, as it provides few protections from piracy and unauthorized
   distribution; that is, anyone you send your apps to can simply forward them
