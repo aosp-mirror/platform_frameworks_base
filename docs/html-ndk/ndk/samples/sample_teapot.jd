@@ -20,7 +20,7 @@ page.title=Sample: Teapot
 installation's root directory. This sample uses the OpenGL library to render the iconic
 <a href="http://math.hws.edu/bridgeman/courses/324/s06/doc/opengl.html#basic">Utah
 teapot</a>. In particular, it showcases the {@code ndk_helper} helper class,
-a collection of native helper functions required for implementing games and
+a collection of native helper functions required for implementing games and 
 similar applications as native applications. This class provides:</p>
 
 <ul>
