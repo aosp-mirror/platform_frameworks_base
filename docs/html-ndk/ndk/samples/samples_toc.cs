@@ -7,22 +7,22 @@
 ?>
 
 <ul id="nav">
+
    <li class="nav-section">
-      <div class="nav-section-header empty"><a href="<?cs var:toroot ?>ndk/samples/downloads.html">
-      <span class="en">Downloads</span></a></div>
+      <div class="nav-section-header empty"><a href="<?cs var:toroot ?>ndk/samples/index.html">
+      <span class="en">Overview</span></a></div>
    </li>
 
    <li class="nav-section">
       <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>ndk/samples/walkthroughs.html"><span class="en">
-      Walkthroughs</span></a></div>
+      <a href="<?cs var:toroot ?>ndk/samples/walkthroughs.html">
+      <span class="en">Walkthroughs</span></a></div>
       <ul>
-      <li><a href="<?cs var:toroot ?>ndk/samples/sample_hellojni.html">hello-jni</a></li>
-      <li><a href="<?cs var:toroot ?>ndk/samples/sample_na.html">sample-na</a></li>
-      <li><a href="<?cs var:toroot ?>ndk/samples/sample_teapot.html">Teapot</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/samples/sample_hellojni.html">hello-jni</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/samples/sample_na.html">native-activity</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/samples/sample_teapot.html">Teapot</a></li>
       </ul>
    </li>
-
 </ul>
 
 
