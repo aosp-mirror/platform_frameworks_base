@@ -12,18 +12,19 @@ Classes are organized into several groups you can see at the top-level of the le
     essentials for Android app development. If you're a new Android app developer, you should
     complete each of these classes in order.</p>
 
-<div>
-<div style="float:left; width:40%; margin-right:30px">
-
-    <p>If you prefer to learn through interactive video training,
-    check out this trailer for a course about the fundamentals of Android development.</p>
-    <p><a href="https://www.udacity.com/course/ud853" class="button">
-    Start the video course</a></p>
-</div>
-
-<div style="float:left; margin-bottom:20px">
-    <iframe width="300" height="169" src="//www.youtube.com/embed/LfVBFFoy9Y0?utm_source=dac&utm_medium=video&utm_content=andfuntrain&utm_campaign=udacint?rel=0&amp;hd=1" frameborder="0" allowfullscreen></iframe>
-</div>
+<div class="wrap">
+  <div class="cols">
+    <div class="col-1of2">
+      <p>If you prefer to learn through interactive video training,
+      check out this trailer for a course about the fundamentals of Android development.</p>
+      <p><a href="https://www.udacity.com/course/ud853" class="button">
+        Start the video course</a>
+      </p>
+    </div>
+    <div class="col-1of2">
+      <iframe width="300" height="169" src="//www.youtube.com/embed/LfVBFFoy9Y0?utm_source=dac&utm_medium=video&utm_content=andfuntrain&utm_campaign=udacint?rel=0&amp;hd=1" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
 </div>
 
 <div style="clear:left"></div>

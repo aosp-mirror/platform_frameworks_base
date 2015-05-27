@@ -15,7 +15,9 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   <div class="wrap" style="max-width:1100px;">
     <div class="cols dac-hero-content">
       <div class="col-10of16 col-push-6of16 dac-hero-figure">
-        <img src="{@docRoot}images/home/devices-hero_620px_2x.png">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png"
+             srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
+             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
       </div>
       <div class="col-6of16 col-pull-10of16">
         <div class="dac-hero-tag"></div>

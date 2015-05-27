@@ -56,9 +56,11 @@ excludeFromSuggestions=true
 <section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
+       data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
        data-query="collection:develop/landing/latest"
+       data-sortOrder="-timestamp"
        data-cardSizes="6x6"
-       data-maxResults="9"
+       data-maxResults="12"
        data-initial-results="3"></div>
 </div></section>
 
@@ -70,10 +72,9 @@ excludeFromSuggestions=true
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/tools"
        data-cardSizes="6x6"
-       data-maxResults="3"
+       data-maxResults="15"
+       data-initial-results="3"
        data-sortOrder="random"></div>
-  <ul class="dac-section-links">
-  </ul>
 </div></section>
 
 <section class="dac-section dac-section-light"><div class="wrap">
