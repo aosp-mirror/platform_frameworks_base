@@ -238,33 +238,33 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-mpv79-preview-ac1d8a8e.tgz</a><br>
-      MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
-      SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+      >hammerhead-MPZ44Q-preview-55d76d3a.tgz</a><br>
+      MD5: 9e2631b06c6525e401ceaae3677ff320<br>
+      SHA-1: 55d76d3a379b18f3363f28d8a462c236ab96fc36
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-mpv79-preview-ac1d8a8e.tgz</a><br>
-      MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
-      SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+      >shamu-MPZ44Q-preview-c1d6506a.tgz</a><br>
+      MD5: 307cbf9dab0a38df4ab2639d02be12aa<br>
+      SHA-1: c1d6506a74094bdb2f4b8677c7fe4967334f9ea8
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-mpv79-preview-ac1d8a8e.tgz</a><br>
-      MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
-      SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+      >volantis-MPZ44Q-preview-d15ad483.tgz</a><br>
+      MD5: 8989ce077510a1b814d58dcdb33d160e<br>
+      SHA-1: d15ad483d0364102984411abda66a4d7b85886c0
     </td>
   </tr>
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-mpv79-preview-d0ddf8ce.tgz</a><br>
-      MD5: b293a5d3a4e07beabebcc0be85ad68a2<br>
-      SHA-1: d0ddf8ce733ba2a34279cdff8827fd604762c2342d
+      >fugu-MPZ44Q-preview-2406ba05.tgz</a><br>
+      MD5: 815902141a85cc65e7725f005cad31d5<br>
+      SHA-1: 2406ba0598dea1e69110497ac0bc8e16789bc8fb
     </td>
   </tr>
 </table>
@@ -305,7 +305,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 
 <script>
-  var urlRoot = "http://storage.googleapis.com/androiddevelopers/preview/";
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/preview/images/";
   function onDownload(link) {
 
     $("#downloadForRealz").html("Download " + $(link).text());
