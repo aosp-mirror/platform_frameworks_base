@@ -1,23 +1,18 @@
-page.title=Building
+page.title=Building Your Project
 @jd:body
 
-<div class="contents">
-<div class="textblock"><p>This section explains, in detail, how to use the NDK to build your project. It comprises the following topics:</p>
-<ul>
-<li><a href="./md_3__key__topics__building__chapter_1-section_8_ndk-build.html">ndk-build</a><ul>
-<li>How to use the shell script that invokes the tools to build your shared libraries.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__building__chapter_1-section_8__android_8mk.html">Android.mk</a><ul>
-<li>Syntax for the file that describes your build sources to the build system.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__building__a_p_p_l_i_c_a_t_i_o_n-_m_k.html">Application.mk</a><ul>
-<li>Syntax for the file that describes the native modules that your application requires.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__building__s_t_a_n_d_a_l_o_n_e-_t_o_o_l_c_h_a_i_n.html">Standalone Toolchain</a><ul>
-<li>How to integrate the NDK into your existing build system. </li>
-</ul>
-</li>
-</ul>
+<p>One of the NDK's core purposes is allowing you to build C and C++ source code into shared
+libraries that you can use in your app.</p>
+
+<p>This section explains how to build native binaries for use in your Android app. It begins by
+explaining the
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file, which
+defines properties specific to individual <i>modules</i>, or libraries. Then, it explains the
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file, which defines
+properties for all the modules that you use in your
+app. Next, it tells you how to use the <a href="{@docRoot}ndk/guides/ndk-build.html">
+{@code ndk-build}</a> script, which is what the NDK uses to build your sources. Last, it ventures
+into advanced territory, discussing how to incorporate the NDK into your own
+<a href="{@docRoot}ndk/guides/standalone_toolchain.html">toolchain</a>, if you prefer to
+build that way instead of using
+<a href="{@docRoot}ndk/guides/ndk-build.html">{@code ndk-build}</a>.</p>

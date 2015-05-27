@@ -23,7 +23,7 @@ page.title=Concepts
 <li>Already familiar with concepts inherent in native programming and in
 <a href="{@docRoot}">Android development</a>.</li>
 <li>Working in <a href="{@docRoot}sdk/index.html">Eclipse, and using the Android
-Development Tools ("ADT")</a>, except where otherwise noted.</li>
+Development Tools (ADT)</a>, except where otherwise noted.</li>
 </ul>
 <h2 id="intro">Introduction</h2>
 
@@ -53,14 +53,14 @@ scripts:
 <li>Generate binaries.</li>
 <li>Copy the binaries to your app's project path.</li>
 </ul>
-<p>For more information, see the
-<a href="{@docRoot}ndk/guides/ndk-build.html">ndk-build</a> section of this guide.</p>
+<p>For more information, see
+<a href="{@docRoot}ndk/guides/ndk-build.html">ndk-build</a>.</p>
 </li>
 </ul>
 
 <ul>
 <li>Java: From your Java source, the Android build process generates {@code .dex}
-("Dalvik EXecutable") files, which are what the Android OS runs in the Dalvik Virtual Machine
+(Dalvik EXecutable) files, which are what the Android OS runs in the Dalvik Virtual Machine
 (“DVM”). Even if your app contains no Java source code at all, the build process still generates a
 {@code .dex} executable file within which the native component runs.
 
@@ -92,14 +92,14 @@ can link against other libraries.</li>
 </ul>
 
 <ul>
-<li>Java Native Interface ("JNI"): The JNI is the interface via which the Java and C++ components
+<li>Java Native Interface (JNI): The JNI is the interface via which the Java and C++ components
 talk to one another. This guide assumes knowledge of the JNI; for information about it, consult the
 <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html">
 Java Native Interface Specification</a>.</li>
 </ul>
 
 <ul>
-<li>Application Binary Interface ("ABI"): The ABI defines exactly how your app's machine code is
+<li>Application Binary Interface (ABI): The ABI defines exactly how your app's machine code is
 expected to interact with the system at runtime. The NDK builds {@code .so} files against these
 definitions. Different ABIs correspond to different architectures: The NDK includes ABI support for
 ARMEABI (default), MIPS, and x86. For more information, see
@@ -109,9 +109,9 @@ ARMEABI (default), MIPS, and x86. For more information, see
 <ul>
 <li>Manifest: If you are writing an app with no Java component to it, you must declare the
 {@link android.app.NativeActivity} class in the
-<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>. The
-<a href="#naa">Native Activity</a> section provides more detail on how to do this, under
-“Using the native-activity.h interface.”
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>.
+<a href="#naa">Native Activities and Applications</a> provides more detail on how to do this, under
+“Using the {@code native-activity.h} interface.”
 </li>
 </ul>
 
@@ -119,21 +119,22 @@ ARMEABI (default), MIPS, and x86. For more information, see
 the Android NDK as standalone compilers.</p>
 
 <ul>
-<li>{@code Android.mk}: You must create an {@code Android.mk} configuration file inside your
-{@code jni} folder. The ndk-build script looks at this file, which defines the module and its name,
-the source files to be compiled, build flags and libraries to link. For more information, see the
-<a href="{@docRoot}ndk/guides/android.mk.html">Android.mk</a> section of this document.</li>
+<li>{@code Android.mk}: You must create an <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> configuration file inside your {@code jni} folder. The ndk-build script
+looks at this file, which defines the module and its name, the source files to be compiled, build
+flags and libraries to link.</li>
 </ul>
 
 <ul>
-<li>{@code Application.mk}: You may optionally create an Application.mk file. This file enumerates
-and describes the modules that your app requires. This information includes:<ul>
+<li>{@code Application.mk}: You may optionally create an
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file. This file
+This file enumerates and describes the modules that your app requires. This information includes:
+
+<ul>
 <li>ABIs used to compile for specific platforms.</li>
 <li>Toolchains.</li>
 <li>Standard libraries to include (static and dynamic STLport or default system).</li>
 </ul>
-<p>For more information, see the
-<a href="{@docRoot}ndk/guides/application.mk.html">Application.mk</a> section.</p>
 </li>
 </ul>
 
@@ -152,13 +153,14 @@ to find the Android Java framework useful for tasks including controlling the di
 <li>Create an Android app Project in Eclipse as you would for any other Android project.</li>
 <li>If you are writing a native-only app, declare the {@link android.app.NativeActivity} class in
 {@code AndroidManifest.xml}. You can do so from the Eclipse/ADT Android Manifest Editor, or by
-hand-editing the file. For more information, see the <a href="#naa">Native Activity</a> section.
+hand-editing the file. For more information, see the <a href="#naa">Native Activities and
+Applications</a>.
 </li>
-<li>Create an Android.mk file describing the native library, including name, flags, linked libraries
-and source files to be compiled in the ‘JNI’ directory.</li>
-<li>OPTIONAL: Create an {@code Application.mk} file configuring the target ABIs, toolchain,
-release/debug mode, and STL. For any of these that you do not specify, the following default values
-are used, respectively:
+<li>Create an {@code Android.mk} file describing the native library, including name, flags, linked
+libraries, and source files to be compiled in the ‘JNI’ directory.</li>
+<li>Optionally, you can create an {@code Application.mk} file configuring the target ABIs,
+toolchain, release/debug mode, and STL. For any of these that you do not specify, the following
+default values are used, respectively:
 <ul>
 <li>
 ABI: armeabi
@@ -195,7 +197,7 @@ machine, sandboxed from other applications. You can therefore still access Andro
 through the JNI. In certain cases, however&ndash;such as for sensors, input events, and
 assets&ndash;the NDK provides native interfaces that you can use instead of having to call
 across the JNI. For more information about such support, see
-<a href="{@docRoot}ndk/guides/stable-apis.html">Stable APIs</a>.</p>
+<a href="{@docRoot}ndk/guides/stable_apis.html">Android NDK Native APIs</a>.</p>
 
 <p>Regardless of whether or not you are developing a native activity, we recommend that you create
 your projects with the traditional Android build tools. Doing so helps ensure building and packaging
@@ -265,25 +267,25 @@ library containing the entry point to the application (such as C/C++ {@code main
 function, which the app calls when the native activity starts. This function, analogous
 to {@code main} in C/C++, receives a pointer to an {@code ANativeActivity} structure,
 which contains function pointers to the various callback implementations that you need to write.
-Set the applicable callback function pointers in {@code ANativeActivity-&gt;;callbacks} to the
+Set the applicable callback function pointers in {@code ANativeActivity-&gt;callbacks} to the
 implementations of your callbacks.</li>
 
 <!--TODO: API Ref links in the above para.-->
 
-<li>Set the {@code ANativeActivity-&gt;;instance} field to the address of any instance of specific
+<li>Set the {@code ANativeActivity-&gt;instance} field to the address of any instance of specific
 data that you want to use.</li>
 <li>Implement anything else that you want your activity to do upon starting.</li>
-<li>Implement the rest of the callbacks that you set in {@code ANativeActivity-&gt;;callbacks}. For
-more information on when the callbacks are called, see the
-<a href="{@docRoot}training/basics/activity-lifecycle/index.html">SDK documentation for Activity Lifecycles</a>.
+<li>Implement the rest of the callbacks that you set in {@code ANativeActivity-&gt;callbacks}. For
+more information on when the callbacks are called, see
+<a href="{@docRoot}training/basics/activity-lifecycle/index.html">Managing the Activity
+Lifecycle</a>.
 </li>
 <li>Develop the rest of your application.</li>
 <li>Create an {@code Android.mk file} in the {@code jni/} directory of your project to describe your
-native module to the build system. For more information, see the
-<a href="./md_3__key__topics__building__chapter_1-section_8__android_8mk.html">Android.mk section.</a>.
-</li>
-<li>Once you have an {@code Android.mk} file, compile your native code using the {@code ndk-build}
-command.</li>
+native module to the build system. For more information, see
+<a href="{@docRoot}ndk/guides/android_mk.html">Android.mk</a>.</li>
+<li>Once you have an <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>
+file, compile your native code using the {@code ndk-build} command.</li>
 
 <pre class="no-pretty-print">
 $ cd &lt;path&gt;/&lt;to&gt;/&lt;project&gt;
