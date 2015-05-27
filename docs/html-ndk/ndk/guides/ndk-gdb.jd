@@ -29,12 +29,12 @@ true}.</li>
 <li>Build your app to run on Android 2.2 (Android API level 8) or higher.</li>
 <li>Debug on a device or emulator running Android 2.2 or higher. For debugging purposes, the target
 API level that you declare in your {@code AndroidManifest.xml} file does not matter.</li>
-<li>Develop your app in a Unix shell. On Windows, use <a href="https://www.cygwin.com/">Cygwin
+<li>Develop your app in a Unix shell. On Windows, use <a href="https://www.cygwin.com/">Cygwin</a>
 or the experimental {@code ndk-gdb-py} <a href="https://www.python.org/">Python</a>
 implementation.</li>
 <li>Use GNU Make 3.81 or higher.</li>
 <li>If you are building your app from
-<a href="http://developer.android.com/sdk/installing/installing-adt.html">Eclipse</a>, build it
+<a href="{@docRoot}sdk/installing/installing-adt.html">Eclipse</a>, build it
 using version 0.9.7 or higher of the ADT plug-in.</li>
 
 <h2 id="use">Usage</h2>
@@ -150,7 +150,7 @@ line.</p>
 
 <tr>
 <td>{@code --adb=&lt;file&gt;}</td>
-<td><p>This option specifies the <a href="http://developer.android.com/tools/help/adb.html">adb</a>
+<td><p>This option specifies the <a href="{@docRoot}tools/help/adb.html">adb</a>
 tool executable. It is only necessary if you have not set your path to include that executable.</p>
 </td>
 </tr>

@@ -6,12 +6,16 @@
        localized titles are added in the language order specified below.
 ?>
 
-
 <ul id="nav">
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/ndk/downloads/index.html"><span class="en">
-      NDK Download</span></a>
-  </li>
+   <li class="nav-section">
+      <div class="nav-section-header empty"><a href="/ndk/downloads/index.html"><span class="en">
+      Downloads</span></a></div>
+   </li>
+
+   <li class="nav-section">
+      <div class="nav-section-header empty"><a href="/ndk/downloads/revision_history.html">
+      <span class="en">Revision History</span></a></div>
+   </li>
 </ul>
 
 

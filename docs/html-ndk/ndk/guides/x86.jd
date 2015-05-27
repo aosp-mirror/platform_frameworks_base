@@ -28,7 +28,7 @@ APP_ABI := armeabi armeabi-v7a x86
 </pre
 
 <p>For more information about defining the {@code APP_ABI} variable, see
-<a href="{docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a>.</p>
+<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a>.</p>
 
 <p>The build system places generated libraries into {@code $PROJECT/libs/x86/}, where
 {@code $PROJECT} represents your project's root directory, and embeds them in your APK under
