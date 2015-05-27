@@ -1517,6 +1517,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 info.setScrollable(true);
             }
         }
+
+        info.removeAction(AccessibilityAction.ACTION_CLICK);
+        info.setClickable(false);
     }
 
     int getSelectionModeForAccessibility() {
@@ -2471,7 +2474,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
                 } return false;
                 case AccessibilityNodeInfo.ACTION_CLICK: {
-                    if (isClickable()) {
+                    if (isItemClickable(host, position)) {
                         return performItemClick(host, position, id);
                     }
                 } return false;
@@ -2514,7 +2517,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             info.addAction(AccessibilityAction.ACTION_SELECT);
         }
 
-        if (isClickable()) {
+        if (isItemClickable(view, position)) {
             info.addAction(AccessibilityAction.ACTION_CLICK);
             info.setClickable(true);
         }
@@ -2523,6 +2526,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             info.addAction(AccessibilityAction.ACTION_LONG_CLICK);
             info.setLongClickable(true);
         }
+    }
+
+    private boolean isItemClickable(View view, int position) {
+        return mAdapter != null && view != null &&
+                mAdapter.isEnabled(position) && !view.hasFocusable();
     }
 
     /**
