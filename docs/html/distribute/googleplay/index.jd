@@ -20,7 +20,7 @@ nonavpage=true
     data-maxResults="3">
   </div>
 
-  <h2>Distribute Your Apps</h2>
+  <h2 id="opportunities">Opportunities &amp; Programs</h2>
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gpfelanding"

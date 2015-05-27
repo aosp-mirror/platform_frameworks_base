@@ -1,19 +1,8 @@
 <ul id="nav">
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/know-your-user.html">
-            <span class="en">Know Your User</span></a>
-    </div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/your-listing.html">
             <span class="en">Create a Great Listing</span>
           </a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/expand-to-new-markets.html">
-          <span class="en">Expand to New Markets</span>
-        </a>
     </div>
   </li>
   <li class="nav-section">
@@ -24,7 +13,13 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/appindexing.html">
-          <span class="en">Drive Installs through Search</span>
+          <span class="en">Drive Installs from Search</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/expand-to-new-markets.html">
+          <span class="en">Expand to New Markets</span>
         </a>
     </div>
   </li>
@@ -35,8 +30,8 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/house-ads.html">
-          <span class="en">Cross-Sell to Users with House Ads</span>
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/app-invites.html">
+          <span class="en">Smarter App Invites</span>
         </a>
     </div>
   </li>
@@ -47,14 +42,8 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-buzz.html">
-          <span class="en">Build Buzz</span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-community.html">
-          <span class="en">Build Community</span>
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/house-ads.html">
+          <span class="en">Cross-Sell with House Ads</span>
         </a>
     </div>
   </li>

@@ -42,20 +42,15 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cast.html">
-          <span class="en">Stream Your Content <span style="white-space:nowrap">with Cast</span></span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cardboard.html">
-          <span class="en">Build VR with <span style="white-space:nowrap">Google Cardboard</span></span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/families/about.html">
           <span class="en">Designed for Families</span>
+        </a>
+    </div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/work/about.html">
+          <span class="en"><span style="white-space:nowrap">Google Play for Work</span></span>
         </a>
     </div>
   </li>
@@ -74,8 +69,14 @@
     </ul>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/work/about.html">
-          <span class="en"><span style="white-space:nowrap">Google Play for Work</span></span>
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cast.html">
+          <span class="en">Stream Your Content <span style="white-space:nowrap">with Cast</span></span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cardboard.html">
+          <span class="en">Build VR with <span style="white-space:nowrap">Google Cardboard</span></span>
         </a>
     </div>
   </li>
