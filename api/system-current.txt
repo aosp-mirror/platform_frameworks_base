@@ -12562,7 +12562,6 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable getCurrent();
     method public android.graphics.Rect getDirtyBounds();
     method public boolean getDither();
-    method public boolean getFilterBitmap();
     method public void getHotspotBounds(android.graphics.Rect);
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
@@ -12579,12 +12578,13 @@ package android.graphics.drawable {
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
     method public boolean isAutoMirrored();
+    method public boolean isFilterBitmap();
     method public boolean isStateful();
     method public final boolean isVisible();
     method public void jumpToCurrentState();
     method public android.graphics.drawable.Drawable mutate();
     method protected void onBoundsChange(android.graphics.Rect);
-    method public boolean onLayoutDirectionChange(int);
+    method public boolean onLayoutDirectionChanged(int);
     method protected boolean onLevelChange(int);
     method protected boolean onStateChange(int[]);
     method public static int resolveOpacity(int, int);

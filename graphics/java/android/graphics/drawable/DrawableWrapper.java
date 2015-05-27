@@ -258,7 +258,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public boolean onLayoutDirectionChange(@View.ResolvedLayoutDir int layoutDirection) {
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
         return mDrawable != null && mDrawable.setLayoutDirection(layoutDirection);
     }
 
