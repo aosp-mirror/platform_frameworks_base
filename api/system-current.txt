@@ -17145,6 +17145,7 @@ package android.media {
     field public static final java.lang.String MIMETYPE_AUDIO_AC3 = "audio/ac3";
     field public static final java.lang.String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
     field public static final java.lang.String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
+    field public static final java.lang.String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
     field public static final java.lang.String MIMETYPE_AUDIO_FLAC = "audio/flac";
     field public static final java.lang.String MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
     field public static final java.lang.String MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
