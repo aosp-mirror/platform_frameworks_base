@@ -227,7 +227,7 @@ public class SystemServicesProxy {
     /** Returns the top task. */
     public ActivityManager.RunningTaskInfo getTopMostTask() {
         List<ActivityManager.RunningTaskInfo> tasks = getRunningTasks(1);
-        if (!tasks.isEmpty()) {
+        if (tasks != null && !tasks.isEmpty()) {
             return tasks.get(0);
         }
         return null;
