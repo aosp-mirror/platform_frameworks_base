@@ -2530,7 +2530,9 @@ public class PackageParser {
         owner.baseHardwareAccelerated = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hardwareAccelerated,
                 owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH);
-        ai.hardwareAccelerated = owner.baseHardwareAccelerated;
+        if (owner.baseHardwareAccelerated) {
+            ai.flags |= ApplicationInfo.FLAG_HARDWARE_ACCELERATED;
+        }
 
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hasCode,
