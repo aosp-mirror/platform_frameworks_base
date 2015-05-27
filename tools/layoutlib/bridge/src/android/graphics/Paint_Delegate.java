@@ -16,13 +16,13 @@
 
 package android.graphics;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.FontFamily_Delegate.FontVariant;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.FontMetricsInt;

@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.annotations.NonNull;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 
 import org.junit.AfterClass;
@@ -26,6 +25,8 @@ import org.kxml2.io.KXmlParser;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import android.annotation.NonNull;
 
 import static org.junit.Assert.assertEquals;
 

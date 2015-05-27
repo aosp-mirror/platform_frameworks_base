@@ -119,6 +119,8 @@ public class Main {
                         "android.app.TimePickerDialog",     // b.android.com/61515
                         "com.android.internal.view.menu.ActionMenu",
                         "android.icu.**",                   // needed by LayoutLib
+                        "android.annotation.NonNull",       // annotations
+                        "android.annotation.Nullable",      // annotations
                     },
                     excludeClasses,
                     new String[] {

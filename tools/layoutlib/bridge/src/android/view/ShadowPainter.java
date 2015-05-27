@@ -16,7 +16,7 @@
 
 package android.view;
 
-import com.android.annotations.NonNull;
+import android.annotation.NonNull;
 
 import java.awt.Graphics2D;
 import java.awt.Image;

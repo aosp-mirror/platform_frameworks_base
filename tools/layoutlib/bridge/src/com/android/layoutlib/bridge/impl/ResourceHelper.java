@@ -17,7 +17,6 @@
 package com.android.layoutlib.bridge.impl;
 
 import com.android.SdkConstants;
-import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
@@ -32,6 +31,7 @@ import com.android.resources.Density;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;

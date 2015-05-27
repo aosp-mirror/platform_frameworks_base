@@ -16,8 +16,8 @@
 
 package android.text;
 
+import android.annotation.NonNull;
 import android.text.StaticLayout.LineBreaks;
-import com.android.annotations.NonNull;
 
 import java.util.Collections;
 import java.util.List;
