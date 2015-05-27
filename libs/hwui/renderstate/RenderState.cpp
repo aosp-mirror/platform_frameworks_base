@@ -266,10 +266,10 @@ void RenderState::render(const Glop& glop) {
         mCaches->textureState().activateTexture(0);
 
         if (texture.clamp != GL_INVALID_ENUM) {
-            texture.texture->setWrap(texture.clamp, true);
+            texture.texture->setWrap(texture.clamp, true, false, texture.target);
         }
         if (texture.filter != GL_INVALID_ENUM) {
-            texture.texture->setFilter(texture.filter, true);
+            texture.texture->setFilter(texture.filter, true, false, texture.target);
         }
 
         mCaches->textureState().bindTexture(texture.target, texture.texture->id);
