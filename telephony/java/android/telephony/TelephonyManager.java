@@ -1537,7 +1537,25 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      */
     public int getSimState() {
-        return getSimState(getDefaultSim());
+        int slotIdx = getDefaultSim();
+        // slotIdx may be invalid due to sim being absent. In that case query all slots to get
+        // sim state
+        if (slotIdx < 0) {
+            // query for all slots and return absent if all sim states are absent, otherwise
+            // return unknown
+            for (int i = 0; i < getPhoneCount(); i++) {
+                int simState = getSimState(i);
+                if (simState != SIM_STATE_ABSENT) {
+                    Rlog.d(TAG, "getSimState: default sim:" + slotIdx + ", sim state for " +
+                            "slotIdx=" + i + " is " + simState + ", return state as unknown");
+                    return SIM_STATE_UNKNOWN;
+                }
+            }
+            Rlog.d(TAG, "getSimState: default sim:" + slotIdx + ", all SIMs absent, return " +
+                    "state as absent");
+            return SIM_STATE_ABSENT;
+        }
+        return getSimState(slotIdx);
     }
 
     /**
@@ -1557,12 +1575,7 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public int getSimState(int slotIdx) {
-        int[] subId = SubscriptionManager.getSubId(slotIdx);
-        if (subId == null || subId.length == 0) {
-            Rlog.d(TAG, "getSimState:- empty subId return SIM_STATE_ABSENT");
-            return SIM_STATE_UNKNOWN;
-        }
-        int simState = SubscriptionManager.getSimStateForSubscriber(subId[0]);
+        int simState = SubscriptionManager.getSimStateForSlotIdx(slotIdx);
         return simState;
     }
 

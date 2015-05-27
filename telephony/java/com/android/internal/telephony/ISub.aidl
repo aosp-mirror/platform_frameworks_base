@@ -166,10 +166,10 @@ interface ISub {
     int[] getActiveSubIdList();
 
     /**
-     * Get the SIM state for the subscriber
+     * Get the SIM state for the slot idx
      * @return SIM state as the ordinal of IccCardConstants.State
      */
-    int getSimStateForSubscriber(int subId);
+    int getSimStateForSlotIdx(int slotIdx);
 
     boolean isActiveSubId(int subId);
 }

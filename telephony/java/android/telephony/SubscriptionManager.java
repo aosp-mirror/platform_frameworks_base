@@ -1105,9 +1105,9 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns a constant indicating the state of sim for the subscription.
+     * Returns a constant indicating the state of sim for the slot idx.
      *
-     * @param subId
+     * @param slotIdx
      *
      * {@See TelephonyManager#SIM_STATE_UNKNOWN}
      * {@See TelephonyManager#SIM_STATE_ABSENT}
@@ -1121,16 +1121,16 @@ public class SubscriptionManager {
      *
      * {@hide}
      */
-    public static int getSimStateForSubscriber(int subId) {
+    public static int getSimStateForSlotIdx(int slotIdx) {
         int simState;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            simState = iSub.getSimStateForSubscriber(subId);
+            simState = iSub.getSimStateForSlotIdx(slotIdx);
         } catch (RemoteException ex) {
             simState = TelephonyManager.SIM_STATE_UNKNOWN;
         }
-        logd("getSimStateForSubscriber: simState=" + simState + " subId=" + subId);
+        logd("getSimStateForSubscriber: simState=" + simState + " slotIdx=" + slotIdx);
         return simState;
     }
 
