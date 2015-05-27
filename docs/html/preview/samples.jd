@@ -24,13 +24,13 @@ page.image=images/cards/samples-new_2x.png
 
 <p><a href="https://github.com/googlesamples/android-RuntimePermissions">Get it on GitHub</a></p>
 
-<h3 id="ConfirmCredentials">Confirm Credentials</h3>
+<h3 id="ConfirmCredentials">Confirm Credential</h3>
 
 <p>
  This sample demonstrates how to use device credentials as an authentication method in your app.
 </p>
 
-<p><a href="https://github.com/googlesamples/android-ConfirmCredentials">Get it on
+<p><a href="https://github.com/googlesamples/android-ConfirmCredential">Get it on
 GitHub</a></p>
 
 <h3 id="FingerprintDialog">Fingerprint Dialog</h3>
