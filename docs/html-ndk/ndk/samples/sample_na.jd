@@ -23,7 +23,7 @@ Java compiler still creates an executable stub for the virtual machine to run.
 The stub serves as a wrapper for the actual, native program, which is located in the {@code .so}
 file.</p>
 
-<p>The app itself simply renders a color onto the entire screen, and
+<p>The app itself simply renders a color onto the entire screen, and 
 then changes the color partly in response to movement that it detects.</p>
 
 <h2 id="am">AndroidManifest.xml</h2>
