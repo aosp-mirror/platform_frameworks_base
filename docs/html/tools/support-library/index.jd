@@ -59,9 +59,9 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 
-<div class="toggle-content open">
+<div class="toggle-content opened">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-open.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.2.0</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
