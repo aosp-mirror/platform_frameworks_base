@@ -304,7 +304,7 @@ public class CarrierConfigManager {
      * </p>
      * <p>
      * This method returns before the reload has completed, and
-     * {@link android.service.carrier.CarrierConfigService#onLoadConfig} will be called from an
+     * {@link android.service.carrier.CarrierService#onLoadConfig} will be called from an
      * arbitrary thread.
      * </p>
      */
