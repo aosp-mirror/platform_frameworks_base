@@ -53,6 +53,11 @@
     <!-- Menu item title that moves the selected documents [CHAR LIMIT=24] -->
     <string name="menu_move">Move to\u2026</string>
 
+    <!-- Menu item title that copies the selected documents to clipboard [CHAR LIMIT=24] -->
+    <string name="menu_copy_to_clipboard">Copy</string>
+    <!-- Menu item title that pastes files from the clipboard [CHAR LIMIT=24] -->
+    <string name="menu_paste_from_clipboard">Paste</string>
+
     <!-- Menu item that reveals internal storage built into the device [CHAR LIMIT=24] -->
     <string name="menu_advanced_show" product="nosdcard">Show internal storage</string>
     <!-- Menu item that reveals SD cards built into the device [CHAR LIMIT=24] -->

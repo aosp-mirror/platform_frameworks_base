@@ -29,6 +29,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -90,6 +91,7 @@ import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+import com.android.internal.util.Preconditions;
 
 import com.google.android.collect.Lists;
 
@@ -145,6 +147,9 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
     private final int mLoaderId = 42;
+
+    private FragmentTuner mFragmentTuner;
+    private DocumentClipper mClipper;
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -267,6 +272,9 @@ public class DirectoryFragment extends Fragment {
         mAdapter = new DocumentsAdapter();
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
+
+        mFragmentTuner = pickFragmentTuner(state);
+        mClipper = new DocumentClipper(context);
 
         if (mType == TYPE_RECENT_OPEN) {
             // Hide titles when showing recents for picking images/videos
@@ -499,29 +507,17 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            final State state = getDisplayState(DirectoryFragment.this);
-
-            final MenuItem open = menu.findItem(R.id.menu_open);
-            final MenuItem share = menu.findItem(R.id.menu_share);
-            final MenuItem delete = menu.findItem(R.id.menu_delete);
-            final MenuItem copy = menu.findItem(R.id.menu_copy);
-            final MenuItem move = menu.findItem(R.id.menu_move);
-
-            final boolean manageOrBrowse = (state.action == ACTION_MANAGE
-                    || state.action == ACTION_BROWSE || state.action == ACTION_BROWSE_ALL);
-
-            open.setVisible(!manageOrBrowse);
-            share.setVisible(manageOrBrowse);
-            delete.setVisible(manageOrBrowse);
-            // Disable copying from the Recents view.
-            copy.setVisible(manageOrBrowse && mType != TYPE_RECENT_OPEN);
-            move.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
+            // Delegate update logic to our owning action, since specialized
+            // logic is desired.
+            mFragmentTuner.updateActionMenu(menu, mType);
             return true;
         }
 
         @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            final List<DocumentInfo> docs = getSelectedDocuments();
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
+
+            // TODO: Call `getSelectedDocuments` in an AsyncTask to avoid UI jank.
+            List<DocumentInfo> docs = getSelectedDocuments();
 
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
@@ -539,13 +535,18 @@ public class DirectoryFragment extends Fragment {
                 mode.finish();
                 return true;
 
-            } else if (id == R.id.menu_copy) {
+            } else if (id == R.id.menu_copy_to) {
                 onTransferDocuments(docs, CopyService.TRANSFER_MODE_COPY);
                 mode.finish();
                 return true;
 
-            } else if (id == R.id.menu_move) {
+            } else if (id == R.id.menu_move_to) {
                 onTransferDocuments(docs, CopyService.TRANSFER_MODE_MOVE);
+                mode.finish();
+                return true;
+
+            } else if (id == R.id.menu_copy_to_clipboard) {
+                copySelectedToClipboard();
                 mode.finish();
                 return true;
 
@@ -1210,13 +1211,20 @@ public class DirectoryFragment extends Fragment {
         return MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
     }
 
-    public List<DocumentInfo> getSelectedDocuments() {
-        final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
-        final List<DocumentInfo> docs = Lists.newArrayList();
-        final int size = checked.size();
+    private @NonNull List<DocumentInfo> getSelectedDocuments() {
+        return getItemsAsDocuments(mCurrentView.getCheckedItemPositions().clone());
+    }
+
+    private List<DocumentInfo> getItemsAsDocuments(SparseBooleanArray items) {
+        if (items == null || items.size() == 0) {
+            return new ArrayList<>(0);
+        }
+
+        final List<DocumentInfo> docs =  new ArrayList<>(items.size());
+        final int size = items.size();
         for (int i = 0; i < size; i++) {
-            if (checked.valueAt(i)) {
-                final Cursor cursor = mAdapter.getItem(checked.keyAt(i));
+            if (items.valueAt(i)) {
+                final Cursor cursor = mAdapter.getItem(items.keyAt(i));
                 final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
                 docs.add(doc);
             }
@@ -1224,65 +1232,61 @@ public class DirectoryFragment extends Fragment {
         return docs;
     }
 
-    private void copyFromClipData(ClipData clipData) {
-        copyFromClipData(
-                clipData,
-                ((BaseActivity)getActivity()).getCurrentDirectory());
+    private void copyFromClipboard() {
+        new AsyncTask<Void, Void, List<DocumentInfo>>() {
+
+            @Override
+            protected List<DocumentInfo> doInBackground(Void... params) {
+                return mClipper.getClippedDocuments();
+            }
+
+            @Override
+            protected void onPostExecute(List<DocumentInfo> docs) {
+                DocumentInfo destination =
+                        ((BaseActivity) getActivity()).getCurrentDirectory();
+                copyDocuments(docs, destination);
+            }
+        }.execute();
     }
 
-    private void copyFromClipData(ClipData clipData, DocumentInfo dstDir) {
-        final List<DocumentInfo> srcDocs = getDocumentsFromClipData(clipData);
+    private void copyFromClipData(final ClipData clipData, final DocumentInfo destination) {
+        Preconditions.checkNotNull(clipData);
+        new AsyncTask<Void, Void, List<DocumentInfo>>() {
 
-        if (!canCopy(srcDocs, dstDir)) {
-            Toast.makeText(getActivity(), R.string.clipboard_files_cannot_paste, Toast.LENGTH_SHORT).show();
+            @Override
+            protected List<DocumentInfo> doInBackground(Void... params) {
+                return mClipper.getDocumentsFromClipData(clipData);
+            }
+
+            @Override
+            protected void onPostExecute(List<DocumentInfo> docs) {
+                copyDocuments(docs, destination);
+            }
+        }.execute();
+    }
+
+    private void copyDocuments(final List<DocumentInfo> docs, final DocumentInfo destination) {
+        if (!canCopy(docs, destination)) {
+            Toast.makeText(
+                    getActivity(),
+                    R.string.clipboard_files_cannot_paste, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (srcDocs.isEmpty()) {
+        if (docs.isEmpty()) {
             return;
         }
 
-        final DocumentStack curStack = getDisplayState(this).stack;
+        final DocumentStack curStack = getDisplayState(DirectoryFragment.this).stack;
         DocumentStack tmpStack = new DocumentStack();
-        if (dstDir != null) {
-            tmpStack.push(dstDir);
+        if (destination != null) {
+            tmpStack.push(destination);
             tmpStack.addAll(curStack);
         } else {
             tmpStack = curStack;
         }
 
-        CopyService.start(getActivity(), srcDocs, tmpStack, CopyService.TRANSFER_MODE_COPY);
-    }
-
-    private List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
-        final List<DocumentInfo> srcDocs = Lists.newArrayList();
-
-        Context context = getActivity();
-        final ContentResolver resolver = context.getContentResolver();
-
-        int itemCount = clipData.getItemCount();
-        for (int i = 0; i < itemCount; ++i) {
-            ClipData.Item item = clipData.getItemAt(i);
-            Uri itemUri = item.getUri();
-            if (itemUri != null && DocumentsContract.isDocumentUri(context, itemUri)) {
-                ContentProviderClient client = null;
-                Cursor cursor = null;
-                try {
-                    client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                            resolver, itemUri.getAuthority());
-                    cursor = client.query(itemUri, null, null, null, null);
-                    cursor.moveToPosition(0);
-                    srcDocs.add(DocumentInfo.fromCursor(cursor, itemUri.getAuthority()));
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage());
-                } finally {
-                    IoUtils.closeQuietly(cursor);
-                    ContentProviderClient.releaseQuietly(client);
-                }
-            }
-        }
-
-        return srcDocs;
+        CopyService.start(getActivity(), docs, tmpStack, CopyService.TRANSFER_MODE_COPY);
     }
 
     private ClipData getClipDataFromDocuments(List<DocumentInfo> docs) {
@@ -1304,22 +1308,40 @@ public class DirectoryFragment extends Fragment {
         return clipData;
     }
 
-    void copyToClipboard() {
-        ClipboardManager clipboard = getClipboardManager();
-        List<DocumentInfo> docs = getSelectedDocuments();
-        ClipData data = getClipDataFromDocuments(docs);
-        clipboard.setPrimaryClip(data);
+    void copySelectedToClipboard() {
+        // ListView returns a reference to its internal selection container,
+        // which will get cleared when we cancel action mode. So we
+        // make a defensive clone here.
+        //
+        // Furthermore, we don't want to call this from within the async task for
+        // basically the same reason...when mode is cancelled, selection is cleared.
+        final SparseBooleanArray selection = mCurrentView.getCheckedItemPositions().clone();
 
-        Activity activity = getActivity();
-        Toast.makeText(activity,
-                activity.getResources().getQuantityString(
-                        R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
-                Toast.LENGTH_SHORT).show();
+        new AsyncTask<Void, Void, List<DocumentInfo>>() {
+            protected List<DocumentInfo> doInBackground(Void... params) {
+                List<DocumentInfo> docs = getItemsAsDocuments(selection);
+                if (!docs.isEmpty()) {
+                    mClipper.clipDocuments(docs);
+                }
+                return docs;
+            };
+            protected void onPostExecute(List<DocumentInfo> docs) {
+                if (docs.isEmpty()) {
+                    Log.i(TAG, "Skipped populating clipboard with empty selection.");
+                    return;
+                }
+                Activity activity = getActivity();
+                Toast.makeText(activity,
+                        activity.getResources().getQuantityString(
+                                R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
+                                Toast.LENGTH_SHORT).show();
+            };
+        }.execute();
     }
 
     void pasteFromClipboard() {
-        ClipboardManager clipboard = getClipboardManager();
-        copyFromClipData(clipboard.getPrimaryClip());
+        copyFromClipboard();
+        getActivity().invalidateOptionsMenu();
     }
 
     private ClipboardManager getClipboardManager() {
@@ -1487,6 +1509,73 @@ public class DirectoryFragment extends Fragment {
 
         public void onDrawShadow(Canvas canvas) {
             mShadow.draw(canvas);
+        }
+    }
+
+    private FragmentTuner pickFragmentTuner(final State state) {
+        return state.action == ACTION_BROWSE_ALL
+                ? new StandaloneTuner()
+                : new DefaultTuner(state);
+    }
+
+    /**
+     * Interface for specializing the Fragment for the "host" Activity.
+     * Feel free to expand the role of this class to handle other specializations.
+     */
+    private interface FragmentTuner {
+        void updateActionMenu(Menu menu, int dirType);
+    }
+
+    /**
+     * Provides support for Platform specific specializations of DirectoryFragment.
+     */
+    private static final class DefaultTuner implements FragmentTuner {
+
+        private final State mState;
+
+        public DefaultTuner(State state) {
+            mState = state;
+        }
+
+        @Override
+        public void updateActionMenu(Menu menu, int dirType) {
+            Preconditions.checkState(mState.action != ACTION_BROWSE_ALL);
+
+            final MenuItem open = menu.findItem(R.id.menu_open);
+            final MenuItem share = menu.findItem(R.id.menu_share);
+            final MenuItem delete = menu.findItem(R.id.menu_delete);
+            final MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
+            final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
+            final MenuItem copyToClipboard = menu.findItem(R.id.menu_copy_to_clipboard);
+
+            final boolean manageOrBrowse = (mState.action == ACTION_MANAGE
+                    || mState.action == ACTION_BROWSE);
+
+            open.setVisible(!manageOrBrowse);
+            share.setVisible(manageOrBrowse);
+            delete.setVisible(manageOrBrowse);
+            // Disable copying from the Recents view.
+            copyTo.setVisible(manageOrBrowse && dirType != TYPE_RECENT_OPEN);
+            moveTo.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
+
+            // Only shown in standalone mode.
+            copyToClipboard.setVisible(false);
+        }
+    }
+
+    /**
+     * Provides support for Standalone specific specializations of DirectoryFragment.
+     */
+    private static final class StandaloneTuner implements FragmentTuner {
+        @Override
+        public void updateActionMenu(Menu menu, int dirType) {
+            menu.findItem(R.id.menu_share).setVisible(true);
+            menu.findItem(R.id.menu_delete).setVisible(true);
+            menu.findItem(R.id.menu_copy_to_clipboard).setVisible(true);
+
+            menu.findItem(R.id.menu_open).setVisible(false);
+            menu.findItem(R.id.menu_copy_to).setVisible(false);
+            menu.findItem(R.id.menu_move_to).setVisible(false);
         }
     }
 }
