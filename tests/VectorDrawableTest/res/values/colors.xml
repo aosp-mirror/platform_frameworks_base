@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
      limitations under the License.
 -->
 <resources>
-    <style name="ColorTheme">
-        <item name="color1">@color/color1</item>
-    </style>
+    <color name="color0">#a6e4ea</color>
+    <color name="color1">#ff3838</color>
+    <color name="color2">#ffff51</color>
+    <color name="color3">#0ed300</color>
 </resources>
