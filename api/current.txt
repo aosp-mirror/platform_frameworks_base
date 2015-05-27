@@ -34601,6 +34601,7 @@ package android.view {
     ctor public GestureDetector(android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler);
     ctor public GestureDetector(android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler, boolean);
     method public boolean isLongpressEnabled();
+    method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public void setIsLongpressEnabled(boolean);
     method public void setOnDoubleTapListener(android.view.GestureDetector.OnDoubleTapListener);

@@ -32,6 +32,9 @@ import android.os.Message;
  *  <li>In the {@link View#onTouchEvent(MotionEvent)} method ensure you call
  *          {@link #onTouchEvent(MotionEvent)}. The methods defined in your callback
  *          will be executed when the events occur.
+ *  <li>If listening for {@link OnStylusButtonPressListener#onStylusButtonPress(MotionEvent)}
+ *          you must call {@link #onGenericMotionEvent(MotionEvent)}
+ *          in {@link View#onGenericMotionEvent(MotionEvent)}.
  * </ul>
  */
 public class GestureDetector {
@@ -149,12 +152,14 @@ public class GestureDetector {
     }
 
     /**
-     * The listener that is used to notify when a stylus button press occurs.
+     * The listener that is used to notify when a stylus button press occurs. When listening for a
+     * stylus button press ensure that you call {@link #onGenericMotionEvent(MotionEvent)} in
+     * {@link View#onGenericMotionEvent(MotionEvent)}.
      */
     public interface OnStylusButtonPressListener {
         /**
          * Notified when a stylus button press occurs. This is when the stylus
-         * is touching the screen and the {@value MotionEvent#BUTTON_SECONDARY}
+         * is touching the screen and the {@value MotionEvent#BUTTON_STYLUS_PRIMARY}
          * is pressed.
          *
          * @param e The motion event that occurred during the stylus button
@@ -241,6 +246,7 @@ public class GestureDetector {
     private boolean mInStylusButtonPress;
     private boolean mAlwaysInTapRegion;
     private boolean mAlwaysInBiggerTapRegion;
+    private boolean mIgnoreNextUpEvent;
 
     private MotionEvent mCurrentDownEvent;
     private MotionEvent mPreviousUpEvent;
@@ -552,18 +558,7 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_DOWN:
-            if (mStylusButtonListener != null
-                    && ev.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
-                    && (ev.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
-                if (mStylusButtonListener.onStylusButtonPress(ev)) {
-                    mInStylusButtonPress = true;
-                    handled = true;
-                    mHandler.removeMessages(LONG_PRESS);
-                    mHandler.removeMessages(TAP);
-                }
-            }
-
-            if (mDoubleTapListener != null && !mInStylusButtonPress) {
+            if (mDoubleTapListener != null) {
                 boolean hadTapMessage = mHandler.hasMessages(TAP);
                 if (hadTapMessage) mHandler.removeMessages(TAP);
                 if ((mCurrentDownEvent != null) && (mPreviousUpEvent != null) && hadTapMessage &&
@@ -592,7 +587,7 @@ public class GestureDetector {
             mInLongPress = false;
             mDeferConfirmSingleTap = false;
 
-            if (mIsLongpressEnabled && !mInStylusButtonPress) {
+            if (mIsLongpressEnabled) {
                 mHandler.removeMessages(LONG_PRESS);
                 mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()
                         + TAP_TIMEOUT + LONGPRESS_TIMEOUT);
@@ -602,16 +597,6 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_MOVE:
-            if (mStylusButtonListener != null && !mInStylusButtonPress && !mInLongPress
-                    && ev.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
-                    && (ev.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
-                if (mStylusButtonListener.onStylusButtonPress(ev)) {
-                    mInStylusButtonPress = true;
-                    handled = true;
-                    mHandler.removeMessages(LONG_PRESS);
-                    mHandler.removeMessages(TAP);
-                }
-            }
             if (mInLongPress || mInStylusButtonPress) {
                 break;
             }
@@ -652,15 +637,12 @@ public class GestureDetector {
             } else if (mInLongPress) {
                 mHandler.removeMessages(TAP);
                 mInLongPress = false;
-            } else if (mInStylusButtonPress) {
-                mHandler.removeMessages(TAP);
-                mInStylusButtonPress = false;
-            } else if (mAlwaysInTapRegion) {
+            } else if (mAlwaysInTapRegion && !mIgnoreNextUpEvent) {
                 handled = mListener.onSingleTapUp(ev);
                 if (mDeferConfirmSingleTap && mDoubleTapListener != null) {
                     mDoubleTapListener.onSingleTapConfirmed(ev);
                 }
-            } else {
+            } else if (!mIgnoreNextUpEvent) {
 
                 // A fling must travel the minimum tap distance
                 final VelocityTracker velocityTracker = mVelocityTracker;
@@ -687,6 +669,7 @@ public class GestureDetector {
             }
             mIsDoubleTapping = false;
             mDeferConfirmSingleTap = false;
+            mIgnoreNextUpEvent = false;
             mHandler.removeMessages(SHOW_PRESS);
             mHandler.removeMessages(LONG_PRESS);
             break;
@@ -702,6 +685,43 @@ public class GestureDetector {
         return handled;
     }
 
+    /**
+     * Analyzes the given generic motion event and if applicable triggers the
+     * appropriate callbacks on the {@link OnGestureListener} supplied.
+     *
+     * @param ev The current motion event.
+     * @return true if the {@link OnGestureListener} consumed the event,
+     *              else false.
+     */
+    public boolean onGenericMotionEvent(MotionEvent ev) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onGenericMotionEvent(ev, 0);
+        }
+
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_BUTTON_PRESS:
+                if (mStylusButtonListener != null && !mInStylusButtonPress && !mInLongPress
+                        && ev.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
+                    if (mStylusButtonListener.onStylusButtonPress(ev)) {
+                        mInStylusButtonPress = true;
+                        mHandler.removeMessages(LONG_PRESS);
+                        mHandler.removeMessages(TAP);
+                        return true;
+                    }
+                }
+                break;
+
+            case MotionEvent.ACTION_BUTTON_RELEASE:
+                if (mInStylusButtonPress
+                        && ev.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
+                    mInStylusButtonPress = false;
+                    mIgnoreNextUpEvent = true;
+                }
+                break;
+        }
+        return false;
+    }
+
     private void cancel() {
         mHandler.removeMessages(SHOW_PRESS);
         mHandler.removeMessages(LONG_PRESS);
@@ -715,6 +735,7 @@ public class GestureDetector {
         mDeferConfirmSingleTap = false;
         mInLongPress = false;
         mInStylusButtonPress = false;
+        mIgnoreNextUpEvent = false;
     }
 
     private void cancelTaps() {
@@ -727,6 +748,7 @@ public class GestureDetector {
         mDeferConfirmSingleTap = false;
         mInLongPress = false;
         mInStylusButtonPress = false;
+        mIgnoreNextUpEvent = false;
     }
 
     private boolean isConsideredDoubleTap(MotionEvent firstDown, MotionEvent firstUp,
