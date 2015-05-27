@@ -489,8 +489,6 @@ please see styles_device_defaults.xml.
     <!-- Alert dialog button bar button -->
     <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Colored">
         <item name="minWidth">64dp</item>
-        <item name="singleLine">true</item>
-        <item name="ellipsize">none</item>
         <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
