@@ -16,6 +16,8 @@
 
 package android.service.gatekeeper;
 
+import android.service.gatekeeper.GateKeeperResponse;
+
 /**
  * Interface for communication with GateKeeper, the
  * secure password storage daemon.
@@ -34,9 +36,9 @@ interface IGateKeeperService {
      *                        If provided, must verify against the currentPasswordHandle.
      * @param desiredPassword The new desired password, for which a handle will be returned
      *                        upon success.
-     * @return the handle corresponding to desiredPassword, or null
+     * @return an EnrollResponse or null on failure
      */
-    byte[] enroll(int uid, in byte[] currentPasswordHandle, in byte[] currentPassword,
+    GateKeeperResponse enroll(int uid, in byte[] currentPasswordHandle, in byte[] currentPassword,
             in byte[] desiredPassword);
 
     /**
@@ -45,10 +47,10 @@ interface IGateKeeperService {
      * @param enrolledPasswordHandle The handle against which the provided password will be
      *                               verified.
      * @param The plaintext blob to verify against enrolledPassword.
-     * @return True if the authentication was successful
+     * @return a VerifyResponse, or null on failure.
      */
-    boolean verify(int uid, in byte[] enrolledPasswordHandle,
-            in byte[] providedPassword);
+    GateKeeperResponse verify(int uid, in byte[] enrolledPasswordHandle, in byte[] providedPassword);
+
     /**
      * Verifies an enrolled handle against a provided, plaintext blob.
      * @param uid The Android user ID associated to this enrollment
@@ -58,9 +60,9 @@ interface IGateKeeperService {
      * @param enrolledPasswordHandle The handle against which the provided password will be
      *                               verified.
      * @param The plaintext blob to verify against enrolledPassword.
-     * @return an opaque attestation of authentication on success, or null.
+     * @return a VerifyResponse with an attestation, or null on failure.
      */
-    byte[] verifyChallenge(int uid, long challenge, in byte[] enrolledPasswordHandle,
+    GateKeeperResponse verifyChallenge(int uid, long challenge, in byte[] enrolledPasswordHandle,
             in byte[] providedPassword);
 
     /**
