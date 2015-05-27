@@ -598,7 +598,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mVisibleFrame.set(vf);
         mDecorFrame.set(dcf);
         mStableFrame.set(sf);
-        mOutsetFrame.set(osf);
+        final boolean hasOutsets = osf != null;
+        if (hasOutsets) {
+            mOutsetFrame.set(osf);
+        }
 
         final int fw = mFrame.width();
         final int fh = mFrame.height();
@@ -661,10 +664,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 Math.max(mFrame.right - mStableFrame.right, 0),
                 Math.max(mFrame.bottom - mStableFrame.bottom, 0));
 
-        mOutsets.set(Math.max(mContentFrame.left - mOutsetFrame.left, 0),
-                Math.max(mContentFrame.top - mOutsetFrame.top, 0),
-                Math.max(mOutsetFrame.right - mContentFrame.right, 0),
-                Math.max(mOutsetFrame.bottom - mContentFrame.bottom, 0));
+        if (hasOutsets) {
+            mOutsets.set(Math.max(mContentFrame.left - mOutsetFrame.left, 0),
+                    Math.max(mContentFrame.top - mOutsetFrame.top, 0),
+                    Math.max(mOutsetFrame.right - mContentFrame.right, 0),
+                    Math.max(mOutsetFrame.bottom - mContentFrame.bottom, 0));
+        } else {
+            mOutsets.set(0, 0, 0, 0);
+        }
 
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
