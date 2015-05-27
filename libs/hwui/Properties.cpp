@@ -29,7 +29,7 @@ bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
 bool Properties::showDirtyRegions = false;
 bool Properties::skipEmptyFrames = true;
-bool Properties::swapBuffersWithDamage = false;
+bool Properties::swapBuffersWithDamage = true;
 
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;
@@ -104,7 +104,7 @@ bool Properties::load() {
     }
 
     skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
-    swapBuffersWithDamage = property_get_bool(PROPERTY_SWAP_WITH_DAMAGE, false);
+    swapBuffersWithDamage = property_get_bool(PROPERTY_SWAP_WITH_DAMAGE, true);
 
     return (prevDebugLayersUpdates != debugLayersUpdates)
             || (prevDebugOverdraw != debugOverdraw)
