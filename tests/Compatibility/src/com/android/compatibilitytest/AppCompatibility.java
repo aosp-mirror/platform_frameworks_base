@@ -17,6 +17,7 @@
 package com.android.compatibilitytest;
 
 import android.app.ActivityManager;
+import android.app.UiModeManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
@@ -97,7 +99,12 @@ public class AppCompatibility extends InstrumentationTestCase {
         String packageName = mArgs.getString(PACKAGE_TO_LAUNCH);
         if (packageName != null) {
             Log.d(TAG, "Launching app " + packageName);
-            ProcessErrorStateInfo err = launchActivity(packageName);
+            Intent intent = getLaunchIntentForPackage(packageName);
+            if (intent == null) {
+                Log.w(TAG, String.format("Skipping %s; no launch intent", packageName));
+                return;
+            }
+            ProcessErrorStateInfo err = launchActivity(packageName, intent);
             // Make sure there are no errors when launching the application,
             // otherwise raise an
             // exception with the first error encountered.
@@ -155,6 +162,19 @@ public class AppCompatibility extends InstrumentationTestCase {
         }
     }
 
+    private Intent getLaunchIntentForPackage(String packageName) {
+        UiModeManager umm = (UiModeManager)
+                getInstrumentation().getContext().getSystemService(Context.UI_MODE_SERVICE);
+        boolean isLeanback = umm.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        Intent intent = null;
+        if (isLeanback) {
+            intent = mPackageManager.getLeanbackLaunchIntentForPackage(packageName);
+        } else {
+            intent = mPackageManager.getLaunchIntentForPackage(packageName);
+        }
+        return intent;
+    }
+
     /**
      * Launches and activity and queries for errors.
      *
@@ -163,18 +183,9 @@ public class AppCompatibility extends InstrumentationTestCase {
      * @return {@link Collection} of {@link ProcessErrorStateInfo} detected
      *         during the app launch.
      */
-    private ProcessErrorStateInfo launchActivity(String packageName) {
-        // the recommended way to see if this is a tv or not.
-        boolean isleanback = !mPackageManager.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
-            && !mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-        Intent intent;
-        if (isleanback) {
-            Log.d(TAG, "Leanback and relax! " + packageName);
-            intent = mPackageManager.getLeanbackLaunchIntentForPackage(packageName);
-        } else {
-            intent = mPackageManager.getLaunchIntentForPackage(packageName);
-        }
-        assertNotNull("Skipping " + packageName + "; missing launch intent", intent);
+    private ProcessErrorStateInfo launchActivity(String packageName, Intent intent) {
+        Log.d(TAG, String.format("launching package \"%s\" with intent: %s",
+                packageName, intent.toString()));
 
         String processName = getProcessName(packageName);
 
