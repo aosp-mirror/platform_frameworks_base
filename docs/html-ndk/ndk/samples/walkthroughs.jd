@@ -4,7 +4,10 @@ page.title=Samples: Walkthroughs
 <p>This section provides detailed walkthroughs of several key samples. The samples are as
 follows:</p>
 
-<li><a href="{@docRoot}ndk/samples/sample_hellojni.html">hello-jni</a>: A very basic app that illustrates core workings of the NDK.</li>
-<li><a href="{@docRoot}ndk/samples/sample_na.html">native-activity</a>: An app that shows the fundamentals of constructing a purely native app. It places particular emphasis on the
+<li><a href="{@docRoot}ndk/samples/sample_hellojni.html">hello-jni</a>: A very basic app that
+illustrates core workings of the NDK.</li>
+<li><a href="{@docRoot}ndk/samples/sample_na.html">native-activity</a>: An app that shows the
+fundamentals of constructing a purely native app. It places particular emphasis on the
 {@code android_native_app_glue library}.</li>
-<li><a href="<a href="{@docRoot}ndk/samples/sample_teapot.html">Teapot</a>: A simple OpenGL demo, showcasing the <code>ndk_helper</code> class.</li>
+<li><a href="<a href="{@docRoot}ndk/samples/sample_teapot.html">Teapot</a>: A simple OpenGL demo,
+showcasing the <code>ndk_helper</code> class.</li>

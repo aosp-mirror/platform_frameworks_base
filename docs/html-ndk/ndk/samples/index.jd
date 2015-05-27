@@ -1,13 +1,26 @@
-page.title=Samples
+page.title=Samples: Overview
 @jd:body
 
-<p>Welcome to the NDK samples area. Here, you can
-<a href="{@docRoot}ndk/samples/downloads.html">download</a> a variety of sample apps to help
-deepen your understanding of how to use the NDK. There are also detailed
-<a href="{@docRoot}ndk/samples/walkthroughs.html">walkthroughs</a> of several
-of the apps, providing additional insight into key topics.</p>
+<p>Welcome to the NDK samples area. Here, you can download a variety of sample
+apps to help deepen your understanding the NDK.
 
-<p>These samples are also contained in the NDK installation package. They reside in
+
+<p>From this page, you can download samples that provide a look at the NDK in action. A few of the
+topics covered are:</p>
+
+<ul>
+   <li>Managing your native app's activity lifecycle.</li>
+   <li>Using native OpenGL on an Android device.</li>
+   <li>Implementing native audio.</li>
+   <li>Exporting modules.</li>
+</ul>
+
+<p class="note"><strong>Note: </strong>These samples are also contained in the NDK installation
+package; if you have already downloaded the NDK, you have them. They reside in
 {@code $NDK/samples/}, where {@code $NDK} is the NDK installation root.</p>
 
+ <div id="sdk-terms-form">
+      <p><a href="{@docRoot}shareables/ndk/ndk-samples.zip" class="button">
+      Download ndk-samples.zip</a></p>
+ </div>
 
