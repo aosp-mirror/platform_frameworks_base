@@ -1,4 +1,12 @@
-page.title=Reference
+page.title=API Reference
 @jd:body
 
-<p>NDK reference docs
+<p>The API reference for the NDK currently comprises documentation for the base set of
+native headers that the NDK provides for Android. These headers, and their associated libraries,
+provide functionalities such as:</p>
+
+<ul>
+   <li>Using hardware sensors.</li>
+   <li>Accessing storage.</li>
+   <li>Handling user input.</li>
+</ul>

@@ -1,17 +1,11 @@
-page.title=Debugging
+page.title=Debugging Your Project
 @jd:body
 
-<div class="title">Debugging </div>  </div>
-</div><!--header-->
-<div class="contents">
-<div class="textblock"><p>This section introduces you to debugging with the NDK. It includes:</p>
-<ul>
-<li><a href="./md_3__key__topics__debugging__n_d_k-_g_d_b.html">ndk-gdb and ndk-gdb-py</a><ul>
-<li>The helper shell script named <code>ndk-gdb</code>, which allows you to launch a native debugging session for your NDK-generated machine code.</li>
-</ul>
-</li>
-<li><a href="./md_3__key__topics__debugging__n_d_k-_s_t_a_c_k.html">ndk-stack</a><ul>
-<li>A tool that helps you use ADB <code>logcat</code> in your debugging. </li>
-</ul>
-</li>
-</ul>
+<p>After you've built your app, you'll probably need to debug it. This section introduces you to the
+NDK's debugging tools.</p>
+
+<p>It begins by telling you how to use the <a href="{@docRoot}ndk/guides/ndk-gdb.html">
+{@code ndk-gdb}</a> tool to debug your code. It closes with an explanation of the
+<a href="{@docRoot}ndk/guides/ndk-stack.html">{@code ndk-stack}</a> tool, which helps you use the
+<a href="{@docRoot}tools/help/logcat.html">ADB logcat tool</a>
+as you debug.</p>

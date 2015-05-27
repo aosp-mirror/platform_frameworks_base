@@ -8,64 +8,58 @@
 
 <ul id="nav">
    <li class="nav-section">
-      <div class="nav-section-header"><a href="/ndk/guides/index.html"><span class="en">
-      Getting Started</span></a></div>
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/index.html">
+      <span class="en">Getting Started</span></a></div>
       <ul>
-         <li><a href="setup.html">Setup</a></li>
-         <li><a href="concepts.html">Concepts</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/setup.html">Setup</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/concepts.html">Concepts</a></li>
       </ul>
    </li>
 
    <li class="nav-section">
-      <div class="nav-section-header"><a href="/ndk/guides/build.html"><span class="en">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/build.html">
+      <span class="en">
       Building</span></a></div>
       <ul>
-         <li><a href="#">ndk-build</a></li>
-         <li><a href="#">Android.mk</a></li>
-         <li><a href="#">Application.mk</a></li>
-         <li><a href="#">Standalone Toolchain</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/android_mk.html">Android.mk</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/application_mk.html">Application.mk</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/ndk-build.html">ndk-build</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/standalone_toolchain.html">Standalone Toolchain
+         </a></li>
       </ul>
    </li>
 
    <li class="nav-section">
-      <div class="nav-section-header"><a href="/ndk/guides/debug.html"><span class="en">
-      Debugging</span></a></div>
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/arch.html">
+      <span class="en">Architectures and CPUs</span></a></div>
       <ul>
-         <li><a href="#">ndk-gdb</a></li>
-         <li><a href="#">ndk-stack</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/abis.html">ABI Management</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/cpu-arm-neon.html">NEON</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/x86.html">x86</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/x86-64.html">x86-64</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/mips.html">MIPS</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/cpu-features.html">The cpufeatures Library</a>
+         </li>
       </ul>
    </li>
 
    <li class="nav-section">
-      <div class="nav-section-header"><a href="/ndk/guides/arch.html"><span class="en">
-      Architectures and CPUs</span></a></div>
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/debug.html">
+      <span class="en">Debugging</span></a></div>
       <ul>
-         <li><a href="#">ABI Management</a></li>
-         <li><a href="#">Neon</a></li>
-         <li><a href="#">Mips</a></li>
-         <li><a href="#">x86</a></li>
-         <li><a href="#">x86-64</a></li>
-         <li><a href="#">CPU Features</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/ndk-gdb.html">ndk-gdb</a></li>
+         <li><a href="<?cs var:toroot ?>ndk/guides/ndk-stack.html">ndk-stack</a></li>
       </ul>
    </li>
 
    <li class="nav-section">
-      <div class="nav-section-header"><a href="/ndk/guides/libs.html"><span class="en">
-      Libraries</span></a></div>
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/libs.html">
+      <span class="en">Libraries</span></a></div>
       <ul>
-      <li><a href="#">Stable APIs</a></li>
-      <li><a href="#">C++ Support</a></li>
-      <li><a href="#">Prebuilt Libraries</a></li>
-      </ul>
-   </li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/prebuilts.html">Prebuilt Libraries</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/cpp-support.html">C++ Support</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/stable_apis.html">Stable APIs</a></li>
 
-   <li class="nav-section">
-      <div class="nav-section-header"><a href="/ndk/guides/sample.html"><span class="en">
-      Sample Walkthrough</span></a></div>
-      <ul>
-      <li><a href="#">hello-jni</a></li>
-      <li><a href="#">native-activity</a></li>
-      <li><a href="#">Teapot</a></li>
       </ul>
    </li>
 

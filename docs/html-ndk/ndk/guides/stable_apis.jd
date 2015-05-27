@@ -58,7 +58,7 @@ under {@code $NDK/platforms/android-&lt;level&gt;/&lt;abi&gt;/usr/include}. When
 have a specific new group of headers and libraries for an Android API level, it means that
 an app targeting that level should use the most recently released NDK assets. For example,
 there was no new release of NDK headers or libraries for Android API levels 6 and 7. Therefore,
-when developing an app targeting Android API level 7, you would use the headers and libraries
+when developing an app targeting Android API level 7, you should use the headers and libraries
 located under {@code android-5/}.</p>
 
 <p>Table 1 shows the correspondence between NDK-supported API levels and Android releases.</p>
