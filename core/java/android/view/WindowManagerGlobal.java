@@ -20,6 +20,7 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -247,7 +248,8 @@ public final class WindowManagerGlobal {
             // set from the application's hardware acceleration setting.
             final Context context = view.getContext();
             if (context != null
-                    && context.getApplicationInfo().hardwareAccelerated) {
+                    && (context.getApplicationInfo().flags
+                            & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
         }

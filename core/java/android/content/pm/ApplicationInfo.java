@@ -373,6 +373,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_EXTRACT_NATIVE_LIBS = 1<<28;
 
     /**
+     * Value for {@link #flags}: {@code true} when the application's rendering
+     * should be hardware accelerated.
+     */
+    public static final int FLAG_HARDWARE_ACCELERATED = 1<<29;
+
+    /**
      * Value for {@link #flags}: true if code from this application will need to be
      * loaded into other applications' processes. On devices that support multiple
      * instruction sets, this implies the code might be loaded into a process that's
@@ -648,11 +654,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
-    /**
-     * True when the application's rendering should be hardware accelerated.
-     */
-    public boolean hardwareAccelerated;
-
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         if (className != null) {
@@ -692,7 +693,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
         pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode);
-        pw.println(prefix + "hardwareAccelerated=" + hardwareAccelerated);
         if (manageSpaceActivityName != null) {
             pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
         }
@@ -784,7 +784,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = orig.descriptionRes;
         uiOptions = orig.uiOptions;
         backupAgentName = orig.backupAgentName;
-        hardwareAccelerated = orig.hardwareAccelerated;
         fullBackupContent = orig.fullBackupContent;
     }
 
@@ -838,7 +837,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
-        dest.writeInt(hardwareAccelerated ? 1 : 0);
         dest.writeInt(fullBackupContent);
     }
 
@@ -891,7 +889,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         backupAgentName = source.readString();
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
-        hardwareAccelerated = source.readInt() != 0;
         fullBackupContent = source.readInt();
     }
 
