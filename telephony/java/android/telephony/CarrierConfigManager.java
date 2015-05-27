@@ -216,7 +216,8 @@ public class CarrierConfigManager {
     public static final String INT_VVM_PORT_NUMBER = "int_vvm_port_number";
 
     /**
-     * The type of visual voicemail protocol the carrier adheres to (see below).
+     * The type of visual voicemail protocol the carrier adheres to. See {@link TelephonyManager}
+     * for possible values. For example {@link TelephonyManager#VVM_TYPE_OMTP}.
      *
      * @hide
      */
