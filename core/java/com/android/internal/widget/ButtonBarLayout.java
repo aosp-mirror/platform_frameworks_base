@@ -33,9 +33,6 @@ public class ButtonBarLayout extends LinearLayout {
     /** Whether the current configuration allows stacking. */
     private final boolean mAllowStacking;
 
-    /** Whether the layout is currently stacked. */
-    private boolean mStacked;
-
     private int mLastWidthSize = -1;
 
     public ButtonBarLayout(Context context, AttributeSet attrs) {
@@ -44,15 +41,14 @@ public class ButtonBarLayout extends LinearLayout {
         final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ButtonBarLayout);
         mAllowStacking = ta.getBoolean(R.styleable.ButtonBarLayout_allowStacking, false);
         ta.recycle();
-
-        mStacked = getOrientation() == VERTICAL;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+
         if (mAllowStacking) {
-            final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-            if (widthSize > mLastWidthSize && mStacked) {
+            if (widthSize > mLastWidthSize && isStacked()) {
                 // We're being measured wider this time, try un-stacking.
                 setStacked(false);
             }
@@ -60,17 +56,36 @@ public class ButtonBarLayout extends LinearLayout {
             mLastWidthSize = widthSize;
         }
 
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        boolean needsRemeasure = false;
 
-        if (mAllowStacking && !mStacked) {
+        // If we're not stacked, make sure the measure spec is AT_MOST rather
+        // than EXACTLY. This ensures that we'll still get TOO_SMALL so that we
+        // know to stack the buttons.
+        final int initialWidthMeasureSpec;
+        if (!isStacked() && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) {
+            initialWidthMeasureSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.AT_MOST);
+
+            // We'll need to remeasure again to fill excess space.
+            needsRemeasure = true;
+        } else {
+            initialWidthMeasureSpec = widthMeasureSpec;
+        }
+
+        super.onMeasure(initialWidthMeasureSpec, heightMeasureSpec);
+
+        if (mAllowStacking && !isStacked()) {
             final int measuredWidth = getMeasuredWidthAndState();
             final int measuredWidthState = measuredWidth & MEASURED_STATE_MASK;
             if (measuredWidthState == MEASURED_STATE_TOO_SMALL) {
                 setStacked(true);
 
                 // Measure again in the new orientation.
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+                needsRemeasure = true;
             }
+        }
+
+        if (needsRemeasure) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
     }
 
@@ -89,7 +104,9 @@ public class ButtonBarLayout extends LinearLayout {
         for (int i = childCount - 2; i >= 0; i--) {
             bringChildToFront(getChildAt(i));
         }
+    }
 
-        mStacked = stacked;
+    private boolean isStacked() {
+        return getOrientation() == LinearLayout.VERTICAL;
     }
 }
