@@ -2,6 +2,8 @@ package com.android.internal.widget;
 
 import android.os.AsyncTask;
 
+import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
+
 import java.util.List;
 
 /**
@@ -16,8 +18,10 @@ public final class LockPatternChecker {
          * Invoked when a security check is finished.
          *
          * @param matched Whether the PIN/Password/Pattern matches the stored one.
+         * @param throttleTimeoutMs The amount of time in ms to wait before reattempting
+         * the call. Only non-0 if matched is false.
          */
-        void onChecked(boolean matched);
+        void onChecked(boolean matched, int throttleTimeoutMs);
     }
 
     /**
@@ -28,8 +32,10 @@ public final class LockPatternChecker {
          * Invoked when a security verification is finished.
          *
          * @param attestation The attestation that the challenge was verified, or null.
+         * @param throttleTimeoutMs The amount of time in ms to wait before reattempting
+         * the call. Only non-0 if attestation is null.
          */
-        void onVerified(byte[] attestation);
+        void onVerified(byte[] attestation, int throttleTimeoutMs);
     }
 
     /**
@@ -47,14 +53,21 @@ public final class LockPatternChecker {
             final int userId,
             final OnVerifyCallback callback) {
         AsyncTask<Void, Void, byte[]> task = new AsyncTask<Void, Void, byte[]>() {
+            private int mThrottleTimeout;
+
             @Override
             protected byte[] doInBackground(Void... args) {
-                return utils.verifyPattern(pattern, challenge, userId);
+                try {
+                    return utils.verifyPattern(pattern, challenge, userId);
+                } catch (RequestThrottledException ex) {
+                    mThrottleTimeout = ex.getTimeoutMs();
+                    return null;
+                }
             }
 
             @Override
             protected void onPostExecute(byte[] result) {
-                callback.onVerified(result);
+                callback.onVerified(result, mThrottleTimeout);
             }
         };
         task.execute();
@@ -74,14 +87,21 @@ public final class LockPatternChecker {
             final int userId,
             final OnCheckCallback callback) {
         AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
+            private int mThrottleTimeout;
+
             @Override
             protected Boolean doInBackground(Void... args) {
-                return utils.checkPattern(pattern, userId);
+                try {
+                    return utils.checkPattern(pattern, userId);
+                } catch (RequestThrottledException ex) {
+                    mThrottleTimeout = ex.getTimeoutMs();
+                    return false;
+                }
             }
 
             @Override
             protected void onPostExecute(Boolean result) {
-                callback.onChecked(result);
+                callback.onChecked(result, mThrottleTimeout);
             }
         };
         task.execute();
@@ -103,14 +123,21 @@ public final class LockPatternChecker {
             final int userId,
             final OnVerifyCallback callback) {
         AsyncTask<Void, Void, byte[]> task = new AsyncTask<Void, Void, byte[]>() {
+            private int mThrottleTimeout;
+
             @Override
             protected byte[] doInBackground(Void... args) {
-                return utils.verifyPassword(password, challenge, userId);
+                try {
+                    return utils.verifyPassword(password, challenge, userId);
+                } catch (RequestThrottledException ex) {
+                    mThrottleTimeout = ex.getTimeoutMs();
+                    return null;
+                }
             }
 
             @Override
             protected void onPostExecute(byte[] result) {
-                callback.onVerified(result);
+                callback.onVerified(result, mThrottleTimeout);
             }
         };
         task.execute();
@@ -130,14 +157,21 @@ public final class LockPatternChecker {
             final int userId,
             final OnCheckCallback callback) {
         AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
+            private int mThrottleTimeout;
+
             @Override
             protected Boolean doInBackground(Void... args) {
-                return utils.checkPassword(password, userId);
+                try {
+                    return utils.checkPassword(password, userId);
+                } catch (RequestThrottledException ex) {
+                    mThrottleTimeout = ex.getTimeoutMs();
+                    return false;
+                }
             }
 
             @Override
             protected void onPostExecute(Boolean result) {
-                callback.onChecked(result);
+                callback.onChecked(result, mThrottleTimeout);
             }
         };
         task.execute();
