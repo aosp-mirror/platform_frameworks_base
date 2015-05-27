@@ -454,6 +454,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
                 updateNetworkState(networkState, info);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
+                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 updateLowPowerMode();
@@ -501,14 +502,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     private void updateLowPowerMode() {
-        final boolean disableGps;
+        // Disable GPS if we are in device idle mode.
+        boolean disableGps = mPowerManager.isDeviceIdleMode();
         switch (Settings.Secure.getInt(mContext.getContentResolver(), BATTERY_SAVER_GPS_MODE,
                 BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF)) {
             case BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF:
-                disableGps = mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
+                // If we are in battery saver mode and the screen is off, disable GPS.
+                disableGps |= mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
                 break;
-            default:
-                disableGps = false;
         }
         if (disableGps != mDisableGps) {
             mDisableGps = disableGps;
@@ -2034,6 +2035,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             intentFilter.addAction(ALARM_TIMEOUT);
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
             intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
             intentFilter.addAction(SIM_STATE_CHANGED);
