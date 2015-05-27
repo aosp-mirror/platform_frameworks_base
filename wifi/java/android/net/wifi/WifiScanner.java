@@ -136,12 +136,17 @@ public class WifiScanner {
         }
     }
 
-    /** reports {@link ScanListener#onResults} when underlying buffers are full */
+    /** reports {@link ScanListener#onResults} when underlying buffers are full
+     * @deprecated
+     */
+    @Deprecated
     public static final int REPORT_EVENT_AFTER_BUFFER_FULL = 0;
     /** reports {@link ScanListener#onResults} after each scan */
     public static final int REPORT_EVENT_AFTER_EACH_SCAN = 1;
     /** reports {@link ScanListener#onFullResult} whenever each beacon is discovered */
     public static final int REPORT_EVENT_FULL_SCAN_RESULT = 2;
+    /** do not batch */
+    public static final int REPORT_EVENT_NO_BATCH = 4;
 
     /**
      * scan configuration parameters to be sent to {@link #startBackgroundScan}
