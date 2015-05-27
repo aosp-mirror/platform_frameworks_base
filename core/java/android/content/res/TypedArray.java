@@ -181,7 +181,26 @@ public class TypedArray {
      *         not be coerced to a string.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
+    @Nullable
     public String getString(int index) {
+        return getString(index, true);
+    }
+
+    /**
+     * Returns a string representation of the value at the given index,
+     * optionally throwing a resource mismatch strict mode violation if the
+     * value must be coerced to a string.
+     *
+     * @param index the index of the attribute to retrieve
+     * @param strict {@code true} to throw a strict mode violation for string
+     *               coercion, {@code false} otherwise
+     * @return a string representation of the value at the given index, or
+     *         {@code null} if the resource could not be coerced to a string
+     * @see StrictMode#noteResourceMismatch(Object)
+     * @hide Used internally for view attribute inspection.
+     */
+    @Nullable
+    public String getString(int index, boolean strict) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -197,7 +216,9 @@ public class TypedArray {
 
         final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            StrictMode.noteResourceMismatch(v);
+            if (strict) {
+                StrictMode.noteResourceMismatch(v);
+            }
             final CharSequence cs = v.coerceToString();
             return cs != null ? cs.toString() : null;
         }
