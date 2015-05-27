@@ -823,13 +823,20 @@ public class CodecTest {
             duration = mMediaPlayer.getDuration();
             // start to play
             mMediaPlayer.start();
-            waittime = duration - mMediaPlayer.getCurrentPosition();
-            synchronized(onCompletion){
-                try {
-                    onCompletion.wait(waittime + buffertime);
-                }catch (Exception e) {
-                    Log.v(TAG, "playMediaSamples are interrupted");
-                    return false;
+            if (duration < 0) {
+                Log.w(TAG, filePath + " has unknown duration, waiting until playback completes");
+                while (mMediaPlayer.isPlaying()) {
+                    SystemClock.sleep(1000);
+                }
+            } else {
+                waittime = duration - mMediaPlayer.getCurrentPosition();
+                synchronized(onCompletion){
+                    try {
+                        onCompletion.wait(waittime + buffertime);
+                    } catch (Exception e) {
+                        Log.v(TAG, "playMediaSamples are interrupted");
+                        return false;
+                    }
                 }
             }
             terminateMessageLooper();
