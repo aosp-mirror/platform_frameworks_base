@@ -66,13 +66,13 @@ option java_package com.android.server
 # when notifications are newly displayed on screen, or disappear from screen
 27510 notification_visibility_changed (newlyVisibleKeys|3),(noLongerVisibleKeys|3)
 # when notifications are expanded, or contracted
-27511 notification_expansion (key|3),(user_action|1),(expanded|1)
+27511 notification_expansion (key|3),(user_action|1),(expanded|1),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification has been clicked
-27520 notification_clicked (key|3)
+27520 notification_clicked (key|3),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification action button has been clicked
-27521 notification_action_clicked (key|3),(action_index|1)
+27521 notification_action_clicked (key|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification has been canceled
-27530 notification_canceled (key|3),(reason|1),(lifespan|1),(exposure|1)
+27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1)
 # replaces 27510 with a row per notification
 27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1)
 
