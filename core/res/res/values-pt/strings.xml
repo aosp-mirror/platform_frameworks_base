@@ -427,8 +427,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impressão digital está sujo. Limpe-o e tente novamente."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"O dedo foi retirado rápido demais. Tente novamente."</string>
-    <!-- no translation found for fingerprint_acquired_too_slow (59250885689661653) -->
-    <skip />
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"O movimento do dedo está muito lento. Tente novamente."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware de impressão digital não disponível."</string>
