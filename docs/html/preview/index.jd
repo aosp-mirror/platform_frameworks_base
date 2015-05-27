@@ -19,8 +19,8 @@ footer.hide=1
         <h1 class="dac-hero-title">Android M Developer Preview</h1>
         <p class="dac-hero-description">
           Get ready for the next version of Android. Test your apps on Nexus 5, 6, 9, and
-          Player. Explore what's new &mdash; a <strong>runtime permissions</strong> model,
-          power-saving <strong>Doze</strong> and <strong>Standby Mode</strong>, new
+          Player. Explore what's new &mdash; <strong>runtime permissions</strong>,
+          <strong>Doze</strong> and <strong>App Standby</strong> power-saving features, new
           <strong>assist technology</strong>, and more.
         </p>
 
