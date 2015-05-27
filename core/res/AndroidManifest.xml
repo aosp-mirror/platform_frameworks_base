@@ -2461,7 +2461,7 @@
 
     <!-- Allows applications to act as network scorers. @hide @SystemApi-->
     <permission android:name="android.permission.LOCAL_MAC_ADDRESS"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signatureOrSystem" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
