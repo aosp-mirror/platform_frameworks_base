@@ -775,6 +775,7 @@ sample_groups := -samplegroup Admin \
                  -samplegroup RenderScript \
                  -samplegroup Security \
                  -samplegroup Sensors \
+                 -samplegroup System \
                  -samplegroup Testing \
                  -samplegroup UI \
                  -samplegroup Views \
