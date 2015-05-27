@@ -19799,9 +19799,10 @@ package android.net.wifi {
     field public static final int REASON_NOT_AUTHORIZED = -4; // 0xfffffffc
     field public static final int REASON_SUCCEEDED = 0; // 0x0
     field public static final int REASON_UNSPECIFIED = -1; // 0xffffffff
-    field public static final int REPORT_EVENT_AFTER_BUFFER_FULL = 0; // 0x0
+    field public static final deprecated int REPORT_EVENT_AFTER_BUFFER_FULL = 0; // 0x0
     field public static final int REPORT_EVENT_AFTER_EACH_SCAN = 1; // 0x1
     field public static final int REPORT_EVENT_FULL_SCAN_RESULT = 2; // 0x2
+    field public static final int REPORT_EVENT_NO_BATCH = 4; // 0x4
     field public static final int WIFI_BAND_24_GHZ = 1; // 0x1
     field public static final int WIFI_BAND_5_GHZ = 2; // 0x2
     field public static final int WIFI_BAND_5_GHZ_DFS_ONLY = 4; // 0x4
