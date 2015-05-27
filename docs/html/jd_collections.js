@@ -349,9 +349,6 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/easy-signin.html",
       "distribute/analyze/build-better-apps.html",
       "distribute/engage/gcm.html",
-      "distribute/engage/app-updates.html",
-      "distribute/engage/community.html",
-      "distribute/engage/video.html"
     ]
   },
   "distribute/monetize": {
