@@ -276,7 +276,7 @@ public abstract class Drawable {
     public void setDither(boolean dither) {}
 
     /**
-     * @return whether this drawable dither its colors
+     * @return whether this drawable dithers its colors
      * @see #setDither(boolean)
      */
     public boolean getDither() {
@@ -295,7 +295,7 @@ public abstract class Drawable {
      * @return whether this drawable filters its bitmap
      * @see #setFilterBitmap(boolean)
      */
-    public boolean getFilterBitmap() {
+    public boolean isFilterBitmap() {
         return false;
     }
 
@@ -444,7 +444,7 @@ public abstract class Drawable {
     public final boolean setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
         if (mLayoutDirection != layoutDirection) {
             mLayoutDirection = layoutDirection;
-            return onLayoutDirectionChange(layoutDirection);
+            return onLayoutDirectionChanged(layoutDirection);
         }
         return false;
     }
@@ -457,7 +457,7 @@ public abstract class Drawable {
      *         the drawable to change and it needs to be re-drawn
      * @see #setLayoutDirection(int)
      */
-    public boolean onLayoutDirectionChange(@View.ResolvedLayoutDir int layoutDirection) {
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
         return false;
     }
 
