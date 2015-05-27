@@ -2787,7 +2787,9 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
+        // Transform the rect into window-relative coordinates.
         final AttachInfo attachInfo = mAttachInfo;
+        bounds.offset(0, attachInfo.mViewRootImpl.mScrollY);
         bounds.offset(-attachInfo.mWindowLeft, -attachInfo.mWindowTop);
         bounds.intersect(0, 0, attachInfo.mViewRootImpl.mWidth, attachInfo.mViewRootImpl.mHeight);
         return !bounds.isEmpty();
