@@ -2562,15 +2562,18 @@ public final class ActivityThread {
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
         Bundle data = new Bundle();
+        AssistStructure structure = null;
+        AssistContent content = new AssistContent();
         ActivityClientRecord r = mActivities.get(cmd.activityToken);
         if (r != null) {
             r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
             r.activity.onProvideAssistData(data);
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL) {
-                data.putParcelable(AssistStructure.ASSIST_KEY, new AssistStructure(r.activity));
-                AssistContent content = new AssistContent();
+                structure = new AssistStructure(r.activity);
                 Intent activityIntent = r.activity.getIntent();
-                if (activityIntent != null) {
+                if (activityIntent != null && (r.window == null ||
+                        (r.window.getAttributes().flags
+                                & WindowManager.LayoutParams.FLAG_SECURE) == 0)) {
                     Intent intent = new Intent(activityIntent);
                     intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                             | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
@@ -2580,15 +2583,14 @@ public final class ActivityThread {
                     content.setIntent(new Intent());
                 }
                 r.activity.onProvideAssistContent(content);
-                data.putParcelable(AssistContent.ASSIST_KEY, content);
             }
         }
-        if (data.isEmpty()) {
-            data = null;
+        if (structure == null) {
+            structure = new AssistStructure();
         }
         IActivityManager mgr = ActivityManagerNative.getDefault();
         try {
-            mgr.reportAssistContextExtras(cmd.requestToken, data);
+            mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content);
         } catch (RemoteException e) {
         }
     }
