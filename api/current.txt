@@ -30000,6 +30000,7 @@ package android.telecom {
     method public android.telecom.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
+    method public android.os.Bundle getIntentExtras();
     method public android.telecom.StatusHints getStatusHints();
     method public int getVideoState();
     method public static boolean hasProperty(int, int);
@@ -30054,6 +30055,7 @@ package android.telecom {
     method public final long getConnectionTime();
     method public final java.util.List<android.telecom.Connection> getConnections();
     method public final android.telecom.DisconnectCause getDisconnectCause();
+    method public final android.os.Bundle getExtras();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public final int getState();
     method public final android.telecom.StatusHints getStatusHints();
@@ -30076,6 +30078,7 @@ package android.telecom {
     method public final void setConnectionCapabilities(int);
     method public final void setConnectionTime(long);
     method public final void setDisconnected(android.telecom.DisconnectCause);
+    method public final void setExtras(android.os.Bundle);
     method public final void setOnHold();
     method public final void setStatusHints(android.telecom.StatusHints);
     method public final void setVideoProvider(android.telecom.Connection, android.telecom.Connection.VideoProvider);
@@ -30102,6 +30105,7 @@ package android.telecom {
     method public final java.util.List<android.telecom.Conferenceable> getConferenceables();
     method public final int getConnectionCapabilities();
     method public final android.telecom.DisconnectCause getDisconnectCause();
+    method public final android.os.Bundle getExtras();
     method public final int getState();
     method public final android.telecom.StatusHints getStatusHints();
     method public final android.telecom.Connection.VideoProvider getVideoProvider();
@@ -30129,6 +30133,7 @@ package android.telecom {
     method public final void setConnectionService(android.telecom.ConnectionService);
     method public final void setDialing();
     method public final void setDisconnected(android.telecom.DisconnectCause);
+    method public final void setExtras(android.os.Bundle);
     method public final void setInitialized();
     method public final void setInitializing();
     method public final void setNextPostDialChar(char);
@@ -30369,6 +30374,7 @@ package android.telecom {
     method public final int getConnectionCapabilities();
     method public final java.util.List<android.telecom.RemoteConnection> getConnections();
     method public android.telecom.DisconnectCause getDisconnectCause();
+    method public final android.os.Bundle getExtras();
     method public final int getState();
     method public void hold();
     method public void merge();
@@ -30391,6 +30397,7 @@ package android.telecom {
     method public void onConnectionRemoved(android.telecom.RemoteConference, android.telecom.RemoteConnection);
     method public void onDestroyed(android.telecom.RemoteConference);
     method public void onDisconnected(android.telecom.RemoteConference, android.telecom.DisconnectCause);
+    method public void onExtrasChanged(android.telecom.RemoteConference, android.os.Bundle);
     method public void onStateChanged(android.telecom.RemoteConference, int, int);
   }
 
@@ -30406,6 +30413,7 @@ package android.telecom {
     method public java.util.List<android.telecom.RemoteConnection> getConferenceableConnections();
     method public int getConnectionCapabilities();
     method public android.telecom.DisconnectCause getDisconnectCause();
+    method public final android.os.Bundle getExtras();
     method public int getState();
     method public android.telecom.StatusHints getStatusHints();
     method public void hold();
@@ -30431,6 +30439,7 @@ package android.telecom {
     method public void onConnectionCapabilitiesChanged(android.telecom.RemoteConnection, int);
     method public void onDestroyed(android.telecom.RemoteConnection);
     method public void onDisconnected(android.telecom.RemoteConnection, android.telecom.DisconnectCause);
+    method public void onExtrasChanged(android.telecom.RemoteConnection, android.os.Bundle);
     method public void onPostDialChar(android.telecom.RemoteConnection, char);
     method public void onPostDialWait(android.telecom.RemoteConnection, java.lang.String);
     method public void onRingbackRequested(android.telecom.RemoteConnection, boolean);

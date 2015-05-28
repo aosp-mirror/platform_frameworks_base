@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
@@ -317,6 +318,17 @@ final class RemoteConnectionService {
                     mOutgoingConnectionServiceRpc, connection);
 
             mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnction);
+        }
+
+        @Override
+        public void setExtras(String callId, Bundle extras) {
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setExtras")
+                        .setExtras(extras);
+            } else {
+                findConferenceForAction(callId, "setExtras")
+                        .setExtras(extras);
+            }
         }
     };
 
