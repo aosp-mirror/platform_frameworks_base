@@ -1704,12 +1704,26 @@ public class ScrollView extends FrameLayout {
         super.draw(canvas);
         if (mEdgeGlowTop != null) {
             final int scrollY = mScrollY;
+            final boolean clipToPadding = getClipToPadding();
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth() - mPaddingLeft - mPaddingRight;
-
-                canvas.translate(mPaddingLeft, Math.min(0, scrollY));
-                mEdgeGlowTop.setSize(width, getHeight());
+                final int width;
+                final int height;
+                final float translateX;
+                final float translateY;
+                if (clipToPadding) {
+                    width = getWidth() - mPaddingLeft - mPaddingRight;
+                    height = getHeight() - mPaddingTop - mPaddingBottom;
+                    translateX = mPaddingLeft;
+                    translateY = mPaddingTop;
+                } else {
+                    width = getWidth();
+                    height = getHeight();
+                    translateX = 0;
+                    translateY = 0;
+                }
+                canvas.translate(translateX, Math.min(0, scrollY) + translateY);
+                mEdgeGlowTop.setSize(width, height);
                 if (mEdgeGlowTop.draw(canvas)) {
                     postInvalidateOnAnimation();
                 }
@@ -1717,11 +1731,23 @@ public class ScrollView extends FrameLayout {
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth() - mPaddingLeft - mPaddingRight;
-                final int height = getHeight();
-
-                canvas.translate(-width + mPaddingLeft,
-                        Math.max(getScrollRange(), scrollY) + height);
+                final int width;
+                final int height;
+                final float translateX;
+                final float translateY;
+                if (clipToPadding) {
+                    width = getWidth() - mPaddingLeft - mPaddingRight;
+                    height = getHeight() - mPaddingTop - mPaddingBottom;
+                    translateX = mPaddingLeft;
+                    translateY = mPaddingTop;
+                } else {
+                    width = getWidth();
+                    height = getHeight();
+                    translateX = 0;
+                    translateY = 0;
+                }
+                canvas.translate(-width + translateX,
+                            Math.max(getScrollRange(), scrollY) + height + translateY);
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
