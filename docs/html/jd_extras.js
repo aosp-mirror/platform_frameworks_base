@@ -132,11 +132,22 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image":"images/cards/card-places_2x.png",
     "type":"Guide"
   },
-    {
+  {
+    "title":"GCM Client for Android",
+    "titleFriendly":"",
+    "summary":"Send push notifications and pubsub from your server to Android devices around the world.",
+    "url":"https://developers.google.com/cloud-messaging/android/client",
+    "group":"",
+    "keywords": ["push","gcm"],
+    "tags": [],
+    "image":"images/cards/card-google-cloud-messaging_16-9_2x.png",
+    "type":"Guide"
+  },
+  {
     "title":"Google Cloud Messaging",
     "titleFriendly":"",
-    "summary":"Send push notifications and pubsub from your server to your users’ devices around the world.",
-    "url":"https://developers.google.com/gcm/android/",
+    "summary":"Learn about GCM and the kinds of services you can offer to users through push notifications",
+    "url":"https://developers.google.com/cloud-messaging/gcm",
     "group":"",
     "keywords": ["push","gcm"],
     "tags": [],
