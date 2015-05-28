@@ -32,7 +32,7 @@ these helper runtimes, their characteristics, and how to use them.
 
 <p>Table 1 provides names, brief explanations, and features of runtimes available inthe NDK.</p>
 
-<p class="table-caption" id="table1">
+<p class="table-caption" id="runtimes">
   <strong>Table 1.</strong> NDK Runtimes and Features.</p>
 
 <table>
