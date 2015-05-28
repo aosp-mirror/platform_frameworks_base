@@ -20,8 +20,10 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -334,6 +336,7 @@ public abstract class Connection extends Conferenceable {
                 List<ConferenceParticipant> participants) {}
         public void onConferenceStarted() {}
         public void onConferenceMergeFailed(Connection c) {}
+        public void onExtrasChanged(Connection c, Bundle extras) {}
     }
 
     public static abstract class VideoProvider {
@@ -832,6 +835,7 @@ public abstract class Connection extends Conferenceable {
     private DisconnectCause mDisconnectCause;
     private Conference mConference;
     private ConnectionService mConnectionService;
+    private Bundle mExtras;
 
     /**
      * Create a new Connection.
@@ -939,6 +943,13 @@ public abstract class Connection extends Conferenceable {
      */
     public final StatusHints getStatusHints() {
         return mStatusHints;
+    }
+
+    /**
+     * @return The extras associated with this connection.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -1367,6 +1378,21 @@ public abstract class Connection extends Conferenceable {
             Log.d(this, "Conference reset");
             mConference = null;
             fireConferenceChanged();
+        }
+    }
+
+    /**
+     * Set some extras that can be associated with this {@code Connection}. No assumptions should
+     * be made as to how an In-Call UI or service will handle these extras.
+     * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras associated with this {@code Connection}.
+     */
+    public final void setExtras(@Nullable Bundle extras) {
+        checkImmutable();
+        mExtras = extras;
+        for (Listener l : mListeners) {
+            l.onExtrasChanged(this, extras);
         }
     }
 
