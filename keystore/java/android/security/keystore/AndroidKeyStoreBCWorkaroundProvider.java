@@ -58,17 +58,17 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
 
         // javax.crypto.Cipher
         putSymmetricCipherImpl("AES/ECB/NoPadding",
-                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$ECB$NoPadding");
+                PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$ECB$NoPadding");
         putSymmetricCipherImpl("AES/ECB/PKCS7Padding",
-                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$ECB$PKCS7Padding");
+                PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$ECB$PKCS7Padding");
 
         putSymmetricCipherImpl("AES/CBC/NoPadding",
-                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$CBC$NoPadding");
+                PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CBC$NoPadding");
         putSymmetricCipherImpl("AES/CBC/PKCS7Padding",
-                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$CBC$PKCS7Padding");
+                PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CBC$PKCS7Padding");
 
         putSymmetricCipherImpl("AES/CTR/NoPadding",
-                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$CTR$NoPadding");
+                PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CTR$NoPadding");
     }
 
     private void putMacImpl(String algorithm, String implClass) {
