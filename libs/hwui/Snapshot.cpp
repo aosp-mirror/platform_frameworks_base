@@ -36,6 +36,7 @@ Snapshot::Snapshot()
         , empty(false)
         , alpha(1.0f)
         , roundRectClipState(nullptr)
+        , projectionPathMask(nullptr)
         , mClipArea(&mClipAreaRoot) {
     transform = &mTransformRoot;
     region = nullptr;
@@ -54,6 +55,7 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , empty(false)
         , alpha(s->alpha)
         , roundRectClipState(s->roundRectClipState)
+        , projectionPathMask(s->projectionPathMask)
         , mClipArea(nullptr)
         , mViewportData(s->mViewportData)
         , mRelativeLightCenter(s->mRelativeLightCenter) {
@@ -141,6 +143,34 @@ void Snapshot::resetTransform(float x, float y, float z) {
     transform->loadTranslate(x, y, z);
 }
 
+void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
+    // build (reverse ordered) list of the stack of snapshots, terminated with a NULL
+    Vector<const Snapshot*> snapshotList;
+    snapshotList.push(nullptr);
+    const Snapshot* current = this;
+    do {
+        snapshotList.push(current);
+        current = current->previous.get();
+    } while (current);
+
+    // traverse the list, adding in each transform that contributes to the total transform
+    outTransform->loadIdentity();
+    for (size_t i = snapshotList.size() - 1; i > 0; i--) {
+        // iterate down the stack
+        const Snapshot* current = snapshotList[i];
+        const Snapshot* next = snapshotList[i - 1];
+        if (current->flags & kFlagIsFboLayer) {
+            // if we've hit a layer, translate by the layer's draw offset
+            outTransform->translate(current->layer->layer.left, current->layer->layer.top);
+        }
+        if (!next || (next->flags & kFlagIsFboLayer)) {
+            // if this snapshot is last, or if this snapshot is last before an
+            // FBO layer (which reset the transform), apply it
+            outTransform->multiply(*(current->transform));
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Clipping round rect
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,6 +219,18 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
 
     // store as immutable so, for this frame, pointer uniquely identifies this bundle of shader info
     roundRectClipState = state;
+}
+
+void Snapshot::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
+    if (path) {
+        ProjectionPathMask* mask = new (allocator) ProjectionPathMask;
+        mask->projectionMask = path;
+        buildScreenSpaceTransform(&(mask->projectionMaskTransform));
+
+        projectionPathMask = mask;
+    } else {
+        projectionPathMask = nullptr;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

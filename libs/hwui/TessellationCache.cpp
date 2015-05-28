@@ -207,6 +207,16 @@ static void mapPointFakeZ(Vector3& point, const mat4* transformXY, const mat4* t
     transformXY->mapPoint(point.x, point.y);
 }
 
+static void reverseVertexArray(Vertex* polygon, int len) {
+    int n = len / 2;
+    for (int i = 0; i < n; i++) {
+        Vertex tmp = polygon[i];
+        int k = len - 1 - i;
+        polygon[i] = polygon[k];
+        polygon[k] = tmp;
+    }
+}
+
 static void tessellateShadows(
         const Matrix4* drawTransform, const Rect* localClip,
         bool isCasterOpaque, const SkPath* casterPerimeter,
@@ -219,10 +229,9 @@ static void tessellateShadows(
     const float casterRefinementThresholdSquared = 4.0f;
     PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
             casterRefinementThresholdSquared, casterVertices2d);
-    if (!ShadowTessellator::isClockwisePath(*casterPerimeter)) {
-        ShadowTessellator::reverseVertexArray(casterVertices2d.editArray(),
-                casterVertices2d.size());
-    }
+
+    // Shadow requires CCW for now. TODO: remove potential double-reverse
+    reverseVertexArray(casterVertices2d.editArray(), casterVertices2d.size());
 
     if (casterVertices2d.size() == 0) return;
 

@@ -83,23 +83,6 @@ public:
     static bool isClockwise(const Vector2* polygon, int len);
 
     static Vector2 calculateNormal(const Vector2& p1, const Vector2& p2);
-    /**
-     * Determine whether the path is clockwise, using the control points.
-     *
-     * TODO: Given the skia is using inverted Y coordinate, shadow system needs
-     * to convert to the same coordinate to avoid the extra reverse.
-     *
-     * @param path The path to be examined.
-     */
-    static bool isClockwisePath(const SkPath &path);
-
-    /**
-     * Reverse the vertex array.
-     *
-     * @param polygon The vertex array to be reversed.
-     * @param len The length of the vertex array.
-     */
-    static void reverseVertexArray(Vertex* polygon, int len);
 
     static int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
             float divisor);

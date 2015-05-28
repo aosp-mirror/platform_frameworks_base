@@ -63,6 +63,7 @@ public:
     mat4 mMatrix;
     float mAlpha;
     const RoundRectClipState* mRoundRectClipState;
+    const ProjectionPathMask* mProjectionPathMask;
 };
 
 class OpStatePair {
