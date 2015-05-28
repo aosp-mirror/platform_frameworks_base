@@ -55,6 +55,7 @@ import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.os.storage.IMountService;
@@ -3285,12 +3286,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             // the PID of the new process, or else throw a RuntimeException.
             boolean isActivityProcess = (entryPoint == null);
             if (entryPoint == null) entryPoint = "android.app.ActivityThread";
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
+                    app.processName);
             checkTime(startTime, "startProcess: asking zygote to start proc");
             Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
                     app.info.dataDir, entryPointArgs);
             checkTime(startTime, "startProcess: returned from zygote!");
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             if (app.isolated) {
                 mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
