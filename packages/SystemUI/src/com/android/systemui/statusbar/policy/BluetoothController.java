@@ -35,7 +35,7 @@ public interface BluetoothController {
     void disconnect(CachedBluetoothDevice device);
 
     public interface Callback {
-        void onBluetoothStateChange(boolean enabled, boolean connecting);
+        void onBluetoothStateChange(boolean enabled);
         void onBluetoothDevicesChanged();
     }
 }
