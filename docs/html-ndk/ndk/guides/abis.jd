@@ -373,7 +373,7 @@ further information
 
 <h3 id="mips64">mips64</h3>
 <p>This ABI is for MIPS64 R6. For more information, see
-<a href="http://www.imgtec.com/mips/architectures/mips64.asp">MIPS Architecture</a>.</p>
+<a href="http://www.imgtec.com/mips/architectures/mips64.asp">MIPS64 Architecture</a>.</p>
 
 <h2 id="gc">Generating Code for a Specific ABI</h2>
 <p>By default, the NDK generates machine code for the armeabi ABI. You can
