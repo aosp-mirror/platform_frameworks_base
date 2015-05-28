@@ -116,7 +116,7 @@ of Android Studio to use for testing.</p>
 <h3 id="create">Create a new project</h3>
 
 <p>
-  We recommend using Android Studio for create a project with the preview. Follow the steps
+  We recommend using Android Studio to create a project with the preview. Follow the steps
   described in <a href="{@docRoot}sdk/installing/create-project.html">Creating a Project</a>
   until you arrive at the <em>Form Factors</em> screen in the project wizard. Then perform
   the following steps to create a project configured for the preview.
