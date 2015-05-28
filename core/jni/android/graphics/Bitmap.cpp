@@ -46,8 +46,8 @@ public:
         SkSafeUnref(mColorTable);
     }
 
-    void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable) {
-        if (kIndex_8_SkColorType != info.colorType()) {
+    void reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
+        if (kIndex_8_SkColorType != newInfo.colorType()) {
             ctable = nullptr;
         }
         mRowBytes = rowBytes;
@@ -56,13 +56,22 @@ public:
             mColorTable = ctable;
             SkSafeRef(mColorTable);
         }
+
+        // Need to validate the alpha type to filter against the color type
+        // to prevent things like a non-opaque RGB565 bitmap
+        SkAlphaType alphaType;
+        LOG_ALWAYS_FATAL_IF(!SkColorTypeValidateAlphaType(
+                newInfo.colorType(), newInfo.alphaType(), &alphaType),
+                "Failed to validate alpha type!");
+
         // Dirty hack is dirty
         // TODO: Figure something out here, Skia's current design makes this
         // really hard to work with. Skia really, really wants immutable objects,
         // but with the nested-ref-count hackery going on that's just not
         // feasible without going insane trying to figure it out
         SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
-        *myInfo = info;
+        *myInfo = newInfo;
+        changeAlphaType(alphaType);
 
         // Docs say to only call this in the ctor, but we're going to call
         // it anyway even if this isn't always the ctor.
@@ -252,6 +261,14 @@ void Bitmap::reconfigure(const SkImageInfo& info, size_t rowBytes,
 
 void Bitmap::reconfigure(const SkImageInfo& info) {
     reconfigure(info, info.minRowBytes(), nullptr);
+}
+
+void Bitmap::setAlphaType(SkAlphaType alphaType) {
+    if (!SkColorTypeValidateAlphaType(info().colorType(), alphaType, &alphaType)) {
+        return;
+    }
+
+    mPixelRef->changeAlphaType(alphaType);
 }
 
 void Bitmap::detachFromJava() {
@@ -861,10 +878,10 @@ static void Bitmap_setHasAlpha(JNIEnv* env, jobject, jlong bitmapHandle,
         jboolean hasAlpha, jboolean requestPremul) {
     LocalScopedBitmap bitmap(bitmapHandle);
     if (hasAlpha) {
-        bitmap->peekAtPixelRef()->changeAlphaType(
+        bitmap->setAlphaType(
                 requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType);
     } else {
-        bitmap->peekAtPixelRef()->changeAlphaType(kOpaque_SkAlphaType);
+        bitmap->setAlphaType(kOpaque_SkAlphaType);
     }
 }
 
@@ -873,9 +890,9 @@ static void Bitmap_setPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle,
     LocalScopedBitmap bitmap(bitmapHandle);
     if (!bitmap->info().isOpaque()) {
         if (isPremul) {
-            bitmap->peekAtPixelRef()->changeAlphaType(kPremul_SkAlphaType);
+            bitmap->setAlphaType(kPremul_SkAlphaType);
         } else {
-            bitmap->peekAtPixelRef()->changeAlphaType(kUnpremul_SkAlphaType);
+            bitmap->setAlphaType(kUnpremul_SkAlphaType);
         }
     }
 }

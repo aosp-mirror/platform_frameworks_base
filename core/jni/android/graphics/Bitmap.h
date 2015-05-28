@@ -71,6 +71,7 @@ public:
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     void reconfigure(const SkImageInfo& info);
+    void setAlphaType(SkAlphaType alphaType);
 
     void getSkBitmap(SkBitmap* outBitmap);
     void detachFromJava();
