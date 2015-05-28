@@ -149,9 +149,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     private final BluetoothController.Callback mCallback = new BluetoothController.Callback() {
         @Override
-        public void onBluetoothStateChange(boolean enabled, boolean connecting) {
+        public void onBluetoothStateChange(boolean enabled) {
             refreshState();
         }
+
         @Override
         public void onBluetoothDevicesChanged() {
             mUiHandler.post(new Runnable() {
