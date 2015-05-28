@@ -18,10 +18,10 @@ page.image=images/cards/card-api-overview_16-9_2x.png
   <li><a href="#app-linking">App Linking</a></li>
   <li><a href="#backup">Auto Backup for Apps</a></li>
   <li><a href="#authentication">Authentication</a>
-    <ul>
+    <ol>
       <li><a href="#fingerprint-authentication">Fingerprint Authentication</a></li>
       <li><a href="#confirm-credentials">Confirm Credentials</a></li>
-    </ul>
+    </ol>
   </li>
   <li><a href="#direct-share">Direct Share</a></li>
   <li><a href="#voice-interactions">Voice Interactions</a></li>
@@ -35,10 +35,10 @@ page.image=images/cards/card-api-overview_16-9_2x.png
   <li><a href="#audio">Audio Features</a></li>
   <li><a href="#video">Video Features</a></li>
   <li><a href="#camera">Camera Features</a>
-    <ul>
+    <ol>
       <li><a href="#flashlight">Flashlight API</a></li>
       <li><a href="#reprocessing">Camera Reprocessing</a></li>
-    </ul>
+    </ol>
   </li>
   <li><a href="#afw">Android for Work Features</a></li>
 </ol>
