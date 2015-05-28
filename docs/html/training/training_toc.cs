@@ -1654,6 +1654,14 @@ results."
     </ul>
   </li> <!-- end of Background Jobs -->
 
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/best-performance.html">
+      <span class="small">Best Practices for</span><br/>
+              Performance
+      </a>
+    </div>
+    <ul>
       <li>
         <a href="<?cs var:toroot ?>training/articles/memory.html"
           description=
@@ -1661,7 +1669,6 @@ results."
           on a variety of mobile devices."
           >Managing Your App's Memory</a>
       </li>
-
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
            description=
@@ -1669,7 +1676,6 @@ results."
            responsiveness and battery efficiency."
           >Performance Tips</a>
       </li>
-
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/improving-layouts/index.html"
@@ -1697,7 +1703,6 @@ results."
           </li>
         </ul>
       </li>
-
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/monitoring-device-state/index.html"
@@ -1707,7 +1712,8 @@ results."
              description=
              "How to minimize the amount of power your app requires by adapting to current
              power conditions and performing power-hungry tasks at proper intervals."
-            >Optimizing Battery Life</a>
+            >Optimizing Battery Life
+            </a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/battery-monitoring.html"
@@ -1763,7 +1769,6 @@ results."
           </li>
         </ul>
       </li>
-
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-anr.html"
            description=
@@ -1771,7 +1776,6 @@ results."
            display an &quot;Application Not Responding&quot; dialog."
           >Keeping Your App Responsive</a>
       </li>
-
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-jni.html"
            description=
@@ -1786,8 +1790,6 @@ results."
       </li>
     </ul>
   </li> <!-- end of Performance -->
-
-
 
   <li class="nav-section">
     <div class="nav-section-header">
