@@ -502,12 +502,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         return doVerifyPattern(pattern, true, challenge, userId);
     }
 
-    private VerifyCredentialResponse doVerifyPattern(String pattern, boolean hasChallenge, long challenge,
-            int userId) throws RemoteException {
+    private VerifyCredentialResponse doVerifyPattern(String pattern, boolean hasChallenge,
+            long challenge, int userId) throws RemoteException {
        checkPasswordReadPermission(userId);
        CredentialHash storedHash = mStorage.readPatternHash(userId);
-       return verifyCredential(userId, storedHash, pattern, hasChallenge,
-               challenge,
+       boolean shouldReEnrollBaseZero = storedHash != null && storedHash.isBaseZeroPattern;
+
+       String patternToVerify;
+       if (shouldReEnrollBaseZero) {
+           patternToVerify = LockPatternUtils.patternStringToBaseZero(pattern);
+       } else {
+           patternToVerify = pattern;
+       }
+
+       VerifyCredentialResponse response = verifyCredential(userId, storedHash, patternToVerify,
+               hasChallenge, challenge,
                new CredentialUtil() {
                    @Override
                    public void setCredential(String pattern, String oldPattern, int userId)
@@ -517,11 +526,19 @@ public class LockSettingsService extends ILockSettings.Stub {
 
                    @Override
                    public byte[] toHash(String pattern, int userId) {
-                       return mLockPatternUtils.patternToHash(
-                               mLockPatternUtils.stringToPattern(pattern));
+                       return LockPatternUtils.patternToHash(
+                               LockPatternUtils.stringToPattern(pattern));
                    }
                }
        );
+
+       if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK
+               && shouldReEnrollBaseZero) {
+           setLockPattern(pattern, patternToVerify, userId);
+       }
+
+       return response;
+
     }
 
     @Override
