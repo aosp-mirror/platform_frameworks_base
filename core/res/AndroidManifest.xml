@@ -349,14 +349,14 @@
         android:description="@string/permdesc_writeContacts"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to read the user's personal profile data. -->
+    <!-- @deprecated No longer enforced. This was last enforced in API version 22. -->
     <permission android:name="android.permission.READ_PROFILE"
         android:permissionGroup="android.permission-group.CONTACTS"
         android:label="@string/permlab_readProfile"
         android:description="@string/permdesc_readProfile"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to write the user's personal profile data. -->
+    <!-- @deprecated No longer enforced. This was last enforced in API version 22. -->
     <permission android:name="android.permission.WRITE_PROFILE"
         android:permissionGroup="android.permission-group.CONTACTS"
         android:label="@string/permlab_writeProfile"
