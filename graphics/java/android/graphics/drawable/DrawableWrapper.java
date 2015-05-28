@@ -180,7 +180,8 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations()
-                | (mState != null ? mState.getChangingConfigurations() : 0);
+                | (mState != null ? mState.getChangingConfigurations() : 0)
+                | mDrawable.getChangingConfigurations();
     }
 
     @Override
@@ -366,15 +367,12 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     /**
-     * Called during inflation to inflate the child element.
+     * Called during inflation to inflate the child element. The last valid
+     * child element will take precedence over any other child elements or
+     * explicit drawable attribute.
      */
     void inflateChildDrawable(Resources r, XmlPullParser parser, AttributeSet attrs,
             Resources.Theme theme) throws XmlPullParserException, IOException {
-        // Drawable specified on the root element takes precedence.
-        if (getDrawable() != null) {
-            return;
-        }
-
         // Seek to the first child element.
         Drawable dr = null;
         int type;
@@ -383,7 +381,6 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type == XmlPullParser.START_TAG) {
                 dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
-                break;
             }
         }
 
