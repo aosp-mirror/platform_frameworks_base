@@ -257,7 +257,8 @@ LOCAL_MODULE:= libandroid_runtime
 
 # -Wno-unknown-pragmas: necessary for Clang as the GL bindings need to turn
 #                       off a GCC warning that Clang doesn't know.
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code -Wno-unknown-pragmas
+LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunreachable-code \
+        -Wno-unknown-pragmas
 
 # -Wno-c++11-extensions: Clang warns about Skia using the C++11 override keyword, but this project
 #                        is not being compiled with that level. Remove once this has changed.
