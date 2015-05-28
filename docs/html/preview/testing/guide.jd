@@ -7,7 +7,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#runtime-permissions">Testing Runtime Permissions</a></li>
+        <li><a href="#runtime-permissions">Testing Permissions</a></li>
         <li><a href="#doze-standby">Testing Doze and App Standby</a></li>
       </ol>
   </div>
@@ -29,7 +29,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
 </p>
 
 <ul>
-  <li><a href="#runtime-permissions">Runtime Permissions</a>
+  <li><a href="#runtime-permissions">Permissions</a>
   </li>
   <li><a href="#doze-mode">Doze and App Standby</a>
   </li>
@@ -41,10 +41,10 @@ page.image=images/cards/card-set-up_16-9_2x.png
 </p>
 
 
-<h2 id="runtime-permissions">Testing Runtime Permissions</h2>
+<h2 id="runtime-permissions">Testing Permissions</h2>
 
 <p>
-  The <a href="{@docRoot}preview/features/runtime-permissions.html">Runtime Permissions</a> feature
+  The new <a href="{@docRoot}preview/features/runtime-permissions.html">Permissions</a> model
   changes the way that permissions are allocated to your app by the user. Instead of granting all
   permissions during the install procedure, your app must ask the user for individual permissions
   at runtime. For users this behavior provides more granular control over each app’s activities, as
@@ -89,7 +89,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
 <h3 id="permission-test-strategy">Test strategy</h3>
 
 <p>
-  The Runtime Permissions change affects the structure and design of your app, as well as
+  The permissions change affects the structure and design of your app, as well as
   the user experience and flows you provide to users. You should assess your app’s current
   permissions use and start planning for the new flows you want to offer. The official release of
   the platform provides compatibility behavior, but you should plan on updating your app and not
@@ -112,8 +112,8 @@ page.image=images/cards/card-set-up_16-9_2x.png
 </p>
 
 <p>
-  For more information on the behavior of Runtime Permissions, testing, and best practices, see the
-  <a href="{@docRoot}preview/features/runtime-permissions.html">Runtime Permissions</a> developer
+  For more information on the behavior of runtime permissions, testing, and best practices, see the
+  <a href="{@docRoot}preview/features/runtime-permissions.html">Permissions</a> developer
   preview page.
 </p>
 
