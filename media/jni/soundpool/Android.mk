@@ -18,6 +18,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE:= libsoundpool
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)
