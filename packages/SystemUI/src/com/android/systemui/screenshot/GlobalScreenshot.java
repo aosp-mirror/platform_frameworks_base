@@ -253,6 +253,17 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
+            OutputStream out = resolver.openOutputStream(uri);
+            image.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+
+            // Update file size in the database
+            values.clear();
+            values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
+            resolver.update(uri, values, null, null);
+
+            // Create a share action for the notification
             final PendingIntent callback = PendingIntent.getBroadcast(context, 0,
                     new Intent(context, GlobalScreenshot.TargetChosenReceiver.class)
                             .putExtra(GlobalScreenshot.CANCEL_ID, mNotificationId),
@@ -261,21 +272,19 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                     callback.getIntentSender());
             chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
+            mNotificationBuilder.addAction(R.drawable.ic_screenshot_share,
+                    r.getString(com.android.internal.R.string.share),
+                    PendingIntent.getActivity(context, 0, chooserIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT));
 
-            mNotificationBuilder.addAction(R.drawable.ic_menu_share,
-                     r.getString(com.android.internal.R.string.share),
-                     PendingIntent.getActivity(context, 0, chooserIntent,
-                             PendingIntent.FLAG_CANCEL_CURRENT));
-
-            OutputStream out = resolver.openOutputStream(uri);
-            image.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-
-            // update file size in the database
-            values.clear();
-            values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
-            resolver.update(uri, values, null, null);
+            // Create a delete action for the notification
+            final PendingIntent deleteAction = PendingIntent.getBroadcast(context,  0,
+                    new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
+                            .putExtra(GlobalScreenshot.CANCEL_ID, mNotificationId)
+                            .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+            mNotificationBuilder.addAction(R.drawable.ic_screenshot_delete,
+                    r.getString(com.android.internal.R.string.delete), deleteAction);
 
             params[0].imageUri = uri;
             params[0].image = null;
@@ -349,6 +358,29 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 }
 
 /**
+ * An AsyncTask that deletes an image from the media store in the background.
+ */
+class DeleteImageInBackgroundTask extends AsyncTask<Uri, Void, Void> {
+    private static final String TAG = "DeleteImageInBackgroundTask";
+
+    private Context mContext;
+
+    DeleteImageInBackgroundTask(Context context) {
+        mContext = context;
+    }
+
+    @Override
+    protected Void doInBackground(Uri... params) {
+        if (params.length != 1) return null;
+
+        Uri screenshotUri = params[0];
+        ContentResolver resolver = mContext.getContentResolver();
+        resolver.delete(screenshotUri, null, null);
+        return null;
+    }
+}
+
+/**
  * TODO:
  *   - Performance when over gl surfaces? Ie. Gallery
  *   - what do we say in the Toast? Which icon do we get if the user uses another
@@ -358,6 +390,7 @@ class GlobalScreenshot {
     private static final String TAG = "GlobalScreenshot";
 
     static final String CANCEL_ID = "android:cancel_id";
+    static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
 
     private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
     private static final int SCREENSHOT_DROP_IN_DURATION = 430;
@@ -761,11 +794,33 @@ class GlobalScreenshot {
                 return;
             }
 
+            // Clear the notification
             final NotificationManager nm =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
             final int id = intent.getIntExtra(CANCEL_ID, 0);
             nm.cancel(id);
+        }
+    }
+
+    /**
+     * Removes the last screenshot.
+     */
+    public static class DeleteScreenshotReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!intent.hasExtra(CANCEL_ID) || !intent.hasExtra(SCREENSHOT_URI_ID)) {
+                return;
+            }
+
+            // Clear the notification
+            final NotificationManager nm =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            final int id = intent.getIntExtra(CANCEL_ID, 0);
+            final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
+            nm.cancel(id);
+
+            // And delete the image from the media store
+            new DeleteImageInBackgroundTask(context).execute(uri);
         }
     }
 }
