@@ -19,6 +19,7 @@ package android.provider;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
+import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.Voicemail;
 
@@ -211,13 +213,17 @@ public class VoicemailContract {
         // that was encoded into call log databases.
 
         /**
-         * The component name of the account in string form.
+         * The {@link ComponentName} of the {@link PhoneAccount} in string form. The
+         * {@link PhoneAccount} of the voicemail is used to differentiate voicemails from different
+         * sources.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
 
         /**
-         * The identifier of a account that is unique to a specified component.
+         * The identifier of a {@link PhoneAccount} that is unique to a specified
+         * {@link ComponentName}. The {@link PhoneAccount} of the voicemail is used to differentiate
+         * voicemails from different sources.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_ID = "subscription_id";
@@ -340,13 +346,15 @@ public class VoicemailContract {
         // PHONE_ACCOUNT_* fields.
 
         /**
-         * The component name of the account in string form.
+         * The {@link ComponentName} of the {@link PhoneAccount} in string form. The
+         * {@link PhoneAccount} differentiates voicemail sources from the same package.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_COMPONENT_NAME = "phone_account_component_name";
 
         /**
-         * The identifier of a account that is unique to a specified component.
+         * The identifier of a {@link PhoneAccount} that is unique to a specified component. The
+         * {@link PhoneAccount} differentiates voicemail sources from the same package.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_ID = "phone_account_id";
