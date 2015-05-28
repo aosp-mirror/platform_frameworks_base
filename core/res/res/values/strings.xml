@@ -3044,6 +3044,11 @@
     <!-- Description of an application permission that lets it read install sessions. -->
     <string name="permdesc_readInstallSessions">Allows an application to read install sessions. This allows it to see details about active package installations.</string>
 
+    <!-- Title of an application permission that lets it read install sessions. -->
+    <string name="permlab_requestInstallPackages">Request install packages</string>
+    <!-- Description of an application permission that lets it read install sessions. -->
+    <string name="permdesc_requestInstallPackages">Allows an application to request installation of packages.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 
