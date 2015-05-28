@@ -583,6 +583,147 @@ public abstract class CameraDevice implements AutoCloseable {
             throws CameraAccessException;
 
     /**
+     * <p>Create a new constrained high speed capture session.</p>
+     *
+     * <p>The application can use normal capture session (created via {@link #createCaptureSession})
+     * for high speed capture if the desired high speed FPS ranges are advertised by
+     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES}, in which case all API
+     * semantics associated with normal capture sessions applies.</p>
+     *
+     * <p>The method creates a specialized capture session that is only targeted at high speed
+     * video recording (>=120fps) use case if the camera device supports high speed video
+     * capability (i.e., {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} contains
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}).
+     * Therefore, it has special characteristics compared with a normal capture session:</p>
+     *
+     * <ul>
+     *
+     * <li>In addition to the output target Surface requirements specified by the
+     *   {@link #createCaptureSession} method, an active high speed capture session will support up
+     *   to 2 output Surfaces, though the application might choose to configure just one Surface
+     *   (e.g., preview only). All Surfaces must be either video encoder surfaces (acquired by
+     *   {@link android.media.MediaRecorder#getSurface} or
+     *   {@link android.media.MediaCodec#createInputSurface}) or preview surfaces (obtained from
+     *   {@link android.view.SurfaceView}, {@link android.graphics.SurfaceTexture} via
+     *   {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}). The Surface sizes
+     *   must be one of the sizes reported by {@link StreamConfigurationMap#getHighSpeedVideoSizes}.
+     *   When multiple Surfaces are configured, their size must be same.</li>
+     *
+     * <li>An active high speed capture session only accepts request lists created via
+     *   {@link #createConstrainedHighSpeedRequestList}, and the request list can only be submitted
+     *   to this session via {@link CameraCaptureSession#captureBurst captureBurst}, or
+     *   {@link CameraCaptureSession#setRepeatingBurst setRepeatingBurst}.</li>
+     *
+     * <li>The FPS ranges being requested to this session must be selected from
+     *   {@link StreamConfigurationMap#getHighSpeedVideoFpsRangesFor}. The application can still use
+     *   {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE} to control the desired FPS range.
+     *   Switching to an FPS range that has different
+     *   {@link android.util.Range#getUpper() maximum FPS} may trigger some camera device
+     *   reconfigurations, which may introduce extra latency. It is recommended that the
+     *   application avoids unnecessary maximum target FPS changes as much as possible during high
+     *   speed streaming.</li>
+     *
+     * <li>For the request lists submitted to this session, the camera device will override the
+     *   {@link CaptureRequest#CONTROL_MODE control mode}, auto-exposure (AE), auto-white balance
+     *   (AWB) and auto-focus (AF) to {@link CameraMetadata#CONTROL_MODE_AUTO},
+     *   {@link CameraMetadata#CONTROL_AE_MODE_ON}, {@link CameraMetadata#CONTROL_AWB_MODE_AUTO}
+     *   and {@link CameraMetadata#CONTROL_AF_MODE_CONTINUOUS_VIDEO}, respectively. All
+     *   post-processing block mode controls will be overridden to be FAST. Therefore, no manual
+     *   control of capture and post-processing parameters is possible. Beside these, only a subset
+     *   of controls will work, see
+     *   {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO} for
+     *   more details.</li>
+     *
+     * </ul>
+     *
+     * @param outputs The new set of Surfaces that should be made available as
+     *                targets for captured high speed image data.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
+     *                                  the callback is null, or the handler is null but the current
+     *                                  thread has no looper, or the camera device doesn't support
+     *                                  high speed video capability.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #createCaptureSession
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see StreamConfigurationMap#getHighSpeedVideoSizes
+     * @see StreamConfigurationMap#getHighSpeedVideoFpsRangesFor
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
+     * @see CameraCaptureSession#captureBurst
+     * @see CameraCaptureSession#setRepeatingBurst
+     * @see #createConstrainedHighSpeedRequestList
+     */
+    public abstract void createConstrainedHighSpeedCaptureSession(@NonNull List<Surface> outputs,
+            @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+
+    /**
+     * <p>Create a unmodifiable list of requests that is suitable for constrained high speed capture
+     * session streaming.</p>
+     *
+     * <p>High speed video streaming creates significant performance pressue on the camera device,
+     * so to achieve efficient high speed streaming, the camera device may have to aggregate
+     * multiple frames together. This means requests must be sent in batched groups, with all
+     * requests sharing the same settings. This method takes the list of output target
+     * Surfaces (subject to the output Surface requirements specified by the contrained high speed
+     * session) and a {@link CaptureRequest request}, and generates a request list that has the same
+     * controls for each request. The input {@link CaptureRequest request} must contain the target
+     * output Surfaces and target high speed FPS range that is one of the
+     * {@link StreamConfigurationMap#getHighSpeedVideoFpsRangesFor} for the Surface size.</p>
+     *
+     * <p>If both preview and recording Surfaces are specified in the {@code request}, the
+     * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE target FPS range} in the input
+     * {@link CaptureRequest request} must be a fixed framerate FPS range, where the
+     * {@link android.util.Range#getLower minimal FPS} ==
+     * {@link android.util.Range#getUpper() maximum FPS}. The created request list will contain
+     * a interleaved request pattern such that the preview output FPS is at least 30fps, the
+     * recording output FPS is {@link android.util.Range#getUpper() maximum FPS} of the requested
+     * FPS range. The application can submit this request list directly to an active high speed
+     * capture session to achieve high speed video recording. When only preview or recording
+     * Surface is specified, this method will return a list of request that have the same controls
+     * and output targets for all requests.</p>
+     *
+     * <p>Submitting a request list created by this method to a normal capture session will result
+     * in an {@link IllegalArgumentException} if the high speed
+     * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE FPS range} is not supported by
+     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES}.</p>
+     *
+     * @param request The high speed capture request that will be used to generate the high speed
+     *                request list.
+     * @return A unmodifiable CaptureRequest list that is suitable for constrained high speed
+     *         capture.
+     *
+     * @throws IllegalArgumentException if the set of output Surfaces in the request do not meet the
+     *                                  high speed video capability requirements, or the camera
+     *                                  device doesn't support high speed video capability, or the
+     *                                  request doesn't meet the high speed video capability
+     *                                  requirements, or the request doesn't contain the required
+     *                                  controls for high speed capture.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #createConstrainedHighSpeedCaptureSession
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see StreamConfigurationMap#getHighSpeedVideoSizes
+     * @see StreamConfigurationMap#getHighSpeedVideoFpsRangesFor
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
+     */
+    @NonNull
+    public abstract List<CaptureRequest> createConstrainedHighSpeedRequestList(
+            @NonNull CaptureRequest request)throws CameraAccessException;
+
+    /**
      * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
      * initialized with template for a target use case. The settings are chosen
      * to be the best options for the specific camera device, so it is not

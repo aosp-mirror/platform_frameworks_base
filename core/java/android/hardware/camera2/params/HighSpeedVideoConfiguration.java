@@ -33,6 +33,7 @@ import android.util.Size;
  * @hide
  */
 public final class HighSpeedVideoConfiguration {
+    static final private int HIGH_SPEED_MAX_MINIMAL_FPS = 120;
 
     /**
      * Create a new {@link HighSpeedVideoConfiguration}.
@@ -48,15 +49,18 @@ public final class HighSpeedVideoConfiguration {
      * @hide
      */
     public HighSpeedVideoConfiguration(
-            final int width, final int height, final int fpsMin, final int fpsMax) {
-        if (fpsMax < 60) {
-            throw new IllegalArgumentException("fpsMax must be at least 60");
+            final int width, final int height, final int fpsMin, final int fpsMax,
+            final int batchSizeMax) {
+        if (fpsMax < HIGH_SPEED_MAX_MINIMAL_FPS) {
+            throw new IllegalArgumentException("fpsMax must be at least " +
+                    HIGH_SPEED_MAX_MINIMAL_FPS);
         }
         mFpsMax = fpsMax;
         mWidth = checkArgumentPositive(width, "width must be positive");
         mHeight = checkArgumentPositive(height, "height must be positive");
         mFpsMin = checkArgumentPositive(fpsMin, "fpsMin must be positive");
         mSize = new Size(mWidth, mHeight);
+        mBatchSizeMax = checkArgumentPositive(batchSizeMax, "batchSizeMax must be positive");
         mFpsRange = new Range<Integer>(mFpsMin, mFpsMax);
     }
 
@@ -106,9 +110,18 @@ public final class HighSpeedVideoConfiguration {
     }
 
     /**
+     * Convenience method to return the max batch size of this high speed video configuration.
+     *
+     * @return the maximal batch size for this high speed video configuration
+     */
+    public int getBatchSizeMax() {
+        return mBatchSizeMax;
+    }
+
+    /**
      * Convenience method to return the FPS range of this high speed video configuration.
      *
-     * @return a Range with high bound >= 60
+     * @return a Range with high bound >= {@value #HIGH_SPEED_MAX_MINIMAL_FPS}
      */
     public Range<Integer> getFpsRange() {
         return mFpsRange;
@@ -135,7 +148,8 @@ public final class HighSpeedVideoConfiguration {
             return mWidth == other.mWidth &&
                     mHeight == other.mHeight &&
                     mFpsMin == other.mFpsMin &&
-                    mFpsMax == other.mFpsMax;
+                    mFpsMax == other.mFpsMax &&
+                    mBatchSizeMax == other.mBatchSizeMax;
         }
         return false;
     }
@@ -152,6 +166,7 @@ public final class HighSpeedVideoConfiguration {
     private final int mHeight;
     private final int mFpsMin;
     private final int mFpsMax;
+    private final int mBatchSizeMax;
     private final Size mSize;
     private final Range<Integer> mFpsRange;
 }

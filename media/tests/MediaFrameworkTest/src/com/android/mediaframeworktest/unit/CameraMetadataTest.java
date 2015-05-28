@@ -731,27 +731,31 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     @SmallTest
     public void testReadWriteHighSpeedVideoConfiguration() {
-        // int32 x 4 x 1
+        // int32 x 5 x 1
         checkKeyMarshal("android.control.availableHighSpeedVideoConfigurations",
                 new HighSpeedVideoConfiguration(
-                        /*width*/1000, /*height*/255, /*fpsMin*/30, /*fpsMax*/200),
+                        /*width*/1000, /*height*/255, /*fpsMin*/30, /*fpsMax*/200,
+                        /*batchSizeMax*/8),
                 /* width, height, fpsMin, fpsMax */
-                toByteArray(1000, 255, 30, 200));
+                toByteArray(1000, 255, 30, 200, 8));
 
-        // int32 x 4 x 3
+        // int32 x 5 x 3
         checkKeyMarshal("android.control.availableHighSpeedVideoConfigurations",
                 new HighSpeedVideoConfiguration[] {
                     new HighSpeedVideoConfiguration(
-                            /*width*/1280, /*height*/720, /*fpsMin*/60, /*fpsMax*/120),
+                            /*width*/1280, /*height*/720, /*fpsMin*/60, /*fpsMax*/120,
+                            /*batchSizeMax*/8),
                     new HighSpeedVideoConfiguration(
-                            /*width*/123, /*height*/456, /*fpsMin*/1, /*fpsMax*/200),
+                            /*width*/123, /*height*/456, /*fpsMin*/1, /*fpsMax*/200,
+                            /*batchSizeMax*/4),
                     new HighSpeedVideoConfiguration(
-                            /*width*/4096, /*height*/2592, /*fpsMin*/30, /*fpsMax*/60)
+                            /*width*/4096, /*height*/2592, /*fpsMin*/30, /*fpsMax*/60,
+                            /*batchSizeMax*/2)
                 },
                 toByteArray(
-                        1280, 720, 60, 120,
-                        123, 456, 1, 200,
-                        4096, 2592, 30, 60
+                        1280, 720, 60, 120, 8,
+                        123, 456, 1, 200, 4,
+                        4096, 2592, 30, 60, 2
         ));
     }
 
