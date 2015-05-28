@@ -295,11 +295,8 @@ class="en">Support Library</span></a></div>
   </li><!-- end of support library -->
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/data-binding/index.html"><span
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>tools/data-binding/index.html"><span
 class="en">Data Binding Library</span></a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/data-binding/guide.html">Guide</a></li>
-    </ul>
   </li><!-- end of support library -->
 
 
