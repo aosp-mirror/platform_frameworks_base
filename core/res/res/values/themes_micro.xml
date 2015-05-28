@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <resources>
-    <style name="Theme.Micro" parent="Theme.Material.NoActionBar">
+    <style name="Theme.MicroBase" parent="Theme.Material.NoActionBar">
         <item name="alertDialogTheme">@style/Theme.Micro.Dialog.Alert</item>
         <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
         <item name="dialogTheme">@style/Theme.Micro.Dialog</item>
@@ -29,7 +29,10 @@
         <item name="windowOverscan">true</item>
     </style>
 
-    <style name="Theme.Micro.Light" parent="Theme.Material.Light.NoActionBar">
+    <style name="Theme.Micro" parent="Theme.MicroBase">
+    </style>
+
+    <style name="Theme.Micro.LightBase" parent="Theme.Material.Light.NoActionBar">
         <item name="alertDialogTheme">@style/Theme.Micro.Dialog.Alert</item>
         <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
         <item name="dialogTheme">@style/Theme.Micro.Dialog</item>
@@ -44,7 +47,11 @@
         <item name="windowOverscan">true</item>
     </style>
 
-    <style name="Theme.Micro.Dialog" parent="Theme.Material.Light.Dialog">
+    <!-- Indirection needed for overlays to make sure there is a common base parent -->
+    <style name="Theme.Micro.Light" parent="Theme.Micro.LightBase">
+    </style>
+
+    <style name="Theme.Micro.DialogBase" parent="Theme.Material.Light.Dialog">
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Micro</item>
         <item name="windowIsFloating">false</item>
         <item name="windowFullscreen">true</item>
@@ -52,6 +59,10 @@
         <item name="textAppearanceInverse">@style/TextAppearance.Micro</item>
         <!-- Required to force windowInsets dispatch through application UI. -->
         <item name="windowOverscan">true</item>
+    </style>
+
+    <!-- Indirection needed for overlays to make sure there is a common base parent -->
+    <style name="Theme.Micro.Dialog" parent="Theme.Micro.DialogBase">
     </style>
 
     <style name="Theme.Micro.Dialog.Alert">
