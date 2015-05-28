@@ -17,6 +17,8 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
@@ -61,6 +63,7 @@ public class RankingHelper implements RankingConfig {
 
     private final ArrayMap<String, Record> mRecords = new ArrayMap<>(); // pkg|uid => Record
     private final ArrayMap<String, NotificationRecord> mProxyByGroupTmp = new ArrayMap<>();
+    private final ArrayMap<String, Record> mRestoredWithoutUids = new ArrayMap<>(); // pkg => Record
 
     private final Context mContext;
     private final Handler mRankingHandler;
@@ -119,12 +122,15 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
-    public void readXml(XmlPullParser parser) throws XmlPullParserException, IOException {
+    public void readXml(XmlPullParser parser, boolean forRestore)
+            throws XmlPullParserException, IOException {
+        final PackageManager pm = mContext.getPackageManager();
         int type = parser.getEventType();
         if (type != XmlPullParser.START_TAG) return;
         String tag = parser.getName();
         if (!TAG_RANKING.equals(tag)) return;
         mRecords.clear();
+        mRestoredWithoutUids.clear();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
             if (type == XmlPullParser.END_TAG && TAG_RANKING.equals(tag)) {
@@ -132,21 +138,38 @@ public class RankingHelper implements RankingConfig {
             }
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_PACKAGE.equals(tag)) {
-                    int uid = safeInt(parser, ATT_UID, UserHandle.USER_ALL);
+                    int uid = safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
                     int priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
                     boolean peekable = safeBool(parser, ATT_PEEKABLE, DEFAULT_PEEKABLE);
                     int vis = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
                     String name = parser.getAttributeValue(null, ATT_NAME);
 
                     if (!TextUtils.isEmpty(name)) {
+                        if (forRestore) {
+                            try {
+                                uid = pm.getPackageUid(name, UserHandle.USER_OWNER);
+                            } catch (NameNotFoundException e) {
+                                // noop
+                            }
+                        }
+                        Record r = null;
+                        if (uid == Record.UNKNOWN_UID) {
+                            r = mRestoredWithoutUids.get(name);
+                            if (r == null) {
+                                r = new Record();
+                                mRestoredWithoutUids.put(name, r);
+                            }
+                        } else {
+                            r = getOrCreateRecord(name, uid);
+                        }
                         if (priority != DEFAULT_PRIORITY) {
-                            getOrCreateRecord(name, uid).priority = priority;
+                            r.priority = priority;
                         }
                         if (peekable != DEFAULT_PEEKABLE) {
-                            getOrCreateRecord(name, uid).peekable = peekable;
+                            r.peekable = peekable;
                         }
                         if (vis != DEFAULT_VISIBILITY) {
-                            getOrCreateRecord(name, uid).visibility = vis;
+                            r.visibility = vis;
                         }
                     }
                 }
@@ -182,13 +205,16 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
-    public void writeXml(XmlSerializer out) throws IOException {
+    public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
         out.startTag(null, TAG_RANKING);
         out.attribute(null, ATT_VERSION, Integer.toString(XML_VERSION));
 
         final int N = mRecords.size();
         for (int i = 0; i < N; i++) {
             final Record r = mRecords.valueAt(i);
+            if (forBackup && UserHandle.getUserId(r.uid) != UserHandle.USER_OWNER) {
+                continue;
+            }
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATT_NAME, r.pkg);
             if (r.priority != DEFAULT_PRIORITY) {
@@ -200,7 +226,9 @@ public class RankingHelper implements RankingConfig {
             if (r.visibility != DEFAULT_VISIBILITY) {
                 out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
             }
-            out.attribute(null, ATT_UID, Integer.toString(r.uid));
+            if (!forBackup) {
+                out.attribute(null, ATT_UID, Integer.toString(r.uid));
+            }
             out.endTag(null, TAG_PACKAGE);
         }
         out.endTag(null, TAG_RANKING);
@@ -364,15 +392,21 @@ public class RankingHelper implements RankingConfig {
             pw.print(prefix);
             pw.println("per-package config:");
         }
-        final int N = mRecords.size();
+        dumpRecords(pw, prefix, filter, mRecords);
+        dumpRecords(pw, prefix, filter, mRestoredWithoutUids);
+    }
+
+    private static void dumpRecords(PrintWriter pw, String prefix,
+            NotificationManagerService.DumpFilter filter, ArrayMap<String, Record> records) {
+        final int N = records.size();
         for (int i = 0; i < N; i++) {
-            final Record r = mRecords.valueAt(i);
+            final Record r = records.valueAt(i);
             if (filter == null || filter.matches(r.pkg)) {
                 pw.print(prefix);
                 pw.print("  ");
                 pw.print(r.pkg);
                 pw.print(" (");
-                pw.print(r.uid);
+                pw.print(r.uid == Record.UNKNOWN_UID ? "UNKNOWN_UID" : Integer.toString(r.uid));
                 pw.print(')');
                 if (r.priority != DEFAULT_PRIORITY) {
                     pw.print(" priority=");
@@ -391,11 +425,39 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
+    public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
+        if (queryReplace || pkgList == null || pkgList.length == 0
+                || mRestoredWithoutUids.isEmpty()) {
+            return; // nothing to do
+        }
+        final PackageManager pm = mContext.getPackageManager();
+        boolean updated = false;
+        for (String pkg : pkgList) {
+            final Record r = mRestoredWithoutUids.get(pkg);
+            if (r != null) {
+                try {
+                    r.uid = pm.getPackageUid(r.pkg, UserHandle.USER_OWNER);
+                    mRestoredWithoutUids.remove(pkg);
+                    mRecords.put(recordKey(r.pkg, r.uid), r);
+                    updated = true;
+                } catch (NameNotFoundException e) {
+                    // noop
+                }
+            }
+        }
+        if (updated) {
+            updateConfig();
+        }
+    }
+
     private static class Record {
+        static int UNKNOWN_UID = UserHandle.USER_NULL;
+
         String pkg;
-        int uid;
+        int uid = UNKNOWN_UID;
         int priority = DEFAULT_PRIORITY;
         boolean peekable = DEFAULT_PEEKABLE;
         int visibility = DEFAULT_VISIBILITY;
     }
+
 }
