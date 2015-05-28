@@ -675,6 +675,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // We currently don't have a default input method... is
                     // one now available?
                     changed = chooseNewDefaultIMELocked();
+                } else if (!changed && isPackageModified(curIm.getPackageName())) {
+                    // Even if the current input method is still available, mCurrentSubtype could
+                    // be obsolete when the package is modified in practice.
+                    changed = true;
                 }
 
                 if (changed) {
