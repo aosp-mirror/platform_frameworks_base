@@ -125,7 +125,7 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/maps/documentation/android/",
       "https://developers.google.com/identity/sign-in/android/",
       "https://developers.google.com/mobile-ads-sdk/download",
-      "https://developers.google.com/gcm/android/",
+      "https://devsite.googleplex.com/cloud-messaging/gcm",
       "https://developers.google.com/app-indexing/"
     ]
   },
@@ -151,7 +151,7 @@ var RESOURCE_COLLECTIONS = {
       "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
       "https://www.udacity.com/course/developing-android-apps--ud853",
       "https://www.udacity.com/course/android-performance--ud825",
-      "https://www.udacity.com/android-nanodegree",
+      "https://www.udacity.com/android",
       "https://www.udacity.com/course/advanced-android-app-development--ud855",
       "https://www.udacity.com/course/android-ubiquitous-computing--ud875",
       "https://www.udacity.com/course/google-play-services--ud876",
@@ -974,7 +974,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/engage/gcm": {
     "title": "",
     "resources": [
-      "google/gcm/index.html",
+      "https://devsite.googleplex.com/cloud-messaging/gcm",
       "http://developer.chrome.com/apps/cloudMessagingV2",
       "http://www.youtube.com/watch?v=y76rjidm8cU"
     ]
