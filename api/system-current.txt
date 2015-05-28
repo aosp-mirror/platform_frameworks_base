@@ -4090,24 +4090,22 @@ package android.app {
   public class AssistContent implements android.os.Parcelable {
     ctor public AssistContent();
     method public int describeContents();
-    method public static android.app.AssistContent getAssistContent(android.os.Bundle);
     method public android.content.ClipData getClipData();
     method public android.content.Intent getIntent();
+    method public android.net.Uri getWebUri();
     method public void setClipData(android.content.ClipData);
     method public void setIntent(android.content.Intent);
+    method public void setWebUri(android.net.Uri);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final java.lang.String ASSIST_KEY = "android:assist_content";
     field public static final android.os.Parcelable.Creator<android.app.AssistContent> CREATOR;
   }
 
   public final class AssistStructure implements android.os.Parcelable {
     method public int describeContents();
     method public android.content.ComponentName getActivityComponent();
-    method public static android.app.AssistStructure getAssistStructure(android.os.Bundle);
     method public android.app.AssistStructure.WindowNode getWindowNodeAt(int);
     method public int getWindowNodeCount();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final java.lang.String ASSIST_KEY = "android:assist_structure";
     field public static final android.os.Parcelable.Creator<android.app.AssistStructure> CREATOR;
   }
 
@@ -31038,7 +31036,7 @@ package android.service.voice {
     method public android.view.View onCreateContentView();
     method public void onDestroy();
     method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
-    method public void onHandleAssist(android.os.Bundle);
+    method public void onHandleAssist(android.os.Bundle, android.app.AssistStructure, android.app.AssistContent);
     method public void onHide();
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
