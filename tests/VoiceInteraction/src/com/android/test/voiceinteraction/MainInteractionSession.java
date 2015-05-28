@@ -119,11 +119,16 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public void onHandleAssist(Bundle assistBundle) {
-        if (assistBundle != null) {
-            parseAssistData(assistBundle);
-        } else {
-            Log.i(TAG, "onHandleAssist: NO ASSIST BUNDLE");
+    public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
+        mAssistStructure = structure;
+        if (mAssistStructure != null) {
+            if (mAssistVisualizer != null) {
+                mAssistVisualizer.setAssistStructure(mAssistStructure);
+            }
+        }
+        if (content != null) {
+            Log.i(TAG, "Assist intent: " + content.getIntent());
+            Log.i(TAG, "Assist clipdata: " + content.getClipData());
         }
     }
 
@@ -136,29 +141,6 @@ public class MainInteractionSession extends VoiceInteractionSession
             mScreenshot.setMaxHeight(screenshot.getHeight()/3);
         } else {
             mScreenshot.setImageDrawable(null);
-        }
-    }
-
-    void parseAssistData(Bundle assistBundle) {
-        if (assistBundle != null) {
-            Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
-            if (assistContext != null) {
-                mAssistStructure = AssistStructure.getAssistStructure(assistContext);
-                if (mAssistStructure != null) {
-                    if (mAssistVisualizer != null) {
-                        mAssistVisualizer.setAssistStructure(mAssistStructure);
-                    }
-                }
-                AssistContent content = AssistContent.getAssistContent(assistContext);
-                if (content != null) {
-                    Log.i(TAG, "Assist intent: " + content.getIntent());
-                    Log.i(TAG, "Assist clipdata: " + content.getClipData());
-                }
-                return;
-            }
-        }
-        if (mAssistVisualizer != null) {
-            mAssistVisualizer.clearAssistData();
         }
     }
 
