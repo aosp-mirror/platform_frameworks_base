@@ -336,9 +336,6 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
       location.hash = "";
       return true;
     } else {
-      $("label#agreeLabel").parent().stop().animate({color: "#258AAF"}, 200,
-        function() {$("label#agreeLabel").parent().stop().animate({color: "#222"}, 200)}
-      );
       return false;
     }
   }
