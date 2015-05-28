@@ -44,7 +44,7 @@ sdk.platform.apiLevel=MNC
 
 <p>Along with new features and capabilities, the M Developer Preview includes a variety of
 system changes and API behavior changes. This document highlights
-some of the key changes that you should be understand and account for in your apps.</p>
+some of the key changes that you should understand and account for in your apps.</p>
 
 <p>If you have previously published an app for Android, be aware that your app
   might be affected by these changes in the platform.</p>
