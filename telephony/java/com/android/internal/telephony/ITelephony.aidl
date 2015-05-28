@@ -945,4 +945,12 @@ interface ITelephony {
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 
     void factoryReset(int subId);
+
+    /**
+     * An estimate of the users's current locale based on the default SIM.
+     *
+     * The returned string will be a well formed BCP-47 language tag, or {@code null}
+     * if no locale could be derived.
+     */
+    String getLocaleFromDefaultSim();
 }
