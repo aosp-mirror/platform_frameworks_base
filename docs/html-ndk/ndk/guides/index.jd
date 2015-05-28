@@ -17,9 +17,9 @@ development process. However, it can be useful in cases in which you need to:</p
 
 <p>This guide gives you the information you need to get up and running with the NDK. It starts by
 explaining the <a href="{@docRoot}ndk/guides/concepts.html">concepts</a> underpinning the NDK, and
-how to <a href="{@docRoot}ndk/guides/setup.html">set it up</a>. Next, it explains how to use
-the NDK to <a href="{@docRoot}ndk/guides/build.html">build</a> and
-<a href="{@docRoot}ndk/guides/debug.html">debug</a> your app. Then, it continues with information
+how to <a href="{@docRoot}ndk/guides/setup.html">set it up</a>. Next, it continues with information
 about targeting <a href="{@docRoot}ndk/guides/arch.html">different hardware platforms</a> in your
-builds. Finally, it discusses how to use your own and other prebuilt
-<a href="{@docRoot}ndk/guides/libs.html">libraries</a>.</p>
+builds. Then, it explains how to use
+the NDK to <a href="{@docRoot}ndk/guides/build.html">build</a> and
+<a href="{@docRoot}ndk/guides/debug.html">debug</a> your app. Finally, it discusses how to use your
+own and other prebuilt <a href="{@docRoot}ndk/guides/libs.html">libraries</a>.</p>
