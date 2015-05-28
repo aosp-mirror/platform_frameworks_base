@@ -118,7 +118,7 @@ page.tags="preview", "developer", "android"
 <p>
   The M Developer Preview runs from May 27 until the final Android M SDK, which
   we’ll release shortly before the public release during Q3
-  2015. 
+  2015.
 </p>
 
 <p>
@@ -204,7 +204,7 @@ page.tags="preview", "developer", "android"
 
 <p>
   You can download these hardware system images for Nexus devices from the
-  <a href="downloads.html">Downloads page</a>:
+  <a href="download.html">Downloads page</a>:
 </p>
 
 <ul>
@@ -240,24 +240,25 @@ page.tags="preview", "developer", "android"
   </li>
 
   <li>
-    <a href="testing.html">Testing Guide</a> and <a href=
-    "api-changes.html">Behavior Changes</a> point you to key areas to test.
+    <a href="{@docRoot}preview/testing/guide.html">Testing Guide</a> and <a href=
+    "behavior-changes.html">Behavior Changes</a> point you to key areas to test.
   </li>
 
   <li>Documentation of new APIs, including an <a href="api-overview.html">API Overview</a>,
-  downloadable <a href="">API Reference</a>, and detailed developer guides on
-  key features such as <a href="">permissions</a>, <a href="">app backup</a>,
-  and others.
+  downloadable <a href="{@docRoot}preview/download.html#docs">API Reference</a>, and detailed developer guides on
+  key features such as
+  <a href="{@docRoot}preview/features/runtime-permissions.html">permissions</a>,
+  <a href="{@docRoot}preview/backup/index.html">app backup</a>, and others.
   </li>
 
   <li>
-    <a href="">Sample code</a> that demonstrates how to support
+    <a href="{@docRoot}preview/samples.html">Sample code</a> that demonstrates how to support
     permissions and other new features.
   </li>
 
   <li>
-    <a href="">Release notes</a> for the current version of the M Developer
-    Preview, including change notes and diff reports.
+    <a href="{@docRoot}preview/support.html#release-notes">Release notes</a> for the current version
+    of the M Developer Preview, including change notes and diff reports.
   </li>
 </ul>
 
@@ -334,7 +335,7 @@ page.tags="preview", "developer", "android"
 
 <ol>
   <li>Review the <a href="{@docRoot}preview/api-overview.html">API Overview</a>
-    and <a href="{@docRoot}preview/behavior.html">Behavior Changes</a> to get an
+    and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a> to get an
     idea of what's new and how it affects your apps.
   </li>
 
@@ -349,7 +350,7 @@ page.tags="preview", "developer", "android"
     Preview updates will be delivered through over-the-air (OTA) updates.</a>
   </li>
 
-  <li>Download the <a href="{@docRoot}preview/reference.html">M Preview API
+  <li>Download the <a href="{@docRoot}preview/download.html#docs">M Preview API
   Reference</a> and <a href="{@docRoot}preview/samples.html">M Preview
   samples</a> to gain more insight into new API features and how to use them in
   your app.
