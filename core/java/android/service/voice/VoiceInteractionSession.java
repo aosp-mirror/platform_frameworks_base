@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.app.AssistContent;
 import android.app.AssistStructure;
 import android.app.Dialog;
 import android.app.Instrumentation;
@@ -180,21 +181,16 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         }
 
         @Override
-        public void handleAssist(Bundle assistBundle) {
+        public void handleAssist(Bundle data, AssistStructure structure,
+                AssistContent content) {
             // We want to pre-warm the AssistStructure before handing it off to the main
             // thread.  There is a strong argument to be made that it should be handed
             // through as a separate param rather than part of the assistBundle.
-            if (assistBundle != null) {
-                Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
-                if (assistContext != null) {
-                    AssistStructure as = AssistStructure.getAssistStructure(assistContext);
-                    if (as != null) {
-                        as.ensureData();
-                    }
-                }
+            if (structure != null) {
+                structure.ensureData();
             }
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_HANDLE_ASSIST,
-                    assistBundle));
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOO(MSG_HANDLE_ASSIST,
+                    data, structure, content));
         }
 
         @Override
@@ -422,8 +418,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
                     doDestroy();
                     break;
                 case MSG_HANDLE_ASSIST:
-                    if (DEBUG) Log.d(TAG, "onHandleAssist: " + msg.obj);
-                    onHandleAssist((Bundle) msg.obj);
+                    args = (SomeArgs)msg.obj;
+                    if (DEBUG) Log.d(TAG, "onHandleAssist: data=" + args.arg1
+                            + " structure=" + args.arg2 + " content=" + args.arg3);
+                    onHandleAssist((Bundle) args.arg1, (AssistStructure) args.arg2,
+                            (AssistContent) args.arg3);
                     break;
                 case MSG_HANDLE_SCREENSHOT:
                     if (DEBUG) Log.d(TAG, "onHandleScreenshot: " + msg.obj);
@@ -817,7 +816,20 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
 
     }
 
+    /** @hide */
     public void onHandleAssist(Bundle assistBundle) {
+    }
+
+    public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
+        if (data != null) {
+            Bundle assistContext = data.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
+            if (assistContext != null) {
+                assistContext.putParcelable(AssistStructure.ASSIST_KEY, structure);
+                assistContext.putParcelable(AssistContent.ASSIST_KEY, content);
+                data.putBundle(Intent.EXTRA_ASSIST_CONTEXT, assistContext);
+            }
+        }
+        onHandleAssist(data);
     }
 
     /** @hide */
