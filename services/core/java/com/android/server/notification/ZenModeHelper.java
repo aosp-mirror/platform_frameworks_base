@@ -256,17 +256,27 @@ public class ZenModeHelper {
         }
     }
 
-    public void readXml(XmlPullParser parser) throws XmlPullParserException, IOException {
+    public void readXml(XmlPullParser parser, boolean forRestore)
+            throws XmlPullParserException, IOException {
         final ZenModeConfig config = ZenModeConfig.readXml(parser, mConfigMigration);
         if (config != null) {
+            if (forRestore) {
+                if (config.user != UserHandle.USER_OWNER) {
+                    return;
+                }
+                config.manualRule = null;  // don't restore the manual rule
+            }
             if (DEBUG) Log.d(TAG, "readXml");
             setConfig(config, "readXml");
         }
     }
 
-    public void writeXml(XmlSerializer out) throws IOException {
+    public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
         final int N = mConfigs.size();
         for (int i = 0; i < N; i++) {
+            if (forBackup && mConfigs.keyAt(i) != UserHandle.USER_OWNER) {
+                continue;
+            }
             mConfigs.valueAt(i).writeXml(out);
         }
     }
