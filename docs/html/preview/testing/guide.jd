@@ -33,7 +33,7 @@ page.keywords=previewresources,androidm,testing,permissions
 <ul>
   <li><a href="#runtime-permissions">Permissions</a>
   </li>
-  <li><a href="#doze-mode">Doze and App Standby</a>
+  <li><a href="#doze-standby">Doze and App Standby</a>
   </li>
   <li><a href="#ids">Auto Backup and Device Identifiers</a></li>
 </ul>
