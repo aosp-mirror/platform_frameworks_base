@@ -353,8 +353,12 @@ public class UiObject {
         Rect parentRect = AccessibilityNodeInfoHelper
                 .getVisibleBoundsInScreen(scrollableParentNode, w, h);
         // adjust for partial clipping of targeted by parent node if required
-        nodeRect.intersect(parentRect);
-        return nodeRect;
+        if (nodeRect.intersect(parentRect)) {
+            return nodeRect;
+        } else {
+            // Node rect has no intersection with parent Rect
+            return new Rect();
+        }
     }
 
     /**
