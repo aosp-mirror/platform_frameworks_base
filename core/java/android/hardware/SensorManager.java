@@ -967,8 +967,9 @@ public abstract class SensorManager {
      *        TYPE_MAGNETIC_FIELD}.
      *
      * @return <code>true</code> on success, <code>false</code> on failure (for
-     *         instance, if the device is in free fall). On failure the output
-     *         matrices are not modified.
+     *         instance, if the device is in free fall). Free fall is defined as
+     *         condition when the magnitude of the gravity is less than 1/10 of
+     *         the nominal value. On failure the output matrices are not modified.
      *
      * @see #getInclination(float[])
      * @see #getOrientation(float[], float[])
@@ -981,6 +982,15 @@ public abstract class SensorManager {
         float Ax = gravity[0];
         float Ay = gravity[1];
         float Az = gravity[2];
+
+        final float normsqA = (Ax*Ax + Ay*Ay + Az*Az);
+        final float g = 9.81f;
+        final float freeFallGravitySquared = 0.01f * g * g;
+        if (normsqA < freeFallGravitySquared) {
+            // gravity less than 10% of normal value
+            return false;
+        }
+
         final float Ex = geomagnetic[0];
         final float Ey = geomagnetic[1];
         final float Ez = geomagnetic[2];
@@ -988,6 +998,7 @@ public abstract class SensorManager {
         float Hy = Ez*Ax - Ex*Az;
         float Hz = Ex*Ay - Ey*Ax;
         final float normH = (float)Math.sqrt(Hx*Hx + Hy*Hy + Hz*Hz);
+
         if (normH < 0.1f) {
             // device is close to free fall (or in space?), or close to
             // magnetic north pole. Typical values are  > 100.
@@ -1117,12 +1128,12 @@ public abstract class SensorManager {
      *        returned by {@link #getRotationMatrix}.
      *
      * @param X
-     *        defines on which world axis and direction the X axis of the device
-     *        is mapped.
+     *        defines the axis of the new cooridinate system that coincide with the X axis of the
+     *        original coordinate system.
      *
      * @param Y
-     *        defines on which world axis and direction the Y axis of the device
-     *        is mapped.
+     *        defines the axis of the new cooridinate system that coincide with the Y axis of the
+     *        original coordinate system.
      *
      * @param outR
      *        the transformed rotation matrix. inR and outR should not be the same
@@ -1219,27 +1230,18 @@ public abstract class SensorManager {
      * <p>
      * When it returns, the array values is filled with the result:
      * <ul>
-     * <li>values[0]: <i>azimuth</i>, rotation around the Z axis.</li>
-     * <li>values[1]: <i>pitch</i>, rotation around the X axis.</li>
+     * <li>values[0]: <i>azimuth</i>, rotation around the -Z axis,
+     *                i.e. the opposite direction of Z axis.</li>
+     * <li>values[1]: <i>pitch</i>, rotation around the -X axis,
+     *                i.e the opposite direction of X axis.</li>
      * <li>values[2]: <i>roll</i>, rotation around the Y axis.</li>
      * </ul>
-     * <p>The reference coordinate-system used is different from the world
-     * coordinate-system defined for the rotation matrix:</p>
-     * <ul>
-     * <li>X is defined as the vector product <b>Y.Z</b> (It is tangential to
-     * the ground at the device's current location and roughly points West).</li>
-     * <li>Y is tangential to the ground at the device's current location and
-     * points towards the magnetic North Pole.</li>
-     * <li>Z points towards the center of the Earth and is perpendicular to the ground.</li>
-     * </ul>
-     *
      * <p>
-     * <center><img src="../../../images/axis_globe_inverted.png"
-     * alt="Inverted world coordinate-system diagram." border="0" /></center>
-     * </p>
-     * <p>
+     * Applying these three intrinsic rotations in azimuth, pitch and roll order transforms
+     * identity matrix to the rotation matrix given in input R.
      * All three angles above are in <b>radians</b> and <b>positive</b> in the
-     * <b>counter-clockwise</b> direction.
+     * <b>counter-clockwise</b> direction. Range of output is: azimuth from -&pi; to &pi;,
+     * pitch from -&pi;/2 to &pi;/2 and roll from -&pi; to &pi;.
      *
      * @param R
      *        rotation matrix see {@link #getRotationMatrix}.
@@ -1275,6 +1277,7 @@ public abstract class SensorManager {
             values[1] = (float)Math.asin(-R[9]);
             values[2] = (float)Math.atan2(-R[8], R[10]);
         }
+
         return values;
     }
 
@@ -1314,9 +1317,9 @@ public abstract class SensorManager {
 
     /** Helper function to compute the angle change between two rotation matrices.
      *  Given a current rotation matrix (R) and a previous rotation matrix
-     *  (prevR) computes the rotation around the z,x, and y axes which
+     *  (prevR) computes the intrinsic rotation around the z, x, and y axes which
      *  transforms prevR to R.
-     *  outputs a 3 element vector containing the z,x, and y angle
+     *  outputs a 3 element vector containing the z, x, and y angle
      *  change at indexes 0, 1, and 2 respectively.
      * <p> Each input matrix is either as a 3x3 or 4x4 row-major matrix
      * depending on the length of the passed array:
@@ -1333,9 +1336,13 @@ public abstract class SensorManager {
      *   |  R[ 8]   R[ 9]   R[10]   R[11]  |
      *   \  R[12]   R[13]   R[14]   R[15]  /
      *</pre>
+     *
+     * See {@link #getOrientation} for more detailed definition of the output.
+     *
      * @param R current rotation matrix
      * @param prevR previous rotation matrix
-     * @param angleChange an an array of floats (z, x, and y) in which the angle change is stored
+     * @param angleChange an an array of floats (z, x, and y) in which the angle change
+     *        (in radians) is stored
      */
 
     public static void getAngleChange( float[] angleChange, float[] R, float[] prevR) {
