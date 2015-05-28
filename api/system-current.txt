@@ -30822,6 +30822,8 @@ package android.telephony {
     method public void reloadCarrierConfigForSubId(int);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.intent.action.carrier_config_changed";
+    field public static final java.lang.String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS = "bool_allow_emergency_video_calls";
+    field public static final java.lang.String BOOL_ALLOW_VIDEO_PAUSE = "bool_allow_video_pause";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_AVAILABLE = "bool_carrier_volte_available";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_PROVISIONED = "bool_carrier_volte_provisioned";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_TTY_SUPPORTED = "bool_carrier_volte_tty_supported";

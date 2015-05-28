@@ -109,6 +109,30 @@ public class CarrierConfigManager {
     @SystemApi
     public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
 
+    /**
+     * Flag indicating whether to allow carrier video calls to emergency numbers.
+     * When {@code true}, video calls to emergency numbers will be allowed.  When {@code false},
+     * video calls to emergency numbers will be initiated as audio-only calls instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS =
+            "bool_allow_emergency_video_calls";
+
+    /**
+     * Flag indicating whether the carrier supports video pause signaling.  When {@code true}, the
+     * carrier supports use of the {@link android.telecom.VideoProfile#STATE_PAUSED} video state
+     * to pause transmission of video when the In-Call app is sent to the background.
+     * When {@code false}, video pause signaling is not supported.  {@code True} by default unless
+     * a carrier configuration overrides the default.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String BOOL_ALLOW_VIDEO_PAUSE =
+            "bool_allow_video_pause";
+
     private final static String TAG = "CarrierConfigManager";
 
     /** The default value for every variable. */
@@ -120,6 +144,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(BOOL_CARRIER_VOLTE_PROVISIONED, false);
         sDefaults.putBoolean(BOOL_CARRIER_VOLTE_TTY_SUPPORTED, true);
         sDefaults.putBoolean(BOOL_SHOW_APN_SETTING_CDMA, false);
+        sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_VIDEO_CALLS, false);
+        sDefaults.putBoolean(BOOL_ALLOW_VIDEO_PAUSE, true);
 
         sDefaults.putInt(INT_VOLTE_REPLACEMENT_RAT, 0);
     }
