@@ -125,7 +125,7 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/maps/documentation/android/",
       "https://developers.google.com/identity/sign-in/android/",
       "https://developers.google.com/mobile-ads-sdk/download",
-      "https://devsite.googleplex.com/cloud-messaging/gcm",
+      "https://developers.google.com/cloud-messaging/gcm",
       "https://developers.google.com/app-indexing/"
     ]
   },
@@ -160,12 +160,15 @@ var RESOURCE_COLLECTIONS = {
       "https://www.udacity.com/course/gradle-for-android-and-java--ud867"
     ]
   },
-  "preview/landing/herolinks": {
+  "preview/landing/more": {
     "title": "",
     "resources": [
-      "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
-      "https://www.udacity.com/course/developing-android-apps--ud853",
-      "https://www.udacity.com/course/android-performance--ud825"
+      "preview/features/runtime-permissions.html",
+      "preview/behavior-changes.html",
+      "preview/backup/index.html",
+      "preview/features/app-linking.html",
+      "preview/testing/guide.html",
+      "preview/testing/performance.html",
     ]
   },
   "distribute/landing/carousel": {
@@ -974,9 +977,8 @@ var RESOURCE_COLLECTIONS = {
   "distribute/engage/gcm": {
     "title": "",
     "resources": [
-      "https://devsite.googleplex.com/cloud-messaging/gcm",
-      "http://developer.chrome.com/apps/cloudMessagingV2",
-      "http://www.youtube.com/watch?v=y76rjidm8cU"
+      "https://developers.google.com/cloud-messaging/gcm",
+      "https://developers.google.com/cloud-messaging/android/client",
     ]
   },
   "distribute/engage/googleplaygames": {
