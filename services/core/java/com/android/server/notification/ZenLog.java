@@ -115,8 +115,11 @@ public class ZenLog {
         append(TYPE_UNSUBSCRIBE, uri + "," + subscribeResult(provider, e));
     }
 
-    public static void traceConfig(String reason, ZenModeConfig newConfig) {
-        append(TYPE_CONFIG, reason + "," + (newConfig != null ? newConfig.toString() : null));
+    public static void traceConfig(String reason, ZenModeConfig oldConfig,
+            ZenModeConfig newConfig) {
+        append(TYPE_CONFIG, reason
+                + "," + (newConfig != null ? newConfig.toString() : null)
+                + "," + ZenModeConfig.diff(oldConfig, newConfig));
     }
 
     public static void traceDisableEffects(NotificationRecord record, String reason) {
