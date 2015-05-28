@@ -19,7 +19,7 @@ page.keywords=previewresources,androidm,testing,permissions
   The Android M Developer Preview gives you an opportunity to ensure your apps work with the next
   version of the platform. This preview includes a number of APIs and behavior changes that can
   impact your app, as described in the <a href="{@docRoot}preview/api-overview.html">API
-  Overview</a> and <a href="{@docRoot}preview/api-changes.html">Behavior Changes</a>. In testing
+  Overview</a> and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>. In testing
   your app with the preview, there are some specific system changes that you should focus on to
   ensure that users have a good experience.
 </p>
