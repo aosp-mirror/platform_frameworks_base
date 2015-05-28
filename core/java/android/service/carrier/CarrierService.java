@@ -24,7 +24,9 @@ import android.os.PersistableBundle;
  * <p>
  * To extend this class, you must declare the service in your manifest file to require the
  * {@link android.Manifest.permission#BIND_CARRIER_SERVICES} permission and include an intent
- * filter with the {@link #SERVICE_INTERFACE} action. For example:
+ * filter with the {@link #CONFIG_SERVICE_INTERFACE} action if the service exposes carrier config
+ * and the {@link #BIND_SERVICE_INTERFACE} action if the service should have a long-lived binding.
+ * For example:
  * </p>
  *
  * <pre>{@code
@@ -32,14 +34,16 @@ import android.os.PersistableBundle;
  *       android:label="@string/service_name"
  *       android:permission="android.permission.BIND_CARRIER_SERVICES">
  *  <intent-filter>
- *      <action android:name="android.service.carrier.CarrierService" />
+ *      <action android:name="android.service.carrier.ConfigService" />
+ *      <action android:name="android.service.carrier.BindService" />
  *  </intent-filter>
  * </service>
  * }</pre>
  */
 public abstract class CarrierService extends Service {
 
-    public static final String SERVICE_INTERFACE = "android.service.carrier.CarrierService";
+    public static final String CONFIG_SERVICE_INTERFACE = "android.service.carrier.ConfigService";
+    public static final String BIND_SERVICE_INTERFACE = "android.service.carrier.BindService";
 
     private final ICarrierService.Stub mStubWrapper;
 
@@ -82,7 +86,8 @@ public abstract class CarrierService extends Service {
     /** @hide */
     @Override
     public final IBinder onBind(Intent intent) {
-        if (!SERVICE_INTERFACE.equals(intent.getAction())) {
+        if (!CONFIG_SERVICE_INTERFACE.equals(intent.getAction())
+            || !BIND_SERVICE_INTERFACE.equals(intent.getAction())) {
             return null;
         }
         return mStubWrapper;
