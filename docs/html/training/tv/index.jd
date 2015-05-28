@@ -8,4 +8,5 @@ page.image=design/tv/images/focus.png
 
 <p>These classes teach you how to build apps for TV devices.</p>
 
-<p class="note"><strong>Note:</strong> For details on how to publish your TV apps in Google Play,  see <a href="{docRoot}distribute/googleplay/tv.html">Distributing to Android TV</a>.</p>
+<p class="note"><strong>Note:</strong> For details on how to publish your TV apps in Google Play,
+see <a href="{@docRoot}distribute/googleplay/tv.html">Distribute to Android TV</a>.</p>
