@@ -17,6 +17,7 @@
 package com.android.compatibilitytest;
 
 import android.app.ActivityManager;
+import android.app.UiAutomation;
 import android.app.UiModeManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -82,10 +83,12 @@ public class AppCompatibility extends InstrumentationTestCase {
         if (workspaceLaunchTimeoutMsecs != null) {
             mWorkspaceLaunchTimeout = Integer.parseInt(workspaceLaunchTimeoutMsecs);
         }
+        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0);
     }
 
     @Override
     protected void tearDown() throws Exception {
+        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_UNFREEZE);
         super.tearDown();
     }
 
