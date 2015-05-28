@@ -130,6 +130,7 @@ public final class BridgeContext extends Context {
         new IdentityHashMap<Object, Map<String,String>>();
 
     // maps for dynamically generated id representing style objects (StyleResourceValue)
+    @Nullable
     private Map<Integer, StyleResourceValue> mDynamicIdToStyleMap;
     private Map<StyleResourceValue, Integer> mStyleToDynamicIdMap;
     private int mDynamicIdGenerator = 0x02030000; // Base id for R.style in custom namespace
@@ -727,7 +728,7 @@ public final class BridgeContext extends Context {
                 }
             }
         } else if (defStyleRes != 0) {
-            StyleResourceValue item = mDynamicIdToStyleMap.get(defStyleRes);
+            StyleResourceValue item = getStyleByDynamicId(defStyleRes);
             if (item != null) {
                 defStyleValues = item;
             } else {
