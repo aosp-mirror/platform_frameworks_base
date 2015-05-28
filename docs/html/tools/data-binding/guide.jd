@@ -26,16 +26,16 @@ tracker</a>. Stay tuned for more information about Data Binding and examples of 
         <a href="#data_binding_layout_files">Data Binding Layout Files</a>
         <ol>
           <li>
-            <a href="writing_expressions">Writing your first data binding
+            <a href="#writing_expressions">Writing your first data binding
             expressions</a>
           </li>
 
           <li>
-            <a href="data_object">Data Object</a>
+            <a href="#data_object">Data Object</a>
           </li>
 
           <li>
-            <a href="binding_data">Binding Data</a>
+            <a href="#binding_data">Binding Data</a>
           </li>
         </ol>
       </li>
@@ -44,23 +44,23 @@ tracker</a>. Stay tuned for more information about Data Binding and examples of 
         <a href="#layout_details">Layout Details</a>
         <ol>
           <li>
-            <a href="imports">Imports</a>
+            <a href="#imports">Imports</a>
           </li>
 
           <li>
-            <a href="variables">Variables</a>
+            <a href="#variables">Variables</a>
           </li>
 
           <li>
-            <a href="custom_binding_class_names">Custom Binding Class Names</a>
+            <a href="#custom_binding_class_names">Custom Binding Class Names</a>
           </li>
 
           <li>
-            <a href="includes">Includes</a>
+            <a href="#includes">Includes</a>
           </li>
 
           <li>
-            <a href="expression_language">Expression Language</a>
+            <a href="#expression_language">Expression Language</a>
           </li>
         </ol>
       </li>
@@ -69,15 +69,15 @@ tracker</a>. Stay tuned for more information about Data Binding and examples of 
         <a href="#data_objects">Data Objects</a>
         <ol>
           <li>
-            <a href="observable_objects">Observable Objects</a>
+            <a href="#observable_objects">Observable Objects</a>
           </li>
 
           <li>
-            <a href="observablefields">ObservableFields</a>
+            <a href="#observablefields">ObservableFields</a>
           </li>
 
           <li>
-            <a href="observable_collections">Observable Collections</a>
+            <a href="#observable_collections">Observable Collections</a>
           </li>
         </ol>
       </li>
@@ -86,23 +86,23 @@ tracker</a>. Stay tuned for more information about Data Binding and examples of 
         <a href="#generated_binding">Generated Binding</a>
         <ol>
           <li>
-            <a href="creating">Creating</a>
+            <a href="#creating">Creating</a>
           </li>
 
           <li>
-            <a href="views_with_ids">Views With IDs</a>
+            <a href="#views_with_ids">Views With IDs</a>
           </li>
 
           <li>
-            <a href="variables">Variables</a>
+            <a href="#variables">Variables</a>
           </li>
 
           <li>
-            <a href="viewstubs">ViewStubs</a>
+            <a href="#viewstubs">ViewStubs</a>
           </li>
 
           <li>
-            <a href="advanced_binding">Advanced Binding</a>
+            <a href="#advanced_binding">Advanced Binding</a>
           </li>
         </ol>
       </li>
@@ -111,15 +111,15 @@ tracker</a>. Stay tuned for more information about Data Binding and examples of 
         <a href="#attribute_setters">Attribute Setters</a>
         <ol>
           <li>
-            <a href="automatic_setters">Automatic Setters</a>
+            <a href="#automatic_setters">Automatic Setters</a>
           </li>
 
           <li>
-            <a href="renamed_setters">Renamed Setters</a>
+            <a href="#renamed_setters">Renamed Setters</a>
           </li>
 
           <li>
-            <a href="custom_setters">Custom Setters</a>
+            <a href="#custom_setters">Custom Setters</a>
           </li>
         </ol>
       </li>
@@ -128,11 +128,11 @@ tracker</a>. Stay tuned for more information about Data Binding and examples of 
         <a href="#converters">Converters</a>
         <ol>
           <li>
-            <a href="object_conversions">Object Conversions</a>
+            <a href="#object_conversions">Object Conversions</a>
           </li>
 
           <li>
-            <a href="custom_conversions">Custom Conversions</a>
+            <a href="#custom_conversions">Custom Conversions</a>
           </li>
         </ol>
       </li>
