@@ -57,7 +57,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
 </p>
 
 <p>
-  This change that affects all apps running on the new platform, even those not targeting the new
+  This change affects all apps running on the new platform, even those not targeting the new
   platform version. The platform provides a limited compatibility behavior for legacy apps, but you
   should begin planning your app’s migration to the new permissions model now, with a goal of
   publishing an updated version of your app at the official platform launch.
@@ -123,7 +123,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
 <h2 id="doze-standby">Testing Doze and App Standby</h2>
 
 <p>
-  The power saving features of Doze and App Standby limits the amount of background processing that
+  The power saving features of Doze and App Standby limit the amount of background processing that
   your app can perform when a device is in an idle state or while your app is not in focus. The
   restrictions the system may impose on apps include limited or no network access,
   suspended background tasks, suspended Notifications, ignored wake requests, and alarms. To ensure
