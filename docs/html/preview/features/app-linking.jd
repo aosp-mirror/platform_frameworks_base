@@ -99,7 +99,7 @@ page.title=App Links
 </pre>
 
 <p>
-  When the (@code android:autoVerify} attribute is present in an app manifest, the platform
+  When the {@code android:autoVerify} attribute is present in an app manifest, the platform
   attempts to verify app links when the app is installed. If the platform cannot successfully
   verify the app links, the app is not set as the preferred app to handle the web links. The next
   time a user opens one of the links, the platform falls back to presenting the user with a
