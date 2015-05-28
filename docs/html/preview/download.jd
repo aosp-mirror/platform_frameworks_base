@@ -214,7 +214,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h2 id="images">Hardware System Images</h2>
 
 <p>
-  These system images allow you install a preview version of the platform on a physical device for
+  These system images allow you to install a preview version of the platform on a physical device for
   testing. By configuring a device with one of these images, you can install and test your app to
   see how it performs on the next version of the platform. The process of installing a system image
   on a device <em>removes all data from the device</em>, so you should backup your data before
