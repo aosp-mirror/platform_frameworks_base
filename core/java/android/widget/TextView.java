@@ -8015,8 +8015,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * through a thunk.
      */
     void sendAfterTextChanged(Editable text) {
-        sLastCutCopyOrTextChangedTime = 0;
-
         if (mListeners != null) {
             final ArrayList<TextWatcher> list = mListeners;
             final int count = list.size();
@@ -8049,6 +8047,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * through a thunk.
      */
     void handleTextChanged(CharSequence buffer, int start, int before, int after) {
+        sLastCutCopyOrTextChangedTime = 0;
+
         final Editor.InputMethodState ims = mEditor == null ? null : mEditor.mInputMethodState;
         if (ims == null || ims.mBatchEditNesting == 0) {
             updateAfterEdit();
