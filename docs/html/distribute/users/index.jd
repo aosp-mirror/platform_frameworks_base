@@ -13,13 +13,13 @@ nonavpage=true
 <div class="resource-widget resource-flow-layout landing col-16"
   data-query="collection:distribute/users"
   data-cardSizes="6x6"
-  data-maxResults="9">
+  data-maxResults="15">
 </div>
-<div class="resource-widget resource-flow-layout landing col-16"
+<!--<div class="resource-widget resource-flow-layout landing col-16"
   data-query="collection:distribute/users"
   data-cardSizes="9x3"
   data-maxResults="16">
-</div>
+</div>-->
 
 <!-- <h2>Related resources</h2>
 
