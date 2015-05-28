@@ -78,11 +78,11 @@ level.</p>
 <p>Native APIs for the respective <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">
 Android API levels</a> reside under {@code $NDK/platforms/}; each API-level
 directory, in turn, contains subdirectories for the various CPUs and architectures. The
-following example shows how to define a <em>sysroot</em> for a build targeting Android 5.1
-(API level 22), for ARM architecture:</p>
+following example shows how to define a <em>sysroot</em> for a build targeting Android 5.0
+(API level 21), for ARM architecture:</p>
 
 <pre class="no-pretty-print">
-SYSROOT=$NDK/platforms/android-22/arch-arm
+SYSROOT=$NDK/platforms/android-21/arch-arm
 </pre>
 
 For more detail about the Android API levels and the respective native APIs they support, see
@@ -120,19 +120,27 @@ $CC -o foo.o -c foo.c
     <th scope="col">Value</th>
   </tr>
   <tr>
+    <td>armeabi</td>
+    <td>{@code -target armv5te-none-linux-androideabi}</td>
+  </tr>
+  <tr>
     <td>armeabi-v7a</td>
     <td>{@code -target armv7-none-linux-androideabi}</td>
   </tr>
   <tr>
-    <td>armeabi</td>
-    <td>{@code -target armv5te-none-linux-androideabi}</td>
+     <td>arm64-v8a</td>
+     <td>{@code -target aarch64-none-linux-android}</td>
   </tr>
-    <tr>
+  <tr>
     <td>x86</td>
     <td>{@code -target i686-none-linux-android}</td>
   </tr>
-    <tr>
-    <td>MIPS</td>
+  <tr>
+    <td>x86_64</td>
+    <td>{@code -target x86_64-none-linux-android}</td>
+  </tr>
+  <tr>
+    <td>mips</td>
     <td>{@code -target mipsel-none-linux-android}</td>
   </tr>
 </table>
@@ -147,7 +155,7 @@ following example:</li>
 Ultimately, a command to compile using Clang might look like this:
 
 <pre class="no-pretty-print">
-export CC="export CC="$NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/ \
+export CC="$NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/ \
 linux-x86/bin/arm-linux-androideabi-gcc-4.8 --sysroot=$SYSROOT" -target \
 armv7-none-linux-androideabi \
 -gcc-toolchain $NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64"
@@ -165,11 +173,11 @@ installation root for the NDK. An example of the use of this script appears belo
 
 <pre class="no-pretty-print">
 $NDK/build/tools/make-standalone-toolchain.sh \
---arch=arm --platform=android-22 --install-dir=/tmp/my-android-toolchain
+--arch=arm --platform=android-21 --install-dir=/tmp/my-android-toolchain
 </pre>
 
 <p>This command creates a directory named {@code /tmp/my-android-toolchain/}, containing a copy of
-the {@code android-22/arch-arm} sysroot, and of the toolchain binaries for a 32-bit ARM
+the {@code android-21/arch-arm} sysroot, and of the toolchain binaries for a 32-bit ARM
 architecture.</p>
 
 <p>Note that the toolchain binaries do not depend on or contain host-specific paths, in other words,
@@ -187,6 +195,14 @@ Table 3 shows the values to use for other toolchains:
     <th scope="col">Value</th>
   </tr>
   <tr>
+    <td>mips64 compiler</td>
+    <td>{@code --arch=mips64}</td>
+  </tr>
+  <tr>
+    <td>mips GCC 4.8 compiler</td>
+    <td>{@code --arch=mips}</td>
+  </tr>
+  <tr>
     <td>x86 GCC 4.8 compiler</td>
     <td>{@code --arch=x86}</td>
   </tr>
@@ -195,7 +211,7 @@ Table 3 shows the values to use for other toolchains:
     <td>{@code --arch=x86_64}</td>
   </tr>
   <tr>
-    <td>MIPS GCC 4.8 compiler</td>
+    <td>mips GCC 4.8 compiler</td>
     <td>{@code --arch=mips}</td>
   </tr>
 </table>
@@ -214,34 +230,28 @@ values you can specify for {@code &lt;toolchain&gt;}:</p>
   <tr>
     <td>arm</td>
     <td>
-       <li>{@code --toolchain=arm-linux-android-4.6}</li>
-       <li>{@code --toolchain=arm-linux-android-4.7}</li>
-       <li>{@code --toolchain=arm-linux-android-4.8}</li>
-       <li>{@code --toolchain=arm-linux-android-4.9}</li>
-       <li>{@code --toolchain=arm-linux-android-clang3.4}</li>
+       <li>{@code --toolchain=arm-linux-androideabi-4.8}</li>
+       <li>{@code --toolchain=arm-linux-androideabi-4.9}</li>
        <li>{@code --toolchain=arm-linux-android-clang3.5}</li>
+       <li>{@code --toolchain=arm-linux-android-clang3.6}</li>
     </td>
   </tr>
   <tr>
     <td>x86</td>
     <td>
-       <li>{@code --toolchain=x86-linux-android-4.6}</li>
-       <li>{@code --toolchain=x86-linux-android-4.7}</li>
        <li>{@code --toolchain=x86-linux-android-4.8}</li>
        <li>{@code --toolchain=x86-linux-android-4.9}</li>
-       <li>{@code --toolchain=x86-linux-android-clang3.4}</li>
        <li>{@code --toolchain=x86-linux-android-clang3.5}</li>
+       <li>{@code --toolchain=x86-linux-android-clang3.6}</li>
     </td>
   </tr>
   <tr>
     <td>mips</td>
     <td>
-       <li>{@code --toolchain=mips-linux-android-4.6}</li>
-       <li>{@code --toolchain=mips-linux-android-4.7}</li>
        <li>{@code --toolchain=mips-linux-android-4.8}</li>
        <li>{@code --toolchain=mips-linux-android-4.9}</li>
-       <li>{@code --toolchain=mips-linux-android-clang3.4}</li>
        <li>{@code --toolchain=mips-linux-android-clang3.5}</li>
+       <li>{@code --toolchain=mips-linux-android-clang3.6}</li>
     </td>
   </tr>
 
@@ -249,41 +259,45 @@ values you can specify for {@code &lt;toolchain&gt;}:</p>
     <td>arm64</td>
     <td>
        <li>{@code --toolchain=aarch64-linux-android-4.9}</li>
-       <li>{@code --toolchain=aarch64-linux-android-clang3.4}</li>
        <li>{@code --toolchain=aarch64-linux-android-clang3.5}</li>
+       <li>{@code --toolchain=aarch64-linux-android-clang3.6}</li>
     </td>
   </tr>
   <tr>
     <td>x86_64</td>
     <td>
        <li>{@code --toolchain=x86_64-linux-android-4.9}</li>
-       <li>{@code --toolchain=x86_64-linux-android-clang3.4}</li>
        <li>{@code --toolchain=x86_64-linux-android-clang3.5}</li>
+       <li>{@code --toolchain=x86_64-linux-android-clang3.6}</li>
     </td>
   </tr>
   <tr>
     <td>mips64</td>
     <td>
        <li>{@code --toolchain=mips64el-linux-android-4.9}</li>
-       <li>{@code --toolchain=mips64el-linux-android-clang3.4}</li>
        <li>{@code --toolchain=mips64el-linux-android-clang3.5}</li>
+       <li>{@code --toolchain=mips64el-linux-android-clang3.6}</li>
     </td>
   </tr>
 </table>
 
-<p class="note"<strong>Note: </strong> Table 4 is not an exhaustive list. Other combinations may
+<p class="note"><strong>Note: </strong> Table 4 is not an exhaustive list. Other combinations may
 also be valid, but are unverified.</p>
 
-<p>You can also copy Clang/LLVM 3.3, using one of two methods: You can append {@code -clang3.3} to
+<p>You can also copy Clang/LLVM 3.6, using one of two methods: You can append {@code -clang3.6} to
 the {@code --toolchain} option, so that the {@code --toolchain} option looks like the following
 example:
 
 <pre class="no-pretty-print">
---toolchain=arm-linux-androideabi-clang3.3
+--toolchain=arm-linux-androideabi-clang3.6
 </pre>
 
-<p>Alternatively, you can add {@code -llvm-version=3.3} as a separate option on the command
+<p>You can also add {@code -llvm-version=3.6} as a separate option on the command
 line.</p>
+
+<p class="note"><strong>Note: </strong>Instead of specifying a specific version, you can also
+use {@code &lt;version&gt;}, which defaults
+to the highest available version of Clang.</p>
 
 <p>By default, the build system builds for a 32-bit host toolchain. You can specify a 64-bit
 host toolchain instead. Table 5 shows the value to use with {@code -system} for different
@@ -304,17 +318,21 @@ platforms.</p>
     <td>64-bit MacOSX</td>
     <td>{@code -system=darwin-x86_64}</td>
   </tr>
+  <tr>
+    <td>64-bit Windows</td>
+    <td>{@code -system=windows-x86_64}</td>
+  </tr>
 </table>
 
-For more information on specifying a 32- or 64-bit instruction host toolchain, see
-<a href="{@docRoot}ndk/guides/ndk-build.html#6432">ndk-build</a>.
+For more information on specifying a 64- or 32-bit instruction host toolchain, see
+<a href="{@docRoot}ndk/guides/ndk-build.html#6432">64-Bit and 32-Bit Toolchains</a>.
 
-<p>You may specify {@code stl=stlport} to copy {@code libstlport} instead of the default
+<p>You may specify {@code --stl=stlport} to copy {@code libstlport} instead of the default
 {@code libgnustl}. If you do so, and you wish to link against the shared library, you must
 explicitly use {@code -lstlport_shared}. This requirement is similar to having to use
 {@code -lgnustl_shared} for GNU {@code libstdc++}.</p>
 
-<p>Similarly, you can specify {@code -stl=libc++} to copy the LLVM libc++ headers and libraries.
+<p>Similarly, you can specify {@code --stl=libc++} to copy the LLVM libc++ headers and libraries.
 To link against the shared library, you must explicitly use -lc++_shared.</p>
 
 <p>You can make these settings directly, as in the following example:</p>
@@ -337,13 +355,13 @@ copy of a C++ STL library, with working exceptions and RTTI support.</p>
 <h2 id="wwc">Working with Clang</h2>
 <p>You can install Clang binaries in the standalone installation by using the
 {@code --llvm-version=&lt;version&gt;} option. {@code &lt;version&gt;} is a LLVM/Clang version
-number, such as {@code 3.4} or {@code 3.5}. For example:
+number, such as {@code 3.5} or {@code 3.6}. For example:
 
 <pre class="no-pretty-print">
 build/tools/make-standalone-toolchain.sh \
 --install-dir=/tmp/mydir \
---toolchain=arm-linux-androideabi-4.7 \
---llvm-version=3.5
+--toolchain=arm-linux-androideabi-4.8 \
+--llvm-version=3.6
 </pre>
 
 <p>Note that Clang binaries are copied along with the GCC ones, because they rely on the same
@@ -356,12 +374,12 @@ be able to use them in your own builds by just setting the {@code CC} and {@code
 variables to point to them.</p>
 
 <h4>Invoking Clang</h4>
-<p>In an ARM standalone installation built with {@code llvm-version=3.3}, invoking
+<p>In an ARM standalone installation built with {@code llvm-version=3.6}, invoking
 <a href="http://clang.llvm.org/">Clang</a> on a Unix system takes the form of a single line. For
 instance:</p>
 
 <pre class="no-pretty-print">
-dirname $0 /clang31 -target armv5te-none-linux-androideabi "$@"
+`dirname $0`/clang36 -target armv5te-none-linux-androideabi "$@"
 </pre>
 
 <p><code>clang++</code> invokes <code>clang++31</code> in the same way.</p>
@@ -404,7 +422,7 @@ working properly:</p>
 <ul>
 <li>{@code -v} to dump commands associated with compiler driver issues</li>
 <li>{@code -###} to dump command line options, including implicitly predefined ones.</li>
-<li>{@code -x c /dev/null -dM -E} to dump predefined preprocessor definitions</li>
+<li>{@code -x c < /dev/null -dM -E} to dump predefined preprocessor definitions</li>
 <li>{@code -save-temps} to compare {@code *.i} or {@code *.ii} preprocessed files.</li>
 </ul>
 
@@ -516,7 +534,7 @@ arm-linux-androideabi-g++ .... -lsupc++
 <h3>C++ STL support</h3>
 <p>The standalone toolchain includes a copy of a C++ Standard Template Library implementation. This
 implementation is either for GNU libstdc++, STLport, or libc++, depending on what you specify for the
-{@code -stl=&lt;name&gt;} option described previously. To use this implementation of STL, you need
+{@code --stl=&lt;name&gt;} option described previously. To use this implementation of STL, you need
 to link your project with the proper library:</p>
 
 <ul>
@@ -551,16 +569,28 @@ for your code to load properly. Table 6 shows where this file is for each toolch
     <th scope="col">Location</th>
   </tr>
   <tr>
-    <td>ARM</td>
+    <td>arm</td>
     <td>{@code $TOOLCHAIN/arm-linux-androideabi/lib/}</td>
+  </tr>
+  <tr>
+    <td>arm64</td>
+    <td>{@code $TOOLCHAIN/aarch64-linux-android/lib/}</td>
   </tr>
   <tr>
     <td>x86</td>
     <td>{@code $TOOLCHAIN/i686-linux-android/lib/}</td>
   </tr>
   <tr>
-    <td>MIPS</td>
+    <td>x86_64</td>
+    <td>{@code $TOOLCHAIN/x86_64-linux-android/lib/}</td>
+  </tr>
+  <tr>
+    <td>mips</td>
     <td>{@code $TOOLCHAIN/mipsel-linux-android/lib/}</td>
+  </tr>
+  <tr>
+    <td>mips64</td>
+    <td>{@code $TOOLCHAIN/mips64el-linux-android/lib/}</td>
   </tr>
 </table>
 
