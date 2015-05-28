@@ -36,6 +36,7 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.backup.BackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -113,12 +114,16 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
@@ -330,6 +335,37 @@ public class NotificationManagerService extends SystemService {
 
     }
 
+    private void readPolicyXml(InputStream stream, boolean forRestore)
+            throws XmlPullParserException, NumberFormatException, IOException {
+        final XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(stream, StandardCharsets.UTF_8.name());
+
+        int type;
+        String tag;
+        int version = DB_VERSION;
+        while ((type = parser.next()) != END_DOCUMENT) {
+            tag = parser.getName();
+            if (type == START_TAG) {
+                if (TAG_NOTIFICATION_POLICY.equals(tag)) {
+                    version = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_VERSION));
+                } else if (TAG_BLOCKED_PKGS.equals(tag)) {
+                    while ((type = parser.next()) != END_DOCUMENT) {
+                        tag = parser.getName();
+                        if (TAG_PACKAGE.equals(tag)) {
+                            mBlockedPackages.add(
+                                    parser.getAttributeValue(null, ATTR_NAME));
+                        } else if (TAG_BLOCKED_PKGS.equals(tag) && type == END_TAG) {
+                            break;
+                        }
+                    }
+                }
+            }
+            mZenModeHelper.readXml(parser, forRestore);
+            mRankingHelper.readXml(parser, forRestore);
+        }
+    }
+
     private void loadPolicyFile() {
         if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized(mPolicyFile) {
@@ -338,33 +374,7 @@ public class NotificationManagerService extends SystemService {
             FileInputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(infile, StandardCharsets.UTF_8.name());
-
-                int type;
-                String tag;
-                int version = DB_VERSION;
-                while ((type = parser.next()) != END_DOCUMENT) {
-                    tag = parser.getName();
-                    if (type == START_TAG) {
-                        if (TAG_NOTIFICATION_POLICY.equals(tag)) {
-                            version = Integer.parseInt(
-                                    parser.getAttributeValue(null, ATTR_VERSION));
-                        } else if (TAG_BLOCKED_PKGS.equals(tag)) {
-                            while ((type = parser.next()) != END_DOCUMENT) {
-                                tag = parser.getName();
-                                if (TAG_PACKAGE.equals(tag)) {
-                                    mBlockedPackages.add(
-                                            parser.getAttributeValue(null, ATTR_NAME));
-                                } else if (TAG_BLOCKED_PKGS.equals(tag) && type == END_TAG) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    mZenModeHelper.readXml(parser);
-                    mRankingHelper.readXml(parser);
-                }
+                readPolicyXml(infile, false /*forRestore*/);
             } catch (FileNotFoundException e) {
                 // No data yet
             } catch (IOException e) {
@@ -396,21 +406,26 @@ public class NotificationManagerService extends SystemService {
             }
 
             try {
-                final XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, StandardCharsets.UTF_8.name());
-                out.startDocument(null, true);
-                out.startTag(null, TAG_NOTIFICATION_POLICY);
-                out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
-                mZenModeHelper.writeXml(out);
-                mRankingHelper.writeXml(out);
-                out.endTag(null, TAG_NOTIFICATION_POLICY);
-                out.endDocument();
+                writePolicyXml(stream, false /*forBackup*/);
                 mPolicyFile.finishWrite(stream);
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to save policy file, restoring backup", e);
                 mPolicyFile.failWrite(stream);
             }
         }
+        BackupManager.dataChanged(getContext().getPackageName());
+    }
+
+    private void writePolicyXml(OutputStream stream, boolean forBackup) throws IOException {
+        final XmlSerializer out = new FastXmlSerializer();
+        out.setOutput(stream, StandardCharsets.UTF_8.name());
+        out.startDocument(null, true);
+        out.startTag(null, TAG_NOTIFICATION_POLICY);
+        out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+        mZenModeHelper.writeXml(out, forBackup);
+        mRankingHelper.writeXml(out, forBackup);
+        out.endTag(null, TAG_NOTIFICATION_POLICY);
+        out.endDocument();
     }
 
     /** Use this when you actually want to post a notification or toast.
@@ -722,6 +737,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mListeners.onPackagesChanged(queryReplace, pkgList);
                 mConditionProviders.onPackagesChanged(queryReplace, pkgList);
+                mRankingHelper.onPackagesChanged(queryReplace, pkgList);
             }
         }
     };
@@ -1671,13 +1687,40 @@ public class NotificationManagerService extends SystemService {
         // Backup/restore interface
         @Override
         public byte[] getBackupPayload(int user) {
-            // TODO: build a payload of whatever is appropriate
+            if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
+            if (user != UserHandle.USER_OWNER) {
+                Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
+                return null;
+            }
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                writePolicyXml(baos, true /*forBackup*/);
+                return baos.toByteArray();
+            } catch (IOException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+            }
             return null;
         }
 
         @Override
         public void applyRestore(byte[] payload, int user) {
-            // TODO: apply the restored payload as new current state
+            if (DBG) Slog.d(TAG, "applyRestore u=" + user + " payload="
+                    + (payload != null ? new String(payload, StandardCharsets.UTF_8) : null));
+            if (payload == null) {
+                Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
+                return;
+            }
+            if (user != UserHandle.USER_OWNER) {
+                Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
+                return;
+            }
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                readPolicyXml(bais, true /*forRestore*/);
+                savePolicyFile();
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
+            }
         }
 
         @Override
