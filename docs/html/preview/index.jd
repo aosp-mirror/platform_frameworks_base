@@ -1,5 +1,5 @@
 page.title=Android M Developer Preview
-page.tags="preview", 
+page.tags="preview",
 meta.tags="preview, M preview"
 fullpage=true
 section.landing=true
@@ -49,5 +49,19 @@ footer.hide=1
        data-cardSizes="6x6"
        data-initial-results="6"
        data-maxResults="16"></div>
+
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Join G+ Community
+    </a></li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        Report Issues
+      </a>
+    </li>
+  </ul>
 </div></section>
 
