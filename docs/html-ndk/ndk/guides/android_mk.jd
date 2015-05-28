@@ -114,7 +114,7 @@ script determines what to build, and how to do it.</p>
 
 <p>There are more complex examples in the samples directories, with commented
 {@code Android.mk} files that you can look at. In addition,
-<a href="{@docRoot}ndk/guides/sample_na.html">Sample: native-activity</a> provides
+<a href="{@docRoot}ndk/samples/sample_na.html">Sample: native-activity</a> provides
 a detailed explanation of that sample's {@code Android.mk} file. Finally, <a href="#var">
 Variables and Macros</a> provides further information on the variables from this section.
 
@@ -873,6 +873,3 @@ $(call import-module,&lt;name&gt;)
 <p>In this example, the build system looks for the module tagged {@code &lt;name&gt;} in the list of
 directories referenced that your {@code NDK_MODULE_PATH} environment variable references, and
 includes its {@code Android.mk} file automatically for you.</p>
-
-<p>For more information, see <a href="import.html">Android Module Paths (Sharing Code)</a>.
-</p>
