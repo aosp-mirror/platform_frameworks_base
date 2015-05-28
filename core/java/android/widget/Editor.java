@@ -1890,6 +1890,11 @@ public class Editor {
 
             if (!extractedTextModeWillBeStarted()) {
                 if (isCursorInsideEasyCorrectionSpan()) {
+                    // Cancel the single tap delayed runnable.
+                    if (mSelectionModeWithoutSelectionRunnable != null) {
+                        mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
+                    }
+
                     mShowSuggestionRunnable = new Runnable() {
                         public void run() {
                             showSuggestions();
@@ -3819,13 +3824,15 @@ public class Editor {
                     SystemClock.uptimeMillis() - TextView.sLastCutCopyOrTextChangedTime;
 
             // Cancel the single tap delayed runnable.
-            if (mDoubleTap && mSelectionModeWithoutSelectionRunnable != null) {
+            if (mSelectionModeWithoutSelectionRunnable != null
+                    && (mDoubleTap || isCursorInsideEasyCorrectionSpan())) {
                 mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
             }
 
             // Prepare and schedule the single tap runnable to run exactly after the double tap
             // timeout has passed.
-            if (!mDoubleTap && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
+            if (!mDoubleTap && !isCursorInsideEasyCorrectionSpan()
+                    && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
                 if (mSelectionModeWithoutSelectionRunnable == null) {
                     mSelectionModeWithoutSelectionRunnable = new Runnable() {
                         public void run() {
