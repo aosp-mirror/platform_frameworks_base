@@ -876,16 +876,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                        "-Xzygote-max-boot-retry=");
 
     /*
-     * When running with debug.gencfi, add --include-cfi to the compiler options so that the boot
-     * image, if it is compiled on device, will include CFI info, as well as other compilations
-     * started by the runtime.
+     * When running with debug.generate-debug-info, add --generate-debug-info to
+     * the compiler options so that the boot image, if it is compiled on device,
+     * will include native debugging information.
      */
-    property_get("debug.gencfi", propBuf, "");
+    property_get("debug.generate-debug-info", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
         addOption("-Xcompiler-option");
-        addOption("--include-cfi");
+        addOption("--generate-debug-info");
         addOption("-Ximage-compiler-option");
-        addOption("--include-cfi");
+        addOption("--generate-debug-info");
     }
 
     initArgs.version = JNI_VERSION_1_4;
