@@ -554,10 +554,10 @@ Number Slow draw: 23342
 </h4>
 
 <p>
-  Tool suites like <a href=
-  "https://developer.android.com/tools/testing-support-library/index.html">UIAutomator</a>,
-  and <a href="https://code.google.com/p/android-test-kit/">Espresso</a> are built to help
-  automate the action of a user moving through your application. These are simple
+  Tool suites, like <a href=
+  "{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a> and
+  <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a>, are
+  built to help automate the action of a user moving through your application. These are simple
   frameworks which mimic user interaction with your device. To use these frameworks, you
   effectively create unique scripts, which run through a set of user-actions, and play them
   out on the device itself.
@@ -585,7 +585,7 @@ Number Slow draw: 23342
 
 <p>
   It’s worth noting that UI testing frameworks (like <a href=
-  "https://developer.android.com/tools/testing-support-library/index.html">UIAutomator</a>)
+  "{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a>)
   run on the target device/emulator directly. While performance gathering information done
   by <em>dumpsys gfxinfo</em> is driven by a host machine, sending commands over ADB. To
   help bridge the automation of these separate entities, <a href=
@@ -595,7 +595,7 @@ Number Slow draw: 23342
 </p>
 
 <p>
-  Building a set of scripts for proper Automation of UI Performance testing, at a minimum,
+  Building a set of scripts for proper automation of UI Performance testing, at a minimum,
   should be able to utilize monkeyRunner to accomplish the following tasks:
 </p>
 
@@ -603,7 +603,7 @@ Number Slow draw: 23342
   <li>Load &amp; Launch a desired APK to a target device, devices, or emulator.
   </li>
 
-  <li>Launch a UIAutomator UI test, and allow it to be executed
+  <li>Launch a UI Automator UI test, and allow it to be executed
   </li>
 
   <li>Collect performance information through <em>dumpsys gfxinfo</em><em>.</em>
