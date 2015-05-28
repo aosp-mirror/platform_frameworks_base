@@ -9,6 +9,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
       <ol>
         <li><a href="#runtime-permissions">Testing Permissions</a></li>
         <li><a href="#doze-standby">Testing Doze and App Standby</a></li>
+        <li><a href="#ids">Auto Backup and Device Identifiers</a></li>
       </ol>
   </div>
 </div>
@@ -33,6 +34,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
   </li>
   <li><a href="#doze-mode">Doze and App Standby</a>
   </li>
+  <li><a href="#ids">Auto Backup and Device Identifiers</a></li>
 </ul>
 
 <p>
@@ -174,3 +176,10 @@ $ adb shell am set-idle &lt;packageName&gt; true
     from standby mode. In particular, you should check if your app's Notifications and background
     jobs continue to function as expected.</li>
 </ol>
+
+<h2 id="ids">Auto Backup for Apps and Device-Specific Identifiers</h2>
+
+<p>If your app is persisting any device-specific identifiers, such as Google
+Cloud Messaging registration ID, in internal storage,
+make sure to follow best practices to exclude the storage
+location from auto-backup, as described in <a href="">Auto Backup for Apps</a>. </p>

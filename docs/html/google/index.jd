@@ -11,7 +11,7 @@ footer.hide=1
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/images/google/hero-play-services_2x.png" style="height:400px">
+        <img class="dac-hero-image" src="{@docRoot}images/google/hero-play-services_2x.png" style="height:400px">
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Build better apps with Google</h1>
@@ -21,11 +21,11 @@ footer.hide=1
           <p class="dac-hero-description">Start by setting up the Google Play services library,
           then build with the APIs you need. </p>
 
-        <a class="dac-hero-cta" href="https://developers.google.com/android/guides/">
+        <a class="dac-hero-cta" href="{@docRoot}google/play-services/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Set up Google Play services
         </a><br>
-        <a class="dac-hero-cta" href="https://developers.google.com/android/reference/">
+        <a class="dac-hero-cta" href="{@docRoot}reference/gms-packages.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           API Reference
         </a><br>
