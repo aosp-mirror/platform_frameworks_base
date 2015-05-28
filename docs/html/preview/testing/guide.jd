@@ -1,5 +1,6 @@
 page.title=Testing Guide
-page.image=images/cards/card-set-up_16-9_2x.png
+page.image=images/cards/card-build_16x9_2x.png
+page.keywords=previewresources,androidm,testing,permissions
 
 @jd:body
 
@@ -182,4 +183,5 @@ $ adb shell am set-idle &lt;packageName&gt; true
 <p>If your app is persisting any device-specific identifiers, such as Google
 Cloud Messaging registration ID, in internal storage,
 make sure to follow best practices to exclude the storage
-location from auto-backup, as described in <a href="">Auto Backup for Apps</a>. </p>
+location from auto-backup, as described in <a href="{@docRoot}preview/backup/index.html">Auto
+Backup for Apps</a>. </p>

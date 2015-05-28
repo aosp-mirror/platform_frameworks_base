@@ -33,7 +33,7 @@
         <li><a href="<?cs var:toroot ?>preview/features/app-linking.html">
           App Links</a></li>
         <li><a href="<?cs var:toroot ?>preview/backup/index.html">
-          Automatic Backups</a></li>
+          Auto Backup for Apps</a></li>
       </ul>
   </li>
 

@@ -1,6 +1,6 @@
 page.title=Behavior Changes
 page.keywords=preview,sdk,compatibility
-sdk.platform.apiLevel=22-mnc
+sdk.platform.apiLevel=MNC
 @jd:body
 
 <div id="qv-wrapper">
