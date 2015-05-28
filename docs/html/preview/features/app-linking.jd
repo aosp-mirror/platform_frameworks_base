@@ -17,7 +17,7 @@ page.title=App Links
 <p>
   The Android Intent system is a flexible mechanism to enable apps to handle content and requests.
   Multiple apps may declare matching URI patterns in their intent filters. When a user clicks on a
-  web link that does not have default launch handler, the platform may show a dialog for the user
+  web link that does not have a default launch handler, the platform may show a dialog for the user
   to select from a list of apps that have declared matching intent filters.
 </p>
 
