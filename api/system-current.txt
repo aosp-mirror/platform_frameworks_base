@@ -155,7 +155,7 @@ package android {
     field public static final java.lang.String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final java.lang.String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
     field public static final java.lang.String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
-    field public static final java.lang.String READ_PROFILE = "android.permission.READ_PROFILE";
+    field public static final deprecated java.lang.String READ_PROFILE = "android.permission.READ_PROFILE";
     field public static final java.lang.String READ_SEARCH_INDEXABLES = "android.permission.READ_SEARCH_INDEXABLES";
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
     field public static final deprecated java.lang.String READ_SOCIAL_STREAM = "android.permission.READ_SOCIAL_STREAM";
@@ -228,7 +228,7 @@ package android {
     field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
     field public static final java.lang.String WRITE_HISTORY_BOOKMARKS = "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS";
     field public static final java.lang.String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
-    field public static final java.lang.String WRITE_PROFILE = "android.permission.WRITE_PROFILE";
+    field public static final deprecated java.lang.String WRITE_PROFILE = "android.permission.WRITE_PROFILE";
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
     field public static final java.lang.String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
     field public static final deprecated java.lang.String WRITE_SOCIAL_STREAM = "android.permission.WRITE_SOCIAL_STREAM";
