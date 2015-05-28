@@ -39,7 +39,7 @@ use cases for this functionality:</p>
     library appropriate to your target ABI. For more information on ensuring library support for
     ABIs, see <a href="#sa">Selecting ABIs for Prebuilt Libraries.</a></p></li>
    <li>Include {@code PREBUILT_SHARED_LIBRARY} or {@code PREBUILT_STATIC_LIBRARY}, depending on
-    whether you are using a shared ({@code .so}) or static {@code .a}) library.</li>
+    whether you are using a shared ({@code .so}) or static ({@code .a}) library.</li>
 </ol>
 
   <p>Here is a trivial example that assumes the prebuilt library {@code libfoo.so} resides in
