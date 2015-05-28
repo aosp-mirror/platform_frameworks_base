@@ -29,7 +29,7 @@
       API Overview</a></div>
       <ul>
         <li><a href="<?cs var:toroot ?>preview/features/runtime-permissions.html">
-          Runtime Permissions</a></li>
+          Permissions</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/app-linking.html">
           App Links</a></li>
         <li><a href="<?cs var:toroot ?>preview/backup/index.html">
