@@ -8,6 +8,7 @@ page.image=images/cards/card-set-up_16-9_2x.png
   <div id="qv">
     <h2>In this document</h2>
       <ol>
+        <li><a href="#get-as13">Get Android Studio 1.3</a></li>
         <li><a href="#get-sdk">Get the Preview SDK</a></li>
         <li><a href="#create-update">Create or Update a Project</a></li>
         <li><a href="#setup-test">Set Up for Testing</a></li>
@@ -15,26 +16,91 @@ page.image=images/cards/card-set-up_16-9_2x.png
   </div>
 </div>
 
-<p>The Preview SDK is available from the Android SDK Manager.
+<p>The M Developer Preview SDK is available from the Android SDK Manager.
 This document assumes that you are familiar with Android app development, such
 as using the Android SDK Manager and creating projects. If you are new to
 Android, see <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First
 App</a> training lesson first.</a></p>
 
-<h2 id="get-sdk">Get the Preview SDK</h2>
+<h2 id="get-as13">Get Android Studio 1.3</h2>
 
-<p>To add the Android Preview SDK components to your development environment:</p>
+<p>The Developer Preview requires Android Studio 1.3, which is in
+preview status. You need
+to install the preview version of Android Studio 1.3 to work with the Preview
+SDK.</p>
+
+<p class="caution"><strong>Caution:</strong> The canary preview of Android
+Studio 1.3 is still in active development. If you are using your primary development
+machine to test the developer preview, you should create a second installation
+of Android Studio to use for testing.</p>
+
+<p>To install the Android Studio 1.3 preview:</p>
 
 <ol>
-  <li>Start the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.</li>
-  <li>In the <strong>Tools</strong> section, select the latest Android <strong>SDK Tools</strong>,
-    <strong>Platform-tools</strong>, and <strong>Build-tools</strong>.</li>
-  <li>Select everything under the <strong>Android M Developer Preview</strong> section and
-    click <strong>Install packages...</strong></li>
-  <li>Accept the Licensing Agreement for all of the packages and click
-    <strong>Install</strong>.</li>
+  <li>Download and launch <a href="{@docRoot}tools/studio/index.html">Android
+  Studio</a>.
+  </li>
+
+  <li>Open the <strong>Settings</strong> window by choosing <strong>File &gt;
+  Settings</strong>. Choose the <strong>Appearance &amp; Behavior &gt; System
+  Settings &gt; Updates</strong> panel.</li>
+
+  <li> On the <strong>Updates</strong> panel, choose the option
+  <strong>Automatically check updates for: Canary Chanel</strong>.
+  </li>
+
+  <li>On the <strong>Updates</strong> panel, select <strong>Check Now</strong>
+  to check for the latest canary build. Download and install the build when you
+  are prompted.
+  </li>
 </ol>
 
+<h2 id="get-sdk">Get the Preview SDK</h2>
+
+<p>To add the Preview SDK components to your development environment:</p>
+
+<ol>
+  <li>Launch the Android Studio 1.3 preview.
+  </li>
+
+  <li>Open the <strong>Settings</strong> window by choosing <strong>File &gt;
+  Settings</strong>. Choose the <strong>Appearance &amp; Behavior &gt; System
+  Settings &gt; Updates</strong> panel.</li>
+
+  <li>On the <strong>Updates</strong> panel, choose the options
+  <strong>Automatically check updates for: Canary Chanel</strong> and
+  <strong>Automatically check updates for Android SDK: Preview Chanel</strong>.
+  </li>
+
+  <li>Click the <strong>Android SDK Manager</strong> button to launch the SDK
+  Manager. (With Android Studio 1.3, the SDK Manager is integrated into Android
+  Studio instead of being a standalone application.)
+  </li>
+
+  <li>Under the <strong>Platforms</strong> section, select <strong>Android MNC
+  Preview</strong>.
+  </li>
+
+  <li>In the <strong>Tools</strong> section, select the latest Android <strong>
+    SDK Tools</strong>, <strong>Platform-tools</strong>, and
+    <strong>Build-tools</strong>.
+  </li>
+
+  <li>Click <strong>Install packages</strong> and accept the licensing
+    agreement for all of the packages.
+  </li>
+
+  <li>Verify that the M Developer Preview is installed by opening the <strong>
+    Settings</strong> window and choosing the <strong>Appearance &amp; Behavior
+    &gt; System Settings &gt; Android SDK</strong> panel.</li>
+
+  <li>On the <strong>Android SDK</strong> panel, choose
+    the <strong>SDK Platforms</strong> tab. <strong>Android MNC
+    Preview</strong> should be listed as <em>Installed</em>. Also, open the
+    <strong>SDK Tools</strong> tab to verify that the latest tools are
+    installed.
+  </li>
+</ol>
 <p>After completing these steps, the preview components are available in your development
   environment. </p>
 
@@ -88,7 +154,7 @@ App</a> training lesson first.</a></p>
 <h3 id="setup-device">Set up a Physical Device</h3>
 
 <p>
-  If you have a Nexus 5, Nexus 6, Nexus 9, or Nexus Player, you can install a preview
+  If you have a Nexus 5, Nexus 6, Nexus 9, or Android TV, you can install a preview
   system image on these devices for testing your app.
   You can set up virtual device with the preview version of the platform from within Android Studio
   using the Android Virtual Device Manager tool.
@@ -109,7 +175,7 @@ App</a> training lesson first.</a></p>
 <p>To create an AVD with the AVD Manager:</p>
 
 <ol>
-  <li>Install the M Preview SDK in your development environment, as described
+  <li>Install the Preview SDK in your development environment, as described
       in <a href="{@docRoot}preview/setup-sdk.html">Setting Up the Preview
       SDK.</a></li>
   <li>Follow the steps in
