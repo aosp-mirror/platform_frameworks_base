@@ -45,7 +45,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import static com.android.ide.common.rendering.api.RenderResources.*;
+import static android.util.TypedValue.TYPE_ATTRIBUTE;
+import static android.util.TypedValue.TYPE_DIMENSION;
+import static android.util.TypedValue.TYPE_FLOAT;
+import static android.util.TypedValue.TYPE_INT_BOOLEAN;
+import static android.util.TypedValue.TYPE_INT_COLOR_ARGB4;
+import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
+import static android.util.TypedValue.TYPE_INT_COLOR_RGB4;
+import static android.util.TypedValue.TYPE_INT_COLOR_RGB8;
+import static android.util.TypedValue.TYPE_INT_DEC;
+import static android.util.TypedValue.TYPE_INT_HEX;
+import static android.util.TypedValue.TYPE_NULL;
+import static android.util.TypedValue.TYPE_REFERENCE;
+import static android.util.TypedValue.TYPE_STRING;
+import static com.android.SdkConstants.PREFIX_RESOURCE_REF;
+import static com.android.SdkConstants.PREFIX_THEME_REF;
+import static com.android.ide.common.rendering.api.RenderResources.REFERENCE_EMPTY;
+import static com.android.ide.common.rendering.api.RenderResources.REFERENCE_NULL;
+import static com.android.ide.common.rendering.api.RenderResources.REFERENCE_UNDEFINED;
 
 /**
  * Custom implementation of TypedArray to handle non compiled resources.
@@ -223,7 +240,7 @@ public final class BridgeTypedArray extends TypedArray {
         String s = getString(index);
         try {
             if (s != null) {
-                return XmlUtils.convertValueToInt(s, defValue);
+                return convertValueToInt(s, defValue);
             }
         } catch (NumberFormatException e) {
             Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
@@ -764,14 +781,57 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     @Override
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public int getType(int index) {
-        if (!hasValue(index)) {
-            return TypedValue.TYPE_NULL;
+        String value = getString(index);
+        if (value == null) {
+            return TYPE_NULL;
         }
-        ResourceValue value = mResourceData[index];
-        ResourceType resourceType = value.getResourceType();
-        return 0;
-        // TODO: fixme.
+        if (value.startsWith(PREFIX_RESOURCE_REF)) {
+            return TYPE_REFERENCE;
+        }
+        if (value.startsWith(PREFIX_THEME_REF)) {
+            return TYPE_ATTRIBUTE;
+        }
+        try {
+            // Don't care about the value. Only called to check if an exception is thrown.
+            convertValueToInt(value, 0);
+            if (value.startsWith("0x") || value.startsWith("0X")) {
+                return TYPE_INT_HEX;
+            }
+            // is it a color?
+            if (value.startsWith("#")) {
+                int length = value.length() - 1;
+                if (length == 3) {  // rgb
+                    return TYPE_INT_COLOR_RGB4;
+                }
+                if (length == 4) {  // argb
+                    return TYPE_INT_COLOR_ARGB4;
+                }
+                if (length == 6) {  // rrggbb
+                    return TYPE_INT_COLOR_RGB8;
+                }
+                if (length == 8) {  // aarrggbb
+                    return TYPE_INT_COLOR_ARGB8;
+                }
+            }
+            if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                return TYPE_INT_BOOLEAN;
+            }
+            return TYPE_INT_DEC;
+        } catch (NumberFormatException ignored) {
+            try {
+                Float.parseFloat(value);
+                return TYPE_FLOAT;
+            } catch (NumberFormatException ignore) {
+            }
+            // Might be a dimension.
+            if (ResourceHelper.parseFloatAttribute(null, value, new TypedValue(), false)) {
+                return TYPE_DIMENSION;
+            }
+        }
+        // TODO: handle fractions.
+        return TYPE_STRING;
     }
 
     /**
@@ -881,6 +941,52 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         return null;
+    }
+
+    /**
+     * Copied from {@link XmlUtils#convertValueToInt(CharSequence, int)}, but adapted to account
+     * for aapt, and the fact that host Java VM's Integer.parseInt("XXXXXXXX", 16) cannot handle
+     * "XXXXXXXX" > 80000000.
+     */
+    private static int convertValueToInt(@Nullable String charSeq, int defValue) {
+        if (null == charSeq)
+            return defValue;
+
+        int sign = 1;
+        int index = 0;
+        int len = charSeq.length();
+        int base = 10;
+
+        if ('-' == charSeq.charAt(0)) {
+            sign = -1;
+            index++;
+        }
+
+        if ('0' == charSeq.charAt(index)) {
+            //  Quick check for a zero by itself
+            if (index == (len - 1))
+                return 0;
+
+            char c = charSeq.charAt(index + 1);
+
+            if ('x' == c || 'X' == c) {
+                index += 2;
+                base = 16;
+            } else {
+                index++;
+                // Leave the base as 10. aapt removes the preceding zero, and thus when framework
+                // sees the value, it only gets the decimal value.
+            }
+        } else if ('#' == charSeq.charAt(index)) {
+            return ResourceHelper.getColor(charSeq) * sign;
+        } else if ("true".equals(charSeq) || "TRUE".equals(charSeq)) {
+            return -1;
+        } else if ("false".equals(charSeq) || "FALSE".equals(charSeq)) {
+            return 0;
+        }
+
+        // Use Long, since we want to handle hex ints > 80000000.
+        return ((int)Long.parseLong(charSeq.substring(index), base)) * sign;
     }
 
     static TypedArray obtain(Resources res, int len) {
