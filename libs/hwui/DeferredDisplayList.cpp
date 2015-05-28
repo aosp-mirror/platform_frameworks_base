@@ -195,6 +195,7 @@ public:
         // Identical round rect clip state means both ops will clip in the same way, or not at all.
         // As the state objects are const, we can compare their pointers to determine mergeability
         if (lhs->mRoundRectClipState != rhs->mRoundRectClipState) return false;
+        if (lhs->mProjectionPathMask != rhs->mProjectionPathMask) return false;
 
         /* Clipping compatibility check
          *

@@ -130,6 +130,7 @@ public:
     void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
     void setClippingRoundRect(LinearAllocator& allocator,
             const Rect& rect, float radius, bool highPriority = true);
+    void setProjectionPathMask(LinearAllocator& allocator, const SkPath* path);
 
     /**
      * Returns true if drawing in the rectangle (left, top, right, bottom)

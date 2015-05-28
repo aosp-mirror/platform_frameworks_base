@@ -37,6 +37,7 @@
 
 #include <SkPath.h>
 #include <SkPaint.h>
+#include <SkPoint.h>
 #include <SkGeometry.h> // WARNING: Internal Skia Header
 
 #include <stdlib.h>
@@ -912,6 +913,39 @@ void pushToVector(Vector<Vertex>& vertices, float x, float y) {
     Vertex::set(newVertex, x, y);
 }
 
+class ClockwiseEnforcer {
+public:
+    void addPoint(const SkPoint& point) {
+        double x = point.x();
+        double y = point.y();
+
+        if (initialized) {
+            sum += (x + lastX) * (y - lastY);
+        } else {
+            initialized = true;
+        }
+
+        lastX = x;
+        lastY = y;
+    }
+    void reverseVectorIfNotClockwise(Vector<Vertex>& vertices) {
+        if (sum < 0) {
+            // negative sum implies CounterClockwise
+            const int size = vertices.size();
+            for (int i = 0; i < size / 2; i++) {
+                Vertex tmp = vertices[i];
+                int k = size - 1 - i;
+                vertices.replaceAt(vertices[k], i);
+                vertices.replaceAt(tmp, k);
+            }
+        }
+    }
+private:
+    bool initialized = false;
+    double lastX, lastY;
+    double sum = 0;
+};
+
 bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool forceClose,
         float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
         Vector<Vertex>& outputVertices) {
@@ -922,18 +956,22 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
     SkPath::Iter iter(path, forceClose);
     SkPoint pts[4];
     SkPath::Verb v;
+    ClockwiseEnforcer clockwiseEnforcer;
     while (SkPath::kDone_Verb != (v = iter.next(pts))) {
             switch (v) {
             case SkPath::kMove_Verb:
                 pushToVector(outputVertices, pts[0].x(), pts[0].y());
                 ALOGV("Move to pos %f %f", pts[0].x(), pts[0].y());
+                clockwiseEnforcer.addPoint(pts[0]);
                 break;
             case SkPath::kClose_Verb:
                 ALOGV("Close at pos %f %f", pts[0].x(), pts[0].y());
+                clockwiseEnforcer.addPoint(pts[0]);
                 break;
             case SkPath::kLine_Verb:
                 ALOGV("kLine_Verb %f %f -> %f %f", pts[0].x(), pts[0].y(), pts[1].x(), pts[1].y());
                 pushToVector(outputVertices, pts[1].x(), pts[1].y());
+                clockwiseEnforcer.addPoint(pts[1]);
                 break;
             case SkPath::kQuad_Verb:
                 ALOGV("kQuad_Verb");
@@ -942,6 +980,8 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[2].x(), pts[2].y(),
                         pts[1].x(), pts[1].y(),
                         sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                clockwiseEnforcer.addPoint(pts[1]);
+                clockwiseEnforcer.addPoint(pts[2]);
                 break;
             case SkPath::kCubic_Verb:
                 ALOGV("kCubic_Verb");
@@ -951,6 +991,9 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[3].x(), pts[3].y(),
                         pts[2].x(), pts[2].y(),
                         sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                clockwiseEnforcer.addPoint(pts[1]);
+                clockwiseEnforcer.addPoint(pts[2]);
+                clockwiseEnforcer.addPoint(pts[3]);
                 break;
             case SkPath::kConic_Verb: {
                 ALOGV("kConic_Verb");
@@ -965,6 +1008,8 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                             quads[offset+1].x(), quads[offset+1].y(),
                             sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
                 }
+                clockwiseEnforcer.addPoint(pts[1]);
+                clockwiseEnforcer.addPoint(pts[2]);
                 break;
             }
             default:
@@ -972,13 +1017,17 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
             }
     }
 
+    bool wasClosed = false;
     int size = outputVertices.size();
     if (size >= 2 && outputVertices[0].x == outputVertices[size - 1].x &&
             outputVertices[0].y == outputVertices[size - 1].y) {
         outputVertices.pop();
-        return true;
+        wasClosed = true;
     }
-    return false;
+
+    // ensure output vector is clockwise
+    clockwiseEnforcer.reverseVectorIfNotClockwise(outputVertices);
+    return wasClosed;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

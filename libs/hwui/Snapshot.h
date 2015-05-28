@@ -63,6 +63,17 @@ public:
     float radius;
 };
 
+class ProjectionPathMask {
+public:
+    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
+    const SkPath* projectionMask;
+    Matrix4 projectionMaskTransform;
+};
+
 /**
  * A snapshot holds information about the current state of the rendering
  * surface. A snapshot is usually created whenever the user calls save()
@@ -190,6 +201,11 @@ public:
             float radius, bool highPriority);
 
     /**
+     * Sets (and replaces) the current projection mask
+     */
+    void setProjectionPathMask(LinearAllocator& allocator, const SkPath* path);
+
+    /**
      * Indicates whether this snapshot should be ignored. A snapshot
      * is typically ignored if its layer is invisible or empty.
      */
@@ -199,6 +215,12 @@ public:
      * Indicates whether the current transform has perspective components.
      */
     bool hasPerspectiveTransform() const;
+
+    /**
+     * Fills outTransform with the current, total transform to screen space,
+     * across layer boundaries.
+     */
+    void buildScreenSpaceTransform(Matrix4* outTransform) const;
 
     /**
      * Dirty flags.
@@ -271,6 +293,11 @@ public:
      * never modified.
      */
     const RoundRectClipState* roundRectClipState;
+
+    /**
+     * Current projection masking path - used exclusively to mask tessellated circles.
+     */
+    const ProjectionPathMask* projectionPathMask;
 
     void dump() const;
 
