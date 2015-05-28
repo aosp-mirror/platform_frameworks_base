@@ -1,7 +1,7 @@
 page.title=App Links
-
+page.image=images/cards/card-app-linking_2x.png
+page.keywords=applinking, deeplinks, intents
 @jd:body
-
 
 <div id="qv-wrapper">
   <div id="qv">
