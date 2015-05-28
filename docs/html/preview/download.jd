@@ -203,9 +203,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="docs-dl">
     <td>Android M Preview<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-devdocs-r1.zip</a><br>
-      MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
-      SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+      >m-preview-1-developer-docs.zip</a><br>
+      MD5: b65201b0d35416f5a1b7a071b52854a7<br>
+      SHA-1: d47e856aa65e06897e6edd902ad8d2b1f05ac3ec
     </td>
   </tr>
 <table>
@@ -305,7 +305,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 
 <script>
-  var urlRoot = "http://storage.googleapis.com/androiddevelopers/preview/images/";
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/preview/";
   function onDownload(link) {
 
     $("#downloadForRealz").html("Download " + $(link).text());
