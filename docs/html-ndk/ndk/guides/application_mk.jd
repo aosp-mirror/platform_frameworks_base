@@ -181,33 +181,9 @@ Android system images, see <a href="{@docRoot}ndk/guides/stable_apis.html">Andro
 <p>By default, the NDK build system provides C++ headers for the minimal C++ runtime library
 ({@code system/lib/libstdc++.so}) provided by the Android system. In addition, it comes with
 alternative C++ implementations that you can use or link to in your own applications.
-Use {@code APP_STL} to select one of them. Table 2 shows the {@code APP_STL} values to specify
-support for different libraries.</p>
-
-<p class="table-caption" id="table2">
-  <strong>Table 2.</strong> {@code APP_STL} settings to support different libraries.</p>
-<table>
-  <tr>
-    <th scope="col">Library</th>
-    <th scope="col">Value</th>
-  </tr>
-  <tr>
-    <td>Static STLport</td>
-    <td>{@code APP_STL := stlport_static}</td>
-  </tr>
-  <tr>
-    <td>Shared STLport</td>
-    <td>{@code APP_STL := stlport_shared}</td>
-  </tr>
-  <tr>
-    <td>Default C++ runtime</td>
-    <td>{@code APP_STL := system}</td>
-  </tr>
-</table>
-
-<p>For more information on this subject, see <a href="{@docRoot}ndk/guides/cpp-support.html">
-C++ Library Support</a>.</p>
-
+Use {@code APP_STL} to select one of them. For information about the supported runtimes, and the
+features they offer, see <a href="{@docRoot}ndk/guides/cpp-support.html#runtimes">NDK Runtimes and
+Features</a>.
 
 <h4>APP_SHORT_COMMANDS</h4>
 <p>The equivalent of {@code LOCAL_SHORT_COMMANDS} in {@code Application.mk} for your whole project.
@@ -222,10 +198,12 @@ To select a version of Clang, define this variable as {@code clang3.4}, {@code c
 
 <h4>APP_PIE</h4>
 <p>Starting from Android 4.1 (API level 16), Android's dynamic linker supports position-independent
-executables (PIE). Use the {@code -fPIE} flag to build them. This flag makes it harder to exploit
-memory corruption bugs by randomizing code location. By default, {@code ndk-build} automatically
-sets this value to {@code true} if your project targets {@code android-16} or higher. You may set
-it manually to either {@code true} or {@code false}.</p>
+executables (PIE). From Android 5.0 (API level 21), executables require PIE.
+
+To use PIE to build your executables, set the {@code -fPIE} flag. This flag makes it harder to
+exploit memory corruption bugs by randomizing code location. By default, {@code ndk-build}
+automatically sets this value to {@code true} if your project targets {@code android-16} or higher.
+You may set it manually to either {@code true} or {@code false}.</p>
 
 <p>This flag applies only to executables. It has no effect when building shared or static
 libraries.</p>
