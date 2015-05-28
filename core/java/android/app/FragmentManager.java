@@ -19,6 +19,9 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -403,6 +406,44 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     static final String VIEW_STATE_TAG = "android:view_state";
     static final String USER_VISIBLE_HINT_TAG = "android:user_visible_hint";
 
+    static class AnimateOnHWLayerIfNeededListener implements Animator.AnimatorListener {
+        private boolean mShouldRunOnHWLayer = false;
+        private View mView;
+        public AnimateOnHWLayerIfNeededListener(final View v) {
+            if (v == null) {
+                return;
+            }
+            mView = v;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            mShouldRunOnHWLayer = shouldRunOnHWLayer(mView, animation);
+            if (mShouldRunOnHWLayer) {
+                mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            }
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mShouldRunOnHWLayer) {
+                mView.setLayerType(View.LAYER_TYPE_NONE, null);
+            }
+            mView = null;
+            animation.removeListener(this);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
+    }
+
     ArrayList<Runnable> mPendingActions;
     Runnable[] mTmpActions;
     boolean mExecutingActions;
@@ -465,6 +506,50 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
         pw.flush();
         throw ex;
+    }
+
+    static boolean modifiesAlpha(Animator anim) {
+        if (anim == null) {
+            return false;
+        }
+        if (anim instanceof ValueAnimator) {
+            ValueAnimator valueAnim = (ValueAnimator) anim;
+            PropertyValuesHolder[] values = valueAnim.getValues();
+            for (int i = 0; i < values.length; i++) {
+                if (("alpha").equals(values[i].getPropertyName())) {
+                    return true;
+                }
+            }
+        } else if (anim instanceof AnimatorSet) {
+            List<Animator> animList = ((AnimatorSet) anim).getChildAnimations();
+            for (int i = 0; i < animList.size(); i++) {
+                if (modifiesAlpha(animList.get(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static boolean shouldRunOnHWLayer(View v, Animator anim) {
+        if (v == null || anim == null) {
+            return false;
+        }
+        return v.getLayerType() == View.LAYER_TYPE_NONE
+                && v.hasOverlappingRendering()
+                && modifiesAlpha(anim);
+    }
+
+    /**
+     * Sets the to be animated view on hardware layer during the animation.
+     */
+    private void setHWLayerAnimListenerIfAlpha(final View v, Animator anim) {
+        if (v == null || anim == null) {
+            return;
+        }
+        if (shouldRunOnHWLayer(v, anim)) {
+            anim.addListener(new AnimateOnHWLayerIfNeededListener(v));
+        }
     }
 
     @Override
@@ -894,6 +979,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                             transitionStyle);
                                     if (anim != null) {
                                         anim.setTarget(f.mView);
+                                        setHWLayerAnimListenerIfAlpha(f.mView, anim);
                                         anim.start();
                                     }
                                     container.addView(f.mView);
@@ -975,6 +1061,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                     }
                                 });
                                 anim.setTarget(f.mView);
+                                setHWLayerAnimListenerIfAlpha(f.mView, anim);
                                 anim.start();
 
                             }
@@ -1188,6 +1275,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                             }
                         }
                     });
+                    setHWLayerAnimListenerIfAlpha(finalFragment.mView, anim);
                     anim.start();
                 } else {
                     fragment.mView.setVisibility(View.GONE);
@@ -1209,6 +1297,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         transitionStyle);
                 if (anim != null) {
                     anim.setTarget(fragment.mView);
+                    setHWLayerAnimListenerIfAlpha(fragment.mView, anim);
                     anim.start();
                 }
                 fragment.mView.setVisibility(View.VISIBLE);
