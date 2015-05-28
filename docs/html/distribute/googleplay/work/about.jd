@@ -55,7 +55,7 @@ page.image=images/distribute/gpfw.jpg
   <li>Follow best practices for security and manage user data properly. Businesses
   are more conscious of data security and employee productivity, especially when it
   comes to features that share information with other services.</li>
-  <li>Support the <a href="{@docRoot}training/enterprise/app-restrictions.html">App Configuration framework to let an administrator remotely configure app settings such as:
+  <li>Support the <a href="{@docRoot}training/enterprise/app-restrictions.html">App Configuration framework</a> to let an administrator remotely configure app settings such as:
     <ul>
       <li>Server address and protocol settings</li>
       <li>The ability to switch features on and off</li>
