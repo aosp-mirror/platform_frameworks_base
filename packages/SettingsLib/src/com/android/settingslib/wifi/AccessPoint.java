@@ -755,7 +755,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         int index = state.ordinal();
 
         if (index >= formats.length || formats[index].length() == 0) {
-            return null;
+            return "";
         }
         return String.format(formats[index], ssid);
     }
