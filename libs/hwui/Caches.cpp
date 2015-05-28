@@ -25,6 +25,7 @@
 #include "LayerRenderer.h"
 #include "ShadowTessellator.h"
 #include "RenderState.h"
+#include "utils/GLUtils.h"
 
 namespace android {
 
@@ -368,6 +369,12 @@ void Caches::flush(FlushMode mode) {
 
     clearGarbage();
     glFinish();
+
+    // glFinish() need dequeue buffer, and it is not 100% success
+    // It generates gl error sometimes, this error will be there
+    // until glGetError called. Call GLUtils::dumpGLErrors to clean
+    // the error in case it leaks to other functions
+    GLUtils::dumpGLErrors();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
