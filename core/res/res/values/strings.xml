@@ -413,6 +413,10 @@
     <!-- Spoken description for ringer normal option. [CHAR LIMIT=NONE] -->
     <string name="silent_mode_ring">Ringer on</string>
 
+    <!-- Reboot to Recovery Progress Dialog. This is shown before it reboots to recovery. -->
+    <string name="reboot_to_recovery_title">Prepare for update</string>
+    <string name="reboot_to_recovery_progress">Processing the update package\u2026</string>
+
     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. -->
     <string name="shutdown_progress">Shutting down\u2026</string>
 
