@@ -292,7 +292,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h3 id="revertDevice">Revert a Device to Factory Specifications</h3>
 
 <p>
-  If you want to uninstall the Preview and revert the device to factory specifications, go to
+  If you want to uninstall the preview and revert the device to factory specifications, go to
   <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a> and
   download the image you want to flash to for your device. Follow the instructions on that page to
   flash the image to your device.
