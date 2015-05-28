@@ -16,6 +16,8 @@
 #ifndef MATHUTILS_H
 #define MATHUTILS_H
 
+#include <math.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -60,6 +62,19 @@ public:
             return MAX_SCALE;
         }
         return scale;
+    }
+
+    /**
+     * Returns the number of points (beyond two, the start and end) needed to form a polygonal
+     * approximation of an arc, with a given threshold value.
+     */
+    inline static int divisionsNeededToApproximateArc(float radius,
+            float angleInRads, float threshold) {
+        const float errConst = (-threshold / radius + 1);
+        const float targetCosVal = 2 * errConst * errConst - 1;
+
+        // needed divisions are rounded up from approximation
+        return (int)(ceilf(angleInRads / acos(targetCosVal)/2)) * 2;
     }
 
     inline static bool areEqual(float valueA, float valueB) {
