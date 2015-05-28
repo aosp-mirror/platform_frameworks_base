@@ -330,10 +330,16 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
+    /*
       $("#tos").fadeOut('fast');
       $("#landing").fadeIn('fast');
+    */
+
       ga('send', 'event', 'M Preview', 'System Image', $("#downloadForRealz").html());
+
+    /*
       location.hash = "";
+    */
       return true;
     } else {
       return false;
