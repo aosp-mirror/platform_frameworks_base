@@ -312,7 +312,7 @@ public class SensorEvent {
      * </p>
      *
      * <p>
-     * values[2]: Roll, rotation around the x-axis (-90 to 90)
+     * values[2]: Roll, rotation around the y-axis (-90 to 90)
      * increasing as the device moves clockwise.
      * </p>
      * </ul>
@@ -325,6 +325,8 @@ public class SensorEvent {
      *
      * <p>
      * <b>Note:</b> This sensor type exists for legacy reasons, please use
+     * {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR
+     * rotation vector sensor type} and
      * {@link android.hardware.SensorManager#getRotationMatrix
      * getRotationMatrix()} in conjunction with
      * {@link android.hardware.SensorManager#remapCoordinateSystem
