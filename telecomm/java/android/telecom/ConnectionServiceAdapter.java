@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 
@@ -380,6 +381,22 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.addExistingConnection(callId, connection);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Sets extras associated with a connection.
+     *
+     * @param callId The unique ID of the call.
+     * @param extras The extras to associate with this call.
+     */
+    void setExtras(String callId, Bundle extras) {
+        Log.v(this, "setExtras: %s", extras);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setExtras(callId, extras);
             } catch (RemoteException ignored) {
             }
         }

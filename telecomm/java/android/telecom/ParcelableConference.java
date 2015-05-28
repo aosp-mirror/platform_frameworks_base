@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -38,6 +39,7 @@ public final class ParcelableConference implements Parcelable {
     private final IVideoProvider mVideoProvider;
     private final int mVideoState;
     private StatusHints mStatusHints;
+    private Bundle mExtras;
 
     public ParcelableConference(
             PhoneAccountHandle phoneAccount,
@@ -47,7 +49,8 @@ public final class ParcelableConference implements Parcelable {
             IVideoProvider videoProvider,
             int videoState,
             long connectTimeMillis,
-            StatusHints statusHints) {
+            StatusHints statusHints,
+            Bundle extras) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mConnectionCapabilities = connectionCapabilities;
@@ -57,6 +60,7 @@ public final class ParcelableConference implements Parcelable {
         mVideoState = videoState;
         mConnectTimeMillis = connectTimeMillis;
         mStatusHints = statusHints;
+        mExtras = extras;
     }
 
     @Override
@@ -110,6 +114,10 @@ public final class ParcelableConference implements Parcelable {
         return mStatusHints;
     }
 
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     public static final Parcelable.Creator<ParcelableConference> CREATOR =
             new Parcelable.Creator<ParcelableConference> () {
         @Override
@@ -125,9 +133,10 @@ public final class ParcelableConference implements Parcelable {
                     IVideoProvider.Stub.asInterface(source.readStrongBinder());
             int videoState = source.readInt();
             StatusHints statusHints = source.readParcelable(classLoader);
+            Bundle extras = source.readBundle(classLoader);
 
             return new ParcelableConference(phoneAccount, state, capabilities, connectionIds,
-                    videoCallProvider, videoState, connectTimeMillis, statusHints);
+                    videoCallProvider, videoState, connectTimeMillis, statusHints, extras);
         }
 
         @Override
@@ -154,5 +163,6 @@ public final class ParcelableConference implements Parcelable {
                 mVideoProvider != null ? mVideoProvider.asBinder() : null);
         destination.writeInt(mVideoState);
         destination.writeParcelable(mStatusHints, 0);
+        destination.writeBundle(mExtras);
     }
 }

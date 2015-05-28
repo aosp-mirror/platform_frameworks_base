@@ -253,6 +253,7 @@ public final class Call {
         private final int mVideoState;
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
+        private final Bundle mIntentExtras;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -480,10 +481,17 @@ public final class Call {
         }
 
         /**
-         * @return A bundle extras to pass with the call
+         * @return The extras associated with this call.
          */
         public Bundle getExtras() {
             return mExtras;
+        }
+
+        /**
+         * @return The extras used with the original intent to place this call.
+         */
+        public Bundle getIntentExtras() {
+            return mIntentExtras;
         }
 
         @Override
@@ -504,7 +512,8 @@ public final class Call {
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
-                        Objects.equals(mExtras, d.mExtras);
+                        Objects.equals(mExtras, d.mExtras) &&
+                        Objects.equals(mIntentExtras, d.mIntentExtras);
             }
             return false;
         }
@@ -524,7 +533,8 @@ public final class Call {
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
                     Objects.hashCode(mStatusHints) +
-                    Objects.hashCode(mExtras);
+                    Objects.hashCode(mExtras) +
+                    Objects.hashCode(mIntentExtras);
         }
 
         /** {@hide} */
@@ -541,7 +551,8 @@ public final class Call {
                 GatewayInfo gatewayInfo,
                 int videoState,
                 StatusHints statusHints,
-                Bundle extras) {
+                Bundle extras,
+                Bundle intentExtras) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -555,6 +566,7 @@ public final class Call {
             mVideoState = videoState;
             mStatusHints = statusHints;
             mExtras = extras;
+            mIntentExtras = intentExtras;
         }
     }
 
@@ -986,7 +998,8 @@ public final class Call {
                 parcelableCall.getGatewayInfo(),
                 parcelableCall.getVideoState(),
                 parcelableCall.getStatusHints(),
-                parcelableCall.getExtras());
+                parcelableCall.getExtras(),
+                parcelableCall.getIntentExtras());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;

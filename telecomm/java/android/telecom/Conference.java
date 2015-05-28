@@ -16,7 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.telecom.Connection.VideoProvider;
 
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public abstract class Conference extends Conferenceable {
         public void onVideoStateChanged(Conference c, int videoState) { }
         public void onVideoProviderChanged(Conference c, Connection.VideoProvider videoProvider) {}
         public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {}
+        public void onExtrasChanged(Conference conference, Bundle extras) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -70,6 +73,7 @@ public abstract class Conference extends Conferenceable {
     private String mDisconnectMessage;
     private long mConnectTimeMillis = CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
+    private Bundle mExtras;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -599,5 +603,26 @@ public abstract class Conference extends Conferenceable {
      */
     public final StatusHints getStatusHints() {
         return mStatusHints;
+    }
+
+    /**
+     * Set some extras that can be associated with this {@code Conference}. No assumptions should
+     * be made as to how an In-Call UI or service will handle these extras.
+     * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras associated with this {@code Connection}.
+     */
+    public final void setExtras(@Nullable Bundle extras) {
+        mExtras = extras;
+        for (Listener l : mListeners) {
+            l.onExtrasChanged(this, extras);
+        }
+    }
+
+    /**
+     * @return The extras associated with this conference.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 }
