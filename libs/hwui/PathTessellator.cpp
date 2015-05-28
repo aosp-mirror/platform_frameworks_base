@@ -942,7 +942,8 @@ public:
     }
 private:
     bool initialized = false;
-    double lastX, lastY;
+    double lastX = 0;
+    double lastY = 0;
     double sum = 0;
 };
 
