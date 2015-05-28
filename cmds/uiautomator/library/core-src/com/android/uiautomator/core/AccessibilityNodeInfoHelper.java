@@ -46,7 +46,10 @@ class AccessibilityNodeInfoHelper {
         displayRect.right = width;
         displayRect.bottom = height;
 
-        nodeRect.intersect(displayRect);
-        return nodeRect;
+        if (nodeRect.intersect(displayRect)) {
+            return nodeRect;
+        } else {
+            return new Rect();
+        }
     }
 }
