@@ -82,7 +82,7 @@ public:
             const mat4& transform, VertexBuffer& vertexBuffer);
 
     /**
-     * Approximates a convex, CW outline into a Vector of 2d vertices.
+     * Approximates a convex outline into a clockwise Vector of 2d vertices.
      *
      * @param path The outline to be approximated
      * @param thresholdSquared The threshold of acceptable error (in pixels) when approximating

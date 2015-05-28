@@ -134,6 +134,12 @@ public:
 
     uint8_t getType() const;
 
+    void multiplyInverse(const Matrix4& v) {
+        Matrix4 inv;
+        inv.loadInverse(v);
+        multiply(inv);
+    }
+
     void multiply(const Matrix4& v) {
         Matrix4 u;
         u.loadMultiply(*this, v);

@@ -24,11 +24,11 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
-    <uses-sdk android:minSdkVersion="11" />
-    
+    <uses-sdk android:minSdkVersion="21" />
+
     <application
         android:label="HwUi"
-        android:hardwareAccelerated="true">
+        android:theme="@android:style/Theme.Material.Light">
 
         <activity
                 android:name="HwTests"
@@ -42,8 +42,7 @@
 
         <activity
                 android:name="PathOpsActivity"
-                android:label="Path/Ops"
-                android:theme="@android:style/Theme.Holo.Light">
+                android:label="Path/Ops">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
@@ -52,8 +51,7 @@
 
         <activity
                 android:name="AssetsAtlasActivity"
-                android:label="Atlas/Framework"
-                android:theme="@android:style/Theme.Holo.Light">
+                android:label="Atlas/Framework">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
@@ -62,8 +60,7 @@
 
         <activity
                 android:name="ScaledTextActivity"
-                android:label="Text/Scaled"
-                android:theme="@android:style/Theme.Holo.Light">
+                android:label="Text/Scaled">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
@@ -72,8 +69,7 @@
 
         <activity
                 android:name="Rotate3dTextActivity"
-                android:label="Text/3D Rotation"
-                android:theme="@android:style/Theme.Holo.Light">
+                android:label="Text/3D Rotation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
