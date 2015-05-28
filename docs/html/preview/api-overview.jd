@@ -165,11 +165,11 @@ method to re-authenticate the user within your app.
 
 <p>To see an app implementation of this feature, refer to the
 <a href="https://github.com/googlesamples/android-ConfirmCredentials" class="external-link">
-  Confirm Device Credentials sample</a>.</p>
+  Confirm Credentials sample</a>.</p>
 
 <h2 id="direct-share">Direct Share</h2>
 
-<img src="{@docRoot}preview/images/direct-share-screen_2x.png"
+<img src="{@docRoot}preview/images/direct-share-screen.png"
 srcset="{@docRoot}preview/images/direct-share-screen.png 1x, preview/images/direct-share-screen_2x.png 2x"
 style="float:right; margin:0 0 20px 30px" width="312" height="335" />
 
