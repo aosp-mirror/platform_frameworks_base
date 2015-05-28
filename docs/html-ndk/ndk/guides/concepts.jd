@@ -111,7 +111,7 @@ ARMEABI (default), MIPS, and x86. For more information, see
 {@link android.app.NativeActivity} class in the
 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>.
 <a href="#naa">Native Activities and Applications</a> provides more detail on how to do this, under
-“Using the {@code native-activity.h} interface.”
+“Using the {@code native_activity.h} interface.”
 </li>
 </ul>
 
@@ -206,14 +206,16 @@ of Android applications with the correct structure.</p>
 <p>The Android NDK provides you with two choices to implement your native activity:</p>
 
 <ul>
-<li>The {@code native_activity.h} header defines the native version of the
+<li>The <a href="{@docRoot}ndk/reference/native__activity_8h.html">{@code native_activity.h}</a>
+header defines the native version of the
 {@link android.app.NativeActivity} class. It contains the callback interface and data structures
 that you need to create your native activity. Because the main thread of your application handles
 the callbacks, your callback implementations must not be blocking. If they block, you might receive
 ANR (Application Not Responding) errors because your main thread is unresponsive until the callback
 returns.</li>
-<li>The android_native_app_glue.h file defines a static helper library built on top of the
-{@code native_activity.h} interface. It spawns another thread, which handles things such as
+<li>The {@code android_native_app_glue.h} file defines a static helper library built on top of the
+<a href="{@docRoot}ndk/reference/native__activity_8h.html">{@code native_activity.h}</a> interface.
+It spawns another thread, which handles things such as
 callbacks or input events in an event loop. Moving these events to a separate thread prevents any
 callbacks from blocking your main thread.</li>
 </ul>
@@ -223,9 +225,11 @@ also available, allowing you to modify the implementation.</p>
 <p>For more information on how to use this static library, examine the native-activity sample
 application and its documentation. Further reading is also available in the comments in the {@code &lt;ndk_root&gt;/sources/android/native_app_glue/android_native_app_glue.h} file.</p>
 
-<h3 id="na">Using the native-activity.h interface</h3>
+<h3 id="na">Using the native_activity.h interface</h3>
 
-<p>To implement a native activity with the {@code native-activity.h} interface:</p>
+<p>To implement a native activity with the
+<a href="{@docRoot}ndk/reference/native__activity_8h.html">{@code native_activity.h}</a>
+interface:</p>
 
 <ol type="1">
 <li>Create a {@code jni/} directory in your project's root directory. This directory stores all of
@@ -263,14 +267,16 @@ library containing the entry point to the application (such as C/C++ {@code main
       &lt;/manifest&gt;
 </pre>
 
-<li>Create a file for your native activity, and implement the {@code ANativeActivity_onCreate()}
-function, which the app calls when the native activity starts. This function, analogous
-to {@code main} in C/C++, receives a pointer to an {@code ANativeActivity} structure,
-which contains function pointers to the various callback implementations that you need to write.
+<li>Create a file for your native activity, and implement the function named in the
+<a href="{@docRoot}ndk/reference/group___native_activity.html#ga02791d0d490839055169f39fdc905c5e">
+{@code ANativeActivity_onCreate}</a> variable.
+The app calls this function when the native activity starts. This function, analogous
+to {@code main} in C/C++, receives a pointer to an
+<a href="{@docRoot}ndk/reference/struct_a_native_activity.html">{@code ANativeActivity}</a>
+structure, which contains function pointers to the various callback implementations that you need
+to write.
 Set the applicable callback function pointers in {@code ANativeActivity-&gt;callbacks} to the
 implementations of your callbacks.</li>
-
-<!--TODO: API Ref links in the above para.-->
 
 <li>Set the {@code ANativeActivity-&gt;instance} field to the address of any instance of specific
 data that you want to use.</li>
@@ -297,7 +303,5 @@ the {@code jni/} directory, the build script automatically packages the {@code .
 from it into the APK.</li>
 </ol>
 
-<p>You can find further information on using {@code native-activity.h} here.</p>
-<!-- (TODO: Link to API ref guide in the above para)-->
 </li>
 </ul>
