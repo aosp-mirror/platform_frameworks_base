@@ -321,6 +321,7 @@ native_init_failure:
     delete lpCallbackData;
     env->SetLongField(thiz, javaAudioRecordFields.nativeCallbackCookie, 0);
 
+    // lpRecorder goes out of scope, so reference count drops to zero
     return (jint) AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED;
 }
 
