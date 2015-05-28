@@ -3282,12 +3282,13 @@ public abstract class BatteryStats implements Parcelable {
         final long wifiIdleTimeMs = getWifiControllerActivity(CONTROLLER_IDLE_TIME, which);
         final long wifiRxTimeMs = getWifiControllerActivity(CONTROLLER_RX_TIME, which);
         final long wifiTxTimeMs = getWifiControllerActivity(CONTROLLER_TX_TIME, which);
+        final long wifiPowerDrainMaMs = getWifiControllerActivity(CONTROLLER_POWER_DRAIN, which);
         final long wifiTotalTimeMs = wifiIdleTimeMs + wifiRxTimeMs + wifiTxTimeMs;
 
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  WiFi Idle time: "); formatTimeMs(sb, wifiIdleTimeMs);
-        sb.append(" (");
+        sb.append("(");
         sb.append(formatRatioLocked(wifiIdleTimeMs, wifiTotalTimeMs));
         sb.append(")");
         pw.println(sb.toString());
@@ -3295,7 +3296,7 @@ public abstract class BatteryStats implements Parcelable {
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  WiFi Rx time:   "); formatTimeMs(sb, wifiRxTimeMs);
-        sb.append(" (");
+        sb.append("(");
         sb.append(formatRatioLocked(wifiRxTimeMs, wifiTotalTimeMs));
         sb.append(")");
         pw.println(sb.toString());
@@ -3303,16 +3304,16 @@ public abstract class BatteryStats implements Parcelable {
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  WiFi Tx time:   "); formatTimeMs(sb, wifiTxTimeMs);
-        sb.append(" (");
+        sb.append("(");
         sb.append(formatRatioLocked(wifiTxTimeMs, wifiTotalTimeMs));
         sb.append(")");
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  WiFi Power drain: ").append(BatteryStatsHelper.makemAh(
-                getWifiControllerActivity(CONTROLLER_POWER_DRAIN, which) / (double)(1000*60*60)));
-        sb.append(" mAh");
+        sb.append("  WiFi Power drain: ").append(
+                BatteryStatsHelper.makemAh(wifiPowerDrainMaMs / (double) (1000*60*60)));
+        sb.append("mAh");
         pw.println(sb.toString());
 
         final long bluetoothIdleTimeMs =
@@ -3325,7 +3326,7 @@ public abstract class BatteryStats implements Parcelable {
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  Bluetooth Idle time: "); formatTimeMs(sb, bluetoothIdleTimeMs);
-        sb.append(" (");
+        sb.append("(");
         sb.append(formatRatioLocked(bluetoothIdleTimeMs, bluetoothTotalTimeMs));
         sb.append(")");
         pw.println(sb.toString());
@@ -3333,7 +3334,7 @@ public abstract class BatteryStats implements Parcelable {
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  Bluetooth Rx time:   "); formatTimeMs(sb, bluetoothRxTimeMs);
-        sb.append(" (");
+        sb.append("(");
         sb.append(formatRatioLocked(bluetoothRxTimeMs, bluetoothTotalTimeMs));
         sb.append(")");
         pw.println(sb.toString());
@@ -3341,7 +3342,7 @@ public abstract class BatteryStats implements Parcelable {
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  Bluetooth Tx time:   "); formatTimeMs(sb, bluetoothTxTimeMs);
-        sb.append(" (");
+        sb.append("(");
         sb.append(formatRatioLocked(bluetoothTxTimeMs, bluetoothTotalTimeMs));
         sb.append(")");
         pw.println(sb.toString());
@@ -3351,7 +3352,7 @@ public abstract class BatteryStats implements Parcelable {
         sb.append("  Bluetooth Power drain: ").append(BatteryStatsHelper.makemAh(
                 getBluetoothControllerActivity(CONTROLLER_POWER_DRAIN, which) /
                         (double)(1000*60*60)));
-        sb.append(" mAh");
+        sb.append("mAh");
         pw.println(sb.toString());
 
         pw.println();
@@ -3653,6 +3654,27 @@ public abstract class BatteryStats implements Parcelable {
                                 whichBatteryRealtime)); sb.append(") ");
                                 sb.append(wifiScanCount);
                                 sb.append("x");
+                pw.println(sb.toString());
+            }
+
+            final long uidWifiIdleTimeMs = u.getWifiControllerActivity(CONTROLLER_IDLE_TIME, which);
+            final long uidWifiRxTimeMs = u.getWifiControllerActivity(CONTROLLER_RX_TIME, which);
+            final long uidWifiTxTimeMs = u.getWifiControllerActivity(CONTROLLER_TX_TIME, which);
+            final long uidWifiTotalTimeMs = uidWifiIdleTimeMs + uidWifiRxTimeMs + uidWifiTxTimeMs;
+            if (uidWifiTotalTimeMs > 0) {
+                sb.setLength(0);
+                sb.append(prefix).append("    WiFi Idle time: ");
+                formatTimeMs(sb, uidWifiIdleTimeMs);
+                sb.append("(").append(formatRatioLocked(uidWifiIdleTimeMs, uidWifiTotalTimeMs))
+                        .append(")\n");
+
+                sb.append(prefix).append("    WiFi Rx time:   "); formatTimeMs(sb, uidWifiRxTimeMs);
+                sb.append("(").append(formatRatioLocked(uidWifiRxTimeMs, uidWifiTotalTimeMs))
+                        .append(")\n");
+
+                sb.append(prefix).append("    WiFi Tx time:   "); formatTimeMs(sb, uidWifiTxTimeMs);
+                sb.append("(").append(formatRatioLocked(uidWifiTxTimeMs, uidWifiTotalTimeMs))
+                        .append(")");
                 pw.println(sb.toString());
             }
 
