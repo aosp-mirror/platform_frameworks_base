@@ -1563,7 +1563,6 @@ public class TelephonyManager {
             return SIM_STATE_UNKNOWN;
         }
         int simState = SubscriptionManager.getSimStateForSubscriber(subId[0]);
-        Rlog.d(TAG, "getSimState: simState=" + simState + " slotIdx=" + slotIdx);
         return simState;
     }
 
@@ -1614,7 +1613,6 @@ public class TelephonyManager {
                 }
             }
         }
-        Rlog.d(TAG, "getSimOperatorNumeric(): default subId=" + subId);
         return getSimOperatorNumericForSubscription(subId);
     }
 
@@ -3032,8 +3030,6 @@ public class TelephonyManager {
                 propVal = values[phoneId];
             }
         }
-        Rlog.d(TAG, "getTelephonyProperty: return propVal='" + propVal + "' phoneId=" + phoneId
-                + " property='" + property + "' defaultVal='" + defaultVal + "' prop=" + prop);
         return propVal == null ? defaultVal : propVal;
     }
 
