@@ -1,6 +1,6 @@
 page.title=Behavior Changes
 page.keywords=preview,sdk,compatibility
-sdk.platform.apiLevel=23
+sdk.platform.apiLevel=22-mnc
 @jd:body
 
 <div id="qv-wrapper">
@@ -10,9 +10,9 @@ sdk.platform.apiLevel=23
 
 <ol id="toc44" class="hide-nested">
     <li><a href="#behavior-runtime-permissions">Runtime Permissions</a></li>
-    <li><a href="#behavior-project-volta">Project Volta</a>
+    <li><a href="#behavior-power">Power-Saving Optimizations</a>
         <ol>
-            <li><a href="#behavior-doze">Doze mode</a></li>
+            <li><a href="#behavior-doze">Doze</a></li>
             <li><a href="#behavior-app-standby">App Standby</a></li>
         </ol>
     </li>
@@ -21,7 +21,6 @@ sdk.platform.apiLevel=23
     <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
     <li><a href="#behavior-test-selection">Text Selection</a></li>
     <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
-    <li><a href="#night-mode">Night Mode</a></li>
     <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
     <li><a href="#behavior-camera">Camera Service Changes</a></li>
     <li><a href="#behavior-art-runtime">ART Runtime</a></li>
@@ -43,7 +42,6 @@ sdk.platform.apiLevel=23
 </div>
 </div>
 
-<p>API Level: M</p>
 <p>Along with new features and capabilities, the M Developer Preview includes a variety of
 system changes and API behavior changes. This document highlights
 some of the key changes that you should be understand and account for in your apps.</p>
@@ -67,16 +65,16 @@ new {@code Context.checkSelfPermission()} method. To request for a permission, c
 <a href="{@docRoot}preview/features/runtime-permissions.html">
 Android M Preview Runtime Permissions</a>.</p>
 
-<h2 id="behavior-project-volta">Project Volta</h2>
+<h2 id="behavior-power">Power-Saving Optimizations</h2>
 <p>This preview introduces new power-saving optimizations for idle devices and apps.</p>
 
-<h3 id="behavior-doze">Doze mode</h3>
+<h3 id="behavior-doze">Doze</h3>
 <p>If a device is unplugged and left stationary with the screen off for a period of time, it
 goes into <em>Doze</em> mode where it attempts to keep the system in a sleep state. In this mode,
 devices periodically resume normal operations for brief periods of time so that app syncing can
 occur and the system can perform any pending operations.</p>
 
-<p>The following restrictions apply to your apps while in Doze mode:</p>
+<p>The following restrictions apply to your apps while in Doze:</p>
 <ul>
 <li>Network access is disabled, unless your app receives a high priority Google Cloud Messaging
 tickle.</li>
@@ -89,7 +87,7 @@ method and {@code AlarmManager.setAndAllowWhileIdle()}.</li>
 permitted to run.</li>
 </ul>
 </p>
-<p>When the device exists doze mode, it executes any jobs and syncs that are pending.</p>
+<p>When the device exits doze, it executes any jobs and syncs that are pending.</p>
 <p>You can test this feature by connecting a device running the M Preview to your development
 machine and calling the following commands:
 </p>
@@ -98,10 +96,11 @@ $ adb shell dumpsys battery unplug
 $ adb shell dumpsys deviceidle step
 $ adb shell dumpsys deviceidle -h
 </pre>
-<p class="note"><strong>Note</strong>: The upcmoning
-<a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> release lets you designate
+<p class="note"><strong>Note</strong>: The upcoming
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> release lets you designate
 high-priority messages. If your app receives high-priority GCM messages, it’s granted
-brief network access even when the device is in doze mode.
+brief network access even when the device is in doze.
 </p>
 
 <h3 id="behavior-app-standby">App standby</h3>
@@ -110,6 +109,7 @@ use. Your app is considered idle after a period of time, unless the system detec
 any of these signals:</p>
 
 <ul>
+<li>The app is explicitly launched by the user.</li>
 <li>The app has a process currently in the foreground (either as an activity or foreground service,
 or in use by another activity or foreground service).</li>
 <li>The app generates a notification that users see on the lock screen or in the
@@ -127,14 +127,15 @@ device is idle for long periods of time, idle apps are allowed network access ar
 machine and calling the following commands:
 </p>
 <pre class="no-prettyprint">
-$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell dumpsys battery unplug
 $ adb shell am set-idle &lt;packageName&gt; true
 $ adb shell am set-idle &lt;packageName&gt; false
 $ adb shell am get-idle &lt;packageName&gt;
 </pre>
 
 <p class="note"><strong>Note</strong>: The upcoming
-<a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> (GCM) release lets you
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> (GCM) release lets you
 designate high-priority messages. If your app receives high-priority GCM messages, it’s granted
 brief network access even when the app is idle.
 </p>
@@ -266,20 +267,6 @@ DSA. ECDSA is still supported.</p>
 is disabled or reset (for example, by the user or a Device Administrator). Keys which require
 encryption at rest will be deleted during these events.</p>
 
-<h2 id="night-mode">Night Mode (User-configurable Dark Theme)</h2>
-<p>
-Support for the {@code -night} resource qualifier has been updated. Previously, night mode was
-only available when a device was docked and in car mode. With this preview, night mode is
-available on
-all devices and is user-configurable via <strong>Settings > Display > Theme</strong>. You can adjust
-this setting globally using {@link android.app.UiModeManager#setNightMode(int) setNightMode()}. The
-Dark theme corresponds to {@link android.app.UiModeManager#MODE_NIGHT_YES}. When the device is in
-night mode, the resource framework prefers resources that have the {@code -night} qualifier. To
-take advantage of user-configurable Dark mode in your app, extend from the
-{@code Theme.Material.DayNight} set of themes rather than {@code Theme.Material} or
-{@code Theme.Material.Light}.
-</p>
-
 <h2 id="behavior-network">Wi-Fi and Networking Changes</h2>
 
 <p>This preview introduces the following behavior changes to the Wi-Fi and networking APIs.</p>
@@ -370,11 +357,12 @@ contents are removed.</p>
 <p>This preview includes the following behavior changes for Android for Work:</p>
 <ul>
 <li><strong>Work contacts in personal contexts.</strong> The Google Dialer
-Call Log now displays work contacts when the user views past calls. Both
-work and personal contacts are now available to devices over Bluetooth, but you can hide work
-profile contacts through a device policy by calling the new
-{@code DevicePolicyManager.setBluetoothContactSharingDisabled()} method. Initiating a call still
-shows personal contacts, as consistent with the experience in Android 5.0.
+Call Log now displays work contacts when the user views past calls.
+Setting {@code DevicePolicyManager.setCrossProfileCallerIdDisabled()} to {@code true} hides the
+work profile contacts in the Google Dialer Call Log. Work contacts can be displayed along with
+personal contacts to devices over Bluetooth only if
+you set {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} to {@code false}. By
+default, it is set to {@code true}.
 </li>
 <li><strong>WiFi configuration removal:</strong> WiFi configurations added by a Profile Owner
 (for example, through calls to the

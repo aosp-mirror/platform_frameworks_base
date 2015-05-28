@@ -15,7 +15,8 @@ page.image=images/cards/card-api-overview_16-9_2x.png
         <span class="less" style="display:none">show less</span></a></h2>
 
 <ol id="toc44" class="hide-nested">
-  <li><a href="#backup">Automatic App Data Backup</a></li>
+  <li><a href="#app-linking">App Linking</a></li>
+  <li><a href="#backup">Auto Backup for Apps</a></li>
   <li><a href="#authentication">Authentication</a>
     <ul>
       <li><a href="#fingerprint-authentication">Fingerprint Authentication</a></li>
@@ -77,12 +78,19 @@ by changes in the platform.</p>
 
 <p>Please see <a href="behavior-changes.html">Behavior Changes</a> for complete information.</p>
 
-<h2 id="backup">Automatic App Data Backup</h2>
+<h2 id="app-linking">App Linking</h2>
+<p>This preview enhances Android’s intent system by providing more powerful app linking.
+This feature allows you to associate an app with a web domain you own. Based on this
+association, the platform can determine the default app to use to handle a particular
+web link and skip prompting users to select an app. To learn how to implement this feature, see
+<a href="{@docRoot}preview/features/app-linking.html">App Linking</a>.
+
+<h2 id="backup">Auto Backup for Apps</h2>
 <p>The system now performs automatic full data backup and restore for apps. This behavior is
 enabled by default for apps targeting M Preview; you do not need to add any additional code. If
 users delete their Google accounts, their backup data is deleted as well. To learn how this feature
 works and how to configure what to back up on the file system, see
-<a href="{@docRoot}preview/backup/index.html">Automatic App Data Backup</a>.</p>
+<a href="{@docRoot}preview/backup/index.html">Auto Backup for Apps</a>.</p>
 
 <h2 id="authentication">Authentication</h2>
 <p>This preview offers new APIs to let you authenticate users by using their fingerprint scans on
@@ -121,9 +129,9 @@ style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 
 <p>If you are testing this feature, follow these steps:</p>
 <ol>
+<li>Install Android SDK Tools Revision 24.3, if you have not done so.</li>
 <li>Enroll a new fingerprint in the emulator by going to
 <strong>Settings > Security > Fingerprint</strong>, then follow the enrollment instructions.</li>
-<li>Install Android SDK Tools Revision 24.3, if you have not done so.</li>
 <li>Use an emulator to emulate fingerprint touch events with the
 following command. Use the same command to emulate fingerprint touch events on the lockscreen or
 in your app.
@@ -137,39 +145,42 @@ adb -e emu finger touch &lt;finger_id&gt;
 </ol>
 
 <h3 id="confirm-credentials">Confirm Credentials</h3>
-<p>Your app can authenticate users based on how recently they last unlocked their device. You can
-use the same public or secret key to authenticate users. This feature frees
-users from having to remember additional app-specific passwords, and avoids the need for you to
-implement your own authentication user interface.</p>
+<p>Your app can authenticate users based on how recently they last unlocked their device. This
+feature frees users from having to remember additional app-specific passwords, and avoids the need
+for you to implement your own authentication user interface. Your app should use this feature in
+conjunction with a public or secret key implementation for user authentication.</p>
 
-<p>You can set your own authentication policy by setting constraints against the key that you are
-generating or importing. To set the constraints for using a key, use the
-{@code android.security.KeyPairGeneratorSpec.Builder} and
-{@code android.security.KeyGeneratorSpec.Builder} classes for public key pairs and secret keys
-respectively. If you are importing keys, use the {@link android.security.KeyStoreParameter.Builder}
-class to set your constraints. You can use the
+<p>To set the timeout duration for which the same key can be re-used after a user is successfully
+authenticated, call the new
+{@code android.security.keystore.KeyGenParameterSpec.setUserAuthenticationValidityDurationSeconds()}
+method when you set up a {@link javax.crypto.KeyGenerator} or
+{@link java.security.KeyPairGenerator}. This feature currently works for symmetric cryptographic
+operations.</p>
+
+<p>Avoid showing the re-authentication dialog excessively -- your apps should try using the
+cryptographic object first and if the the timeout expires, use the
 {@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence) createConfirmDeviceCredentialIntent()}
-method to re-authenticate the user within your app if the timeout expired.
+method to re-authenticate the user within your app.
 </p>
 
 <p>To see an app implementation of this feature, refer to the
-<a href="https://github.com/googlesamples/android-ConfirmDeviceCredentials" class="external-link">
+<a href="https://github.com/googlesamples/android-ConfirmCredentials" class="external-link">
   Confirm Device Credentials sample</a>.</p>
 
 <h2 id="direct-share">Direct Share</h2>
 
 <img src="{@docRoot}preview/images/direct-share-screen_2x.png"
 srcset="{@docRoot}preview/images/direct-share-screen.png 1x, preview/images/direct-share-screen_2x.png 2x"
-style="float:right; margin:0 0 20px 30px" width="312" height="385" />
+style="float:right; margin:0 0 20px 30px" width="312" height="335" />
 
-<p>This preview provides you with APIs to makes sharing intuitive and quick for users. You can now
-define <em>deep links</em> that target a specific activity in your app. These deep links are
-exposed to users via the <em>Share</em> menu. This feature allows users to share content to
-targets, such as contacts, within other apps. For example, the deep link might launch an
-activity in another social network app, which lets the user share content directly to a specific
-friend or community in that app.</p>
+<p>This preview provides you with APIs to make sharing intuitive and quick for users. You can now
+define <em>direct share targets</em> that launch a specific activity in your app. These direct share
+targets are exposed to users via the <em>Share</em> menu. This feature allows users to share
+content to targets, such as contacts, within other apps. For example, the direct share target might
+launch an activity in another social network app, which lets the user share content directly to a
+specific friend or community in that app.</p>
 
-<p>To enable sharing via deep links, you must define a class that extends the
+<p>To enable direct share targets you must define a class that extends the
 {@code android.service.} <br>
 {@code chooser.ChooserTargetService} class. Declare your
 {@code ChooserTargetService} in the manifest. Within that declaration, specify the
@@ -203,10 +214,6 @@ manifest.</p>
         android:value=".ChooserTargetService" /&gt;
 &lt;/activity>
 </pre>
-<p>To see an app implementation of this feature, refer to the
-<a href="https://github.com/googlesamples/android-DeepLinkSharing" class="external-link">
-  Deep Link Sharing sample</a>.</p>
-
 
 <h2 id="voice-interactions">Voice Interactions</h2>
 <p>
@@ -226,9 +233,10 @@ class="external-link">Voice Actions developer site</a>.
 This preview offers a new way for users to engage with your apps through an assistant. To use this
 feature, the user must enable the assistant to use the current context. Once enabled, the user
 can summon the assistant within any app, by long-pressing on the <strong>Home</strong> button.</p>
-<p>The platform passes the current context to the assistant. In addition to the standard set of
-information that the platform passes to the assistant, your app can share additional information
-by using the new {@code android.app.Activity.AssistContent} class.</p>
+<p>Your app can elect to not share the current context with the assistant by setting the
+{@link android.view.WindowManager.LayoutParams#FLAG_SECURE} flag. In addition to the
+standard set of information that the platform passes to the assistant, your app can share
+additional information by using the new {@code android.app.Activity.AssistContent} class.</p>
 
 <p>To provide the assistant with additional context from your app, follow these steps:</p>
 
@@ -323,9 +331,6 @@ the {@code WindowManager.LayoutParams.preferredDisplayModeId} property of your a
 feature is useful if you want to switch to 4K display resolution. While in 4K display mode, the
 UI continues to be rendered at the original resolution (such as 1080p) and is upscaled to 4K, but
 {@link android.view.SurfaceView} objects may show content at the native resolution.</p>
-
-<p>To test the new 4K display mode, simulate a secondary display of a larger resolution using the
-<strong>Developer Options</strong> settings.</p>
 
 <h2 id="behavior-themeable-colorstatelists">Themeable ColorStateLists</h2>
 <p>Theme attributes are now supported in
@@ -494,22 +499,16 @@ Google credentials.
 <p>Additionally, by setting app restrictions on Google Play services, Device Owners can specify
 alternative Google accounts for unlocking FRP to replace the ones activated on the device.</p>
 </li>
+<img src="{@docRoot}preview/images/work-profile-screen_2x.png"
+srcset="{@docRoot}preview/images/work-profile-screen.png 1x, preview/images/work-profile-screen_2x.png 2x"
+style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 <li><strong>Data usage tracking.</strong> A Profile or Device Owner can now query for the
 data usage statistics visible in <strong>Settings > Data</strong> usage by using the new
 {@code android.app.usage.NetworkStatsManager} methods. Profile Owners are automatically granted
 permission to query data on the profile they manage, while Device Owners get access to usage data
 of the managed primary user.</li>
-<li><strong>Runtime permission management:</strong> With the new runtime permissions model, a
-Profile or Device Owner can now silently grant or revoke an app’s permissions by calling
-{@code DevicePolicyManager.setPermissionGranted()}. Granting or revoking a single permission applies
-that setting to all permissions within that runtime permission group; the user is not prompted
-at runtime when any permission from that runtime permission group is required. Furthermore, the
-user cannot modify the selection made by the Profile or Device Owner within the app’s permissions
-screen in <strong>Settings</strong>.
-<img src="{@docRoot}preview/images/work-profile-screen_2x.png"
-srcset="{@docRoot}preview/images/work-profile-screen.png 1x, preview/images/work-profile-screen_2x.png 2x"
-style="float:right; margin:0 0 10px 20px" width="282" height="476" />
-<p>A Profile or Device Owner can also set a permission policy
+<li><strong>Runtime permission management:</strong>
+<p>A Profile or Device Owner can set a permission policy
 for all runtime requests of all applications using
 {@code DevicePolicyManager.setPermissionPolicy()}, to either prompt the user to grant the
 permission as normal or automatically grant or deny the permission silently. If the latter policy
@@ -517,8 +516,10 @@ is set, the user cannot modify the selection made by the Profile or Device Owner
 app’s permissions screen in <strong>Settings</strong>.</p></li>
 <li><strong>VPN in Settings:</strong> VPN apps are now visible in
     <strong>Settings > More > VPN</strong>.
-Additionally, the notifications that accompany VPN usage are now specific to whether that VPN is
-configured for a managed profile or the entire device.</li>
+Additionally, the notifications that accompany VPN usage are now specific to how that VPN is
+configured. For Profile Owner, the notifications are specific to whether the VPN is configured
+for a managed profile, a personal profile, or both. For a Device Owner, the notifications are
+specific to whether the VPN is configured for the entire device.</li>
 <li><strong>Work status notification:</strong> A status bar briefcase icon now appears whenever
 an app from the managed profile has an activity in the foreground. Furthermore, if the device is
 unlocked directly to the activity of an app in the managed profile, a toast is displayed notifying
