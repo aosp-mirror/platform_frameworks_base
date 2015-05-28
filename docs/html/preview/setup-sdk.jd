@@ -132,7 +132,7 @@ of Android Studio to use for testing.</p>
 
 <p>
   For existing projects, you must modify the project configuration to enable the preview APIs. In
-  your the development environment, open the <code>build.gradle</code> file for your module and
+  your development environment, open the <code>build.gradle</code> file for your module and
   set these values as follows:
 </p>
 
@@ -146,7 +146,7 @@ of Android Studio to use for testing.</p>
 <h2 id="setup-test">Set Up for Testing</h2>
 
 <p>
-  Testing app with the preview requires that you have a device or virtual device configured with
+  Testing an app with the preview requires that you have a device or virtual device configured with
   the preview version of the platform. If you have a compatible device, you can install the preview
   platform for testing. Otherwise, you can configure a virtual device for testing.
 </p>
@@ -156,7 +156,7 @@ of Android Studio to use for testing.</p>
 <p>
   If you have a Nexus 5, Nexus 6, Nexus 9, or Android TV, you can install a preview
   system image on these devices for testing your app.
-  You can set up virtual device with the preview version of the platform from within Android Studio
+  You can set up a virtual device with the preview version of the platform from within Android Studio
   using the Android Virtual Device Manager tool.
 </p>
 
