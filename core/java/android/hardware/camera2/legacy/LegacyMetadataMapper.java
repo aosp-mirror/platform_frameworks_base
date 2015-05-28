@@ -754,6 +754,7 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP                    ,
                     CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES                      ,
                     CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS                       ,
+                    CameraCharacteristics.CONTROL_AVAILABLE_MODES                         ,
                     CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES                   ,
                     CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES     ,
                     CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES                     ,
