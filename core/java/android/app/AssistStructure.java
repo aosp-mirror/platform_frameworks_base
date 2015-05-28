@@ -607,35 +607,7 @@ final public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setTextPaint(TextPaint paint) {
-            ViewNodeText t = getNodeText();
-            t.mTextColor = paint.getColor();
-            t.mTextBackgroundColor = paint.bgColor;
-            t.mTextSize = paint.getTextSize();
-            t.mTextStyle = 0;
-            Typeface tf = paint.getTypeface();
-            if (tf != null) {
-                if (tf.isBold()) {
-                    t.mTextStyle |= ViewNode.TEXT_STYLE_BOLD;
-                }
-                if (tf.isItalic()) {
-                    t.mTextStyle |= ViewNode.TEXT_STYLE_ITALIC;
-                }
-            }
-            int pflags = paint.getFlags();
-            if ((pflags& Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
-                t.mTextStyle |= ViewNode.TEXT_STYLE_BOLD;
-            }
-            if ((pflags& Paint.UNDERLINE_TEXT_FLAG) != 0) {
-                t.mTextStyle |= ViewNode.TEXT_STYLE_UNDERLINE;
-            }
-            if ((pflags& Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
-                t.mTextStyle |= ViewNode.TEXT_STYLE_STRIKE_THRU;
-            }
-        }
-
-        @Override
-        public void setTextStyle(int size, int fgColor, int bgColor, int style) {
+        public void setTextStyle(float size, int fgColor, int bgColor, int style) {
             ViewNodeText t = getNodeText();
             t.mTextColor = fgColor;
             t.mTextBackgroundColor = bgColor;

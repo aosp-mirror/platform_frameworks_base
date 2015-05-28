@@ -1374,7 +1374,9 @@ public class Switch extends CompoundButton {
                 newText.append(oldText).append(' ').append(switchText);
                 structure.setText(newText);
             }
-            structure.setTextPaint(mTextPaint);
+            // The style of the label text is provided via the base TextView class. This is more
+            // relevant than the style of the (optional) on/off text on the switch button itself,
+            // so ignore the size/color/style stored this.mTextPaint.
         }
     }
 
