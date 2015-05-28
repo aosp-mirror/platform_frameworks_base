@@ -485,7 +485,7 @@ NEON functions.</p>
 
 <p>You don't have to use any specific compiler flag when targeting the MIPS ABI.</p>
 
-<p>To learn more about ABI support, see <a href="{@docRoot}ndk/guides/x86.html">x86</a>.</p>
+<p>To learn more about ABI support, see <a href="{@docRoot}ndk/guides/x86.html">x86 Support</a>.</p>
 
 <h2 id="war">Warnings and Limitations</h2>
 <h3>Windows support</h3>
