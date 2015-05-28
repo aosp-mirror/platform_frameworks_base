@@ -225,6 +225,12 @@
 
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
+                  android:process=":screenshot"
+                  android:exported="false" />
+
+        <!-- Callback for deleting screenshot notification -->
+        <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
+                  android:process=":screenshot"
                   android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
