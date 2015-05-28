@@ -4580,4 +4580,18 @@ public class TelephonyManager {
         } catch (RemoteException e) {
         }
     }
+
+
+    /** @hide */
+    public String getLocaleFromDefaultSim() {
+        try {
+            final ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getLocaleFromDefaultSim();
+            }
+        } catch (RemoteException ex) {
+        }
+
+        return null;
+    }
 }
