@@ -120,6 +120,7 @@ package android {
     field public static final java.lang.String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
     field public static final java.lang.String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
+    field public static final java.lang.String REQUEST_INSTALL_PACKAGES = "android.permission.REQUEST_INSTALL_PACKAGES";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
