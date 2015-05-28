@@ -126,7 +126,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /** {@hide} */
@@ -244,15 +243,18 @@ public class NotificationManagerService extends SystemService {
 
     private Archive mArchive;
 
-    // Notification control database. For now just contains disabled packages.
+    // Persistent storage for notification policy
     private AtomicFile mPolicyFile;
+
+    // Temporary holder for <blocked-packages> config coming from old policy files.
     private HashSet<String> mBlockedPackages = new HashSet<String>();
 
     private static final int DB_VERSION = 1;
 
-    private static final String TAG_BODY = "notification-policy";
+    private static final String TAG_NOTIFICATION_POLICY = "notification-policy";
     private static final String ATTR_VERSION = "version";
 
+    // Obsolete:  converted if present, but not resaved to disk.
     private static final String TAG_BLOCKED_PKGS = "blocked-packages";
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
@@ -310,52 +312,8 @@ public class NotificationManagerService extends SystemService {
             mBuffer.addLast(nr.cloneLight());
         }
 
-        public void clear() {
-            mBuffer.clear();
-        }
-
         public Iterator<StatusBarNotification> descendingIterator() {
             return mBuffer.descendingIterator();
-        }
-        public Iterator<StatusBarNotification> ascendingIterator() {
-            return mBuffer.iterator();
-        }
-        public Iterator<StatusBarNotification> filter(
-                final Iterator<StatusBarNotification> iter, final String pkg, final int userId) {
-            return new Iterator<StatusBarNotification>() {
-                StatusBarNotification mNext = findNext();
-
-                private StatusBarNotification findNext() {
-                    while (iter.hasNext()) {
-                        StatusBarNotification nr = iter.next();
-                        if ((pkg == null || nr.getPackageName() == pkg)
-                                && (userId == UserHandle.USER_ALL || nr.getUserId() == userId)) {
-                            return nr;
-                        }
-                    }
-                    return null;
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return mNext == null;
-                }
-
-                @Override
-                public StatusBarNotification next() {
-                    StatusBarNotification next = mNext;
-                    if (next == null) {
-                        throw new NoSuchElementException();
-                    }
-                    mNext = findNext();
-                    return next;
-                }
-
-                @Override
-                public void remove() {
-                    iter.remove();
-                }
-            };
         }
 
         public StatusBarNotification[] getArray(int count) {
@@ -370,21 +328,10 @@ public class NotificationManagerService extends SystemService {
             return a;
         }
 
-        public StatusBarNotification[] getArray(int count, String pkg, int userId) {
-            if (count == 0) count = mBufferSize;
-            final StatusBarNotification[] a
-                    = new StatusBarNotification[Math.min(count, mBuffer.size())];
-            Iterator<StatusBarNotification> iter = filter(descendingIterator(), pkg, userId);
-            int i=0;
-            while (iter.hasNext() && i < count) {
-                a[i++] = iter.next();
-            }
-            return a;
-        }
-
     }
 
     private void loadPolicyFile() {
+        if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized(mPolicyFile) {
             mBlockedPackages.clear();
 
@@ -400,7 +347,7 @@ public class NotificationManagerService extends SystemService {
                 while ((type = parser.next()) != END_DOCUMENT) {
                     tag = parser.getName();
                     if (type == START_TAG) {
-                        if (TAG_BODY.equals(tag)) {
+                        if (TAG_NOTIFICATION_POLICY.equals(tag)) {
                             version = Integer.parseInt(
                                     parser.getAttributeValue(null, ATTR_VERSION));
                         } else if (TAG_BLOCKED_PKGS.equals(tag)) {
@@ -438,7 +385,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void handleSavePolicyFile() {
-        Slog.d(TAG, "handleSavePolicyFile");
+        if (DBG) Slog.d(TAG, "handleSavePolicyFile");
         synchronized (mPolicyFile) {
             final FileOutputStream stream;
             try {
@@ -452,11 +399,11 @@ public class NotificationManagerService extends SystemService {
                 final XmlSerializer out = new FastXmlSerializer();
                 out.setOutput(stream, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
-                out.startTag(null, TAG_BODY);
+                out.startTag(null, TAG_NOTIFICATION_POLICY);
                 out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
                 mZenModeHelper.writeXml(out);
                 mRankingHelper.writeXml(out);
-                out.endTag(null, TAG_BODY);
+                out.endTag(null, TAG_NOTIFICATION_POLICY);
                 out.endDocument();
                 mPolicyFile.finishWrite(stream);
             } catch (IOException e) {
@@ -814,8 +761,12 @@ public class NotificationManagerService extends SystemService {
                 // Refresh managed services
                 mConditionProviders.onUserSwitched(user);
                 mListeners.onUserSwitched(user);
+                mZenModeHelper.onUserSwitched(user);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 mUserProfiles.updateCache(context);
+            } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
+                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                mZenModeHelper.onUserRemoved(user);
             }
         }
     };
@@ -976,6 +927,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_STOPPED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_REMOVED);
         getContext().registerReceiver(mIntentReceiver, filter);
 
         IntentFilter pkgFilter = new IntentFilter();
@@ -1426,8 +1378,6 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationsShownFromListener(INotificationListener token, String[] keys) {
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
             long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
