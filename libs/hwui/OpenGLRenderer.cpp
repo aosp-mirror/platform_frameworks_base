@@ -40,6 +40,7 @@
 
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <SkPathOps.h>
 #include <SkShader.h>
 #include <SkTypeface.h>
 
@@ -1193,8 +1194,9 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
     state.mMatrix.load(*currentMatrix);
     state.mAlpha = currentSnapshot()->alpha;
 
-    // always store/restore, since it's just a pointer
+    // always store/restore, since these are just pointers
     state.mRoundRectClipState = currentSnapshot()->roundRectClipState;
+    state.mProjectionPathMask = currentSnapshot()->projectionPathMask;
     return false;
 }
 
@@ -1202,6 +1204,7 @@ void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool
     setMatrix(state.mMatrix);
     writableSnapshot()->alpha = state.mAlpha;
     writableSnapshot()->roundRectClipState = state.mRoundRectClipState;
+    writableSnapshot()->projectionPathMask = state.mProjectionPathMask;
 
     if (state.mClipValid && !skipClipRestore) {
         writableSnapshot()->setClip(state.mClip.left, state.mClip.top,
@@ -1758,6 +1761,7 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
 void OpenGLRenderer::drawConvexPath(const SkPath& path, const SkPaint* paint) {
     VertexBuffer vertexBuffer;
     // TODO: try clipping large paths to viewport
+
     PathTessellator::tessellatePath(path, paint, *currentTransform(), vertexBuffer);
     drawVertexBuffer(vertexBuffer, paint);
 }
@@ -1864,19 +1868,41 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p
             || PaintUtils::paintWillNotDraw(*p)) {
         return;
     }
+
     if (p->getPathEffect() != nullptr) {
         mCaches.textureState().activateTexture(0);
         PathTexture* texture = mCaches.pathCache.getCircle(radius, p);
         drawShape(x - radius, y - radius, texture, p);
-    } else {
-        SkPath path;
-        if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
-            path.addCircle(x, y, radius + p->getStrokeWidth() / 2);
-        } else {
-            path.addCircle(x, y, radius);
-        }
-        drawConvexPath(path, p);
+        return;
     }
+
+    SkPath path;
+    if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
+        path.addCircle(x, y, radius + p->getStrokeWidth() / 2);
+    } else {
+        path.addCircle(x, y, radius);
+    }
+
+    if (CC_UNLIKELY(currentSnapshot()->projectionPathMask != nullptr)) {
+        // mask ripples with projection mask
+        SkPath maskPath = *(currentSnapshot()->projectionPathMask->projectionMask);
+
+        Matrix4 screenSpaceTransform;
+        currentSnapshot()->buildScreenSpaceTransform(&screenSpaceTransform);
+
+        Matrix4 totalTransform;
+        totalTransform.loadInverse(screenSpaceTransform);
+        totalTransform.multiply(currentSnapshot()->projectionPathMask->projectionMaskTransform);
+
+        SkMatrix skTotalTransform;
+        totalTransform.copyTo(skTotalTransform);
+        maskPath.transform(skTotalTransform);
+
+        // Mask the ripple path by the projection mask, now that it's
+        // in local space. Note that this can create CCW paths.
+        Op(path, maskPath, kIntersect_PathOp, &path);
+    }
+    drawConvexPath(path, p);
 }
 
 void OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
@@ -2147,6 +2173,10 @@ void OpenGLRenderer::setClippingOutline(LinearAllocator& allocator, const Outlin
 void OpenGLRenderer::setClippingRoundRect(LinearAllocator& allocator,
         const Rect& rect, float radius, bool highPriority) {
     mState.setClippingRoundRect(allocator, rect, radius, highPriority);
+}
+
+void OpenGLRenderer::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
+    mState.setProjectionPathMask(allocator, path);
 }
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,

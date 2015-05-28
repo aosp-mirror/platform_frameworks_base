@@ -769,31 +769,9 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     const RenderProperties& backgroundProps = backgroundOp->mRenderNode->properties();
     renderer.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
 
-    // If the projection reciever has an outline, we mask each of the projected rendernodes to it
-    // Either with clipRect, or special saveLayer masking
-    if (projectionReceiverOutline != nullptr) {
-        const SkRect& outlineBounds = projectionReceiverOutline->getBounds();
-        if (projectionReceiverOutline->isRect(nullptr)) {
-            // mask to the rect outline simply with clipRect
-            ClipRectOp* clipOp = new (alloc) ClipRectOp(
-                    outlineBounds.left(), outlineBounds.top(),
-                    outlineBounds.right(), outlineBounds.bottom(), SkRegion::kIntersect_Op);
-            handler(clipOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
-        } else {
-            // wrap the projected RenderNodes with a SaveLayer that will mask to the outline
-            SaveLayerOp* op = new (alloc) SaveLayerOp(
-                    outlineBounds.left(), outlineBounds.top(),
-                    outlineBounds.right(), outlineBounds.bottom(),
-                    255, SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag | SkCanvas::kARGB_ClipLayer_SaveFlag);
-            op->setMask(projectionReceiverOutline);
-            handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
-
-            /* TODO: add optimizations here to take advantage of placement/size of projected
-             * children (which may shrink saveLayer area significantly). This is dependent on
-             * passing actual drawing/dirtying bounds of projected content down to native.
-             */
-        }
-    }
+    // If the projection reciever has an outline, we mask projected content to it
+    // (which we know, apriori, are all tessellated paths)
+    renderer.setProjectionPathMask(alloc, projectionReceiverOutline);
 
     // draw projected nodes
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
@@ -808,10 +786,8 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
         renderer.restoreToCount(restoreTo);
     }
 
-    if (projectionReceiverOutline != nullptr) {
-        handler(new (alloc) RestoreToCountOp(restoreTo),
-                PROPERTY_SAVECOUNT, properties().getClipToBounds());
-    }
+    handler(new (alloc) RestoreToCountOp(restoreTo),
+            PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
 
 /**

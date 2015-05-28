@@ -189,6 +189,9 @@ void CanvasState::setClippingRoundRect(LinearAllocator& allocator,
     mSnapshot->setClippingRoundRect(allocator, rect, radius, highPriority);
 }
 
+void CanvasState::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
+    mSnapshot->setProjectionPathMask(allocator, path);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Quick Rejection
