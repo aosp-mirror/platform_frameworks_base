@@ -150,6 +150,23 @@ public class ClipDrawable extends DrawableWrapper {
     }
 
     @Override
+    public int getOpacity() {
+        final Drawable dr = getDrawable();
+        final int opacity = dr.getOpacity();
+        if (opacity == PixelFormat.TRANSPARENT || dr.getLevel() == 0) {
+            return PixelFormat.TRANSPARENT;
+        }
+
+        final int level = getLevel();
+        if (level >= MAX_LEVEL) {
+            return dr.getOpacity();
+        }
+
+        // Some portion of non-transparent drawable is showing.
+        return PixelFormat.TRANSLUCENT;
+    }
+
+    @Override
     public void draw(Canvas canvas) {
         final Drawable dr = getDrawable();
         if (dr.getLevel() == 0) {
