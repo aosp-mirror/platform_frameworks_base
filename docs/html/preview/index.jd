@@ -39,24 +39,7 @@ footer.hide=1
   </div>
 </section>
 
-
-<div class="wrap dac-offset-parent">
-  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
-    <i class="dac-sprite dac-arrow-down-gray"></i>
-  </a>
-</div>
-
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
-  <h2 class="norule">Latest</h2>
-  <div class="resource-widget resource-flow-layout col-16"
-       data-query="type:blog+tag:androidm,type:youtube+tag:androidm"
-       data-cardSizes="6x6"
-       data-maxResults="6"
-       data-initial-results="3"</div>
-</div></section>
-
-
-<section class="dac-section dac-light"><div class="wrap">
+<section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Resources</h1>
   <div class="dac-section-subtitle">
     Essential information to help you get your apps ready for Android M.
