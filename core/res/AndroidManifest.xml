@@ -1485,7 +1485,6 @@
         android:label="@string/permlab_readSyncStats"
         android:protectionLevel="normal" />
 
-
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
@@ -1942,6 +1941,14 @@
          @hide -->
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:protectionLevel="signature" />
+
+    <!-- Allows an application to request installing packages. Apps
+         targeting APIs greater than 22 must hold this permission in
+         order to use {@link android.content.Intent#ACTION_INSTALL_PACKAGE}.-->
+    <permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        android:label="@string/permlab_requestInstallPackages"
+        android:description="@string/permdesc_requestInstallPackages"
+        android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows an application to install packages.
     <p>Not for use by third-party applications. -->
