@@ -41,7 +41,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private final LocalBluetoothManager mLocalBluetoothManager;
 
     private boolean mEnabled;
-    private boolean mConnecting;
+    private int mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
     private CachedBluetoothDevice mLastDevice;
 
     private final H mHandler = new H();
@@ -63,7 +63,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             return;
         }
         pw.print("  mEnabled="); pw.println(mEnabled);
-        pw.print("  mConnecting="); pw.println(mConnecting);
+        pw.print("  mConnectionState="); pw.println(stateToString(mConnectionState));
         pw.print("  mLastDevice="); pw.println(mLastDevice);
         pw.print("  mCallbacks.size="); pw.println(mCallbacks.size());
         pw.println("  Bluetooth Devices:");
@@ -73,10 +73,25 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         }
     }
 
+    private static String stateToString(int state) {
+        switch (state) {
+            case BluetoothAdapter.STATE_CONNECTED:
+                return "CONNECTED";
+            case BluetoothAdapter.STATE_CONNECTING:
+                return "CONNECTING";
+            case BluetoothAdapter.STATE_DISCONNECTED:
+                return "DISCONNECTED";
+            case BluetoothAdapter.STATE_DISCONNECTING:
+                return "DISCONNECTING";
+        }
+        return "UNKNOWN(" + state + ")";
+    }
+
     private String getDeviceString(CachedBluetoothDevice device) {
         return device.getName() + " " + device.getBondState() + " " + device.isConnected();
     }
 
+    @Override
     public void addStateChangedCallback(Callback cb) {
         mCallbacks.add(cb);
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
@@ -94,14 +109,12 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     @Override
     public boolean isBluetoothConnected() {
-        return mLocalBluetoothManager != null
-                && mLocalBluetoothManager.getBluetoothAdapter().getConnectionState()
-                == BluetoothAdapter.STATE_CONNECTED;
+        return mConnectionState == BluetoothAdapter.STATE_CONNECTED;
     }
 
     @Override
     public boolean isBluetoothConnecting() {
-        return mConnecting;
+        return mConnectionState == BluetoothAdapter.STATE_CONNECTING;
     }
 
     @Override
@@ -190,7 +203,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     @Override
     public void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
-        mConnecting = state == BluetoothAdapter.STATE_CONNECTING;
+        mConnectionState = state;
         mLastDevice = cachedDevice;
         updateConnected();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
@@ -225,7 +238,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         }
 
         private void fireStateChange(BluetoothController.Callback cb) {
-            cb.onBluetoothStateChange(mEnabled, mConnecting);
+            cb.onBluetoothStateChange(mEnabled);
         }
     }
 }
