@@ -37,6 +37,6 @@ Classes are organized into several groups you can see at the top-level of the le
        data-query="collection:develop/landing/courses"
        data-sortOrder="random"
        data-cardSizes="6x6"
-       data-maxResults="9"
+       data-maxResults="12"
        data-initial-results="3"></div>
 </div>

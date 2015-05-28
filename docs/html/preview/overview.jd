@@ -43,7 +43,7 @@ page.tags="preview", "developer", "android"
       </h5>
 
       <p>
-        You  can get updates over the air, once you’ve flashed a
+        You  can get updates over-the-air, once you’ve flashed a
         device to the initial preview.
       </p>
     </div>
@@ -51,12 +51,6 @@ page.tags="preview", "developer", "android"
 
   <div class="cols">
 
-<!--<div class="col-4of12">
-<h5>Early access to new  APIs</h5>
-<p>Explore the new capabilities and APIs offered in the new platform and give us
-feedback. Note that APIs and capabilities may change during the Preview
-program.</p>
-</div>-->
 
     <div class="col-4of12">
       <h5>
@@ -82,7 +76,7 @@ program.</p>
 
     <div class="col-4of12">
       <h5>
-        Feedback and support channels
+        Feedback and support
       </h5>
 
       <p>
@@ -90,6 +84,7 @@ program.</p>
         "https://code.google.com/p/android-developer-preview/">issue tracker</a>.
         Connect with other developers in the <a
         href="http://g.co/dev/AndroidMDevPreview">M&nbsp;Developer Community</a>.
+
       </p>
     </div>
   </div>
@@ -154,7 +149,7 @@ program.</p>
 <p>
   As you test and develop on Android M, we strongly recommend <strong>keeping
   your development environment up-to-date</strong> as Preview updates are released.
-  To make the process easier, we'll deliver <strong>updates over the air
+  To make the process easier, we'll deliver <strong>updates over-the-air
   (OTA)</strong> to devices already flashed to a Preview build, as well as
   providing system images that you can download and flash manually.
 </p>
@@ -279,8 +274,9 @@ program.</p>
   <li><a href="https://code.google.com/p/android-developer-preview/">M
   Developer Preview Issue Tracker</a> is your <strong>primary feedback
   channel.</strong> You can report bugs, performance issues, and general
-  feedback through the issue tracker. You can also check for known issues
-  and find workaround steps, if available.
+  feedback through the issue tracker. You can also check for <a
+  href="https://code.google.com/p/android-developer-preview/wiki/KnownIssues">known issues</a>
+  and find workaround steps.
   </li>
 
   <li>The <a href="http://g.co/dev/AndroidMDevPreview">Android M Developer
