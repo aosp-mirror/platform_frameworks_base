@@ -152,13 +152,11 @@ public:
      */
     inline int capExtraDivisions() const {
         if (cap == SkPaint::kRound_Cap) {
+            // always use 2 points for hairline
             if (halfStrokeWidth == 0.0f) return 2;
 
-            // ROUND_CAP_THRESH is the maximum error for polygonal approximation of the round cap
-            const float errConst = (-ROUND_CAP_THRESH / halfStrokeWidth + 1);
-            const float targetCosVal = 2 * errConst * errConst - 1;
-            int neededDivisions = (int)(ceilf(PI / acos(targetCosVal)/2)) * 2;
-            return neededDivisions;
+            float threshold = MathUtils::min(inverseScaleX, inverseScaleY) * ROUND_CAP_THRESH;
+            return MathUtils::divisionsNeededToApproximateArc(halfStrokeWidth, PI, threshold);
         }
         return 0;
     }
