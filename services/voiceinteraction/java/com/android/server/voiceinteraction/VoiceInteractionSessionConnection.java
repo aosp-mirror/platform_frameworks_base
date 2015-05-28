@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.AssistContent;
+import android.app.AssistStructure;
 import android.app.IActivityManager;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -291,33 +292,37 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             return;
         }
         if (mHaveAssistData) {
+            Bundle assistData;
+            AssistStructure structure;
+            AssistContent content;
             if (mAssistData != null) {
+                assistData = mAssistData.getBundle("data");
+                structure = mAssistData.getParcelable("structure");
+                content = mAssistData.getParcelable("content");
                 int uid = mAssistData.getInt(Intent.EXTRA_ASSIST_UID, -1);
-                if (uid >= 0) {
-                    Bundle assistContext = mAssistData.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
-                    if (assistContext != null) {
-                        AssistContent content = AssistContent.getAssistContent(assistContext);
-                        if (content != null) {
-                            Intent intent = content.getIntent();
-                            if (intent != null) {
-                                ClipData data = intent.getClipData();
-                                if (data != null && Intent.isAccessUriMode(intent.getFlags())) {
-                                    grantClipDataPermissions(data, intent.getFlags(), uid,
-                                            mCallingUid, mSessionComponentName.getPackageName());
-                                }
-                            }
-                            ClipData data = content.getClipData();
-                            if (data != null) {
-                                grantClipDataPermissions(data,
-                                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                                        uid, mCallingUid, mSessionComponentName.getPackageName());
-                            }
+                if (uid >= 0 && content != null) {
+                    Intent intent = content.getIntent();
+                    if (intent != null) {
+                        ClipData data = intent.getClipData();
+                        if (data != null && Intent.isAccessUriMode(intent.getFlags())) {
+                            grantClipDataPermissions(data, intent.getFlags(), uid,
+                                    mCallingUid, mSessionComponentName.getPackageName());
                         }
                     }
+                    ClipData data = content.getClipData();
+                    if (data != null) {
+                        grantClipDataPermissions(data,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                                uid, mCallingUid, mSessionComponentName.getPackageName());
+                    }
                 }
+            } else {
+                assistData = null;
+                structure = null;
+                content = null;
             }
             try {
-                mSession.handleAssist(mAssistData);
+                mSession.handleAssist(assistData, structure, content);
             } catch (RemoteException e) {
             }
             mAssistData = null;

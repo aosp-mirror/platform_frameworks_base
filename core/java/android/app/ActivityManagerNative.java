@@ -2193,7 +2193,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             Bundle extras = data.readBundle();
-            reportAssistContextExtras(token, extras);
+            AssistStructure structure = AssistStructure.CREATOR.createFromParcel(data);
+            AssistContent content = AssistContent.CREATOR.createFromParcel(data);
+            reportAssistContextExtras(token, extras, structure, content);
             reply.writeNoException();
             return true;
         }
@@ -5359,13 +5361,15 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void reportAssistContextExtras(IBinder token, Bundle extras)
-            throws RemoteException {
+    public void reportAssistContextExtras(IBinder token, Bundle extras, AssistStructure structure,
+            AssistContent content) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         data.writeBundle(extras);
+        structure.writeToParcel(data, 0);
+        content.writeToParcel(data, 0);
         mRemote.transact(REPORT_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
