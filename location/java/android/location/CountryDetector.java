@@ -44,8 +44,6 @@ import android.util.Log;
  * You do not instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.COUNTRY_DETECTOR)}.
- * <p>
- * Both ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION permissions are needed.
  *
  * @hide
  */
