@@ -3513,6 +3513,7 @@ package android.app {
     method public deprecated void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
+    method public boolean shouldShowRequestPermissionRationale(java.lang.String);
     method public boolean shouldUpRecreateTask(android.content.Intent);
     method public final deprecated void showDialog(int);
     method public final deprecated boolean showDialog(int, android.os.Bundle);
