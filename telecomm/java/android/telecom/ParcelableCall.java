@@ -54,6 +54,7 @@ public final class ParcelableCall implements Parcelable {
     private final StatusHints mStatusHints;
     private final int mVideoState;
     private final List<String> mConferenceableCallIds;
+    private final Bundle mIntentExtras;
     private final Bundle mExtras;
 
     public ParcelableCall(
@@ -77,6 +78,7 @@ public final class ParcelableCall implements Parcelable {
             StatusHints statusHints,
             int videoState,
             List<String> conferenceableCallIds,
+            Bundle intentExtras,
             Bundle extras) {
         mId = id;
         mState = state;
@@ -98,6 +100,7 @@ public final class ParcelableCall implements Parcelable {
         mStatusHints = statusHints;
         mVideoState = videoState;
         mConferenceableCallIds = Collections.unmodifiableList(conferenceableCallIds);
+        mIntentExtras = intentExtras;
         mExtras = extras;
     }
 
@@ -227,12 +230,21 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /**
-     * Any extras to pass with the call
+     * Any extras associated with this call.
      *
      * @return a bundle of extras
      */
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    /**
+     * Extras passed in as part of the original call intent.
+     *
+     * @return The intent extras.
+     */
+    public Bundle getIntentExtras() {
+        return mIntentExtras;
     }
 
     /**
@@ -277,7 +289,8 @@ public final class ParcelableCall implements Parcelable {
             int videoState = source.readInt();
             List<String> conferenceableCallIds = new ArrayList<>();
             source.readList(conferenceableCallIds, classLoader);
-            Bundle extras = source.readParcelable(classLoader);
+            Bundle intentExtras = source.readBundle(classLoader);
+            Bundle extras = source.readBundle(classLoader);
             return new ParcelableCall(
                     id,
                     state,
@@ -299,6 +312,7 @@ public final class ParcelableCall implements Parcelable {
                     statusHints,
                     videoState,
                     conferenceableCallIds,
+                    intentExtras,
                     extras);
         }
 
@@ -338,7 +352,8 @@ public final class ParcelableCall implements Parcelable {
         destination.writeParcelable(mStatusHints, 0);
         destination.writeInt(mVideoState);
         destination.writeList(mConferenceableCallIds);
-        destination.writeParcelable(mExtras, 0);
+        destination.writeBundle(mIntentExtras);
+        destination.writeBundle(mExtras);
     }
 
     @Override
