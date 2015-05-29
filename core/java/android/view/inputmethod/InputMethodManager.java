@@ -1306,12 +1306,16 @@ public final class InputMethodManager {
             if (DEBUG) Log.v(TAG, "focusOut: " + view
                     + " mServedView=" + mServedView
                     + " winFocus=" + view.hasWindowFocus());
-            // CAVEAT: We have ignored focusOut event in Android L MR-1 and prior.  Need special
-            // care when changing the logic here because there are so many cases to be taken into
-            // consideration, e.g., WindowManager.LayoutParams.SOFT_INPUT_* flags.
-            if (mServedView == view && view.hasWindowFocus()) {
-                mNextServedView = null;
-                scheduleCheckFocusLocked(view);
+            if (mServedView != view) {
+                // The following code would auto-hide the IME if we end up
+                // with no more views with focus.  This can happen, however,
+                // whenever we go into touch mode, so it ends up hiding
+                // at times when we don't really want it to.  For now it
+                // seems better to just turn it all off.
+                if (false && view.hasWindowFocus()) {
+                    mNextServedView = null;
+                    scheduleCheckFocusLocked(view);
+                }
             }
         }
     }
