@@ -186,10 +186,6 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"റിംഗർ ഓഫുചെയ്യുക"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"റിംഗർ വൈബ്രേറ്റുചെയ്യുക"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"റിംഗർ ഓൺചെയ്യുക"</string>
-    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
-    <skip />
-    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
-    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"ഷട്ട്‌ഡൗൺ ചെയ്യുന്നു..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"നിങ്ങളുടെ ടാബ്‌ലെറ്റ് ഷട്ട്‌ഡൗൺ ചെയ്യും."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"നിങ്ങളുടെ ടിവി ഷട്ട്ഡൗൺ ചെയ്യും."</string>
@@ -1096,10 +1092,6 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"മീഡിയ ഔട്ട്‌പുട്ടിനെ മറ്റ് ബാഹ്യ ഉപകരണങ്ങളിലേക്ക് റൂട്ടുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ഇൻസ്‌റ്റാൾ സെഷനുകൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ഇൻസ്റ്റാൾ ചെയ്‌ത സെഷനുകൾ റീഡുചെയ്യുന്നതിന് ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സജീവ പാക്കേജ് ഇൻസ്റ്റാളേഷനുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ കാണുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
-    <skip />
-    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
-    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"സൂം ചെയ്യൽ നിയന്ത്രണങ്ങൾക്ക് രണ്ട് തവണ സ്‌പർശിക്കുക"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"പോവുക"</string>
