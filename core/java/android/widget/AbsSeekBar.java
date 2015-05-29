@@ -86,10 +86,10 @@ public abstract class AbsSeekBar extends ProgressBar {
     public AbsSeekBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.SeekBar, defStyleAttr, defStyleRes);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.SeekBar, defStyleAttr, defStyleRes);
 
-        final Drawable thumb = a.getDrawable(com.android.internal.R.styleable.SeekBar_thumb);
+        final Drawable thumb = a.getDrawable(R.styleable.SeekBar_thumb);
         setThumb(thumb);
 
         if (a.hasValue(R.styleable.SeekBar_thumbTintMode)) {
@@ -103,18 +103,22 @@ public abstract class AbsSeekBar extends ProgressBar {
             mHasThumbTint = true;
         }
 
+        mSplitTrack = a.getBoolean(R.styleable.SeekBar_splitTrack, false);
+
         // Guess thumb offset if thumb != null, but allow layout to override.
-        final int thumbOffset = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.SeekBar_thumbOffset, getThumbOffset());
+        final int thumbOffset = a.getDimensionPixelOffset(R.styleable.SeekBar_thumbOffset, getThumbOffset());
         setThumbOffset(thumbOffset);
 
-        mSplitTrack = a.getBoolean(com.android.internal.R.styleable.SeekBar_splitTrack, false);
+        final boolean useDisabledAlpha = a.getBoolean(R.styleable.SeekBar_useDisabledAlpha, true);
         a.recycle();
 
-        a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Theme, 0, 0);
-        mDisabledAlpha = a.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
-        a.recycle();
+        if (useDisabledAlpha) {
+            final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Theme, 0, 0);
+            mDisabledAlpha = ta.getFloat(R.styleable.Theme_disabledAlpha, 0.5f);
+            ta.recycle();
+        } else {
+            mDisabledAlpha = 1.0f;
+        }
 
         applyThumbTint();
 
@@ -360,7 +364,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         super.drawableStateChanged();
 
         final Drawable progressDrawable = getProgressDrawable();
-        if (progressDrawable != null) {
+        if (progressDrawable != null && mDisabledAlpha < 1.0f) {
             progressDrawable.setAlpha(isEnabled() ? NO_ALPHA : (int) (NO_ALPHA * mDisabledAlpha));
         }
 

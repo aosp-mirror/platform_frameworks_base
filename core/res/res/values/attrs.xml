@@ -3908,6 +3908,11 @@
         <attr name="thumbOffset" format="dimension" />
         <!-- Whether to split the track and leave a gap for the thumb drawable. -->
         <attr name="splitTrack" format="boolean" />
+        <!-- Whether to force the track's alpha to ?android:attr/disabledAlpha
+             when disabled. This is required for Holo and Gingerbread, but
+             should always be false for Material and  beyond.
+             @hide Developers shouldn't need to change this. -->
+        <attr name="useDisabledAlpha" format="boolean" />
         <!-- Tint to apply to the button graphic. -->
         <attr name="thumbTint" format="color" />
         <!-- Blending mode used to apply the button graphic tint. -->
@@ -5117,6 +5122,18 @@
         <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
              default value is src_in, which treats the drawable as an alpha mask. -->
         <attr name="tintMode" />
+        <!-- Left optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetLeft" />
+        <!-- Top optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetTop" />
+        <!-- Right optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetRight" />
+        <!-- Bottom optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetBottom" />
     </declare-styleable>
 
     <!-- Used to specify the size of the shape for GradientDrawable. -->
@@ -5578,6 +5595,18 @@
         <!-- The opacity of the whole vector drawable, as a value between 0
              (completely transparent) and 1 (completely opaque). -->
         <attr name="alpha" />
+        <!-- Left optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetLeft" format="dimension" />
+        <!-- Top optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetTop" format="dimension" />
+        <!-- Right optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetRight" format="dimension" />
+        <!-- Bottom optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetBottom" format="dimension" />
     </declare-styleable>
 
     <!-- Defines the group used in VectorDrawables. -->
