@@ -2988,6 +2988,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * timestamps measure time in the same timebase as {@link android.os.SystemClock#elapsedRealtimeNanos }, and they can
      * be compared to other timestamps from other subsystems that
      * are using that base.</p>
+     * <p>For reprocessing, the timestamp will match the start of exposure of
+     * the input image, i.e. {@link CaptureResult#SENSOR_TIMESTAMP the
+     * timestamp} in the TotalCaptureResult that was used to create the
+     * reprocess capture request.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * &gt; 0</p>
