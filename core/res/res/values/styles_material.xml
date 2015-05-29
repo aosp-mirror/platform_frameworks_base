@@ -721,6 +721,7 @@ please see styles_device_defaults.xml.
         <item name="indeterminateDrawable">@drawable/seekbar_track_material</item>
         <item name="thumb">@drawable/seekbar_thumb_material_anim</item>
         <item name="splitTrack">true</item>
+        <item name="useDisabledAlpha">false</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
