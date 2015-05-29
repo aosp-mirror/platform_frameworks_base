@@ -303,6 +303,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_TRUSTED_OVERLAY = 1<<9;
     static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<10;
     static final int SCAN_REQUIRE_KNOWN = 1<<12;
+    static final int SCAN_MOVE = 1<<13;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -6347,16 +6348,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
                 deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
             } else {
-                // TODO: We need this second call to derive in two cases :
-                //
-                // - To update the native library paths based on the final install location.
-                // - We don't call dexopt when moving packages, and so we have to scan again.
-                //
-                // We can simplify this and avoid having to scan the package again by letting
-                // scanPackageLI know if the current install was a move (and deriving things only
-                // in that case) and by "reparenting" the native lib directory in the case of
-                // a normal (non-move) install.
-                deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, false /* extract libs */);
+                if ((scanFlags & SCAN_MOVE) != 0) {
+                    // We haven't run dex-opt for this move (since we've moved the compiled output too)
+                    // but we already have this packages package info in the PackageSetting. We just
+                    // use that and derive the native library path based on the new codepath.
+                    pkg.applicationInfo.primaryCpuAbi = pkgSetting.primaryCpuAbiString;
+                    pkg.applicationInfo.secondaryCpuAbi = pkgSetting.secondaryCpuAbiString;
+                }
+
+                // Set native library paths again. For moves, the path will be updated based on the
+                // ABIs we've determined above. For non-moves, the path will be updated based on the
+                // ABIs we determined during compilation, but the path will depend on the final
+                // package path (after the rename away from the stage path).
+                setNativeLibraryPaths(pkg);
             }
 
             if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
@@ -11645,6 +11649,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (args.move != null) {
             // We did an in-place move, so dex is ready to roll
             scanFlags |= SCAN_NO_DEX;
+            scanFlags |= SCAN_MOVE;
         } else if (!forwardLocked && !pkg.applicationInfo.isExternalAsec()) {
             // Enable SCAN_NO_DEX flag to skip dexopt at a later stage
             scanFlags |= SCAN_NO_DEX;
