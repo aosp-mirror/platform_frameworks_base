@@ -46,10 +46,8 @@ $ &lt;ndk&gt;/ndk-build
 
 <p>In this example, <code>&lt;project&gt;</code> points to your
 project’s root directory, and <code>&lt;ndk&gt;</code> is the directory where
-you installed the NDK. As noted in <a
-href="{@docRoot}ndk/guides/setup.html#install">Setup</a>, you can add {@code $NDK} to your
-{@code PATH} to avoid having to type the whole filepath every time you use ndk-build.
-Alternatively, you can create an alias.</p>
+you installed the NDK.</p>
+
 <p><a class="anchor" id="options"></a> </p>
 <h3>Options</h3>
 <p>All parameters to ndk-build are passed directly to the underlying GNU {@code make}
