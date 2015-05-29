@@ -170,8 +170,8 @@ method to re-authenticate the user within your app.
 <h2 id="direct-share">Direct Share</h2>
 
 <img src="{@docRoot}preview/images/direct-share-screen.png"
-srcset="{@docRoot}preview/images/direct-share-screen.png 1x, preview/images/direct-share-screen_2x.png 2x"
-style="float:right; margin:0 0 20px 30px" width="312" height="335" />
+srcset="{@docRoot}preview/images/direct-share-screen.png 1x, {@docRoot}preview/images/direct-share-screen_2x.png 2x"
+style="float:right; margin:0 0 20px 30px" width="312" height="329" />
 
 <p>This preview provides you with APIs to make sharing intuitive and quick for users. You can now
 define <em>direct share targets</em> that launch a specific activity in your app. These direct share
@@ -499,8 +499,8 @@ Google credentials.
 <p>Additionally, by setting app restrictions on Google Play services, Device Owners can specify
 alternative Google accounts for unlocking FRP to replace the ones activated on the device.</p>
 </li>
-<img src="{@docRoot}preview/images/work-profile-screen_2x.png"
-srcset="{@docRoot}preview/images/work-profile-screen.png 1x, preview/images/work-profile-screen_2x.png 2x"
+<img src="{@docRoot}preview/images/work-profile-screen.png"
+srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x"
 style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 <li><strong>Data usage tracking.</strong> A Profile or Device Owner can now query for the
 data usage statistics visible in <strong>Settings > Data</strong> usage by using the new
