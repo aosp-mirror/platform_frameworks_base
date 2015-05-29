@@ -19,6 +19,8 @@ package android.security.keystore;
 import android.security.KeyStore;
 import android.security.keymaster.KeymasterDefs;
 
+import libcore.util.EmptyArray;
+
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -94,6 +96,9 @@ abstract class KeyStoreCryptoOperationUtils {
      *        RNG.
      */
     static byte[] getRandomBytesToMixIntoKeystoreRng(SecureRandom rng, int sizeBytes) {
+        if (sizeBytes <= 0) {
+            return EmptyArray.BYTE;
+        }
         if (rng == null) {
             rng = getRng();
         }
