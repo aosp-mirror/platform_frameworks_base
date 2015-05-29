@@ -306,6 +306,14 @@ public class InputMethodService extends AbstractInputMethodService {
     int mStatusIcon;
     int mBackDisposition;
 
+    /**
+     * {@code true} when the previous IME had non-empty inset at the bottom of the screen and we
+     * have not shown our own window yet.  In this situation, the previous inset continues to be
+     * shown as an empty region until it is explicitly updated. Basically we can trigger the update
+     * by calling 1) {@code mWindow.show()} or 2) {@link #clearInsetOfPreviousIme()}.
+     */
+    boolean mShouldClearInsetOfPreviousIme;
+
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
@@ -408,6 +416,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mShowInputRequested = false;
             mShowInputForced = false;
             doHideWindow();
+            clearInsetOfPreviousIme();
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_HIDDEN
@@ -432,6 +441,7 @@ public class InputMethodService extends AbstractInputMethodService {
                     mWindowAdded = false;
                 }
             }
+            clearInsetOfPreviousIme();
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = isInputViewShown();
             mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
@@ -669,6 +679,9 @@ public class InputMethodService extends AbstractInputMethodService {
         super.setTheme(mTheme);
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        // If the previous IME has occupied non-empty inset in the screen, we need to decide whether
+        // we continue to use the same size of the inset or update it
+        mShouldClearInsetOfPreviousIme = (mImm.getInputMethodWindowVisibleHeight() > 0);
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
@@ -1494,6 +1507,9 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
             onWindowShown();
             mWindow.show();
+            // Put here rather than in onWindowShown() in case people forget to call
+            // super.onWindowShown().
+            mShouldClearInsetOfPreviousIme = false;
         }
     }
 
@@ -1540,7 +1556,23 @@ public class InputMethodService extends AbstractInputMethodService {
     public void onWindowHidden() {
         // Intentionally empty
     }
-    
+
+    /**
+     * Reset the inset occupied the previous IME when and only when
+     * {@link #mShouldClearInsetOfPreviousIme} is {@code true}.
+     */
+    private void clearInsetOfPreviousIme() {
+        if (DEBUG) Log.v(TAG, "clearInsetOfPreviousIme() "
+                + " mShouldClearInsetOfPreviousIme=" + mShouldClearInsetOfPreviousIme);
+        if (!mShouldClearInsetOfPreviousIme || mWindow == null) return;
+        // We do not call onWindowShown() and onWindowHidden() so as not to make the IME author
+        // confused.
+        // TODO: Find out a better way which has less side-effect.
+        mWindow.show();
+        mWindow.hide();
+        mShouldClearInsetOfPreviousIme = false;
+    }
+
     /**
      * Called when a new client has bound to the input method.  This
      * may be followed by a series of {@link #onStartInput(EditorInfo, boolean)}
@@ -2428,5 +2460,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " visibleTopInsets=" + mTmpInsets.visibleTopInsets
                 + " touchableInsets=" + mTmpInsets.touchableInsets
                 + " touchableRegion=" + mTmpInsets.touchableRegion);
+        p.println(" mShouldClearInsetOfPreviousIme=" + mShouldClearInsetOfPreviousIme);
     }
 }
