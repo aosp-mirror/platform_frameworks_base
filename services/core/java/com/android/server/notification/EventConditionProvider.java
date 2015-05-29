@@ -211,7 +211,7 @@ public class EventConditionProvider extends SystemConditionProviderService {
                 continue;
             }
             CheckEventResult result = null;
-            if (event.calendar == EventInfo.ANY_CALENDAR) {
+            if (event.calendar == null) { // any calendar
                 // event could exist on any tracker
                 for (int i = 0; i < mTrackers.size(); i++) {
                     final CalendarTracker tracker = mTrackers.valueAt(i);
