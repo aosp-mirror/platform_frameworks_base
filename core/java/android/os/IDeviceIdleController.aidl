@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.os.UserHandle;
+
 /** @hide */
 interface IDeviceIdleController {
     void addPowerSaveWhitelistApp(String name);
@@ -23,5 +25,7 @@ interface IDeviceIdleController {
     String[] getSystemPowerWhitelist();
     String[] getFullPowerWhitelist();
     int[] getAppIdWhitelist();
+    int[] getAppIdTempWhitelist();
     boolean isPowerSaveWhitelistApp(String name);
+    void addPowerSaveTempWhitelistApp(String name, long duration, int userId);
 }

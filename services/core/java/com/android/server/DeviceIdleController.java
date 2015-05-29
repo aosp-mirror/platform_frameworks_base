@@ -16,14 +16,19 @@
 
 package com.android.server;
 
+import android.Manifest;
+import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
+import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
@@ -47,7 +52,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
@@ -55,6 +62,7 @@ import android.view.Display;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -72,6 +80,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Keeps track of device idleness and drives low power mode based on that.
@@ -79,7 +88,8 @@ import java.nio.charset.StandardCharsets;
 public class DeviceIdleController extends SystemService {
     private static final String TAG = "DeviceIdleController";
 
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = false;
+    private static final boolean COMPRESS_TIME = false;
 
     public static final String SERVICE_NAME = "deviceidle";
 
@@ -94,29 +104,31 @@ public class DeviceIdleController extends SystemService {
      * immediately after going inactive just because we don't want to be continually running
      * the significant motion sensor whenever the screen is off.
      */
-    private static final long DEFAULT_INACTIVE_TIMEOUT = !DEBUG ? 30*60*1000L
-            : 2 * 60 * 1000L;
+    private static final long DEFAULT_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 30*60*1000L
+            : 3 * 60 * 1000L;
     /**
      * This is the time, after seeing motion, that we wait after becoming inactive from
      * that until we start looking for motion again.
      */
-    private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = !DEBUG ? 10*60*1000L
+    private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 10*60*1000L
             : 60 * 1000L;
     /**
      * This is the time, after the inactive timeout elapses, that we will wait looking
      * for significant motion until we truly consider the device to be idle.
      */
-    private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT = !DEBUG ? 30*60*1000L
-            : 2 * 60 * 1000L;
+    private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 30*60*1000L
+            : 3 * 60 * 1000L;
     /**
      * This is the initial time, after being idle, that we will allow ourself to be back
      * in the IDLE_PENDING state allowing the system to run normally until we return to idle.
      */
-    private static final long DEFAULT_IDLE_PENDING_TIMEOUT = 5*60*1000L;
+    private static final long DEFAULT_IDLE_PENDING_TIMEOUT = !COMPRESS_TIME ? 5*60*1000L
+            : 30 * 1000L;
     /**
      * Maximum pending idle timeout (time spent running) we will be allowed to use.
      */
-    private static final long DEFAULT_MAX_IDLE_PENDING_TIMEOUT = 10*60*1000L;
+    private static final long DEFAULT_MAX_IDLE_PENDING_TIMEOUT = !COMPRESS_TIME ? 10*60*1000L
+            : 60 * 1000L;
     /**
      * Scaling factor to apply to current pending idle timeout each time we cycle through
      * that state.
@@ -126,13 +138,13 @@ public class DeviceIdleController extends SystemService {
      * This is the initial time that we want to sit in the idle state before waking up
      * again to return to pending idle and allowing normal work to run.
      */
-    private static final long DEFAULT_IDLE_TIMEOUT = !DEBUG ? 60*60*1000L
-            : 5 * 60 * 1000L;
+    private static final long DEFAULT_IDLE_TIMEOUT = !COMPRESS_TIME ? 60*60*1000L
+            : 6 * 60 * 1000L;
     /**
      * Maximum idle duration we will be allowed to use.
      */
-    private static final long DEFAULT_MAX_IDLE_TIMEOUT = !DEBUG ? 6*60*60*1000L
-            : 10 * 60 * 1000L;
+    private static final long DEFAULT_MAX_IDLE_TIMEOUT = !COMPRESS_TIME ? 6*60*60*1000L
+            : 30 * 60 * 1000L;
     /**
      * Scaling factor to apply to current idle timeout each time we cycle through that state.
      */
@@ -141,8 +153,13 @@ public class DeviceIdleController extends SystemService {
      * This is the minimum time we will allow until the next upcoming alarm for us to
      * actually go in to idle mode.
      */
-    private static final long DEFAULT_MIN_TIME_TO_ALARM = !DEBUG ? 60*60*1000L
-            : 5 * 60 * 1000L;
+    private static final long DEFAULT_MIN_TIME_TO_ALARM = !COMPRESS_TIME ? 60*60*1000L
+            : 6 * 60 * 1000L;
+
+    /**
+     * Max amount of time to temporarily whitelist an app when it receives a high priority tickle.
+     */
+    private static final long MAX_TEMP_APP_WHITELIST_DURATION = 5 * 60 * 1000L;
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
@@ -210,6 +227,17 @@ public class DeviceIdleController extends SystemService {
      */
     private int[] mPowerSaveWhitelistAppIdArray = new int[0];
 
+    /**
+     * List of end times for UIDs that are temporarily marked as being allowed to access
+     * the network and acquire wakelocks. Times are in milliseconds.
+     */
+    private SparseLongArray mTempWhitelistAppIdEndTimes = new SparseLongArray();
+
+    /**
+     * Current app IDs of temporarily whitelist apps for high-priority messages.
+     */
+    private int[] mTempWhitelistAppIdArray = new int[0];
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
@@ -252,6 +280,7 @@ public class DeviceIdleController extends SystemService {
     static final int MSG_REPORT_IDLE_ON = 2;
     static final int MSG_REPORT_IDLE_OFF = 3;
     static final int MSG_REPORT_ACTIVE = 4;
+    static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 5;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -294,6 +323,10 @@ public class DeviceIdleController extends SystemService {
                         getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                     }
                 } break;
+                case MSG_TEMP_APP_WHITELIST_TIMEOUT: {
+                    int uid = msg.arg1;
+                    checkTempAppWhitelistTimeout(uid);
+                } break;
             }
         }
     }
@@ -325,8 +358,37 @@ public class DeviceIdleController extends SystemService {
             return getAppIdWhitelistInternal();
         }
 
+        @Override public int[] getAppIdTempWhitelist() {
+            return getAppIdTempWhitelistInternal();
+        }
+
         @Override public boolean isPowerSaveWhitelistApp(String name) {
             return isPowerSaveWhitelistAppInternal(name);
+        }
+
+        @Override public void addPowerSaveTempWhitelistApp(String packageName, long duration,
+                int userId) throws RemoteException {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
+                    "No permission to change device idle whitelist");
+            userId = ActivityManagerNative.getDefault().handleIncomingUser(
+                    Binder.getCallingPid(),
+                    Binder.getCallingUid(),
+                    userId,
+                    /*allowAll=*/ false,
+                    /*requireFull=*/ false,
+                    "addAppBrieflyToWhitelist", null);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                PackageInfo pi = AppGlobals.getPackageManager()
+                        .getPackageInfo(packageName, 0, userId);
+                if (pi == null) return;
+                DeviceIdleController.this.addPowerSaveTempWhitelistAppInternal(packageName,
+                        duration, userId);
+            } catch (RemoteException re) {
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -478,6 +540,70 @@ public class DeviceIdleController extends SystemService {
     public int[] getAppIdWhitelistInternal() {
         synchronized (this) {
             return mPowerSaveWhitelistAppIdArray;
+        }
+    }
+
+    public int[] getAppIdTempWhitelistInternal() {
+        synchronized (this) {
+            return mTempWhitelistAppIdArray;
+        }
+    }
+
+    /**
+     * Adds an app to the temporary whitelist and resets the endTime for granting the
+     * app an exemption to access network and acquire wakelocks.
+     */
+    public void addPowerSaveTempWhitelistAppInternal(String packageName, long duration,
+            int userId) {
+        if (duration > MAX_TEMP_APP_WHITELIST_DURATION) {
+            duration = MAX_TEMP_APP_WHITELIST_DURATION;
+        }
+        try {
+            int uid = getContext().getPackageManager().getPackageUid(packageName, userId);
+            int appId = UserHandle.getAppId(uid);
+            final long timeNow = System.currentTimeMillis();
+            synchronized (this) {
+                long currentEndTime = mTempWhitelistAppIdEndTimes.get(appId);
+                // Set the new end time
+                mTempWhitelistAppIdEndTimes.put(appId, timeNow + duration);
+                if (DEBUG) {
+                    Slog.d(TAG, "Adding AppId " + appId + " to temp whitelist");
+                }
+                if (currentEndTime == 0) {
+                    // No pending timeout for the app id, post a delayed message
+                    postTempActiveTimeoutMessage(appId, duration);
+                    updateTempWhitelistAppIdsLocked();
+                    reportTempWhitelistChangedLocked();
+                }
+            }
+        } catch (NameNotFoundException e) {
+        }
+    }
+
+    private void postTempActiveTimeoutMessage(int uid, long delay) {
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_TEMP_APP_WHITELIST_TIMEOUT, uid, 0),
+                delay);
+    }
+
+    void checkTempAppWhitelistTimeout(int uid) {
+        final long timeNow = System.currentTimeMillis();
+        synchronized (this) {
+            long endTime = mTempWhitelistAppIdEndTimes.get(uid);
+            if (endTime == 0) {
+                // Nothing to do
+                return;
+            }
+            if (timeNow >= endTime) {
+                mTempWhitelistAppIdEndTimes.delete(uid);
+                if (DEBUG) {
+                    Slog.d(TAG, "Removing UID " + uid + " from temp whitelist");
+                }
+                updateTempWhitelistAppIdsLocked();
+                reportTempWhitelistChangedLocked();
+            } else {
+                // Need more time
+                postTempActiveTimeoutMessage(uid, endTime - timeNow);
+            }
         }
     }
 
@@ -659,14 +785,41 @@ public class DeviceIdleController extends SystemService {
         }
         mPowerSaveWhitelistAppIdArray = appids;
         if (mLocalPowerManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting wakelock whitelist to "
+                        + Arrays.toString(mPowerSaveWhitelistAppIdArray));
+            }
             mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAppIdArray);
+        }
+    }
+
+    private void updateTempWhitelistAppIdsLocked() {
+        final int size = mTempWhitelistAppIdEndTimes.size();
+        if (mTempWhitelistAppIdArray.length != size) {
+            mTempWhitelistAppIdArray = new int[size];
+        }
+        for (int i = 0; i < size; i++) {
+            mTempWhitelistAppIdArray[i] = mTempWhitelistAppIdEndTimes.keyAt(i);
+        }
+        if (mLocalPowerManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting wakelock temp whitelist to "
+                        + Arrays.toString(mTempWhitelistAppIdArray));
+            }
+            mLocalPowerManager.setDeviceIdleTempWhitelist(mTempWhitelistAppIdArray);
         }
     }
 
     private void reportPowerSaveWhitelistChangedLocked() {
         Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        getContext().sendBroadcast(intent);
+        getContext().sendBroadcastAsUser(intent, UserHandle.OWNER);
+    }
+
+    private void reportTempWhitelistChangedLocked() {
+        Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        getContext().sendBroadcastAsUser(intent, UserHandle.OWNER);
     }
 
     void readConfigFileLocked() {
@@ -817,11 +970,18 @@ public class DeviceIdleController extends SystemService {
         }
 
         if (args != null) {
+            int userId = UserHandle.USER_OWNER;
             for (int i=0; i<args.length; i++) {
                 String arg = args[i];
                 if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
+                } else if ("-u".equals(arg)) {
+                    i++;
+                    if (i < args.length) {
+                        arg = args[i];
+                        userId = Integer.parseInt(arg);
+                    }
                 } else if ("-a".equals(arg)) {
                     // Ignore, we always dump all.
                 } else if ("step".equals(arg)) {
@@ -873,6 +1033,17 @@ public class DeviceIdleController extends SystemService {
                         }
                     }
                     return;
+                } else if ("tempwhitelist".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("At least one package name must be specified");
+                        return;
+                    }
+                    while (i < args.length) {
+                        arg = args[i];
+                        i++;
+                        addPowerSaveTempWhitelistAppInternal(arg, 10000L, userId);
+                    }
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     return;
