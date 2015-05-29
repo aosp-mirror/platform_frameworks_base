@@ -141,6 +141,7 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
+
         <item name="findOnPageNextDrawable">@drawable/ic_find_next_material</item>
         <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_material</item>
 
@@ -160,8 +161,6 @@ please see themes_device_defaults.xml.
         <item name="windowTitleStyle">@style/WindowTitle.Material</item>
         <item name="windowTitleSize">@dimen/action_bar_default_height_material</item>
         <item name="windowTitleBackgroundStyle">@style/WindowTitleBackground.Material</item>
-        <item name="windowContentTransitions">false</item>
-        <item name="windowActivityTransitions">true</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Activity</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">true</item>
@@ -173,6 +172,8 @@ please see themes_device_defaults.xml.
         <item name="windowEnterTransition">@transition/fade</item>
         <item name="windowSharedElementEnterTransition">@transition/move</item>
         <item name="windowSharedElementExitTransition">@transition/move</item>
+        <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">true</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/ThemeOverlay.Material.Dialog</item>
@@ -305,6 +306,9 @@ please see themes_device_defaults.xml.
         <item name="detailsElementBackground">?attr/colorBackground</item>
         <item name="fingerprintDrawable">@drawable/ic_fingerprint_dark</item>
 
+        <!-- PreferenceFrameLayout attributes -->
+        <item name="preferenceFrameLayoutStyle">@style/Widget.Material.PreferenceFrameLayout</item>
+
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@color/search_widget_corpus_item_background</item>
 
@@ -350,9 +354,6 @@ please see themes_device_defaults.xml.
         <!-- SearchView attributes -->
         <item name="searchViewStyle">@style/Widget.Material.SearchView</item>
         <item name="searchDialogTheme">@style/Theme.Material.SearchBar</item>
-
-        <!-- PreferenceFrameLayout attributes -->
-        <item name="preferenceFrameLayoutStyle">@style/Widget.Material.PreferenceFrameLayout</item>
 
         <!-- NumberPicker style-->
         <item name="numberPickerStyle">@style/Widget.Material.NumberPicker</item>
@@ -453,8 +454,8 @@ please see themes_device_defaults.xml.
 
         <item name="buttonStyleSmall">@style/Widget.Material.Light.Button.Small</item>
         <item name="buttonStyleInset">@style/Widget.Material.Light.Button.Inset</item>
-
         <item name="buttonStyleToggle">@style/Widget.Material.Light.Button.Toggle</item>
+
         <item name="switchStyle">@style/Widget.Material.Light.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Material.Light.MediaRouteButton</item>
 
@@ -487,6 +488,8 @@ please see themes_device_defaults.xml.
         <item name="listChoiceBackgroundIndicator">@drawable/list_choice_background_material</item>
         <item name="activatedBackgroundIndicator">@drawable/activated_background_material</item>
 
+        <item name="listDividerAlertDialog">@null</item>
+
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">?attr/expandableListPreferredItemPaddingLeft</item>
 
@@ -495,7 +498,6 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredChildIndicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
 
-        <item name="listDividerAlertDialog">@null</item>
         <item name="findOnPageNextDrawable">@drawable/ic_find_next_material</item>
         <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_material</item>
 
@@ -632,6 +634,7 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Material.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Material.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Material.Light.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Material.Light.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
@@ -681,7 +684,10 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Material.Light.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height_material</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Material.Light.PopupWindow.ActionMode</item>
+        <item name="actionMenuTextAppearance">@style/TextAppearance.Material.Widget.ActionBar.Menu</item>
+        <item name="actionMenuTextColor">?attr/textColorPrimary</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
         <item name="actionBarItemBackground">@drawable/action_bar_item_background_material</item>
 
@@ -723,6 +729,7 @@ please see themes_device_defaults.xml.
         <!-- DatePicker dialog theme -->
         <item name="datePickerDialogTheme">?attr/dialogTheme</item>
 
+        <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_material</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_material</item>
@@ -733,6 +740,7 @@ please see themes_device_defaults.xml.
         <item name="colorPrimaryDark">@color/primary_dark_material_light</item>
         <item name="colorPrimary">@color/primary_material_light</item>
         <item name="colorAccent">@color/accent_material_light</item>
+        <item name="colorEdgeEffect">?attr/colorPrimary</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
