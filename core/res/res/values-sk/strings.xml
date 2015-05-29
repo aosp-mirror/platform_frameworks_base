@@ -188,10 +188,6 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvonenie je vypnuté"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibračné zvonenie"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvonenie je zapnuté"</string>
-    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
-    <skip />
-    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
-    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Prebieha vypínanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Váš tablet bude vypnutý."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televízor sa vypne."</string>
@@ -1110,10 +1106,6 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikácii smerovať výstup médií do ďalších externých zariadení."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Čítať relácie inštalácií"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Toto povolenie umožňuje aplikácii čítať relácie inštalácií a zobraziť tak podrobnosti o aktívnych inštaláciách balíkov."</string>
-    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
-    <skip />
-    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
-    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ovládacie prvky lupy zobrazíte dvojitým dotknutím"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Hľadať"</string>

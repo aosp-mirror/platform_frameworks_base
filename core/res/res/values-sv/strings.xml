@@ -186,10 +186,6 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringsignal av"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrerande ringsignal"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringsignal på"</string>
-    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
-    <skip />
-    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
-    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Tv:n stängs av."</string>
@@ -1096,10 +1092,6 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Tillåter att appen omdirigerar medieuppspelningar till andra externa enheter."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Läsa installationssessioner"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillåt appen att läsa installationssessioner. Det ger den tillgång till uppgifter om aktiva paketinstallationer."</string>
-    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
-    <skip />
-    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
-    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryck två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Det gick inte att lägga till widgeten."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Kör"</string>
