@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -361,6 +362,12 @@ public class VectorDrawable extends Drawable {
         return (int) mVectorState.mVPathRenderer.mBaseHeight;
     }
 
+    /** @hide */
+    @Override
+    public Insets getOpticalInsets() {
+        return mVectorState.mVPathRenderer.mOpticalInsets;
+    }
+
     @Override
     public boolean canApplyTheme() {
         return (mVectorState != null && mVectorState.canApplyTheme()) || super.canApplyTheme();
@@ -523,6 +530,16 @@ public class VectorDrawable extends Drawable {
             throw new XmlPullParserException(a.getPositionDescription() +
                     "<vector> tag requires height > 0");
         }
+
+        final int insetLeft = a.getDimensionPixelSize(
+                R.styleable.VectorDrawable_opticalInsetLeft, pathRenderer.mOpticalInsets.left);
+        final int insetTop = a.getDimensionPixelSize(
+                R.styleable.VectorDrawable_opticalInsetTop, pathRenderer.mOpticalInsets.top);
+        final int insetRight = a.getDimensionPixelSize(
+                R.styleable.VectorDrawable_opticalInsetRight, pathRenderer.mOpticalInsets.right);
+        final int insetBottom = a.getDimensionPixelSize(
+                R.styleable.VectorDrawable_opticalInsetBottom, pathRenderer.mOpticalInsets.bottom);
+        pathRenderer.mOpticalInsets = Insets.of(insetLeft, insetTop, insetRight, insetBottom);
 
         final float alphaInFloat = a.getFloat(R.styleable.VectorDrawable_alpha,
                 pathRenderer.getAlpha());
@@ -821,6 +838,7 @@ public class VectorDrawable extends Drawable {
         float mBaseHeight = 0;
         float mViewportWidth = 0;
         float mViewportHeight = 0;
+        Insets mOpticalInsets = Insets.NONE;
         int mRootAlpha = 0xFF;
         String mRootName = null;
 
@@ -859,6 +877,7 @@ public class VectorDrawable extends Drawable {
             mBaseHeight = copy.mBaseHeight;
             mViewportWidth = copy.mViewportWidth;
             mViewportHeight = copy.mViewportHeight;
+            mOpticalInsets = copy.mOpticalInsets;
             mChangingConfigurations = copy.mChangingConfigurations;
             mRootAlpha = copy.mRootAlpha;
             mRootName = copy.mRootName;
