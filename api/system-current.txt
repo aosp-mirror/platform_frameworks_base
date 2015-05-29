@@ -27958,6 +27958,7 @@ package android.provider {
     method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
     method public static android.net.Uri renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String);
     field public static final java.lang.String EXTRA_ERROR = "error";
+    field public static final java.lang.String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
     field public static final java.lang.String EXTRA_INFO = "info";
     field public static final java.lang.String EXTRA_LOADING = "loading";
     field public static final java.lang.String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";

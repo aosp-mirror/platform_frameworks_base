@@ -383,6 +383,12 @@ public class RootsCache {
                 continue;
             }
 
+            // Exclude roots from the calling package.
+            if (state.excludedAuthorities.contains(root.authority)) {
+                if (LOGD) Log.d(TAG, "Excluding root " + root.authority + " from calling package.");
+                continue;
+            }
+
             matching.add(root);
         }
         return matching;

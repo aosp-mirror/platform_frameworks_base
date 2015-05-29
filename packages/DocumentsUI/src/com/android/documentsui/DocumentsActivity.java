@@ -256,6 +256,8 @@ public class DocumentsActivity extends BaseActivity {
                     BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
         }
 
+        state.excludedAuthorities = getExcludedAuthorities();
+
         return state;
     }
 
