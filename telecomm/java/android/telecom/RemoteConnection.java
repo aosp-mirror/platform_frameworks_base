@@ -20,8 +20,10 @@ import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -197,9 +199,17 @@ public final class RemoteConnection {
         public void onConferenceChanged(
                 RemoteConnection connection,
                 RemoteConference conference) {}
+
+        /**
+         * Handles changes to the {@code RemoteConference} extras.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param extras The extras containing other information associated with the connection.
+         */
+        public void onExtrasChanged(RemoteConnection connection, @Nullable Bundle extras) {}
     }
 
-    /** {@hide} */
+    /** @hide */
     public static class VideoProvider {
 
         public abstract static class Listener {
@@ -415,6 +425,7 @@ public final class RemoteConnection {
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
     private RemoteConference mConference;
+    private Bundle mExtras;
 
     /**
      * @hide
@@ -611,6 +622,15 @@ public final class RemoteConnection {
      */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
+    }
+
+    /**
+     * Obtain the extras associated with this {@code RemoteConnection}.
+     *
+     * @return The extras for this connection.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -1094,6 +1114,21 @@ public final class RemoteConnection {
                     }
                 });
             }
+        }
+    }
+
+    /** @hide */
+    void setExtras(final Bundle extras) {
+        mExtras = extras;
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onExtrasChanged(connection, extras);
+                }
+            });
         }
     }
 

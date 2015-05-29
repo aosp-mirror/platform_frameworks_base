@@ -18,7 +18,9 @@ package android.telecom;
 
 import com.android.internal.telecom.IConnectionService;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 
@@ -49,6 +51,7 @@ public final class RemoteConference {
                 RemoteConference conference,
                 List<RemoteConnection> conferenceableConnections) {}
         public void onDestroyed(RemoteConference conference) {}
+        public void onExtrasChanged(RemoteConference conference, @Nullable Bundle extras) {}
     }
 
     private final String mId;
@@ -65,6 +68,7 @@ public final class RemoteConference {
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
     private int mConnectionCapabilities;
+    private Bundle mExtras;
 
     /** @hide */
     RemoteConference(String id, IConnectionService connectionService) {
@@ -209,6 +213,21 @@ public final class RemoteConference {
         }
     }
 
+    /** @hide */
+    void setExtras(final Bundle extras) {
+        mExtras = extras;
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final RemoteConference conference = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onExtrasChanged(conference, extras);
+                }
+            });
+        }
+    }
+
     /**
      * Returns the list of {@link RemoteConnection}s contained in this conference.
      *
@@ -235,6 +254,15 @@ public final class RemoteConference {
      */
     public final int getConnectionCapabilities() {
         return mConnectionCapabilities;
+    }
+
+    /**
+     * Obtain the extras associated with this {@code RemoteConnection}.
+     *
+     * @return The extras for this connection.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 
     /**
