@@ -203,8 +203,8 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
 
         final int wPadding = getPaddingLeft() + getPaddingRight();
         final int hPadding = getPaddingTop() + getPaddingBottom();
-        maxWidth -= wPadding;
-        maxHeight -= hPadding;
+        maxWidth = Math.max(0, maxWidth - wPadding);
+        maxHeight = Math.max(0, maxHeight - hPadding);
 
         int width = widthMode == MeasureSpec.EXACTLY ? widthSize : 0;
         int height = heightMode == MeasureSpec.EXACTLY ? heightSize : 0;
