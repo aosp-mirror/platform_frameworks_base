@@ -115,20 +115,22 @@ ARMEABI (default), MIPS, and x86. For more information, see
 </li>
 </ul>
 
-<p>The following two items only apply in cases in which you are using the toolchains provided with
-the Android NDK as standalone compilers.</p>
+<p>The following two items are only required for building using the
+<a href="{@docRoot}ndk/guides/ndk-build.html">{@code ndk-build}</a> script,
+and for debugging using the <a href="{@docRoot}ndk/guides/ndk-gdb.html">
+{@code ndk-gdb}</a> script.
 
 <ul>
-<li>{@code Android.mk}: You must create an <a href="{@docRoot}ndk/guides/android_mk.html">
-{@code Android.mk}</a> configuration file inside your {@code jni} folder. The ndk-build script
-looks at this file, which defines the module and its name, the source files to be compiled, build
-flags and libraries to link.</li>
+<li><a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>:
+You must create an <a href="{@docRoot}ndk/guides/android_mk.html">
+{@code Android.mk}</a> configuration file inside your {@code jni} folder. The {@code ndk-build}
+script looks at this file, which defines the module and its name, the source files to be compiled,
+build flags and libraries to link.</li>
 </ul>
 
 <ul>
-<li>{@code Application.mk}: You may optionally create an
-<a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a> file. This file
-This file enumerates and describes the modules that your app requires. This information includes:
+<li><a href="{@docRoot}ndk/guides/application_mk.html">{@code Application.mk}</a>: This file
+enumerates and describes the modules that your app requires. This information includes:
 
 <ul>
 <li>ABIs used to compile for specific platforms.</li>
