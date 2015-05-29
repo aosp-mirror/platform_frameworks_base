@@ -49,6 +49,10 @@ public class CarrierConfigManager {
     public static final String
             ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
 
+    // Below are the keys used in carrier config bundles. To add a new variable, define the key and
+    // give it a default value in sDefaults. If you need to ship a per-network override in the
+    // system image, that can be added in packages/apps/CarrierConfig.
+
     /**
      * Flag indicating whether the Phone app should ignore EVENT_SIM_NETWORK_LOCKED
      * events from the Sim.
