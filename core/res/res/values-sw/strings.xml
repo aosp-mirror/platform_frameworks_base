@@ -188,6 +188,10 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Programu ya milio imezimwa"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Mtetemo wa programu ya milio"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Programu ya milio imewashwa"</string>
+    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
+    <skip />
+    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Inafunga..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Kompyuta kibao yako itazima."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Runinga yako itazimwa."</string>
@@ -1094,6 +1098,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Inaruhusu programu kufuatilia utoaji wa habari kwa vifaa vingine vya nje."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Soma vipindi vya kusanikisha"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Huruhusu programu kusoma vipindi vya kusanikisha. Hii huiruhusu kuona maelezo kuhusu usanikishaji wa programu unaoendelea."</string>
+    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
+    <skip />
+    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Gusa mara mbili kwa udhibiti cha kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>

@@ -186,6 +186,10 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ರಿಂಗರ್ ಆಫ್"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ರಿಂಗರ್ ವೈಬ್ರೇಷನ್‌"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ರಿಂಗರ್ ಆನ್"</string>
+    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
+    <skip />
+    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತಿದೆ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ನಿಮ್ಮ ಟಿವಿಯನ್ನು ಮುಚ್ಚಲಾಗುತ್ತದೆ."</string>
@@ -1092,6 +1096,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ಇತರ ಬಾಹ್ಯ ಸಾಧನಗಳಿಗೆ ಮೀಡಿಯಾ ಔಟ್‍‍ಪುಟ್ ಅನ್ನು ರೂಟ್ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ಸ್ಥಾಪನೆ ಸೆಷನ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ಸ್ಥಾಪಿತ ಸೆಷನ್‌ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ. ಸಕ್ರಿಯ ಪ್ಯಾಕೇಜ್‌ ಸ್ಥಾಪನೆಗಳ ಕುರಿತು ವಿವರಣೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಇದು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
+    <skip />
+    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ಜೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ವಿಜೆಟ್ ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ಹೋಗು"</string>

@@ -277,6 +277,10 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Коңгуроо өчүк"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Чалганда титирөө"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Коңгуроо жандырылган"</string>
+    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
+    <skip />
+    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
+    <skip />
     <!-- no translation found for shutdown_progress (2281079257329981203) -->
     <skip />
     <!-- no translation found for shutdown_confirm (3385745179555731470) -->
@@ -554,7 +558,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Манжа изи иштелбей койду. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Манжа изинин сенсору кирдеп калган. Тазалап, кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Манжа өтө тез жылдырылды. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">".Манжа өтө акырын жылдырылды. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Манжа өтө жай жылды. Кайра аракет кылыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Манжа изинин аппараттык камсыздоосу жеткиликтүү эмес."</string>
@@ -1441,6 +1445,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
+    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
+    <skip />
+    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>
     <!-- no translation found for ime_action_go (8320845651737369027) -->

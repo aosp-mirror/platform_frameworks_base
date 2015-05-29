@@ -186,6 +186,10 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Suoneria disattivata"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Suoneria vibrazione"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Suoneria attiva"</string>
+    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
+    <skip />
+    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Spegnimento..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Il tablet verrà spento."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"La TV verrà spenta."</string>
@@ -421,7 +425,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestisci hardware per il riconoscimento delle impronte digitali"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Consente all\'app di richiamare metodi per aggiungere e rimuovere modelli di impronte digitali da utilizzare."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizza hardware per il riconoscimento delle impronte digitali"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizzo di hardware per il riconoscimento delle impronte digitali"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Consente all\'app di utilizzare l\'hardware per il riconoscimento delle impronte digitali per eseguire l\'autenticazione"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta digitale parziale. Riprova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta digitale. Riprova."</string>
@@ -821,7 +825,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Ultimo mese"</string>
     <string name="older" msgid="5211975022815554840">"Precedente"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"in data <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"alle ore <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"nel <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"giorno"</string>
@@ -1092,6 +1096,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Consente a un\'applicazione di indirizzare l\'uscita di media verso altri dispositivi esterni."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lettura di sessioni di installazione"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
+    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
+    <skip />
+    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tocca due volte per il comando dello zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Aggiunta del widget non riuscita."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vai"</string>

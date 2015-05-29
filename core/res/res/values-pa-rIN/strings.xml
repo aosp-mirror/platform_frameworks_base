@@ -186,6 +186,10 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ਰਿੰਗਰ ਬੰਦ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ਰਿੰਗਰ ਵਾਈਬ੍ਰੇਟ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ਰਿੰਗਰ ਚਾਲੂ"</string>
+    <!-- no translation found for reboot_to_recovery_title (7851482804359554338) -->
+    <skip />
+    <!-- no translation found for reboot_to_recovery_progress (983446780859314345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"ਬੰਦ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ਤੁਹਾਡੀ ਟੈਬਲੇਟ ਬੰਦ ਕੀਤੀ ਜਾਏਗੀ।"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ਤੁਹਾਡਾ TV ਬੰਦ ਕੀਤਾ ਜਾਏਗਾ।"</string>
@@ -1092,6 +1096,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੂੰ ਹੋਰਾਂ ਬਾਹਰੀ ਡਿਵਾਈਸਾਂ ਲਈ ਮੀਡੀਆ ਆਊਟਪੁਟ ਰੂਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ਇੰਸਟੌਲ ਸੈਸ਼ਨ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਇੰਸਟੌਲ ਸੈਸ਼ਨ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਇਸਨੂੰ ਸਕਿਰਿਆ ਪੈਕੇਜ ਇੰਸਟੌਲੇਸ਼ਨਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <!-- no translation found for permlab_requestInstallPackages (1772330282283082214) -->
+    <skip />
+    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ਜ਼ੂਮ ਨਿਯੰਤਰਣ ਲਈ ਦੋ ਵਾਰ ਛੋਹਵੋ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ਵਿਜੇਟ ਨਹੀਂ ਜੋੜ ਸਕਿਆ।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ਜਾਓ"</string>
