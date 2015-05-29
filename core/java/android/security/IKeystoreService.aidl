@@ -67,7 +67,8 @@ interface IKeystoreService {
     OperationResult begin(IBinder appToken, String alias, int purpose, boolean pruneable,
         in KeymasterArguments params, in byte[] entropy, out KeymasterArguments operationParams);
     OperationResult update(IBinder token, in KeymasterArguments params, in byte[] input);
-    OperationResult finish(IBinder token, in KeymasterArguments params, in byte[] signature);
+    OperationResult finish(IBinder token, in KeymasterArguments params, in byte[] signature,
+        in byte[] entropy);
     int abort(IBinder handle);
     boolean isOperationAuthorized(IBinder token);
     int addAuthToken(in byte[] authToken);
