@@ -26,8 +26,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:layout_gravity="center_horizontal"
-    android:layout_alignParentBottom="true"
-    android:clickable="true">
+    android:layout_alignParentBottom="true">
 
     <com.android.keyguard.CarrierText
         android:id="@+id/carrier_text"
