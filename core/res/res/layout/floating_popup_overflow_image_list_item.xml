@@ -16,17 +16,21 @@
 */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/floating_toolbar_menu_button_minimum_width"
-    android:layout_height="@dimen/floating_toolbar_height"
-    android:minWidth="@dimen/floating_toolbar_menu_button_minimum_width"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="@dimen/floating_toolbar_overflow_image_button_width"
     android:minHeight="@dimen/floating_toolbar_height"
     android:focusable="false"
     android:focusableInTouchMode="false"
     android:importantForAccessibility="no">
     <ImageView
         android:id="@+id/floating_toolbar_menu_item_image_button"
-        android:layout_width="@dimen/floating_toolbar_menu_button_minimum_width"
+        android:layout_width="@dimen/floating_toolbar_overflow_image_button_width"
         android:layout_height="@dimen/floating_toolbar_height"
-        android:layout_marginStart="18dp"
+        android:paddingTop="@dimen/floating_toolbar_menu_image_button_vertical_padding"
+        android:paddingStart="@dimen/floating_toolbar_overflow_side_padding"
+        android:paddingBottom="@dimen/floating_toolbar_menu_image_button_vertical_padding"
+        android:paddingEnd="@dimen/floating_toolbar_overflow_side_padding"
+        android:layout_margin="0dp"
         android:scaleType="centerInside"/>
 </LinearLayout>

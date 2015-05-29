@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceListItemSmall"
-    android:gravity="center_vertical"
+    android:gravity="start|center_vertical"
     android:minWidth="@dimen/floating_toolbar_menu_button_side_padding"
     android:minHeight="@dimen/floating_toolbar_height"
     android:paddingStart="@dimen/floating_toolbar_overflow_side_padding"
@@ -29,7 +29,8 @@
     android:layout_margin="0dp"
     android:singleLine="true"
     android:ellipsize="end"
-    android:fontFamily="sans-serif"
+    android:fontFamily="sans-serif-medium"
     android:textSize="@dimen/floating_toolbar_text_size"
     android:textColor="?attr/colorForeground"
     android:textAllCaps="true" />
+
