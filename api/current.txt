@@ -30482,6 +30482,7 @@ package android.telecom {
     method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CHANGE_DEFAULT_DIALER = "android.telecom.action.CHANGE_DEFAULT_DIALER";
     field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
+    field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.telecom.action.INCOMING_CALL";
     field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecom.action.SHOW_CALL_SETTINGS";
