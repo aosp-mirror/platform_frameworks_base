@@ -21,6 +21,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -432,6 +433,12 @@ public abstract class ConnectionService extends Service {
             String id = mIdByConference.get(conference);
             mAdapter.setStatusHints(id, statusHints);
         }
+
+        @Override
+        public void onExtrasChanged(Conference conference, Bundle extras) {
+            String id = mIdByConference.get(conference);
+            mAdapter.setExtras(id, extras);
+        }
     };
 
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
@@ -569,6 +576,14 @@ public abstract class ConnectionService extends Service {
                 mAdapter.onConferenceMergeFailed(id);
             }
         }
+
+        @Override
+        public void onExtrasChanged(Connection connection, Bundle extras) {
+            String id = mIdByConnection.get(connection);
+            if (id != null) {
+                mAdapter.setExtras(id, extras);
+            }
+        }
     };
 
     /** {@inheritDoc} */
@@ -638,7 +653,8 @@ public abstract class ConnectionService extends Service {
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
-                        createIdList(connection.getConferenceables())));
+                        createIdList(connection.getConferenceables()),
+                        connection.getExtras()));
     }
 
     private void abort(String callId) {
@@ -919,7 +935,8 @@ public abstract class ConnectionService extends Service {
                             null : conference.getVideoProvider().getInterface(),
                     conference.getVideoState(),
                     conference.getConnectTimeMillis(),
-                    conference.getStatusHints());
+                    conference.getStatusHints(),
+                    conference.getExtras());
 
             mAdapter.addConferenceCall(id, parcelableConference);
             mAdapter.setVideoProvider(id, conference.getVideoProvider());
@@ -964,7 +981,8 @@ public abstract class ConnectionService extends Service {
                     connection.getAudioModeIsVoip(),
                     connection.getStatusHints(),
                     connection.getDisconnectCause(),
-                    emptyList);
+                    emptyList,
+                    connection.getExtras());
             mAdapter.addExistingConnection(id, parcelableConnection);
         }
     }
