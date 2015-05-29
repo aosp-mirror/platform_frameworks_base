@@ -33,6 +33,7 @@ import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -374,14 +375,17 @@ public class KeyguardViewMediator extends SystemUI {
                         + ",state=" + simState + ")");
             }
 
-            try {
-                int size = mKeyguardStateCallbacks.size();
-                boolean simPinSecure = mUpdateMonitor.isSimPinSecure();
-                for (int i = 0; i < size; i++) {
+            int size = mKeyguardStateCallbacks.size();
+            boolean simPinSecure = mUpdateMonitor.isSimPinSecure();
+            for (int i = size - 1; i >= 0; i--) {
+                try {
                     mKeyguardStateCallbacks.get(i).onSimSecureStateChanged(simPinSecure);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onSimSecureStateChanged", e);
+                    if (e instanceof DeadObjectException) {
+                        mKeyguardStateCallbacks.remove(i);
+                    }
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to call onSimSecureStateChanged", e);
             }
 
             switch (simState) {
@@ -544,6 +548,7 @@ public class KeyguardViewMediator extends SystemUI {
         // Assume keyguard is showing (unless it's disabled) until we know for sure...
         setShowingLocked(!shouldWaitForProvisioning() && !mLockPatternUtils.isLockScreenDisabled(
                 KeyguardUpdateMonitor.getCurrentUser()));
+        updateInputRestrictedLocked();
         mTrustManager.reportKeyguardShowingChanged();
 
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
@@ -925,13 +930,16 @@ public class KeyguardViewMediator extends SystemUI {
         boolean inputRestricted = isInputRestricted();
         if (mInputRestricted != inputRestricted) {
             mInputRestricted = inputRestricted;
-            try {
-                int size = mKeyguardStateCallbacks.size();
-                for (int i = 0; i < size; i++) {
+            int size = mKeyguardStateCallbacks.size();
+            for (int i = size - 1; i >= 0; i--) {
+                try {
                     mKeyguardStateCallbacks.get(i).onInputRestrictedStateChanged(inputRestricted);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onDeviceProvisioned", e);
+                    if (e instanceof DeadObjectException) {
+                        mKeyguardStateCallbacks.remove(i);
+                    }
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to call onDeviceProvisioned", e);
             }
         }
     }
@@ -1530,13 +1538,16 @@ public class KeyguardViewMediator extends SystemUI {
     private void setShowingLocked(boolean showing) {
         if (showing != mShowing) {
             mShowing = showing;
-            try {
-                int size = mKeyguardStateCallbacks.size();
-                for (int i = 0; i < size; i++) {
+            int size = mKeyguardStateCallbacks.size();
+            for (int i = size - 1; i >= 0; i--) {
+                try {
                     mKeyguardStateCallbacks.get(i).onShowingStateChanged(showing);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onShowingStateChanged", e);
+                    if (e instanceof DeadObjectException) {
+                        mKeyguardStateCallbacks.remove(i);
+                    }
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to call onShowingStateChanged", e);
             }
             updateInputRestrictedLocked();
             mTrustManager.reportKeyguardShowingChanged();
@@ -1551,7 +1562,7 @@ public class KeyguardViewMediator extends SystemUI {
                 callback.onShowingStateChanged(mShowing);
                 callback.onInputRestrictedStateChanged(mInputRestricted);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to call onShowingStateChanged or onSimSecureStateChanged", e);
+                Slog.w(TAG, "Failed to call onShowingStateChanged or onSimSecureStateChanged or onInputRestrictedStateChanged", e);
             }
         }
     }
