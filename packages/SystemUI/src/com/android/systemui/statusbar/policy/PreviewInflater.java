@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.policy;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -138,14 +139,14 @@ public class PreviewInflater {
 
     public static boolean wouldLaunchResolverActivity(Context ctx, Intent intent,
             int currentUserId) {
-        return getTargetPackage(ctx, intent, currentUserId) == null;
+        return getTargetActivityInfo(ctx, intent, currentUserId) == null;
     }
 
     /**
-     * @return the target package of the intent it resolves to a specific package or {@code null} if
-     *         it resolved to the resolver activity
+     * @return the target activity info of the intent it resolves to a specific package or
+     *         {@code null} if it resolved to the resolver activity
      */
-    public static String getTargetPackage(Context ctx, Intent intent,
+    public static ActivityInfo getTargetActivityInfo(Context ctx, Intent intent,
             int currentUserId) {
         PackageManager packageManager = ctx.getPackageManager();
         final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
@@ -158,7 +159,7 @@ public class PreviewInflater {
         if (resolved == null || wouldLaunchResolverActivity(resolved, appList)) {
             return null;
         } else {
-            return resolved.activityInfo.packageName;
+            return resolved.activityInfo;
         }
     }
 

@@ -1826,6 +1826,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
+    public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
+        startActivityDismissingKeyguard(intent, false, dismissShade, callback);
+    }
+
+    @Override
     public void preventNextAnimation() {
         overrideActivityPendingAppTransition(true /* keyguardShowing */);
     }
@@ -2707,7 +2712,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            final boolean dismissShade) {
+            boolean dismissShade) {
+        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, null /* callback */);
+    }
+
+    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
+            final boolean dismissShade, final Callback callback) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
         final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
@@ -2717,16 +2727,35 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             public void run() {
                 intent.setFlags(
                         Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mContext.startActivityAsUser(
-                        intent, new UserHandle(UserHandle.USER_CURRENT));
+                int result = ActivityManager.START_CANCELED;
+                try {
+                    result = ActivityManagerNative.getDefault().startActivityAsUser(
+                            null, mContext.getBasePackageName(),
+                            intent,
+                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null,
+                            UserHandle.CURRENT.getIdentifier());
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Unable to start activity", e);
+                }
                 overrideActivityPendingAppTransition(
                         keyguardShowing && !afterKeyguardGone);
+                if (callback != null) {
+                    callback.onActivityStarted(result);
+                }
             }
         };
-        executeRunnableDismissingKeyguard(runnable, dismissShade, afterKeyguardGone);
+        Runnable cancelRunnable = new Runnable() {
+            @Override
+            public void run() {
+                callback.onActivityStarted(ActivityManager.START_CANCELED);
+            }
+        };
+        executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShade, afterKeyguardGone);
     }
 
     public void executeRunnableDismissingKeyguard(final Runnable runnable,
+            final Runnable cancelAction,
             final boolean dismissShade,
             final boolean afterKeyguardGone) {
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
@@ -2753,7 +2782,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
                 return true;
             }
-        }, afterKeyguardGone);
+        }, cancelAction, afterKeyguardGone);
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -2813,10 +2842,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected void dismissKeyguardThenExecute(final OnDismissAction action,
+    protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {
+        dismissKeyguardThenExecute(action, null /* cancelRunnable */, afterKeyguardGone);
+    }
+
+    private void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
         if (mStatusBarKeyguardViewManager.isShowing()) {
-            mStatusBarKeyguardViewManager.dismissWithAction(action, afterKeyguardGone);
+            mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
+                    afterKeyguardGone);
         } else {
             action.onDismiss();
         }

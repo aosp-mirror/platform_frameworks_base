@@ -160,7 +160,7 @@ public class KeyguardAffordanceHelper {
                 } else {
                     mTouchSlopExeeded = false;
                 }
-                mCallback.onSwipingStarted(targetView == mLeftIcon);
+                mCallback.onSwipingStarted(targetView == mRightIcon);
                 mSwipingInProgress = true;
                 mTargetedView = targetView;
                 mInitialTouchX = x;
@@ -550,7 +550,7 @@ public class KeyguardAffordanceHelper {
 
         float getMaxTranslationDistance();
 
-        void onSwipingStarted(boolean isRightwardMotion);
+        void onSwipingStarted(boolean rightIcon);
 
         void onSwipingAborted();
 

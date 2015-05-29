@@ -95,16 +95,16 @@ public class KeyguardBouncer {
         mShowingSoon = false;
     }
 
-    public void showWithDismissAction(OnDismissAction r) {
+    public void showWithDismissAction(OnDismissAction r, Runnable cancelAction) {
         ensureView();
-        mKeyguardView.setOnDismissAction(r);
+        mKeyguardView.setOnDismissAction(r, cancelAction);
         show(false /* resetSecuritySelection */);
     }
 
     public void hide(boolean destroyView) {
         cancelShowRunnable();
          if (mKeyguardView != null) {
-            mKeyguardView.setOnDismissAction(null);
+            mKeyguardView.cancelDismissAction();
             mKeyguardView.cleanUp();
         }
         if (destroyView) {

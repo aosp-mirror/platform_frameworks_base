@@ -19,7 +19,6 @@ package com.google.android.test.cameraprewarm;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.WindowManager;
 
 import com.google.android.test.cameraprewarm.R;
 
@@ -31,7 +30,6 @@ public class CameraActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_activity);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         Log.i(TAG, "Activity created");
     }
 }

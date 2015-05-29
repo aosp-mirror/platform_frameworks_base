@@ -24,6 +24,11 @@ import android.content.Intent;
  * Keyguard.
  */
 public interface ActivityStarter {
-    public void startActivity(Intent intent, boolean dismissShade);
+    void startActivity(Intent intent, boolean dismissShade);
+    void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void preventNextAnimation();
+
+    interface Callback {
+        void onActivityStarted(int resultCode);
+    }
 }
