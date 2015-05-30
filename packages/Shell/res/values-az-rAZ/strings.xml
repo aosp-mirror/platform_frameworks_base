@@ -18,7 +18,9 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Baq raport alındı"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Xətanı şikayətini paylaşmaq üçün toxunun"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Baq raportunu paylaşmaq üçün sola sürüşdürün"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Xətanı şikayətini paylaşmaq üçün toxunun"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Baq raportları sistemin müxtəlif jurnal fayllarından data içərir ki, buna şəxsi və konfidensial məlumatlar da aiddir. Yalnız inandığınız adamlarla baq raportlarını paylaşın."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Bu mesajı növbəti dəfə göstər"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Baq hesabatları"</string>
 </resources>
