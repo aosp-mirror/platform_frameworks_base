@@ -945,17 +945,30 @@ public interface WindowManagerPolicy {
     public int focusChangedLw(WindowState lastFocus, WindowState newFocus);
 
     /**
-     * Called when the device is waking up.
+     * Called when the device has started waking up.
      */
-    public void wakingUp();
+    public void startedWakingUp();
 
     /**
-     * Called when the device is going to sleep.
-     *
-     * @param why {@link #OFF_BECAUSE_OF_USER} or
-     * {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     * Called when the device has finished waking up.
      */
-    public void goingToSleep(int why);
+    public void finishedWakingUp();
+
+    /**
+     * Called when the device has started going to sleep.
+     *
+     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
+     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    public void startedGoingToSleep(int why);
+
+    /**
+     * Called when the device has finished going to sleep.
+     *
+     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
+     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    public void finishedGoingToSleep(int why);
 
     /**
      * Called when the device is about to turn on the screen to show content.
