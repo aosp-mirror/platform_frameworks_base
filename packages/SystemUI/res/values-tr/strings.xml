@@ -397,7 +397,19 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinali geri yüklemek için dokunun."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"İş profilindesiniz"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sistem Arayüzü ayarlayıcısı"</string>
+    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
+    <skip />
+    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
+    <skip />
     <string name="quick_settings" msgid="10042998191725428">"Hızlı Ayarlar"</string>
     <string name="add_tile" msgid="2995389510240786221">"Blok ekle"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Yayın Bloku"</string>
+    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
+    <skip />
+    <!-- no translation found for alarm_template (3980063409350522735) -->
+    <skip />
+    <!-- no translation found for alarm_template_far (4242179982586714810) -->
+    <skip />
 </resources>
