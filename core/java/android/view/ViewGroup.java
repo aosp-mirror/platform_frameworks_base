@@ -5225,12 +5225,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         descendant.mTop - descendant.mScrollY);
                 if (clipToBounds) {
                     View p = (View) theParent;
-                    rect.intersect(0, 0, p.mRight - p.mLeft, p.mBottom - p.mTop);
+                    boolean intersected = rect.intersect(0, 0, p.mRight - p.mLeft,
+                            p.mBottom - p.mTop);
+                    if (!intersected) {
+                        rect.setEmpty();
+                    }
                 }
             } else {
                 if (clipToBounds) {
                     View p = (View) theParent;
-                    rect.intersect(0, 0, p.mRight - p.mLeft, p.mBottom - p.mTop);
+                    boolean intersected = rect.intersect(0, 0, p.mRight - p.mLeft,
+                            p.mBottom - p.mTop);
+                    if (!intersected) {
+                        rect.setEmpty();
+                    }
                 }
                 rect.offset(descendant.mScrollX - descendant.mLeft,
                         descendant.mScrollY - descendant.mTop);
