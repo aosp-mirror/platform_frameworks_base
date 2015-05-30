@@ -119,7 +119,14 @@ public class StateSet {
     /** @hide */
     public StateSet() {}
 
+    /**
+     * A state specification that will be matched by all StateSets.
+     */
     public static final int[] WILD_CARD = new int[0];
+
+    /**
+     * A state set that does not contain any valid states.
+     */
     public static final int[] NOTHING = new int[] { 0 };
 
     /**
