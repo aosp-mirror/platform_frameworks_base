@@ -1455,7 +1455,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Match current screen state.
         if (!mPowerManager.isInteractive()) {
-            goingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+            startedGoingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+            finishedGoingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
 
         mWindowManagerInternal.registerAppTransitionListener(
@@ -5233,9 +5234,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void goingToSleep(int why) {
+    public void startedGoingToSleep(int why) {
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Started going to sleep... (why=" + why + ")");
+    }
+
+    // Called on the PowerManager's Notifier thread.
+    @Override
+    public void finishedGoingToSleep(int why) {
         EventLog.writeEvent(70000, 0);
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Going to sleep...");
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Finished going to sleep... (why=" + why + ")");
 
         // We must get this work done here because the power manager will drop
         // the wake lock and let the system suspend once this function returns.
@@ -5252,24 +5259,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void wakeUpFromPowerKey(long eventTime) {
-        wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey);
-    }
-
-    private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode) {
-        if (!wakeInTheaterMode && isTheaterModeEnabled()) {
-            return false;
-        }
-
-        mPowerManager.wakeUp(wakeTime);
-        return true;
-    }
-
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void wakingUp() {
+    public void startedWakingUp() {
         EventLog.writeEvent(70000, 1);
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Waking up...");
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Started waking up...");
 
         // Since goToSleep performs these functions synchronously, we must
         // do the same here.  We cannot post this work to a handler because
@@ -5295,6 +5289,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (DEBUG_WAKEUP) Slog.d(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
             finishKeyguardDrawn();
         }
+    }
+
+    // Called on the PowerManager's Notifier thread.
+    @Override
+    public void finishedWakingUp() {
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Finished waking up...");
+    }
+
+    private void wakeUpFromPowerKey(long eventTime) {
+        wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey);
+    }
+
+    private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode) {
+        if (!wakeInTheaterMode && isTheaterModeEnabled()) {
+            return false;
+        }
+
+        mPowerManager.wakeUp(wakeTime);
+        return true;
     }
 
     private void finishKeyguardDrawn() {
@@ -5789,7 +5802,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mSystemBooted = true;
         }
-        wakingUp();
+        startedWakingUp();
         screenTurningOn(null);
     }
 
