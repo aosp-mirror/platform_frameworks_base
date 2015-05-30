@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
+    <string name="app_label" msgid="7164937344850004466">"Interfaz de usuario del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>

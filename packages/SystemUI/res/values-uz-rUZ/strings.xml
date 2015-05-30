@@ -87,7 +87,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Qulfdan chiqarish"</string>
     <string name="unlock_label" msgid="8779712358041029439">"qulfdan chiqarish"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonni ochish"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"ovozli yordamni yoqish"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"ovozli yordamni ochish"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamerani ochish"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Yangi vazifa tartibini tanlash"</string>
     <string name="cancel" msgid="6442560571259935130">"Bekor qilish"</string>
@@ -315,7 +315,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"Ochish uchun yana bosing"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Qulfdan chiqarish uchun tepaga suring"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefon: ekranni ikonkadan boshlab istalgan tomonga suring"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Ovozli yordam: belgidan boshlab suring"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Ovozli yordam: ikonkadan boshlab istalgan tomonga suring"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Kamera: ekranni ikonkadan boshlab istalgan tomonga suring"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Tinchlik saqlansin"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Faqat muhimlari"</string>
