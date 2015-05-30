@@ -42,7 +42,7 @@ startpage=true
   The Android framework provides classes for building user interfaces for these types of apps with
   the <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support
   library</a>. This library provides a framework of classes for creating an efficient and familiar
-  interface for browsing and playing media files with minimal coding. The classes are designed
+  interface for browsing and playing media files with minimal coding. The classes are designed to
   be extended and customized so you can create an experience that is unique to your app.
 </p>
 
