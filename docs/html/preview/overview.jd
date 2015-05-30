@@ -116,7 +116,7 @@ page.tags="preview", "developer", "android"
 <img src="{@docRoot}preview/images/m-preview-timeline-crop.png" alt=
 "Preview program timeline" id="timeline">
 <p>
-  The M Developer Preview runs from May 27 until the final Android M SDK, which
+  The M Developer Preview runs from May 28 until the final Android M SDK, which
   we’ll release shortly before the public release during Q3
   2015.
 </p>
@@ -326,7 +326,7 @@ page.tags="preview", "developer", "android"
 </p>
 
 <h2 id="get_started">
-  How to get started?
+  How to get started
 </h2>
 
 <p>
@@ -336,10 +336,12 @@ page.tags="preview", "developer", "android"
 <ol>
   <li>Review the <a href="{@docRoot}preview/api-overview.html">API Overview</a>
     and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a> to get an
-    idea of what's new and how it affects your apps.
+    idea of what's new and how it affects your apps. In particular, learn about
+    the new <a href="{@docRoot}preview/features/runtime-permissions.html">runtime
+    permissions</a> model, power-saving features, and auto backup.
   </li>
 
-  <li>Setup for testing and development by following the instructions for
+  <li>Set up your environment by following the instructions for
     <a href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
     and configuring test devices.
   </li>
