@@ -508,7 +508,7 @@ public class VoiceInteractor {
     }
 
     /**
-     * Execute an extended command using the trusted system VoiceInteractionService.
+     * Execute a vendor-specific command using the trusted system VoiceInteractionService.
      * This allows an Activity to request additional information from the user needed to
      * complete an action (e.g. booking a table might have several possible times that the
      * user could select from or an app might need the user to agree to a terms of service).

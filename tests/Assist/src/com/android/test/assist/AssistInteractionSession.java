@@ -17,16 +17,13 @@
 package com.android.test.assist;
 
 import android.animation.Animator;
-import android.animation.RevealAnimator;
 import android.animation.ValueAnimator;
 import android.app.VoiceInteractor;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
@@ -105,7 +102,7 @@ public class AssistInteractionSession extends VoiceInteractionSession {
     @Override
     public void onShow(Bundle args, int showFlags) {
         super.onShow(args, showFlags);
-        if ((showFlags & VoiceInteractionService.START_SOURCE_ASSIST_GESTURE) != 0) {
+        if ((showFlags & SHOW_SOURCE_ASSIST_GESTURE) != 0) {
             mBackground.getViewTreeObserver().addOnPreDrawListener(
                     new ViewTreeObserver.OnPreDrawListener() {
                         @Override
