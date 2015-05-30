@@ -796,17 +796,26 @@ public class TelephonyManager {
     public CellLocation getCellLocation() {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null)
+            if (telephony == null) {
+                Rlog.d(TAG, "getCellLocation returning null because telephony is null");
                 return null;
+            }
             Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
-            if (bundle.isEmpty()) return null;
-            CellLocation cl = CellLocation.newFromBundle(bundle);
-            if (cl.isEmpty())
+            if (bundle.isEmpty()) {
+                Rlog.d(TAG, "getCellLocation returning null because bundle is empty");
                 return null;
+            }
+            CellLocation cl = CellLocation.newFromBundle(bundle);
+            if (cl.isEmpty()) {
+                Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty");
+                return null;
+            }
             return cl;
         } catch (RemoteException ex) {
+            Rlog.d(TAG, "getCellLocation returning null due to RemoteException " + ex);
             return null;
         } catch (NullPointerException ex) {
+            Rlog.d(TAG, "getCellLocation returning null due to NullPointerException " + ex);
             return null;
         }
     }
