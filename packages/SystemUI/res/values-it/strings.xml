@@ -316,7 +316,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifiche meno urgenti in basso"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tocca di nuovo per aprire"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Scorri verso l\'alto per sbloccare"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Scorri dall\'icona per accedere al telefono"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Scorri per accedere al telefono"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Scorri dall\'icona per accedere a Voice Assist"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Scorri dall\'icona per accedere alla fotocamera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silenzio totale"</string>
