@@ -33,10 +33,6 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Бардыгын тандоо"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Төмөнкүгө көчүрүү…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Төмөнкүгө жылдыруу..."</string>
-    <!-- no translation found for menu_copy_to_clipboard (489311381979634291) -->
-    <skip />
-    <!-- no translation found for menu_paste_from_clipboard (2071583031180257091) -->
-    <skip />
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ички сактагычты көрсөтүү"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD картаны көрсөтүү"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ички эстутумду жашыруу"</string>

@@ -33,8 +33,6 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Избери ги сите"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Копирај во…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Премести во..."</string>
-    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Копирај"</string>
-    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Залепи"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Прикажи внатрешна мемор."</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Прикажи СД-картичка"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Скриј внатрешна меморија"</string>
