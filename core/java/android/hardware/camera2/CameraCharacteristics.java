@@ -1003,12 +1003,33 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Position of the camera optical center.</p>
-     * <p>As measured in the device sensor coordinate system, the
-     * position of the camera device's optical center, as a
-     * three-dimensional vector <code>(x,y,z)</code>.</p>
-     * <p>To transform a world position to a camera-device centered
-     * coordinate system, the position must be translated by this
-     * vector and then rotated by {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}.</p>
+     * <p>The position of the camera device's lens optical center,
+     * as a three-dimensional vector <code>(x,y,z)</code>, relative to the
+     * optical center of the largest camera device facing in the
+     * same direction as this camera, in the {@link android.hardware.SensorEvent Android sensor coordinate
+     * axes}. Note that only the axis definitions are shared with
+     * the sensor coordinate system, but not the origin.</p>
+     * <p>If this device is the largest or only camera device with a
+     * given facing, then this position will be <code>(0, 0, 0)</code>; a
+     * camera device with a lens optical center located 3 cm from
+     * the main sensor along the +X axis (to the right from the
+     * user's perspective) will report <code>(0.03, 0, 0)</code>.</p>
+     * <p>To transform a pixel coordinates between two cameras
+     * facing the same direction, first the source camera
+     * android.lens.radialDistortion must be corrected for.  Then
+     * the source camera android.lens.intrinsicCalibration needs
+     * to be applied, followed by the {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}
+     * of the source camera, the translation of the source camera
+     * relative to the destination camera, the
+     * {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} of the destination camera, and
+     * finally the inverse of android.lens.intrinsicCalibration
+     * of the destination camera. This obtains a
+     * radial-distortion-free coordinate in the destination
+     * camera pixel coordinates.</p>
+     * <p>To compare this against a real image from the destination
+     * camera, the destination camera image then needs to be
+     * corrected for radial distortion before comparison or
+     * sampling.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
