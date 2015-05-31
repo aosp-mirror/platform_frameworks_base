@@ -968,13 +968,20 @@ public final class Call {
         unregisterCallback(listener);
     }
 
-
     /** {@hide} */
     Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = STATE_NEW;
+    }
+
+    /** {@hide} */
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, int state) {
+        mPhone = phone;
+        mTelecomCallId = telecomCallId;
+        mInCallAdapter = inCallAdapter;
+        mState = state;
     }
 
     /** {@hide} */

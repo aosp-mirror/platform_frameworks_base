@@ -122,7 +122,8 @@ public final class Phone {
     }
 
     final void internalAddCall(ParcelableCall parcelableCall) {
-        Call call = new Call(this, parcelableCall.getId(), mInCallAdapter);
+        Call call = new Call(this, parcelableCall.getId(), mInCallAdapter,
+                parcelableCall.getState());
         mCallByTelecomCallId.put(parcelableCall.getId(), call);
         mCalls.add(call);
         checkCallTree(parcelableCall);
