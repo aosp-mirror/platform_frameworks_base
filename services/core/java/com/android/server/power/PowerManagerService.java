@@ -1217,8 +1217,6 @@ public final class PowerManagerService extends SystemService
 
     private void setWakefulnessLocked(int wakefulness, int reason) {
         if (mWakefulness != wakefulness) {
-            finishWakefulnessChangeLocked();
-
             mWakefulness = wakefulness;
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
@@ -1226,10 +1224,14 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void finishWakefulnessChangeLocked() {
-        if (mWakefulnessChanging) {
-            mNotifier.onWakefulnessChangeFinished(mWakefulness);
+    private void finishWakefulnessChangeIfNeededLocked() {
+        if (mWakefulnessChanging && mDisplayReady) {
+            if (mWakefulness == WAKEFULNESS_DOZING
+                    && (mWakeLockSummary & WAKE_LOCK_DOZE) == 0) {
+                return; // wait until dream has enabled dozing
+            }
             mWakefulnessChanging = false;
+            mNotifier.onWakefulnessChangeFinished();
         }
     }
 
@@ -1280,9 +1282,7 @@ public final class PowerManagerService extends SystemService
             updateDreamLocked(dirtyPhase2, displayBecameReady);
 
             // Phase 4: Send notifications, if needed.
-            if (mDisplayReady) {
-                finishWakefulnessChangeLocked();
-            }
+            finishWakefulnessChangeIfNeededLocked();
 
             // Phase 5: Update suspend blocker.
             // Because we might release the last suspend blocker here, we need to make sure
