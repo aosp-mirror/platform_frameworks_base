@@ -94,7 +94,6 @@ public class CallbackHandlerTest extends AndroidTestCase {
     public void testSignalCallback_setMobileDataIndicators() {
         IconState status = new IconState(true, 0, "");
         IconState qs = new IconState(true, 1, "");
-        int dark = 2;
         boolean in = true;
         boolean out = true;
         String typeDescription = "Test 1";
@@ -103,13 +102,12 @@ public class CallbackHandlerTest extends AndroidTestCase {
         int qsType = R.drawable.ic_qs_signal_1x;
         boolean wide = true;
         int subId = 5;
-        mHandler.setMobileDataIndicators(status, qs, dark, type, qsType, in, out, typeDescription,
+        mHandler.setMobileDataIndicators(status, qs, type, qsType, in, out, typeDescription,
                 description, wide, subId);
         waitForCallbacks();
 
         ArgumentCaptor<IconState> statusArg = ArgumentCaptor.forClass(IconState.class);
         ArgumentCaptor<IconState> qsArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<Integer> darkStrengthArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> qsTypeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> inArg = ArgumentCaptor.forClass(Boolean.class);
@@ -118,13 +116,12 @@ public class CallbackHandlerTest extends AndroidTestCase {
         ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Boolean> wideArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Integer> subIdArg = ArgumentCaptor.forClass(Integer.class);
-        Mockito.verify(mSignalCallback).setMobileDataIndicators(statusArg.capture(), qsArg.capture(),
-                darkStrengthArg.capture(), typeIconArg.capture(), qsTypeIconArg.capture(),
-                inArg.capture(), outArg.capture(), typeContentArg.capture(), descArg.capture(),
-                wideArg.capture(), subIdArg.capture());
+        Mockito.verify(mSignalCallback).setMobileDataIndicators(statusArg.capture(),
+                qsArg.capture(), typeIconArg.capture(), qsTypeIconArg.capture(), inArg.capture(),
+                outArg.capture(), typeContentArg.capture(), descArg.capture(), wideArg.capture(),
+                subIdArg.capture());
         assertEquals(status, statusArg.getValue());
         assertEquals(qs, qsArg.getValue());
-        assertEquals(dark, (int) darkStrengthArg.getValue());
         assertEquals(type, (int) typeIconArg.getValue());
         assertEquals(qsType, (int) qsTypeIconArg.getValue());
         assertEquals(in, (boolean) inArg.getValue());
