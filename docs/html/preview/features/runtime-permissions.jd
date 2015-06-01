@@ -129,12 +129,12 @@ page.image=images/permissions_check.png
     that they need to grant that permission.
   </li>
 
-  <div class="figure" style="width:220px">
-    <img src="images/app-permissions-screen.png" srcset=
-    "images/app-permissions-screen@2x.png 2x" alt="" width="220" height=
-    "375">
+  <div class="figure" style="width:220px" id="fig-perms-screen">
+    <img src="images/app-permissions-screen_2x.png"
+    srcset="images/app-permissions-screen.png 1x, images/app-permissions-screen_2x.png 2x"
+    alt="" width="220">
     <p class="img-caption">
-      <strong>Figure 2.</strong> Permission screen in the app's Settings.
+      <strong>Figure 1.</strong> Permission screen in the app's Settings.
     </p>
   </div>
 
