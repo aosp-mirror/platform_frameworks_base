@@ -189,11 +189,6 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mBootCompleted;
     private boolean mBootSendUserPresent;
 
-    // Whether the next call to playSounds() should be skipped.  Defaults to
-    // true because the first lock (on boot) should be silent.
-    private boolean mSuppressNextLockSound = true;
-
-
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
 
@@ -256,7 +251,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private KeyguardUpdateMonitor mUpdateMonitor;
 
-    private boolean mScreenOn;
+    private boolean mDeviceInteractive;
 
     // last known state of the cellular connection
     private String mPhoneState = TelephonyManager.EXTRA_STATE_IDLE;
@@ -307,6 +302,18 @@ public class KeyguardViewMediator extends SystemUI {
 
     private final ArrayList<IKeyguardStateCallback> mKeyguardStateCallbacks = new ArrayList<>();
 
+    /**
+     * When starting going to sleep, we figured out that we need to reset Keyguard state and this
+     * should be committed when finished going to sleep.
+     */
+    private boolean mPendingReset;
+
+    /**
+     * When starting goign to sleep, we figured out that we need to lock Keyguard and this should be
+     * committed when finished going to sleep.
+     */
+    private boolean mPendingLock;
+
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -342,7 +349,7 @@ public class KeyguardViewMediator extends SystemUI {
         public void onPhoneStateChanged(int phoneState) {
             synchronized (KeyguardViewMediator.this) {
                 if (TelephonyManager.CALL_STATE_IDLE == phoneState  // call ending
-                        && !mScreenOn                           // screen off
+                        && !mDeviceInteractive                           // screen off
                         && mExternallyEnabled) {                // not disabled by any app
 
                     // note: this is a way to gracefully reenable the keyguard when the call
@@ -518,7 +525,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public boolean isScreenOn() {
-            return mScreenOn;
+            return mDeviceInteractive;
         }
     };
 
@@ -555,7 +562,7 @@ public class KeyguardViewMediator extends SystemUI {
                 mViewMediatorCallback, mLockPatternUtils);
         final ContentResolver cr = mContext.getContentResolver();
 
-        mScreenOn = mPM.isScreenOn();
+        mDeviceInteractive = mPM.isInteractive();
 
         mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
         String soundPath = Settings.Global.getString(cr, Settings.Global.LOCK_SOUND);
@@ -618,23 +625,18 @@ public class KeyguardViewMediator extends SystemUI {
      * @param why either {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
      *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
-    public void onScreenTurnedOff(int why) {
+    public void onStartedGoingToSleep(int why) {
+        if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + why + ")");
         synchronized (this) {
-            mScreenOn = false;
-            if (DEBUG) Log.d(TAG, "onScreenTurnedOff(" + why + ")");
-
-            resetKeyguardDonePendingLocked();
-            mHideAnimationRun = false;
+            mDeviceInteractive = false;
 
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
             // camera while preventing unwanted input.
             int currentUser = KeyguardUpdateMonitor.getCurrentUser();
             final boolean lockImmediately =
-                mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
-                        || !mLockPatternUtils.isSecure(currentUser);
-
-            notifyScreenOffLocked();
+                    mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
+                            || !mLockPatternUtils.isSecure(currentUser);
 
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
@@ -648,12 +650,37 @@ public class KeyguardViewMediator extends SystemUI {
                     hideLocked();
                 }
             } else if (mShowing) {
-                resetStateLocked();
+                mPendingReset = true;
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
-                   || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
+                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
                 doKeyguardLaterLocked();
-            } else {
+            } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
+                mPendingLock = true;
+            }
+
+            if (mPendingLock || mPendingReset) {
+                playSounds(true);
+            }
+        }
+    }
+
+    public void onFinishedGoingToSleep(int why) {
+        if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + why + ")");
+        synchronized (this) {
+            mDeviceInteractive = false;
+
+            resetKeyguardDonePendingLocked();
+            mHideAnimationRun = false;
+
+            notifyScreenOffLocked();
+
+            if (mPendingReset) {
+                resetStateLocked();
+                mPendingReset = false;
+            }
+            if (mPendingLock) {
                 doKeyguardLocked(null);
+                mPendingLock = false;
             }
         }
         KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurnedOff(why);
@@ -691,7 +718,6 @@ public class KeyguardViewMediator extends SystemUI {
 
         if (timeout <= 0) {
             // Lock now
-            mSuppressNextLockSound = true;
             doKeyguardLocked(null);
         } else {
             // Lock in the future
@@ -711,13 +737,15 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     /**
-     * Let's us know the screen was turned on.
+     * Let's us know when the device is waking up.
      */
-    public void onScreenTurnedOn(IKeyguardShowCallback callback) {
+    public void onStartedWakingUp(IKeyguardShowCallback callback) {
+
+        // TODO: Rename all screen off/on references to interactive/sleeping
         synchronized (this) {
-            mScreenOn = true;
+            mDeviceInteractive = true;
             cancelDoKeyguardLaterLocked();
-            if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
+            if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
             if (callback != null) {
                 notifyScreenOnLocked(callback);
             }
@@ -742,7 +770,8 @@ public class KeyguardViewMediator extends SystemUI {
      */
     public void onDreamingStarted() {
         synchronized (this) {
-            if (mScreenOn && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
+            if (mDeviceInteractive
+                    && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
                 doKeyguardLaterLocked();
             }
         }
@@ -753,7 +782,7 @@ public class KeyguardViewMediator extends SystemUI {
      */
     public void onDreamingStopped() {
         synchronized (this) {
-            if (mScreenOn) {
+            if (mDeviceInteractive) {
                 cancelDoKeyguardLaterLocked();
             }
         }
@@ -1108,8 +1137,6 @@ public class KeyguardViewMediator extends SystemUI {
                         + sequence + ", mDelayedShowingSequence = " + mDelayedShowingSequence);
                 synchronized (KeyguardViewMediator.this) {
                     if (mDelayedShowingSequence == sequence) {
-                        // Don't play lockscreen SFX if the screen went off due to timeout.
-                        mSuppressNextLockSound = true;
                         doKeyguardLocked(null);
                     }
                 }
@@ -1260,13 +1287,6 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void playSounds(boolean locked) {
-        // User feedback for keyguard.
-
-        if (mSuppressNextLockSound) {
-            mSuppressNextLockSound = false;
-            return;
-        }
-
         playSound(locked ? mLockSoundId : mUnlockSoundId);
     }
 
@@ -1291,9 +1311,6 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void playTrustedSound() {
-        if (mSuppressNextLockSound) {
-            return;
-        }
         playSound(mTrustedSoundId);
     }
 
@@ -1325,9 +1342,6 @@ public class KeyguardViewMediator extends SystemUI {
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             userActivity();
-
-            // Do this at the end to not slow down display of the keyguard.
-            playSounds(true);
 
             mShowKeyguardWakeLock.release();
         }

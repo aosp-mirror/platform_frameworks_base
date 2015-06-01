@@ -56,10 +56,8 @@ public class KeyguardServiceDelegate {
         boolean systemIsReady;
         boolean deviceHasKeyguard;
         public boolean enabled;
-        public boolean dismissable;
         public int offReason;
         public int currentUser;
-        public boolean screenIsOn;
         public boolean bootCompleted;
     };
 
@@ -138,7 +136,7 @@ public class KeyguardServiceDelegate {
                 // If the system is ready, it means keyguard crashed and restarted.
                 mKeyguardService.onSystemReady();
                 // This is used to hide the scrim once keyguard displays.
-                mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(
+                mKeyguardService.onStartedWakingUp(new KeyguardShowDelegate(
                         mShowListenerWhenConnect));
                 mShowListenerWhenConnect = null;
             }
@@ -218,10 +216,10 @@ public class KeyguardServiceDelegate {
         mKeyguardState.dreaming = false;
     }
 
-    public void onScreenTurnedOn(final ShowListener showListener) {
+    public void onStartedWakingUp(final ShowListener showListener) {
         if (mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "onScreenTurnedOn(showListener = " + showListener + ")");
-            mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(showListener));
+            mKeyguardService.onStartedWakingUp(new KeyguardShowDelegate(showListener));
         } else {
             // try again when we establish a connection
             Slog.w(TAG, "onScreenTurnedOn(): no keyguard service!");
@@ -230,15 +228,19 @@ public class KeyguardServiceDelegate {
             mShowListenerWhenConnect = showListener;
             showScrim();
         }
-        mKeyguardState.screenIsOn = true;
     }
 
-    public void onScreenTurnedOff(int why) {
+    public void onStartedGoingToSleep(int why) {
         if (mKeyguardService != null) {
-            mKeyguardService.onScreenTurnedOff(why);
+            mKeyguardService.onStartedGoingToSleep(why);
         }
         mKeyguardState.offReason = why;
-        mKeyguardState.screenIsOn = false;
+    }
+
+    public void onFinishedGoingToSleep(int why) {
+        if (mKeyguardService != null) {
+            mKeyguardService.onFinishedGoingToSleep(why);
+        }
     }
 
     public void setKeyguardEnabled(boolean enabled) {
