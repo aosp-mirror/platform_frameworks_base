@@ -739,14 +739,16 @@ class TextLine {
 
         float ret = 0;
 
+        int contextLen = contextEnd - contextStart;
         if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor != 0 || runIsRtl))) {
             if (mCharsValid) {
-                ret = wp.getRunAdvance(mChars, start, contextEnd, contextStart, contextEnd,
-                        runIsRtl, end);
+                ret = wp.getTextRunAdvances(mChars, start, runLen,
+                        contextStart, contextLen, runIsRtl, null, 0);
             } else {
                 int delta = mStart;
-                ret = wp.getRunAdvance(mText, delta + start, delta + contextEnd,
-                        delta + contextStart, delta + contextEnd, runIsRtl, delta + end);
+                ret = wp.getTextRunAdvances(mText, delta + start,
+                        delta + end, delta + contextStart, delta + contextEnd,
+                        runIsRtl, null, 0);
             }
         }
 

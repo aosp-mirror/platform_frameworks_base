@@ -1121,7 +1121,6 @@ public abstract class Layout {
      * closest to the specified horizontal position.
      */
     public int getOffsetForHorizontal(int line, float horiz) {
-        // TODO: use Paint.getOffsetForAdvance to avoid binary search
         int max = getLineEnd(line) - 1;
         int min = getLineStart(line);
         Directions dirs = getLineDirections(line);
