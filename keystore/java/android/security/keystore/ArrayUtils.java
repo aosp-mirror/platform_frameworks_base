@@ -32,6 +32,10 @@ public abstract class ArrayUtils {
         return ((array != null) && (array.length > 0)) ? array.clone() : array;
     }
 
+    public static byte[] cloneIfNotEmpty(byte[] array) {
+        return ((array != null) && (array.length > 0)) ? array.clone() : array;
+    }
+
     public static byte[] concat(byte[] arr1, byte[] arr2) {
         return concat(arr1, 0, (arr1 != null) ? arr1.length : 0,
                 arr2, 0, (arr2 != null) ? arr2.length : 0);
