@@ -129,7 +129,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPatternView);
         mLockPatternView.setSaveEnabled(false);
-        mLockPatternView.setFocusable(false);
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
 
         // stealth mode will be the same for the life of this screen
@@ -139,9 +138,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
-        setFocusableInTouchMode(true);
-
-        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        mSecurityMessageDisplay = KeyguardMessageArea.findSecurityMessageDisplay(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         mContainer = (ViewGroup) findViewById(R.id.container);
         mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
