@@ -253,6 +253,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
     private final TrustedTime mTime;
+    private final UserManager mUserManager;
 
     private IConnectivityManager mConnManager;
     private INotificationManager mNotifManager;
@@ -336,6 +337,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
                 DeviceIdleController.SERVICE_NAME));
         mTime = checkNotNull(time, "missing TrustedTime");
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
         HandlerThread thread = new HandlerThread(TAG);
         thread.start();
@@ -1986,7 +1988,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
      */
     void updateRulesForGlobalChangeLocked(boolean restrictedNetworksChanged) {
         final PackageManager pm = mContext.getPackageManager();
-        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
         // If we are in restrict power mode, we allow all important apps
         // to have data access.  Otherwise, we restrict data access to only
@@ -1996,7 +1997,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                 : ActivityManager.PROCESS_STATE_TOP;
 
         // update rules for all installed applications
-        final List<UserInfo> users = um.getUsers();
+        final List<UserInfo> users = mUserManager.getUsers();
         final List<ApplicationInfo> apps = pm.getInstalledApplications(
                 PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS);
 
@@ -2353,6 +2354,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     public void factoryReset(String subscriber) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
+        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_NETWORK_RESET)) {
+            return;
+        }
+
         // Turn mobile data limit off
         NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
         NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriber);
@@ -2368,9 +2373,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         // Turn restrict background data off
         setRestrictBackground(false);
 
-        // Remove app's "restrict background data" flag
-        for (int uid : getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND)) {
-            setUidPolicy(uid, POLICY_NONE);
+        if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_APPS_CONTROL)) {
+            // Remove app's "restrict background data" flag
+            for (int uid : getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND)) {
+                setUidPolicy(uid, POLICY_NONE);
+            }
         }
     }
 }
