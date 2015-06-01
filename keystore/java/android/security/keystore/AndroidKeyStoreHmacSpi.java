@@ -128,9 +128,9 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
         mKey = null;
         IBinder operationToken = mOperationToken;
         if (operationToken != null) {
-            mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
+        mOperationToken = null;
         mOperationHandle = 0;
         mChunkedStreamer = null;
     }
@@ -138,9 +138,9 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
     private void resetWhilePreservingInitState() {
         IBinder operationToken = mOperationToken;
         if (operationToken != null) {
-            mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
+        mOperationToken = null;
         mOperationHandle = 0;
         mChunkedStreamer = null;
     }
