@@ -258,7 +258,7 @@ public class DateUtils
      * Returns a string describing 'time' as a time relative to 'now'.
      * <p>
      * Time spans in the past are formatted like "42 minutes ago".
-     * Time spans in the future are formatted like "in 42 minutes".
+     * Time spans in the future are formatted like "In 42 minutes".
      *
      * @param time the time to describe, in milliseconds
      * @param now the current time in milliseconds
@@ -275,7 +275,7 @@ public class DateUtils
      * Returns a string describing 'time' as a time relative to 'now'.
      * <p>
      * Time spans in the past are formatted like "42 minutes ago". Time spans in
-     * the future are formatted like "in 42 minutes".
+     * the future are formatted like "In 42 minutes".
      * <p>
      * Can use {@link #FORMAT_ABBREV_RELATIVE} flag to use abbreviated relative
      * times, like "42 mins ago".
