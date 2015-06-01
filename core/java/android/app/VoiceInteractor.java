@@ -262,9 +262,9 @@ public class VoiceInteractor {
 
         /**
          * Create a new confirmation request.
-         * @param prompt Optional confirmation text to read to the user as the action being
-         * confirmed.
-         * @param extras Additional optional information.
+         * @param prompt Optional confirmation to speak to the user or null if nothing
+         *     should be spoken.
+         * @param extras Additional optional information or null.
          */
         public ConfirmationRequest(CharSequence prompt, Bundle extras) {
             mPrompt = prompt;
@@ -305,7 +305,7 @@ public class VoiceInteractor {
              * Creates an option that a user can select with their voice by matching the label
              * or one of several synonyms.
              * @param label The label that will both be matched against what the user speaks
-             * and displayed visually.
+             *     and displayed visually.
              */
             public Option(CharSequence label) {
                 mLabel = label;
@@ -316,10 +316,10 @@ public class VoiceInteractor {
              * Creates an option that a user can select with their voice by matching the label
              * or one of several synonyms.
              * @param label The label that will both be matched against what the user speaks
-             * and displayed visually.
+             *     and displayed visually.
              * @param index The location of this option within the overall set of options.
-             * Can be used to help identify the option when it is returned from the
-             * voice interactor.
+             *     Can be used to help identify the option when it is returned from the
+             *     voice interactor.
              */
             public Option(CharSequence label, int index) {
                 mLabel = label;
@@ -330,7 +330,7 @@ public class VoiceInteractor {
              * Add a synonym term to the option to indicate an alternative way the content
              * may be matched.
              * @param synonym The synonym that will be matched against what the user speaks,
-             * but not displayed.
+             *     but not displayed.
              */
             public Option addSynonym(CharSequence synonym) {
                 if (mSynonyms == null) {
@@ -412,9 +412,10 @@ public class VoiceInteractor {
 
         /**
          * Create a new pick option request.
-         * @param prompt Optional question to be spoken to the user via text to speech.
+         * @param prompt Optional question to be asked of the user when the options are
+         *     presented or null if nothing should be asked.
          * @param options The set of {@link Option}s the user is selecting from.
-         * @param extras Additional optional information.
+         * @param extras Additional optional information or null.
          */
         public PickOptionRequest(CharSequence prompt, Option[] options, Bundle extras) {
             mPrompt = prompt;
@@ -425,10 +426,10 @@ public class VoiceInteractor {
         /**
          * Called when a single option is confirmed or narrowed to one of several options.
          * @param finished True if the voice interaction has finished making a selection, in
-         * which case {@code selections} contains the final result.  If false, this request is
-         * still active and you will continue to get calls on it.
+         *     which case {@code selections} contains the final result.  If false, this request is
+         *     still active and you will continue to get calls on it.
          * @param selections Either a single {@link Option} or one of several {@link Option}s the
-         * user has narrowed the choices down to.
+         *     user has narrowed the choices down to.
          * @param result Additional optional information.
          */
         public void onPickOptionResult(boolean finished, Option[] selections, Bundle result) {
@@ -455,8 +456,9 @@ public class VoiceInteractor {
 
         /**
          * Create a new completed voice interaction request.
-         * @param message Optional message to tell user about the completion status of the task.
-         * @param extras Additional optional information.
+         * @param message Optional message to speak to the user about the completion status of
+         *     the task or null if nothing should be spoken.
+         * @param extras Additional optional information or null.
          */
         public CompleteVoiceRequest(CharSequence message, Bundle extras) {
             mMessage = message;
@@ -489,9 +491,9 @@ public class VoiceInteractor {
 
         /**
          * Create a new voice abort request.
-         * @param message Optional message to tell user about not being able to complete
-         * the interaction with voice.
-         * @param extras Additional optional information.
+         * @param message Optional message to speak to the user indicating why the task could
+         *     not be completed by voice or null if nothing should be spoken.
+         * @param extras Additional optional information or null.
          */
         public AbortVoiceRequest(CharSequence message, Bundle extras) {
             mMessage = message;
@@ -631,10 +633,11 @@ public class VoiceInteractor {
     /**
      * Queries the supported commands available from the VoiceinteractionService.
      * The command is a string that describes the generic operation to be performed.
-     * An example might be "com.google.voice.commands.REQUEST_NUMBER_BAGS" to request the number
-     * of bags as part of airline check-in.  (This is not an actual working example.)
+     * An example might be "org.example.commands.PICK_DATE" to ask the user to pick
+     * a date.  (Note: This is not an actual working example.)
      *
-     * @param commands
+     * @param commands The array of commands to query for support.
+     * @return Array of booleans indicating whether each command is supported or not.
      */
     public boolean[] supportsCommands(String[] commands) {
         try {
