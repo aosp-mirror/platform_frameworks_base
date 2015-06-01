@@ -220,9 +220,9 @@ static void agps_status_callback(AGpsStatus* agps_status)
       case AF_INET:
           {
             struct sockaddr_in *in = (struct sockaddr_in*)&(agps_status->addr);
-            uint32_t *pAddr = (uint32_t*)&(in->sin_addr);
-            byteArray = convert_to_ipv4(*pAddr, true /* net_order */);
-            if (byteArray != NULL) {
+            uint32_t ipAddr = *(uint32_t*)&(in->sin_addr);
+            byteArray = convert_to_ipv4(ipAddr, true /* net_order */);
+            if (ipAddr == INADDR_NONE || byteArray != NULL) {
                 isSupported = true;
             }
             IF_ALOGD() {
