@@ -35,7 +35,7 @@ import static com.android.internal.util.Preconditions.*;
  */
 public class GLThreadManager {
     private final String TAG;
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     private static final int MSG_NEW_CONFIGURATION = 1;
     private static final int MSG_NEW_FRAME = 2;

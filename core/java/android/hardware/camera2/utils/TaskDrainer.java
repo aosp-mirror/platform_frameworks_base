@@ -52,7 +52,7 @@ public class TaskDrainer<T> {
     }
 
     private static final String TAG = "TaskDrainer";
-    private final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private final boolean DEBUG = false;
 
     private final Handler mHandler;
     private final DrainListener mListener;
@@ -110,7 +110,7 @@ public class TaskDrainer<T> {
      */
     public void taskStarted(T task) {
         synchronized (mLock) {
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG + "[" + mName + "]", "taskStarted " + task);
             }
 
@@ -141,7 +141,7 @@ public class TaskDrainer<T> {
      */
     public void taskFinished(T task) {
         synchronized (mLock) {
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG + "[" + mName + "]", "taskFinished " + task);
             }
 
@@ -163,7 +163,7 @@ public class TaskDrainer<T> {
     public void beginDrain() {
         synchronized (mLock) {
             if (!mDraining) {
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG + "[" + mName + "]", "beginDrain started");
                 }
 
@@ -172,7 +172,7 @@ public class TaskDrainer<T> {
                 // If all tasks that had started had already finished by now, fire #onDrained
                 checkIfDrainFinished();
             } else {
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG + "[" + mName + "]", "beginDrain ignored");
                 }
             }
@@ -190,7 +190,7 @@ public class TaskDrainer<T> {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG + "[" + mName + "]", "onDrained");
                 }
 

@@ -38,7 +38,7 @@ import static android.hardware.camera2.marshal.MarshalHelpers.*;
 public class MarshalQueryableEnum<T extends Enum<T>> implements MarshalQueryable<T> {
 
     private static final String TAG = MarshalQueryableEnum.class.getSimpleName();
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private static final int UINT8_MIN = 0x0;
     private static final int UINT8_MAX = (1 << Byte.SIZE) - 1;
@@ -110,7 +110,7 @@ public class MarshalQueryableEnum<T extends Enum<T>> implements MarshalQueryable
                 Class<?> typeClass = (Class<?>)managedType.getType();
 
                 if (typeClass.isEnum()) {
-                    if (VERBOSE) {
+                    if (DEBUG) {
                         Log.v(TAG, "possible enum detected for " + typeClass);
                     }
 
@@ -151,7 +151,7 @@ public class MarshalQueryableEnum<T extends Enum<T>> implements MarshalQueryable
                     "Expected values array to be the same size as the enumTypes values "
                             + values.length + " for type " + enumType);
         }
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "Registered enum values for type " + enumType + " values");
         }
 
