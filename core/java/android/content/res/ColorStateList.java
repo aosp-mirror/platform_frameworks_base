@@ -382,6 +382,14 @@ public class ColorStateList implements Parcelable {
                     defaultAlphaMod = 1.0f;
                 }
 
+                // Extract the theme attributes, if any, before attempting to
+                // read from the typed array. This prevents a crash if we have
+                // unresolved attrs.
+                themeAttrsList[i] = a.extractThemeAttrs(themeAttrsList[i]);
+                if (themeAttrsList[i] != null) {
+                    hasUnresolvedAttrs = true;
+                }
+
                 final int baseColor = a.getColor(
                         R.styleable.ColorStateListItem_color, mColors[i]);
                 final float alphaMod = a.getFloat(
@@ -390,12 +398,6 @@ public class ColorStateList implements Parcelable {
 
                 // Account for any configuration changes.
                 mChangingConfigurations |= a.getChangingConfigurations();
-
-                // Extract the theme attributes, if any.
-                themeAttrsList[i] = a.extractThemeAttrs(themeAttrsList[i]);
-                if (themeAttrsList[i] != null) {
-                    hasUnresolvedAttrs = true;
-                }
 
                 a.recycle();
             }
