@@ -18,6 +18,7 @@ package android.hardware.camera2.impl;
 
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -35,17 +36,22 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.LongParcelable;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Range;
 import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -326,7 +332,8 @@ public class CameraDeviceImpl extends CameraDevice {
         for (Surface s : outputs) {
             outputConfigs.add(new OutputConfiguration(s));
         }
-        configureStreamsChecked(/*inputConfig*/null, outputConfigs);
+        configureStreamsChecked(/*inputConfig*/null, outputConfigs,
+                /*isConstrainedHighSpeed*/false);
 
     }
 
@@ -344,12 +351,14 @@ public class CameraDeviceImpl extends CameraDevice {
      *
      * @param inputConfig input configuration or {@code null} for no input
      * @param outputs a list of one or more surfaces, or {@code null} to unconfigure
+     * @param isConstrainedHighSpeed If the streams configuration is for constrained high speed output.
      * @return whether or not the configuration was successful
      *
      * @throws CameraAccessException if there were any unexpected problems during configuration
      */
     public boolean configureStreamsChecked(InputConfiguration inputConfig,
-            List<OutputConfiguration> outputs) throws CameraAccessException {
+            List<OutputConfiguration> outputs, boolean isConstrainedHighSpeed)
+                    throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
             outputs = new ArrayList<OutputConfiguration>();
@@ -422,7 +431,7 @@ public class CameraDeviceImpl extends CameraDevice {
                 }
 
                 try {
-                    mRemoteDevice.endConfigure();
+                    mRemoteDevice.endConfigure(isConstrainedHighSpeed);
                 }
                 catch (IllegalArgumentException e) {
                     // OK. camera service can reject stream config if it's not supported by HAL
@@ -463,7 +472,8 @@ public class CameraDeviceImpl extends CameraDevice {
         for (Surface surface : outputs) {
             outConfigurations.add(new OutputConfiguration(surface));
         }
-        createCaptureSessionInternal(null, outConfigurations, callback, handler);
+        createCaptureSessionInternal(null, outConfigurations, callback, handler,
+                /*isConstrainedHighSpeed*/false);
     }
 
     @Override
@@ -475,7 +485,8 @@ public class CameraDeviceImpl extends CameraDevice {
             Log.d(TAG, "createCaptureSessionByOutputConfiguration");
         }
 
-        createCaptureSessionInternal(null, outputConfigurations, callback, handler);
+        createCaptureSessionInternal(null, outputConfigurations, callback, handler,
+                /*isConstrainedHighSpeed*/false);
     }
 
     @Override
@@ -494,19 +505,25 @@ public class CameraDeviceImpl extends CameraDevice {
         for (Surface surface : outputs) {
             outConfigurations.add(new OutputConfiguration(surface));
         }
-        createCaptureSessionInternal(inputConfig, outConfigurations, callback, handler);
+        createCaptureSessionInternal(inputConfig, outConfigurations, callback, handler,
+                /*isConstrainedHighSpeed*/false);
     }
 
     private void createCaptureSessionInternal(InputConfiguration inputConfig,
             List<OutputConfiguration> outputConfigurations,
-            CameraCaptureSession.StateCallback callback, Handler handler)
-            throws CameraAccessException {
+            CameraCaptureSession.StateCallback callback, Handler handler,
+            boolean isConstrainedHighSpeed) throws CameraAccessException {
         synchronized(mInterfaceLock) {
             if (DEBUG) {
                 Log.d(TAG, "createCaptureSessionInternal");
             }
 
             checkIfCameraClosedOrInError();
+
+            if (isConstrainedHighSpeed && inputConfig != null) {
+                throw new IllegalArgumentException("Constrained high speed session doesn't support"
+                        + " input configuration yet.");
+            }
 
             // Notify current session that it's going away, before starting camera operations
             // After this call completes, the session is not allowed to call into CameraDeviceImpl
@@ -520,7 +537,8 @@ public class CameraDeviceImpl extends CameraDevice {
             Surface input = null;
             try {
                  // configure streams and then block until IDLE
-                configureSuccess = configureStreamsChecked(inputConfig, outputConfigurations);
+                configureSuccess = configureStreamsChecked(inputConfig, outputConfigurations,
+                        isConstrainedHighSpeed);
                 if (inputConfig != null) {
                     input = new Surface();
                     mRemoteDevice.getInputSurface(/*out*/input);
@@ -545,7 +563,7 @@ public class CameraDeviceImpl extends CameraDevice {
             CameraCaptureSessionImpl newSession =
                     new CameraCaptureSessionImpl(mNextSessionId++, input,
                             outSurfaces, callback, handler, this, mDeviceHandler,
-                            configureSuccess);
+                            configureSuccess, isConstrainedHighSpeed);
 
             // TODO: wait until current session closes, then create the new session
             mCurrentSession = newSession;
@@ -1907,17 +1925,156 @@ public class CameraDeviceImpl extends CameraDevice {
         return mCharacteristics;
     }
 
+    private void checkConstrainedHighSpeedSurfaces(Collection<Surface> surfaces,
+            Range<Integer> fpsRange) {
+        if (surfaces == null || surfaces.size() == 0 || surfaces.size() > 2) {
+            throw new IllegalArgumentException("Output target surface list must not be null and"
+                    + " the size must be 1 or 2");
+        }
+
+        StreamConfigurationMap config =
+                getCharacteristics().get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        List<Size> highSpeedSizes = null;
+        if (fpsRange == null) {
+            highSpeedSizes = Arrays.asList(config.getHighSpeedVideoSizes());
+        } else {
+            // Check the FPS range first if provided
+            Range<Integer>[] highSpeedFpsRanges = config.getHighSpeedVideoFpsRanges();
+            if(!Arrays.asList(highSpeedFpsRanges).contains(fpsRange)) {
+                throw new IllegalArgumentException("Fps range " + fpsRange.toString() + " in the"
+                        + " request is not a supported high speed fps range " +
+                        Arrays.toString(highSpeedFpsRanges));
+            }
+            highSpeedSizes = Arrays.asList(config.getHighSpeedVideoSizesFor(fpsRange));
+        }
+
+        for (Surface surface : surfaces) {
+            // Surface size must be supported high speed sizes.
+            Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
+            int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
+
+            if (surfaceFormat != ImageFormat.PRIVATE) {
+                throw new IllegalArgumentException("Surface format is not for preview or"
+                        + " hardware video encoding" + surfaceFormat);
+            }
+
+            if (!highSpeedSizes.contains(surfaceSize)) {
+                throw new IllegalArgumentException("Surface size " + surfaceSize.toString() + " is"
+                        + " not part of the high speed supported size list " +
+                        Arrays.toString(highSpeedSizes.toArray()));
+            }
+            // Each output surface must be either preview surface or recording surface.
+            if (!SurfaceUtils.isSurfaceForPreview(surface) &&
+                    !SurfaceUtils.isSurfaceForHwVideoEncoder(surface)) {
+                throw new IllegalArgumentException("This output surface is neither preview nor "
+                        + "hardware video encoding surface");
+            }
+            if (SurfaceUtils.isSurfaceForPreview(surface) &&
+                    SurfaceUtils.isSurfaceForHwVideoEncoder(surface)) {
+                throw new IllegalArgumentException("This output surface can not be both preview"
+                        + " and hardware video encoding surface");
+            }
+        }
+
+        // For 2 output surface case, they shouldn't be same type.
+        if (surfaces.size() == 2) {
+            // Up to here, each surface can only be either preview or recording.
+            Iterator<Surface> iterator = surfaces.iterator();
+            boolean isFirstSurfacePreview =
+                    SurfaceUtils.isSurfaceForPreview(iterator.next());
+            boolean isSecondSurfacePreview =
+                    SurfaceUtils.isSurfaceForPreview(iterator.next());
+            if (isFirstSurfacePreview == isSecondSurfacePreview) {
+                throw new IllegalArgumentException("The 2 output surfaces must have different"
+                        + " type");
+            }
+        }
+    }
+
     @Override
     public void createConstrainedHighSpeedCaptureSession(List<Surface> outputs,
             android.hardware.camera2.CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException {
-        // TODO: to be implemented
-        throw new UnsupportedOperationException("To be implemented!!!!");
+        if (outputs == null || outputs.size() == 0 || outputs.size() > 2) {
+            throw new IllegalArgumentException(
+                    "Output surface list must not be null and the size must be no more than 2");
+        }
+        checkConstrainedHighSpeedSurfaces(outputs, /*fpsRange*/null);
+
+        List<OutputConfiguration> outConfigurations = new ArrayList<>(outputs.size());
+        for (Surface surface : outputs) {
+            outConfigurations.add(new OutputConfiguration(surface));
+        }
+        createCaptureSessionInternal(null, outConfigurations, callback, handler,
+                /*isConstrainedHighSpeed*/true);
     }
 
     @Override
     public List<CaptureRequest> createConstrainedHighSpeedRequestList(CaptureRequest request)
             throws CameraAccessException {
-        throw new UnsupportedOperationException("To be implemented!!!!");
+        if (request == null) {
+            throw new IllegalArgumentException("Input capture request must not be null");
+        }
+        Collection<Surface> outputSurfaces = request.getTargets();
+        Range<Integer> fpsRange = request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
+        checkConstrainedHighSpeedSurfaces(outputSurfaces, fpsRange);
+
+        // Request list size: to limit the preview to 30fps, need use maxFps/30; to maximize
+        // the preview frame rate, should use maxBatch size for that high speed stream
+        // configuration. We choose the former for now.
+        int requestListSize = fpsRange.getUpper() / 30;
+        List<CaptureRequest> requestList = new ArrayList<CaptureRequest>();
+
+        // Prepare the Request builders: need carry over the request controls.
+        // First, create a request builder that will only include preview or recording target.
+        CameraMetadataNative requestMetadata = new CameraMetadataNative(request.getNativeCopy());
+        CaptureRequest.Builder singleTargetRequestBuilder = new CaptureRequest.Builder(
+                requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
+
+        // Overwrite the capture intent to make sure a good value is set.
+        Surface[] surfaces = (Surface[])outputSurfaces.toArray();
+        if (outputSurfaces.size() == 1 && SurfaceUtils.isSurfaceForHwVideoEncoder(surfaces[0])) {
+            singleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
+        } else {
+            // Video only, or preview + video
+            singleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
+        }
+        singleTargetRequestBuilder.setPartOfCHSRequestList(/*partOfCHSList*/true);
+
+        // Second, Create a request builder that will include both preview and recording targets.
+        CaptureRequest.Builder doubleTargetRequestBuilder = null;
+        if (outputSurfaces.size() == 2) {
+            doubleTargetRequestBuilder = new CaptureRequest.Builder(
+                    requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
+            doubleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
+            doubleTargetRequestBuilder.addTarget(surfaces[0]);
+            doubleTargetRequestBuilder.addTarget(surfaces[1]);
+            doubleTargetRequestBuilder.setPartOfCHSRequestList(/*partOfCHSList*/true);
+            // Make sure singleTargetRequestBuilder contains only recording surface for
+            // preview + recording case.
+            Surface recordingSurface = surfaces[0];
+            if (!SurfaceUtils.isSurfaceForHwVideoEncoder(recordingSurface)) {
+                recordingSurface = surfaces[1];
+            }
+            singleTargetRequestBuilder.addTarget(recordingSurface);
+        } else {
+            // Single output case: either recording or preview.
+            singleTargetRequestBuilder.addTarget(surfaces[0]);
+        }
+
+        // Generate the final request list.
+        for (int i = 0; i < requestListSize; i++) {
+            if (i == 0 && doubleTargetRequestBuilder != null) {
+                // First request should be recording + preview request
+                requestList.add(doubleTargetRequestBuilder.build());
+            } else {
+                requestList.add(singleTargetRequestBuilder.build());
+            }
+        }
+
+        return Collections.unmodifiableList(requestList);
     }
 }

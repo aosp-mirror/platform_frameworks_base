@@ -82,6 +82,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static final int GRALLOC_USAGE_SW_READ_OFTEN = 0x00000003;
     private static final int GRALLOC_USAGE_HW_TEXTURE = 0x00000100;
     private static final int GRALLOC_USAGE_HW_COMPOSER = 0x00000800;
+    private static final int GRALLOC_USAGE_HW_RENDER = 0x00000200;
     private static final int GRALLOC_USAGE_HW_VIDEO_ENCODER = 0x00010000;
 
     public static final int MAX_DIMEN_FOR_ROUNDING = 1080; // maximum allowed width for rounding
@@ -547,6 +548,42 @@ public class LegacyCameraDevice implements AutoCloseable {
         boolean flexibleConsumer = ((usageFlags & disallowedFlags) == 0 &&
                 (usageFlags & allowedFlags) != 0);
         return flexibleConsumer;
+    }
+
+    public static boolean isPreviewConsumer(Surface output) {
+        int usageFlags = detectSurfaceUsageFlags(output);
+        int disallowedFlags = GRALLOC_USAGE_HW_VIDEO_ENCODER | GRALLOC_USAGE_RENDERSCRIPT |
+                GRALLOC_USAGE_SW_READ_OFTEN;
+        int allowedFlags = GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_HW_COMPOSER |
+                GRALLOC_USAGE_HW_RENDER;
+        boolean previewConsumer = ((usageFlags & disallowedFlags) == 0 &&
+                (usageFlags & allowedFlags) != 0);
+        int surfaceFormat = ImageFormat.UNKNOWN;
+        try {
+            surfaceFormat = detectSurfaceType(output);
+        } catch(BufferQueueAbandonedException e) {
+            throw new IllegalArgumentException("Surface was abandoned", e);
+        }
+
+        return previewConsumer && (surfaceFormat == ImageFormat.PRIVATE);
+    }
+
+    public static boolean isVideoEncoderConsumer(Surface output) {
+        int usageFlags = detectSurfaceUsageFlags(output);
+        int disallowedFlags = GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_HW_COMPOSER |
+                GRALLOC_USAGE_RENDERSCRIPT | GRALLOC_USAGE_SW_READ_OFTEN;
+        int allowedFlags = GRALLOC_USAGE_HW_VIDEO_ENCODER;
+        boolean videoEncoderConsumer = ((usageFlags & disallowedFlags) == 0 &&
+                (usageFlags & allowedFlags) != 0);
+
+        int surfaceFormat = ImageFormat.UNKNOWN;
+        try {
+            surfaceFormat = detectSurfaceType(output);
+        } catch(BufferQueueAbandonedException e) {
+            throw new IllegalArgumentException("Surface was abandoned", e);
+        }
+
+        return videoEncoderConsumer && (surfaceFormat == ImageFormat.PRIVATE);
     }
 
     /**

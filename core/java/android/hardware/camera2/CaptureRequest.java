@@ -169,6 +169,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private final HashSet<Surface> mSurfaceSet;
     private final CameraMetadataNative mSettings;
     private boolean mIsReprocess;
+    // If this request is part of constrained high speed request list that was created by
+    // {@link CameraDevice#createConstrainedHighSpeedRequestList}.
+    private boolean mIsPartOfCHSRequestList = false;
     // Each reprocess request must be tied to a reprocessable session ID.
     // Valid only for reprocess requests (mIsReprocess == true).
     private int mReprocessableSessionId;
@@ -197,6 +200,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         mSettings = new CameraMetadataNative(source.mSettings);
         mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
         mIsReprocess = source.mIsReprocess;
+        mIsPartOfCHSRequestList = source.mIsPartOfCHSRequestList;
         mReprocessableSessionId = source.mReprocessableSessionId;
         mUserTag = source.mUserTag;
     }
@@ -318,6 +322,35 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     public boolean isReprocess() {
         return mIsReprocess;
+    }
+
+    /**
+     * <p>Determine if this request is part of a constrained high speed request list that was
+     * created by {@link CameraDevice#createConstrainedHighSpeedRequestList}. A constrained high
+     * speed request list contains some constrained high speed capture requests with certain
+     * interleaved pattern that is suitable for high speed preview/video streaming. An active
+     * constrained high speed capture session only accepts constrained high speed request lists.
+     * This method can be used to do the sanity check when a constrained high speed capture session
+     * receives a request list via {@link CameraCaptureSession#setRepeatingBurst} or
+     * {@link CameraCaptureSession#captureBurst}.
+     * </p>
+     *
+     *
+     * @return {@code true} if this request is part of a constrained high speed request list,
+     * {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean isPartOfCRequestList() {
+        return mIsPartOfCHSRequestList;
+    }
+
+    /**
+     * Returns a copy of the underlying {@link CameraMetadataNative}.
+     * @hide
+     */
+    public CameraMetadataNative getNativeCopy() {
+        return new CameraMetadataNative(mSettings);
     }
 
     /**
@@ -547,6 +580,18 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         }
 
         /**
+         * <p>Mark this request as part of a constrained high speed request list created by
+         * {@link CameraDevice#createConstrainedHighSpeedRequestList}. A constrained high speed
+         * request list contains some constrained high speed capture requests with certain
+         * interleaved pattern that is suitable for high speed preview/video streaming.</p>
+         *
+         * @hide
+         */
+        public void setPartOfCHSRequestList(boolean partOfCHSList) {
+            mRequest.mIsPartOfCHSRequestList = partOfCHSList;
+        }
+
+        /**
          * Build a request using the current target Surfaces and settings.
          * <p>Note that, although it is possible to create a {@code CaptureRequest} with no target
          * {@link Surface}s, passing such a request into {@link CameraCaptureSession#capture},
@@ -562,7 +607,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         public CaptureRequest build() {
             return new CaptureRequest(mRequest);
         }
-
 
         /**
          * @hide
