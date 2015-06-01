@@ -35,6 +35,7 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -57,6 +58,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 public class ZenModePanel extends LinearLayout {
@@ -96,6 +98,7 @@ public class ZenModePanel extends LinearLayout {
     private View mZenIntroductionConfirm;
     private View mZenIntroductionCustomize;
     private LinearLayout mZenConditions;
+    private TextView mZenAlarmWarning;
 
     private Callback mCallback;
     private ZenModeController mController;
@@ -176,6 +179,7 @@ public class ZenModePanel extends LinearLayout {
         });
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
+        mZenAlarmWarning = (TextView) findViewById(R.id.zen_alarm_warning);
     }
 
     @Override
@@ -436,6 +440,40 @@ public class ZenModePanel extends LinearLayout {
                     : R.string.zen_silence_introduction);
             mZenIntroductionCustomize.setVisibility(zenImportant ? VISIBLE : GONE);
         }
+        final String warning = computeAlarmWarningText(zenNone);
+        mZenAlarmWarning.setVisibility(warning != null ? VISIBLE : GONE);
+        mZenAlarmWarning.setText(warning);
+    }
+
+    private String computeAlarmWarningText(boolean zenNone) {
+        if (!zenNone) {
+            return null;
+        }
+        final long now = System.currentTimeMillis();
+        final long nextAlarm = mController.getNextAlarm();
+        if (nextAlarm < now) {
+            return null;
+        }
+        int warningRes = 0;
+        if (mSessionExitCondition == null || isForever(mSessionExitCondition)) {
+            warningRes = R.string.zen_alarm_warning_indef;
+        } else {
+            final long time = ZenModeConfig.tryParseCountdownConditionId(mSessionExitCondition.id);
+            if (time > now && nextAlarm < time) {
+                warningRes = R.string.zen_alarm_warning;
+            }
+        }
+        if (warningRes == 0) {
+            return null;
+        }
+        final boolean soon = (nextAlarm - now) < 24 * 60 * 60 * 1000;
+        final boolean is24 = DateFormat.is24HourFormat(mContext, ActivityManager.getCurrentUser());
+        final String skeleton = soon ? (is24 ? "Hm" : "hma") : (is24 ? "EEEHm" : "EEEhma");
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        final CharSequence formattedTime = DateFormat.format(pattern, nextAlarm);
+        final int templateRes = soon ? R.string.alarm_template : R.string.alarm_template_far;
+        final String template = getResources().getString(templateRes, formattedTime);
+        return getResources().getString(warningRes, template);
     }
 
     private static Condition parseExistingTimeCondition(Context context, Condition condition) {
