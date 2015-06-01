@@ -18,16 +18,19 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * The <code>AudioFormat</code> class is used to access a number of audio format and
+ * The {@link AudioFormat} class is used to access a number of audio format and
  * channel configuration constants. They are for instance used
  * in {@link AudioTrack} and {@link AudioRecord}, as valid values in individual parameters of
  * constructors like {@link AudioTrack#AudioTrack(int, int, int, int, int, int)}, where the fourth
  * parameter is one of the <code>AudioFormat.ENCODING_*</code> constants.
+ * The <code>AudioFormat</code> constants are also used in {@link MediaFormat} to specify
+ * audio related values commonly used in media, such as for {@link MediaFormat#KEY_CHANNEL_MASK}.
  * <p>The {@link AudioFormat.Builder} class can be used to create instances of
  * the <code>AudioFormat</code> format class.
  * Refer to
@@ -39,6 +42,9 @@ import java.util.Arrays;
  * <li><a href="#encoding">encoding</a>
  * <li><a href="#channelMask">channel masks</a>
  * </ol>
+ * <p>Closely associated with the <code>AudioFormat</code> is the notion of an
+ * <a href="#audioFrame">audio frame</a>, which is used throughout the documentation
+ * to represent the minimum size complete unit of audio data.
  *
  * <h4 id="sampleRate">Sample rate</h4>
  * <p>Expressed in Hz, the sample rate in an <code>AudioFormat</code> instance expresses the number
@@ -48,10 +54,69 @@ import java.util.Arrays;
  * can be played on a device operating at a sample rate of 48000Hz; the sample rate conversion is
  * automatically handled by the platform, it will not play at 6x speed.
  *
+ * <p>As of API {@link android.os.Build.VERSION_CODES#MNC},
+ * sample rates up to 192kHz are supported
+ * for <code>AudioRecord</code> and <code>AudioTrack</code>, with sample rate conversion
+ * performed as needed.
+ * To improve efficiency and avoid lossy conversions, it is recommended to match the sample rate
+ * for <code>AudioRecord</code> and <code>AudioTrack</code> to the endpoint device
+ * sample rate, and limit the sample rate to no more than 48kHz unless there are special
+ * device capabilities that warrant a higher rate.
+ *
  * <h4 id="encoding">Encoding</h4>
- * <p>For PCM audio, audio encoding is used to describe the bit representation of an audio data
- * sample; for example, the size as 8 bit, 16 bit, and the representation as integer or float.
- * <br>For compressed formats, audio encoding is used to describe the compression scheme being used.
+ * <p>Audio encoding is used to describe the bit representation of audio data, which can be
+ * either linear PCM or compressed audio, such as AC3 or DTS.
+ * <p>For linear PCM, the audio encoding describes the sample size, 8 bits, 16 bits, or 32 bits,
+ * and the sample representation, integer or float.
+ * <ul>
+ * <li> {@link #ENCODING_PCM_8BIT}: The audio sample is a 8 bit unsigned integer in the
+ * range [0, 255], with a 128 offset for zero. This is typically stored as a Java byte in a
+ * byte array or ByteBuffer. Since the Java byte is <em>signed</em>,
+ * be careful with math operations and conversions as the most significant bit is inverted.
+ * </li>
+ * <li> {@link #ENCODING_PCM_16BIT}: The audio sample is a 16 bit signed integer
+ * typically stored as a Java short in a short array, but when the short
+ * is stored in a ByteBuffer, it is native endian (as compared to the default Java big endian).
+ * The short has full range from [-32768, 32767],
+ * and is sometimes interpreted as fixed point Q.15 data.
+ * </li>
+ * <li> {@link #ENCODING_PCM_FLOAT}: Introduced in
+ * API {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this encoding specifies that
+ * the audio sample is a 32 bit IEEE single precision float. The sample can be
+ * manipulated as a Java float in a float array, though within a ByteBuffer
+ * it is stored in native endian byte order.
+ * The nominal range of <code>ENCODING_PCM_FLOAT</code> audio data is [-1.0, 1.0].
+ * It is implementation dependent whether the positive maximum of 1.0 is included
+ * in the interval. Values outside of the nominal range are clamped before
+ * sending to the endpoint device. Beware that
+ * the handling of NaN is undefined; subnormals may be treated as zero; and
+ * infinities are generally clamped just like other values for <code>AudioTrack</code>
+ * &ndash; try to avoid infinities because they can easily generate a NaN.
+ * <br>
+ * To achieve higher audio bit depth than a signed 16 bit integer short,
+ * it is recommended to use <code>ENCODING_PCM_FLOAT</code> for audio capture, processing,
+ * and playback.
+ * Floats are efficiently manipulated by modern CPUs,
+ * have greater precision than 24 bit signed integers,
+ * and have greater dynamic range than 32 bit signed integers.
+ * <code>AudioRecord</code> as of API {@link android.os.Build.VERSION_CODES#MNC} and
+ * <code>AudioTrack</code> as of API {@link android.os.Build.VERSION_CODES#LOLLIPOP}
+ * support <code>ENCODING_PCM_FLOAT</code>.
+ * </li>
+ * </ul>
+ * <p>For compressed audio, the encoding specifies the method of compression,
+ * for example {@link #ENCODING_AC3} and {@link #ENCODING_DTS}. The compressed
+ * audio data is typically stored as bytes in
+ * a byte array or ByteBuffer. When a compressed audio encoding is specified
+ * for an <code>AudioTrack</code>, it creates a direct (non-mixed) track
+ * for output to an endpoint (such as HDMI) capable of decoding the compressed audio.
+ * For (most) other endpoints, which are not capable of decoding such compressed audio,
+ * you will need to decode the data first, typically by creating a {@link MediaCodec}.
+ * Alternatively, one may use {@link MediaPlayer} for playback of compressed
+ * audio files or streams.
+ * <p>When compressed audio is sent out through a direct <code>AudioTrack</code>,
+ * it need not be written in exact multiples of the audio access unit;
+ * this differs from <code>MediaCodec</code> input buffers.
  *
  * <h4 id="channelMask">Channel mask</h4>
  * <p>Channel masks are used in <code>AudioTrack</code> and <code>AudioRecord</code> to describe
@@ -127,6 +192,22 @@ import java.util.Arrays;
  *  about position it corresponds to, in which case the channel index mask is <code>0xC</code>.
  *  Multichannel <code>AudioRecord</code> sessions should use channel index masks.
  * </ul>
+ * <h4 id="audioFrame">Audio Frame</h4>
+ * <p>For linear PCM, an audio frame consists of a set of samples captured at the same time,
+ * whose count and
+ * channel association are given by the <a href="#channelMask">channel mask</a>,
+ * and whose sample contents are specified by the <a href="#encoding">encoding</a>.
+ * For example, a stereo 16 bit PCM frame consists of
+ * two 16 bit linear PCM samples, with a frame size of 4 bytes.
+ * For compressed audio, an audio frame may alternately
+ * refer to an access unit of compressed data bytes that is logically grouped together for
+ * decoding and bitstream access (e.g. {@link MediaCodec}),
+ * or a single byte of compressed data (e.g. {@link AudioTrack#getBufferSizeInFrames()
+ * AudioTrack.getBufferSizeInFrames()}),
+ * or the linear PCM frame result from decoding the compressed data
+ * (e.g.{@link AudioTrack#getPlaybackHeadPosition()
+ * AudioTrack.getPlaybackHeadPosition()}),
+ * depending on the context where audio frame is used.
  */
 public class AudioFormat {
 
