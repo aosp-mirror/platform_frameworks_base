@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,61 +14,36 @@
      limitations under the License.
 -->
 
-<animated-selector xmlns:android="http://schemas.android.com/apk/res/android" android:constantSize="true">
-    <item android:state_enabled="false" android:state_pressed="true">
-        <bitmap android:src="@drawable/scrubber_control_off_mtrl_alpha" android:gravity="center" android:tint="?attr/colorControlActivated" android:alpha="?attr/disabledAlpha" />
-    </item>
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false">
-        <bitmap android:src="@drawable/scrubber_control_off_mtrl_alpha" android:gravity="center" android:tint="?attr/colorControlNormal" android:alpha="?attr/disabledAlpha" />
+        <shape
+            android:shape="ring"
+            android:innerRadius="2dp"
+            android:thickness="2dp"
+            android:useLevel="false"
+            android:tint="?attr/colorControlNormal"
+            android:opticalInsetLeft="3dp"
+            android:opticalInsetRight="3dp">
+            <solid
+                android:color="#ff000000" />
+            <size
+                android:width="18dp"
+                android:height="18dp" />
+        </shape>
     </item>
-    <item android:state_pressed="true" android:id="@+id/pressed">
-        <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_005" android:gravity="center" android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:id="@+id/not_pressed">
-        <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_000" android:gravity="center" android:tint="?attr/colorControlActivated" />
-    </item>
-    <transition android:fromId="@+id/not_pressed" android:toId="@+id/pressed">
-        <animation-list>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_000" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_001" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_002" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_003" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_004" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_to_pressed_mtrl_005" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-        </animation-list>
-    </transition>
-    <transition android:fromId="@+id/pressed" android:toId="@+id/not_pressed">
-        <animation-list>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_from_pressed_mtrl_000" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_from_pressed_mtrl_001" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_from_pressed_mtrl_002" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_from_pressed_mtrl_003" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_from_pressed_mtrl_004" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/scrubber_control_from_pressed_mtrl_005" android:gravity="center" android:tint="?attr/colorControlActivated" />
-            </item>
-        </animation-list>
-    </transition>
+    <item
+        android:id="@+id/pressed"
+        android:state_pressed="true"
+        android:drawable="@drawable/seekbar_thumb_pressed_to_unpressed" />
+    <item
+        android:id="@+id/unpressed"
+        android:drawable="@drawable/seekbar_thumb_unpressed_to_pressed" />
+    <transition
+        android:fromId="@+id/unpressed"
+        android:toId="@+id/pressed"
+        android:drawable="@drawable/seekbar_thumb_unpressed_to_pressed_animation" />
+    <transition
+        android:fromId="@+id/pressed"
+        android:toId="@+id/unpressed"
+        android:drawable="@drawable/seekbar_thumb_pressed_to_unpressed_animation" />
 </animated-selector>

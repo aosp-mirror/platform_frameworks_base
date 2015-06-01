@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.DashPathEffect;
+import android.graphics.Insets;
 import android.graphics.LinearGradient;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -1107,6 +1108,16 @@ public class GradientDrawable extends Drawable {
         if (tint != null) {
             state.mTint = tint;
         }
+
+        final int insetLeft = a.getDimensionPixelSize(
+                R.styleable.GradientDrawable_opticalInsetLeft, state.mOpticalInsets.left);
+        final int insetTop = a.getDimensionPixelSize(
+                R.styleable.GradientDrawable_opticalInsetTop, state.mOpticalInsets.top);
+        final int insetRight = a.getDimensionPixelSize(
+                R.styleable.GradientDrawable_opticalInsetRight, state.mOpticalInsets.right);
+        final int insetBottom = a.getDimensionPixelSize(
+                R.styleable.GradientDrawable_opticalInsetBottom, state.mOpticalInsets.bottom);
+        state.mOpticalInsets = Insets.of(insetLeft, insetTop, insetRight, insetBottom);
     }
 
     @Override
@@ -1469,6 +1480,12 @@ public class GradientDrawable extends Drawable {
         return mGradientState.mHeight;
     }
 
+    /** @hide */
+    @Override
+    public Insets getOpticalInsets() {
+        return mGradientState.mOpticalInsets;
+    }
+
     @Override
     public ConstantState getConstantState() {
         mGradientState.mChangingConfigurations = getChangingConfigurations();
@@ -1573,6 +1590,7 @@ public class GradientDrawable extends Drawable {
         public int mInnerRadius = -1;
         public int mThickness = -1;
         public boolean mDither = false;
+        public Insets mOpticalInsets = Insets.NONE;
 
         float mCenterX = 0.5f;
         float mCenterY = 0.5f;
@@ -1631,6 +1649,7 @@ public class GradientDrawable extends Drawable {
             mInnerRadius = state.mInnerRadius;
             mThickness = state.mThickness;
             mDither = state.mDither;
+            mOpticalInsets = state.mOpticalInsets;
             mCenterX = state.mCenterX;
             mCenterY = state.mCenterY;
             mGradientRadius = state.mGradientRadius;
