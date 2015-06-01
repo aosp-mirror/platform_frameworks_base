@@ -24,14 +24,13 @@ App</a> training lesson first.</a></p>
 
 <h2 id="get-as13">Get Android Studio 1.3</h2>
 
-<p>The Developer Preview requires Android Studio 1.3, which is in
-preview status. You need
-to install the preview version of Android Studio 1.3 to work with the Preview
-SDK.</p>
+<p>The Developer Preview is best used with Android Studio 1.3, which is in
+preview status. It is highly recommended that you install the preview version of
+Android Studio 1.3 to work with the Preview SDK.</p>
 
 <p class="caution"><strong>Caution:</strong> The canary preview of Android
 Studio 1.3 is still in active development. If you are using your primary development
-machine to test the developer preview, you should create a second installation
+machine to test the developer preview, you can create a second installation
 of Android Studio to use for testing.</p>
 
 <p>To install the Android Studio 1.3 preview:</p>
@@ -41,9 +40,15 @@ of Android Studio to use for testing.</p>
   Studio</a>.
   </li>
 
-  <li>Open the <strong>Settings</strong> window by choosing <strong>File &gt;
-  Settings</strong>. Choose the <strong>Appearance &amp; Behavior &gt; System
-  Settings &gt; Updates</strong> panel.</li>
+  <li>Open the <strong>Settings</strong> window (on Windows, you can do this
+  by choosing <strong>File &gt; Settings</strong>). Choose the
+  <strong>Appearance &amp; Behavior &gt; System
+  Settings &gt; Updates</strong> panel.
+
+    <p class="aside">On OSX, you can find the <strong>Appearance &amp;
+    Behavior</strong> panel
+    in Android Studio's <strong>Preferences</strong> window.</p>
+  </li>
 
   <li> On the <strong>Updates</strong> panel, choose the option
   <strong>Automatically check updates for: Canary Channel</strong>.
@@ -63,18 +68,24 @@ of Android Studio to use for testing.</p>
   <li>Launch the Android Studio 1.3 preview.
   </li>
 
-  <li>Open the <strong>Settings</strong> window by choosing <strong>File &gt;
-  Settings</strong>. Choose the <strong>Appearance &amp; Behavior &gt; System
-  Settings &gt; Updates</strong> panel.</li>
+  <li>Open the <strong>Settings</strong> window (on Windows, you can do this
+  by choosing <strong>File &gt; Settings</strong>). Choose the
+  <strong>Appearance &amp; Behavior &gt; System
+  Settings &gt; Updates</strong> panel.
+
+    <p class="aside">On OSX, you can find the <strong>Appearance &amp;
+    Behavior</strong> panel
+    in Android Studio's <strong>Preferences</strong> window.</p>
+  </li>
 
   <li>On the <strong>Updates</strong> panel, choose the options
   <strong>Automatically check updates for: Canary Channel</strong> and
   <strong>Automatically check updates for Android SDK: Preview Channel</strong>.
   </li>
 
-  <li>Click the <strong>Android SDK Manager</strong> button to launch the SDK
-  Manager. (With Android Studio 1.3, the SDK Manager is integrated into Android
-  Studio instead of being a standalone application.)
+  <li>Launch the <strong>Android SDK Manager</strong>. (With Android Studio 1.3,
+  the SDK Manager is integrated into Android Studio instead of being a
+  standalone application.)
   </li>
 
   <li>Under the <strong>Platforms</strong> section, select <strong>Android MNC
@@ -124,7 +135,8 @@ of Android Studio to use for testing.</p>
 
 <ul>
   <li>Check <strong>Phone and Tablet</strong>.</li>
-  <li>Select <strong>API 22+: Android M (Preview)</strong> in <strong>Minimum SDK</strong>.</li>
+  <li>Select <strong>MNC: Android M (Preview)</strong> in <strong>Minimum
+    SDK</strong>.</li>
 </ul>
 
 
@@ -151,7 +163,7 @@ of Android Studio to use for testing.</p>
   platform for testing. Otherwise, you can configure a virtual device for testing.
 </p>
 
-<h3 id="setup-device">Set up a Physical Device</h3>
+<h3 id="setup-device">Set up a physical device</h3>
 
 <p>
   If you have a Nexus 5, Nexus 6, Nexus 9, or Android TV, you can install a preview
@@ -165,7 +177,7 @@ of Android Studio to use for testing.</p>
   it</em>, so you should backup any data before installing a preview image.
 </p>
 
-<h3 id="setupAVD">Set up a Virtual Device</h3>
+<h3 id="setupAVD">Set up a virtual device</h3>
 
 <p>
   You can set up virtual device with the preview version of the platform from within Android Studio
@@ -182,9 +194,10 @@ of Android Studio to use for testing.</p>
       <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
       Manager</a>. Use the following settings:
     <ul>
-      <li><strong>Device:</strong> Nexus 5, Nexus 6, Nexus 9, or Nexus Player</li>
+      <li><strong>Device:</strong> Nexus 5, Nexus 6, Nexus 9, or Android TV</li>
       <li><strong>Target:</strong>
        Android M (Preview) - API Level M</li>
+      <li><strong>ABI:</strong> x86</li>
     </ul>
   </li>
 </ol>
