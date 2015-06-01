@@ -160,7 +160,7 @@ public class QsTuner extends Fragment implements Callback {
         else if (spec.equals("bt")) return R.string.quick_settings_bluetooth_label;
         else if (spec.equals("inversion")) return R.string.quick_settings_inversion_label;
         else if (spec.equals("cell")) return R.string.quick_settings_cellular_detail_title;
-        else if (spec.equals("airplane")) return R.string.quick_settings_airplane_mode_label;
+        else if (spec.equals("airplane")) return R.string.airplane_mode;
         else if (spec.equals("dnd")) return R.string.quick_settings_dnd_label;
         else if (spec.equals("rotation")) return R.string.quick_settings_rotation_locked_label;
         else if (spec.equals("flashlight")) return R.string.quick_settings_flashlight_label;
