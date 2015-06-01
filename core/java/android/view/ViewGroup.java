@@ -3602,14 +3602,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Sets whether this ViewGroup will clip its children to its padding, if
-     * padding is present.
+     * Sets whether this ViewGroup will clip its children to its padding and resize (but not
+     * clip) any EdgeEffect to the padded region, if padding is present.
      * <p>
      * By default, children are clipped to the padding of their parent
-     * Viewgroup. This clipping behavior is only enabled if padding is non-zero.
+     * ViewGroup. This clipping behavior is only enabled if padding is non-zero.
      *
-     * @param clipToPadding true to clip children to the padding of the
-     *        group, false otherwise
+     * @param clipToPadding true to clip children to the padding of the group, and resize (but
+     *        not clip) any EdgeEffect to the padded region. False otherwise.
      * @attr ref android.R.styleable#ViewGroup_clipToPadding
      */
     public void setClipToPadding(boolean clipToPadding) {
@@ -3620,13 +3620,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Returns whether this ViewGroup will clip its children to its padding, if
-     * padding is present.
+     * Returns whether this ViewGroup will clip its children to its padding, and resize (but
+     * not clip) any EdgeEffect to the padded region, if padding is present.
      * <p>
      * By default, children are clipped to the padding of their parent
      * Viewgroup. This clipping behavior is only enabled if padding is non-zero.
      *
-     * @return true if this ViewGroup clips children to its padding, false otherwise
+     * @return true if this ViewGroup clips children to its padding and resizes (but doesn't
+     *         clip) any EdgeEffect to the padded region, false otherwise.
      *
      * @attr ref android.R.styleable#ViewGroup_clipToPadding
      */
