@@ -223,8 +223,8 @@
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Интернет байланысы жоқ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi қосулы"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS қызметін іздеуде"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"Аймақ GPS арқылы орнатылған"</string>
-    <string name="accessibility_location_active" msgid="2427290146138169014">"Аймақ өтініштері қосылған"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Орын GPS арқылы орнатылған"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Орын өтініштері қосылған"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Барлық хабарларды жойыңыз."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Хабарландыру параметрлері"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> параметрлері"</string>
@@ -238,7 +238,7 @@
     <string name="start_dreams" msgid="7219575858348719790">"Қалғу"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Этернет"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Мазаламау"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Тек басымдық"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Маңыздылары ғана"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Тек дабылдар"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Толық тыныштық"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -251,8 +251,8 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Портрет"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Пейзаж"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Енгізу әдісі"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"Аймақ"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Аймақ өшірулі"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Орын"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Орын өшірулі"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Meдиа құрылғысы"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI (алынған сигнал қуатының көрсеткіші)"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Тек қана төтенше қоңыраулар"</string>
@@ -318,7 +318,7 @@
     <string name="voice_hint" msgid="8939888732119726665">"Дауыс көмекшісін ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Камераны ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Толық тыныштық"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Тек басымдық"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Маңыздылары ғана"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Тек дабылдар"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Толық\nтыныштық"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Тек\nбасымдық"</string>
