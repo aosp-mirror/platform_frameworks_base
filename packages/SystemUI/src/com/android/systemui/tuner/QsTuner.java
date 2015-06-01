@@ -304,6 +304,16 @@ public class QsTuner extends Fragment implements Callback {
             }
 
             @Override
+            public String getPrimaryVpnName() {
+                return null;
+            }
+
+            @Override
+            public String getProfileVpnName() {
+                return null;
+            }
+
+            @Override
             public void onUserSwitched(int newUserId) {
             }
 

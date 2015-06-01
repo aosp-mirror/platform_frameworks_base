@@ -110,15 +110,13 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void handleRefreshState() {
-        boolean hasDeviceOwner = mSecurityController.hasDeviceOwner();
-        boolean hasVpn = mSecurityController.isVpnEnabled();
-
-        mIsVisible = (hasVpn || hasDeviceOwner);
-        mIsIconVisible = hasVpn;
-        if (hasDeviceOwner) {
+        mIsIconVisible = mSecurityController.isVpnEnabled();
+        if (mSecurityController.hasDeviceOwner()) {
             mFooterTextId = R.string.device_owned_footer;
+            mIsVisible = true;
         } else {
             mFooterTextId = R.string.vpn_footer;
+            mIsVisible = mIsIconVisible;
         }
         mMainHandler.post(mUpdateDisplayState);
     }
@@ -132,15 +130,17 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void createDialog() {
-        boolean hasDeviceOwner = mSecurityController.hasDeviceOwner();
-        boolean hasProfile = mSecurityController.hasProfileOwner();
-        boolean hasVpn = mSecurityController.isVpnEnabled();
+        String deviceOwner = mSecurityController.getDeviceOwnerName();
+        String profileOwner = mSecurityController.getProfileOwnerName();
+        String primaryVpn = mSecurityController.getPrimaryVpnName();
+        String profileVpn = mSecurityController.getProfileVpnName();
+        boolean managed = mSecurityController.hasProfileOwner();
 
         mDialog = new SystemUIDialog(mContext);
-        mDialog.setTitle(getTitle(hasDeviceOwner, hasProfile));
-        mDialog.setMessage(getMessage(hasDeviceOwner, hasProfile, hasVpn));
+        mDialog.setTitle(getTitle(deviceOwner));
+        mDialog.setMessage(getMessage(deviceOwner, profileOwner, primaryVpn, profileVpn, managed));
         mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
-        if (hasVpn) {
+        if (mSecurityController.isVpnEnabled()) {
             mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getNegativeButton(), this);
         }
         mDialog.show();
@@ -154,31 +154,42 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         return mContext.getString(R.string.quick_settings_done);
     }
 
-    private String getMessage(boolean hasDeviceOwner, boolean hasProfile, boolean hasVpn) {
-        if (hasDeviceOwner) {
-            if (hasVpn) {
-                return mContext.getString(R.string.monitoring_description_vpn_device_owned,
-                        mSecurityController.getDeviceOwnerName());
+    private String getMessage(String deviceOwner, String profileOwner, String primaryVpn,
+            String profileVpn, boolean primaryUserIsManaged) {
+        if (deviceOwner != null) {
+            if (primaryVpn != null) {
+                return mContext.getString(R.string.monitoring_description_vpn_app_device_owned,
+                        deviceOwner, primaryVpn);
             } else {
                 return mContext.getString(R.string.monitoring_description_device_owned,
-                        mSecurityController.getDeviceOwnerName());
+                        deviceOwner);
             }
-        } else if (hasProfile) {
-            return mContext.getString(
-                    R.string.monitoring_description_vpn_profile_owned,
-                    mSecurityController.getProfileOwnerName());
+        } else if (primaryVpn != null) {
+            if (profileVpn != null) {
+                return mContext.getString(R.string.monitoring_description_app_personal_work,
+                        profileOwner, profileVpn, primaryVpn);
+            } else {
+                return mContext.getString(R.string.monitoring_description_app_personal,
+                        primaryVpn);
+            }
+        } else if (profileVpn != null) {
+            return mContext.getString(R.string.monitoring_description_app_work,
+                    profileOwner, profileVpn);
+        } else if (profileOwner != null && primaryUserIsManaged) {
+            return mContext.getString(R.string.monitoring_description_device_owned,
+                    profileOwner);
         } else {
-            return mContext.getString(R.string.monitoring_description_vpn);
+            // No device owner, no personal VPN, no work VPN, no user owner. Why are we here?
+            return null;
         }
     }
 
-    private int getTitle(boolean hasDeviceOwner, boolean hasProfile) {
-        if (hasDeviceOwner) {
+    private int getTitle(String deviceOwner) {
+        if (deviceOwner != null) {
             return R.string.monitoring_title_device_owned;
-        } else if (hasProfile) {
-            return R.string.monitoring_title_profile_owned;
+        } else {
+            return R.string.monitoring_title;
         }
-        return R.string.monitoring_title;
     }
 
     private final Runnable mUpdateDisplayState = new Runnable() {

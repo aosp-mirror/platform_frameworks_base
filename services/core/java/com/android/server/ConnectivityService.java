@@ -2994,7 +2994,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         throwIfLockdownEnabled();
 
         synchronized(mVpns) {
-            return mVpns.get(userId).prepare(oldPackage, newPackage);
+            Vpn vpn = mVpns.get(userId);
+            if (vpn != null) {
+                return vpn.prepare(oldPackage, newPackage);
+            } else {
+                return false;
+            }
         }
     }
 
@@ -3016,7 +3021,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceCrossUserPermission(userId);
 
         synchronized(mVpns) {
-            mVpns.get(userId).setPackageAuthorization(packageName, authorized);
+            Vpn vpn = mVpns.get(userId);
+            if (vpn != null) {
+                vpn.setPackageAuthorization(packageName, authorized);
+            }
         }
     }
 
@@ -3127,7 +3135,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public VpnConfig getVpnConfig(int userId) {
         enforceCrossUserPermission(userId);
         synchronized(mVpns) {
-            return mVpns.get(userId).getVpnConfig();
+            Vpn vpn = mVpns.get(userId);
+            if (vpn != null) {
+                return vpn.getVpnConfig();
+            } else {
+                return null;
+            }
         }
     }
 
