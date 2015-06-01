@@ -793,7 +793,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public ActionMode startActionModeForChild(
             View originalView, ActionMode.Callback callback, int type) {
-        if ((mGroupFlags & FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED) == 0) {
+        if ((mGroupFlags & FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED) == 0
+                && type == ActionMode.TYPE_PRIMARY) {
             ActionMode mode;
             try {
                 mGroupFlags |= FLAG_START_ACTION_MODE_FOR_CHILD_IS_TYPED;
