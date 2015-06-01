@@ -4264,7 +4264,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // that is being hidden in an animation - keep the
             // keyguard hidden until the new window shows up and
             // we know whether to show the keyguard or not.
-            if (win.isAnimatingLw() && appWindow && showWhenLocked) {
+            if (win.isAnimatingLw() && appWindow && showWhenLocked && mKeyguardHidden) {
                 mHideLockScreen = true;
                 mWinShowWhenLocked = win;
             }
