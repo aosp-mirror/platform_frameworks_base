@@ -807,7 +807,9 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
         if (BluetoothUuid.containsAnyUuid(uuids, PbapServerProfile.PBAB_CLIENT_UUIDS)) {
             // The pairing dialog now warns of phone-book access for paired devices.
             // No separate prompt is displayed after pairing.
-            setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_ALLOWED);
+            if (getPhonebookPermissionChoice() == CachedBluetoothDevice.ACCESS_UNKNOWN) {
+                setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_ALLOWED);
+            }
         }
     }
 
