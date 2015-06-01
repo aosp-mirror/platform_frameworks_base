@@ -238,7 +238,7 @@ public final class ShutdownThread extends Thread {
         // throw up an indeterminate system dialog to indicate radio is
         // shutting down.
         ProgressDialog pd = new ProgressDialog(context);
-        if (mRebootReason.equals(PowerManager.REBOOT_RECOVERY)) {
+        if (PowerManager.REBOOT_RECOVERY.equals(mRebootReason)) {
             pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_recovery_title));
         } else {
             pd.setTitle(context.getText(com.android.internal.R.string.power_off));
