@@ -46,7 +46,7 @@ of Android Studio to use for testing.</p>
   Settings &gt; Updates</strong> panel.</li>
 
   <li> On the <strong>Updates</strong> panel, choose the option
-  <strong>Automatically check updates for: Canary Chanel</strong>.
+  <strong>Automatically check updates for: Canary Channel</strong>.
   </li>
 
   <li>On the <strong>Updates</strong> panel, select <strong>Check Now</strong>
@@ -68,8 +68,8 @@ of Android Studio to use for testing.</p>
   Settings &gt; Updates</strong> panel.</li>
 
   <li>On the <strong>Updates</strong> panel, choose the options
-  <strong>Automatically check updates for: Canary Chanel</strong> and
-  <strong>Automatically check updates for Android SDK: Preview Chanel</strong>.
+  <strong>Automatically check updates for: Canary Channel</strong> and
+  <strong>Automatically check updates for Android SDK: Preview Channel</strong>.
   </li>
 
   <li>Click the <strong>Android SDK Manager</strong> button to launch the SDK
