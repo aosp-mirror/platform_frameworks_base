@@ -237,7 +237,7 @@ abstract class RippleComponent {
     }
 
     protected final void invalidateSelf() {
-        mOwner.invalidateSelf();
+        mOwner.invalidateSelf(false);
     }
 
     protected final boolean isHardwareAnimating() {
