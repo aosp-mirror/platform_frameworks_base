@@ -295,6 +295,13 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
+     * Sets state to be dialing.
+     */
+    public final void setDialing() {
+        setState(Connection.STATE_DIALING);
+    }
+
+    /**
      * Sets state to be active.
      */
     public final void setActive() {
