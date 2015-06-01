@@ -654,16 +654,22 @@ public abstract class CameraCaptureSession implements AutoCloseable {
 
         /**
          * This method is called when the camera device has started capturing
-         * the output image for the request, at the beginning of image exposure.
+         * the output image for the request, at the beginning of image exposure, or
+         * when the camera device has started processing an input image for a reprocess
+         * request.
          *
-         * <p>This callback is invoked right as the capture of a frame begins,
-         * so it is the most appropriate time for playing a shutter sound,
-         * or triggering UI indicators of capture.</p>
+         * <p>For a regular capture request, this callback is invoked right as
+         * the capture of a frame begins, so it is the most appropriate time
+         * for playing a shutter sound, or triggering UI indicators of capture.</p>
          *
          * <p>The request that is being used for this capture is provided, along
-         * with the actual timestamp for the start of exposure. This timestamp
-         * matches the timestamp that will be included in
-         * {@link CaptureResult#SENSOR_TIMESTAMP the result timestamp field},
+         * with the actual timestamp for the start of exposure. For a reprocess
+         * request, this timestamp will be the input image's start of exposure
+         * which matches {@link CaptureResult#SENSOR_TIMESTAMP the result timestamp field}
+         * of the {@link TotalCaptureResult} that was used to
+         * {@link CameraDevice#createReprocessCaptureRequest create the reprocess request}.
+         * This timestamp matches the timestamps that will be
+         * included in {@link CaptureResult#SENSOR_TIMESTAMP the result timestamp field},
          * and in the buffers sent to each output Surface. These buffer
          * timestamps are accessible through, for example,
          * {@link android.media.Image#getTimestamp() Image.getTimestamp()} or
@@ -679,7 +685,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param request the request for the capture that just begun
-         * @param timestamp the timestamp at start of capture, in nanoseconds.
+         * @param timestamp the timestamp at start of capture for a regular request, or
+         *                  the timestamp at the input image's start of capture for a
+         *                  reprocess request, in nanoseconds.
          * @param frameNumber the frame number for this capture
          *
          * @see android.media.MediaActionSound
