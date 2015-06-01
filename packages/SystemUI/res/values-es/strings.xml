@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"Interfaz de usuario del sistema"</string>
+    <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
@@ -397,7 +397,19 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar la versión original."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Estás en el perfil de trabajo"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Configurador de IU del sistema"</string>
+    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
+    <skip />
+    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
+    <skip />
     <string name="quick_settings" msgid="10042998191725428">"Ajustes rápidos"</string>
     <string name="add_tile" msgid="2995389510240786221">"Añadir mosaico"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Mosaico de emisión"</string>
+    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
+    <skip />
+    <!-- no translation found for alarm_template (3980063409350522735) -->
+    <skip />
+    <!-- no translation found for alarm_template_far (4242179982586714810) -->
+    <skip />
 </resources>
