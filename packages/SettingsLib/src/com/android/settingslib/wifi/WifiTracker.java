@@ -205,7 +205,9 @@ public class WifiTracker {
      * Gets the current list of access points.
      */
     public List<AccessPoint> getAccessPoints() {
-        return mAccessPoints;
+        synchronized (mAccessPoints) {
+            return new ArrayList<>(mAccessPoints);
+        }
     }
 
     public WifiManager getManager() {
@@ -230,14 +232,14 @@ public class WifiTracker {
 
     public void dump(PrintWriter pw) {
         pw.println("  - wifi tracker ------");
-        for (AccessPoint accessPoint : mAccessPoints) {
+        for (AccessPoint accessPoint : getAccessPoints()) {
             pw.println("  " + accessPoint);
         }
     }
 
     private void updateAccessPoints() {
         // Swap the current access points into a cached list.
-        ArrayList<AccessPoint> cachedAccessPoints = new ArrayList<>(mAccessPoints);
+        List<AccessPoint> cachedAccessPoints = getAccessPoints();
         ArrayList<AccessPoint> accessPoints = new ArrayList<>();
 
         // Clear out the configs so we don't think something is saved when it isn't.
@@ -330,7 +332,7 @@ public class WifiTracker {
         mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
     }
 
-    private AccessPoint getCachedOrCreate(ScanResult result, ArrayList<AccessPoint> cache) {
+    private AccessPoint getCachedOrCreate(ScanResult result, List<AccessPoint> cache) {
         final int N = cache.size();
         for (int i = 0; i < N; i++) {
             if (cache.get(i).matches(result)) {
@@ -342,7 +344,7 @@ public class WifiTracker {
         return new AccessPoint(mContext, result);
     }
 
-    private AccessPoint getCachedOrCreate(WifiConfiguration config, ArrayList<AccessPoint> cache) {
+    private AccessPoint getCachedOrCreate(WifiConfiguration config, List<AccessPoint> cache) {
         final int N = cache.size();
         for (int i = 0; i < N; i++) {
             if (cache.get(i).matches(config)) {
@@ -380,7 +382,9 @@ public class WifiTracker {
             }
         }
         if (reorder) {
-            Collections.sort(mAccessPoints);
+            synchronized (mAccessPoints) {
+                Collections.sort(mAccessPoints);
+            }
             mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
         }
     }
