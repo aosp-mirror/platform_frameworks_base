@@ -2206,6 +2206,16 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (changingTarget.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
                 mLastWallpaperDisplayOffsetY = changingTarget.mWallpaperDisplayOffsetY;
             }
+            if (target.mWallpaperXStep >= 0) {
+                mLastWallpaperXStep = target.mWallpaperXStep;
+            } else if (changingTarget.mWallpaperXStep >= 0) {
+                mLastWallpaperXStep = changingTarget.mWallpaperXStep;
+            }
+            if (target.mWallpaperYStep >= 0) {
+                mLastWallpaperYStep = target.mWallpaperYStep;
+            } else if (changingTarget.mWallpaperYStep >= 0) {
+                mLastWallpaperYStep = changingTarget.mWallpaperYStep;
+            }
         }
 
         int curTokenIndex = mWallpaperTokens.size();
