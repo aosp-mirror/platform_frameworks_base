@@ -685,6 +685,8 @@ public class Build {
         final String bootimage = SystemProperties.get("ro.bootimage.build.fingerprint");
         final String requiredBootloader = SystemProperties.get("ro.build.expect.bootloader");
         final String currentBootloader = SystemProperties.get("ro.bootloader");
+        final String requiredRecovery = SystemProperties.get("ro.expect.recovery_id");
+        final String currentRecovery = SystemProperties.get("ro.recovery_id");
         final String requiredRadio = SystemProperties.get("ro.build.expect.baseband");
         final String currentRadio = SystemProperties.get("gsm.version.baseband");
 
@@ -701,7 +703,6 @@ public class Build {
             }
         }
 
-        /* TODO: Figure out issue with checks failing
         if (!TextUtils.isEmpty(bootimage)) {
             if (!Objects.equals(system, bootimage)) {
                 Slog.e(TAG, "Mismatched fingerprints; system reported " + system
@@ -718,6 +719,15 @@ public class Build {
             }
         }
 
+        if (!TextUtils.isEmpty(requiredRecovery)) {
+            if (!Objects.equals(currentRecovery, requiredRecovery)) {
+                Slog.e(TAG, "Mismatched recovery version: build requires " + requiredRecovery
+                        + " but runtime reports " + currentRecovery);
+                return false;
+            }
+        }
+
+        /* TODO: uncomment when new bootloader lands b/20860620
         if (!TextUtils.isEmpty(requiredRadio)) {
             if (!Objects.equals(currentRadio, requiredRadio)) {
                 Slog.e(TAG, "Mismatched radio version: build requires " + requiredRadio
