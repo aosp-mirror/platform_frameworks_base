@@ -129,6 +129,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             private final KeyStoreCryptoOperationStreamer mDelegate;
             private final int mModulusSizeBytes;
             private final ByteArrayOutputStream mInputBuffer = new ByteArrayOutputStream();
+            private long mConsumedInputSizeBytes;
 
             private ZeroPaddingEncryptionStreamer(
                     KeyStoreCryptoOperationStreamer delegate,
@@ -142,6 +143,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                     throws KeyStoreException {
                 if (inputLength > 0) {
                     mInputBuffer.write(input, inputOffset, inputLength);
+                    mConsumedInputSizeBytes += inputLength;
                 }
                 return EmptyArray.BYTE;
             }
@@ -151,6 +153,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                     byte[] additionalEntropy)
                     throws KeyStoreException {
                 if (inputLength > 0) {
+                    mConsumedInputSizeBytes += inputLength;
                     mInputBuffer.write(input, inputOffset, inputLength);
                 }
                 byte[] bufferedInput = mInputBuffer.toByteArray();
@@ -172,6 +175,16 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                             + " modulus (" + mModulusSizeBytes + " bytes)");
                 }
                 return mDelegate.doFinal(paddedInput, 0, paddedInput.length, additionalEntropy);
+            }
+
+            @Override
+            public long getConsumedInputSizeBytes() {
+                return mConsumedInputSizeBytes;
+            }
+
+            @Override
+            public long getProducedOutputSizeBytes() {
+                return mDelegate.getProducedOutputSizeBytes();
             }
         }
     }

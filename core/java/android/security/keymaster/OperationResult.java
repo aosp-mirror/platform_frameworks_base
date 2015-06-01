@@ -35,14 +35,27 @@ public class OperationResult implements Parcelable {
 
     public static final Parcelable.Creator<OperationResult> CREATOR = new
             Parcelable.Creator<OperationResult>() {
+                @Override
                 public OperationResult createFromParcel(Parcel in) {
                     return new OperationResult(in);
                 }
 
+                @Override
                 public OperationResult[] newArray(int length) {
                     return new OperationResult[length];
                 }
             };
+
+    public OperationResult(
+            int resultCode, IBinder token, long operationHandle, int inputConsumed, byte[] output,
+            KeymasterArguments outParams) {
+        this.resultCode = resultCode;
+        this.token = token;
+        this.operationHandle = operationHandle;
+        this.inputConsumed = inputConsumed;
+        this.output = output;
+        this.outParams = outParams;
+    }
 
     protected OperationResult(Parcel in) {
         resultCode = in.readInt();
