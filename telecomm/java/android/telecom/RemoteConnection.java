@@ -152,7 +152,6 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param videoState The new video state of the {@code RemoteConnection}.
-         * @hide
          */
         public void onVideoStateChanged(RemoteConnection connection, int videoState) {}
 
@@ -183,7 +182,6 @@ public final class RemoteConnection {
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param videoProvider The new {@code VideoProvider} associated with this
          *         {@code RemoteConnection}.
-         * @hide
          */
         public void onVideoProviderChanged(
                 RemoteConnection connection, VideoProvider videoProvider) {}
@@ -209,21 +207,20 @@ public final class RemoteConnection {
         public void onExtrasChanged(RemoteConnection connection, @Nullable Bundle extras) {}
     }
 
-    /** @hide */
     public static class VideoProvider {
 
-        public abstract static class Listener {
-            public void onReceiveSessionModifyRequest(
+        public abstract static class Callback {
+            public void onSessionModifyRequestReceived(
                     VideoProvider videoProvider,
                     VideoProfile videoProfile) {}
 
-            public void onReceiveSessionModifyResponse(
+            public void onSessionModifyResponseReceived(
                     VideoProvider videoProvider,
                     int status,
                     VideoProfile requestedProfile,
                     VideoProfile responseProfile) {}
 
-            public void onHandleCallSessionEvent(VideoProvider videoProvider, int event) {}
+            public void onCallSessionEvent(VideoProvider videoProvider, int event) {}
 
             public void onPeerDimensionsChanged(VideoProvider videoProvider, int width, int height) {}
 
@@ -239,16 +236,16 @@ public final class RemoteConnection {
         private final IVideoCallback mVideoCallbackDelegate = new IVideoCallback() {
             @Override
             public void receiveSessionModifyRequest(VideoProfile videoProfile) {
-                for (Listener l : mListeners) {
-                    l.onReceiveSessionModifyRequest(VideoProvider.this, videoProfile);
+                for (Callback l : mCallbacks) {
+                    l.onSessionModifyRequestReceived(VideoProvider.this, videoProfile);
                 }
             }
 
             @Override
             public void receiveSessionModifyResponse(int status, VideoProfile requestedProfile,
                     VideoProfile responseProfile) {
-                for (Listener l : mListeners) {
-                    l.onReceiveSessionModifyResponse(
+                for (Callback l : mCallbacks) {
+                    l.onSessionModifyResponseReceived(
                             VideoProvider.this,
                             status,
                             requestedProfile,
@@ -258,21 +255,21 @@ public final class RemoteConnection {
 
             @Override
             public void handleCallSessionEvent(int event) {
-                for (Listener l : mListeners) {
-                    l.onHandleCallSessionEvent(VideoProvider.this, event);
+                for (Callback l : mCallbacks) {
+                    l.onCallSessionEvent(VideoProvider.this, event);
                 }
             }
 
             @Override
             public void changePeerDimensions(int width, int height) {
-                for (Listener l : mListeners) {
+                for (Callback l : mCallbacks) {
                     l.onPeerDimensionsChanged(VideoProvider.this, width, height);
                 }
             }
 
             @Override
             public void changeCallDataUsage(long dataUsage) {
-                for (Listener l : mListeners) {
+                for (Callback l : mCallbacks) {
                     l.onCallDataUsageChanged(VideoProvider.this, dataUsage);
                 }
             }
@@ -280,14 +277,14 @@ public final class RemoteConnection {
             @Override
             public void changeCameraCapabilities(
                     VideoProfile.CameraCapabilities cameraCapabilities) {
-                for (Listener l : mListeners) {
+                for (Callback l : mCallbacks) {
                     l.onCameraCapabilitiesChanged(VideoProvider.this, cameraCapabilities);
                 }
             }
 
             @Override
             public void changeVideoQuality(int videoQuality) {
-                for (Listener l : mListeners) {
+                for (Callback l : mCallbacks) {
                     l.onVideoQualityChanged(VideoProvider.this, videoQuality);
                 }
             }
@@ -308,10 +305,10 @@ public final class RemoteConnection {
          * load factor before resizing, 1 means we only expect a single thread to
          * access the map so make only a single shard
          */
-        private final Set<Listener> mListeners = Collections.newSetFromMap(
-                new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
+        private final Set<Callback> mCallbacks = Collections.newSetFromMap(
+                new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
 
-        public VideoProvider(IVideoProvider videoProviderBinder) {
+        VideoProvider(IVideoProvider videoProviderBinder) {
             mVideoProviderBinder = videoProviderBinder;
             try {
                 mVideoProviderBinder.addVideoCallback(mVideoCallbackServant.getStub().asBinder());
@@ -319,12 +316,12 @@ public final class RemoteConnection {
             }
         }
 
-        public void addListener(Listener l) {
-            mListeners.add(l);
+        public void registerCallback(Callback l) {
+            mCallbacks.add(l);
         }
 
-        public void removeListener(Listener l) {
-            mListeners.remove(l);
+        public void unregisterCallback(Callback l) {
+            mCallbacks.remove(l);
         }
 
         public void setCamera(String cameraId) {
@@ -609,7 +606,6 @@ public final class RemoteConnection {
      * Obtains the video state of this {@code RemoteConnection}.
      *
      * @return The video state of the {@code RemoteConnection}. See {@link VideoProfile.VideoState}.
-     * @hide
      */
     public int getVideoState() {
         return mVideoState;
@@ -618,7 +614,6 @@ public final class RemoteConnection {
     /**
      * Obtains the video provider of this {@code RemoteConnection}.
      * @return The video provider associated with this {@code RemoteConnection}.
-     * @hide
      */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
