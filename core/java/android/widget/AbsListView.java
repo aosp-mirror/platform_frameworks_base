@@ -820,44 +820,36 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mOwnerThread = Thread.currentThread();
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.AbsListView, defStyleAttr, defStyleRes);
+                attrs, R.styleable.AbsListView, defStyleAttr, defStyleRes);
 
-        Drawable d = a.getDrawable(com.android.internal.R.styleable.AbsListView_listSelector);
-        if (d != null) {
-            setSelector(d);
+        final Drawable selector = a.getDrawable(R.styleable.AbsListView_listSelector);
+        if (selector != null) {
+            setSelector(selector);
         }
 
-        mDrawSelectorOnTop = a.getBoolean(
-                com.android.internal.R.styleable.AbsListView_drawSelectorOnTop, false);
+        mDrawSelectorOnTop = a.getBoolean(R.styleable.AbsListView_drawSelectorOnTop, false);
 
-        boolean stackFromBottom = a.getBoolean(R.styleable.AbsListView_stackFromBottom, false);
-        setStackFromBottom(stackFromBottom);
+        setStackFromBottom(a.getBoolean(
+                R.styleable.AbsListView_stackFromBottom, false));
+        setScrollingCacheEnabled(a.getBoolean(
+                R.styleable.AbsListView_scrollingCache, true));
+        setTextFilterEnabled(a.getBoolean(
+                R.styleable.AbsListView_textFilterEnabled, false));
+        setTranscriptMode(a.getInt(
+                R.styleable.AbsListView_transcriptMode, TRANSCRIPT_MODE_DISABLED));
+        setCacheColorHint(a.getColor(
+                R.styleable.AbsListView_cacheColorHint, 0));
+        setSmoothScrollbarEnabled(a.getBoolean(
+                R.styleable.AbsListView_smoothScrollbar, true));
+        setChoiceMode(a.getInt(
+                R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
 
-        boolean scrollingCacheEnabled = a.getBoolean(R.styleable.AbsListView_scrollingCache, true);
-        setScrollingCacheEnabled(scrollingCacheEnabled);
-
-        boolean useTextFilter = a.getBoolean(R.styleable.AbsListView_textFilterEnabled, false);
-        setTextFilterEnabled(useTextFilter);
-
-        int transcriptMode = a.getInt(R.styleable.AbsListView_transcriptMode,
-                TRANSCRIPT_MODE_DISABLED);
-        setTranscriptMode(transcriptMode);
-
-        int color = a.getColor(R.styleable.AbsListView_cacheColorHint, 0);
-        setCacheColorHint(color);
-
-        boolean enableFastScroll = a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false);
-        setFastScrollEnabled(enableFastScroll);
-
-        int fastScrollStyle = a.getResourceId(R.styleable.AbsListView_fastScrollStyle, 0);
-        setFastScrollStyle(fastScrollStyle);
-
-        boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
-        setSmoothScrollbarEnabled(smoothScrollbar);
-
-        setChoiceMode(a.getInt(R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
-        setFastScrollAlwaysVisible(
-                a.getBoolean(R.styleable.AbsListView_fastScrollAlwaysVisible, false));
+        setFastScrollEnabled(a.getBoolean(
+                R.styleable.AbsListView_fastScrollEnabled, false));
+        setFastScrollStyle(a.getResourceId(
+                R.styleable.AbsListView_fastScrollStyle, 0));
+        setFastScrollAlwaysVisible(a.getBoolean(
+                R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
     }
