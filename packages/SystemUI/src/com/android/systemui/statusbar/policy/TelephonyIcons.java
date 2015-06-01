@@ -73,22 +73,13 @@ class TelephonyIcons {
             { R.drawable.stat_sys_signal_carrier_network_change_animation,
               R.drawable.stat_sys_signal_carrier_network_change_animation,
               R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation,
               R.drawable.stat_sys_signal_carrier_network_change_animation },
             { R.drawable.stat_sys_signal_carrier_network_change_animation,
               R.drawable.stat_sys_signal_carrier_network_change_animation,
               R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation,
               R.drawable.stat_sys_signal_carrier_network_change_animation }
-        };
-
-    static final int[][] TELEPHONY_CARRIER_NETWORK_CHANGE_DARK = {
-            { R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
-              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
-              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
-              R.drawable.stat_sys_signal_dark_carrier_network_change_animation },
-            { R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
-              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
-              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
-              R.drawable.stat_sys_signal_dark_carrier_network_change_animation }
         };
 
     static final int[][] QS_TELEPHONY_CARRIER_NETWORK_CHANGE = {
@@ -216,8 +207,6 @@ class TelephonyIcons {
     static final int ICON_1X = R.drawable.stat_sys_data_fully_connected_1x;
     static final int ICON_CARRIER_NETWORK_CHANGE =
             R.drawable.stat_sys_signal_carrier_network_change_animation;
-    static final int ICON_CARRIER_NETWORK_CHANGE_DARK =
-            R.drawable.stat_sys_signal_dark_carrier_network_change_animation;
 
     static final int QS_ICON_LTE = R.drawable.ic_qs_signal_lte;
     static final int QS_ICON_3G = R.drawable.ic_qs_signal_3g;
@@ -229,12 +218,10 @@ class TelephonyIcons {
     static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
             "CARRIER_NETWORK_CHANGE",
             TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE,
-            TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE_DARK,
             TelephonyIcons.QS_TELEPHONY_CARRIER_NETWORK_CHANGE,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
             0, 0,
             TelephonyIcons.ICON_CARRIER_NETWORK_CHANGE,
-            TelephonyIcons.ICON_CARRIER_NETWORK_CHANGE_DARK,
             TelephonyIcons.QS_ICON_CARRIER_NETWORK_CHANGE,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.accessibility_carrier_network_change_mode,

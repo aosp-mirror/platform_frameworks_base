@@ -117,7 +117,7 @@ public class MobileSignalController extends SignalController<
 
     public void setCarrierNetworkChangeMode(boolean carrierNetworkChangeMode) {
         mCurrentState.carrierNetworkChangeMode = carrierNetworkChangeMode;
-        notifyListenersIfNecessary();
+        updateTelephony();
     }
 
     /**
@@ -220,13 +220,9 @@ public class MobileSignalController extends SignalController<
                         && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
-        mCallbackHandler.setMobileDataIndicators(statusIcon, qsIcon, getCurrentDarkIconId(),
-                typeIcon, qsTypeIcon, activityIn, activityOut, dataContentDescription, description,
-                icons.mIsWide, mSubscriptionInfo.getSubscriptionId());
-    }
-
-    private int getCurrentDarkIconId() {
-        return getCurrentIconId(false /* light */);
+        mCallbackHandler.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+                activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
+                mSubscriptionInfo.getSubscriptionId());
     }
 
     @Override
@@ -478,17 +474,8 @@ public class MobileSignalController extends SignalController<
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
                 int discContentDesc, int dataContentDesc, int dataType, boolean isWide,
                 int qsDataType) {
-            this(name, sbIcons, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState,
-                    sbDiscState, sbDiscState, qsDiscState, discContentDesc, dataContentDesc,
-                    dataType, isWide, qsDataType);
-        }
-
-        public MobileIconGroup(String name, int[][] sbIcons, int[][] sbDarkIcons, int[][] qsIcons,
-                int[] contentDesc, int sbNullState, int qsNullState, int sbDiscState,
-                int sbDarkDiscState, int qsDiscState, int discContentDesc, int dataContentDesc,
-                int dataType, boolean isWide, int qsDataType) {
-            super(name, sbIcons, sbDarkIcons, qsIcons, contentDesc, sbNullState, qsNullState,
-                    sbDiscState, sbDarkDiscState, qsDiscState, discContentDesc);
+            super(name, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState, sbDiscState,
+                    qsDiscState, discContentDesc);
             mDataContentDescription = dataContentDesc;
             mDataType = dataType;
             mIsWide = isWide;
