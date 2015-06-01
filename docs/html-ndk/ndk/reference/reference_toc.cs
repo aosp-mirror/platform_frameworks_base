@@ -64,7 +64,7 @@
     <div class="nav-section-header"><a href="/ndk/reference/group___storage.html"><span class="en">
     Storage Manager</span></a></div>
     <ul>
-      <li><a href="/ndk/reference/storage__manager_8h.html">sensor_manager.h</a></li>
+      <li><a href="/ndk/reference/storage__manager_8h.html">storage_manager.h</a></li>
       <li><a href="/ndk/reference/obb_8h.html">obb.h</a></li>
     </ul>
   </li>
