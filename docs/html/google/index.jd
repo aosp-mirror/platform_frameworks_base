@@ -72,6 +72,7 @@ footer.hide=1
   <h2 class="norule">Videos</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:google/landing/videos"
+       data-sortOrder="-timestamp"
        data-cardSizes="6x6"
        data-maxResults="3"></div>
   </div>

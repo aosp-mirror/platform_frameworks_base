@@ -294,10 +294,23 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image":"http://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
     "type":"video"
   },
+
+  {
+    "title":"Google Play Services 7.5",
+    "titleFriendly":"",
+    "summary":"This update brings App Invites, topics to GCM, GCMNetworkManager, Cast Remote Display API, Smart Lock for Passwords, Maps API for Android Wear, Google Fit extensions and more.",
+    "url":"https://www.youtube.com/watch?v=M3Udfu6qidk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
+    "group":"",
+    "keywords": ["google play services"],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/M3Udfu6qidk/maxresdefault.jpg",
+    "type":"video"
+  },
   {
     "title":"Google Play Services 7.3",
     "titleFriendly":"",
-    "summary":"Google Play Services 7.3 brings a ton of great new features to help you BUILD BETTER APPS! This update brings the ability to connect multiple wearables simultaneously to a single phone.",
+    "summary":"This update brings the ability to connect multiple wearables simultaneously to a single phone. There are also some great new updates to Google Fit, including nutrition types, and to Location.",
     "url":"https://www.youtube.com/watch?v=FOn64iqlphk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
     "group":"",
     "keywords": ["google play services"],
