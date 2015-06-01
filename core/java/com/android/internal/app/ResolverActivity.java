@@ -785,7 +785,7 @@ public class ResolverActivity extends Activity {
         }
         mAlwaysUseOption = alwaysUseOption;
 
-        int count = mAdapter.mDisplayList.size();
+        int count = mAdapter.getUnfilteredCount();
         if (count > 1 || (count == 1 && mAdapter.getOtherProfile() != null)) {
             setContentView(layoutId);
             mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
@@ -1390,6 +1390,18 @@ public class ResolverActivity extends Activity {
                 result--;
             }
             return result;
+        }
+
+        public int getUnfilteredCount() {
+            return mDisplayList.size();
+        }
+
+        public int getDisplayInfoCount() {
+            return mDisplayList.size();
+        }
+
+        public DisplayResolveInfo getDisplayInfoAt(int index) {
+            return mDisplayList.get(index);
         }
 
         public TargetInfo getItem(int position) {
