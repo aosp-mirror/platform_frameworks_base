@@ -29,8 +29,6 @@ public class Constants {
             public static final boolean EnableTransitionThumbnailDebugMode = false;
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
-            // Enables app-info pane on long-pressing the icon
-            public static final boolean EnableDevAppInfoOnLongPress = true;
             // Enables dismiss-all
             public static final boolean EnableDismissAll = false;
             // Enables debug mode
