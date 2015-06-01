@@ -27,6 +27,26 @@
 namespace android {
 namespace uirenderer {
 
+/**
+ * Structure used for threshold values in outline path tessellation.
+ *
+ * TODO: PaintInfo should store one of this object, and initialized all values in constructor
+ * depending on its type (point, line or path).
+ */
+struct PathApproximationInfo {
+    PathApproximationInfo(float invScaleX, float invScaleY, float pixelThreshold)
+        : thresholdSquared(pixelThreshold * pixelThreshold)
+        , sqrInvScaleX(invScaleX * invScaleX)
+        , sqrInvScaleY(invScaleY * invScaleY)
+        , thresholdForConicQuads(pixelThreshold * MathUtils::min(invScaleX, invScaleY) / 2.0f) {
+    };
+
+    const float thresholdSquared;
+    const float sqrInvScaleX;
+    const float sqrInvScaleY;
+    const float thresholdForConicQuads;
+};
+
 class PathTessellator {
 public:
     /**
@@ -85,16 +105,15 @@ public:
      * Approximates a convex outline into a clockwise Vector of 2d vertices.
      *
      * @param path The outline to be approximated
-     * @param thresholdSquared The threshold of acceptable error (in pixels) when approximating
+     * @param threshold The threshold of acceptable error (in pixels) when approximating
      * @param outputVertices An empty Vector which will be populated with the output
      */
-    static bool approximatePathOutlineVertices(const SkPath &path, float thresholdSquared,
+    static bool approximatePathOutlineVertices(const SkPath &path, float threshold,
             Vector<Vertex> &outputVertices);
 
 private:
     static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
-            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
-            Vector<Vertex> &outputVertices);
+            const PathApproximationInfo& approximationInfo, Vector<Vertex> &outputVertices);
 
 /*
   endpoints a & b,
@@ -104,7 +123,7 @@ private:
             float ax, float ay,
             float bx, float by,
             float cx, float cy,
-            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+            const PathApproximationInfo& approximationInfo,
             Vector<Vertex> &outputVertices, int depth = 0);
 
 /*
@@ -116,7 +135,7 @@ private:
             float c1x, float c1y,
             float p2x, float p2y,
             float c2x, float c2y,
-            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+            const PathApproximationInfo& approximationInfo,
             Vector<Vertex> &outputVertices, int depth = 0);
 };
 

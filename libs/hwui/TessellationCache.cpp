@@ -226,9 +226,9 @@ static void tessellateShadows(
 
     // tessellate caster outline into a 2d polygon
     Vector<Vertex> casterVertices2d;
-    const float casterRefinementThresholdSquared = 4.0f;
+    const float casterRefinementThreshold = 2.0f;
     PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
-            casterRefinementThresholdSquared, casterVertices2d);
+            casterRefinementThreshold, casterVertices2d);
 
     // Shadow requires CCW for now. TODO: remove potential double-reverse
     reverseVertexArray(casterVertices2d.editArray(), casterVertices2d.size());
