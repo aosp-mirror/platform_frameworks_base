@@ -678,11 +678,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 mHeaderView.mMoveTaskButton.setOnClickListener(this);
             }
             mActionButtonView.setOnClickListener(this);
-            if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
-                if (mConfig.developerOptionsEnabled) {
-                    mHeaderView.mApplicationIcon.setOnLongClickListener(this);
-                }
-            }
+            mHeaderView.mApplicationIcon.setOnLongClickListener(this);
         }
         mTaskDataLoaded = true;
     }
@@ -701,9 +697,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 mHeaderView.mMoveTaskButton.setOnClickListener(null);
             }
             mActionButtonView.setOnClickListener(null);
-            if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
-                mHeaderView.mApplicationIcon.setOnLongClickListener(null);
-            }
+            mHeaderView.mApplicationIcon.setOnLongClickListener(null);
         }
         mTaskDataLoaded = false;
     }
