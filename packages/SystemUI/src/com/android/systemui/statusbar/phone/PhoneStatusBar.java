@@ -31,6 +31,8 @@ import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -61,6 +63,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -228,6 +231,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
+
+    private static final boolean ONLY_CORE_APPS;
+
+    static {
+        boolean onlyCoreApps;
+        try {
+            onlyCoreApps = IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
+                    .isOnlyCoreApps();
+        } catch (RemoteException e) {
+            onlyCoreApps = false;
+        }
+        ONLY_CORE_APPS = onlyCoreApps;
+    }
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -1323,7 +1339,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned()
                 && (mUserSetup || mUserSwitcherController == null
                         || !mUserSwitcherController.isSimpleUserSwitcher())
-                && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0));
+                && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
+                && !ONLY_CORE_APPS);
     }
 
     private void updateNotificationShadeForChildren() {
@@ -2031,7 +2048,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     boolean panelsEnabled() {
-        return (mDisabled1 & StatusBarManager.DISABLE_EXPAND) == 0;
+        return (mDisabled1 & StatusBarManager.DISABLE_EXPAND) == 0 && !ONLY_CORE_APPS;
     }
 
     void makeExpandedVisible(boolean force) {
