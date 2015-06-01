@@ -64,6 +64,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.app.AlarmManager.RTC;
@@ -1055,6 +1056,28 @@ class AlarmManagerService extends SystemService {
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
             pw.print("Num time change events: "); pw.println(mNumTimeChanged);
 
+            pw.println();
+            pw.println("Next alarm clock information: ");
+            final TreeSet<Integer> users = new TreeSet<>();
+            for (int i = 0; i < mNextAlarmClockForUser.size(); i++) {
+                users.add(mNextAlarmClockForUser.keyAt(i));
+            }
+            for (int i = 0; i < mPendingSendNextAlarmClockChangedForUser.size(); i++) {
+                users.add(mPendingSendNextAlarmClockChangedForUser.keyAt(i));
+            }
+            for (int user : users) {
+                final AlarmManager.AlarmClockInfo next = mNextAlarmClockForUser.get(user);
+                final long time = next != null ? next.getTriggerTime() : 0;
+                final boolean pendingSend = mPendingSendNextAlarmClockChangedForUser.get(user);
+                pw.print("  user:"); pw.print(user);
+                pw.print(" pendingSend:"); pw.print(pendingSend);
+                pw.print(" time:"); pw.print(time);
+                if (time > 0) {
+                    pw.print(" = "); pw.print(sdf.format(new Date(time)));
+                    pw.print(" = "); TimeUtils.formatDuration(time, nowRTC, pw);
+                }
+                pw.println();
+            }
             if (mAlarmBatches.size() > 0) {
                 pw.println();
                 pw.print("Pending alarm batches: ");
