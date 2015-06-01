@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Seleziona tutti"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Copia in…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Sposta in..."</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copia"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Incolla"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Mostra memoria interna"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostra scheda SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Nascondi memoria interna"</string>
@@ -56,7 +58,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Scorciatoie"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivi"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Altre app"</string>
-    <string name="empty" msgid="7858882803708117596">"Nessun articolo"</string>
+    <string name="empty" msgid="7858882803708117596">"Nessun elemento"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Impossibile aprire il file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Impossibile eliminare alcuni documenti"</string>
     <string name="share_via" msgid="8966594246261344259">"Condividi via"</string>

@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"ಎಲ್ಲವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ಇದಕ್ಕೆ ನಕಲಿಸಿ…"</string>
     <string name="menu_move" msgid="1828090633118079817">"ಇದಕ್ಕೆ ಸರಿಸು…"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ನಕಲಿಸು"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ಅಂಟಿಸು"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ತೋರಿಸು"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD ಕಾಡ್‌ ಅನ್ನು ತೋರಿಸು"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ಮರೆಮಾಡಿ"</string>

@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Барлығын таңдау"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Көшіру орны…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Орнын ауыстыру…"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Көшіру"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Қою"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ішкі жадты көрсету"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD картасын көрсету"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ішкі жадты жасыру"</string>
@@ -59,7 +61,7 @@
     <string name="empty" msgid="7858882803708117596">"Бос"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Файлды аша алмады"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Кейбір құжаттарды жою мүмкін болмады"</string>
-    <string name="share_via" msgid="8966594246261344259">"арқылы бөлісу"</string>
+    <string name="share_via" msgid="8966594246261344259">"Бөлісу"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Файлдарды көшіру"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> қалды"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">

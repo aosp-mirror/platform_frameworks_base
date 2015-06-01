@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Khetha konke"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopishela ku…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Hambisa ku…"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopisha"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Namathisela"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Bonisa isitoreji sangaphakathi"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Bonisa ikhadi le-SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Fihla isitoreji sangaphakathi"</string>

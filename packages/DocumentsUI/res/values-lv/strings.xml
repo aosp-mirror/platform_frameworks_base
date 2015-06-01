@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Atlasīt visus"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopēt…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Pārvietot uz…"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopēt"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Ielīmēt"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Rādīt iekšējo atmiņu"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Rādīt SD karti"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Paslēpt iekšējo atmiņu"</string>
