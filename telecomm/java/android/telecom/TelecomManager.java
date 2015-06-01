@@ -124,6 +124,16 @@ public class TelecomManager {
             "android.telecom.action.CHANGE_DEFAULT_DIALER";
 
     /**
+     * Privileged version of {@link #ACTION_CHANGE_DEFAULT_DIALER} that doesn't require
+     * confirmation from the user via the dialog.
+     *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * @hide
+     */
+    public static final String ACTION_CHANGE_DEFAULT_DIALER_PRIVILEGED =
+            "android.telecom.action.CHANGE_DEFAULT_DIALER_PRIVILEGED";
+
+    /**
      * Activity action: Opens the settings screen where a user can enable and disable which
      * {@link PhoneAccount}s are allows to make and receive calls. Because a user must
      * explicitly enable an account before the system will use it, an app may want to send the
