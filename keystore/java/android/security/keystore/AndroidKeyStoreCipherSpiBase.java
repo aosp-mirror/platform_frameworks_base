@@ -162,7 +162,6 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     protected void resetAll() {
         IBinder operationToken = mOperationToken;
         if (operationToken != null) {
-            mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
         mEncrypting = false;
@@ -186,9 +185,9 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     protected void resetWhilePreservingInitState() {
         IBinder operationToken = mOperationToken;
         if (operationToken != null) {
-            mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
+        mOperationToken = null;
         mOperationHandle = 0;
         mMainDataStreamer = null;
         mCachedException = null;
