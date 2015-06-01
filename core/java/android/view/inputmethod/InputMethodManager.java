@@ -1320,6 +1320,22 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Call this when a view is being detached from a {@link android.view.Window}.
+     * @hide
+     */
+    public void onViewDetachedFromWindow(View view) {
+        synchronized (mH) {
+            if (DEBUG) Log.v(TAG, "onViewDetachedFromWindow: " + view
+                    + " mServedView=" + mServedView
+                    + " hasWindowFocus=" + view.hasWindowFocus());
+            if (mServedView == view && view.hasWindowFocus()) {
+                mNextServedView = null;
+                scheduleCheckFocusLocked(view);
+            }
+        }
+    }
+
     static void scheduleCheckFocusLocked(View view) {
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
         if (viewRootImpl != null) {
