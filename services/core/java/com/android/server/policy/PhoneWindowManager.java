@@ -2154,7 +2154,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
 
-            Window win = new PhoneWindow(context);
+            PhoneWindow win = new PhoneWindow(context);
+            win.setIsStartingWindow(true);
             final TypedArray ta = win.getWindowStyle();
             if (ta.getBoolean(
                         com.android.internal.R.styleable.Window_windowDisablePreview, false)
