@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
+import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IUserSwitchObserver;
 import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
@@ -75,6 +76,7 @@ public class PhoneStatusBarPolicy {
 
     private boolean mZenVisible;
     private boolean mVolumeVisible;
+    private boolean mCurrentUserSetup;
 
     private int mZen;
 
@@ -175,11 +177,12 @@ public class PhoneStatusBarPolicy {
     }
 
     private void updateAlarm() {
-        final boolean hasAlarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
+        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         final boolean zenNone = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, hasAlarm);
         mService.setIcon(SLOT_ALARM_CLOCK, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, 0, null);
+        mService.setIconVisibility(SLOT_ALARM_CLOCK, mCurrentUserSetup && hasAlarm);
     }
 
     private final void updateSimState(Intent intent) {
@@ -390,5 +393,11 @@ public class PhoneStatusBarPolicy {
     public void setKeyguardShowing(boolean visible) {
         mKeyguardVisible = visible;
         updateManagedProfile();
+    }
+
+    public void setCurrentUserSetup(boolean userSetup) {
+        if (mCurrentUserSetup == userSetup) return;
+        mCurrentUserSetup = userSetup;
+        updateAlarm();
     }
 }

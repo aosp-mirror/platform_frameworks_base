@@ -349,6 +349,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (!mUserSetup && mStatusBarView != null)
                     animateCollapseQuickSettings();
             }
+            if (mIconPolicy != null) {
+                mIconPolicy.setCurrentUserSetup(mUserSetup);
+            }
         }
     };
 
@@ -554,6 +557,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController, mHotspotController);
+        mIconPolicy.setCurrentUserSetup(mUserSetup);
         mSettingsObserver.onChange(false); // set up
 
         mHeadsUpObserver.onChange(true); // set up
