@@ -9028,11 +9028,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Our work here is done.
             return;
         }
+
+        final int callingUid = Binder.getCallingUid();
+        final int lockTaskUid = lockTask.mLockTaskUid;
         // Ensure the same caller for startLockTaskMode and stopLockTaskMode.
+        // It is possible lockTaskMode was started by the system process because
+        // android:lockTaskMode is set to a locking value in the application manifest instead of
+        // the app calling startLockTaskMode. In this case {@link TaskRecord.mLockTaskUid} will
+        // be 0, so we compare the callingUid to the {@link TaskRecord.effectiveUid} instead.
         if (getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_LOCKED &&
-                Binder.getCallingUid() != lockTask.mLockTaskUid) {
-            throw new SecurityException("Invalid uid, expected " + lockTask.mLockTaskUid);
+                callingUid != lockTaskUid
+                && (lockTaskUid != 0
+                    || (lockTaskUid == 0 && callingUid != lockTask.effectiveUid))) {
+            throw new SecurityException("Invalid uid, expected " + lockTaskUid
+                    + " callingUid=" + callingUid + " effectiveUid=" + lockTask.effectiveUid);
         }
+
         long ident = Binder.clearCallingIdentity();
         try {
             Log.d(TAG, "stopLockTaskMode");
