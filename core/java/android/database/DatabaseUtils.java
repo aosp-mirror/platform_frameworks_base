@@ -270,7 +270,7 @@ public class DatabaseUtils {
         window.setStartPosition(position);
         window.setNumColumns(numColumns);
         if (cursor.moveToPosition(position)) {
-            do {
+            rowloop: do {
                 if (!window.allocRow()) {
                     break;
                 }
@@ -307,7 +307,7 @@ public class DatabaseUtils {
                     }
                     if (!success) {
                         window.freeLastRow();
-                        break;
+                        break rowloop;
                     }
                 }
                 position += 1;
