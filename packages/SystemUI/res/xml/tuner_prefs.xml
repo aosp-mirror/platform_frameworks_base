@@ -17,10 +17,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/system_ui_tuner">
 
-        <!-- Tuner prefs go here -->
-
         <Preference
             android:key="qs_tuner"
             android:title="@string/quick_settings" />
+
+        <SwitchPreference
+            android:key="battery_pct"
+            android:title="@string/show_battery_percentage"
+            android:summary="@string/show_battery_percentage_summary"
+            android:persistent="false" />
 
 </PreferenceScreen>
