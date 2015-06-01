@@ -353,10 +353,14 @@ public final class FloatingToolbar {
          *      from.
          */
         public FloatingToolbarPopup(View parent) {
+            mMarginHorizontal = parent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
+            mMarginVertical = parent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_vertical_margin);
             mParent = Preconditions.checkNotNull(parent);
             mContentContainer = createContentContainer(parent.getContext());
             mPopupWindow = createPopupWindow(mContentContainer);
-            mShowAnimation = createGrowFadeInFromBottom(mContentContainer);
+            mShowAnimation = createGrowFadeInFromBottom(mContentContainer, mMarginHorizontal);
             mDismissAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
                     150,  // startDelay
@@ -376,17 +380,15 @@ public final class FloatingToolbar {
                             mPopupWindow.dismiss();
                         }
                     });
-            mMarginHorizontal = parent.getResources()
-                    .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
-            mMarginVertical = parent.getResources()
-                    .getDimensionPixelSize(R.dimen.floating_toolbar_vertical_margin);
         }
 
         /**
          * Lays out buttons for the specified menu items.
          */
-        public void layoutMenuItems(List<MenuItem> menuItems,
-                MenuItem.OnMenuItemClickListener menuItemClickListener, int suggestedWidth) {
+        public void layoutMenuItems(
+                List<MenuItem> menuItems,
+                MenuItem.OnMenuItemClickListener menuItemClickListener,
+                int suggestedWidth) {
             Preconditions.checkNotNull(menuItems);
 
             mContentContainer.removeAllViews();
@@ -593,7 +595,9 @@ public final class FloatingToolbar {
             final int startWidth = mContentContainer.getWidth();
             final int startHeight = mContentContainer.getHeight();
             final float startY = mContentContainer.getY();
-            final float right = mContentContainer.getX() + mContentContainer.getWidth();
+            final float left = mContentContainer.getX();
+            final float right = left + mContentContainer.getWidth();
+            final boolean rtl = mContentContainer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
             Animation widthAnimation = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -601,7 +605,11 @@ public final class FloatingToolbar {
                     int deltaWidth = (int) (interpolatedTime * (targetWidth - startWidth));
                     params.width = startWidth + deltaWidth;
                     mContentContainer.setLayoutParams(params);
-                    mContentContainer.setX(right - mContentContainer.getWidth());
+                    if (rtl) {
+                        mContentContainer.setX(left);
+                    } else {
+                        mContentContainer.setX(right - mContentContainer.getWidth());
+                    }
                 }
             };
             Animation heightAnimation = new Animation() {
@@ -644,9 +652,11 @@ public final class FloatingToolbar {
             final int targetHeight = mainPanelSize.getHeight();
             final int startWidth = mContentContainer.getWidth();
             final int startHeight = mContentContainer.getHeight();
-            final float right = mContentContainer.getX() + mContentContainer.getWidth();
             final float bottom = mContentContainer.getY() + mContentContainer.getHeight();
             final boolean morphedUpwards = (mOverflowDirection == OVERFLOW_DIRECTION_UP);
+            final float left = mContentContainer.getX();
+            final float right = left + mContentContainer.getWidth();
+            final boolean rtl = mContentContainer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
             Animation widthAnimation = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -654,7 +664,11 @@ public final class FloatingToolbar {
                     int deltaWidth = (int) (interpolatedTime * (targetWidth - startWidth));
                     params.width = startWidth + deltaWidth;
                     mContentContainer.setLayoutParams(params);
-                    mContentContainer.setX(right - mContentContainer.getWidth());
+                    if (rtl) {
+                        mContentContainer.setX(left);
+                    } else {
+                        mContentContainer.setX(right - mContentContainer.getWidth());
+                    }
                 }
             };
             Animation heightAnimation = new Animation() {
@@ -747,9 +761,7 @@ public final class FloatingToolbar {
          */
         private void positionMainPanel() {
             Preconditions.checkNotNull(mMainPanel);
-            float x = mPopupWindow.getWidth()
-                    - (mMainPanel.getView().getMeasuredWidth() + mMarginHorizontal);
-            mContentContainer.setX(x);
+            mContentContainer.setX(mMarginHorizontal);
 
             float y = mMarginVertical;
             if  (mOverflowDirection == OVERFLOW_DIRECTION_UP) {
@@ -1320,12 +1332,14 @@ public final class FloatingToolbar {
      *
      * @param view  The view to animate
      */
-    private static AnimatorSet createGrowFadeInFromBottom(View view) {
+    private static AnimatorSet createGrowFadeInFromBottom(View view, int x) {
         AnimatorSet growFadeInFromBottomAnimation =  new AnimatorSet();
         growFadeInFromBottomAnimation.playTogether(
                 ObjectAnimator.ofFloat(view, View.SCALE_X, 0.5f, 1).setDuration(125),
                 ObjectAnimator.ofFloat(view, View.SCALE_Y, 0.5f, 1).setDuration(125),
-                ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(75));
+                ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(75),
+                // Make sure that view.x is always fixed throughout the duration of this animation.
+                ObjectAnimator.ofFloat(view, View.X, x, x));
         growFadeInFromBottomAnimation.setStartDelay(50);
         return growFadeInFromBottomAnimation;
     }
