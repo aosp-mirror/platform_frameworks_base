@@ -60,6 +60,7 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -232,6 +233,12 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             // for DATE_TAKEN
             long dateSeconds = mImageTime / 1000;
 
+            // Save
+            OutputStream out = new FileOutputStream(mImageFilePath);
+            image.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+
             // Save the screenshot to the MediaStore
             ContentValues values = new ContentValues();
             ContentResolver resolver = context.getContentResolver();
@@ -244,24 +251,16 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
             values.put(MediaStore.Images.ImageColumns.WIDTH, mImageWidth);
             values.put(MediaStore.Images.ImageColumns.HEIGHT, mImageHeight);
+            values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
+            // Create a share intent
             String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
             String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-
-            OutputStream out = resolver.openOutputStream(uri);
-            image.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-
-            // Update file size in the database
-            values.clear();
-            values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
-            resolver.update(uri, values, null, null);
 
             // Create a share action for the notification
             final PendingIntent callback = PendingIntent.getBroadcast(context, 0,
