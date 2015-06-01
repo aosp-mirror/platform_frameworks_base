@@ -51,17 +51,20 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
-    int textureFillFlags = static_cast<int>(texture.getFormat() == GL_ALPHA
-            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
-    if (linearFiltering) {
-        textureFillFlags |= TextureFillFlags::kForceFilter;
+    int textureFillFlags = TextureFillFlags::None;
+    if (texture.getFormat() == GL_ALPHA) {
+        textureFillFlags |= TextureFillFlags::IsAlphaMaskTexture;
     }
-    const Matrix4& transform = pureTranslate ? Matrix4::identity() : *(renderer->currentTransform());
+    if (linearFiltering) {
+        textureFillFlags |= TextureFillFlags::ForceFilter;
+    }
+    int transformFlags = pureTranslate
+            ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
     Glop glop;
     GlopBuilder(renderer->mRenderState, renderer->mCaches, &glop)
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
             .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, renderer->currentSnapshot()->alpha)
-            .setTransform(renderer->currentSnapshot()->getOrthoMatrix(), transform, false)
+            .setTransform(*(renderer->currentSnapshot()), transformFlags)
             .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
             .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)
             .build();
