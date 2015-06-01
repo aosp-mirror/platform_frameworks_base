@@ -221,10 +221,10 @@ public class AppWidgetHost {
             int appWidgetId, int intentFlags, int requestCode, @Nullable Bundle options) {
         try {
             IntentSender intentSender = sService.createAppWidgetConfigIntentSender(
-                    mContext.getOpPackageName(), appWidgetId, intentFlags);
+                    mContext.getOpPackageName(), appWidgetId);
             if (intentSender != null) {
-                activity.startIntentSenderForResult(intentSender, requestCode, null, 0, 0, 0,
-                        options);
+                activity.startIntentSenderForResult(intentSender, requestCode, null, 0,
+                        intentFlags, intentFlags, options);
             } else {
                 throw new ActivityNotFoundException();
             }

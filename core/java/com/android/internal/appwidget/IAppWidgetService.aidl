@@ -41,8 +41,7 @@ interface IAppWidgetService {
     void deleteAllHosts();
     RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId);
     int[] getAppWidgetIdsForHost(String callingPackage, int hostId);
-    IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
-            int intentFlags);
+    IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId);
 
     //
     // for AppWidgetManager
