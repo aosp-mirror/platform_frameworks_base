@@ -502,7 +502,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-design:22.0.0
+com.android.support:design:22.2.0
 </pre>
 
 
