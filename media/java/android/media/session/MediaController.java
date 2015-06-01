@@ -1018,7 +1018,9 @@ public final class MediaController {
         }
 
         public void post(int what, Object obj, Bundle data) {
-            obtainMessage(what, obj).sendToTarget();
+            Message msg = obtainMessage(what, obj);
+            msg.setData(data);
+            msg.sendToTarget();
         }
     }
 
