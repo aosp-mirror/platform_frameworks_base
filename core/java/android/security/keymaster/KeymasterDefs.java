@@ -93,12 +93,10 @@ public final class KeymasterDefs {
     public static final int KM_ALGORITHM_HMAC = 128;
 
     // Block modes.
-    public static final int KM_MODE_FIRST_UNAUTHENTICATED = 1;
-    public static final int KM_MODE_ECB = KM_MODE_FIRST_UNAUTHENTICATED;
+    public static final int KM_MODE_ECB = 1;
     public static final int KM_MODE_CBC = 2;
-    public static final int KM_MODE_CTR = 4;
-    public static final int KM_MODE_FIRST_AUTHENTICATED = 32;
-    public static final int KM_MODE_GCM = KM_MODE_FIRST_AUTHENTICATED;
+    public static final int KM_MODE_CTR = 3;
+    public static final int KM_MODE_GCM = 32;
 
     // Padding modes.
     public static final int KM_PAD_NONE = 1;
