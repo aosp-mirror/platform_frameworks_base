@@ -57,7 +57,7 @@
     <string name="empty" msgid="7858882803708117596">"Бос"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Файлды аша алмады"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Кейбір құжаттарды жою мүмкін болмады"</string>
-    <string name="share_via" msgid="8966594246261344259">"арқылы бөлісу"</string>
+    <string name="share_via" msgid="8966594246261344259">"Бөлісу"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Файлдарды көшіру"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> қалды"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
