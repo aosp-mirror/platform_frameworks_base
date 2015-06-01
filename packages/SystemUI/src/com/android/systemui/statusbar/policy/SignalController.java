@@ -133,22 +133,10 @@ public abstract class SignalController<T extends SignalController.State,
      * Gets the signal icon for SB based on current state of connected, enabled, and level.
      */
     public int getCurrentIconId() {
-        return getCurrentIconId(true /* light */);
-    }
-
-    protected int getCurrentIconId(boolean light) {
         if (mCurrentState.connected) {
-            if (light) {
-                return getIcons().mSbIcons[mCurrentState.inetCondition][mCurrentState.level];
-            } else {
-                return getIcons().mSbDarkIcons[mCurrentState.inetCondition][mCurrentState.level];
-            }
+            return getIcons().mSbIcons[mCurrentState.inetCondition][mCurrentState.level];
         } else if (mCurrentState.enabled) {
-            if (light) {
-                return getIcons().mSbDiscState;
-            } else {
-                return getIcons().mSbDarkDiscState;
-            }
+            return getIcons().mSbDiscState;
         } else {
             return getIcons().mSbNullState;
         }
@@ -229,13 +217,11 @@ public abstract class SignalController<T extends SignalController.State,
      */
     static class IconGroup {
         final int[][] mSbIcons;
-        final int[][] mSbDarkIcons;
         final int[][] mQsIcons;
         final int[] mContentDesc;
         final int mSbNullState;
         final int mQsNullState;
         final int mSbDiscState;
-        final int mSbDarkDiscState;
         final int mQsDiscState;
         final int mDiscContentDesc;
         // For logging.
@@ -244,22 +230,13 @@ public abstract class SignalController<T extends SignalController.State,
         public IconGroup(String name, int[][] sbIcons, int[][] qsIcons, int[] contentDesc,
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
                 int discContentDesc) {
-            this(name, sbIcons, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState,
-                    sbDiscState, sbDiscState, qsDiscState, discContentDesc);
-        }
-
-        public IconGroup(String name, int[][] sbIcons, int[][] sbDarkIcons, int[][] qsIcons,
-                int[] contentDesc, int sbNullState, int qsNullState, int sbDiscState,
-                int sbDarkDiscState, int qsDiscState, int discContentDesc) {
             mName = name;
             mSbIcons = sbIcons;
-            mSbDarkIcons = sbDarkIcons;
             mQsIcons = qsIcons;
             mContentDesc = contentDesc;
             mSbNullState = sbNullState;
             mQsNullState = qsNullState;
             mSbDiscState = sbDiscState;
-            mSbDarkDiscState = sbDarkDiscState;
             mQsDiscState = qsDiscState;
             mDiscContentDesc = discContentDesc;
         }
