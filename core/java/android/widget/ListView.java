@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Trace;
 import com.android.internal.R;
@@ -144,7 +145,7 @@ public class ListView extends AbsListView {
     }
 
     public ListView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.listViewStyle);
+        this(context, attrs, R.attr.listViewStyle);
     }
 
     public ListView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -155,38 +156,37 @@ public class ListView extends AbsListView {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.ListView, defStyleAttr, defStyleRes);
+                attrs, R.styleable.ListView, defStyleAttr, defStyleRes);
 
-        CharSequence[] entries = a.getTextArray(
-                com.android.internal.R.styleable.ListView_entries);
+        final CharSequence[] entries = a.getTextArray(R.styleable.ListView_entries);
         if (entries != null) {
-            setAdapter(new ArrayAdapter<CharSequence>(context,
-                    com.android.internal.R.layout.simple_list_item_1, entries));
+            setAdapter(new ArrayAdapter<>(context, R.layout.simple_list_item_1, entries));
         }
 
-        final Drawable d = a.getDrawable(com.android.internal.R.styleable.ListView_divider);
+        final Drawable d = a.getDrawable(R.styleable.ListView_divider);
         if (d != null) {
-            // If a divider is specified use its intrinsic height for divider height
+            // Use an implicit divider height which may be explicitly
+            // overridden by android:dividerHeight further down.
             setDivider(d);
         }
-        
-        final Drawable osHeader = a.getDrawable(
-                com.android.internal.R.styleable.ListView_overScrollHeader);
+
+        final Drawable osHeader = a.getDrawable(R.styleable.ListView_overScrollHeader);
         if (osHeader != null) {
             setOverscrollHeader(osHeader);
         }
 
-        final Drawable osFooter = a.getDrawable(
-                com.android.internal.R.styleable.ListView_overScrollFooter);
+        final Drawable osFooter = a.getDrawable(R.styleable.ListView_overScrollFooter);
         if (osFooter != null) {
             setOverscrollFooter(osFooter);
         }
 
-        // Use the height specified, zero being the default
-        final int dividerHeight = a.getDimensionPixelSize(
-                com.android.internal.R.styleable.ListView_dividerHeight, 0);
-        if (dividerHeight != 0) {
-            setDividerHeight(dividerHeight);
+        // Use an explicit divider height, if specified.
+        if (a.hasValueOrEmpty(R.styleable.ListView_dividerHeight)) {
+            final int dividerHeight = a.getDimensionPixelSize(
+                    R.styleable.ListView_dividerHeight, 0);
+            if (dividerHeight != 0) {
+                setDividerHeight(dividerHeight);
+            }
         }
 
         mHeaderDividersEnabled = a.getBoolean(R.styleable.ListView_headerDividersEnabled, true);
@@ -3434,18 +3434,23 @@ public class ListView extends AbsListView {
      * Returns the drawable that will be drawn between each item in the list.
      *
      * @return the current drawable drawn between list elements
+     * @attr ref R.styleable#ListView_divider
      */
+    @Nullable
     public Drawable getDivider() {
         return mDivider;
     }
 
     /**
-     * Sets the drawable that will be drawn between each item in the list. If the drawable does
-     * not have an intrinsic height, you should also call {@link #setDividerHeight(int)}
+     * Sets the drawable that will be drawn between each item in the list.
+     * <p>
+     * <strong>Note:</strong> If the drawable does not have an intrinsic
+     * height, you should also call {@link #setDividerHeight(int)}.
      *
-     * @param divider The drawable to use.
+     * @param divider the drawable to use
+     * @attr ref R.styleable#ListView_divider
      */
-    public void setDivider(Drawable divider) {
+    public void setDivider(@Nullable Drawable divider) {
         if (divider != null) {
             mDividerHeight = divider.getIntrinsicHeight();
         } else {
