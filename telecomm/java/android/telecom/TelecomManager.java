@@ -69,9 +69,7 @@ public class TelecomManager {
     /**
      * The {@link android.content.Intent} action used to configure a
      * {@link android.telecom.ConnectionService}.
-     * @hide
      */
-    @SystemApi
     public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
             "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
 
