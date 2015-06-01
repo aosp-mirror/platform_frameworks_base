@@ -124,17 +124,16 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
 
     @Override
     public void setMobileDataIndicators(final IconState statusIcon, final IconState qsIcon,
-            final int darkStatusIcon, final int statusType, final int qsType,
-            final boolean activityIn, final boolean activityOut,
-            final String typeContentDescription, final String description, final boolean isWide,
-            final int subId) {
+            final int statusType, final int qsType,final boolean activityIn,
+            final boolean activityOut, final String typeContentDescription,
+            final String description, final boolean isWide, final int subId) {
         post(new Runnable() {
             @Override
             public void run() {
                 for (SignalCallback signalCluster : mSignalCallbacks) {
-                    signalCluster.setMobileDataIndicators(statusIcon, qsIcon, darkStatusIcon,
-                            statusType, qsType, activityIn, activityOut, typeContentDescription,
-                            description, isWide, subId);
+                    signalCluster.setMobileDataIndicators(statusIcon, qsIcon, statusType, qsType,
+                            activityIn, activityOut, typeContentDescription, description, isWide,
+                            subId);
                 }
             }
         });

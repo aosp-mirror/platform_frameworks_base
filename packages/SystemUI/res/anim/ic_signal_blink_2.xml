@@ -23,22 +23,22 @@
         android:valueType="colorType">
         <keyframe
             android:fraction="0.0"
-            android:value="@color/light_mode_icon_color_dual_tone_background"/>
+            android:value="?attr/backgroundColor"/>
         <keyframe
             android:fraction="0.32"
-            android:value="@color/light_mode_icon_color_dual_tone_background"/>
+            android:value="?attr/backgroundColor"/>
         <keyframe
             android:fraction="0.33"
-            android:value="@color/light_mode_icon_color_dual_tone_fill"/>
+            android:value="?attr/fillColor"/>
         <keyframe
             android:fraction="0.66"
-            android:value="@color/light_mode_icon_color_dual_tone_fill"/>
+            android:value="?attr/fillColor"/>
         <keyframe
             android:fraction="0.67"
-            android:value="@color/light_mode_icon_color_dual_tone_background"/>
+            android:value="?attr/backgroundColor"/>
         <keyframe
             android:fraction="1.0"
-            android:value="@color/light_mode_icon_color_dual_tone_background"/>
+            android:value="?attr/backgroundColor"/>
     </propertyValuesHolder>
 
 </objectAnimator>
