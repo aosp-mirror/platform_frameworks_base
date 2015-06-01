@@ -2771,8 +2771,9 @@
              to allow the children to draw outside of their bounds. The default value of
              this property is true. -->
         <attr name="clipChildren" format="boolean" />
-        <!-- Defines whether the ViewGroup will clip its children to its padding, if
-             padding is not zero. This property is set to true by default. -->
+        <!-- Defines whether the ViewGroup will clip its children and resize (but not clip) any
+             EdgeEffect to its padding, if padding is not zero. This property is set to true by
+             default. -->
         <attr name="clipToPadding" format="boolean" />
         <!-- Defines the layout animation to use the first time the ViewGroup is laid out.
              Layout animations can also be started manually after the first layout. -->
