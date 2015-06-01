@@ -30101,6 +30101,7 @@ package android.telecom {
     method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
     method public final void setConnectionCapabilities(int);
     method public final void setConnectionTime(long);
+    method public final void setDialing();
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setExtras(android.os.Bundle);
     method public final void setOnHold();
