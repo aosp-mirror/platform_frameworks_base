@@ -265,6 +265,13 @@ public class ZenModeHelper {
                     return;
                 }
                 config.manualRule = null;  // don't restore the manual rule
+                if (config.automaticRules != null) {
+                    for (ZenModeConfig.ZenRule automaticRule : config.automaticRules.values()) {
+                        // don't restore transient state from restored automatic rules
+                        automaticRule.snoozing = false;
+                        automaticRule.condition = null;
+                    }
+                }
             }
             if (DEBUG) Log.d(TAG, "readXml");
             setConfig(config, "readXml");
@@ -498,7 +505,7 @@ public class ZenModeHelper {
         if (config == null) return;
 
         final EventInfo events = new EventInfo();
-        events.calendar = EventInfo.ANY_CALENDAR;
+        events.calendar = null; // any calendar
         events.reply = EventInfo.REPLY_YES_OR_MAYBE;
         final ZenRule rule = new ZenRule();
         rule.enabled = false;
