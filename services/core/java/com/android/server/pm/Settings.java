@@ -4386,7 +4386,7 @@ final class Settings {
 
             FileInputStream in;
             try {
-                in = new FileInputStream(permissionsFile);
+                in = new AtomicFile(permissionsFile).openRead();
             } catch (FileNotFoundException fnfe) {
                 Slog.i(PackageManagerService.TAG, "No permissions state");
                 return;
