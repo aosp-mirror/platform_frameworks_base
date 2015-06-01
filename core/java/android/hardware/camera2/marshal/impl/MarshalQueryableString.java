@@ -31,7 +31,7 @@ import static android.hardware.camera2.impl.CameraMetadataNative.*;
 public class MarshalQueryableString implements MarshalQueryable<String> {
 
     private static final String TAG = MarshalQueryableString.class.getSimpleName();
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
     private static final byte NUL = (byte)'\0'; // used as string terminator
@@ -72,7 +72,7 @@ public class MarshalQueryableString implements MarshalQueryable<String> {
                 stringLength++;
             }
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG,
                         "unmarshal - scanned " + stringLength + " characters; found null? "
                                 + foundNull);

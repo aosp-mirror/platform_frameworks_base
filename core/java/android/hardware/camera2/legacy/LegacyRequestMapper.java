@@ -42,7 +42,7 @@ import static android.hardware.camera2.CaptureRequest.*;
 @SuppressWarnings("deprecation")
 public class LegacyRequestMapper {
     private static final String TAG = "LegacyRequestMapper";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     /** Default quality for android.jpeg.quality, android.jpeg.thumbnailQuality */
     private static final byte DEFAULT_JPEG_QUALITY = 85;
@@ -75,7 +75,7 @@ public class LegacyRequestMapper {
 
             if (params.isZoomSupported()) {
                 params.setZoom(zoomData.zoomIndex);
-            } else if (VERBOSE) {
+            } else if (DEBUG) {
                 Log.v(TAG, "convertRequestToMetadata - zoom is not supported");
             }
         }
@@ -210,7 +210,7 @@ public class LegacyRequestMapper {
                 params.setAutoExposureLock(aeLock);
             }
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "convertRequestToMetadata - control.aeLock set to " + aeLock);
             }
 
@@ -231,7 +231,7 @@ public class LegacyRequestMapper {
                 params.setFocusMode(focusMode);
             }
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "convertRequestToMetadata - control.afMode "
                         + afMode + " mapped to " + focusMode);
             }
@@ -250,7 +250,7 @@ public class LegacyRequestMapper {
                 params.setWhiteBalance(whiteBalanceMode);
             }
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "convertRequestToMetadata - control.awbMode "
                         + awbMode + " mapped to " + whiteBalanceMode);
             }
@@ -520,7 +520,7 @@ public class LegacyRequestMapper {
                             " regions, ignoring all beyond the first " + maxNumMeteringAreas);
         }
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "convertMeteringRegionsToLegacy - " + regionName + " areas = "
                     + ParameterUtils.stringFromAreaList(meteringAreaList));
         }
@@ -593,7 +593,7 @@ public class LegacyRequestMapper {
             p.setFlashMode(flashModeSetting);
         }
 
-        if (VERBOSE) {
+        if (DEBUG) {
                 Log.v(TAG,
                         "mapAeAndFlashMode - set flash.mode (api1) to " + flashModeSetting
                         + ", requested (api2) " + flashMode

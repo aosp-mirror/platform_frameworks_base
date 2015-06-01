@@ -56,7 +56,7 @@ import java.util.ArrayList;
 public final class CameraManager {
 
     private static final String TAG = "CameraManager";
-    private final boolean DEBUG;
+    private final boolean DEBUG = false;
 
     private static final int USE_CALLING_UID = -1;
 
@@ -73,7 +73,6 @@ public final class CameraManager {
      * @hide
      */
     public CameraManager(Context context) {
-        DEBUG = Log.isLoggable(TAG, Log.DEBUG);
         synchronized(mLock) {
             mContext = context;
         }
@@ -722,7 +721,7 @@ public final class CameraManager {
             implements IBinder.DeathRecipient {
 
         private static final String TAG = "CameraManagerGlobal";
-        private final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+        private final boolean DEBUG = false;
 
         // Singleton instance
         private static final CameraManagerGlobal gCameraManager =
