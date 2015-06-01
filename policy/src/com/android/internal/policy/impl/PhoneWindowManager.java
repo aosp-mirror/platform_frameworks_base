@@ -3641,7 +3641,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect vf = mTmpVisibleFrame;
         final Rect dcf = mTmpDecorFrame;
         final Rect sf = mTmpStableFrame;
-        final Rect osf = mTmpOutsetFrame;
+        Rect osf = null;
         dcf.setEmpty();
 
         final boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
@@ -3654,7 +3654,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             sf.set(mOverscanLeft, mOverscanTop, mOverscanRight, mOverscanBottom);
         }
-        osf.set(mStableLeft, mStableTop, mStableRight, mStableBottom);
 
         if (!isDefaultDisplay) {
             if (attached != null) {
@@ -4029,7 +4028,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // If the device has a chin (e.g. some watches), a dead area at the bottom of the screen we
         // need to provide information to the clients that want to pretend that you can draw there.
-        if (isDefaultDisplay) {
+        if (isDefaultDisplay && (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0) {
+            osf = mTmpOutsetFrame;
+            osf.set(cf.left, cf.top, cf.right, cf.bottom);
             int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
             if (outset > 0) {
                 int rotation = Surface.ROTATION_0;
@@ -4060,7 +4061,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
                 + " dcf=" + dcf.toShortString()
                 + " sf=" + sf.toShortString()
-                + " osf=" + osf.toShortString());
+                + " osf=" + (osf == null ? "null" : osf.toShortString()));
 
         win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf);
 
