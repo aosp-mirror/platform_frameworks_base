@@ -67,6 +67,7 @@ public class PhoneStatusBarPolicy {
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
+    private final AlarmManager mAlarmManager;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -112,7 +113,8 @@ public class PhoneStatusBarPolicy {
         mContext = context;
         mCast = cast;
         mHotspot = hotspot;
-        mService = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -173,9 +175,11 @@ public class PhoneStatusBarPolicy {
     }
 
     private void updateAlarm() {
-        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmSet);
+        final boolean hasAlarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
+        final boolean zenNone = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mService.setIconVisibility(SLOT_ALARM_CLOCK, hasAlarm);
+        mService.setIcon(SLOT_ALARM_CLOCK, zenNone ? R.drawable.stat_sys_alarm_dim
+                : R.drawable.stat_sys_alarm, 0, null);
     }
 
     private final void updateSimState(Intent intent) {
@@ -259,6 +263,7 @@ public class PhoneStatusBarPolicy {
             mService.setIconVisibility(SLOT_VOLUME, volumeVisible);
             mVolumeVisible = volumeVisible;
         }
+        updateAlarm();
     }
 
     private final void updateBluetooth() {
