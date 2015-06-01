@@ -6486,7 +6486,9 @@ package android.bluetooth {
     method public static boolean checkBluetoothAddress(java.lang.String);
     method public void closeProfileProxy(int, android.bluetooth.BluetoothProfile);
     method public boolean disable();
+    method public boolean disableBLE();
     method public boolean enable();
+    method public boolean enableBLE();
     method public java.lang.String getAddress();
     method public android.bluetooth.le.BluetoothLeAdvertiser getBluetoothLeAdvertiser();
     method public android.bluetooth.le.BluetoothLeScanner getBluetoothLeScanner();
@@ -6502,6 +6504,7 @@ package android.bluetooth {
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isDiscovering();
     method public boolean isEnabled();
+    method public boolean isLeEnabled();
     method public boolean isMultipleAdvertisementSupported();
     method public boolean isOffloadedFilteringSupported();
     method public boolean isOffloadedScanBatchingSupported();
@@ -6512,6 +6515,7 @@ package android.bluetooth {
     method public deprecated boolean startLeScan(android.bluetooth.BluetoothAdapter.LeScanCallback);
     method public deprecated boolean startLeScan(java.util.UUID[], android.bluetooth.BluetoothAdapter.LeScanCallback);
     method public deprecated void stopLeScan(android.bluetooth.BluetoothAdapter.LeScanCallback);
+    field public static final java.lang.String ACTION_BLE_STATE_CHANGED = "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
     field public static final java.lang.String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
     field public static final java.lang.String ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
     field public static final java.lang.String ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
