@@ -57,12 +57,12 @@ Platform Versions</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on May 4, 2015.
+<p style="clear:both"><em>Data collected during a 7-day period ending on June 1, 2015.
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
-<p class="note"><strong>Note:</strong> Because this data is gathered from the new Google Play
-Store app, which supports Android 2.2 and above, devices running older versions are not included.
+<p class="note"><strong>Note:</strong> This data is gathered from the new Google Play
+Store app, which supports Android 2.2 and above, so devices running older versions are not included.
 However, in August, 2013, versions older than Android 2.2 accounted for about 1% of devices that
 <em>checked in</em> to Google servers (not those that actually visited Google Play Store).
 </p>
@@ -88,7 +88,7 @@ Screens</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on May 4, 2015.
+<p style="clear:both"><em>Data collected during a 7-day period ending on June 1, 2015.
 
 <br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
@@ -108,7 +108,7 @@ support for any lower version (for example, support for version 2.0 also implies
 
 
 <img alt="" style="float:right"
-src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0%7CGL%203.1&chf=bg%2Cs%2C00000000&chd=t%3A64.1%2C34.5%2C1.4&chco=c4df9b%2C6fad0c&cht=p&chs=400x250">
+src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0%7CGL%203.1&chf=bg%2Cs%2C00000000&chd=t%3A63.0%2C35.0%2C2.0&chco=c4df9b%2C6fad0c&cht=p&chs=400x250">
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
@@ -126,21 +126,21 @@ uses.</p>
 </tr>
 <tr>
 <td>2.0</td>
-<td>64.1%</td>
+<td>63.0%</td>
 </tr>
 <tr>
 <td>3.0</td>
-<td>34.5%</td>
+<td>35.0%</td>
 </tr>
 <tr>
 <td>3.1</td>
-<td>1.4%</td>
+<td>2.0%</td>
 </tr>
 </table>
 
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on May 4, 2015</em></p>
+<p style="clear:both"><em>Data collected during a 7-day period ending on June 1, 2015</em></p>
 
 
 
@@ -158,7 +158,7 @@ uses.</p>
 var VERSION_DATA =
 [
   {
-    "chart": "//chart.googleapis.com/chart?chf=bg%2Cs%2C00000000&chd=t%3A0.3%2C5.7%2C5.3%2C39.2%2C39.8%2C9.7&chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chs=500x250&cht=p&chco=c4df9b%2C6fad0c",
+    "chart": "//chart.googleapis.com/chart?chco=c4df9b%2C6fad0c&cht=p&chs=500x250&chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chd=t%3A0.3%2C5.6%2C5.1%2C37.4%2C39.2%2C12.4&chf=bg%2Cs%2C00000000",
     "data": [
       {
         "api": 8,
@@ -168,42 +168,42 @@ var VERSION_DATA =
       {
         "api": 10,
         "name": "Gingerbread",
-        "perc": "5.7"
+        "perc": "5.6"
       },
       {
         "api": 15,
         "name": "Ice Cream Sandwich",
-        "perc": "5.3"
+        "perc": "5.1"
       },
       {
         "api": 16,
         "name": "Jelly Bean",
-        "perc": "15.6"
+        "perc": "14.7"
       },
       {
         "api": 17,
         "name": "Jelly Bean",
-        "perc": "18.1"
+        "perc": "17.5"
       },
       {
         "api": 18,
         "name": "Jelly Bean",
-        "perc": "5.5"
+        "perc": "5.2"
       },
       {
         "api": 19,
         "name": "KitKat",
-        "perc": "39.8"
+        "perc": "39.2"
       },
       {
         "api": 21,
         "name": "Lollipop",
-        "perc": "9.0"
+        "perc": "11.6"
       },
       {
         "api": 22,
         "name": "Lollipop",
-        "perc": "0.7"
+        "perc": "0.8"
       }
     ]
   }
@@ -222,23 +222,23 @@ var SCREEN_DATA =
         "xhdpi": "0.6"
       },
       "Normal": {
-        "hdpi": "39.5",
+        "hdpi": "39.9",
         "mdpi": "7.6",
         "tvdpi": "0.1",
         "xhdpi": "19.8",
-        "xxhdpi": "16.2"
+        "xxhdpi": "15.9"
       },
       "Small": {
         "ldpi": "4.1"
       },
       "Xlarge": {
         "hdpi": "0.3",
-        "mdpi": "3.2",
+        "mdpi": "3.1",
         "xhdpi": "0.6"
       }
     },
-    "densitychart": "//chart.googleapis.com/chart?chf=bg%2Cs%2C00000000&chd=t%3A4.5%2C15.6%2C2.3%2C40.4%2C21.0%2C16.2&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chs=400x250&cht=p&chco=c4df9b%2C6fad0c",
-    "layoutchart": "//chart.googleapis.com/chart?chf=bg%2Cs%2C00000000&chd=t%3A4.1%2C8.6%2C83.2%2C4.1&chl=Xlarge%7CLarge%7CNormal%7CSmall&chs=400x250&cht=p&chco=c4df9b%2C6fad0c"
+    "densitychart": "//chart.googleapis.com/chart?chco=c4df9b%2C6fad0c&cht=p&chs=400x250&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chd=t%3A4.5%2C15.5%2C2.3%2C40.8%2C21.0%2C15.9&chf=bg%2Cs%2C00000000",
+    "layoutchart": "//chart.googleapis.com/chart?chco=c4df9b%2C6fad0c&cht=p&chs=400x250&chl=Xlarge%7CLarge%7CNormal%7CSmall&chd=t%3A4.0%2C8.6%2C83.3%2C4.1&chf=bg%2Cs%2C00000000"
   }
 ];
 
