@@ -145,13 +145,6 @@ public abstract class ViewStructure {
     public abstract void setText(CharSequence text, int selectionStart, int selectionEnd);
 
     /**
-     * Set default global style of the text previously set with
-     * {@link #setText}, derived from the given TextPaint object.  Size, foreground color,
-     * background color, and style information will be extracted from the paint.
-     */
-    public abstract void setTextPaint(TextPaint paint);
-
-    /**
      * Explicitly set default global style information for text that was previously set with
      * {@link #setText}.
      *
@@ -160,7 +153,7 @@ public abstract class ViewStructure {
      * @param bgColor The background color, packed as 0xAARRGGBB.
      * @param style Style flags, as defined by {@link android.app.AssistStructure.ViewNode}.
      */
-    public abstract void setTextStyle(int size, int fgColor, int bgColor, int style);
+    public abstract void setTextStyle(float size, int fgColor, int bgColor, int style);
 
     /**
      * Set optional hint text associated with this view; this is for example the text that is

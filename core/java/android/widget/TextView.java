@@ -25,6 +25,7 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.XmlRes;
 import android.app.Activity;
+import android.app.AssistStructure;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -8785,7 +8786,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod();
         if (!isPassword) {
             structure.setText(getText(), getSelectionStart(), getSelectionEnd());
-            structure.setTextPaint(mTextPaint);
+
+            // Extract style information that applies to the TextView as a whole.
+            int style = 0;
+            int typefaceStyle = getTypefaceStyle();
+            if ((typefaceStyle & Typeface.BOLD) != 0) {
+                style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
+            }
+            if ((typefaceStyle & Typeface.ITALIC) != 0) {
+                style |= AssistStructure.ViewNode.TEXT_STYLE_ITALIC;
+            }
+
+            // Global styles can also be set via TextView.setPaintFlags().
+            int paintFlags = mTextPaint.getFlags();
+            if ((paintFlags & Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
+                style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
+            }
+            if ((paintFlags & Paint.UNDERLINE_TEXT_FLAG) != 0) {
+                style |= AssistStructure.ViewNode.TEXT_STYLE_UNDERLINE;
+            }
+            if ((paintFlags & Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
+                style |= AssistStructure.ViewNode.TEXT_STYLE_STRIKE_THRU;
+            }
+
+            // TextView does not have its own text background color. A background is either part
+            // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
+            structure.setTextStyle(getTextSize(), getCurrentTextColor(),
+                    AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
         }
         structure.setHint(getHint());
     }

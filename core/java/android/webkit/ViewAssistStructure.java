@@ -132,12 +132,7 @@ public class ViewAssistStructure extends android.view.ViewAssistStructure {
     }
 
     @Override
-    public  void setTextPaint(TextPaint paint) {
-        mV.setTextPaint(paint);
-    }
-
-    @Override
-    public void setTextStyle(int size, int fgColor, int bgColor, int style) {
+    public void setTextStyle(float size, int fgColor, int bgColor, int style) {
         mV.setTextStyle(size, fgColor, bgColor, style);
     }
 
