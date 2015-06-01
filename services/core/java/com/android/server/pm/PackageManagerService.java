@@ -1876,7 +1876,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             alreadyDexOpted.add(frameworkDir.getPath() + "/core-libart.jar");
 
             /**
-             * And there are a number of commands implemented in Java, which
+             * There are a number of commands implemented in Java, which
              * we currently need to do the dexopt on so that they can be
              * run from a non-root shell.
              */
@@ -6361,63 +6361,39 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final String path = scanFile.getPath();
         final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
-        if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) {
-            setBundledAppAbisAndRoots(pkg, pkgSetting);
 
-            // If we haven't found any native libraries for the app, check if it has
-            // renderscript code. We'll need to force the app to 32 bit if it has
-            // renderscript bitcode.
-            if (pkg.applicationInfo.primaryCpuAbi == null
-                    && pkg.applicationInfo.secondaryCpuAbi == null
-                    && Build.SUPPORTED_64_BIT_ABIS.length >  0) {
-                NativeLibraryHelper.Handle handle = null;
-                try {
-                    handle = NativeLibraryHelper.Handle.create(scanFile);
-                    if (NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
-                        pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
-                    }
-                } catch (IOException ioe) {
-                    Slog.w(TAG, "Error scanning system app : " + ioe);
-                } finally {
-                    IoUtils.closeQuietly(handle);
-                }
-            }
-
-            setNativeLibraryPaths(pkg);
+        if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
+            derivePackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
         } else {
-            if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-                deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
-            } else {
-                if ((scanFlags & SCAN_MOVE) != 0) {
-                    // We haven't run dex-opt for this move (since we've moved the compiled output too)
-                    // but we already have this packages package info in the PackageSetting. We just
-                    // use that and derive the native library path based on the new codepath.
-                    pkg.applicationInfo.primaryCpuAbi = pkgSetting.primaryCpuAbiString;
-                    pkg.applicationInfo.secondaryCpuAbi = pkgSetting.secondaryCpuAbiString;
-                }
-
-                // Set native library paths again. For moves, the path will be updated based on the
-                // ABIs we've determined above. For non-moves, the path will be updated based on the
-                // ABIs we determined during compilation, but the path will depend on the final
-                // package path (after the rename away from the stage path).
-                setNativeLibraryPaths(pkg);
+            if ((scanFlags & SCAN_MOVE) != 0) {
+                // We haven't run dex-opt for this move (since we've moved the compiled output too)
+                // but we already have this packages package info in the PackageSetting. We just
+                // use that and derive the native library path based on the new codepath.
+                pkg.applicationInfo.primaryCpuAbi = pkgSetting.primaryCpuAbiString;
+                pkg.applicationInfo.secondaryCpuAbi = pkgSetting.secondaryCpuAbiString;
             }
 
-            if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
-            final int[] userIds = sUserManager.getUserIds();
-            synchronized (mInstallLock) {
-                // Create a native library symlink only if we have native libraries
-                // and if the native libraries are 32 bit libraries. We do not provide
-                // this symlink for 64 bit libraries.
-                if (pkg.applicationInfo.primaryCpuAbi != null &&
-                        !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
-                    final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
-                    for (int userId : userIds) {
-                        if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
-                                nativeLibPath, userId) < 0) {
-                            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                    "Failed linking native library dir (user=" + userId + ")");
-                        }
+            // Set native library paths again. For moves, the path will be updated based on the
+            // ABIs we've determined above. For non-moves, the path will be updated based on the
+            // ABIs we determined during compilation, but the path will depend on the final
+            // package path (after the rename away from the stage path).
+            setNativeLibraryPaths(pkg);
+        }
+
+        if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
+        final int[] userIds = sUserManager.getUserIds();
+        synchronized (mInstallLock) {
+            // Create a native library symlink only if we have native libraries
+            // and if the native libraries are 32 bit libraries. We do not provide
+            // this symlink for 64 bit libraries.
+            if (pkg.applicationInfo.primaryCpuAbi != null &&
+                    !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
+                final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
+                for (int userId : userIds) {
+                    if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
+                            nativeLibPath, userId) < 0) {
+                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Failed linking native library dir (user=" + userId + ")");
                     }
                 }
             }
@@ -6946,8 +6922,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      *
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
-    public void deriveNonSystemPackageAbi(PackageParser.Package pkg, File scanFile,
-                                          String cpuAbiOverride, boolean extractLibs)
+    public void derivePackageAbi(PackageParser.Package pkg, File scanFile,
+                                 String cpuAbiOverride, boolean extractLibs)
             throws PackageManagerException {
         // TODO: We can probably be smarter about this stuff. For installed apps,
         // we can calculate this information at install time once and for all. For
@@ -6959,8 +6935,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         setNativeLibraryPaths(pkg);
 
         // We would never need to extract libs for forward-locked and external packages,
-        // since the container service will do it for us.
-        if (pkg.isForwardLocked() || isExternal(pkg)) {
+        // since the container service will do it for us. We shouldn't attempt to
+        // extract libs from system app when it was not updated.
+        if (pkg.isForwardLocked() || isExternal(pkg) ||
+            (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) ) {
             extractLibs = false;
         }
 
@@ -7287,33 +7265,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 info.secondaryNativeLibraryDir = new File(info.nativeLibraryRootDir,
                         VMRuntime.getInstructionSet(info.secondaryCpuAbi)).getAbsolutePath();
             }
-        }
-    }
-
-    /**
-     * Calculate the abis and roots for a bundled app. These can uniquely
-     * be determined from the contents of the system partition, i.e whether
-     * it contains 64 or 32 bit shared libraries etc. We do not validate any
-     * of this information, and instead assume that the system was built
-     * sensibly.
-     */
-    private void setBundledAppAbisAndRoots(PackageParser.Package pkg,
-                                           PackageSetting pkgSetting) {
-        final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
-
-        // If "/system/lib64/apkname" exists, assume that is the per-package
-        // native library directory to use; otherwise use "/system/lib/apkname".
-        final String apkRoot = calculateBundledApkRoot(pkg.applicationInfo.sourceDir);
-        setBundledAppAbi(pkg, apkRoot, apkName);
-        // pkgSetting might be null during rescan following uninstall of updates
-        // to a bundled app, so accommodate that possibility.  The settings in
-        // that case will be established later from the parsed package.
-        //
-        // If the settings aren't null, sync them up with what we've just derived.
-        // note that apkRoot isn't stored in the package settings.
-        if (pkgSetting != null) {
-            pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-            pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         }
     }
 
@@ -11695,7 +11646,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             scanFlags |= SCAN_NO_DEX;
 
             try {
-                deriveNonSystemPackageAbi(pkg, new File(pkg.codePath), args.abiOverride,
+                derivePackageAbi(pkg, new File(pkg.codePath), args.abiOverride,
                         true /* extract libs */);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
