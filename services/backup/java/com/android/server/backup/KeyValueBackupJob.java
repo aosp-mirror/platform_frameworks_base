@@ -38,16 +38,17 @@ public class KeyValueBackupJob extends JobService {
             new ComponentName("android", KeyValueBackupJob.class.getName());
     private static final int JOB_ID = 0x5039;
 
-    // Once someone asks for a backup, this is how long we hold off, batching
-    // up additional requests, before running the actual backup pass.  Privileged
-    // callers can always trigger an immediate pass via BackupManager.backupNow().
+    // Minimum wait time between backups even while we're on charger
     static final long BATCH_INTERVAL = 4 * AlarmManager.INTERVAL_HOUR;
 
     // Random variation in next-backup scheduling time to avoid server load spikes
     private static final int FUZZ_MILLIS = 10 * 60 * 1000;
 
-    // Don't let the job scheduler defer forever; give it a (lenient) deadline
-    private static final long MAX_DEFERRAL = 1 * AlarmManager.INTERVAL_HOUR;
+    // Once someone asks for a backup, this is how long we hold off until we find
+    // an on-charging opportunity.  If we hit this max latency we will run the operation
+    // regardless.  Privileged callers can always trigger an immediate pass via
+    // BackupManager.backupNow().
+    private static final long MAX_DEFERRAL = AlarmManager.INTERVAL_DAY;
 
     private static boolean sScheduled = false;
     private static long sNextScheduled = 0;
@@ -70,7 +71,8 @@ public class KeyValueBackupJob extends JobService {
                 JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sKeyValueJobService)
                         .setMinimumLatency(delay)
                         .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                        .setOverrideDeadline(delay + MAX_DEFERRAL);
+                        .setRequiresCharging(true)
+                        .setOverrideDeadline(MAX_DEFERRAL);
                 js.schedule(builder.build());
 
                 sNextScheduled = System.currentTimeMillis() + delay;
