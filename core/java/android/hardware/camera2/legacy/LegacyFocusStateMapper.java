@@ -38,7 +38,7 @@ import static com.android.internal.util.Preconditions.*;
 @SuppressWarnings("deprecation")
 public class LegacyFocusStateMapper {
     private static String TAG = "LegacyFocusStateMapper";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private final Camera mCamera;
 
@@ -90,7 +90,7 @@ public class LegacyFocusStateMapper {
         final String afMode = parameters.getFocusMode();
 
         if (!Objects.equals(mAfModePrevious, afMode)) {
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "processRequestTriggers - AF mode switched from " + mAfModePrevious +
                         " to " + afMode);
             }
@@ -120,7 +120,7 @@ public class LegacyFocusStateMapper {
                     synchronized (mLock) {
                         int latestAfRun = mAfRun;
 
-                        if (VERBOSE) {
+                        if (DEBUG) {
                             Log.v(TAG,
                                     "onAutoFocusMoving - start " + start + " latest AF run " +
                                             latestAfRun + ", last AF run " + currentAfRun
@@ -192,7 +192,7 @@ public class LegacyFocusStateMapper {
                     mAfState = afStateAfterStart;
                 }
 
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG, "processRequestTriggers - got AF_TRIGGER_START, " +
                             "new AF run is " + currentAfRun);
                 }
@@ -208,7 +208,7 @@ public class LegacyFocusStateMapper {
                         synchronized (mLock) {
                             int latestAfRun = mAfRun;
 
-                            if (VERBOSE) {
+                            if (DEBUG) {
                                 Log.v(TAG, "onAutoFocus - success " + success + " latest AF run " +
                                         latestAfRun + ", last AF run " + currentAfRun);
                             }
@@ -255,7 +255,7 @@ public class LegacyFocusStateMapper {
 
                     mCamera.cancelAutoFocus();
 
-                    if (VERBOSE) {
+                    if (DEBUG) {
                         Log.v(TAG, "processRequestTriggers - got AF_TRIGGER_CANCEL, " +
                                 "new AF run is " + updatedAfRun);
                     }
@@ -288,7 +288,7 @@ public class LegacyFocusStateMapper {
             newAfState = mAfState;
         }
 
-        if (VERBOSE && newAfState != mAfStatePrevious) {
+        if (DEBUG && newAfState != mAfStatePrevious) {
             Log.v(TAG, String.format("mapResultTriggers - afState changed from %s to %s",
                     afStateToString(mAfStatePrevious), afStateToString(newAfState)));
         }

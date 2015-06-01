@@ -59,10 +59,9 @@ import static com.android.internal.util.Preconditions.*;
  * </p>
  */
 public class LegacyCameraDevice implements AutoCloseable {
-    public static final String DEBUG_PROP = "HAL1ShimLogging";
     private final String TAG;
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     private final int mCameraId;
     private final CameraCharacteristics mStaticCharacteristics;
     private final ICameraDeviceCallbacks mDeviceCallbacks;

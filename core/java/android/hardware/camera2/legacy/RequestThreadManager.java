@@ -62,10 +62,9 @@ public class RequestThreadManager {
     private final int mCameraId;
     private final RequestHandlerThread mRequestThread;
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     // For slightly more spammy messages that will get repeated every frame
-    private static final boolean VERBOSE =
-            Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
+    private static final boolean VERBOSE = false;
     private Camera mCamera;
     private final CameraCharacteristics mCharacteristics;
 
