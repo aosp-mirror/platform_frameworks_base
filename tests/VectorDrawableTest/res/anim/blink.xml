@@ -22,7 +22,7 @@
     <propertyValuesHolder
         android:propertyName="fillColor"
         android:valueType="colorType"
-        android:valueFrom="#ff3838"
-        android:valueTo="?attr/color1" />
+        android:valueFrom="?attr/color1"
+        android:valueTo="@android:color/white" />
 
 </objectAnimator>
