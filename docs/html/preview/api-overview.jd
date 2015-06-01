@@ -61,7 +61,7 @@ influencing the direction of the Android framework,
 <a href="{@docRoot}preview/setup-sdk.html">give the M Developer Preview a
 try</a> and send us your feedback!</p>
 
-<p class="caution"><strong>Caution:</strong> Do not not publish apps
+<p class="caution"><strong>Caution:</strong> Do not publish apps
 that use the M Developer Preview to the Google Play store.</p>
 
 <p class="note"><strong>Note:</strong> This document often refers to classes and
