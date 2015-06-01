@@ -758,7 +758,10 @@ final class AccessibilityInteractionController {
             Rect visibleDisplayFrame = mTempRect2;
             visibleDisplayFrame.set(0, 0, displayWidth, displayHeight);
 
-            visibleWinFrame.intersect(visibleDisplayFrame);
+            if (!visibleWinFrame.intersect(visibleDisplayFrame)) {
+                // If there's no intersection with display, set visibleWinFrame empty.
+                visibleDisplayFrame.setEmpty();
+            }
 
             if (!visibleWinFrame.intersects(boundsInScreen.left, boundsInScreen.top,
                     boundsInScreen.right, boundsInScreen.bottom)) {

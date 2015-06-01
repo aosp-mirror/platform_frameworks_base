@@ -2791,7 +2791,11 @@ public final class ViewRootImpl implements ViewParent,
         final AttachInfo attachInfo = mAttachInfo;
         bounds.offset(0, attachInfo.mViewRootImpl.mScrollY);
         bounds.offset(-attachInfo.mWindowLeft, -attachInfo.mWindowTop);
-        bounds.intersect(0, 0, attachInfo.mViewRootImpl.mWidth, attachInfo.mViewRootImpl.mHeight);
+        if (!bounds.intersect(0, 0, attachInfo.mViewRootImpl.mWidth,
+                attachInfo.mViewRootImpl.mHeight)) {
+            // If no intersection, set bounds to empty.
+            bounds.setEmpty();
+        }
         return !bounds.isEmpty();
     }
 
