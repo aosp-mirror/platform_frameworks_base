@@ -1068,20 +1068,35 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>The correction coefficients to correct for this camera device's
-     * radial lens distortion.</p>
-     * <p>Three cofficients <code>[kappa_1, kappa_2, kappa_3]</code> that
-     * can be used to correct the lens's radial geometric
-     * distortion with the mapping equations:</p>
-     * <pre><code> x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 )
-     * y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 )
+     * radial and tangential lens distortion.</p>
+     * <p>Three radial distortion coefficients <code>[kappa_1, kappa_2,
+     * kappa_3]</code> and two tangential distortion coefficients
+     * <code>[kappa_4, kappa_5]</code> that can be used to correct the
+     * lens's geometric distortion with the mapping equations:</p>
+     * <pre><code> x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+     *        kappa_4 * (2 * x_i * y_i) + kappa_5 * ( r^2 + 2 * x_i^2 )
+     *  y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+     *        kappa_5 * (2 * x_i * y_i) + kappa_4 * ( r^2 + 2 * y_i^2 )
      * </code></pre>
-     * <p>where <code>[x_i, y_i]</code> are normalized coordinates with <code>(0,0)</code>
-     * at the lens optical center, and <code>[-1, 1]</code> are the edges of
-     * the active pixel array; and where <code>[x_c, y_c]</code> are the
-     * corrected normalized coordinates with radial distortion
-     * removed; and <code>r^2 = x_i^2 + y_i^2</code>.</p>
+     * <p>Here, <code>[x_c, y_c]</code> are the coordinates to sample in the
+     * input image that correspond to the pixel values in the
+     * corrected image at the coordinate <code>[x_i, y_i]</code>:</p>
+     * <pre><code> correctedImage(x_i, y_i) = sample_at(x_c, y_c, inputImage)
+     * </code></pre>
+     * <p>The pixel coordinates are defined in a normalized
+     * coordinate system related to the
+     * android.lens.intrinsicCalibration calibration fields.
+     * Both <code>[x_i, y_i]</code> and <code>[x_c, y_c]</code> have <code>(0,0)</code> at the
+     * lens optical center <code>[c_x, c_y]</code>. The maximum magnitudes
+     * of both x and y coordinates are normalized to be 1 at the
+     * edge further from the optical center, so the range
+     * for both dimensions is <code>-1 &lt;= x &lt;= 1</code>.</p>
+     * <p>Finally, <code>r</code> represents the radial distance from the
+     * optical center, <code>r^2 = x_i^2 + y_i^2</code>, and its magnitude
+     * is therefore no larger than <code>|r| &lt;= sqrt(2)</code>.</p>
+     * <p>The distortion model used is the Brown-Conrady model.</p>
      * <p><b>Units</b>:
-     * Coefficients for a 6th-degree even radial polynomial.</p>
+     * Unitless coefficients.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
     @PublicKey
