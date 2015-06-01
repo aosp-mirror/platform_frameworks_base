@@ -12,7 +12,7 @@ page.title=Application.mk
     </div>
   </div>
 
-<p>This document explains the syntax of the {@code Application.mk} build file, which describes the
+<p>This document explains the {@code Application.mk} build file, which describes the
 native <em>modules</em> that your app requires. A module can be a static library, a shared library,
 or an executable.</p>
 
