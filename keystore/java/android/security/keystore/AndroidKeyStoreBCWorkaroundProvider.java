@@ -51,10 +51,29 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
 
         // javax.crypto.Mac
         putMacImpl("HmacSHA1", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA1");
+        put("Alg.Alias.Mac.1.2.840.113549.2.7", "HmacSHA1");
+        put("Alg.Alias.Mac.HMAC-SHA1", "HmacSHA1");
+        put("Alg.Alias.Mac.HMAC/SHA1", "HmacSHA1");
+
         putMacImpl("HmacSHA224", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA224");
+        put("Alg.Alias.Mac.1.2.840.113549.2.9", "HmacSHA224");
+        put("Alg.Alias.Mac.HMAC-SHA224", "HmacSHA224");
+        put("Alg.Alias.Mac.HMAC/SHA224", "HmacSHA224");
+
         putMacImpl("HmacSHA256", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA256");
+        put("Alg.Alias.Mac.1.2.840.113549.2.9", "HmacSHA256");
+        put("Alg.Alias.Mac.HMAC-SHA256", "HmacSHA256");
+        put("Alg.Alias.Mac.HMAC/SHA256", "HmacSHA256");
+
         putMacImpl("HmacSHA384", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA384");
+        put("Alg.Alias.Mac.1.2.840.113549.2.10", "HmacSHA384");
+        put("Alg.Alias.Mac.HMAC-SHA384", "HmacSHA384");
+        put("Alg.Alias.Mac.HMAC/SHA384", "HmacSHA384");
+
         putMacImpl("HmacSHA512", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA512");
+        put("Alg.Alias.Mac.1.2.840.113549.2.11", "HmacSHA512");
+        put("Alg.Alias.Mac.HMAC-SHA512", "HmacSHA512");
+        put("Alg.Alias.Mac.HMAC/SHA512", "HmacSHA512");
 
         // javax.crypto.Cipher
         putSymmetricCipherImpl("AES/ECB/NoPadding",
