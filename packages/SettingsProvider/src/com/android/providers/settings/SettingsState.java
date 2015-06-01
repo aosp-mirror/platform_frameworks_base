@@ -400,7 +400,7 @@ final class SettingsState {
             return;
         }
         try {
-            in = new FileInputStream(mStatePersistFile);
+            in = new AtomicFile(mStatePersistFile).openRead();
         } catch (FileNotFoundException fnfe) {
             Slog.i(LOG_TAG, "No settings state");
             return;
