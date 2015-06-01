@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"सबै चयन गर्नुहोस्"</string>
     <string name="menu_copy" msgid="3612326052677229148">"यसमा प्रतिलिपि गर्नुहोस् ..."</string>
     <string name="menu_move" msgid="1828090633118079817">"…मा सार्नुहोस्"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"प्रतिलिपि बनाउनुहोस्"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"टाँस्नुहोस्"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"आन्तरिक भण्डारण देखाउनुहोस्"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD कार्ड देखाउनुहोस्"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"आन्तरिक भण्डारण लुकाउनुहोस्"</string>
