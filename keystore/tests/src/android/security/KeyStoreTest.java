@@ -806,8 +806,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
-        args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
-        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
@@ -819,6 +817,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 128);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, null, out);
         IBinder token = result.token;
@@ -827,6 +826,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertEquals("Update should succeed", KeyStore.NO_ERROR, result.resultCode);
         assertEquals("Finish should succeed", KeyStore.NO_ERROR,
                 mKeyStore.finish(token, null, null).resultCode);
+        // TODO: Assert that an AEAD tag was returned by finish
     }
 
     public void testBadToken() throws Exception {

@@ -50,8 +50,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_BLOCK_MODE = KM_ENUM_REP | 4;
     public static final int KM_TAG_DIGEST = KM_ENUM_REP | 5;
     public static final int KM_TAG_PADDING = KM_ENUM_REP | 6;
-    public static final int KM_TAG_RETURN_UNAUTHED = KM_BOOL | 7;
-    public static final int KM_TAG_CALLER_NONCE = KM_BOOL | 8;
+    public static final int KM_TAG_CALLER_NONCE = KM_BOOL | 7;
 
     public static final int KM_TAG_RESCOPING_ADD = KM_ENUM_REP | 101;
     public static final int KM_TAG_RESCOPING_DEL = KM_ENUM_REP | 102;
@@ -82,7 +81,7 @@ public final class KeymasterDefs {
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
-    public static final int KM_TAG_CHUNK_LENGTH = KM_INT | 1002;
+    public static final int KM_TAG_AEAD_TAG = KM_BYTES | 1002;
     public static final int KM_TAG_AUTH_TOKEN = KM_BYTES | 1003;
     public static final int KM_TAG_MAC_LENGTH = KM_INT | 1004;
 
@@ -194,7 +193,7 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_UNSUPPORTED_EC_FIELD = -50;
     public static final int KM_ERROR_MISSING_NONCE = -51;
     public static final int KM_ERROR_INVALID_NONCE = -52;
-    public static final int KM_ERROR_UNSUPPORTED_CHUNK_LENGTH = -53;
+    public static final int KM_ERROR_MISSING_MAC_LENGTH = -53;
     public static final int KM_ERROR_RESCOPABLE_KEY_NOT_USABLE = -54;
     public static final int KM_ERROR_CALLER_NONCE_PROHIBITED = -55;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
