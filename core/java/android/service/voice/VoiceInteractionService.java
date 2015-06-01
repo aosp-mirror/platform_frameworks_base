@@ -70,25 +70,6 @@ public class VoiceInteractionService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
-    /**
-     * Flag for use with {@link #showSession}: request that the session be started with
-     * assist data from the currently focused activity.
-     */
-    public static final int START_WITH_ASSIST = 1<<0;
-
-    /**
-     * @hide
-     * Flag for use with {@link #showSession}: request that the session be started with
-     * a screen shot of the currently focused activity.
-     */
-    public static final int START_WITH_SCREENSHOT = 1<<1;
-
-    /**
-     * Flag for use with {@link #showSession}: indicate that the session has been started from the
-     * system assist gesture.
-     */
-    public static final int START_SOURCE_ASSIST_GESTURE = 1<<2;
-
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override public void ready() {
             mHandler.sendEmptyMessage(MSG_READY);
@@ -176,6 +157,10 @@ public class VoiceInteractionService extends Service {
      * Request that the associated {@link android.service.voice.VoiceInteractionSession} be
      * shown to the user, starting it if necessary.
      * @param args Arbitrary arguments that will be propagated to the session.
+     * @param flags Indicates additional optional behavior that should be performed.  May
+     * be {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST}
+     * to request that the system generate and deliver assist data on the current foreground
+     * app as part of showing the session UI.
      */
     public void showSession(Bundle args, int flags) {
         if (mSystemService == null) {

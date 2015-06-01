@@ -68,10 +68,28 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  * when done.  It can also initiate voice interactions with applications by calling
  * {@link #startVoiceActivity}</p>.
  */
-public abstract class VoiceInteractionSession implements KeyEvent.Callback,
-        ComponentCallbacks2 {
+public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCallbacks2 {
     static final String TAG = "VoiceInteractionSession";
     static final boolean DEBUG = true;
+
+    /**
+     * Flag received in {@link #onShow}: originator requested that the session be started with
+     * assist data from the currently focused activity.
+     */
+    public static final int SHOW_WITH_ASSIST = 1<<0;
+
+    /**
+     * @hide
+     * Flag received in {@link #onShow}: originator requested that the session be started with
+     * a screen shot of the currently focused activity.
+     */
+    public static final int SHOW_WITH_SCREENSHOT = 1<<1;
+
+    /**
+     * Flag for use with {@link #onShow}: indicates that the session has been started from the
+     * system assist gesture.
+     */
+    public static final int SHOW_SOURCE_ASSIST_GESTURE = 1<<2;
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;
@@ -105,10 +123,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         @Override
         public IVoiceInteractorRequest startConfirmation(String callingPackage,
                 IVoiceInteractorCallback callback, CharSequence prompt, Bundle extras) {
-            Request request = newRequest(callback);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_CONFIRMATION,
-                    new Caller(callingPackage, Binder.getCallingUid()), request,
-                    prompt, extras));
+            ConfirmationRequest request = new ConfirmationRequest(callingPackage,
+                    Binder.getCallingUid(), callback, VoiceInteractionSession.this,
+                    prompt, extras);
+            addRequest(request);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_START_CONFIRMATION,
+                    request));
             return request.mInterface;
         }
 
@@ -116,47 +136,54 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         public IVoiceInteractorRequest startPickOption(String callingPackage,
                 IVoiceInteractorCallback callback, CharSequence prompt,
                 VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
-            Request request = newRequest(callback);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOOO(MSG_START_PICK_OPTION,
-                    new Caller(callingPackage, Binder.getCallingUid()), request,
-                    prompt, options, extras));
+            PickOptionRequest request = new PickOptionRequest(callingPackage,
+                    Binder.getCallingUid(), callback, VoiceInteractionSession.this,
+                    prompt, options, extras);
+            addRequest(request);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_START_PICK_OPTION,
+                    request));
             return request.mInterface;
         }
 
         @Override
         public IVoiceInteractorRequest startCompleteVoice(String callingPackage,
                 IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
-            Request request = newRequest(callback);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_COMPLETE_VOICE,
-                    new Caller(callingPackage, Binder.getCallingUid()), request,
-                    message, extras));
+            CompleteVoiceRequest request = new CompleteVoiceRequest(callingPackage,
+                    Binder.getCallingUid(), callback, VoiceInteractionSession.this,
+                    message, extras);
+            addRequest(request);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_START_COMPLETE_VOICE,
+                    request));
             return request.mInterface;
         }
 
         @Override
         public IVoiceInteractorRequest startAbortVoice(String callingPackage,
                 IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
-            Request request = newRequest(callback);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_ABORT_VOICE,
-                    new Caller(callingPackage, Binder.getCallingUid()), request,
-                    message, extras));
+            AbortVoiceRequest request = new AbortVoiceRequest(callingPackage,
+                    Binder.getCallingUid(), callback, VoiceInteractionSession.this,
+                    message, extras);
+            addRequest(request);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_START_ABORT_VOICE,
+                    request));
             return request.mInterface;
         }
 
         @Override
         public IVoiceInteractorRequest startCommand(String callingPackage,
                 IVoiceInteractorCallback callback, String command, Bundle extras) {
-            Request request = newRequest(callback);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_COMMAND,
-                    new Caller(callingPackage, Binder.getCallingUid()), request,
-                    command, extras));
+            CommandRequest request = new CommandRequest(callingPackage,
+                    Binder.getCallingUid(), callback, VoiceInteractionSession.this,
+                    command, extras);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_START_COMMAND,
+                    request));
             return request.mInterface;
         }
 
         @Override
         public boolean[] supportsCommands(String callingPackage, String[] commands) {
             Message msg = mHandlerCaller.obtainMessageIOO(MSG_SUPPORTS_COMMANDS,
-                    0, new Caller(callingPackage, Binder.getCallingUid()), commands);
+                    0, commands, null);
             SomeArgs args = mHandlerCaller.sendMessageAndWait(msg);
             if (args != null) {
                 boolean[] res = (boolean[])args.arg1;
@@ -222,7 +249,16 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         }
     };
 
-    public static class Request {
+    /** @hide */
+    public static class Caller {
+    }
+
+    /**
+     * Base class representing a request from a voice-driver app to perform a particular
+     * voice operation with the user.  See related subclasses for the types of requests
+     * that are possible.
+     */
+    public static class Request extends Caller {
         final IVoiceInteractorRequest mInterface = new IVoiceInteractorRequest.Stub() {
             @Override
             public void cancel() throws RemoteException {
@@ -233,12 +269,40 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
                 }
             }
         };
+        final String mCallingPackage;
+        final int mCallingUid;
         final IVoiceInteractorCallback mCallback;
         final WeakReference<VoiceInteractionSession> mSession;
+        final Bundle mExtras;
 
-        Request(IVoiceInteractorCallback callback, VoiceInteractionSession session) {
+        Request(String packageName, int uid, IVoiceInteractorCallback callback,
+                VoiceInteractionSession session, Bundle extras) {
+            mCallingPackage = packageName;
+            mCallingUid = uid;
             mCallback = callback;
             mSession = session.mWeakRef;
+            mExtras = extras;
+        }
+
+        /**
+         * Return the uid of the application that initiated the request.
+         */
+        public int getCallingUid() {
+            return mCallingUid;
+        }
+
+        /**
+         * Return the package name of the application that initiated the request.
+         */
+        public String getCallingPackage() {
+            return mCallingPackage;
+        }
+
+        /**
+         * Return any additional extra information that was supplied as part of the request.
+         */
+        public Bundle getExtras() {
+            return mExtras;
         }
 
         void finishRequest() {
@@ -255,6 +319,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             }
         }
 
+        /** @hide */
         public void sendConfirmResult(boolean confirmed, Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
@@ -265,6 +330,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             }
         }
 
+        /** @hide */
         public void sendPickOptionResult(boolean finished,
                 VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
             try {
@@ -279,6 +345,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             }
         }
 
+        /** @hide */
         public void sendCompleteVoiceResult(Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendCompleteVoiceResult: req=" + mInterface
@@ -289,6 +356,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             }
         }
 
+        /** @hide */
         public void sendAbortVoiceResult(Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
@@ -299,6 +367,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             }
         }
 
+        /** @hide */
         public void sendCommandResult(boolean finished, Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendCommandResult: req=" + mInterface
@@ -311,7 +380,15 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             }
         }
 
+        /** @hide */
         public void sendCancelResult() {
+            cancel();
+        }
+
+        /**
+         * ASk the app to cancel this current request.
+         */
+        public void cancel() {
             try {
                 if (DEBUG) Log.d(TAG, "sendCancelResult: req=" + mInterface);
                 finishRequest();
@@ -321,13 +398,200 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         }
     }
 
-    public static class Caller {
-        final String packageName;
-        final int uid;
+    /**
+     * A request for confirmation from the user of an operation, as per
+     * {@link android.app.VoiceInteractor.ConfirmationRequest
+     * VoiceInteractor.ConfirmationRequest}.
+     */
+    public static final class ConfirmationRequest extends Request {
+        final CharSequence mPrompt;
 
-        Caller(String _packageName, int _uid) {
-            packageName = _packageName;
-            uid = _uid;
+        ConfirmationRequest(String packageName, int uid, IVoiceInteractorCallback callback,
+                VoiceInteractionSession session, CharSequence prompt, Bundle extras) {
+            super(packageName, uid, callback, session, extras);
+            mPrompt = prompt;
+        }
+
+        /**
+         * Return the prompt informing the user of what will happen, as per
+         * {@link android.app.VoiceInteractor.ConfirmationRequest
+         * VoiceInteractor.ConfirmationRequest}.
+         */
+        public CharSequence getPrompt() {
+            return mPrompt;
+        }
+
+        /**
+         * Report that the voice interactor has confirmed the operation with the user, resulting
+         * in a call to
+         * {@link android.app.VoiceInteractor.ConfirmationRequest#onConfirmationResult
+         * VoiceInteractor.ConfirmationRequest.onConfirmationResult}.
+         */
+        public void sendConfirmationResult(boolean confirmed, Bundle result) {
+            sendConfirmResult(confirmed, result);
+        }
+    }
+
+    /**
+     * A request for the user to pick from a set of option, as per
+     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+     */
+    public static final class PickOptionRequest extends Request {
+        final CharSequence mPrompt;
+        final VoiceInteractor.PickOptionRequest.Option[] mOptions;
+
+        PickOptionRequest(String packageName, int uid, IVoiceInteractorCallback callback,
+                VoiceInteractionSession session, CharSequence prompt,
+                VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
+            super(packageName, uid, callback, session, extras);
+            mPrompt = prompt;
+            mOptions = options;
+        }
+
+        /**
+         * Return the prompt informing the user of what they are picking, as per
+         * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+         */
+        public CharSequence getPrompt() {
+            return mPrompt;
+        }
+
+        /**
+         * Return the set of options the user is picking from, as per
+         * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+         */
+        public VoiceInteractor.PickOptionRequest.Option[] getOptions() {
+            return mOptions;
+        }
+
+        /**
+         * Report an intermediate option selection from the request, without completing it (the
+         * request is still active and the app is waiting for the final option selection),
+         * resulting in a call to
+         * {@link android.app.VoiceInteractor.PickOptionRequest#onPickOptionResult
+         * VoiceInteractor.PickOptionRequest.onPickOptionResult} with false for finished.
+         */
+        public void sendIntermediatePickOptionResult(
+                VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
+            sendPickOptionResult(false, selections, result);
+        }
+
+        /**
+         * Report the final option selection for the request, completing the request
+         * and resulting in a call to
+         * {@link android.app.VoiceInteractor.PickOptionRequest#onPickOptionResult
+         * VoiceInteractor.PickOptionRequest.onPickOptionResult} with false for finished.
+         */
+        public void sendPickOptionResult(
+                VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
+            sendPickOptionResult(true, selections, result);
+        }
+    }
+
+    /**
+     * A request to simply inform the user that the voice operation has completed, as per
+     * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+     * VoiceInteractor.CompleteVoiceRequest}.
+     */
+    public static final class CompleteVoiceRequest extends Request {
+        final CharSequence mMessage;
+
+        CompleteVoiceRequest(String packageName, int uid, IVoiceInteractorCallback callback,
+                VoiceInteractionSession session, CharSequence message, Bundle extras) {
+            super(packageName, uid, callback, session, extras);
+            mMessage = message;
+        }
+
+        /**
+         * Return the message informing the user of the completion, as per
+         * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+         * VoiceInteractor.CompleteVoiceRequest}.
+         */
+        public CharSequence getMessage() {
+            return mMessage;
+        }
+
+        /**
+         * Report that the voice interactor has finished completing the voice operation, resulting
+         * in a call to
+         * {@link android.app.VoiceInteractor.CompleteVoiceRequest#onCompleteResult
+         * VoiceInteractor.CompleteVoiceRequest.onCompleteResult}.
+         */
+        public void sendCompleteResult(Bundle result) {
+            sendCompleteVoiceResult(result);
+        }
+    }
+
+    /**
+     * A request to report that the current user interaction can not be completed with voice, as per
+     * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+     */
+    public static final class AbortVoiceRequest extends Request {
+        final CharSequence mMessage;
+
+        AbortVoiceRequest(String packageName, int uid, IVoiceInteractorCallback callback,
+                VoiceInteractionSession session, CharSequence message, Bundle extras) {
+            super(packageName, uid, callback, session, extras);
+            mMessage = message;
+        }
+
+        /**
+         * Return the message informing the user of the problem, as per
+         * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+         */
+        public CharSequence getMessage() {
+            return mMessage;
+        }
+
+        /**
+         * Report that the voice interactor has finished aborting the voice operation, resulting
+         * in a call to
+         * {@link android.app.VoiceInteractor.AbortVoiceRequest#onAbortResult
+         * VoiceInteractor.AbortVoiceRequest.onAbortResult}.
+         */
+        public void sendAbortResult(Bundle result) {
+            sendAbortVoiceResult(result);
+        }
+    }
+
+    /**
+     * A generic vendor-specific request, as per
+     * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
+     */
+    public static final class CommandRequest extends Request {
+        final String mCommand;
+
+        CommandRequest(String packageName, int uid, IVoiceInteractorCallback callback,
+                VoiceInteractionSession session, String command, Bundle extras) {
+            super(packageName, uid, callback, session, extras);
+            mCommand = command;
+        }
+
+        /**
+         * Return the command that is being executed, as per
+         * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
+         */
+        public String getCommand() {
+            return mCommand;
+        }
+
+        /**
+         * Report an intermediate result of the request, without completing it (the request
+         * is still active and the app is waiting for the final result), resulting in a call to
+         * {@link android.app.VoiceInteractor.CommandRequest#onCommandResult
+         * VoiceInteractor.CommandRequest.onCommandResult} with false for isCompleted.
+         */
+        public void sendIntermediateResult(Bundle result) {
+            sendCommandResult(false, result);
+        }
+
+        /**
+         * Report the final result of the request, completing the request and resulting in a call to
+         * {@link android.app.VoiceInteractor.CommandRequest#onCommandResult
+         * VoiceInteractor.CommandRequest.onCommandResult} with true for isCompleted.
+         */
+        public void sendResult(Bundle result) {
+            sendCommandResult(true, result);
         }
     }
 
@@ -354,50 +618,33 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
             SomeArgs args;
             switch (msg.what) {
                 case MSG_START_CONFIRMATION:
-                    args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onConfirm: req=" + ((Request) args.arg2).mInterface
-                            + " prompt=" + args.arg3 + " extras=" + args.arg4);
-                    onConfirm((Caller)args.arg1, (Request)args.arg2, (CharSequence)args.arg3,
-                            (Bundle)args.arg4);
+                    if (DEBUG) Log.d(TAG, "onConfirm: req=" + msg.obj);
+                    onRequestConfirmation((ConfirmationRequest) msg.obj);
                     break;
                 case MSG_START_PICK_OPTION:
-                    args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onPickOption: req=" + ((Request) args.arg2).mInterface
-                            + " prompt=" + args.arg3 + " options=" + args.arg4
-                            + " extras=" + args.arg5);
-                    onPickOption((Caller)args.arg1, (Request)args.arg2, (CharSequence)args.arg3,
-                            (VoiceInteractor.PickOptionRequest.Option[])args.arg4,
-                            (Bundle)args.arg5);
+                    if (DEBUG) Log.d(TAG, "onPickOption: req=" + msg.obj);
+                    onRequestPickOption((PickOptionRequest) msg.obj);
                     break;
                 case MSG_START_COMPLETE_VOICE:
-                    args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onCompleteVoice: req=" + ((Request) args.arg2).mInterface
-                            + " message=" + args.arg3 + " extras=" + args.arg4);
-                    onCompleteVoice((Caller) args.arg1, (Request) args.arg2,
-                            (CharSequence) args.arg3, (Bundle) args.arg4);
+                    if (DEBUG) Log.d(TAG, "onCompleteVoice: req=" + msg.obj);
+                    onRequestCompleteVoice((CompleteVoiceRequest) msg.obj);
                     break;
                 case MSG_START_ABORT_VOICE:
-                    args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onAbortVoice: req=" + ((Request) args.arg2).mInterface
-                            + " message=" + args.arg3 + " extras=" + args.arg4);
-                    onAbortVoice((Caller) args.arg1, (Request) args.arg2, (CharSequence) args.arg3,
-                            (Bundle) args.arg4);
+                    if (DEBUG) Log.d(TAG, "onAbortVoice: req=" + msg.obj);
+                    onRequestAbortVoice((AbortVoiceRequest) msg.obj);
                     break;
                 case MSG_START_COMMAND:
-                    args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onCommand: req=" + ((Request) args.arg2).mInterface
-                            + " command=" + args.arg3 + " extras=" + args.arg4);
-                    onCommand((Caller) args.arg1, (Request) args.arg2, (String) args.arg3,
-                            (Bundle) args.arg4);
+                    if (DEBUG) Log.d(TAG, "onCommand: req=" + msg.obj);
+                    onRequestCommand((CommandRequest) msg.obj);
                     break;
                 case MSG_SUPPORTS_COMMANDS:
                     args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onGetSupportedCommands: cmds=" + args.arg2);
-                    args.arg1 = onGetSupportedCommands((Caller) args.arg1, (String[]) args.arg2);
+                    if (DEBUG) Log.d(TAG, "onGetSupportedCommands: cmds=" + args.arg1);
+                    args.arg1 = onGetSupportedCommands((String[]) args.arg1);
                     break;
                 case MSG_CANCEL:
                     if (DEBUG) Log.d(TAG, "onCancel: req=" + ((Request)msg.obj));
-                    onCancel((Request)msg.obj);
+                    onCancelRequest((Request) msg.obj);
                     break;
                 case MSG_TASK_STARTED:
                     if (DEBUG) Log.d(TAG, "onTaskStarted: intent=" + msg.obj
@@ -526,12 +773,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         return mContext;
     }
 
-    Request newRequest(IVoiceInteractorCallback callback) {
-        synchronized (this) {
-            Request req = new Request(callback, this);
-            mActiveRequests.put(req.mInterface.asBinder(), req);
-            return req;
-        }
+    void addRequest(Request req) {
+        mActiveRequests.put(req.mInterface.asBinder(), req);
     }
 
     Request removeRequest(IBinder reqInterface) {
@@ -630,7 +873,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         mContentFrame = (FrameLayout)mRootView.findViewById(android.R.id.content);
     }
 
+    /** @hide */
     public void show() {
+        show(null, 0);
+    }
+
+    public void show(Bundle args, int showFlags) {
         try {
             mSystemService.showSessionFromSession(mToken, null, 0);
         } catch (RemoteException e) {
@@ -644,11 +892,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         }
     }
 
-    /** TODO: remove */
+    /** @hide */
     public void showWindow() {
     }
 
-    /** TODO: remove */
+    /** @hide */
     public void hideWindow() {
     }
 
@@ -677,7 +925,9 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
      * <p>As the voice activity runs, it can retrieve a {@link android.app.VoiceInteractor}
      * through which it can perform voice interactions through your session.  These requests
      * for voice interactions will appear as callbacks on {@link #onGetSupportedCommands},
-     * {@link #onConfirm}, {@link #onCommand}, and {@link #onCancel}.
+     * {@link #onRequestConfirmation}, {@link #onRequestPickOption},
+     * {@link #onRequestCompleteVoice}, {@link #onRequestAbortVoice},
+     * or {@link #onRequestCommand}
      *
      * <p>You will receive a call to {@link #onTaskStarted} when the task starts up
      * and {@link #onTaskFinished} when the last activity has finished.
@@ -748,8 +998,25 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         }
     }
 
+    /**
+     * Initiatize a new session.  At this point you don't know exactly what this
+     * session will be used for; you will find that out in {@link #onShow}.
+     */
+    public void onCreate() {
+        doOnCreate();
+    }
+
     /** @hide */
     public void onCreate(Bundle args) {
+        doOnCreate();
+    }
+    
+    /** @hide */
+    public void onCreate(Bundle args, int showFlags) {
+        doOnCreate();
+    }
+
+    private void doOnCreate() {
         mTheme = mTheme != 0 ? mTheme
                 : com.android.internal.R.style.Theme_DeviceDefault_VoiceInteractionSession;
         mInflater = (LayoutInflater)mContext.getSystemService(
@@ -763,15 +1030,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
         mWindow.setToken(mToken);
-    }
-
-    /**
-     * Initiatize a new session.  The given args and showFlags are the initial values
-     * passed to {@link VoiceInteractionService#showSession VoiceInteractionService.showSession},
-     * if possible.  Normally you should handle these in {@link #onShow}.
-     */
-    public void onCreate(Bundle args, int showFlags) {
-        onCreate(args);
     }
 
     /**
@@ -928,18 +1186,45 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
         hide();
     }
 
+    /** @hide */
+    public boolean[] onGetSupportedCommands(Caller caller, String[] commands) {
+        return new boolean[commands.length];
+    }
+    /** @hide */
+    public void onConfirm(Caller caller, Request request, CharSequence prompt,
+            Bundle extras) {
+    }
+    /** @hide */
+    public void onPickOption(Caller caller, Request request, CharSequence prompt,
+            VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
+    }
+    /** @hide */
+    public void onCompleteVoice(Caller caller, Request request, CharSequence message,
+           Bundle extras) {
+        request.sendCompleteVoiceResult(null);
+    }
+    /** @hide */
+    public void onAbortVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
+        request.sendAbortVoiceResult(null);
+    }
+    /** @hide */
+    public void onCommand(Caller caller, Request request, String command, Bundle extras) {
+    }
+    /** @hide */
+    public void onCancel(Request request) {
+    }
+
     /**
      * Request to query for what extended commands the session supports.
      *
-     * @param caller Who is making the request.
      * @param commands An array of commands that are being queried.
      * @return Return an array of booleans indicating which of each entry in the
      * command array is supported.  A true entry in the array indicates the command
      * is supported; false indicates it is not.  The default implementation returns
      * an array of all false entries.
      */
-    public boolean[] onGetSupportedCommands(Caller caller, String[] commands) {
-        return new boolean[commands.length];
+    public boolean[] onGetSupportedCommands(String[] commands) {
+        return onGetSupportedCommands(new Caller(), commands);
     }
 
     /**
@@ -947,31 +1232,22 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
      * corresponding to a {@link android.app.VoiceInteractor.ConfirmationRequest
      * VoiceInteractor.ConfirmationRequest}.
      *
-     * @param caller Who is making the request.
      * @param request The active request.
-     * @param prompt The prompt informing the user of what will happen, as per
-     * {@link android.app.VoiceInteractor.ConfirmationRequest VoiceInteractor.ConfirmationRequest}.
-     * @param extras Any additional information, as per
-     * {@link android.app.VoiceInteractor.ConfirmationRequest VoiceInteractor.ConfirmationRequest}.
      */
-    public abstract void onConfirm(Caller caller, Request request, CharSequence prompt,
-            Bundle extras);
+    public void onRequestConfirmation(ConfirmationRequest request) {
+        onConfirm(request, request, request.getPrompt(), request.getExtras());
+    }
 
     /**
      * Request for the user to pick one of N options, corresponding to a
      * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
      *
-     * @param caller Who is making the request.
      * @param request The active request.
-     * @param prompt The prompt informing the user of what they are picking, as per
-     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
-     * @param options The set of options the user is picking from, as per
-     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
-     * @param extras Any additional information, as per
-     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
      */
-    public abstract void onPickOption(Caller caller, Request request, CharSequence prompt,
-            VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras);
+    public void onRequestPickOption(PickOptionRequest request) {
+        onPickOption(request, request, request.getPrompt(), request.getOptions(),
+                request.getExtras());
+    }
 
     /**
      * Request to complete the voice interaction session because the voice activity successfully
@@ -980,18 +1256,10 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
      * VoiceInteractor.CompleteVoiceRequest}.  The default implementation just sends an empty
      * confirmation back to allow the activity to exit.
      *
-     * @param caller Who is making the request.
      * @param request The active request.
-     * @param message The message informing the user of the problem, as per
-     * {@link android.app.VoiceInteractor.CompleteVoiceRequest
-     * VoiceInteractor.CompleteVoiceRequest}.
-     * @param extras Any additional information, as per
-     * {@link android.app.VoiceInteractor.CompleteVoiceRequest
-     * VoiceInteractor.CompleteVoiceRequest}.
      */
-    public void onCompleteVoice(Caller caller, Request request, CharSequence message,
-           Bundle extras) {
-        request.sendCompleteVoiceResult(null);
+    public void onRequestCompleteVoice(CompleteVoiceRequest request) {
+        onCompleteVoice(request, request, request.getMessage(), request.getExtras());
     }
 
     /**
@@ -1001,15 +1269,10 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
      * VoiceInteractor.AbortVoiceRequest}.  The default implementation just sends an empty
      * confirmation back to allow the activity to exit.
      *
-     * @param caller Who is making the request.
      * @param request The active request.
-     * @param message The message informing the user of the problem, as per
-     * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
-     * @param extras Any additional information, as per
-     * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
      */
-    public void onAbortVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
-        request.sendAbortVoiceResult(null);
+    public void onRequestAbortVoice(AbortVoiceRequest request) {
+        onAbortVoice(request, request, request.getMessage(), request.getExtras());
     }
 
     /**
@@ -1017,20 +1280,21 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
      * corresponding to a {@link android.app.VoiceInteractor.CommandRequest
      * VoiceInteractor.CommandRequest}.
      *
-     * @param caller Who is making the request.
      * @param request The active request.
-     * @param command The command that is being executed, as per
-     * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
-     * @param extras Any additional information, as per
-     * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
      */
-    public abstract void onCommand(Caller caller, Request request, String command, Bundle extras);
+    public void onRequestCommand(CommandRequest request) {
+        onCommand(request, request, request.getCommand(), request.getExtras());
+    }
 
     /**
      * Called when the {@link android.app.VoiceInteractor} has asked to cancel a {@link Request}
-     * that was previously delivered to {@link #onConfirm} or {@link #onCommand}.
+     * that was previously delivered to {@link #onRequestConfirmation},
+     * {@link #onRequestPickOption}, {@link #onRequestCompleteVoice}, {@link #onRequestAbortVoice},
+     * or {@link #onRequestCommand}.
      *
      * @param request The request that is being canceled.
      */
-    public abstract void onCancel(Request request);
+    public void onCancelRequest(Request request) {
+        onCancel(request);
+    }
 }

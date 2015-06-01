@@ -46,6 +46,7 @@ import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
+import android.service.voice.VoiceInteractionSession;
 import android.speech.RecognitionService;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -732,9 +733,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.showSessionLocked(new Bundle() /* sessionArgs */,
-                            VoiceInteractionService.START_SOURCE_ASSIST_GESTURE
-                                    | VoiceInteractionService.START_WITH_ASSIST
-                                    | VoiceInteractionService.START_WITH_SCREENSHOT,
+                            VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE
+                                    | VoiceInteractionSession.SHOW_WITH_ASSIST
+                                    | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,
                             showCallback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
