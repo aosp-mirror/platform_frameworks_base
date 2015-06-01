@@ -30418,6 +30418,8 @@ package android.telecom {
     method public final android.os.Bundle getExtras();
     method public int getState();
     method public android.telecom.StatusHints getStatusHints();
+    method public final android.telecom.RemoteConnection.VideoProvider getVideoProvider();
+    method public int getVideoState();
     method public void hold();
     method public boolean isRingbackRequested();
     method public boolean isVoipAudioMode();
@@ -30447,7 +30449,35 @@ package android.telecom {
     method public void onRingbackRequested(android.telecom.RemoteConnection, boolean);
     method public void onStateChanged(android.telecom.RemoteConnection, int);
     method public void onStatusHintsChanged(android.telecom.RemoteConnection, android.telecom.StatusHints);
+    method public void onVideoProviderChanged(android.telecom.RemoteConnection, android.telecom.RemoteConnection.VideoProvider);
+    method public void onVideoStateChanged(android.telecom.RemoteConnection, int);
     method public void onVoipAudioChanged(android.telecom.RemoteConnection, boolean);
+  }
+
+  public static class RemoteConnection.VideoProvider {
+    method public void registerCallback(android.telecom.RemoteConnection.VideoProvider.Callback);
+    method public void requestCallDataUsage();
+    method public void requestCameraCapabilities();
+    method public void sendSessionModifyRequest(android.telecom.VideoProfile, android.telecom.VideoProfile);
+    method public void sendSessionModifyResponse(android.telecom.VideoProfile);
+    method public void setCamera(java.lang.String);
+    method public void setDeviceOrientation(int);
+    method public void setDisplaySurface(android.view.Surface);
+    method public void setPauseImage(android.net.Uri);
+    method public void setPreviewSurface(android.view.Surface);
+    method public void setZoom(float);
+    method public void unregisterCallback(android.telecom.RemoteConnection.VideoProvider.Callback);
+  }
+
+  public static abstract class RemoteConnection.VideoProvider.Callback {
+    ctor public RemoteConnection.VideoProvider.Callback();
+    method public void onCallDataUsageChanged(android.telecom.RemoteConnection.VideoProvider, long);
+    method public void onCallSessionEvent(android.telecom.RemoteConnection.VideoProvider, int);
+    method public void onCameraCapabilitiesChanged(android.telecom.RemoteConnection.VideoProvider, android.telecom.VideoProfile.CameraCapabilities);
+    method public void onPeerDimensionsChanged(android.telecom.RemoteConnection.VideoProvider, int, int);
+    method public void onSessionModifyRequestReceived(android.telecom.RemoteConnection.VideoProvider, android.telecom.VideoProfile);
+    method public void onSessionModifyResponseReceived(android.telecom.RemoteConnection.VideoProvider, int, android.telecom.VideoProfile, android.telecom.VideoProfile);
+    method public void onVideoQualityChanged(android.telecom.RemoteConnection.VideoProvider, int);
   }
 
   public final class StatusHints implements android.os.Parcelable {
