@@ -438,7 +438,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
       // Out of service and carrier network change is true, show special indicator
       verifyLastMobileDataIndicators(true /* visible */,
               TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE[0][0] /* strengthIcon */,
-              TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE_DARK[0][0] /* darkStrengthIcon */,
               0 /* typeIcon */);
 
       // Revert back

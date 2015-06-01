@@ -180,13 +180,12 @@ public class SignalClusterView
     }
 
     @Override
-    public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int darkStatusIcon,
-            int statusType, int qsType, boolean activityIn, boolean activityOut,
-            String typeContentDescription, String description, boolean isWide, int subId) {
+    public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+            int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
+            String description, boolean isWide, int subId) {
         PhoneState state = getOrInflateState(subId);
         state.mMobileVisible = statusIcon.visible;
         state.mMobileStrengthId = statusIcon.icon;
-        state.mMobileDarkStrengthId = darkStatusIcon;
         state.mMobileTypeId = statusType;
         state.mMobileDescription = statusIcon.contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
@@ -426,7 +425,7 @@ public class SignalClusterView
     private class PhoneState {
         private final int mSubId;
         private boolean mMobileVisible = false;
-        private int mMobileStrengthId = 0, mMobileDarkStrengthId = 0, mMobileTypeId = 0;
+        private int mMobileStrengthId = 0, mMobileTypeId = 0;
         private boolean mIsMobileTypeIconWide;
         private String mMobileDescription, mMobileTypeDescription;
 
@@ -483,9 +482,8 @@ public class SignalClusterView
             mMobileDark.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0,
                     0, 0, 0);
 
-            if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d dark=%d typ=%d",
-                        (mMobileVisible ? "VISIBLE" : "GONE"), mMobileStrengthId,
-                        mMobileDarkStrengthId, mMobileTypeId));
+            if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d typ=%d",
+                        (mMobileVisible ? "VISIBLE" : "GONE"), mMobileStrengthId, mMobileTypeId));
 
             mMobileType.setVisibility(mMobileTypeId != 0 ? View.VISIBLE : View.GONE);
 
