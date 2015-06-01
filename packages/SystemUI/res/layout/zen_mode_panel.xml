@@ -97,4 +97,15 @@
         android:orientation="vertical"
         android:paddingBottom="@dimen/zen_mode_condition_detail_bottom_padding" />
 
+
+    <TextView
+        android:id="@+id/zen_alarm_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="16dp"
+        android:textDirection="locale"
+        android:lineSpacingMultiplier="1.20029"
+        android:textAppearance="@style/TextAppearance.QS.Warning" />
+
 </com.android.systemui.volume.ZenModePanel>

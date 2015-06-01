@@ -142,6 +142,11 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="TextAppearance.QS.Warning">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/system_warning_color</item>
+    </style>
+
     <style name="TextAppearance.QS.DetailButton">
         <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
         <item name="android:textColor">@color/qs_detail_button</item>
