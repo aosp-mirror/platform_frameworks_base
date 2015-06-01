@@ -621,9 +621,6 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 (params.getKeyValidityForConsumptionEnd() != null)
                         ? params.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
-        // TODO: Remove this once keymaster does not require us to specify the size of imported key.
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
-
         if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!params.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
