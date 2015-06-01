@@ -1990,8 +1990,23 @@ public class AudioTrack
      *     The dead object error code is not returned if some data was successfully transferred.
      *     In this case, the error is returned at the next write().
      */
-    public int write(ByteBuffer audioData, int sizeInBytes,
+    public int write(@NonNull ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode, long timestamp) {
+
+        if (mState == STATE_UNINITIALIZED) {
+            Log.e(TAG, "AudioTrack.write() called in invalid state STATE_UNINITIALIZED");
+            return ERROR_INVALID_OPERATION;
+        }
+
+        if ((writeMode != WRITE_BLOCKING) && (writeMode != WRITE_NON_BLOCKING)) {
+            Log.e(TAG, "AudioTrack.write() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
+        }
+
+        if (mDataLoadMode != MODE_STREAM) {
+            Log.e(TAG, "AudioTrack.write() with timestamp called for non-streaming mode track");
+            return ERROR_INVALID_OPERATION;
+        }
 
         if ((mAttributes.getFlags() & AudioAttributes.FLAG_HW_AV_SYNC) == 0) {
             Log.d(TAG, "AudioTrack.write() called on a regular AudioTrack. Ignoring pts...");
