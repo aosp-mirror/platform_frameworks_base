@@ -5269,6 +5269,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void startedGoingToSleep(int why) {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Started going to sleep... (why=" + why + ")");
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.onStartedGoingToSleep(why);
+        }
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -5286,9 +5289,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateOrientationListenerLp();
             updateLockScreenTimeout();
         }
-
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onScreenTurnedOff(why);
+            mKeyguardDelegate.onFinishedGoingToSleep(why);
         }
     }
 
@@ -5316,7 +5318,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onScreenTurnedOn(mKeyguardDelegateCallback);
+            mKeyguardDelegate.onStartedWakingUp(mKeyguardDelegateCallback);
             // ... eventually calls finishKeyguardDrawn
         } else {
             if (DEBUG_WAKEUP) Slog.d(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
