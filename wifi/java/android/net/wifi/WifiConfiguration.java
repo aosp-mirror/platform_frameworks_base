@@ -861,60 +861,6 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * indicates whether the configuration is valid
-     * @return true if valid, false otherwise
-     * @hide
-     */
-    public boolean isValid() {
-        String reason = strIsValid();
-        if (reason != null) {
-            Log.e(TAG, "WiFi Config not valid: " + reason);
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-
-    private String strIsValid() {
-
-        if (allowedKeyManagement == null)
-            return "allowed kmgmt";
-
-        if (allowedKeyManagement.cardinality() > 1) {
-            if (allowedKeyManagement.cardinality() != 2) {
-                return "cardinality != 2";
-            }
-            if (!allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
-                return "not WPA_EAP";
-            }
-            if ((!allowedKeyManagement.get(KeyMgmt.IEEE8021X))
-                    && (!allowedKeyManagement.get(KeyMgmt.WPA_PSK))) {
-                return "not PSK or 8021X";
-            }
-        }
-
-        if (!TextUtils.isEmpty(FQDN)) {
-            /* this is passpoint configuration; it must not have an SSID */
-            if (!TextUtils.isEmpty(SSID)) {
-                return "SSID not expected for Passpoint: '" + SSID + "'";
-            }
-            /* this is passpoint configuration; it must have a providerFriendlyName */
-            if (TextUtils.isEmpty(providerFriendlyName)) {
-                return "no provider friendly name";
-            }
-            /* this is passpoint configuration; it must have enterprise config */
-            if (enterpriseConfig == null
-                    || enterpriseConfig.getEapMethod() == WifiEnterpriseConfig.Eap.NONE ) {
-                return "no enterprise config";
-            }
-        }
-
-        // TODO: Add more checks
-        return null;
-    }
-
-    /**
      * Identify if this configuration represents a passpoint network
      */
     public boolean isPasspoint() {
@@ -1238,8 +1184,8 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public int getAuthType() {
-        if (isValid() == false) {
-            throw new IllegalStateException("Invalid configuration");
+        if (allowedKeyManagement.cardinality() > 1) {
+            throw new IllegalStateException("More than one auth type set");
         }
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return KeyMgmt.WPA_PSK;
