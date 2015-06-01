@@ -410,10 +410,10 @@ public class ZenModeConfig implements Parcelable {
                         rt.allowMessagesFrom = DEFAULT_SOURCE;
                     }
                 } else if (MANUAL_TAG.equals(tag)) {
-                    rt.manualRule = readRuleXml(parser, false /*conditionRequired*/);
+                    rt.manualRule = readRuleXml(parser);
                 } else if (AUTOMATIC_TAG.equals(tag)) {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
-                    final ZenRule automaticRule = readRuleXml(parser, true /*conditionRequired*/);
+                    final ZenRule automaticRule = readRuleXml(parser);
                     if (id != null && automaticRule != null) {
                         rt.automaticRules.put(id, automaticRule);
                     }
@@ -455,7 +455,7 @@ public class ZenModeConfig implements Parcelable {
         out.endTag(null, ZEN_TAG);
     }
 
-    public static ZenRule readRuleXml(XmlPullParser parser, boolean conditionRequired) {
+    public static ZenRule readRuleXml(XmlPullParser parser) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
         rt.snoozing = safeBoolean(parser, RULE_ATT_SNOOZING, false);
@@ -801,7 +801,7 @@ public class ZenModeConfig implements Parcelable {
                 .authority(SYSTEM_AUTHORITY)
                 .appendPath(EVENT_PATH)
                 .appendQueryParameter("userId", Long.toString(event.userId))
-                .appendQueryParameter("calendar", Long.toString(event.calendar))
+                .appendQueryParameter("calendar", event.calendar != null ? event.calendar : "")
                 .appendQueryParameter("reply", Integer.toString(event.reply))
                 .build();
     }
@@ -819,21 +819,21 @@ public class ZenModeConfig implements Parcelable {
         if (!isEvent) return null;
         final EventInfo rt = new EventInfo();
         rt.userId = tryParseInt(conditionId.getQueryParameter("userId"), UserHandle.USER_NULL);
-        rt.calendar = tryParseLong(conditionId.getQueryParameter("calendar"),
-                EventInfo.ANY_CALENDAR);
+        rt.calendar = conditionId.getQueryParameter("calendar");
+        if (TextUtils.isEmpty(rt.calendar) || tryParseLong(rt.calendar, -1L) != -1L) {
+            rt.calendar = null;
+        }
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
     }
 
     public static class EventInfo {
-        public static final long ANY_CALENDAR = 0;
-
         public static final int REPLY_ANY_EXCEPT_NO = 0;
         public static final int REPLY_YES_OR_MAYBE = 1;
         public static final int REPLY_YES = 2;
 
         public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
-        public long calendar = ANY_CALENDAR;  // CalendarContract.Calendars._ID, or ANY_CALENDAR
+        public String calendar;  // CalendarContract.Calendars.OWNER_ACCOUNT, or null for any
         public int reply;
 
         @Override
@@ -846,7 +846,7 @@ public class ZenModeConfig implements Parcelable {
             if (!(o instanceof EventInfo)) return false;
             final EventInfo other = (EventInfo) o;
             return userId == other.userId
-                    && calendar == other.calendar
+                    && Objects.equals(calendar, other.calendar)
                     && reply == other.reply;
         }
 
@@ -860,7 +860,6 @@ public class ZenModeConfig implements Parcelable {
 
         public static int resolveUserId(int userId) {
             return userId == UserHandle.USER_NULL ? ActivityManager.getCurrentUser() : userId;
-
         }
     }
 
