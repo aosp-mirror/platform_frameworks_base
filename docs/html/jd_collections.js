@@ -132,6 +132,7 @@ var RESOURCE_COLLECTIONS = {
   "google/landing/videos": {
     "title": "",
     "resources": [
+      "https://www.youtube.com/watch?v=M3Udfu6qidk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
       "https://www.youtube.com/watch?v=FOn64iqlphk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
       "https://www.youtube.com/watch?v=F0Kh_RnSM0w&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
       "https://www.youtube.com/watch?v=fvtMtfCuEpw&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf"
