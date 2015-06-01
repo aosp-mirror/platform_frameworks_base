@@ -443,14 +443,13 @@ public class IpReachabilityMonitor {
                 if (mIpWatchList.containsKey(destination)) {
                     final short value =
                             (msgType == NetlinkConstants.RTM_DELNEIGH)
-                            ? StructNdMsg.NUD_FAILED
+                            ? StructNdMsg.NUD_NONE
                             : nudState;
                     mIpWatchList.put(destination, value);
                 }
             }
 
-            if ((msgType == NetlinkConstants.RTM_DELNEIGH) ||
-                (nudState == StructNdMsg.NUD_FAILED)) {
+            if (nudState == StructNdMsg.NUD_FAILED) {
                 Log.w(TAG, "ALERT: " + eventMsg);
                 handleNeighborLost(eventMsg);
             }
