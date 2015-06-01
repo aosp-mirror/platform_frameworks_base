@@ -77,7 +77,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.lang.ref.WeakReference;
 
 /**
@@ -624,9 +623,6 @@ public class MediaPlayer implements SubtitleController.Listener
     private int mUsage = -1;
     private boolean mBypassInterruptionPolicy;
 
-    // use AtomicBoolean instead of boolean so we can use the same member both as a flag and a lock.
-    private AtomicBoolean mPreparing = new AtomicBoolean();
-
     /**
      * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a MediaPlayer from a Uri or resource.
@@ -1166,10 +1162,6 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void prepare() throws IOException, IllegalStateException {
-        // The synchronous version of prepare also recieves a MEDIA_PREPARED message.
-        synchronized (mPreparing) {
-            mPreparing.set(true);
-        }
         _prepare();
         scanInternalSubtitleTracks();
     }
@@ -1186,14 +1178,7 @@ public class MediaPlayer implements SubtitleController.Listener
      *
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public void prepareAsync() throws IllegalStateException {
-        synchronized (mPreparing) {
-            mPreparing.set(true);
-        }
-        _prepareAsync();
-    }
-
-    private native void _prepareAsync() throws IllegalStateException;
+    public native void prepareAsync() throws IllegalStateException;
 
     /**
      * Starts or resumes playback. If playback had previously been paused,
@@ -1244,9 +1229,6 @@ public class MediaPlayer implements SubtitleController.Listener
      * initialized.
      */
     public void stop() throws IllegalStateException {
-        synchronized (mPreparing) {
-            mPreparing.set(false);
-        }
         stayAwake(false);
         _stop();
     }
@@ -1676,9 +1658,6 @@ public class MediaPlayer implements SubtitleController.Listener
      * at the same time.
      */
     public void release() {
-        synchronized (mPreparing) {
-            mPreparing.set(false);
-        }
         stayAwake(false);
         updateSurfaceScreenOn();
         mOnPreparedListener = null;
@@ -1705,9 +1684,6 @@ public class MediaPlayer implements SubtitleController.Listener
      * data source and calling prepare().
      */
     public void reset() {
-        synchronized (mPreparing) {
-            mPreparing.set(false);
-        }
         mSelectedSubtitleTrackIndex = -1;
         synchronized(mOpenSubtitleSources) {
             for (final InputStream is: mOpenSubtitleSources) {
@@ -2828,11 +2804,15 @@ public class MediaPlayer implements SubtitleController.Listener
             }
             switch(msg.what) {
             case MEDIA_PREPARED:
-                synchronized (mPreparing) {
-                    if (mPreparing.get()) {
-                        scanInternalSubtitleTracks();
-                        mPreparing.set(false);
-                    }
+                try {
+                    scanInternalSubtitleTracks();
+                } catch (RuntimeException e) {
+                    // send error message instead of crashing;
+                    // send error message instead of inlining a call to onError
+                    // to avoid code duplication.
+                    Message msg2 = obtainMessage(
+                            MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
+                    sendMessage(msg2);
                 }
                 if (mOnPreparedListener != null)
                     mOnPreparedListener.onPrepared(mMediaPlayer);
@@ -2908,7 +2888,13 @@ public class MediaPlayer implements SubtitleController.Listener
                     Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
                     break;
                 case MEDIA_INFO_METADATA_UPDATE:
-                    scanInternalSubtitleTracks();
+                    try {
+                        scanInternalSubtitleTracks();
+                    } catch (RuntimeException e) {
+                        Message msg2 = obtainMessage(
+                                MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
+                        sendMessage(msg2);
+                    }
                     // fall through
 
                 case MEDIA_INFO_EXTERNAL_METADATA_UPDATE:
