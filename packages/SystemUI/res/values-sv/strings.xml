@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryck igen för att öppna"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Dra uppåt om du vill låsa upp"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Dra från ikonen om du vill visa telefonen"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Svep för att öppna telefonen"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Dra från ikonen om du vill visa röstassistenten"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Dra från ikonen om du vill visa kameran"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Svep för att öppna kameran"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Helt tyst"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bara prioriterade"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Endast alarm"</string>
@@ -397,7 +397,19 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryck här om du vill återställa den ursprungliga appen."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du använder Work-profilen"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Inställningar för systemgränssnitt"</string>
+    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
+    <skip />
+    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
+    <skip />
     <string name="quick_settings" msgid="10042998191725428">"Snabbinställningar"</string>
     <string name="add_tile" msgid="2995389510240786221">"Lägg till en ruta"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Skicka ruta"</string>
+    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
+    <skip />
+    <!-- no translation found for alarm_template (3980063409350522735) -->
+    <skip />
+    <!-- no translation found for alarm_template_far (4242179982586714810) -->
+    <skip />
 </resources>

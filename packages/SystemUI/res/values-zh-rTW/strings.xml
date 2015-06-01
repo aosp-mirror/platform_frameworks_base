@@ -240,7 +240,7 @@
     <string name="start_dreams" msgid="7219575858348719790">"休眠模式"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"乙太網路"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"零打擾"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"僅顯示優先通知"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"僅限優先通知"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"僅允許鬧鐘"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"完全靜音"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"藍牙"</string>
@@ -320,7 +320,7 @@
     <string name="voice_hint" msgid="8939888732119726665">"滑動語音小幫手圖示即可啟用"</string>
     <string name="camera_hint" msgid="7939688436797157483">"滑動相機圖示即可啟用"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全靜音"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"僅顯示優先通知"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"僅限優先通知"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"僅允許鬧鐘"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"完全\n靜音"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"僅允許\n優先通知"</string>
@@ -399,7 +399,19 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸這裡即可恢復原始設定。"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"您目前在 Work 設定檔"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"系統使用者介面調整精靈"</string>
+    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
+    <skip />
+    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
+    <skip />
     <string name="quick_settings" msgid="10042998191725428">"快速設定"</string>
     <string name="add_tile" msgid="2995389510240786221">"新增圖塊"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"播送圖塊"</string>
+    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
+    <skip />
+    <!-- no translation found for alarm_template (3980063409350522735) -->
+    <skip />
+    <!-- no translation found for alarm_template_far (4242179982586714810) -->
+    <skip />
 </resources>
