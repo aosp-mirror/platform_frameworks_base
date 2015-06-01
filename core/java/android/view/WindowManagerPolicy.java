@@ -158,10 +158,12 @@ public interface WindowManagerPolicy {
          * @param decorFrame The decor frame specified by policy specific to this window,
          * to use for proper cropping during animation.
          * @param stableFrame The frame around which stable system decoration is positioned.
+         * @param outsetFrame The frame that includes areas that aren't part of the surface but we
+         * want to treat them as such.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame);
+                Rect stableFrame, Rect outsetFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
