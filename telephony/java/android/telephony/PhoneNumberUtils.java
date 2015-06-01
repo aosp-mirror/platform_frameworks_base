@@ -2351,12 +2351,12 @@ public class PhoneNumberUtils
      *
      * @param s A {@code Spannable} to annotate.
      * @param start The starting character position of the phone number in {@code s}.
-     * @param end The ending character position of the phone number in {@code s}.
+     * @param endExclusive The position after the ending character in the phone number {@code s}.
      */
-    public static void addPhoneTtsSpan(Spannable s, int start, int end) {
-        s.setSpan(getPhoneTtsSpan(s.subSequence(start, end).toString()),
+    public static void addPhoneTtsSpan(Spannable s, int start, int endExclusive) {
+        s.setSpan(getPhoneTtsSpan(s.subSequence(start, endExclusive).toString()),
                 start,
-                end,
+                endExclusive,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
