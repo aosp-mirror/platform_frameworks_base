@@ -33,6 +33,8 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Piliin Lahat"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopyahin sa..."</string>
     <string name="menu_move" msgid="1828090633118079817">"Ilipat sa…"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopyahin"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"I-paste"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ipakita internal storage"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Ipakita ang SD card"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Itago internal storage"</string>
