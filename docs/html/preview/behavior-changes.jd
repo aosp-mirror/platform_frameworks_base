@@ -50,20 +50,21 @@ some of the key changes that you should understand and account for in your apps.
   might be affected by these changes in the platform.</p>
 
 <h2 id="behavior-runtime-permissions">Runtime Permissions</h1>
-<p>This preview introduces a new runtime permissions model, where users can now directly manage
-their app permissions at runtime. This model gives users improved visibility and control over
+<p>This preview introduces a new permissions model, where users can now directly manage
+app permissions at runtime. This model gives users improved visibility and control over
 permissions, while streamlining the installation and auto-update processes for app developers.
-Users can set permissions on or off for all apps running on the M Preview. However, apps that
-don’t target the M Preview cannot request permissions at runtime.</p>
+Users can grant or revoke permissions individually for installed apps. </p>
 
 <p>On your apps that target the M Preview, make sure to check and request for permissions at
 runtime. To determine if your app has been granted a permission, call the
 new {@code Context.checkSelfPermission()} method. To request for a permission, call the new
-{@code Activity.requestPermission()} method.</p>
+{@code Activity.requestPermission()} method. Even if your app is not targeting M, you
+should test your app under the new permissions model.</p>
 
-<p>For more information on supporting the new permissions model in your app, see
+<p>For details on supporting the new permissions model in your app, see the
 <a href="{@docRoot}preview/features/runtime-permissions.html">
-Android M Preview Runtime Permissions</a>.</p>
+Permissions</a> developer preview page. For tips on how to assess the impact on your app,
+see the <a href="{@docRoot}preview/testing/guide.html#runtime-permissions">Testing Guide</a></p>
 
 <h2 id="behavior-power">Power-Saving Optimizations</h2>
 <p>This preview introduces new power-saving optimizations for idle devices and apps.</p>
@@ -103,6 +104,10 @@ high-priority messages. If your app receives high-priority GCM messages, it’s 
 brief network access even when the device is in doze.
 </p>
 
+<p>See the
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
+to test Doze in your apps. </p>
+
 <h3 id="behavior-app-standby">App standby</h3>
 <p>With this preview, the system may determine that apps are idle when they are not in active
 use. Your app is considered idle after a period of time, unless the system detects
@@ -139,6 +144,10 @@ Google Cloud Messaging</a> (GCM) release lets you
 designate high-priority messages. If your app receives high-priority GCM messages, it’s granted
 brief network access even when the app is idle.
 </p>
+
+<p>See the
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
+to test App Standby in your apps. </p>
 
 <h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
 <p>

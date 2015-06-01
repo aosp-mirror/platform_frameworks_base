@@ -57,7 +57,7 @@ page.keywords=previewresources,androidm,testing,permissions
   app features from working, or they may work in a degraded state.
 </p>
 
-<p>
+<p class="caution">
   This change affects all apps running on the new platform, even those not targeting the new
   platform version. The platform provides a limited compatibility behavior for legacy apps, but you
   should begin planning your app’s migration to the new permissions model now, with a goal of
