@@ -2737,10 +2737,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (mCollectionItemInfo != null) {
             parcel.writeInt(1);
-            parcel.writeInt(mCollectionItemInfo.getColumnIndex());
-            parcel.writeInt(mCollectionItemInfo.getColumnSpan());
             parcel.writeInt(mCollectionItemInfo.getRowIndex());
             parcel.writeInt(mCollectionItemInfo.getRowSpan());
+            parcel.writeInt(mCollectionItemInfo.getColumnIndex());
+            parcel.writeInt(mCollectionItemInfo.getColumnSpan());
             parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
             parcel.writeInt(mCollectionItemInfo.isSelected() ? 1 : 0);
         } else {
