@@ -1025,6 +1025,12 @@
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI tuner</string>
 
+    <!-- Preference to show/hide embedded battery percentage [CHAR LIMIT=50] -->
+    <string name="show_battery_percentage">Show embedded battery percentage</string>
+
+    <!-- Summary for battery percentage preference [CHAR LIMIT=NONE] -->
+    <string name="show_battery_percentage_summary">Show battery level percentage inside the status bar icon when not charging</string>
+
     <!-- Name of quick settings -->
     <string name="quick_settings">Quick Settings</string>
 
