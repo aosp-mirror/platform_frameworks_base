@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
@@ -48,6 +49,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.R;
 import com.android.server.LocalServices;
 
@@ -79,6 +81,7 @@ public class ZenModeHelper {
     private final RingerModeDelegate mRingerModeDelegate = new RingerModeDelegate();
     private final ZenModeConditions mConditions;
     private final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
+    private final Metrics mMetrics = new Metrics();
 
     private int mZenMode;
     private int mUser = UserHandle.USER_OWNER;
@@ -90,6 +93,7 @@ public class ZenModeHelper {
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
         mContext = context;
         mHandler = new H(looper);
+        addCallback(mMetrics);
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mDefaultConfig = readDefaultConfig(context.getResources());
         appendDefaultScheduleRules(mDefaultConfig);
@@ -144,6 +148,7 @@ public class ZenModeHelper {
         if (mAudioManager != null) {
             mAudioManager.setRingerModeDelegate(mRingerModeDelegate);
         }
+        mHandler.postMetricsTimer();
     }
 
     public void onUserSwitched(int user) {
@@ -696,8 +701,37 @@ public class ZenModeHelper {
         }
     }
 
+    private final class Metrics extends Callback {
+        private static final String COUNTER_PREFIX = "dnd_mode_";
+        private static final long MINIMUM_LOG_PERIOD_MS = 60 * 1000;
+
+        private int mPreviousZenMode = -1;
+        private long mBeginningMs = 0L;
+
+        @Override
+        void onZenModeChanged() {
+            emit();
+        }
+
+        private void emit() {
+            mHandler.postMetricsTimer();
+            final long now = SystemClock.elapsedRealtime();
+            final long since = (now - mBeginningMs);
+            if (mPreviousZenMode != mZenMode || since > MINIMUM_LOG_PERIOD_MS) {
+                if (mPreviousZenMode != -1) {
+                    MetricsLogger.count(mContext, COUNTER_PREFIX + mPreviousZenMode, (int) since);
+                }
+                mPreviousZenMode = mZenMode;
+                mBeginningMs = now;
+            }
+        }
+    }
+
     private final class H extends Handler {
         private static final int MSG_DISPATCH = 1;
+        private static final int MSG_METRICS = 2;
+
+        private static final long METRICS_PERIOD_MS = 6 * 60 * 60 * 1000;
 
         private H(Looper looper) {
             super(looper);
@@ -708,11 +742,19 @@ public class ZenModeHelper {
             sendEmptyMessage(MSG_DISPATCH);
         }
 
+        private void postMetricsTimer() {
+            removeMessages(MSG_METRICS);
+            sendEmptyMessageDelayed(MSG_METRICS, METRICS_PERIOD_MS);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_DISPATCH:
                     dispatchOnZenModeChanged();
+                    break;
+                case MSG_METRICS:
+                    mMetrics.emit();
                     break;
             }
         }
