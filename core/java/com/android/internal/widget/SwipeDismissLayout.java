@@ -16,9 +16,11 @@
 
 package com.android.internal.widget;
 
-import android.animation.TimeInterpolator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,8 +30,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
 /**
@@ -62,10 +62,6 @@ public class SwipeDismissLayout extends FrameLayout {
     // Cached ViewConfiguration and system-wide constant values
     private int mSlop;
     private int mMinFlingVelocity;
-    private int mMaxFlingVelocity;
-    private long mAnimationTime;
-    private TimeInterpolator mCancelInterpolator;
-    private TimeInterpolator mDismissInterpolator;
 
     // Transient properties
     private int mActiveTouchId;
@@ -92,6 +88,18 @@ public class SwipeDismissLayout extends FrameLayout {
                     }
                 }
             };
+    private BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mDismissed) {
+                dismiss();
+            } else {
+                cancel();
+            }
+            resetMembers();
+        }
+    };
+    private IntentFilter mScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 
     private float mLastX;
 
@@ -114,11 +122,6 @@ public class SwipeDismissLayout extends FrameLayout {
         ViewConfiguration vc = ViewConfiguration.get(context);
         mSlop = vc.getScaledTouchSlop();
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
-        mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
-        mAnimationTime = getContext().getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-        mCancelInterpolator = new DecelerateInterpolator(1.5f);
-        mDismissInterpolator = new AccelerateInterpolator(1.5f);
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 com.android.internal.R.styleable.Theme);
         mUseDynamicTranslucency = !a.hasValue(
@@ -141,15 +144,17 @@ public class SwipeDismissLayout extends FrameLayout {
             getViewTreeObserver().addOnEnterAnimationCompleteListener(
                     mOnEnterAnimationCompleteListener);
         }
+        getContext().registerReceiver(mScreenOffReceiver, mScreenOffFilter);
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
+        getContext().unregisterReceiver(mScreenOffReceiver);
         if (getContext() instanceof Activity) {
             getViewTreeObserver().removeOnEnterAnimationCompleteListener(
                     mOnEnterAnimationCompleteListener);
         }
+        super.onDetachedFromWindow();
     }
 
     @Override
