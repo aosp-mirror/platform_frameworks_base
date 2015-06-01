@@ -307,7 +307,7 @@
     <dimen name="unlock_falsing_threshold">80dp</dimen>
 
     <!-- Lockscreen falsing threshold for quick settings. -->
-    <dimen name="qs_falsing_threshold">40dp</dimen>
+    <dimen name="qs_falsing_threshold">60dp</dimen>
 
     <!-- Falsing threshold used when dismissing notifications from the lockscreen. -->
     <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
