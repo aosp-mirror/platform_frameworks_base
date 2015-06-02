@@ -21,6 +21,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.SystemProperties;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,8 @@ import com.android.keyguard.R;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.StatusBarState;
+
+import java.lang.reflect.Field;
 
 /**
  * Encapsulates all logic for the status bar window state management.
@@ -45,6 +48,7 @@ public class StatusBarWindowManager {
     private final boolean mKeyguardScreenRotation;
 
     private final State mCurrentState = new State();
+    private boolean mLogState;
 
     public StatusBarWindowManager(Context context) {
         mContext = context;
@@ -129,14 +133,18 @@ public class StatusBarWindowManager {
     }
 
     private void applyHeight(State state) {
-        boolean expanded = !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
-                || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing);
+        boolean expanded = isExpanded(state);
         if (expanded) {
             mLpChanged.height = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
             mLpChanged.height = mBarHeight;
         }
+    }
+
+    private boolean isExpanded(State state) {
+        return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
+                || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
+                || state.headsUpShowing);
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -176,6 +184,9 @@ public class StatusBarWindowManager {
         applyFitsSystemWindows(state);
         applyModalFlag(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
+            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD && mLogState) {
+                logCurrentState();
+            }
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
     }
@@ -272,6 +283,21 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setLogState(boolean logState) {
+        mLogState = logState;
+        if (logState) {
+            Log.w(PhoneStatusBar.TAG, "===== Started logging WM state changes =====");
+            logCurrentState();
+        } else {
+            Log.w(PhoneStatusBar.TAG, "===== Finished logging WM state changes =====");
+        }
+    }
+
+    private void logCurrentState() {
+        Log.i(PhoneStatusBar.TAG, mCurrentState.toString()
+                + "\n  Expanded: " + isExpanded(mCurrentState));
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -293,6 +319,32 @@ public class StatusBarWindowManager {
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder();
+            String newLine = "\n";
+            result.append("Window State {");
+            result.append(newLine);
+
+            Field[] fields = this.getClass().getDeclaredFields();
+
+            // Print field names paired with their values
+            for (Field field : fields) {
+                result.append("  ");
+                try {
+                    result.append(field.getName());
+                    result.append(": ");
+                    //requires access to private field:
+                    result.append(field.get(this));
+                } catch (IllegalAccessException ex) {
+                }
+                result.append(newLine);
+            }
+            result.append("}");
+
+            return result.toString();
         }
     }
 }

@@ -182,6 +182,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         HeadsUpManager.OnHeadsUpChangedListener {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
+    public static final boolean DEBUG_EMPTY_KEYGUARD = true;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
@@ -1977,6 +1978,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarWindowManager.setPanelExpanded(isExpanded);
     }
 
+    public void endWindowManagerLogging() {
+        mStatusBarWindowManager.setLogState(false);
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
@@ -3492,6 +3497,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
         mNotificationPanel.instantExpand();
+        if (DEBUG_EMPTY_KEYGUARD) {
+            mStatusBarWindowManager.setLogState(true);
+        }
     }
 
     private void instantCollapseNotificationPanel() {

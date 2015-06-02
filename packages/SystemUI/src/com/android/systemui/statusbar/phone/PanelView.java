@@ -777,6 +777,15 @@ public abstract class PanelView extends FrameLayout {
 
     public void setExpandedFraction(float frac) {
         setExpandedHeight(getMaxPanelHeight() * frac);
+        if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD
+                && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+            if (frac == 0.0f) {
+                Log.i(PhoneStatusBar.TAG, "Panel collapsed! Stacktrace: "
+                        + Log.getStackTraceString(new Throwable()));
+            } else if (frac == 1.0f) {
+                mStatusBar.endWindowManagerLogging();
+            }
+        }
     }
 
     public float getExpandedHeight() {
@@ -808,6 +817,11 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public void collapse(boolean delayed, float speedUpFactor) {
+        if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD
+                && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+            Log.i(PhoneStatusBar.TAG, "Panel collapsed! Stacktrace: "
+                    + Log.getStackTraceString(new Throwable()));
+        }
         if (DEBUG) logf("collapse: " + this);
         if (mPeekPending || mPeekAnimator != null) {
             mCollapseAfterPeek = true;
