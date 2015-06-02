@@ -51,7 +51,7 @@ import java.util.List;
 public abstract class CameraMetadata<TKey> {
 
     private static final String TAG = "CameraMetadataAb";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     /**
      * Set a camera metadata field to a value. The field definitions can be
@@ -131,7 +131,7 @@ public abstract class CameraMetadata<TKey> {
              CameraMetadata<TKey> instance,
              int[] filterTags) {
 
-        if (VERBOSE) Log.v(TAG, "getKeysStatic for " + type);
+        if (DEBUG) Log.v(TAG, "getKeysStatic for " + type);
 
         // TotalCaptureResult does not have any of the keys on it, use CaptureResult instead
         if (type.equals(TotalCaptureResult.class)) {
@@ -163,10 +163,10 @@ public abstract class CameraMetadata<TKey> {
                     if (shouldKeyBeAdded(key, field, filterTags)) {
                         keyList.add(key);
 
-                        if (VERBOSE) {
+                        if (DEBUG) {
                             Log.v(TAG, "getKeysStatic - key was added - " + key);
                         }
-                    } else if (VERBOSE) {
+                    } else if (DEBUG) {
                         Log.v(TAG, "getKeysStatic - key was filtered - " + key);
                     }
                 }

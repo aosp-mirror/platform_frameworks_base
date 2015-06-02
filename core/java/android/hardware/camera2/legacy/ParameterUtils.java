@@ -225,7 +225,7 @@ public class ParameterUtils {
     }
 
     private static final String TAG = "ParameterUtils";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     /** getZoomRatios stores zoom ratios in 1/100 increments, e.x. a zoom of 3.2 is 320 */
     private static final int ZOOM_RATIO_MULTIPLIER = 100;
@@ -398,7 +398,7 @@ public class ParameterUtils {
         Rect cropRegionAsPreview =
                 shrinkToSameAspectRatioCentered(previewCrop, actualCrop);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "getClosestAvailableZoomCrop - actualCrop = " + actualCrop);
             Log.v(TAG,
                     "getClosestAvailableZoomCrop - previewCrop = " + previewCrop);
@@ -418,7 +418,7 @@ public class ParameterUtils {
         List<Rect> availablePreviewCropRegions =
                 getAvailablePreviewZoomCropRectangles(params, activeArray, streamSize);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG,
                     "getClosestAvailableZoomCrop - availableReportedCropRegions = " +
                             ListUtils.listToString(availableReportedCropRegions));
@@ -758,7 +758,7 @@ public class ParameterUtils {
             userCropRegion = activeArraySizeOnly;
         }
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "convertScalerCropRegion - user crop region was " + userCropRegion);
         }
 
@@ -768,7 +768,7 @@ public class ParameterUtils {
                 previewSize, userCropRegion,
                 /*out*/reportedCropRegion, /*out*/previewCropRegion);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "convertScalerCropRegion - zoom calculated to: " +
                     "zoomIndex = " + zoomIdx +
                     ", reported crop region = " + reportedCropRegion +
@@ -862,7 +862,7 @@ public class ParameterUtils {
             reportedMetering = reportedMeteringRect.rect;
         }
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, String.format(
                     "convertMeteringRectangleToLegacy - activeArray = %s, meteringRect = %s, " +
                     "previewCrop = %s, meteringArea = %s, previewMetering = %s, " +

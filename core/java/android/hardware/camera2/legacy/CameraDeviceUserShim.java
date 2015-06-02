@@ -61,7 +61,7 @@ import java.util.List;
 public class CameraDeviceUserShim implements ICameraDeviceUser {
     private static final String TAG = "CameraDeviceUserShim";
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     private static final int OPEN_CAMERA_TIMEOUT_MS = 5000; // 5 sec (same as api1 cts timeout)
 
     private final LegacyCameraDevice mLegacyDevice;

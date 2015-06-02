@@ -28,7 +28,7 @@ import java.util.Objects;
 public class ArrayUtils {
 
     private static final String TAG = "ArrayUtils";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     /** Return the index of {@code needle} in the {@code array}, or else {@code -1} */
     public static <T> int getArrayIndex(T[] array, T needle) {
@@ -117,7 +117,7 @@ public class ArrayUtils {
 
             // Guard against unexpected values
             if (strIndex < 0) {
-                if (VERBOSE) Log.v(TAG, "Ignoring invalid value " + str);
+                if (DEBUG) Log.v(TAG, "Ignoring invalid value " + str);
                 continue;
             }
 
