@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -49,10 +48,17 @@ public class StatusBarIconView extends AnimatedImageView {
     private int mNumberY;
     private String mNumberText;
     private Notification mNotification;
+    private final boolean mBlocked;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
+        this(context, slot, notification, false);
+    }
+
+    public StatusBarIconView(Context context, String slot, Notification notification,
+            boolean blocked) {
         super(context);
         final Resources res = context.getResources();
+        mBlocked = blocked;
         mSlot = slot;
         mNumberPain = new Paint();
         mNumberPain.setTextAlign(Paint.Align.CENTER);
@@ -80,6 +86,7 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public StatusBarIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mBlocked = false;
         final Resources res = context.getResources();
         final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
         final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
@@ -148,7 +155,7 @@ public class StatusBarIconView extends AnimatedImageView {
             invalidate();
         }
         if (!visibilityEquals) {
-            setVisibility(icon.visible ? VISIBLE : GONE);
+            setVisibility(icon.visible && !mBlocked ? VISIBLE : GONE);
         }
         return true;
     }
@@ -280,5 +287,9 @@ public class StatusBarIconView extends AnimatedImageView {
     public String toString() {
         return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon
             + " notification=" + mNotification + ")";
+    }
+
+    public String getSlot() {
+        return mSlot;
     }
 }

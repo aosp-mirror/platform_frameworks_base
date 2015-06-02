@@ -20,10 +20,14 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArraySet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -52,6 +56,8 @@ import java.util.ArrayList;
 public class StatusBarIconController {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
+
+    public static final String ICON_BLACKLIST = "icon_blacklist";
 
     private Context mContext;
     private PhoneStatusBar mPhoneStatusBar;
@@ -89,6 +95,8 @@ public class StatusBarIconController {
     private long mTransitionDeferringStartTime;
     private long mTransitionDeferringDuration;
 
+    private final ArraySet<String> mIconBlacklist;
+
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
         @Override
         public void run() {
@@ -118,7 +126,12 @@ public class StatusBarIconController {
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
+        mIconBlacklist = getIconBlacklist(context);
         updateResources();
+
+        context.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(StatusBarIconController.ICON_BLACKLIST), false,
+                mBlacklistObserver);
     }
 
     public void updateResources() {
@@ -130,11 +143,12 @@ public class StatusBarIconController {
     }
 
     public void addSystemIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
+        boolean blocked = mIconBlacklist.contains(slot);
+        StatusBarIconView view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
-        view = new StatusBarIconView(mContext, slot, null);
+        view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
         mStatusIconsKeyguard.addView(view, viewIndex, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
@@ -413,5 +427,44 @@ public class StatusBarIconController {
             mHandler.postAtTime(mTransitionDeferringDoneRunnable, startTime);
         }
         mTransitionPending = false;
+    }
+
+    private final ContentObserver mBlacklistObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange) {
+            mIconBlacklist.clear();
+            mIconBlacklist.addAll(getIconBlacklist(mContext));
+            ArrayList<StatusBarIconView> views = new ArrayList<StatusBarIconView>();
+            // Get all the current views.
+            for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
+                views.add((StatusBarIconView) mStatusIcons.getChildAt(i));
+            }
+            // Remove all the icons.
+            for (int i = views.size() - 1; i >= 0; i--) {
+                removeSystemIcon(views.get(i).getSlot(), i, i);
+            }
+            // Add them all back
+            for (int i = 0; i < views.size(); i++) {
+                addSystemIcon(views.get(i).getSlot(), i, i, views.get(i).getStatusBarIcon());
+            }
+        }
+    };
+
+    public static ArraySet<String> getIconBlacklist(Context context) {
+        String blackListStr = Settings.Secure.getString(context.getContentResolver(),
+                ICON_BLACKLIST);
+        ArraySet<String> ret = new ArraySet<String>();
+        if (blackListStr != null) {
+            String[] blacklist = blackListStr.split(",");
+            for (String slot : blacklist) {
+                if (!TextUtils.isEmpty(slot)) {
+                    ret.add(slot);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static boolean isBlocked(Context context, String slot) {
+        return getIconBlacklist(context).contains(slot);
     }
 }

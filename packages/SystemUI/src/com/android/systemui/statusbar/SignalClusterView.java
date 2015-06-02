@@ -18,10 +18,13 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -33,6 +36,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -48,6 +52,11 @@ public class SignalClusterView
 
     static final String TAG = "SignalClusterView";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final String SLOT_AIRPLANE = "airplane";
+    private static final String SLOT_MOBILE = "mobile";
+    private static final String SLOT_WIFI = "wifi";
+    private static final String SLOT_ETHERNET = "ethernet";
 
     NetworkControllerImpl mNC;
     SecurityController mSC;
@@ -81,6 +90,11 @@ public class SignalClusterView
     private int mEndPadding;
     private int mEndPaddingNothingVisible;
 
+    private boolean mBlockAirplane;
+    private boolean mBlockMobile;
+    private boolean mBlockWifi;
+    private boolean mBlockEthernet;
+
     public SignalClusterView(Context context) {
         this(context, null);
     }
@@ -91,6 +105,14 @@ public class SignalClusterView
 
     public SignalClusterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        readBlacklist();
+    }
+
+    private void readBlacklist() {
+        mBlockAirplane = StatusBarIconController.isBlocked(getContext(), SLOT_AIRPLANE);
+        mBlockMobile = StatusBarIconController.isBlocked(getContext(), SLOT_MOBILE);
+        mBlockWifi = StatusBarIconController.isBlocked(getContext(), SLOT_WIFI);
+        mBlockEthernet = StatusBarIconController.isBlocked(getContext(), SLOT_ETHERNET);
     }
 
     public void setNetworkController(NetworkControllerImpl nc) {
@@ -141,6 +163,9 @@ public class SignalClusterView
 
         apply();
         applyIconTint();
+        getContext().getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(StatusBarIconController.ICON_BLACKLIST), false,
+                mBlacklistObserver);
     }
 
     @Override
@@ -153,6 +178,7 @@ public class SignalClusterView
         mAirplane       = null;
         mMobileSignalGroup.removeAllViews();
         mMobileSignalGroup = null;
+        getContext().getContentResolver().unregisterContentObserver(mBlacklistObserver);
 
         super.onDetachedFromWindow();
     }
@@ -172,7 +198,7 @@ public class SignalClusterView
     @Override
     public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
             boolean activityIn, boolean activityOut, String description) {
-        mWifiVisible = statusIcon.visible;
+        mWifiVisible = statusIcon.visible && !mBlockWifi;
         mWifiStrengthId = statusIcon.icon;
         mWifiDescription = statusIcon.contentDescription;
 
@@ -184,7 +210,7 @@ public class SignalClusterView
             int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
             String description, boolean isWide, int subId) {
         PhoneState state = getOrInflateState(subId);
-        state.mMobileVisible = statusIcon.visible;
+        state.mMobileVisible = statusIcon.visible && !mBlockMobile;
         state.mMobileStrengthId = statusIcon.icon;
         state.mMobileTypeId = statusType;
         state.mMobileDescription = statusIcon.contentDescription;
@@ -196,7 +222,7 @@ public class SignalClusterView
 
     @Override
     public void setEthernetIndicators(IconState state) {
-        mEthernetVisible = state.visible;
+        mEthernetVisible = state.visible && !mBlockEthernet;
         mEthernetIconId = state.icon;
         mEthernetDescription = state.contentDescription;
 
@@ -205,7 +231,7 @@ public class SignalClusterView
 
     @Override
     public void setNoSims(boolean show) {
-        mNoSimsVisible = show;
+        mNoSimsVisible = show && !mBlockMobile;
     }
 
     @Override
@@ -244,7 +270,7 @@ public class SignalClusterView
 
     @Override
     public void setIsAirplaneMode(IconState icon) {
-        mIsAirplaneMode = icon.visible;
+        mIsAirplaneMode = icon.visible && !mBlockAirplane;
         mAirplaneIconId = icon.icon;
         mAirplaneContentDescription = icon.contentDescription;
 
@@ -502,5 +528,14 @@ public class SignalClusterView
             setTint(mMobileType, tint);
         }
     }
+
+    private final ContentObserver mBlacklistObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange) {
+            readBlacklist();
+            // Re-register to get new callbacks.
+            mNC.removeSignalCallback(SignalClusterView.this);
+            mNC.addSignalCallback(SignalClusterView.this);
+        };
+    };
 }
 
