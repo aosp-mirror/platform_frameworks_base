@@ -506,50 +506,6 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_CERTIFICATE_CHECKSUM";
 
     /**
-     * A String extra holding the MAC address of the Bluetooth device to connect to with status
-     * updates during provisioning.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_BT_MAC_ADDRESS
-            = "android.app.extra.PROVISIONING_BT_MAC_ADDRESS";
-
-    /**
-     * A String extra holding the Bluetooth service UUID on the device to connect to with status
-     * updates during provisioning.
-     *
-     * <p>This value must be specified when {@code #EXTRA_PROVISIONING_BT_MAC_ADDRESS} is present.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_BT_UUID
-            = "android.app.extra.PROVISIONING_BT_UUID";
-
-    /**
-     * A String extra holding a unique identifier used to identify the device connecting over
-     * Bluetooth. This identifier will be part of every status message sent to the remote device.
-     *
-     * <p>This value must be specified when {@code #EXTRA_PROVISIONING_BT_MAC_ADDRESS} is present.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_BT_DEVICE_ID
-            = "android.app.extra.PROVISIONING_BT_DEVICE_ID";
-
-    /**
-     * A Boolean extra that that will cause a provisioned device to temporarily proxy network
-     * traffic over Bluetooth. When a Wi-Fi network is available, the network proxy will stop.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_BT_USE_PROXY
-            = "android.app.extra.PROVISIONING_BT_USE_PROXY";
-
-    /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
      * holds data needed by the system to wipe factory reset protection. The data needed to wipe
      * the device depend on the installed factory reset protection implementation. For example,
@@ -632,11 +588,7 @@ public class DevicePolicyManager {
      * Replaces {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}. The value of the property
      * should be converted to a String via
      * {@link android.content.ComponentName#flattenToString()}</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_BT_MAC_ADDRESS}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_BT_UUID}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_BT_DEVICE_ID}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_BT_USE_PROXY}, optional</li></ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE}, optional</li></ul>
      *
      * <p> When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
@@ -695,45 +647,6 @@ public class DevicePolicyManager {
     @SystemApi
     public static final String ACTION_SET_PROFILE_OWNER
             = "android.app.action.SET_PROFILE_OWNER";
-
-    /**
-     * Protected broadcast action that will be sent to managed provisioning to notify it that a
-     * status update has been reported by the device initializer. The status update will be
-     * reported to the remote setup device over Bluetooth.
-     *
-     * <p>Broadcasts with this action must supply a
-     * {@linkplain DeviceInitializerStatus#FLAG_STATUS_CUSTOM custom} status code in the
-     * {@link EXTRA_DEVICE_INITIALIZER_STATUS_CODE} extra.
-     *
-     * <p>Broadcasts may optionally contain a description in the
-     * {@link EXTRA_DEVICE_INITIALIZER_STATUS_DESCRIPTION} extra.
-     * @hide
-     */
-    @SystemApi
-    public static final String ACTION_SEND_DEVICE_INITIALIZER_STATUS
-            = "android.app.action.SEND_DEVICE_INITIALIZER_STATUS";
-
-    /**
-     * An integer extra that contains the status code that defines a status update. This extra must
-     * sent as part of a broadcast with an action of {@code ACTION_SEND_DEVICE_INITIALIZER_STATUS}.
-     *
-     * <p>The status code sent with this extra must be a custom status code as defined by
-     * {@link DeviceInitializerStatus#FLAG_STATUS_CUSTOM}.
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_DEVICE_INITIALIZER_STATUS_CODE
-            = "android.app.extra.DEVICE_INITIALIZER_STATUS_CODE";
-
-    /**
-     * A {@code String} extra that contains an optional description accompanying a status update.
-     * This extra my be sent as part of a broadcast with an action of
-     * {@code ACTION_SEND_DEVICE_INITIALIZER_STATUS}.
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_DEVICE_INITIALIZER_STATUS_DESCRIPTION
-            = "android.app.extra.DEVICE_INITIALIZER_STATUS_DESCRIPTION";
 
     /**
      * @hide
@@ -4251,21 +4164,6 @@ public class DevicePolicyManager {
             mService.setUserIcon(admin, icon);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set the user icon ", re);
-        }
-    }
-
-    /**
-     * Called by device initializer to send a provisioning status update to the remote setup device.
-     *
-     * @param statusCode a custom status code value as defined by
-     *    {@link DeviceInitializerStatus#FLAG_STATUS_CUSTOM}.
-     * @param description custom description of the status code sent
-     */
-    public void sendDeviceInitializerStatus(int statusCode, String description) {
-        try {
-            mService.sendDeviceInitializerStatus(statusCode, description);
-        } catch (RemoteException re) {
-            Log.w(TAG, "Could not send device initializer status", re);
         }
     }
 

@@ -6026,40 +6026,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void sendDeviceInitializerStatus(int statusCode, String description) {
-        synchronized (this) {
-            String packageName = getDeviceInitializer();
-            if (packageName == null) {
-                throw new SecurityException("No device initializers");
-            }
-            UserHandle callingUser = Binder.getCallingUserHandle();
-            int deviceInitializerUid = -1;
-            try {
-                deviceInitializerUid = mContext.getPackageManager().getPackageUid(
-                        packageName, callingUser.getIdentifier());
-            } catch (NameNotFoundException e) {
-                throw new SecurityException(e);
-            }
-            if (Binder.getCallingUid() != deviceInitializerUid) {
-                throw new SecurityException("Caller must be a device initializer");
-            }
-            long id = Binder.clearCallingIdentity();
-            try {
-                Intent intent = new Intent(
-                        DevicePolicyManager.ACTION_SEND_DEVICE_INITIALIZER_STATUS);
-                intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_INITIALIZER_STATUS_CODE,
-                        statusCode);
-                intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_INITIALIZER_STATUS_DESCRIPTION,
-                        description);
-                mContext.sendBroadcastAsUser(intent, callingUser,
-                        android.Manifest.permission.RECEIVE_DEVICE_INITIALIZER_STATUS);
-            } finally {
-                restoreCallingIdentity(id);
-            }
-        }
-    }
-
-    @Override
     public boolean setKeyguardDisabled(ComponentName who, boolean disabled) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
