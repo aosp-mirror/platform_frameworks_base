@@ -50,8 +50,7 @@ import java.util.List;
  * or to have some of data besides toString() results fill the views,
  * override {@link #getView(int, View, ViewGroup)} to return the type of view you want.
  */
-public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
-        Spinner.ThemedSpinnerAdapter {
+public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSpinnerAdapter {
     /**
      * Contains the list of objects that represent the data of this ArrayAdapter.
      * The content of this list is referred to as "the array" in the documentation.
