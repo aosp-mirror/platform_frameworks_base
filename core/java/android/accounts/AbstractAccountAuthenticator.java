@@ -108,6 +108,14 @@ import java.util.Arrays;
 public abstract class AbstractAccountAuthenticator {
     private static final String TAG = "AccountAuthenticator";
 
+    /**
+     * Bundle key used for the {@code long} expiration time (in millis from the unix epoch) of the
+     * associated auth token.
+     *
+     * @see #getAuthToken
+     */
+    public static final String KEY_CUSTOM_TOKEN_EXPIRY = "android.accounts.expiry";
+
     private final Context mContext;
 
     public AbstractAccountAuthenticator(Context context) {
@@ -115,6 +123,7 @@ public abstract class AbstractAccountAuthenticator {
     }
 
     private class Transport extends IAccountAuthenticator.Stub {
+        @Override
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
                 String authTokenType, String[] features, Bundle options)
                 throws RemoteException {
@@ -140,6 +149,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void confirmCredentials(IAccountAuthenticatorResponse response,
                 Account account, Bundle options) throws RemoteException {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -162,6 +172,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void getAuthTokenLabel(IAccountAuthenticatorResponse response,
                 String authTokenType)
                 throws RemoteException {
@@ -184,6 +195,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void getAuthToken(IAccountAuthenticatorResponse response,
                 Account account, String authTokenType, Bundle loginOptions)
                 throws RemoteException {
@@ -209,6 +221,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
                 String authTokenType, Bundle loginOptions) throws RemoteException {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -234,6 +247,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void editProperties(IAccountAuthenticatorResponse response,
                 String accountType) throws RemoteException {
             checkBinderPermission();
@@ -248,6 +262,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void hasFeatures(IAccountAuthenticatorResponse response,
                 Account account, String[] features) throws RemoteException {
             checkBinderPermission();
@@ -262,6 +277,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void getAccountRemovalAllowed(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
             checkBinderPermission();
@@ -276,6 +292,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void getAccountCredentialsForCloning(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
             checkBinderPermission();
@@ -291,6 +308,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void addAccountFromCredentials(IAccountAuthenticatorResponse response,
                 Account account,
                 Bundle accountCredentials) throws RemoteException {
@@ -410,21 +428,42 @@ public abstract class AbstractAccountAuthenticator {
     public abstract Bundle confirmCredentials(AccountAuthenticatorResponse response,
             Account account, Bundle options)
             throws NetworkErrorException;
+
     /**
-     * Gets the authtoken for an account.
+     * Gets an authtoken for an account.
+     *
+     * If not {@code null}, the resultant {@link Bundle} will contain different sets of keys
+     * depending on whether a token was successfully issued and, if not, whether one
+     * could be issued via some {@link android.app.Activity}.
+     * <p>
+     * If a token cannot be provided without some additional activity, the Bundle should contain
+     * {@link AccountManager#KEY_INTENT} with an associated {@link Intent}. On the other hand, if
+     * there is no such activity, then a Bundle containing
+     * {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} should be
+     * returned.
+     * <p>
+     * If a token can be successfully issued, the implementation should return the
+     * {@link AccountManager#KEY_ACCOUNT_NAME} and {@link AccountManager#KEY_ACCOUNT_TYPE} of the
+     * account associated with the token as well as the {@link AccountManager#KEY_AUTHTOKEN}. In
+     * addition {@link AbstractAccountAuthenticator} implementations that declare themselves
+     * {@code android:customTokens=true} may also provide a non-negative {@link
+     * #KEY_CUSTOM_TOKEN_EXPIRY} long value containing the expiration timestamp of the expiration
+     * time (in millis since the unix epoch).
+     * <p>
+     * Implementers should assume that tokens will be cached on the basis of account and
+     * authTokenType. The system may ignore the contents of the supplied options Bundle when
+     * determining to re-use a cached token. Furthermore, implementers should assume a supplied
+     * expiration time will be treated as non-binding advice.
+     * <p>
+     * Finally, note that for android:customTokens=false authenticators, tokens are cached
+     * indefinitely until some client calls {@link
+     * AccountManager#invalidateAuthToken(String,String)}.
+     *
      * @param response to send the result back to the AccountManager, will never be null
      * @param account the account whose credentials are to be retrieved, will never be null
      * @param authTokenType the type of auth token to retrieve, will never be null
      * @param options a Bundle of authenticator-specific options, may be null
-     * @return a Bundle result or null if the result is to be returned via the response. The result
-     * will contain either:
-     * <ul>
-     * <li> {@link AccountManager#KEY_INTENT}, or
-     * <li> {@link AccountManager#KEY_ACCOUNT_NAME}, {@link AccountManager#KEY_ACCOUNT_TYPE},
-     * and {@link AccountManager#KEY_AUTHTOKEN}, or
-     * <li> {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} to
-     * indicate an error
-     * </ul>
+     * @return a Bundle result or null if the result is to be returned via the response.
      * @throws NetworkErrorException if the authenticator could not honor the request due to a
      * network error
      */
@@ -518,6 +557,7 @@ public abstract class AbstractAccountAuthenticator {
     public Bundle getAccountCredentialsForCloning(final AccountAuthenticatorResponse response,
             final Account account) throws NetworkErrorException {
         new Thread(new Runnable() {
+            @Override
             public void run() {
                 Bundle result = new Bundle();
                 result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
@@ -543,6 +583,7 @@ public abstract class AbstractAccountAuthenticator {
             Account account,
             Bundle accountCredentials) throws NetworkErrorException {
         new Thread(new Runnable() {
+            @Override
             public void run() {
                 Bundle result = new Bundle();
                 result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);

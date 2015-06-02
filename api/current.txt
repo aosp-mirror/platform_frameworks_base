@@ -2716,6 +2716,7 @@ package android.accounts {
     method public final android.os.IBinder getIBinder();
     method public abstract android.os.Bundle hasFeatures(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String[]) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle updateCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
+    field public static final java.lang.String KEY_CUSTOM_TOKEN_EXPIRY = "android.accounts.expiry";
   }
 
   public class Account implements android.os.Parcelable {
