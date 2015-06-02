@@ -495,12 +495,22 @@ public class TtsSpan implements ParcelableSpan {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeString(mType);
         dest.writePersistableBundle(mArgs);
     }
 
     @Override
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.TTS_SPAN;
     }
 

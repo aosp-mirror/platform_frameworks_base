@@ -42,6 +42,11 @@ public class TypefaceSpan extends MetricAffectingSpan implements ParcelableSpan 
     }
     
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.TYPEFACE_SPAN;
     }
     
@@ -50,6 +55,11 @@ public class TypefaceSpan extends MetricAffectingSpan implements ParcelableSpan 
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeString(mFamily);
     }
 

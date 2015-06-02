@@ -34,6 +34,11 @@ public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableS
     }
     
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.RELATIVE_SIZE_SPAN;
     }
     
@@ -42,6 +47,11 @@ public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableS
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeFloat(mProportion);
     }
 
