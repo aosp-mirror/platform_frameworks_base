@@ -71,6 +71,7 @@ package android {
     field public static final java.lang.String CAPTURE_VIDEO_OUTPUT = "android.permission.CAPTURE_VIDEO_OUTPUT";
     field public static final java.lang.String CHANGE_COMPONENT_ENABLED_STATE = "android.permission.CHANGE_COMPONENT_ENABLED_STATE";
     field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
+    field public static final java.lang.String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
     field public static final java.lang.String CHANGE_NETWORK_STATE = "android.permission.CHANGE_NETWORK_STATE";
     field public static final java.lang.String CHANGE_WIFI_MULTICAST_STATE = "android.permission.CHANGE_WIFI_MULTICAST_STATE";
     field public static final java.lang.String CHANGE_WIFI_STATE = "android.permission.CHANGE_WIFI_STATE";
@@ -6332,6 +6333,7 @@ package android.app.usage {
     method public java.util.List<android.app.usage.ConfigurationStats> queryConfigurations(int, long, long);
     method public android.app.usage.UsageEvents queryEvents(long, long);
     method public java.util.List<android.app.usage.UsageStats> queryUsageStats(int, long, long);
+    method public void whitelistAppTemporarily(java.lang.String, long, android.os.UserHandle);
     field public static final int INTERVAL_BEST = 4; // 0x4
     field public static final int INTERVAL_DAILY = 0; // 0x0
     field public static final int INTERVAL_MONTHLY = 2; // 0x2
