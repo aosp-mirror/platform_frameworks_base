@@ -20,7 +20,7 @@ page.image=images/cards/card-api-overview_16-9_2x.png
   <li><a href="#authentication">Authentication</a>
     <ol>
       <li><a href="#fingerprint-authentication">Fingerprint Authentication</a></li>
-      <li><a href="#confirm-credentials">Confirm Credentials</a></li>
+      <li><a href="#confirm-credential">Confirm Credential</a></li>
     </ol>
   </li>
   <li><a href="#direct-share">Direct Share</a></li>
@@ -144,7 +144,7 @@ adb -e emu finger touch &lt;finger_id&gt;
 </li>
 </ol>
 
-<h3 id="confirm-credentials">Confirm Credentials</h3>
+<h3 id="confirm-credential">Confirm Credential</h3>
 <p>Your app can authenticate users based on how recently they last unlocked their device. This
 feature frees users from having to remember additional app-specific passwords, and avoids the need
 for you to implement your own authentication user interface. Your app should use this feature in
@@ -164,8 +164,8 @@ method to re-authenticate the user within your app.
 </p>
 
 <p>To see an app implementation of this feature, refer to the
-<a href="https://github.com/googlesamples/android-ConfirmCredentials" class="external-link">
-  Confirm Credentials sample</a>.</p>
+<a href="https://github.com/googlesamples/android-ConfirmCredential" class="external-link">
+  Confirm Credential sample</a>.</p>
 
 <h2 id="direct-share">Direct Share</h2>
 
