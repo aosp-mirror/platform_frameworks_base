@@ -1756,6 +1756,12 @@ public class Editor {
         if (!checkFieldAndSelectCurrentWord()) {
             return false;
         }
+
+        // Avoid dismissing the selection if it exists.
+        mPreserveDetachedSelection = true;
+        stopTextActionMode();
+        mPreserveDetachedSelection = false;
+
         getSelectionController().enterDrag();
         return true;
     }
@@ -3129,7 +3135,9 @@ public class Editor {
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
                 if (!customCallback.onCreateActionMode(mode, menu)) {
-                    // The custom mode can choose to cancel the action mode
+                    // The custom mode can choose to cancel the action mode, dismiss selection.
+                    Selection.setSelection((Spannable) mTextView.getText(),
+                            mTextView.getSelectionEnd());
                     return false;
                 }
             }
