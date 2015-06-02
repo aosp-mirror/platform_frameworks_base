@@ -298,7 +298,7 @@ public interface WebViewProvider {
     interface ViewDelegate {
         public boolean shouldDelayChildPressedState();
 
-        public void onProvideVirtualAssistStructure(android.view.ViewAssistStructure structure);
+        public void onProvideVirtualStructure(android.view.ViewStructure structure);
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
 
