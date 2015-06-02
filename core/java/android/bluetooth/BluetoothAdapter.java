@@ -410,6 +410,7 @@ public final class BluetoothAdapter {
      * Broadcast Action: The Bluetooth adapter state has changed in LE only mode.
      * @hide
      */
+    @SystemApi
     public static final String ACTION_BLE_STATE_CHANGED =
         "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
 
@@ -620,17 +621,18 @@ public final class BluetoothAdapter {
      * @return true if the local Bluetooth LE adapter is turned on
      * @hide
      */
-     public boolean isLeEnabled() {
-        final int state = getLeState();
-        if (state == BluetoothAdapter.STATE_ON) {
-            if (DBG) Log.d (TAG, "STATE_ON");
-        } else if (state == BluetoothAdapter.STATE_BLE_ON) {
-            if (DBG) Log.d (TAG, "STATE_BLE_ON");
-        } else {
-            if (DBG) Log.d (TAG, "STATE_OFF");
-            return false;
-        }
-        return true;
+    @SystemApi
+    public boolean isLeEnabled() {
+       final int state = getLeState();
+       if (state == BluetoothAdapter.STATE_ON) {
+           if (DBG) Log.d (TAG, "STATE_ON");
+       } else if (state == BluetoothAdapter.STATE_BLE_ON) {
+           if (DBG) Log.d (TAG, "STATE_BLE_ON");
+       } else {
+           if (DBG) Log.d (TAG, "STATE_OFF");
+           return false;
+       }
+       return true;
     }
 
     /**
@@ -680,6 +682,7 @@ public final class BluetoothAdapter {
      *         immediate error
      * @hide
      */
+    @SystemApi
     public boolean disableBLE() {
         if (!isBleScanAlwaysAvailable()) return false;
 
@@ -742,6 +745,7 @@ public final class BluetoothAdapter {
      *         immediate error
      * @hide
      */
+    @SystemApi
     public boolean enableBLE() {
         if (!isBleScanAlwaysAvailable()) return false;
 
