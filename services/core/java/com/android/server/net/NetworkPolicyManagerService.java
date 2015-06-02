@@ -283,8 +283,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     /**
      * UIDs that have been white-listed to always be able to have network access
      * in power save mode.
+     * TODO: An int array might be sufficient
      */
     private final SparseBooleanArray mPowerSaveWhitelistAppIds = new SparseBooleanArray();
+
+    private final SparseBooleanArray mPowerSaveTempWhitelistAppIds = new SparseBooleanArray();
 
     /** Set of ifaces that are metered. */
     private ArraySet<String> mMeteredIfaces = new ArraySet<>();
@@ -371,6 +374,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         }
     }
 
+    void updatePowerSaveTempWhitelistLocked() {
+        try {
+            final int[] whitelist = mDeviceIdleController.getAppIdTempWhitelist();
+            mPowerSaveTempWhitelistAppIds.clear();
+            if (whitelist != null) {
+                for (int uid : whitelist) {
+                    mPowerSaveTempWhitelistAppIds.put(uid, true);
+                }
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
     public void systemReady() {
         if (!isBandwidthControlEnabled()) {
             Slog.w(TAG, "bandwidth controls disabled, unable to enforce policy");
@@ -392,6 +408,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                         if (mRestrictPower != enabled) {
                             mRestrictPower = enabled;
                             updateRulesForGlobalChangeLocked(true);
+                            updateRulesForTempWhitelistChangeLocked();
                         }
                     }
                 }
@@ -404,6 +421,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
 
             if (mRestrictBackground || mRestrictPower || mDeviceIdleMode) {
                 updateRulesForGlobalChangeLocked(true);
+                updateRulesForTempWhitelistChangeLocked();
                 updateNotificationsLocked();
             }
         }
@@ -428,6 +446,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         // listen for changes to power save whitelist
         final IntentFilter whitelistFilter = new IntentFilter(
                 PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
+        whitelistFilter.addAction(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
         mContext.registerReceiver(mPowerSaveWhitelistReceiver, whitelistFilter, null, mHandler);
 
         // watch for network interfaces to be claimed
@@ -496,8 +515,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and POWER_SAVE_WHITELIST_CHANGED is protected
             synchronized (mRulesLock) {
-                updatePowerSaveWhitelistLocked();
-                updateRulesForGlobalChangeLocked(false);
+                if (PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED.equals(intent.getAction())) {
+                    updatePowerSaveWhitelistLocked();
+                    updateRulesForGlobalChangeLocked(false);
+                } else {
+                    updatePowerSaveTempWhitelistLocked();
+                    updateRulesForTempWhitelistChangeLocked();
+                }
             }
         }
     };
@@ -2019,6 +2043,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         }
     }
 
+    void updateRulesForTempWhitelistChangeLocked() {
+        final List<UserInfo> users = mUserManager.getUsers();
+        for (UserInfo user : users) {
+            for (int i = mPowerSaveTempWhitelistAppIds.size() - 1; i >= 0; i--) {
+                int appId = mPowerSaveTempWhitelistAppIds.keyAt(i);
+                int uid = UserHandle.getUid(user.id, appId);
+                updateRulesForUidLocked(uid);
+            }
+        }
+    }
+
     private static boolean isUidValidForRules(int uid) {
         // allow rules on specific system services, and any apps
         if (uid == android.os.Process.MEDIA_UID || uid == android.os.Process.DRM_UID
@@ -2065,8 +2100,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
 
         // derive active rules based on policy and active state
 
+        int appId = UserHandle.getAppId(uid);
         int uidRules = RULE_ALLOW_ALL;
-        if (uidIdle && !mPowerSaveWhitelistAppIds.get(UserHandle.getAppId(uid))) {
+        if (uidIdle && !mPowerSaveWhitelistAppIds.get(appId)
+                && !mPowerSaveTempWhitelistAppIds.get(appId)) {
             uidRules = RULE_REJECT_ALL;
         } else if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
             // uid in background, and policy says to block metered data
@@ -2077,7 +2114,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                 uidRules = RULE_REJECT_METERED;
             }
         } else if (mRestrictPower || mDeviceIdleMode) {
-            final boolean whitelisted = mPowerSaveWhitelistAppIds.get(UserHandle.getAppId(uid));
+            final boolean whitelisted = mPowerSaveWhitelistAppIds.get(appId)
+                    || mPowerSaveTempWhitelistAppIds.get(appId);
             if (!whitelisted && !uidForeground
                     && (uidPolicy & POLICY_ALLOW_BACKGROUND_BATTERY_SAVE) == 0) {
                 // uid is in background, restrict power use mode is on (so we want to

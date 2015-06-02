@@ -137,6 +137,8 @@ public abstract class PowerManagerInternal {
 
     public abstract void setDeviceIdleWhitelist(int[] appids);
 
+    public abstract void setDeviceIdleTempWhitelist(int[] appids);
+
     public abstract void updateUidProcState(int uid, int procState);
 
     public abstract void uidGone(int uid);
