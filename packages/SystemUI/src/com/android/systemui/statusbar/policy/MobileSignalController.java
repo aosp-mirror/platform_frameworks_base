@@ -272,7 +272,7 @@ public class MobileSignalController extends SignalController<
     }
 
     private boolean isCarrierNetworkChangeActive() {
-        return !hasService() && mCurrentState.carrierNetworkChangeMode;
+        return mCurrentState.carrierNetworkChangeMode;
     }
 
     public void handleBroadcast(Intent intent) {
