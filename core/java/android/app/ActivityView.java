@@ -24,7 +24,10 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.SurfaceTexture;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -48,7 +51,9 @@ public class ActivityView extends ViewGroup {
     private static final String TAG = "ActivityView";
     private static final boolean DEBUG = false;
 
-    DisplayMetrics mMetrics;
+    private static final int MSG_SET_SURFACE = 1;
+
+    DisplayMetrics mMetrics = new DisplayMetrics();
     private final TextureView mTextureView;
     private ActivityContainerWrapper mActivityContainer;
     private Activity mActivity;
@@ -57,6 +62,9 @@ public class ActivityView extends ViewGroup {
     private Surface mSurface;
     private int mLastVisibility;
     private ActivityViewCallback mActivityViewCallback;
+
+    private HandlerThread mThread = new HandlerThread("ActivityViewThread");
+    private Handler mHandler;
 
     public ActivityView(Context context) {
         this(context, null);
@@ -89,12 +97,27 @@ public class ActivityView extends ViewGroup {
                     + e);
         }
 
+        mThread.start();
+        mHandler = new Handler(mThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == MSG_SET_SURFACE) {
+                    try {
+                        mActivityContainer.setSurface((Surface) msg.obj, msg.arg1, msg.arg2,
+                                mMetrics.densityDpi);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(
+                                "ActivityView: Unable to set surface of ActivityContainer. " + e);
+                    }
+                }
+            }
+        };
         mTextureView = new TextureView(context);
         mTextureView.setSurfaceTextureListener(new ActivityViewSurfaceTextureListener());
         addView(mTextureView);
 
         WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
-        mMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(mMetrics);
 
         mLastVisibility = getVisibility();
@@ -111,18 +134,12 @@ public class ActivityView extends ViewGroup {
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
 
-        if (mSurface != null) {
-            try {
-                if (visibility == View.GONE) {
-                    mActivityContainer.setSurface(null, mWidth, mHeight, mMetrics.densityDpi);
-                } else if (mLastVisibility == View.GONE) {
-                    // Don't change surface when going between View.VISIBLE and View.INVISIBLE.
-                    mActivityContainer.setSurface(mSurface, mWidth, mHeight, mMetrics.densityDpi);
-                }
-            } catch (RemoteException e) {
-                throw new RuntimeException(
-                        "ActivityView: Unable to set surface of ActivityContainer. " + e);
-            }
+        if (mSurface != null && (visibility == View.GONE || mLastVisibility == View.GONE)) {
+            Message msg = Message.obtain(mHandler, MSG_SET_SURFACE);
+            msg.obj = (visibility == View.GONE) ? null : mSurface;
+            msg.arg1 = mWidth;
+            msg.arg2 = mHeight;
+            mHandler.sendMessage(msg);
         }
         mLastVisibility = visibility;
     }
