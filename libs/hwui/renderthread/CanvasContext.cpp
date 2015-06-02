@@ -391,7 +391,11 @@ void CanvasContext::setTextureAtlas(RenderThread& thread,
 
 void CanvasContext::dumpFrames(int fd) {
     FILE* file = fdopen(fd, "a");
-    fprintf(file, "\n\n---PROFILEDATA---");
+    fprintf(file, "\n\n---PROFILEDATA---\n");
+    for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::kNumIndexes); i++) {
+        fprintf(file, FrameInfoNames[i].c_str());
+        fprintf(file, ",");
+    }
     for (size_t i = 0; i < mFrames.size(); i++) {
         FrameInfo& frame = mFrames[i];
         if (frame[FrameInfoIndex::kSyncStart] == 0) {
