@@ -277,6 +277,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Коңгуроо өчүк"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Чалганда титирөө"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Коңгуроо жандырылган"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Жаңыртууга даярдоо"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Жаңыртуу топтому иштелүүдө…"</string>
     <!-- no translation found for shutdown_progress (2281079257329981203) -->
     <skip />
     <!-- no translation found for shutdown_confirm (3385745179555731470) -->
@@ -376,6 +378,15 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Колдонмого SMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"билдирүүлөрдү (MMS) кабыл алуу"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Колдонмого MMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"уюктук берүү билдирүүлөрүн окуу"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Колдонмого түзмөгүңүз кабыл алган уюк берүүнүн билдирүүлөрүн окууга жол берет. Шашылыш эскертүү билдирүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралу сизди эскертүү үчүн жөнөтүлөт. Зыяндуу колдономолор шашылыш эскертүүлөр берилип жатканда, сиздин түзмөктүн иштешине жолтоо болушу мүмкүн."</string>
+    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
+    <skip />
+    <!-- no translation found for permlab_subscribedFeedsRead (4756609637053353318) -->
+    <skip />
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Колдонмого учурда шайкештештирилген каналдардын чоо-жайларын алуу мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_sendSms (5600830612147671529) -->
     <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Колдонмого SMS билдирүүлөрүн жөнөтүү уруксатын берет. Бул сиз күтпөгөн чыгымдарга алып келиши мүмкүн. Зыяндуу колдонмолор сиздин ырастооңузсуз билдирүүлөрдү жөнөтүп, көп чыгымдарга себепкер болушу мүмкүн."</string>
@@ -554,7 +565,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Манжа изи иштелбей койду. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Манжа изинин сенсору кирдеп калган. Тазалап, кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Манжа өтө тез жылдырылды. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">".Манжа өтө акырын жылдырылды. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Манжа өтө жай жылды. Кайра аракет кылыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Манжа изинин аппараттык камсыздоосу жеткиликтүү эмес."</string>
@@ -1441,6 +1452,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Топтомдорду орнотууну талап кылуу"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Колдонмого топтомдорду орнотууну өтүнүүсүнө жол ачат."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>
     <!-- no translation found for ime_action_go (8320845651737369027) -->

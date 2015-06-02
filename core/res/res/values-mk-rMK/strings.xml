@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Исклучено ѕвонење"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ѕвонење на вибрации"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Вклучено ѕвонење"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Подготови се за ажурирање"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Пакетот за ажурирање се обработува..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Се исклучува..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Вашиот таблет ќе се исклучи."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Вашиот телевизор ќе се исклучи."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Овозможува апликацијата да прима и да обработува СМС пораки. Тоа значи дека апликацијата може да следи или да брише пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"прими текстуални пораки (ММС)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Овозможува апликацијата да прима и да обработува ММС пораки. Тоа значи дека апликацијата може да следи или да брише пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"прочитај пораки за мобилно емитување"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Овозможува апликациите да ги читаат пораките за мобилно емитување што ги прима вашиот уред. Предупредувањата за мобилно емитување се доставуваат на некои локации, за да ве предупредат на итни ситуации. Злонамерните апликации може да пречат во ефикасноста или работењето на вашиот уред кога се прима емитување за итен случај."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваши сметки"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Пристапи кон достапните сметки."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читај претплатени навестувања на содржина"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозволува апликацијата да добива детали за навестувања што се тековно синхронизирани."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"испраќај СМС пораки"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Овозможува апликацијата да испраќа СМС пораки. Ова може да предизвика неочекувани трошоци. Злонамерните апликации може да ве чинат пари поради испраќање пораки без ваша потврда."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"прочитај ги своите текстуални пораки (СМС или ММС)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Овозможува апликацијата да насочува излез за медиуми кон други надворешни уреди."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Читај сесии на инсталирање"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дозволува апликација да чита сесии на инсталирање. Тоа овозможува апликацијата да гледа детали за активни инсталации на пакет."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Барај инсталирање пакети"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Дозволува апликацијата да бара инсталација на пакети."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Допрете двапати за регулирање на зумирањето"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Не можеше да се додаде виџет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Оди"</string>

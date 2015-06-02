@@ -188,6 +188,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Звонок отключен"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибросигнал"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звонок включен"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Подготовка к обновлению"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Обновление пакета…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Телевизор будет выключен."</string>
@@ -267,6 +269,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Приложение сможет получать и обрабатывать SMS. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"Прием MMS-сообщений"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Приложение сможет получать и обрабатывать MMS. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Читать сообщения массовой рассылки"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Приложение получит доступ к сообщениям широковещательных SMS-служб, которые в некоторых странах используются для информирования населения об экстренных ситуациях. Вредоносные программы могут помешать работе устройства, на которое поступают такие сообщения."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваши аккаунты"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ к имеющимся аккаунтам."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Просмотр фидов пользователя"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Приложение сможет получать сведения о синхронизируемых в настоящее время фидах."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Отправка SMS-сообщений"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Приложение сможет отправлять SMS. Учтите, что вредоносные программы смогут отправлять сообщения без уведомления, что может привести к непредвиденным расходам."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"Просмотр SMS и MMS"</string>
@@ -1106,6 +1114,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Приложение сможет направлять поток мультимедиа на другие внешние устройства."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Чтение данных сеансов установки"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Чтение данных текущих сеансов установки пакетов."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Разрешение на установку пакетов"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Приложение сможет запрашивать разрешения на установку пакетов."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Нажмите дважды для изменения масштаба"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Не удалось добавить виджет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Выбрать"</string>

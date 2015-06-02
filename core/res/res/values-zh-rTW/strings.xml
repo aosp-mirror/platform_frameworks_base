@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"鈴聲震動"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"鈴聲開啟"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"準備進行更新"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"正在處理更新套件…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"關機中…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板電腦將會關機。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的電視即將關閉。"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理簡訊。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收簡訊 (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理多媒體訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允許應用程式讀取您裝置收到的區域廣播訊息。某些地點會發出區域廣播警示，警告您有緊急狀況發生。請注意，惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的效能或運作。"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帳戶"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"讀取訂閱資訊提供"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允許應用程式取得目前已同步處理的資訊提供詳細資料。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"傳送 SMS 簡訊"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允許應用程式傳送簡訊，但可能產生非預期的費用。惡意應用程式可能利用此功能擅自傳送簡訊，增加您不必要的額外支出。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"讀取您的簡訊 (SMS 或 MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允許應用程式將媒體輸出轉送至其他外部裝置。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"讀取安裝工作階段"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允許應用程式讀取安裝工作階段。應用程式將可查看目前的套件安裝詳細資料。"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"要求安裝套件"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"允許應用程式要求安裝套件。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"輕觸兩下即可控制縮放"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>

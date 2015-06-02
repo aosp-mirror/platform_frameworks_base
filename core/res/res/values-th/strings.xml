@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ปิดเสียง"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"เปิดเสียง"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"เตรียมพร้อมสำหรับการอัปเดต"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"กำลังประมวลผลแพ็กเกจการอัปเดต…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิด..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ทีวีของคุณจะปิด"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ SMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"รับข้อความ (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ MMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"อ่านข้อความที่ได้รับจากสถานีมือถือ"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"อนุญาตให้แอปอ่านข้อความจากสถานีมือถือที่อุปกรณ์ได้รับ การแจ้งเตือนทางมือถือมีให้บริการในบางพื้นที่ โดยจะแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจเข้าแทรกแซงการทำงานของอุปกรณ์เมื่อได้รับข้อความแจ้งเตือนฉุกเฉิน"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"บัญชีของคุณ"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"เข้าถึงบัญชีที่ใช้งานได้"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"อ่านฟีดข้อมูลที่สมัครไว้"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"อนุญาตให้แอปพลิเคชันดูรายละเอียดเกี่ยวกับฟีดที่ซิงค์ไว้ในปัจจุบัน"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ส่งข้อความ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"อนุญาตให้แอปพลิเคชันส่งข้อความ SMS ซึ่งอาจทำให้มีการเรียกเก็บเงินที่ไม่คาดคิด แอปพลิเคชันที่เป็นอันตรายอาจทำให้คุณเสียค่าใช้จ่ายด้วยการส่งข้อความโดยไม่รอการยืนยันจากคุณ"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"อ่านข้อความของคุณ (SMS หรือ MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"อนุญาตให้แอปพลิเคชันกำหนดเส้นทางเอาต์พุตของสื่อไปยังอุปกรณ์ภายนอกอื่นๆ"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"อ่านเซสชันการติดตั้ง"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"อนุญาตให้แอปพลิเคชันอ่านเซสชันการติดตั้ง ซึ่งจะอนุญาตให้อ่านรายละเอียดเกี่ยวกับการติดตั้งแพ็กเกจที่ใช้งาน"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ขอติดตั้งแพ็กเกจ"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"อนุญาตให้แอปพลิเคชันขอการติดตั้งแพ็กเกจ"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>

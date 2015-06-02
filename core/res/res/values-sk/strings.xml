@@ -104,7 +104,7 @@
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Používateľ, s ktorým komunikujete, požiadal o režim VCO textového telefónu"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Používateľ, s ktorým komunikujete, požiadal o režim OFF textového telefónu"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voice"</string>
-    <string name="serviceClassData" msgid="872456782077937893">"Údaje"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Dáta"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Async"</string>
@@ -188,6 +188,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvonenie je vypnuté"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibračné zvonenie"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvonenie je zapnuté"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Príprava na aktualizáciu"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Spracováva sa balík aktualizácií…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Prebieha vypínanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Váš tablet bude vypnutý."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televízor sa vypne."</string>
@@ -267,6 +269,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Umožňuje aplikácii prijímať a spracovávať správy SMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prijímať textové správy (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikácii prijímať a spracovávať správy MMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čítať správy Cell Broadcast"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikácii čítať správy Cell Broadcast prijaté vaším zariadením. Upozornenia Cell Broadcast sú doručované na určitých miestach a upozorňujú na núdzové situácie. Škodlivé aplikácie môžu pri prijatí núdzovej správy Cell Broadcast narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Prístup k dostupným účtom."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikácii získať podrobnosti o aktuálne synchronizovaných informačných kanáloch."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odosielať správy SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikácii odosielať správy SMS. Môže to mať za následok účtovanie neočakávaných poplatkov. Škodlivé aplikácie vám môžu spôsobiť výdavky odosielaním správ bez vášho potvrdenia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čítať textové správy (SMS alebo MMS)"</string>
@@ -409,7 +417,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikácii konfigurovať miestny telefón s rozhraním Bluetooth, vyhľadávať a spárovať vzdialené zariadenia."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"pripojiť a odpojiť od WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Umožňuje aplikácii určiť, či je povolený štandard WiMAX, a tiež informácie o všetkých pripojených sieťach WiMAX."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Zmeniť stav siete WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Meniť stav pripojenia WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Umožňuje aplikácii pripojiť tablet k sieťam WiMAX a odpojiť ho od nich."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Umožňuje aplikácii pripojiť televízor k sieťam WiMAX a odpojiť ho z nich."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Umožňuje aplikácii pripojiť telefón k sieťam WiMAX a odpojiť ho od nich."</string>
@@ -519,9 +527,9 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknúť obrazovku"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ovládať, ako a kedy sa obrazovka uzamkne."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazanie všetkých údajov"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia tabletu."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Vymažte údaje televízora bez upozornenia obnovením jeho továrenských nastavení."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia telefónu."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia výrobné nastavenia tabletu."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Vymažte údaje televízora bez upozornenia obnovením jeho výrobných nastavení."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia výrobné nastavenia telefónu."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Vymazať údaje používateľa"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Vymažte bez upozornenia údaje tohto používateľa na tomto televízore."</string>
@@ -698,12 +706,12 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších neúspešných pokusoch (<xliff:g id="NUMBER_1">%d</xliff:g>) budete vyzvaní odomknúť tablet pomocou prihlasovacích údajov služby Google.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Vzor na odomknutie ste nesprávne nakreslili <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa zobrazí výzva na odomknutie vášho televízora pomocou prihlásenia Google.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou prihlasovacích údajov Google.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v tablete obnovia predvolené továrenské nastavenia a všetky používateľské údaje budú stratené."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa obnovia továrenské nastavenia televízora a prídete o všetky údaje používateľa."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v telefóne obnovia predvolené továrenské nastavenia a všetky používateľské údaje budú stratené."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V tablete sa teraz obnovia predvolené továrenské nastavenia."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER">%d</xliff:g>-krát. Teraz v ňom budú obnovené továrenské nastavenia."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V telefóne sa teraz obnovia predvolené továrenské nastavenia."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v tablete obnovia predvolené výrobné nastavenia a všetky používateľské údaje budú stratené."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa obnovia výrobné nastavenia televízora a prídete o všetky údaje používateľa."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v telefóne obnovia predvolené výrobné nastavenia a všetky používateľské údaje budú stratené."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V tablete sa teraz obnovia predvolené výrobné nastavenia."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER">%d</xliff:g>-krát. Teraz v ňom budú obnovené výrobné nastavenia."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V telefóne sa teraz obnovia predvolené výrobné nastavenia."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Počet sekúnd zostávajúcich do ďalšieho pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zabudli ste vzor?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Odomknutie účtu"</string>
@@ -1106,6 +1114,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikácii smerovať výstup médií do ďalších externých zariadení."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Čítať relácie inštalácií"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Toto povolenie umožňuje aplikácii čítať relácie inštalácií a zobraziť tak podrobnosti o aktívnych inštaláciách balíkov."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Vyžiadať inštaláciu balíkov"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Umožňuje aplikácii vyžiadať inštaláciu balíkov."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ovládacie prvky lupy zobrazíte dvojitým dotknutím"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Hľadať"</string>
@@ -1329,12 +1339,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávny kód PIN. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v tablete obnovia predvolené továrenské nastavenia a všetky používateľské údaje budú stratené."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa obnovia továrenské nastavenia televízora a prídete o všetky údaje používateľa."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v telefóne obnovia predvolené továrenské nastavenia a všetky používateľské údaje budú stratené."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V tablete sa teraz obnovia predvolené továrenské nastavenia."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER">%d</xliff:g>-krát. Teraz sa v ňom obnovia továrenské nastavenia."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V telefóne sa teraz obnovia predvolené továrenské nastavenia."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v tablete obnovia predvolené výrobné nastavenia a všetky používateľské údaje budú stratené."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa obnovia výrobné nastavenia televízora a prídete o všetky údaje používateľa."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v telefóne obnovia predvolené výrobné nastavenia a všetky používateľské údaje budú stratené."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V tablete sa teraz obnovia predvolené výrobné nastavenia."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER">%d</xliff:g>-krát. Teraz sa v ňom obnovia výrobné nastavenia."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V telefóne sa teraz obnovia predvolené výrobné nastavenia."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších <xliff:g id="NUMBER_1">%d</xliff:g> neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Vzor na odomknutie ste nakreslili nesprávne <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa zobrazí výzva na odomknutie televízora pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
@@ -1538,7 +1548,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Udalosť"</string>
     <string name="muted_by" msgid="6147073845094180001">"Stlmené aplikáciou <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
-    <string name="system_error_wipe_data" msgid="6608165524785354962">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho továrenské nastavenia."</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho výrobné nastavenia."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Vo vašom zariadení došlo k internému problému. Ak chcete získať podrobné informácie, obráťte sa na jeho výrobcu."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Žiadosť USSD bola upravená na žiadosť DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Žiadosť USSD bola upravená na žiadosť SS."</string>

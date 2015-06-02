@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Csengő kikapcsolva"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Csengő rezeg"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Csengő bekapcsolva"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Felkészülés a frissítésre"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"A frissítési csomag feldolgozása…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Leállítás..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"A táblagép ki fog kapcsolni."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"A tévé ki fog kapcsolni."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lehetővé teszi az alkalmazás számára, hogy SMS-eket fogadjon és dolgozzon fel. Ez azt jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"szöveges üzenetek (MMS) fogadása"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lehetővé teszi az alkalmazás számára, hogy MMS-eket fogadjon és dolgozzon fel. Ez azt jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"cellán belüli üzenetek olvasása"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lehetővé teszi az alkalmazás számára az eszközre érkező cellán belüli üzenetek olvasását. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások befolyásolhatják az eszköz  teljesítményét vagy működését vészhelyzeti cellaüzenet érkezésekor."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Az Ön fiókjai"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Hozzáférés az elérhető fiókokhoz."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"feliratkozott hírcsatornák olvasása"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lehetővé teszi az alkalmazás számára, hogy részleteket kapjon a jelenleg szinkronizált hírcsatornákról."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-ek küldése"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lehetővé teszi az alkalmazás számára, hogy SMS-eket küldjön. Ennek eredményeként váratlan terhelésekkel találkozhat. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül küldhetnek üzeneteket, így költségek merülhetnek fel."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"szöveges üzenetek (SMS vagy MMS) olvasása"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lehetővé teszi az alkalmazás számára, hogy más külső eszközökre irányítsa a médiafájlok lejátszását."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Telepítési munkamenetek olvasása"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Engedélyezi az alkalmazásnak a telepítési munkamenetek olvasását. Ezáltal részleteket kaphat az egyes csomagok éppen folyamatban lévő telepítéséről."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Telepítőcsomagok kérése"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lehetővé teszi az alkalmazás számára csomagok telepítésének kérését."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Érintse meg kétszer a nagyítás beállításához"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nem sikerült hozzáadni a modult."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ugrás"</string>

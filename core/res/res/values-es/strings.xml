@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Timbre desactivado"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Modo vibración"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activado"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Preparándose para la actualización"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Procesando paquete de actualización…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"El tablet se apagará."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"La TV se apagará."</string>
@@ -203,7 +205,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de error"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de errores"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está desactivado. Activar"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El sonido está activado. Desactivar"</string>
@@ -243,9 +245,9 @@
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"acceder a datos de sensores y dispositivos wearable"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de la ventana"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar exploración táctil"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar la exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Los elementos seleccionados se dirán en voz alta y podrás explorar la pantalla mediante gestos."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar accesibilidad web mejorada"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar la accesibilidad web mejorada"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Es posible que se instalen secuencias de comandos para que el contenido de las aplicaciones sea más accesible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Incluye datos personales como números de tarjetas de crédito y contraseñas."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensajes de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"leer mensajes de difusión móvil"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que la aplicación lea mensajes de difusión móvil que haya recibido el dispositivo. Las alertas de difusión móvil se envían en algunas ubicaciones para avisar de situaciones de emergencia. Es posible que las aplicaciones malintencionadas interfieran en el rendimiento o en el funcionamiento del dispositivo si se recibe una alerta de difusión móvil de emergencia."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tus cuentas"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acceder a las cuentas disponibles"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leer feeds a los que está suscrito el usuario"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que la aplicación obtenga detalles sobre los feeds sincronizados actualmente."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensajes SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite que la aplicación envíe mensajes SMS, lo que puede generar cargos inesperados. Las aplicaciones malintencionadas pueden causarte gastos imprevistos al enviar mensajes sin tu confirmación."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"leer tus mensajes de texto (SMS o MMS)"</string>
@@ -514,7 +522,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueo de pantalla"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borrar los datos del tablet sin avisar restableciendo datos de fábrica"</string>
@@ -643,7 +651,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Pariente"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Hermana"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Cónyuge"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizada"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizado"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Casa"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Trabajo"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Otro"</string>
@@ -1041,7 +1049,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Si activas el almacenamiento USB, se detendrán algunas aplicaciones que estás usando y es posible que no estén disponibles hasta que lo desactives."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Error de funcionamiento de USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB para carga"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB para cargar"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferir archivos"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferir fotos"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
@@ -1054,7 +1062,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Se perderán todos los datos de tu tarjeta."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para inhabilitar la depuración USB"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca aquí para inhabilitarla"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Elegir teclados"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostrar método de entrada"</string>
@@ -1067,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparando <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Comprobando errores"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nueva <xliff:g id="NAME">%s</xliff:g> detectada"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos y contenido multimedia"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos y multimedia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Tu <xliff:g id="NAME">%s</xliff:g> tiene daños"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Tu <xliff:g id="NAME">%s</xliff:g> tiene daños: prueba a formatear de nuevo la unidad"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Extracción inesperada de <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que la aplicación dirija salidas de medios a otros dispositivos externos."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Consultar sesiones de instalación"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que una aplicación consulte sesiones de instalación para ver detalles sobre instalaciones de paquetes activos."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Solicitar instalación de paquetes"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite a una aplicación solicitar la instalación de paquetes."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1234,7 +1244,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Conexiones automáticas restringidas"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca para eliminar la restricción."</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca para quitar la restricción"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
     <string name="issued_to" msgid="454239480274921032">"Emitido para:"</string>
@@ -1439,7 +1449,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Volver a intentar más tarde"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Mostrando pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Para salir, desliza el dedo hacia abajo desde la parte superior de la pantalla."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Para salir, desliza hacia abajo desde arriba."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Entendido"</string>
     <string name="done_label" msgid="2093726099505892398">"Listo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Control deslizante circular de horas"</string>

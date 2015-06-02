@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Soittoääni: mykistetty"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Soittoääni: värinä"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Soittoääni: normaali"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Valmistaudu päivitykseen"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Käsitellään päivityspakettia…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televisio sammutetaan."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Antaa sovelluksen vastaanottaa ja käsitellä tekstiviestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"vastaanota tekstiviestejä (multimedia)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Antaa sovelluksen vastaanottaa ja käsitellä multimediaviestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lue tiedotteita"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Antaa sovelluksen lukea laitteesi vastaanottamia tiedotteita. Tiedotteiden avulla ilmoitetaan hätätilanteista joissakin paikoissa. Haitalliset sovellukset voivat häiritä laitteen toimintaa laitteen vastaanottaessa hätätiedotteen."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Omat tilit"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Käytä saatavilla olevia tilejä."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lukea tilattuja syötteitä"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Antaa sovelluksen saada tietoja tällä hetkellä synkronoitavista syötteistä."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"lähetä tekstiviestejä"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Antaa sovelluksen lähettää tekstiviestejä. Tästä voi aiheutua odottamattomia kuluja. Haitalliset sovellukset voivat aiheuttaa kuluja lähettämällä viestejä ilman lupaasi."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lue tekstiviestejä (teksti tai multimedia)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Antaa sovelluksen reitittää mediaa muihin ulkoisiin laitteisiin."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lue asennusistuntoja"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Sallii sovelluksen lukea asennusistuntoja. Toiminto sallii sovelluksen lukea aktiivisten asennuspakettien tietoja."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Pyydä pakettien asennusta"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Antaa sovelluksen pyytää pakettien asennusta."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ohjaa zoomausta napauttamalla kahdesti"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widgetin lisääminen epäonnistui."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Siirry"</string>

@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringer off"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringer vibrate"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringer on"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Prepare for update"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Processing the update package…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Shutting down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Your TV will shut down."</string>
@@ -255,7 +257,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Allows the app to be the status bar."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expand/collapse status bar"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Allows the app to expand or collapse the status bar."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"install shortcuts"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"Install shortcuts"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Allows an application to add Home screen shortcuts without user intervention."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"uninstall shortcuts"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Allows the application to remove Home screen shortcuts without user intervention."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Allows the app to receive and process SMS messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"receive text messages (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Allows the app to receive and process MMS messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"read mobile broadcast messages"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Allows the app to read mobile broadcast messages received by your device. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency mobile broadcast is received."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Your accounts"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Access the available accounts."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"read subscribed feeds"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Allows the app to get details about the currently synced feeds."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send SMS messages"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Allows the app to send SMS messages. This may result in unexpected charges. Malicious apps may cost you money by sending messages without your confirmation."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"read your text messages (SMS or MMS)"</string>
@@ -283,7 +291,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Allows the app to enable the car mode."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"close other apps"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Allows the app to end background processes of other apps. This may cause other apps to stop running."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"draw over other apps"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Draw over other apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Allows the app to draw on top of other applications or parts of the user interface. They may interfere with your use of the interface in any application, or change what you think you are seeing in other applications."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"make app always run"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Allows the app to make parts of itself persistent in memory. This can limit the memory available to other apps, slowing down the tablet."</string>
@@ -395,23 +403,23 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Allows the app to change the state of tethered network connectivity."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"view Wi-Fi connections"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Allows the app to view information about Wi-Fi networking, such as whether Wi-Fi is enabled and name of connected Wi-Fi devices."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"connect and disconnect from Wi-Fi"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Connect and disconnect from Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Allows the app to connect to and disconnect from Wi-Fi access points and to make changes to device configuration for Wi-Fi networks."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"allow Wi-Fi Multicast reception"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your tablet. It uses more power than the non-multicast mode."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your TV. It uses more power than the non-multicast mode."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your phone. It uses more power than the non-multicast mode."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"access Bluetooth settings"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Access Bluetooth settings"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Allows the app to configure the local Bluetooth tablet and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Allows the app to configure the local Bluetooth TV, and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Allows the app to configure the local Bluetooth phone and to discover and pair with remote devices."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"connect and disconnect from WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Allows the app to determine whether WiMAX is enabled and information about any WiMAX networks that are connected."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"change WiMAX state"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Change WiMAX state"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Allows the app to connect the tablet to and disconnect the tablet from WiMAX networks."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Allows the app to connect the TV to and disconnect the TV from WiMAX networks."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Allows the app to connect the phone to and disconnect the phone from WiMAX networks."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"pair with Bluetooth devices"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"Pair with Bluetooth devices"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Allows the app to view the configuration of Bluetooth on the tablet and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Allows the app to view the configuration of Bluetooth on the TV, and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Allows the app to view the configuration of the Bluetooth on the phone and to make and accept connections with paired devices."</string>
@@ -421,7 +429,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Allows the app to disable the keylock and any associated password security. For example, the phone disables the keylock when receiving an incoming phone call, then re-enables the keylock when the call is finished."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"manage fingerprint hardware"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Allows the app to invoke methods to add and delete fingerprint templates for use."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"use fingerprint hardware"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"Use fingerprint hardware"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Allows the app to use fingerprint hardware for authentication"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Partial fingerprint detected. Please try again."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Couldn\'t process fingerprint. Please try again."</string>
@@ -445,7 +453,7 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Allows an app to modify the sync settings for an account. For example, this can be used to enable syncing of the People app with an account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"read sync statistics"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"write subscribed feeds"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"Write subscribed feeds"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Allows the app to modify your currently synced feeds. Malicious apps may change your synced feeds."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"read terms you added to the dictionary"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Allows the app to read all words, names and phrases that the user may have stored in the user dictionary."</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Allows an application to route media output to other external devices."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Read install sessions"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Allows an application to read install sessions. This allows it to see details about active package installations."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Request install packages"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Allows an application to request installation of packages."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Touch twice for zoom control"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Couldn\'t add widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Go"</string>

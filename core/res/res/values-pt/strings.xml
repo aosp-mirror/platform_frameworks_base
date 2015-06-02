@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Campainha desligada"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibração da campainha"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Campainha ligada"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Preparar para atualização"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Processando o pacote de atualização…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Encerrando…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Seu tablet será desligado."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Sua TV será desligada."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que o app receba e processe mensagens SMS. Isso significa que o app pode monitorar ou excluir mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"receber mensagens de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que o app receba e processe mensagens MMS. Isso significa que o app pode monitorar ou excluir as mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensagens de difusão celular"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que o app leia mensagens de difusão celular recebidas por seu dispositivo. Alertas de difusão celular são recebidos em alguns locais para avisar você de situações de emergência. Apps maliciosos podem interferir no desempenho ou funcionamento de seu dispositivo quando uma difusão celular de emergência é recebida."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Suas contas"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acessar as contas disponíveis."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds inscritos"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que o app obtenha detalhes sobre os feeds sincronizados no momento."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensagens SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite que o app envie mensagens SMS. Isso pode resultar em cobranças inesperadas. Apps maliciosos podem gerar custos através do envio de mensagens sem sua confirmação."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler suas mensagens de texto (SMS ou MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que um app faça o roteamento de saída de mídia para outros dispositivos externos."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Ler sessões de instalação"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que um app leia sessões de instalação. Isso permite que ele veja detalhes sobre as instalações de pacote ativas."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Solicitar instalação de pacotes"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite que um app solicite a instalação de pacotes."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toque duas vezes para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Não foi possível adicionar widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
