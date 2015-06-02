@@ -408,7 +408,7 @@ public final class ShutdownThread extends Thread {
         }
 
         // If it's to reboot into recovery, invoke uncrypt via init service.
-        if (mRebootReason.equals(PowerManager.REBOOT_RECOVERY)) {
+        if (PowerManager.REBOOT_RECOVERY.equals(mRebootReason)) {
             uncrypt();
         }
 
