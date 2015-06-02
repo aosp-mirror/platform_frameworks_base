@@ -1913,6 +1913,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public void addChildrenForAccessibility(ArrayList<View> childrenForAccessibility) {
+        if (getAccessibilityNodeProvider() != null) {
+            return;
+        }
         ChildListForAccessibility children = ChildListForAccessibility.obtain(this, true);
         try {
             final int childrenCount = children.getChildCount();
