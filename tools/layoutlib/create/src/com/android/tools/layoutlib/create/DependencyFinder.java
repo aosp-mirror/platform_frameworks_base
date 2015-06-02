@@ -307,7 +307,9 @@ public class DependencyFinder {
 
             try {
                 // exclude classes that are part of the default JRE (the one executing this program)
-                if (getClass().getClassLoader().loadClass(className) != null) {
+                // or in java package (we won't be able to load them anyway).
+                if (className.startsWith("java.") ||
+                        getClass().getClassLoader().loadClass(className) != null) {
                     return;
                 }
             } catch (ClassNotFoundException e) {
