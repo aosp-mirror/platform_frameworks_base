@@ -928,6 +928,14 @@ public final class PowerManager {
             = "android.os.action.POWER_SAVE_WHITELIST_CHANGED";
 
     /**
+     * @hide Intent that is broadcast when the set of temporarily whitelisted apps has changed.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED
+            = "android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED";
+
+    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} is about to change.
      * This broadcast is only sent to registered receivers.
      *
