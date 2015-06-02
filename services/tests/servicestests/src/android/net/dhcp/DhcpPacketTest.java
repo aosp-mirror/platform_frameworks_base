@@ -17,6 +17,7 @@
 package android.net.dhcp;
 
 import android.net.NetworkUtils;
+import android.net.DhcpResults;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
@@ -38,14 +39,27 @@ public class DhcpPacketTest extends TestCase {
     class TestDhcpPacket extends DhcpPacket {
         private byte mType;
         // TODO: Make this a map of option numbers to bytes instead.
-        private byte[] mDomainBytes, mVendorInfoBytes;
+        private byte[] mDomainBytes, mVendorInfoBytes, mLeaseTimeBytes;
 
-        public TestDhcpPacket(byte type, byte[] domainBytes, byte[] vendorInfoBytes) {
+        public TestDhcpPacket(byte type) {
             super(0xdeadbeef, (short) 0, INADDR_ANY, CLIENT_ADDR, INADDR_ANY, INADDR_ANY,
                   CLIENT_MAC, true);
             mType = type;
+        }
+
+        public TestDhcpPacket setDomainBytes(byte[] domainBytes) {
             mDomainBytes = domainBytes;
+            return this;
+        }
+
+        public TestDhcpPacket setVendorInfoBytes(byte[] vendorInfoBytes) {
             mVendorInfoBytes = vendorInfoBytes;
+            return this;
+        }
+
+        public TestDhcpPacket setLeaseTimeBytes(byte[] leaseTimeBytes) {
+            mLeaseTimeBytes = leaseTimeBytes;
+            return this;
         }
 
         public ByteBuffer buildPacket(int encap, short unusedDestUdp, short unusedSrcUdp) {
@@ -63,6 +77,9 @@ public class DhcpPacketTest extends TestCase {
             if (mVendorInfoBytes != null) {
                 addTlv(buffer, DHCP_VENDOR_CLASS_ID, mVendorInfoBytes);
             }
+            if (mLeaseTimeBytes != null) {
+                addTlv(buffer, DHCP_LEASE_TIME, mLeaseTimeBytes);
+            }
             addTlvEnd(buffer);
         }
 
@@ -78,8 +95,10 @@ public class DhcpPacketTest extends TestCase {
     private void assertDomainAndVendorInfoParses(
             String expectedDomain, byte[] domainBytes,
             String expectedVendorInfo, byte[] vendorInfoBytes) {
-        ByteBuffer packet = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER,
-                domainBytes, vendorInfoBytes).build();
+        ByteBuffer packet = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER)
+                .setDomainBytes(domainBytes)
+                .setVendorInfoBytes(vendorInfoBytes)
+                .build();
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
         assertEquals(expectedDomain, offerPacket.mDomainName);
         assertEquals(expectedVendorInfo, offerPacket.mVendorId);
@@ -113,5 +132,47 @@ public class DhcpPacketTest extends TestCase {
                                         "ANDROID\u0000METERED", meteredEmbeddedNull);
         assertDomainAndVendorInfoParses("goo.gl", trailingNullDomain,
                                         "ANDROID_METERE\u0000", meteredTrailingNull);
+    }
+
+    private void assertLeaseTimeParses(boolean expectValid, Integer rawLeaseTime,
+                                       long leaseTimeMillis, byte[] leaseTimeBytes) {
+        TestDhcpPacket testPacket = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER);
+        if (leaseTimeBytes != null) {
+            testPacket.setLeaseTimeBytes(leaseTimeBytes);
+        }
+        ByteBuffer packet = testPacket.build();
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+        if (!expectValid) {
+            assertNull(offerPacket);
+            return;
+        }
+        assertEquals(rawLeaseTime, offerPacket.mLeaseTime);
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();  // Just check this doesn't crash.
+        assertEquals(leaseTimeMillis, offerPacket.getLeaseTimeMillis());
+    }
+
+    @SmallTest
+    public void testLeaseTime() throws Exception {
+        byte[] noLease = null;
+        byte[] tooShortLease = new byte[] { 0x00, 0x00 };
+        byte[] tooLongLease = new byte[] { 0x00, 0x00, 0x00, 60, 0x01 };
+        byte[] zeroLease = new byte[] { 0x00, 0x00, 0x00, 0x00 };
+        byte[] tenSecondLease = new byte[] { 0x00, 0x00, 0x00, 10 };
+        byte[] oneMinuteLease = new byte[] { 0x00, 0x00, 0x00, 60 };
+        byte[] fiveMinuteLease = new byte[] { 0x00, 0x00, 0x01, 0x2c };
+        byte[] oneDayLease = new byte[] { 0x00, 0x01, 0x51, (byte) 0x80 };
+        byte[] maxIntPlusOneLease = new byte[] { (byte) 0x80, 0x00, 0x00, 0x01 };
+        byte[] infiniteLease = new byte[] { (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
+
+        assertLeaseTimeParses(true, null, 0, noLease);
+        assertLeaseTimeParses(false, null, 0, tooShortLease);
+        assertLeaseTimeParses(false, null, 0, tooLongLease);
+        assertLeaseTimeParses(true, 0, 60 * 1000, zeroLease);
+        assertLeaseTimeParses(true, 10, 60 * 1000, tenSecondLease);
+        assertLeaseTimeParses(true, 60, 60 * 1000, oneMinuteLease);
+        assertLeaseTimeParses(true, 300, 300 * 1000, fiveMinuteLease);
+        assertLeaseTimeParses(true, 86400, 86400 * 1000, oneDayLease);
+        assertLeaseTimeParses(true, -2147483647, 2147483649L * 1000, maxIntPlusOneLease);
+        assertLeaseTimeParses(true, DhcpPacket.INFINITE_LEASE, 0, infiniteLease);
     }
 }
