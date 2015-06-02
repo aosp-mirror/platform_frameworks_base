@@ -28,6 +28,12 @@ import java.util.List;
 abstract class DhcpPacket {
     protected static final String TAG = "DhcpPacket";
 
+    // dhcpcd has a minimum lease of 20 seconds, but DhcpStateMachine would refuse to wake up the
+    // CPU for anything shorter than 5 minutes. For sanity's sake, this must be higher than the
+    // DHCP client timeout.
+    public static final int MINIMUM_LEASE = 60;
+    public static final int INFINITE_LEASE = (int) 0xffffffff;
+
     public static final Inet4Address INADDR_ANY = (Inet4Address) Inet4Address.ANY;
     public static final Inet4Address INADDR_BROADCAST = (Inet4Address) Inet4Address.ALL;
     public static final byte[] ETHER_BROADCAST = new byte[] {
@@ -1006,8 +1012,22 @@ abstract class DhcpPacket {
         results.domains = mDomainName;
         results.serverAddress = mServerIdentifier;
         results.vendorInfo = mVendorId;
-        results.leaseDuration = mLeaseTime;
+        results.leaseDuration = (mLeaseTime != null) ? mLeaseTime : INFINITE_LEASE;
         return results;
+    }
+
+    /**
+     * Returns the parsed lease time, in milliseconds, or 0 for infinite.
+     */
+    public long getLeaseTimeMillis() {
+        // dhcpcd treats the lack of a lease time option as an infinite lease.
+        if (mLeaseTime == null || mLeaseTime == INFINITE_LEASE) {
+            return 0;
+        } else if (0 <= mLeaseTime && mLeaseTime < MINIMUM_LEASE) {
+            return MINIMUM_LEASE * 1000;
+        } else {
+            return (mLeaseTime & 0xffffffffL) * 1000;
+        }
     }
 
     /**
