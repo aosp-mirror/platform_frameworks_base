@@ -130,6 +130,39 @@ public class DevicePolicyManager {
         = "android.app.action.PROVISION_MANAGED_PROFILE";
 
     /**
+     * Activity action: Starts the provisioning flow which sets up a managed device.
+     * Must be started with {@link android.app.Activity#startActivityForResult(Intent, int)}.
+     *
+     * <p> During device owner provisioning a device admin app is set as the owner of the device.
+     * A device owner has full control over the device. The device owner can not be modified by the
+     * user.
+     *
+     * <p> A typical use case would be a device that is owned by a company, but used by either an
+     * employee or client.
+     *
+     * <p> An intent with this action can be sent only on an unprovisioned device.
+     * It is possible to check if the device is provisioned or not by looking at
+     * {@link android.provider.Settings.Global#DEVICE_PROVISIONED}
+     *
+     * The intent contains the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
+     * </ul>
+     *
+     * <p> When device owner provisioning has completed, an intent of the type
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
+     * device owner.
+     *
+     * <p> If provisioning fails, the device is factory reset.
+     *
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROVISION_MANAGED_DEVICE
+        = "android.app.action.PROVISION_MANAGED_DEVICE";
+
+    /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that allows
      * a mobile device management application that starts managed profile provisioning to pass data
      * to itself on the managed profile when provisioning completes. The mobile device management
@@ -169,11 +202,13 @@ public class DevicePolicyManager {
      * application that will be set as the profile owner or device owner and active admin.
      *
      * <p>If an application starts provisioning directly via an intent with action
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE} the package name of this component has to match the
-     * package name of the application that started provisioning.
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} or
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE} the package name of this
+     * component has to match the package name of the application that started provisioning.
      *
      * <p>This component is set as device owner and active admin when device owner provisioning is
-     * started by an NFC message containing an NFC record with MIME type
+     * started by an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE} or by an NFC
+     * message containing an NFC record with MIME type
      * {@link #MIME_TYPE_PROVISIONING_NFC_V2}. For the NFC record, the component name should be
      * flattened to a string, via {@link ComponentName#flattenToShortString()}.
      *
@@ -213,8 +248,8 @@ public class DevicePolicyManager {
      * A Boolean extra that can be used by the mobile device management application to skip the
      * disabling of system apps during provisioning when set to {@code true}.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} or an intent with action
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
      */
     public static final String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED =
             "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
@@ -414,8 +449,8 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether device encryption can be skipped as part of Device Owner
      * provisioning.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} or an intent with action
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
@@ -609,8 +644,7 @@ public class DevicePolicyManager {
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
      * A device owner has full control over the device. The device owner can not be modified by the
-     * user and the only way of resetting the device is if the device owner app calls a factory
-     * reset.
+     * user.
      *
      * <p> A typical use case would be a device that is owned by a company, but used by either an
      * employee or client.
