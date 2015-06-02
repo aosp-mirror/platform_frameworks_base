@@ -51,7 +51,7 @@ import java.util.Map;
  * </ul>
  * If no appropriate binding can be found, an {@link IllegalStateException} is thrown.
  */
-public class SimpleAdapter extends BaseAdapter implements Filterable, Spinner.ThemedSpinnerAdapter {
+public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpinnerAdapter {
     private int[] mTo;
     private String[] mFrom;
     private ViewBinder mViewBinder;
