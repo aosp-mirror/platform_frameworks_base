@@ -3360,6 +3360,46 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public boolean shouldShowRequestPermissionRationale(String permissionName,
+            String packageName, int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "canShowRequestPermissionRationale for user " + userId);
+        }
+
+        final int uid = getPackageUid(packageName, userId);
+        if (UserHandle.getAppId(getCallingUid()) != UserHandle.getAppId(uid)) {
+            return false;
+        }
+
+        if (checkPermission(permissionName, packageName, userId)
+                == PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        final int flags;
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            flags = getPermissionFlags(permissionName,
+                    packageName, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
+                | PackageManager.FLAG_PERMISSION_POLICY_FIXED
+                | PackageManager.FLAG_PERMISSION_USER_FIXED;
+
+        if ((flags & fixedFlags) != 0) {
+            return false;
+        }
+
+        return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+    }
+
+    @Override
     public boolean isProtectedBroadcast(String actionName) {
         synchronized (mPackages) {
             return mProtectedBroadcasts.contains(actionName);
