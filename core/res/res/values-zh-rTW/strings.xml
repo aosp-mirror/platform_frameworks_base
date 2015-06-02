@@ -1231,7 +1231,6 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB 隨身碟"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB 隨身碟"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"編輯"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"數據用量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"輕觸即可查看使用量和設定。"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已達到 2G-3G 數據流量上限"</string>

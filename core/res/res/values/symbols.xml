@@ -86,7 +86,6 @@
   <java-symbol type="id" name="info" />
   <java-symbol type="id" name="inputExtractAccessories" />
   <java-symbol type="id" name="inputExtractAction" />
-  <java-symbol type="id" name="inputExtractEditButton" />
   <java-symbol type="id" name="issued_on" />
   <java-symbol type="id" name="left_icon" />
   <java-symbol type="id" name="leftSpacer" />

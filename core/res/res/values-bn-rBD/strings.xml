@@ -1231,7 +1231,6 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB ড্রাইভ"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ড্রাইভ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB সঞ্চয়স্থান"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"সম্পাদনা করুন"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ডেটা ব্যবহারের সতর্কতা"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ব্যবহার এবং সেটিংস দেখতে স্পর্শ করুন৷"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ডেটা সীমা ছাড়িয়েছে"</string>
