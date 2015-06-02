@@ -431,6 +431,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return false;
     }
 
+    public void disableLayersForOneFrame() {
+        List<TaskStackView> stackViews = getTaskStackViews();
+        for (int i = 0; i < stackViews.size(); i++) {
+            stackViews.get(i).disableLayersForOneFrame();
+        }
+    }
+
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override

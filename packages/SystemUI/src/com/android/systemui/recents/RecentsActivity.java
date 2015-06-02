@@ -441,6 +441,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (mConfig.launchedHasConfigurationChanged) {
             onEnterAnimationTriggered();
         }
+
+        if (!mConfig.launchedHasConfigurationChanged) {
+            mRecentsView.disableLayersForOneFrame();
+        }
     }
 
     @Override
