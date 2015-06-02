@@ -16,20 +16,18 @@
 
 package com.google.android.test.cameraprewarm;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.provider.MediaStore;
+import android.service.media.CameraPrewarmService;
 import android.util.Log;
 
-public class PrewarmReceiver extends BroadcastReceiver {
+public class PrewarmService extends CameraPrewarmService {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(MediaStore.ACTION_STILL_IMAGE_CAMERA_PREWARM)) {
-            Log.i(CameraActivity.TAG, "Prewarm received");
-        } else if (intent.getAction().equals(MediaStore.ACTION_STILL_IMAGE_CAMERA_COOLDOWN)){
-            Log.i(CameraActivity.TAG, "Cooldown received");
-        }
+    public void onPrewarm() {
+        Log.i("PrewarmService", "Warming up");
+    }
+
+    @Override
+    public void onCooldown(boolean cameraIntentFired) {
+        Log.i("PrewarmService", "Cooling down fired=" + cameraIntentFired);
     }
 }

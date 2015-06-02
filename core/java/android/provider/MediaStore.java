@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteException;
@@ -33,6 +34,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.service.media.CameraPrewarmService;
 import android.util.Log;
 
 import java.io.FileInputStream;
@@ -226,33 +228,24 @@ public final class MediaStore {
     public static final String INTENT_ACTION_STILL_IMAGE_CAMERA = "android.media.action.STILL_IMAGE_CAMERA";
 
     /**
-     * The name of the Intent action used to indicate that a camera launch might be imminent. This
-     * broadcast should be targeted to the package that is receiving
-     * {@link #INTENT_ACTION_STILL_IMAGE_CAMERA} or
-     * {@link #INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE}, depending on the context. If such
-     * intent would launch the resolver activity, this broadcast should not be sent at all.
+     * Name under which an activity handling {@link #INTENT_ACTION_STILL_IMAGE_CAMERA} or
+     * {@link #INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE} publishes the service name for its prewarm
+     * service.
      * <p>
-     * A receiver of this broadcast should do the absolute minimum amount of work to initialize the
-     * camera in order to reduce startup time in likely case that shortly after an actual camera
-     * launch intent would be sent.
+     * This meta-data should reference the fully qualified class name of the prewarm service
+     * extending {@link CameraPrewarmService}.
      * <p>
-     * In case the actual intent will not be fired, the target package will receive
-     * {@link #ACTION_STILL_IMAGE_CAMERA_COOLDOWN}. However, it is recommended that the receiver
-     * also implements a timeout to close the camera after receiving this intent, as there is no
-     * guarantee that {@link #ACTION_STILL_IMAGE_CAMERA_COOLDOWN} will be delivered.
+     * The prewarm service will get bound and receive a prewarm signal
+     * {@link CameraPrewarmService#onPrewarm()} when a camera launch intent fire might be imminent.
+     * An application implementing a prewarm service should do the absolute minimum amount of work
+     * to initialize the camera in order to reduce startup time in likely case that shortly after a
+     * camera launch intent would be sent.
+     * <p>
+     * If the camera launch intent gets fired shortly after, the service will be unbound
+     * asynchronously, without receiving
      */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_STILL_IMAGE_CAMERA_PREWARM = "android.media.action.STILL_IMAGE_CAMERA_PREWARM";
-
-    /**
-     * The name of the Intent action used to indicate that an imminent camera launch has been
-     * cancelled by the user. This broadcast should be targeted to the package that has received
-     * {@link #ACTION_STILL_IMAGE_CAMERA_PREWARM}.
-     * <p>
-     * A receiver of this broadcast should close the camera immediately.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_STILL_IMAGE_CAMERA_COOLDOWN = "android.media.action.STILL_IMAGE_CAMERA_COOLDOWN";
+    public static final String META_DATA_STILL_IMAGE_CAMERA_PREWARM_SERVICE =
+            "android.media.still_image_camera_preview_service";
 
     /**
      * The name of the Intent action used to launch a camera in still image mode
@@ -2268,5 +2261,4 @@ public final class MediaStore {
         }
         return null;
     }
-
 }
