@@ -158,6 +158,15 @@ Number Slow draw: 23342
     </ul>
   </li>
 
+  <li>INTENDED_VSYNC
+    <ul>
+      <li>The intended start point for the frame. If this value is different from VSYNC, there
+      was work occurring on the UI thread that prevented it from responding to the vsync signal
+      in a timely fashion.
+      </li>
+    </ul>
+  </li>
+
   <li>VSYNC
     <ul>
       <li>The time value that was used in all the vsync listeners and drawing for the frame
@@ -168,16 +177,6 @@ Number Slow draw: 23342
       <a href=
       "https://www.youtube.com/watch?v=1iaHxmfZGGc&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=23">
         Understanding VSYNC</a> video.
-      </li>
-    </ul>
-  </li>
-
-
-  <li>INTENDED_VSYNC
-    <ul>
-      <li>The intended start point for the frame. If this value is different from VSYNC, there
-      was work occurring on the UI thread that prevented it from responding to the vsync signal
-      in a timely fashion.
       </li>
     </ul>
   </li>
