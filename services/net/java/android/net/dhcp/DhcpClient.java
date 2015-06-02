@@ -390,11 +390,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     private void scheduleRenew() {
-        long now = SystemClock.elapsedRealtime();
-        long alarmTime = (now + mDhcpLeaseExpiry) / 2;
         mAlarmManager.cancel(mRenewIntent);
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, mRenewIntent);
-        Log.d(TAG, "Scheduling renewal in " + ((alarmTime - now) / 1000) + "s");
+        if (mDhcpLeaseExpiry != 0) {
+            long now = SystemClock.elapsedRealtime();
+            long alarmTime = (now + mDhcpLeaseExpiry) / 2;
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, mRenewIntent);
+            Log.d(TAG, "Scheduling renewal in " + ((alarmTime - now) / 1000) + "s");
+        } else {
+            Log.d(TAG, "Infinite lease, no renewal needed");
+        }
     }
 
     private void notifyLease() {
@@ -586,6 +590,12 @@ public class DhcpClient extends BaseDhcpStateMachine {
         return true;
     }
 
+    public void setDhcpLeaseExpiry(DhcpPacket packet) {
+        long leaseTimeMillis = packet.getLeaseTimeMillis();
+        mDhcpLeaseExpiry =
+                (leaseTimeMillis > 0) ? SystemClock.elapsedRealtime() + leaseTimeMillis : 0;
+    }
+
     /**
      * Retransmits packets using jittered exponential backoff with an optional timeout. Packet
      * transmission is triggered by CMD_KICK, which is sent by an AlarmManager alarm.
@@ -723,10 +733,9 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 DhcpResults results = packet.toDhcpResults();
                 if (results != null) {
                     mDhcpLease = results;
-                    Log.d(TAG, "Confirmed lease: " + mDhcpLease);
-                    mDhcpLeaseExpiry = SystemClock.elapsedRealtime() +
-                            mDhcpLease.leaseDuration * 1000;
                     mOffer = null;
+                    Log.d(TAG, "Confirmed lease: " + mDhcpLease);
+                    setDhcpLeaseExpiry(packet);
                     transitionTo(mDhcpBoundState);
                 }
             } else if (packet instanceof DhcpNakPacket) {
@@ -797,10 +806,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         protected void receivePacket(DhcpPacket packet) {
             if (!isValidPacket(packet)) return;
             if ((packet instanceof DhcpAckPacket)) {
-                DhcpResults results = packet.toDhcpResults();
-                mDhcpLease.leaseDuration = results.leaseDuration;
-                mDhcpLeaseExpiry = SystemClock.elapsedRealtime() +
-                        mDhcpLease.leaseDuration * 1000;
+                setDhcpLeaseExpiry(packet);
                 transitionTo(mDhcpBoundState);
             } else if (packet instanceof DhcpNakPacket) {
                 transitionTo(mDhcpInitState);
