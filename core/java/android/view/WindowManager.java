@@ -309,6 +309,7 @@ public interface WindowManager extends ViewManager {
          * Window type: a above sub-panel on top of an application window and it's
          * sub-panel windows. These windows are displayed on top of their attached window
          * and any {@link #TYPE_APPLICATION_SUB_PANEL} panels.
+         * @hide
          */
         public static final int TYPE_APPLICATION_ABOVE_SUB_PANEL = FIRST_SUB_WINDOW + 5;
 
