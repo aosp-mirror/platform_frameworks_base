@@ -30840,12 +30840,14 @@ package android.telephony {
 
   public class PhoneNumberUtils {
     ctor public PhoneNumberUtils();
-    method public static void addPhoneTtsSpan(android.text.Spannable, int, int);
+    method public static void addTtsSpan(android.text.Spannable, int, int);
     method public static java.lang.String calledPartyBCDFragmentToString(byte[], int, int);
     method public static java.lang.String calledPartyBCDToString(byte[], int, int);
     method public static boolean compare(java.lang.String, java.lang.String);
     method public static boolean compare(android.content.Context, java.lang.String, java.lang.String);
     method public static java.lang.String convertKeypadLettersToDigits(java.lang.String);
+    method public static android.text.style.TtsSpan createTtsSpan(java.lang.String);
+    method public static java.lang.CharSequence createTtsSpannable(java.lang.CharSequence);
     method public static java.lang.String extractNetworkPortion(java.lang.String);
     method public static java.lang.String extractPostDialPortion(java.lang.String);
     method public static deprecated void formatJapaneseNumber(android.text.Editable);
@@ -30858,8 +30860,6 @@ package android.telephony {
     method public static java.lang.String formatNumberToRFC3966(java.lang.String, java.lang.String);
     method public static deprecated int getFormatTypeForLocale(java.util.Locale);
     method public static java.lang.String getNumberFromIntent(android.content.Intent, android.content.Context);
-    method public static android.text.style.TtsSpan getPhoneTtsSpan(java.lang.String);
-    method public static java.lang.CharSequence getPhoneTtsSpannable(java.lang.CharSequence);
     method public static java.lang.String getStrippedReversed(java.lang.String);
     method public static final boolean is12Key(char);
     method public static final boolean isDialable(char);

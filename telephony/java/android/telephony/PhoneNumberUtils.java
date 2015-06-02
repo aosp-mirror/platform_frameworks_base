@@ -2336,12 +2336,12 @@ public class PhoneNumberUtils
      * @param phoneNumber A {@code CharSequence} the entirety of which represents a phone number.
      * @return A {@code CharSequence} with appropriate annotations.
      */
-    public static CharSequence getPhoneTtsSpannable(CharSequence phoneNumber) {
+    public static CharSequence createTtsSpannable(CharSequence phoneNumber) {
         if (phoneNumber == null) {
             return null;
         }
         Spannable spannable = Spannable.Factory.getInstance().newSpannable(phoneNumber);
-        PhoneNumberUtils.addPhoneTtsSpan(spannable, 0, spannable.length());
+        PhoneNumberUtils.addTtsSpan(spannable, 0, spannable.length());
         return spannable;
     }
 
@@ -2353,8 +2353,8 @@ public class PhoneNumberUtils
      * @param start The starting character position of the phone number in {@code s}.
      * @param endExclusive The position after the ending character in the phone number {@code s}.
      */
-    public static void addPhoneTtsSpan(Spannable s, int start, int endExclusive) {
-        s.setSpan(getPhoneTtsSpan(s.subSequence(start, endExclusive).toString()),
+    public static void addTtsSpan(Spannable s, int start, int endExclusive) {
+        s.setSpan(createTtsSpan(s.subSequence(start, endExclusive).toString()),
                 start,
                 endExclusive,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -2366,13 +2366,13 @@ public class PhoneNumberUtils
      *
      * @param phoneNumber A {@code CharSequence} the entirety of which represents a phone number.
      * @return A {@code CharSequence} with appropriate annotations.
-     * @deprecated Renamed {@link #getPhoneTtsSpannable}.
+     * @deprecated Renamed {@link #createTtsSpannable}.
      *
      * @hide
      */
     @Deprecated
     public static CharSequence ttsSpanAsPhoneNumber(CharSequence phoneNumber) {
-        return getPhoneTtsSpannable(phoneNumber);
+        return createTtsSpannable(phoneNumber);
     }
 
     /**
@@ -2383,13 +2383,13 @@ public class PhoneNumberUtils
      * @param start The starting character position of the phone number in {@code s}.
      * @param end The ending character position of the phone number in {@code s}.
      *
-     * @deprecated Renamed {@link #addPhoneTtsSpan}.
+     * @deprecated Renamed {@link #addTtsSpan}.
      *
      * @hide
      */
     @Deprecated
     public static void ttsSpanAsPhoneNumber(Spannable s, int start, int end) {
-        addPhoneTtsSpan(s, start, end);
+        addTtsSpan(s, start, end);
     }
 
     /**
@@ -2398,7 +2398,7 @@ public class PhoneNumberUtils
      * @param phoneNumberString A {@code String} the entirety of which represents a phone number.
      * @return A {@code TtsSpan} for {@param phoneNumberString}.
      */
-    public static TtsSpan getPhoneTtsSpan(String phoneNumberString) {
+    public static TtsSpan createTtsSpan(String phoneNumberString) {
         if (phoneNumberString == null) {
             return null;
         }
