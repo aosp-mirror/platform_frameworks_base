@@ -1341,7 +1341,6 @@
     <!-- @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
     <permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature"
         android:label="@string/permlab_manageProfileAndDeviceOwners"
         android:description="@string/permdesc_manageProfileAndDeviceOwners" />
@@ -2443,8 +2442,7 @@
     <!-- Allows receiving status updates from a device initializer.
          @hide Not for use by third-party applications. -->
     <permission android:name="android.permission.RECEIVE_DEVICE_INITIALIZER_STATUS"
-                android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-                android:protectionLevel="signature" />
+        android:protectionLevel="signature" />
 
     <!-- The system process that is allowed to bind to services in carrier apps will
          have this permission. Carrier apps should use this permission to protect
