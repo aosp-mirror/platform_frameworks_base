@@ -348,12 +348,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Widget.ActionBar.Menu"
-           parent="TextAppearance.Material.Menu">
+           parent="TextAppearance.Material.Widget.Button">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Menu.Inverse"
-           parent="TextAppearance.Material.Menu.Inverse">
+           parent="TextAppearance.Material.Widget.Button.Inverse">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
