@@ -22,6 +22,7 @@ import com.android.internal.telecom.IVideoProvider;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -339,65 +340,92 @@ public abstract class Connection extends Conferenceable {
         public void onExtrasChanged(Connection c, Bundle extras) {}
     }
 
+    /**
+     * Provides a means of controlling the video session associated with a {@link Connection}.
+     * <p>
+     * Implementations create a custom subclass of {@link VideoProvider} and the
+     * {@link ConnectionService} creates an instance sets it on the {@link Connection} using
+     * {@link Connection#setVideoProvider(VideoProvider)}.  Any connection which supports video
+     * should set the {@link VideoProvider}.
+     * <p>
+     * The {@link VideoProvider} serves two primary purposes: it provides a means for Telecom and
+     * {@link InCallService} implementations to issue requests related to the video session;
+     * it provides a means for the {@link ConnectionService} to report events and information
+     * related to the video session to Telecom and the {@link InCallService} implementations.
+     * <p>
+     * {@link InCallService} implementations interact with the {@link VideoProvider} via
+     * {@link android.telecom.InCallService.VideoCall}.
+     */
     public static abstract class VideoProvider {
 
         /**
          * Video is not being received (no protocol pause was issued).
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_RX_PAUSE = 1;
 
         /**
-         * Video reception has resumed after a SESSION_EVENT_RX_PAUSE.
+         * Video reception has resumed after a {@link #SESSION_EVENT_RX_PAUSE}.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_RX_RESUME = 2;
 
         /**
          * Video transmission has begun. This occurs after a negotiated start of video transmission
          * when the underlying protocol has actually begun transmitting video to the remote party.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_TX_START = 3;
 
         /**
          * Video transmission has stopped. This occurs after a negotiated stop of video transmission
          * when the underlying protocol has actually stopped transmitting video to the remote party.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_TX_STOP = 4;
 
         /**
-         * A camera failure has occurred for the selected camera.  The In-Call UI can use this as a
-         * cue to inform the user the camera is not available.
+         * A camera failure has occurred for the selected camera.  The {@link InCallService} can use
+         * this as a cue to inform the user the camera is not available.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_CAMERA_FAILURE = 5;
 
         /**
-         * Issued after {@code SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready for
-         * operation.  The In-Call UI can use this as a cue to inform the user that the camera has
-         * become available again.
+         * Issued after {@link #SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready
+         * for operation.  The {@link InCallService} can use this as a cue to inform the user that
+         * the camera has become available again.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_CAMERA_READY = 6;
 
         /**
          * Session modify request was successful.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1;
 
         /**
          * Session modify request failed.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_FAIL = 2;
 
         /**
          * Session modify request ignored due to invalid parameters.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
 
         /**
          * Session modify request timed out.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_TIMED_OUT = 4;
 
         /**
-         * Session modify request rejected by remote UE.
+         * Session modify request rejected by remote user.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
 
@@ -569,9 +597,17 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Sets the camera to be used for video recording in a video connection.
+         * Sets the camera to be used for the outgoing video.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating the capabilities of the chosen
+         * camera via
+         * {@link VideoProvider#changeCameraCapabilities(VideoProfile.CameraCapabilities)}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setCamera(String)}.
          *
-         * @param cameraId The id of the camera.
+         * @param cameraId The id of the camera (use ids as reported by
+         * {@link CameraManager#getCameraIdList()}).
          */
         public abstract void onSetCamera(String cameraId);
 
@@ -579,21 +615,30 @@ public abstract class Connection extends Conferenceable {
          * Sets the surface to be used for displaying a preview of what the user's camera is
          * currently capturing.  When video transmission is enabled, this is the video signal which
          * is sent to the remote device.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setPreviewSurface(Surface)}.
          *
-         * @param surface The surface.
+         * @param surface The {@link Surface}.
          */
         public abstract void onSetPreviewSurface(Surface surface);
 
         /**
          * Sets the surface to be used for displaying the video received from the remote device.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setDisplaySurface(Surface)}.
          *
-         * @param surface The surface.
+         * @param surface The {@link Surface}.
          */
         public abstract void onSetDisplaySurface(Surface surface);
 
         /**
          * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of
          * the device is 0 degrees.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setDeviceOrientation(int)}.
          *
          * @param rotation The device orientation, in degrees.
          */
@@ -601,57 +646,100 @@ public abstract class Connection extends Conferenceable {
 
         /**
          * Sets camera zoom ratio.
+         * <p>
+         * Sent from the {@link InCallService} via {@link InCallService.VideoCall#setZoom(float)}.
          *
          * @param value The camera zoom ratio.
          */
         public abstract void onSetZoom(float value);
 
         /**
-         * Issues a request to modify the properties of the current session.  The request is
-         * sent to the remote device where it it handled by the In-Call UI.
-         * Some examples of session modification requests: upgrade connection from audio to video,
-         * downgrade connection from video to audio, pause video.
+         * Issues a request to modify the properties of the current video session.
+         * <p>
+         * Example scenarios include: requesting an audio-only call to be upgraded to a
+         * bi-directional video call, turning on or off the user's camera, sending a pause signal
+         * when the {@link InCallService} is no longer the foreground application.
+         * <p>
+         * If the {@link VideoProvider} determines a request to be invalid, it should call
+         * {@link #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)} to report the
+         * invalid request back to the {@link InCallService}.
+         * <p>
+         * Where a request requires confirmation from the user of the peer device, the
+         * {@link VideoProvider} must communicate the request to the peer device and handle the
+         * user's response.  {@link #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)}
+         * is used to inform the {@link InCallService} of the result of the request.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#sendSessionModifyRequest(VideoProfile)}.
          *
-         * @param fromProfile The video properties prior to the request.
-         * @param toProfile The video properties with the requested changes made.
+         * @param fromProfile The video profile prior to the request.
+         * @param toProfile The video profile with the requested changes made.
          */
         public abstract void onSendSessionModifyRequest(VideoProfile fromProfile,
                 VideoProfile toProfile);
 
-        /**te
-         * Provides a response to a request to change the current connection session video
-         * properties.
-         * This is in response to a request the InCall UI has received via the InCall UI.
+        /**
+         * Provides a response to a request to change the current video session properties.
+         * <p>
+         * For example, if the peer requests and upgrade from an audio-only call to a bi-directional
+         * video call, could decline the request and keep the call as audio-only.
+         * In such a scenario, the {@code responseProfile} would have a video state of
+         * {@link VideoProfile#STATE_AUDIO_ONLY}.  If the user had decided to accept the request,
+         * the video state would be {@link VideoProfile#STATE_BIDIRECTIONAL}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#sendSessionModifyResponse(VideoProfile)} in response to
+         * a {@link InCallService.VideoCall.Callback#onSessionModifyRequestReceived(VideoProfile)}
+         * callback.
          *
-         * @param responseProfile The response connection video properties.
+         * @param responseProfile The response video profile.
          */
         public abstract void onSendSessionModifyResponse(VideoProfile responseProfile);
 
         /**
-         * Issues a request to the video provider to retrieve the camera capabilities.
-         * Camera capabilities are reported back to the caller via the In-Call UI.
+         * Issues a request to the {@link VideoProvider} to retrieve the camera capabilities.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating the capabilities of the chosen
+         * camera via
+         * {@link VideoProvider#changeCameraCapabilities(VideoProfile.CameraCapabilities)}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#requestCameraCapabilities()}.
          */
         public abstract void onRequestCameraCapabilities();
 
         /**
-         * Issues a request to the video telephony framework to retrieve the cumulative data usage
-         * for the current connection.  Data usage is reported back to the caller via the
-         * InCall UI.
+         * Issues a request to the {@link VideoProvider} to retrieve the current data usage for the
+         * video component of the current {@link Connection}.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating current data usage, in bytes,
+         * via {@link VideoProvider#setCallDataUsage(long)}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#requestCallDataUsage()}.
          */
         public abstract void onRequestConnectionDataUsage();
 
         /**
-         * Provides the video telephony framework with the URI of an image to be displayed to remote
-         * devices when the video signal is paused.
+         * Provides the {@link VideoProvider} with the {@link Uri} of an image to be displayed to
+         * the peer device when the video signal is paused.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setPauseImage(Uri)}.
          *
          * @param uri URI of image to display.
          */
         public abstract void onSetPauseImage(Uri uri);
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the
+         * {@link VideoProvider} receives a session modification request.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onSessionModifyRequestReceived(VideoProfile)},
          *
-         * @param videoProfile The requested video connection profile.
+         * @param videoProfile The requested video profile.
+         * @see #onSendSessionModifyRequest(VideoProfile, VideoProfile)
          */
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
             if (mVideoCallbacks != null) {
@@ -665,14 +753,22 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the
+         * {@link VideoProvider} receives a response to a session modification request.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onSessionModifyResponseReceived(int,
+         * VideoProfile, VideoProfile)}.
          *
          * @param status Status of the session modify request.  Valid values are
          *               {@link VideoProvider#SESSION_MODIFY_REQUEST_SUCCESS},
          *               {@link VideoProvider#SESSION_MODIFY_REQUEST_FAIL},
-         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_INVALID}
-         * @param requestedProfile The original request which was sent to the remote device.
-         * @param responseProfile The actual profile changes made by the remote device.
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_INVALID},
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_TIMED_OUT},
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE}
+         * @param requestedProfile The original request which was sent to the peer device.
+         * @param responseProfile The actual profile changes agreed to by the peer device.
+         * @see #onSendSessionModifyRequest(VideoProfile, VideoProfile)
          */
         public void receiveSessionModifyResponse(int status,
                 VideoProfile requestedProfile, VideoProfile responseProfile) {
@@ -688,14 +784,18 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the
+         * {@link VideoProvider} reports a call session event.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onCallSessionEvent(int)}.
          *
-         * Valid values are: {@link VideoProvider#SESSION_EVENT_RX_PAUSE},
-         * {@link VideoProvider#SESSION_EVENT_RX_RESUME},
-         * {@link VideoProvider#SESSION_EVENT_TX_START},
-         * {@link VideoProvider#SESSION_EVENT_TX_STOP}
-         *
-         * @param event The event.
+         * @param event The event.  Valid values are: {@link VideoProvider#SESSION_EVENT_RX_PAUSE},
+         *      {@link VideoProvider#SESSION_EVENT_RX_RESUME},
+         *      {@link VideoProvider#SESSION_EVENT_TX_START},
+         *      {@link VideoProvider#SESSION_EVENT_TX_STOP},
+         *      {@link VideoProvider#SESSION_EVENT_CAMERA_FAILURE},
+         *      {@link VideoProvider#SESSION_EVENT_CAMERA_READY}.
          */
         public void handleCallSessionEvent(int event) {
             if (mVideoCallbacks != null) {
@@ -709,7 +809,14 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the dimensions of the
+         * peer's video have changed.
+         * <p>
+         * This could occur if, for example, the peer rotates their device, changing the aspect
+         * ratio of the video, or if the user switches between the back and front cameras.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onPeerDimensionsChanged(int, int)}.
          *
          * @param width  The updated peer video width.
          * @param height The updated peer video height.
@@ -726,9 +833,18 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the data usage of the
+         * video associated with the current {@link Connection} has changed.
+         * <p>
+         * This could be in response to a preview request via
+         * {@link #onRequestConnectionDataUsage()}, or as a periodic update by the
+         * {@link VideoProvider}.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onCallDataUsageChanged(long)}.
          *
-         * @param dataUsage The updated data usage.
+         * @param dataUsage The updated data usage (in bytes).  Reported as the cumulative bytes
+         *                  used since the start of the call.
          */
         public void setCallDataUsage(long dataUsage) {
             if (mVideoCallbacks != null) {
@@ -742,9 +858,9 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * @see #setCallDataUsage(long)
          *
-         * @param dataUsage The updated data usage.
+         * @param dataUsage The updated data usage (in byes).
          * @deprecated - Use {@link #setCallDataUsage(long)} instead.
          * @hide
          */
@@ -753,9 +869,18 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the capabilities of
+         * the current camera have changed.
+         * <p>
+         * The {@link VideoProvider} should call this in response to
+         * {@link VideoProvider#onRequestCameraCapabilities()}, or when the current camera is
+         * changed via {@link VideoProvider#onSetCamera(String)}.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onCameraCapabilitiesChanged(
+         * VideoProfile.CameraCapabilities)}.
          *
-         * @param cameraCapabilities The changed camera capabilities.
+         * @param cameraCapabilities The new camera capabilities.
          */
         public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
             if (mVideoCallbacks != null) {
@@ -769,15 +894,17 @@ public abstract class Connection extends Conferenceable {
         }
 
         /**
-         * Invokes callback method defined in listening {@link InCallService} implementations.
+         * Used to inform listening {@link InCallService} implementations when the video quality
+         * of the call has changed.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onVideoQualityChanged(int)}.
          *
-         * Allowed values:
-         * {@link VideoProfile#QUALITY_HIGH},
-         * {@link VideoProfile#QUALITY_MEDIUM},
-         * {@link VideoProfile#QUALITY_LOW},
-         * {@link VideoProfile#QUALITY_DEFAULT}.
-         *
-         * @param videoQuality The updated video quality.
+         * @param videoQuality The updated video quality.  Valid values:
+         *      {@link VideoProfile#QUALITY_HIGH},
+         *      {@link VideoProfile#QUALITY_MEDIUM},
+         *      {@link VideoProfile#QUALITY_LOW},
+         *      {@link VideoProfile#QUALITY_DEFAULT}.
          */
         public void changeVideoQuality(int videoQuality) {
             if (mVideoCallbacks != null) {
