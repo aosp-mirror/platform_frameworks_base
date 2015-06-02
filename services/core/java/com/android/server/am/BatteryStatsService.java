@@ -555,17 +555,45 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteFlashlightOn() {
+    public void noteFlashlightOn(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteFlashlightOnLocked();
+            mStats.noteFlashlightOnLocked(uid);
         }
     }
 
-    public void noteFlashlightOff() {
+    public void noteFlashlightOff(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteFlashlightOffLocked();
+            mStats.noteFlashlightOffLocked(uid);
+        }
+    }
+
+    public void noteStartCamera(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteCameraOnLocked(uid);
+        }
+    }
+
+    public void noteStopCamera(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteCameraOffLocked(uid);
+        }
+    }
+
+    public void noteResetCamera() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteResetCameraLocked();
+        }
+    }
+
+    public void noteResetFlashlight() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteResetFlashlightLocked();
         }
     }
 
