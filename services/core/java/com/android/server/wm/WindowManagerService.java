@@ -208,7 +208,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
-    static final boolean DEBUG_STARTING_WINDOW = false;
+    static final boolean DEBUG_STARTING_WINDOW = true;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
