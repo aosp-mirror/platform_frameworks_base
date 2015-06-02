@@ -867,13 +867,13 @@ public class RemoteViews implements Parcelable, Filter {
             if (targetDrawable != null) {
                 // Perform modifications only if values are set correctly
                 if (alpha != -1) {
-                    targetDrawable.setAlpha(alpha);
+                    targetDrawable.mutate().setAlpha(alpha);
                 }
                 if (filterMode != null) {
-                    targetDrawable.setColorFilter(colorFilter, filterMode);
+                    targetDrawable.mutate().setColorFilter(colorFilter, filterMode);
                 }
                 if (level != -1) {
-                    targetDrawable.setLevel(level);
+                    targetDrawable.mutate().setLevel(level);
                 }
             }
         }
