@@ -2057,6 +2057,7 @@
   <java-symbol type="dimen" name="timepicker_text_size_inner" />
   <java-symbol type="string" name="battery_saver_description" />
   <java-symbol type="string" name="zen_mode_forever" />
+  <java-symbol type="string" name="zen_mode_forever_dnd" />
   <java-symbol type="string" name="zen_mode_rule_name_combination" />
   <java-symbol type="plurals" name="zen_mode_duration_minutes" />
   <java-symbol type="plurals" name="zen_mode_duration_hours" />
