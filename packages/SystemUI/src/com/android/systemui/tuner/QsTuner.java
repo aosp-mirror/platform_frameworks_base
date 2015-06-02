@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -32,7 +33,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnDragListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -47,6 +47,7 @@ import com.android.systemui.qs.QSTile.ResourceIcon;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.policy.SecurityController;
 
 import java.util.List;
 
@@ -174,7 +175,7 @@ public class QsTuner extends Fragment implements Callback {
 
         public CustomHost(Context context) {
             super(context, null, null, null, null, null, null, null, null, null,
-                    null, null, null);
+                    null, null, new BlankSecurityController());
         }
 
         @Override
@@ -215,15 +216,8 @@ public class QsTuner extends Fragment implements Callback {
         }
 
         private void setTiles(List<String> tiles) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < tiles.size(); i++) {
-                if (builder.length() != 0) {
-                    builder.append(',');
-                }
-                builder.append(tiles.get(i));
-            }
-            Secure.putStringForUser(getContext().getContentResolver(),
-                    TILES_SETTING, builder.toString(), mUserTracker.getCurrentUserId());
+            Secure.putStringForUser(getContext().getContentResolver(), TILES_SETTING,
+                    TextUtils.join(",", tiles), mUserTracker.getCurrentUserId());
         }
 
         public void showAddDialog() {
@@ -281,6 +275,45 @@ public class QsTuner extends Fragment implements Callback {
                 }
             }
             return true;
+        }
+
+        private static class BlankSecurityController implements SecurityController {
+            @Override
+            public boolean hasDeviceOwner() {
+                return false;
+            }
+
+            @Override
+            public boolean hasProfileOwner() {
+                return false;
+            }
+
+            @Override
+            public String getDeviceOwnerName() {
+                return null;
+            }
+
+            @Override
+            public String getProfileOwnerName() {
+                return null;
+            }
+
+            @Override
+            public boolean isVpnEnabled() {
+                return false;
+            }
+
+            @Override
+            public void onUserSwitched(int newUserId) {
+            }
+
+            @Override
+            public void addCallback(SecurityControllerCallback callback) {
+            }
+
+            @Override
+            public void removeCallback(SecurityControllerCallback callback) {
+            }
         }
     }
 
