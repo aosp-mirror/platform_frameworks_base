@@ -4510,7 +4510,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             attributes[i] = resourceName;
-            attributes[i + 1] = t.getString(index, false);
+            attributes[i + 1] = t.getString(index);
             i += 2;
         }
 
