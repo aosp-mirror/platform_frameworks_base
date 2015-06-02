@@ -523,6 +523,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         if (neededWidth > measuredWidth) {
                             mMeasuredScreenWidth += neededWidth - measuredWidth;
                         }
+                        if (mMeasuredScreenWidth < measuredWidth) {
+                            // If the screen width is less than the exact measured width,
+                            // expand to match.
+                            mMeasuredScreenWidth = measuredWidth;
+                        }
                     }
 
                     if (renderingMode.isVertExpand()) {
@@ -530,6 +535,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         int neededHeight = result.getSecond();
                         if (neededHeight > measuredHeight) {
                             mMeasuredScreenHeight += neededHeight - measuredHeight;
+                        }
+                        if (mMeasuredScreenHeight < measuredHeight) {
+                            // If the screen height is less than the exact measured height,
+                            // expand to match.
+                            mMeasuredScreenHeight = measuredHeight;
                         }
                     }
                 }
