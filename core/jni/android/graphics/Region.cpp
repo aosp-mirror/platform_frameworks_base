@@ -218,7 +218,12 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
         return NULL;
     }
     SkRegion* region = new SkRegion;
-    region->readFromMemory(regionData, size);
+    size_t actualSize = region->readFromMemory(regionData, size);
+
+    if (size != actualSize) {
+        delete region;
+        return NULL;
+    }
 
     return reinterpret_cast<jlong>(region);
 }
