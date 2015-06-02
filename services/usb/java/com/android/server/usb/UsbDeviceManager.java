@@ -411,6 +411,16 @@ public class UsbDeviceManager {
             sendMessageDelayed(msg, (connected == 0) ? UPDATE_DELAY : 0);
         }
 
+        private void updatePersistentProperty() {
+            String newValue = mAdbEnabled ? "adb" : "none";
+            String value = SystemProperties.get(UsbManager.ADB_PERSISTENT_PROPERTY);
+            if (DEBUG) { Slog.d(TAG, "updatePersistentProperty newValue=" + newValue + " value=" + value); }
+            if (!newValue.equals(value)) {
+                SystemProperties.set(UsbManager.ADB_PERSISTENT_PROPERTY, mAdbEnabled ? "adb" : "none");
+            }
+            waitForState(newValue);
+        }
+
         private boolean waitForState(String state) {
             // wait for the transition to complete.
             // give up after 1 second.
@@ -426,7 +436,10 @@ public class UsbDeviceManager {
         private boolean setUsbConfig(String config) {
             if (DEBUG) Slog.d(TAG, "setUsbConfig(" + config + ")");
             // set the new configuration
-            SystemProperties.set(UsbManager.USB_SETTINGS_PROPERTY, config);
+            String oldConfig = SystemProperties.get(UsbManager.USB_SETTINGS_PROPERTY);
+            if (!config.equals(oldConfig)) {
+                SystemProperties.set(UsbManager.USB_SETTINGS_PROPERTY, config);
+            }
             return waitForState(config);
         }
 
@@ -436,7 +449,7 @@ public class UsbDeviceManager {
                 mAdbEnabled = enable;
                 // Due to the persist.sys.usb.config property trigger, changing adb state requires
                 // persisting default function
-                SystemProperties.set(UsbManager.ADB_PERSISTENT_PROPERTY, mAdbEnabled ? "adb" : "none");
+                updatePersistentProperty();
                 // After persisting them use the lock-down aware function set
                 setEnabledFunctions(getDefaultFunctions());
                 updateAdbNotification();
@@ -610,7 +623,7 @@ public class UsbDeviceManager {
                     break;
                 case MSG_SYSTEM_READY:
                     setUsbConfig(mCurrentFunctions);
-                    SystemProperties.set(UsbManager.ADB_PERSISTENT_PROPERTY, mAdbEnabled ? "adb" : "none");
+                    updatePersistentProperty();
                     updateUsbNotification();
                     updateAdbNotification();
                     updateUsbState();
