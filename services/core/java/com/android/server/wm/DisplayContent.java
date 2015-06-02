@@ -238,6 +238,7 @@ class DisplayContent {
             final TaskStack stack = win.getStack();
             if (win.isVisibleLw() && stack != null && stack != focusedStack) {
                 mTmpRect.set(win.mVisibleFrame);
+                // If no intersection, we need mTmpRect to be unmodified.
                 mTmpRect.intersect(win.mVisibleInsets);
                 mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
             }
