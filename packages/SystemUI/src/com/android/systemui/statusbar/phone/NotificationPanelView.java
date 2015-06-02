@@ -1934,12 +1934,12 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void onSwipingStarted(boolean isRightwardMotion) {
-        boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? isRightwardMotion
-                : !isRightwardMotion;
-        if (!start) {
+    public void onSwipingStarted(boolean rightIcon) {
+        boolean camera = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? !rightIcon
+                : rightIcon;
+        if (camera) {
             mSecureCameraLaunchManager.onSwipingStarted();
-            mKeyguardBottomArea.prewarmCamera();
+            mKeyguardBottomArea.bindCameraPrewarmService();
         }
         requestDisallowInterceptTouchEvent(true);
         mOnlyAffordanceInThisMotion = true;
@@ -1948,7 +1948,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onSwipingAborted() {
-        mKeyguardBottomArea.maybeCooldownCamera();
+        mKeyguardBottomArea.unbindCameraPrewarmService(false /* launched */);
     }
 
     @Override

@@ -28075,8 +28075,6 @@ package android.provider {
     method public static java.lang.String getVersion(android.content.Context);
     field public static final java.lang.String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
     field public static final java.lang.String ACTION_IMAGE_CAPTURE_SECURE = "android.media.action.IMAGE_CAPTURE_SECURE";
-    field public static final java.lang.String ACTION_STILL_IMAGE_CAMERA_COOLDOWN = "android.media.action.STILL_IMAGE_CAMERA_COOLDOWN";
-    field public static final java.lang.String ACTION_STILL_IMAGE_CAMERA_PREWARM = "android.media.action.STILL_IMAGE_CAMERA_PREWARM";
     field public static final java.lang.String ACTION_VIDEO_CAPTURE = "android.media.action.VIDEO_CAPTURE";
     field public static final java.lang.String AUTHORITY = "media";
     field public static final java.lang.String EXTRA_DURATION_LIMIT = "android.intent.extra.durationLimit";
@@ -28104,6 +28102,7 @@ package android.provider {
     field public static final java.lang.String INTENT_ACTION_VIDEO_PLAY_FROM_SEARCH = "android.media.action.VIDEO_PLAY_FROM_SEARCH";
     field public static final java.lang.String MEDIA_IGNORE_FILENAME = ".nomedia";
     field public static final java.lang.String MEDIA_SCANNER_VOLUME = "volume";
+    field public static final java.lang.String META_DATA_STILL_IMAGE_CAMERA_PREWARM_SERVICE = "android.media.still_image_camera_preview_service";
     field public static final java.lang.String UNKNOWN_STRING = "<unknown>";
   }
 
@@ -30764,6 +30763,13 @@ package android.service.dreams {
 }
 
 package android.service.media {
+
+  public abstract class CameraPrewarmService extends android.app.Service {
+    ctor public CameraPrewarmService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onCooldown(boolean);
+    method public abstract void onPrewarm();
+  }
 
   public abstract class MediaBrowserService extends android.app.Service {
     ctor public MediaBrowserService();

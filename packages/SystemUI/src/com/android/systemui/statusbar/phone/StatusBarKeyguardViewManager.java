@@ -126,10 +126,11 @@ public class StatusBarKeyguardViewManager {
         updateStates();
     }
 
-    public void dismissWithAction(OnDismissAction r, boolean afterKeyguardGone) {
+    public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
+            boolean afterKeyguardGone) {
         if (mShowing) {
             if (!afterKeyguardGone) {
-                mBouncer.showWithDismissAction(r);
+                mBouncer.showWithDismissAction(r, cancelAction);
             } else {
                 mBouncer.show(false /* resetSecuritySelection */);
                 mAfterKeyguardGoneAction = r;
