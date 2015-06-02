@@ -150,7 +150,7 @@ public class CopyService extends IntentService {
             mDstClient = DocumentsApplication.acquireUnstableProviderOrThrow(getContentResolver(),
                     stack.peek().authority);
 
-            setupCopyJob(srcs, stack);
+            setupCopyJob(srcs, stack, transferMode);
 
             for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
                 copy(srcs.get(i), stack.peek(), transferMode);
@@ -172,10 +172,12 @@ public class CopyService extends IntentService {
                 navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
                 navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
 
+                final int titleResourceId = (transferMode == TRANSFER_MODE_COPY ?
+                        R.plurals.copy_error_notification_title :
+                        R.plurals.move_error_notification_title);
                 final Notification.Builder errorBuilder = new Notification.Builder(this)
-                        .setContentTitle(context.getResources().
-                                getQuantityString(R.plurals.copy_error_notification_title,
-                                        mFailedFiles.size(), mFailedFiles.size()))
+                        .setContentTitle(context.getResources().getQuantityString(titleResourceId,
+                                mFailedFiles.size(), mFailedFiles.size()))
                         .setContentText(getString(R.string.notification_touch_for_details))
                         .setContentIntent(PendingIntent.getActivity(context, 0, navigateIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT))
@@ -199,10 +201,12 @@ public class CopyService extends IntentService {
      *
      * @param srcs A list of src files to copy.
      * @param stack The copy destination stack.
+     * @param transferMode The mode (i.e. copy, or move)
      * @throws RemoteException
      */
-    private void setupCopyJob(ArrayList<DocumentInfo> srcs, DocumentStack stack)
+    private void setupCopyJob(ArrayList<DocumentInfo> srcs, DocumentStack stack, int transferMode)
             throws RemoteException {
+        final boolean copying = (transferMode == TRANSFER_MODE_COPY);
         // Create an ID for this copy job. Use the timestamp.
         mJobId = String.valueOf(SystemClock.elapsedRealtime());
         // Reset the cancellation flag.
@@ -212,8 +216,10 @@ public class CopyService extends IntentService {
         final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
         navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
 
+        final String contentTitle = getString(copying ? R.string.copy_notification_title
+                : R.string.move_notification_title);
         mProgressBuilder = new Notification.Builder(this)
-                .setContentTitle(getString(R.string.copy_notification_title))
+                .setContentTitle(contentTitle)
                 .setContentIntent(PendingIntent.getActivity(context, 0, navigateIntent, 0))
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setSmallIcon(R.drawable.ic_menu_copy)
@@ -227,8 +233,10 @@ public class CopyService extends IntentService {
                         PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT));
 
         // Send an initial progress notification.
+        final String contentText = getString(copying ? R.string.copy_preparing
+                : R.string.move_preparing);
         mProgressBuilder.setProgress(0, 0, true); // Indeterminate progress while setting up.
-        mProgressBuilder.setContentText(getString(R.string.copy_preparing));
+        mProgressBuilder.setContentText(contentText);
         mNotificationManager.notify(mJobId, 0, mProgressBuilder.build());
 
         // Reset batch parameters.

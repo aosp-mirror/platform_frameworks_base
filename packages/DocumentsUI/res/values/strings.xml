@@ -126,6 +126,8 @@
 
     <!-- Title of the copy notification [CHAR LIMIT=24] -->
     <string name="copy_notification_title">Copying files</string>
+    <!-- Title of the move notification [CHAR LIMIT=24] -->
+    <string name="move_notification_title">Moving files</string>
     <!-- Text shown on the copy notification to indicate remaining time, in minutes [CHAR LIMIT=24] -->
     <string name="copy_remaining"><xliff:g id="duration" example="3 minutes">%s</xliff:g> left</string>
     <!-- Toast shown when a file copy is kicked off -->
@@ -137,12 +139,19 @@
         <item quantity="one">Moving <xliff:g id="count" example="1">%1$d</xliff:g> file.</item>
         <item quantity="other">Moving <xliff:g id="count" example="3">%1$d</xliff:g> files.</item>
     </plurals>
-    <!-- Text shown on the copy notification while DocumentsUI performs setup in preparation for copying files [CHAR LIMIT=32] -->
+    <!-- Text shown on the notification while DocumentsUI performs setup in preparation for copying files [CHAR LIMIT=32] -->
     <string name="copy_preparing">Preparing for copy\u2026</string>
+    <!-- Text shown on the notification while DocumentsUI performs setup in preparation for moving files [CHAR LIMIT=32] -->
+    <string name="move_preparing">Preparing for move\u2026</string>
     <!-- Title of the copy error notification [CHAR LIMIT=48] -->
     <plurals name="copy_error_notification_title">
         <item quantity="one">Couldn\'t copy <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
         <item quantity="other">Couldn\'t copy <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
+    </plurals>
+    <!-- Title of the move error notification [CHAR LIMIT=48] -->
+    <plurals name="move_error_notification_title">
+        <item quantity="one">Couldn\'t move <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
+        <item quantity="other">Couldn\'t move <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
     </plurals>
     <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
     <string name="notification_touch_for_details">Touch to view details</string>
@@ -150,6 +159,8 @@
     <string name="retry">Retry</string>
     <!-- Contents of the copying failure alert dialog. [CHAR LIMIT=48] -->
     <string name="copy_failure_alert_content">These files weren\'t copied: <xliff:g id="list">%1$s</xliff:g></string>
+    <!-- Contents of the moving failure alert dialog. [CHAR LIMIT=48] -->
+    <string name="move_failure_alert_content">These files weren\'t moved: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Toast shown when a user copies files to clipboard. -->
     <plurals name="clipboard_files_clipped">
         <item quantity="one">Copied <xliff:g id="count" example="1">%1$d</xliff:g> file to clipboard.</item>

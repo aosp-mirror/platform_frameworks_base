@@ -84,8 +84,9 @@ public class FailureDialogFragment extends DialogFragment
             list.append(String.format("&#8226; %s<br>", documentInfo.displayName));
         }
         list.append("</p>");
-        final String message = String.format(getString(R.string.copy_failure_alert_content),
-                list.toString());
+        final String messageFormat = getString(mTransferMode == CopyService.TRANSFER_MODE_COPY ?
+                R.string.copy_failure_alert_content : R.string.move_failure_alert_content);
+        final String message = String.format(messageFormat, list.toString());
 
         return new AlertDialog.Builder(getActivity())
                 .setMessage(Html.fromHtml(message))
