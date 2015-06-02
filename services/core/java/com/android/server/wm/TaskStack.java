@@ -144,7 +144,11 @@ public class TaskStack {
                 bounds = mTmpRect;
                 mFullscreen = true;
             } else {
-                bounds.intersect(mTmpRect); // ensure bounds are entirely within the display rect
+                // ensure bounds are entirely within the display rect
+                if (!bounds.intersect(mTmpRect)) {
+                    // Can't set bounds outside the containing display.. Sorry!
+                    return false;
+                }
                 mFullscreen = mTmpRect.equals(bounds);
             }
         }
