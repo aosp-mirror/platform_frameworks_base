@@ -37,8 +37,6 @@ import android.os.ServiceManager;
  * @see Context#CARRIER_CONFIG_SERVICE
  */
 public class CarrierConfigManager {
-    private final static String TAG = "CarrierConfigManager";
-
     /**
      * @hide
      */
@@ -225,39 +223,7 @@ public class CarrierConfigManager {
      */
     public static final String STRING_VVM_TYPE = "string_vvm_type";
 
-    // These variables are used by the MMS service and exposed through another API, {@link
-    // SmsManager}. The variable names and string values are copied from there.
-    public static final String BOOL_MMS_ALIAS_ENABLED = "aliasEnabled";
-    public static final String BOOL_MMS_ALLOW_ATTACH_AUDIO = "allowAttachAudio";
-    public static final String BOOL_MMS_APPEND_TRANSACTION_ID = "enabledTransID";
-    public static final String BOOL_MMS_GROUP_MMS_ENABLED = "enableGroupMms";
-    public static final String BOOL_MMS_MMS_DELIVERY_REPORT_ENABLED = "enableMMSDeliveryReports";
-    public static final String BOOL_MMS_MMS_ENABLED = "enabledMMS";
-    public static final String BOOL_MMS_MMS_READ_REPORT_ENABLED = "enableMMSReadReports";
-    public static final String BOOL_MMS_MULTIPART_SMS_ENABLED = "enableMultipartSMS";
-    public static final String BOOL_MMS_NOTIFY_WAP_MMSC_ENABLED = "enabledNotifyWapMMSC";
-    public static final String BOOL_MMS_SEND_MULTIPART_SMS_AS_SEPARATE_MESSAGES = "sendMultipartSmsAsSeparateMessages";
-    public static final String BOOL_MMS_SHOW_CELL_BROADCAST_APP_LINKS = "config_cellBroadcastAppLinks";
-    public static final String BOOL_MMS_SMS_DELIVERY_REPORT_ENABLED = "enableSMSDeliveryReports";
-    public static final String BOOL_MMS_SUPPORT_HTTP_CHARSET_HEADER = "supportHttpCharsetHeader";
-    public static final String BOOL_MMS_SUPPORT_MMS_CONTENT_DISPOSITION = "supportMmsContentDisposition";
-    public static final String INT_MMS_ALIAS_MAX_CHARS = "aliasMaxChars";
-    public static final String INT_MMS_ALIAS_MIN_CHARS = "aliasMinChars";
-    public static final String INT_MMS_HTTP_SOCKET_TIMEOUT = "httpSocketTimeout";
-    public static final String INT_MMS_MAX_IMAGE_HEIGHT = "maxImageHeight";
-    public static final String INT_MMS_MAX_IMAGE_WIDTH = "maxImageWidth";
-    public static final String INT_MMS_MAX_MESSAGE_SIZE = "maxMessageSize";
-    public static final String INT_MMS_MESSAGE_TEXT_MAX_SIZE = "maxMessageTextSize";
-    public static final String INT_MMS_RECIPIENT_LIMIT = "recipientLimit";
-    public static final String INT_MMS_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD = "smsToMmsTextLengthThreshold";
-    public static final String INT_MMS_SMS_TO_MMS_TEXT_THRESHOLD = "smsToMmsTextThreshold";
-    public static final String INT_MMS_SUBJECT_MAX_LENGTH = "maxSubjectLength";
-    public static final String STRING_MMS_EMAIL_GATEWAY_NUMBER = "emailGatewayNumber";
-    public static final String STRING_MMS_HTTP_PARAMS = "httpParams";
-    public static final String STRING_MMS_NAI_SUFFIX = "naiSuffix";
-    public static final String STRING_MMS_UA_PROF_TAG_NAME = "uaProfTagName";
-    public static final String STRING_MMS_UA_PROF_URL = "uaProfUrl";
-    public static final String STRING_MMS_USER_AGENT = "userAgent";
+    private final static String TAG = "CarrierConfigManager";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -296,39 +262,6 @@ public class CarrierConfigManager {
         sDefaults.putInt(INT_VVM_PORT_NUMBER, 0);
         sDefaults.putString(STRING_VVM_DESTINATION_NUMBER, "");
         sDefaults.putString(STRING_VVM_TYPE, "");
-
-        // MMS defaults
-        sDefaults.putBoolean(BOOL_MMS_ALIAS_ENABLED, false);
-        sDefaults.putBoolean(BOOL_MMS_ALLOW_ATTACH_AUDIO, true);
-        sDefaults.putBoolean(BOOL_MMS_APPEND_TRANSACTION_ID, false);
-        sDefaults.putBoolean(BOOL_MMS_GROUP_MMS_ENABLED, true);
-        sDefaults.putBoolean(BOOL_MMS_MMS_DELIVERY_REPORT_ENABLED, false);
-        sDefaults.putBoolean(BOOL_MMS_MMS_ENABLED, true);
-        sDefaults.putBoolean(BOOL_MMS_MMS_READ_REPORT_ENABLED, false);
-        sDefaults.putBoolean(BOOL_MMS_MULTIPART_SMS_ENABLED, true);
-        sDefaults.putBoolean(BOOL_MMS_NOTIFY_WAP_MMSC_ENABLED, false);
-        sDefaults.putBoolean(BOOL_MMS_SEND_MULTIPART_SMS_AS_SEPARATE_MESSAGES, false);
-        sDefaults.putBoolean(BOOL_MMS_SHOW_CELL_BROADCAST_APP_LINKS, true);
-        sDefaults.putBoolean(BOOL_MMS_SMS_DELIVERY_REPORT_ENABLED, true);
-        sDefaults.putBoolean(BOOL_MMS_SUPPORT_HTTP_CHARSET_HEADER, false);
-        sDefaults.putBoolean(BOOL_MMS_SUPPORT_MMS_CONTENT_DISPOSITION, true);
-        sDefaults.putInt(INT_MMS_ALIAS_MAX_CHARS, 48);
-        sDefaults.putInt(INT_MMS_ALIAS_MIN_CHARS, 2);
-        sDefaults.putInt(INT_MMS_HTTP_SOCKET_TIMEOUT, 60 * 1000);
-        sDefaults.putInt(INT_MMS_MAX_IMAGE_HEIGHT, 480);
-        sDefaults.putInt(INT_MMS_MAX_IMAGE_WIDTH, 640);
-        sDefaults.putInt(INT_MMS_MAX_MESSAGE_SIZE, 300 * 1024);
-        sDefaults.putInt(INT_MMS_MESSAGE_TEXT_MAX_SIZE, -1);
-        sDefaults.putInt(INT_MMS_RECIPIENT_LIMIT, Integer.MAX_VALUE);
-        sDefaults.putInt(INT_MMS_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD, -1);
-        sDefaults.putInt(INT_MMS_SMS_TO_MMS_TEXT_THRESHOLD, -1);
-        sDefaults.putInt(INT_MMS_SUBJECT_MAX_LENGTH, 40);
-        sDefaults.putString(STRING_MMS_EMAIL_GATEWAY_NUMBER, "");
-        sDefaults.putString(STRING_MMS_HTTP_PARAMS, "");
-        sDefaults.putString(STRING_MMS_NAI_SUFFIX, "");
-        sDefaults.putString(STRING_MMS_UA_PROF_TAG_NAME, "x-wap-profile");
-        sDefaults.putString(STRING_MMS_UA_PROF_URL, "");
-        sDefaults.putString(STRING_MMS_USER_AGENT, "");
     }
 
     /**
