@@ -274,14 +274,6 @@ $ adb connect &lt;ip-address-for-adt-1&gt;:4321
   starts the multi-color cycle, release the small, round button, and ADT-1 boots up. If you release
   the button while the LED is flashing red, the device will be in Fastboot mode.</p>
 
-<p>
-  <strong>There is a hardware problem with my ADT-1. How do I return it?</strong>
-</p>
-<p>You can request a return of the device using the
-  <a href="https://support.google.com/googleplay/android-developer/contact/adt_rma">return
-  merchandise authorization form</a>.
-</p>
-
 
 <h2 id="emote">Android TV Remote Control App</h2>
 
