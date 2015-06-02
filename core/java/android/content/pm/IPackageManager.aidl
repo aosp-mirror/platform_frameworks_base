@@ -105,6 +105,9 @@ interface IPackageManager {
     void updatePermissionFlags(String permissionName, String packageName, int flagMask,
             int flagValues, int userId);
 
+    boolean shouldShowRequestPermissionRationale(String permissionName,
+            String packageName, int userId);
+
     boolean isProtectedBroadcast(String actionName);
 
     int checkSignatures(String pkg1, String pkg2);
