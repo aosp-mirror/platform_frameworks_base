@@ -357,17 +357,19 @@ public class WifiTracker {
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
-        /* sticky broadcasts can call this when wifi is disabled */
-        if (!mWifiManager.isWifiEnabled()) {
-            mScanner.pause();
-            return;
-        }
+        if (mScanner != null) {
+            /* sticky broadcasts can call this when wifi is disabled */
+            if (!mWifiManager.isWifiEnabled()) {
+                mScanner.pause();
+                return;
+            }
 
-        if (networkInfo != null &&
-                networkInfo.getDetailedState() == DetailedState.OBTAINING_IPADDR) {
-            mScanner.pause();
-        } else {
-            mScanner.resume();
+            if (networkInfo != null &&
+                    networkInfo.getDetailedState() == DetailedState.OBTAINING_IPADDR) {
+                mScanner.pause();
+            } else {
+                mScanner.resume();
+            }
         }
 
         mLastInfo = mWifiManager.getConnectionInfo();
