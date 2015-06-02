@@ -17,8 +17,6 @@
 package android.service.persistentdata;
 
 import android.annotation.SystemApi;
-import android.app.PendingIntent;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -43,56 +41,6 @@ import android.util.Slog;
 @SystemApi
 public class PersistentDataBlockManager {
     private static final String TAG = PersistentDataBlockManager.class.getSimpleName();
-
-    /**
-     * Broadcast action that will be called when the {@link #wipeIfAllowed(Bundle,PendingIntent)}
-     * method is called.  A broadcast with this action will be sent to the package allowed to write
-     * to the persistent data block. Packages receiving this broadcasts should respond by using the
-     * {@link android.app.PendingIntent} sent in the {@link #EXTRA_WIPE_IF_ALLOWED_CALLBACK} extra.
-     */
-    public static final String ACTION_WIPE_IF_ALLOWED
-            = "android.service.persistentdata.action.WIPE_IF_ALLOWED";
-
-    /**
-     * A {@link android.os.Parcelable} extra of type {@link android.app.PendingIntent} used to
-     * response to {@link #wipeIfAllowed(Bundle,PendingIntent)}. This extra will set in broadcasts
-     * with an action of {@link #ACTION_WIPE_IF_ALLOWED}.
-     */
-    public static final String EXTRA_WIPE_IF_ALLOWED_CALLBACK
-            = "android.service.persistentdata.extra.WIPE_IF_ALLOWED_CALLBACK";
-
-    /**
-     * Result code indicating that the data block was wiped.
-     *
-     * <p>This value is set as result code of the {@link android.app.PendingIntent} argument to
-     * {@link #wipeIfAllowed(Bundle,PendingIntent)}
-     */
-    public static final int STATUS_SUCCESS = 0;
-
-    /**
-     * Result code indicating that a remote exception was received while processing the request.
-     *
-     * <p>This value is set as result code of the {@link android.app.PendingIntent} argument to
-     * {@link #wipeIfAllowed(Bundle,PendingIntent)}
-     */
-    public static final int STATUS_ERROR_REMOTE_EXCEPTION = 1;
-
-    /**
-     * Result code indicating that a network error occurred while processing the request.
-     *
-     * <p>This value is set as result code of the {@link android.app.PendingIntent} argument to
-     * {@link #wipeIfAllowed(Bundle,PendingIntent)}
-     */
-    public static final int STATUS_ERROR_NETWORK_ERROR = 2;
-
-    /**
-     * Result code indicating that the data block could not be cleared with the provided data.
-     *
-     * <p>This value is set as result code of the {@link android.app.PendingIntent} argument to
-     * {@link #wipeIfAllowed(Bundle,PendingIntent)}
-     */
-    public static final int STATUS_ERROR_NOT_COMPLIANT = 3;
-
     private IPersistentDataBlockService sService;
 
     public PersistentDataBlockManager(IPersistentDataBlockService service) {
@@ -164,28 +112,6 @@ public class PersistentDataBlockManager {
     public void wipe() {
         try {
             sService.wipe();
-        } catch (RemoteException e) {
-            onError("wiping persistent partition");
-        }
-    }
-
-    /**
-     * Attempt to wipe the data block by sending a broadcast to the package allowed to modify the
-     * datablock. The allowed package can refuse to wipe the data block based on the contents of
-     * the specified bundle. This bundle may contain data used by the allowed package to wipe the
-     * partition such as account credentials or an authorization token.
-     * @param bundle data used to wipe the data block. The contents of this bundle depend on the
-     *    allowed package receiving the data.
-     * @param pi intent called when attempt finished. The result code of this intent will be set
-     *    to one of {@link #STATUS_SUCCESS}, {@link #STATUS_ERROR_REMOTE_EXCEPTION},
-     *    {@link #STATUS_ERROR_NETWORK_ERROR}, or {@link #STATUS_ERROR_NOT_COMPLIANT}.
-     */
-    public void wipeIfAllowed(Bundle bundle, PendingIntent pi) {
-        if (pi == null) {
-            throw new NullPointerException();
-        }
-        try {
-            sService.wipeIfAllowed(bundle, pi);
         } catch (RemoteException e) {
             onError("wiping persistent partition");
         }

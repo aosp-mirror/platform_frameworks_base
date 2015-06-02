@@ -16,8 +16,6 @@
 
 package android.service.persistentdata;
 
-import android.app.PendingIntent;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -32,7 +30,6 @@ interface IPersistentDataBlockService {
     int write(in byte[] data);
     byte[] read();
     void wipe();
-    void wipeIfAllowed(in Bundle bundle, in PendingIntent pi);
     int getDataBlockSize();
     long getMaximumDataBlockSize();
 
