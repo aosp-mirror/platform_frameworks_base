@@ -39651,7 +39651,6 @@ package android.view {
     field public static final int TITLE_CHANGED = 64; // 0x40
     field public static final int TYPE_ACCESSIBILITY_OVERLAY = 2032; // 0x7f0
     field public static final int TYPE_APPLICATION = 2; // 0x2
-    field public static final int TYPE_APPLICATION_ABOVE_SUB_PANEL = 1005; // 0x3ed
     field public static final int TYPE_APPLICATION_ATTACHED_DIALOG = 1003; // 0x3eb
     field public static final int TYPE_APPLICATION_MEDIA = 1001; // 0x3e9
     field public static final int TYPE_APPLICATION_PANEL = 1000; // 0x3e8
