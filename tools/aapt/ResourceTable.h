@@ -235,8 +235,10 @@ public:
                        const ConfigDescription* config = NULL);
 
     status_t assignResourceIds();
-    status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL);
+    status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL,
+                        bool skipSymbolsWithoutDefaultLocalization = false);
     void addLocalization(const String16& name, const String8& locale, const SourcePos& src);
+    void addDefaultLocalization(const String16& name);
     status_t validateLocalizations(void);
 
     status_t flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
@@ -588,6 +590,8 @@ private:
 
     // key = string resource name, value = set of locales in which that name is defined
     std::map<String16, std::map<String8, SourcePos>> mLocalizations;
+    // set of string resources names that have a default localization
+    std::set<String16> mHasDefaultLocalization;
     std::queue<CompileResourceWorkItem> mWorkQueue;
 };
 
