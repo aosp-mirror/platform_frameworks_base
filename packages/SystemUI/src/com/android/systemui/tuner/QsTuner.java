@@ -15,6 +15,7 @@
  */
 package com.android.systemui.tuner;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ClipData;
@@ -49,6 +50,7 @@ import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.SecurityController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QsTuner extends Fragment implements Callback {
@@ -105,6 +107,12 @@ public class QsTuner extends Fragment implements Callback {
         mAddTarget = (FrameLayout) mScrollRoot.findViewById(R.id.add_target);
         setupAddTarget();
         return mScrollRoot;
+    }
+
+    @Override
+    public void onDestroyView() {
+        mTileHost.destroy();
+        super.onDestroyView();
     }
 
     private void setupDropTarget() {
@@ -187,7 +195,7 @@ public class QsTuner extends Fragment implements Callback {
             if (oldTile.equals(newTile)) {
                 return;
             }
-            List<String> order = loadTileSpecs();
+            List<String> order = new ArrayList<>(mTileSpecs);
             int index = order.indexOf(oldTile);
             if (index < 0) {
                 Log.e(TAG, "Can't find " + oldTile);
@@ -199,32 +207,33 @@ public class QsTuner extends Fragment implements Callback {
         }
 
         public void remove(String tile) {
-            List<String> tiles = loadTileSpecs();
+            List<String> tiles = new ArrayList<>(mTileSpecs);
             tiles.remove(tile);
             setTiles(tiles);
         }
 
         public void add(String tile) {
-            List<String> tiles = loadTileSpecs();
+            List<String> tiles = new ArrayList<>(mTileSpecs);
             tiles.add(tile);
             setTiles(tiles);
         }
 
         public void reset() {
             Secure.putStringForUser(getContext().getContentResolver(),
-                    TILES_SETTING, "default", mUserTracker.getCurrentUserId());
+                    TILES_SETTING, "default", ActivityManager.getCurrentUser());
         }
 
         private void setTiles(List<String> tiles) {
             Secure.putStringForUser(getContext().getContentResolver(), TILES_SETTING,
-                    TextUtils.join(",", tiles), mUserTracker.getCurrentUserId());
+                    TextUtils.join(",", tiles), ActivityManager.getCurrentUser());
         }
 
         public void showAddDialog() {
-            List<String> tiles = loadTileSpecs();
+            List<String> tiles = mTileSpecs;
             String[] defaults =
                 getContext().getString(R.string.quick_settings_tiles_default).split(",");
             final String[] available = new String[defaults.length + 1 - tiles.size()];
+            final String[] availableTiles = new String[available.length];
             int index = 0;
             for (int i = 0; i < defaults.length; i++) {
                 if (tiles.contains(defaults[i])) {
@@ -232,8 +241,10 @@ public class QsTuner extends Fragment implements Callback {
                 }
                 int resource = getLabelResource(defaults[i]);
                 if (resource != 0) {
+                    availableTiles[index] = defaults[i];
                     available[index++] = getContext().getString(resource);
                 } else {
+                    availableTiles[index] = defaults[i];
                     available[index++] = defaults[i];
                 }
             }
@@ -243,7 +254,7 @@ public class QsTuner extends Fragment implements Callback {
                     .setItems(available, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             if (which < available.length - 1) {
-                                add(available[which]);
+                                add(availableTiles[which]);
                             } else {
                                 showBroadcastTileDialog();
                             }
