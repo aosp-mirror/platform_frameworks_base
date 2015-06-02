@@ -231,5 +231,10 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#enablePhoneAccount
      */
-    void enablePhoneAccount(in PhoneAccountHandle accountHandle, boolean isEnabled);
+    boolean enablePhoneAccount(in PhoneAccountHandle accountHandle, boolean isEnabled);
+
+    /**
+     * @see TelecomServiceImpl#setDefaultDialer
+     */
+    boolean setDefaultDialer(in String packageName);
 }
