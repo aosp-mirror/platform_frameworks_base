@@ -32260,6 +32260,7 @@ package android.telecom {
     method public final deprecated void setConnectTimeMillis(long);
     method public final void setConnectionCapabilities(int);
     method public final void setConnectionTime(long);
+    method public final void setDialing();
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setExtras(android.os.Bundle);
     method public final void setOnHold();
