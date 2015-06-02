@@ -289,6 +289,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private Rect mTempRect;
     private Rect mOutsets = new Rect();
 
+    private boolean mIsStartingWindow;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -3891,7 +3893,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // A pending invalidation will typically be resolved before the posted message
                 // would run normally in order to satisfy instance state restoration.
                 PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
-                if (!isDestroyed() && (st == null || st.menu == null)) {
+                if (!isDestroyed() && (st == null || st.menu == null) && !mIsStartingWindow) {
                     invalidatePanelMenu(FEATURE_ACTION_BAR);
                 }
             } else {
@@ -4965,5 +4967,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
         }
+    }
+
+    public void setIsStartingWindow(boolean isStartingWindow) {
+        mIsStartingWindow = isStartingWindow;
     }
 }
