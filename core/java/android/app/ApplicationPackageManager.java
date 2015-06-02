@@ -486,6 +486,16 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean shouldShowRequestPermissionRationale(String permission) {
+        try {
+            return mPM.shouldShowRequestPermissionRationale(permission,
+                    mContext.getPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
     public int checkSignatures(String pkg1, String pkg2) {
         try {
             return mPM.checkSignatures(pkg1, pkg2);
