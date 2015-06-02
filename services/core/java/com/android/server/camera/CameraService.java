@@ -20,10 +20,15 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.util.Slog;
 
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
 import java.util.Collection;
@@ -36,7 +41,8 @@ import java.util.Set;
  *
  * @hide
  */
-public class CameraService extends SystemService {
+public class CameraService extends SystemService implements Handler.Callback {
+    private static final String TAG = "CameraService_proxy";
 
     /**
      * This must match the ICameraService.aidl definition
@@ -49,7 +55,14 @@ public class CameraService extends SystemService {
     public static final int NO_EVENT = 0; // NOOP
     public static final int USER_SWITCHED = 1; // User changed, argument is the new user handle
 
+    // Handler message codes
+    private static final int MSG_SWITCH_USER = 1;
+
+    private static final int RETRY_DELAY_TIME = 20; //ms
+
     private final Context mContext;
+    private final ServiceThread mHandlerThread;
+    private final Handler mHandler;
     private UserManager mUserManager;
 
     private final Object mLock = new Object();
@@ -58,18 +71,29 @@ public class CameraService extends SystemService {
     private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
         @Override
         public void pingForUserUpdate() {
-            // Binder call
-            synchronized(mLock) {
-                if (mEnabledCameraUsers != null) {
-                    notifyMediaserver(USER_SWITCHED, mEnabledCameraUsers);
-                }
-            }
+            notifySwitchWithRetries(30);
         }
     };
 
     public CameraService(Context context) {
         super(context);
         mContext = context;
+        mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_DISPLAY, /*allowTo*/false);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper(), this);
+    }
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        switch(msg.what) {
+            case MSG_SWITCH_USER: {
+                notifySwitchWithRetries(msg.arg1);
+            } break;
+            default: {
+                Slog.e(TAG, "CameraService error, invalid message: " + msg.what);
+            } break;
+        }
+        return true;
     }
 
     @Override
@@ -119,12 +143,30 @@ public class CameraService extends SystemService {
         return handles;
     }
 
-    private void notifyMediaserver(int eventType, Set<Integer> updatedUserHandles) {
+    private void notifySwitchWithRetries(int retries) {
+        synchronized(mLock) {
+            if (mEnabledCameraUsers == null) {
+                return;
+            }
+            if (notifyMediaserver(USER_SWITCHED, mEnabledCameraUsers)) {
+                retries = 0;
+            }
+        }
+        if (retries <= 0) {
+            return;
+        }
+        Slog.i(TAG, "Could not notify camera service of user switch, retrying...");
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SWITCH_USER, retries - 1, 0, null),
+                RETRY_DELAY_TIME);
+    }
+
+    private boolean notifyMediaserver(int eventType, Set<Integer> updatedUserHandles) {
         // Forward the user switch event to the native camera service running in the mediaserver
         // process.
         IBinder cameraServiceBinder = getBinderService(CAMERA_SERVICE_BINDER_NAME);
         if (cameraServiceBinder == null) {
-            return; // Camera service not active, cannot evict user clients.
+            Slog.w(TAG, "Could not notify mediaserver, camera service not available.");
+            return false; // Camera service not active, cannot evict user clients.
         }
 
         ICameraService cameraServiceRaw = ICameraService.Stub.asInterface(cameraServiceBinder);
@@ -132,8 +174,11 @@ public class CameraService extends SystemService {
         try {
             cameraServiceRaw.notifySystemEvent(eventType, toArray(updatedUserHandles));
         } catch (RemoteException e) {
+            Slog.w(TAG, "Could not notify mediaserver, remote exception: " + e);
             // Not much we can do if camera service is dead.
+            return false;
         }
+        return true;
     }
 
     private static int[] toArray(Collection<Integer> c) {
