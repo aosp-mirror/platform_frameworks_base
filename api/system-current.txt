@@ -31015,11 +31015,9 @@ package android.service.voice {
     method public void showSession(android.os.Bundle, int);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
-    field public static final int START_SOURCE_ASSIST_GESTURE = 4; // 0x4
-    field public static final int START_WITH_ASSIST = 1; // 0x1
   }
 
-  public abstract class VoiceInteractionSession implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback {
+  public class VoiceInteractionSession implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback {
     ctor public VoiceInteractionSession(android.content.Context);
     ctor public VoiceInteractionSession(android.content.Context, android.os.Handler);
     method public void finish();
@@ -31027,20 +31025,15 @@ package android.service.voice {
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.Dialog getWindow();
     method public void hide();
-    method public void hideWindow();
-    method public void onAbortVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onBackPressed();
-    method public abstract void onCancel(android.service.voice.VoiceInteractionSession.Request);
+    method public void onCancelRequest(android.service.voice.VoiceInteractionSession.Request);
     method public void onCloseSystemDialogs();
-    method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
-    method public void onCompleteVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
     method public void onConfigurationChanged(android.content.res.Configuration);
-    method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
-    method public void onCreate(android.os.Bundle, int);
+    method public void onCreate();
     method public android.view.View onCreateContentView();
     method public void onDestroy();
-    method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
+    method public boolean[] onGetSupportedCommands(java.lang.String[]);
     method public void onHandleAssist(android.os.Bundle, android.app.AssistStructure, android.app.AssistContent);
     method public void onHide();
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -31048,7 +31041,11 @@ package android.service.voice {
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public void onLowMemory();
-    method public abstract void onPickOption(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+    method public void onRequestAbortVoice(android.service.voice.VoiceInteractionSession.AbortVoiceRequest);
+    method public void onRequestCommand(android.service.voice.VoiceInteractionSession.CommandRequest);
+    method public void onRequestCompleteVoice(android.service.voice.VoiceInteractionSession.CompleteVoiceRequest);
+    method public void onRequestConfirmation(android.service.voice.VoiceInteractionSession.ConfirmationRequest);
+    method public void onRequestPickOption(android.service.voice.VoiceInteractionSession.PickOptionRequest);
     method public void onShow(android.os.Bundle, int);
     method public void onTaskFinished(android.content.Intent, int);
     method public void onTaskStarted(android.content.Intent, int);
@@ -31056,12 +31053,31 @@ package android.service.voice {
     method public void setContentView(android.view.View);
     method public void setKeepAwake(boolean);
     method public void setTheme(int);
-    method public void show();
-    method public void showWindow();
+    method public void show(android.os.Bundle, int);
     method public void startVoiceActivity(android.content.Intent);
+    field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
+    field public static final int SHOW_WITH_ASSIST = 1; // 0x1
   }
 
-  public static class VoiceInteractionSession.Caller {
+  public static final class VoiceInteractionSession.AbortVoiceRequest extends android.service.voice.VoiceInteractionSession.Request {
+    method public java.lang.CharSequence getMessage();
+    method public void sendAbortResult(android.os.Bundle);
+  }
+
+  public static final class VoiceInteractionSession.CommandRequest extends android.service.voice.VoiceInteractionSession.Request {
+    method public java.lang.String getCommand();
+    method public void sendIntermediateResult(android.os.Bundle);
+    method public void sendResult(android.os.Bundle);
+  }
+
+  public static final class VoiceInteractionSession.CompleteVoiceRequest extends android.service.voice.VoiceInteractionSession.Request {
+    method public java.lang.CharSequence getMessage();
+    method public void sendCompleteResult(android.os.Bundle);
+  }
+
+  public static final class VoiceInteractionSession.ConfirmationRequest extends android.service.voice.VoiceInteractionSession.Request {
+    method public java.lang.CharSequence getPrompt();
+    method public void sendConfirmationResult(boolean, android.os.Bundle);
   }
 
   public static final class VoiceInteractionSession.Insets {
@@ -31074,13 +31090,18 @@ package android.service.voice {
     field public final android.graphics.Region touchableRegion;
   }
 
+  public static final class VoiceInteractionSession.PickOptionRequest extends android.service.voice.VoiceInteractionSession.Request {
+    method public android.app.VoiceInteractor.PickOptionRequest.Option[] getOptions();
+    method public java.lang.CharSequence getPrompt();
+    method public void sendIntermediatePickOptionResult(android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+    method public void sendPickOptionResult(android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+  }
+
   public static class VoiceInteractionSession.Request {
-    method public void sendAbortVoiceResult(android.os.Bundle);
-    method public void sendCancelResult();
-    method public void sendCommandResult(boolean, android.os.Bundle);
-    method public void sendCompleteVoiceResult(android.os.Bundle);
-    method public void sendConfirmResult(boolean, android.os.Bundle);
-    method public void sendPickOptionResult(boolean, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+    method public void cancel();
+    method public java.lang.String getCallingPackage();
+    method public int getCallingUid();
+    method public android.os.Bundle getExtras();
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {

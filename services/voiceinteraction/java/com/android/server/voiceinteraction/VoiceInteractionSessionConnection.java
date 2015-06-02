@@ -40,6 +40,7 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.IVoiceInteractionSessionService;
 import android.service.voice.VoiceInteractionService;
+import android.service.voice.VoiceInteractionSession;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
@@ -180,7 +181,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     public boolean showLocked(Bundle args, int flags,
             IVoiceInteractionSessionShowCallback showCallback) {
         // For now we never allow screenshots.
-        flags &= ~VoiceInteractionService.START_WITH_SCREENSHOT;
+        flags &= ~VoiceInteractionSession.SHOW_WITH_SCREENSHOT;
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
@@ -192,7 +193,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             mShowArgs = args;
             mShowFlags = flags;
             mHaveAssistData = false;
-            if ((flags&VoiceInteractionService.START_WITH_ASSIST) != 0) {
+            if ((flags& VoiceInteractionSession.SHOW_WITH_ASSIST) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_STRUCTURE, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
                         && isStructureEnabled()) {
@@ -209,7 +210,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                 mAssistData = null;
             }
             mHaveScreenshot = false;
-            if ((flags&VoiceInteractionService.START_WITH_SCREENSHOT) != 0) {
+            if ((flags& VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_SCREENSHOT, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED) {
                     try {
