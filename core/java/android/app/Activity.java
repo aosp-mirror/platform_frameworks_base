@@ -38,6 +38,7 @@ import com.android.internal.app.ToolbarActionBar;
 
 import android.annotation.SystemApi;
 import android.app.admin.DevicePolicyManager;
+import android.app.assist.AssistContent;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;

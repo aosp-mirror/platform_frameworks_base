@@ -555,8 +555,6 @@ aidl_files := \
 	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
-	frameworks/base/core/java/android/app/AssistStructure.aidl \
-	frameworks/base/core/java/android/app/AssistContent.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/NotificationManager.aidl \
 	frameworks/base/core/java/android/app/WallpaperInfo.aidl \
@@ -566,6 +564,8 @@ aidl_files := \
 	frameworks/base/core/java/android/app/AlarmManager.aidl \
 	frameworks/base/core/java/android/app/SearchableInfo.aidl \
 	frameworks/base/core/java/android/app/VoiceInteractor.aidl \
+	frameworks/base/core/java/android/app/assist/AssistContent.aidl \
+	frameworks/base/core/java/android/app/assist/AssistStructure.aidl \
 	frameworks/base/core/java/android/app/job/JobParameters.aidl \
 	frameworks/base/core/java/android/app/job/JobInfo.aidl \
 	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
