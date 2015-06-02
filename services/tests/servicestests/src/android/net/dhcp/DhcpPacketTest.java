@@ -18,6 +18,7 @@ package android.net.dhcp;
 
 import android.net.NetworkUtils;
 import android.net.DhcpResults;
+import android.net.LinkAddress;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
@@ -34,17 +35,25 @@ public class DhcpPacketTest extends TestCase {
             (Inet4Address) NetworkUtils.numericToInetAddress("192.0.2.1");
     private static Inet4Address CLIENT_ADDR =
             (Inet4Address) NetworkUtils.numericToInetAddress("192.0.2.234");
+    // Use our own empty address instead of Inet4Address.ANY or INADDR_ANY to ensure that the code
+    // doesn't use == instead of equals when comparing addresses.
+    private static Inet4Address ANY = (Inet4Address) NetworkUtils.numericToInetAddress("0.0.0.0");
+
     private static byte[] CLIENT_MAC = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
     class TestDhcpPacket extends DhcpPacket {
         private byte mType;
         // TODO: Make this a map of option numbers to bytes instead.
-        private byte[] mDomainBytes, mVendorInfoBytes, mLeaseTimeBytes;
+        private byte[] mDomainBytes, mVendorInfoBytes, mLeaseTimeBytes, mNetmaskBytes;
 
-        public TestDhcpPacket(byte type) {
-            super(0xdeadbeef, (short) 0, INADDR_ANY, CLIENT_ADDR, INADDR_ANY, INADDR_ANY,
+        public TestDhcpPacket(byte type, Inet4Address clientIp, Inet4Address yourIp) {
+            super(0xdeadbeef, (short) 0, clientIp, yourIp, INADDR_ANY, INADDR_ANY,
                   CLIENT_MAC, true);
             mType = type;
+        }
+
+        public TestDhcpPacket(byte type) {
+            this(type, INADDR_ANY, CLIENT_ADDR);
         }
 
         public TestDhcpPacket setDomainBytes(byte[] domainBytes) {
@@ -59,6 +68,11 @@ public class DhcpPacketTest extends TestCase {
 
         public TestDhcpPacket setLeaseTimeBytes(byte[] leaseTimeBytes) {
             mLeaseTimeBytes = leaseTimeBytes;
+            return this;
+        }
+
+        public TestDhcpPacket setNetmaskBytes(byte[] netmaskBytes) {
+            mNetmaskBytes = netmaskBytes;
             return this;
         }
 
@@ -79,6 +93,9 @@ public class DhcpPacketTest extends TestCase {
             }
             if (mLeaseTimeBytes != null) {
                 addTlv(buffer, DHCP_LEASE_TIME, mLeaseTimeBytes);
+            }
+            if (mNetmaskBytes != null) {
+                addTlv(buffer, DHCP_SUBNET_MASK, mNetmaskBytes);
             }
             addTlvEnd(buffer);
         }
@@ -174,5 +191,51 @@ public class DhcpPacketTest extends TestCase {
         assertLeaseTimeParses(true, 86400, 86400 * 1000, oneDayLease);
         assertLeaseTimeParses(true, -2147483647, 2147483649L * 1000, maxIntPlusOneLease);
         assertLeaseTimeParses(true, DhcpPacket.INFINITE_LEASE, 0, infiniteLease);
+    }
+
+    private void checkIpAddress(String expected, Inet4Address clientIp, Inet4Address yourIp,
+                                byte[] netmaskBytes) {
+        checkIpAddress(expected, DHCP_MESSAGE_TYPE_OFFER, clientIp, yourIp, netmaskBytes);
+        checkIpAddress(expected, DHCP_MESSAGE_TYPE_ACK, clientIp, yourIp, netmaskBytes);
+    }
+
+    private void checkIpAddress(String expected, byte type,
+                                Inet4Address clientIp, Inet4Address yourIp,
+                                byte[] netmaskBytes) {
+        ByteBuffer packet = new TestDhcpPacket(type, clientIp, yourIp)
+                .setNetmaskBytes(netmaskBytes)
+                .build();
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+        DhcpResults results = offerPacket.toDhcpResults();
+
+        if (expected != null) {
+            LinkAddress expectedAddress = new LinkAddress(expected);
+            assertEquals(expectedAddress, results.ipAddress);
+        } else {
+            assertNull(results);
+        }
+    }
+
+    @SmallTest
+    public void testIpAddress() throws Exception {
+        byte[] slash11Netmask = new byte[] { (byte) 0xff, (byte) 0xe0, 0x00, 0x00 };
+        byte[] slash24Netmask = new byte[] { (byte) 0xff, (byte) 0xff, (byte) 0xff, 0x00 };
+        byte[] invalidNetmask = new byte[] { (byte) 0xff, (byte) 0xfb, (byte) 0xff, 0x00 };
+        Inet4Address example1 = (Inet4Address) NetworkUtils.numericToInetAddress("192.0.2.1");
+        Inet4Address example2 = (Inet4Address) NetworkUtils.numericToInetAddress("192.0.2.43");
+
+        // A packet without any addresses is not valid.
+        checkIpAddress(null, ANY, ANY, slash24Netmask);
+
+        // ClientIP is used iff YourIP is not present.
+        checkIpAddress("192.0.2.1/24", example2, example1, slash24Netmask);
+        checkIpAddress("192.0.2.43/11", example2, ANY, slash11Netmask);
+        checkIpAddress("192.0.2.43/11", ANY, example2, slash11Netmask);
+
+        // Invalid netmasks are ignored.
+        checkIpAddress(null, example2, ANY, invalidNetmask);
+
+        // If there is no netmask, implicit netmasks are used.
+        checkIpAddress("192.0.2.43/24", ANY, example2, null);
     }
 }
