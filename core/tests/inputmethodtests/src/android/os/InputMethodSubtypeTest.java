@@ -56,6 +56,10 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
         verifyLocale("zz");
         verifyLocale("iw");
         verifyLocale("he");
+        verifyLocale("tl");
+        verifyLocale("tl_PH");
+        verifyLocale("fil");
+        verifyLocale("fil_PH");
     }
 
     @SmallTest
