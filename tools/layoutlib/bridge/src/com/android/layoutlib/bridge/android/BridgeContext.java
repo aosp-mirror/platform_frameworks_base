@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.SdkConstants;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -62,6 +63,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -145,6 +147,29 @@ public final class BridgeContext extends Context {
     private SharedPreferences mSharedPreferences;
     private ClassLoader mClassLoader;
     private IBinder mBinder;
+
+
+    /**
+     * Some applications that target both pre API 17 and post API 17, set the newer attrs to
+     * reference the older ones. For example, android:paddingStart will resolve to
+     * android:paddingLeft. This way the apps need to only define paddingLeft at any other place.
+     * This a map from value to attribute name. Warning for missing references shouldn't be logged
+     * if value and attr name pair is the same as an entry in this map.
+     */
+    private static Map<String, String> RTL_ATTRS = new HashMap<String, String>(10);
+
+    static {
+        RTL_ATTRS.put("?android:attr/paddingLeft", "paddingStart");
+        RTL_ATTRS.put("?android:attr/paddingRight", "paddingEnd");
+        RTL_ATTRS.put("?android:attr/layout_marginLeft", "layout_marginStart");
+        RTL_ATTRS.put("?android:attr/layout_marginRight", "layout_marginEnd");
+        RTL_ATTRS.put("?android:attr/layout_toLeft", "layout_toStartOf");
+        RTL_ATTRS.put("?android:attr/layout_toRight", "layout_toEndOf");
+        RTL_ATTRS.put("?android:attr/layout_alignParentLeft", "layout_alignParentStart");
+        RTL_ATTRS.put("?android:attr/layout_alignParentRight", "layout_alignParentEnd");
+        RTL_ATTRS.put("?android:attr/drawableLeft", "drawableStart");
+        RTL_ATTRS.put("?android:attr/drawableRight", "drawableEnd");
+    }
 
     /**
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
@@ -830,6 +855,22 @@ public final class BridgeContext extends Context {
                         }
 
                         resValue = mRenderResources.resolveResValue(resValue);
+
+                        // If the value is a reference to another theme attribute that doesn't
+                        // exist, we should log a warning and omit it.
+                        String val = resValue.getValue();
+                        if (val != null && val.startsWith(SdkConstants.PREFIX_THEME_REF)) {
+                            if (!attrName.equals(RTL_ATTRS.get(val)) ||
+                                    getApplicationInfo().targetSdkVersion <
+                                            VERSION_CODES.JELLY_BEAN_MR1) {
+                                // Only log a warning if the referenced value isn't one of the RTL
+                                // attributes, or the app targets old API.
+                                Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
+                                        String.format("Failed to find '%s' in current theme.", val),
+                                        val);
+                            }
+                            resValue = null;
+                        }
                     }
 
                     ta.bridgeSetValue(index, attrName, frameworkAttr, resValue);
