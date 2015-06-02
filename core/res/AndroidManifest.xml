@@ -81,6 +81,7 @@
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_WHITELIST_CHANGED" />
+    <protected-broadcast android:name="android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED" />
 
     <protected-broadcast android:name="android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED" />
 
@@ -2145,6 +2146,12 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.CHANGE_APP_IDLE_STATE"
         android:protectionLevel="signature" />
+
+    <!-- @hide @SystemApi Allows an application to temporarily whitelist an inactive app to
+         access the network and acquire wakelocks.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"
+        android:protectionLevel="system|signature" />
 
     <!-- @SystemApi Allows an application to collect battery statistics -->
     <permission android:name="android.permission.BATTERY_STATS"
