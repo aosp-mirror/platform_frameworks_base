@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * PanProfile handles Bluetooth PAN profile (NAP and PANU).
  */
-final class PanProfile implements LocalBluetoothProfile {
+public final class PanProfile implements LocalBluetoothProfile {
     private static final String TAG = "PanProfile";
     private static boolean V = true;
 
@@ -106,8 +106,7 @@ final class PanProfile implements LocalBluetoothProfile {
     }
 
     public boolean isPreferred(BluetoothDevice device) {
-        // return current connection status so profile checkbox is set correctly
-        return getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED;
+        return true;
     }
 
     public int getPreferred(BluetoothDevice device) {
