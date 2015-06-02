@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class SurfaceTextureRenderer {
     private static final String TAG = SurfaceTextureRenderer.class.getSimpleName();
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     private static final int EGL_RECORDABLE_ANDROID = 0x3142; // from EGL/eglext.h
     private static final int GL_MATRIX_SIZE = 16;
     private static final int VERTEX_POS_SIZE = 3;

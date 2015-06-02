@@ -34,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class CaptureCollector {
     private static final String TAG = "CaptureCollector";
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     private static final int FLAG_RECEIVED_JPEG = 1;
     private static final int FLAG_RECEIVED_JPEG_TS = 2;

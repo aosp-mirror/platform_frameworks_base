@@ -41,7 +41,7 @@ import android.util.Log;
  */
 public class CameraDeviceState {
     private static final String TAG = "CameraDeviceState";
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     private static final int STATE_ERROR = 0;
     private static final int STATE_UNCONFIGURED = 1;

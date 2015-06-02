@@ -58,7 +58,7 @@ import java.util.TreeMap;
  */
 public class CameraDeviceImpl extends CameraDevice {
     private final String TAG;
-    private final boolean DEBUG;
+    private final boolean DEBUG = false;
 
     private static final int REQUEST_ID_NONE = -1;
 
@@ -240,7 +240,6 @@ public class CameraDeviceImpl extends CameraDevice {
             tag = tag.substring(0, MAX_TAG_LEN);
         }
         TAG = tag;
-        DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
         Integer partialCount =
                 mCharacteristics.get(CameraCharacteristics.REQUEST_PARTIAL_RESULT_COUNT);
