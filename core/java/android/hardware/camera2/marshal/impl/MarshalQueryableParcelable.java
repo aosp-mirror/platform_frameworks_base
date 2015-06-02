@@ -34,7 +34,7 @@ public class MarshalQueryableParcelable<T extends Parcelable>
         implements MarshalQueryable<T> {
 
     private static final String TAG = "MarshalParcelable";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private static final String FIELD_CREATOR = "CREATOR";
 
@@ -70,7 +70,7 @@ public class MarshalQueryableParcelable<T extends Parcelable>
 
         @Override
         public void marshal(T value, ByteBuffer buffer) {
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "marshal " + value);
             }
 
@@ -100,7 +100,7 @@ public class MarshalQueryableParcelable<T extends Parcelable>
 
         @Override
         public T unmarshal(ByteBuffer buffer) {
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "unmarshal, buffer remaining " + buffer.remaining());
             }
 
@@ -142,7 +142,7 @@ public class MarshalQueryableParcelable<T extends Parcelable>
                 buffer.reset();
                 buffer.position(buffer.position() + actualLength);
 
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG, "unmarshal, parcel length was " + actualLength);
                     Log.v(TAG, "unmarshal, value is " + value);
                 }
@@ -165,7 +165,7 @@ public class MarshalQueryableParcelable<T extends Parcelable>
                 value.writeToParcel(parcel, /*flags*/0);
                 int length = parcel.marshall().length;
 
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG, "calculateMarshalSize, length when parceling "
                             + value + " is " + length);
                 }
