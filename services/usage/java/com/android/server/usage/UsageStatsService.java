@@ -90,23 +90,24 @@ public class UsageStatsService extends SystemService implements
 
     static final String TAG = "UsageStatsService";
 
-    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    static final boolean DEBUG = false;
+    private static final boolean COMPRESS_TIME = false;
 
     private static final long TEN_SECONDS = 10 * 1000;
     private static final long ONE_MINUTE = 60 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
-    private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
+    private static final long FLUSH_INTERVAL = COMPRESS_TIME ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
-    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 4
+    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = COMPRESS_TIME ? ONE_MINUTE * 4
             : 12 * 60 * ONE_MINUTE; // 12 hours of screen-on time sans dream-time
-    static final long DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 8
+    static final long DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS = COMPRESS_TIME ? ONE_MINUTE * 8
             : 2L * 24 * 60 * ONE_MINUTE; // 2 days
-    static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE
+    static final long DEFAULT_CHECK_IDLE_INTERVAL = COMPRESS_TIME ? ONE_MINUTE
             : 8 * 60 * ONE_MINUTE; // 8 hours
-    static final long DEFAULT_PAROLE_INTERVAL = DEBUG ? ONE_MINUTE * 10
+    static final long DEFAULT_PAROLE_INTERVAL = COMPRESS_TIME ? ONE_MINUTE * 10
             : 24 * 60 * ONE_MINUTE; // 24 hours between paroles
-    static final long DEFAULT_PAROLE_DURATION = DEBUG ? ONE_MINUTE
+    static final long DEFAULT_PAROLE_DURATION = COMPRESS_TIME ? ONE_MINUTE
             : 10 * ONE_MINUTE; // 10 minutes
 
     // Handler message types.
@@ -338,7 +339,6 @@ public class UsageStatsService extends SystemService implements
 
     /** Check all running users' apps to see if they enter an idle state. */
     void checkIdleStates() {
-        if (DEBUG) Slog.d(TAG, "Checking idle state");
         final int[] runningUsers;
         try {
             runningUsers = ActivityManagerNative.getDefault().getRunningUserIds();
@@ -991,6 +991,12 @@ public class UsageStatsService extends SystemService implements
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void whitelistAppTemporarily(String packageName, long duration, int userId)
+                throws RemoteException {
+            mDeviceIdleController.addPowerSaveTempWhitelistApp(packageName, duration, userId);
         }
 
         @Override

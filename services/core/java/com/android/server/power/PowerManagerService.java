@@ -438,6 +438,9 @@ public final class PowerManagerService extends SystemService
     // Set of app ids that we will always respect the wake locks for.
     int[] mDeviceIdleWhitelist = new int[0];
 
+    // Set of app ids that are temporarily allowed to acquire wakelocks due to high-pri message
+    int[] mDeviceIdleTempWhitelist = new int[0];
+
     private final SparseIntArray mUidState = new SparseIntArray();
 
     // True if theater mode is enabled
@@ -2320,6 +2323,15 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    void setDeviceIdleTempWhitelistInternal(int[] appids) {
+        synchronized (mLock) {
+            mDeviceIdleTempWhitelist = appids;
+            if (mDeviceIdleMode) {
+                updateWakeLockDisabledStatesLocked();
+            }
+        }
+    }
+
     void updateUidProcStateInternal(int uid, int procState) {
         synchronized (mLock) {
             mUidState.put(uid, procState);
@@ -2372,6 +2384,7 @@ public final class PowerManagerService extends SystemService
                 // for application uids that are not whitelisted.
                 if (appid >= Process.FIRST_APPLICATION_UID &&
                         Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
+                        Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&
                         mUidState.get(wakeLock.mOwnerUid,
                                 ActivityManager.PROCESS_STATE_CACHED_EMPTY)
                                 > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
@@ -2579,6 +2592,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mBatteryLevelLow=" + mBatteryLevelLow);
             pw.println("  mDeviceIdleMode=" + mDeviceIdleMode);
             pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
+            pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
             pw.println("  mLastSleepTime=" + TimeUtils.formatUptime(mLastSleepTime));
             pw.println("  mLastUserActivityTime=" + TimeUtils.formatUptime(mLastUserActivityTime));
@@ -3475,6 +3489,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public void setDeviceIdleWhitelist(int[] appids) {
             setDeviceIdleWhitelistInternal(appids);
+        }
+
+        @Override
+        public void setDeviceIdleTempWhitelist(int[] appids) {
+            setDeviceIdleTempWhitelistInternal(appids);
         }
 
         @Override
