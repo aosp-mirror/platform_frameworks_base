@@ -6872,6 +6872,7 @@ package android.bluetooth {
 
   public final class BluetoothDevice implements android.os.Parcelable {
     method public android.bluetooth.BluetoothGatt connectGatt(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback);
+    method public android.bluetooth.BluetoothGatt connectGatt(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback, int);
     method public boolean createBond();
     method public android.bluetooth.BluetoothSocket createInsecureRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket createRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
@@ -6917,6 +6918,9 @@ package android.bluetooth {
     field public static final java.lang.String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
     field public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2; // 0x2
     field public static final int PAIRING_VARIANT_PIN = 0; // 0x0
+    field public static final int TRANSPORT_AUTO = 0; // 0x0
+    field public static final int TRANSPORT_BREDR = 1; // 0x1
+    field public static final int TRANSPORT_LE = 2; // 0x2
   }
 
   public final class BluetoothGatt implements android.bluetooth.BluetoothProfile {
