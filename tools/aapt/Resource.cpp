@@ -1604,7 +1604,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     
     if (table.hasResources()) {
         sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
-        err = table.addSymbols(symbols);
+        err = table.addSymbols(symbols, bundle->getSkipSymbolsWithoutDefaultLocalization());
         if (err < NO_ERROR) {
             return err;
         }

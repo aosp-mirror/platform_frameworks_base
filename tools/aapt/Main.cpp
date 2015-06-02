@@ -212,6 +212,9 @@ void usage(void)
         "   --ignore-assets\n"
         "       Assets to be ignored. Default pattern is:\n"
         "       %s\n"
+        "   --skip-symbols-without-default-localization\n"
+        "       Prevents symbols from being generated for strings that do not have a default\n"
+        "       localization\n"
         "   --no-version-vectors\n"
         "       Do not automatically generate versioned copies of vector XML resources.\n",
         gDefaultIgnoreAssets);
@@ -659,6 +662,8 @@ int main(int argc, char* const argv[])
                     bundle.setProduct(argv[0]);
                 } else if (strcmp(cp, "-non-constant-id") == 0) {
                     bundle.setNonConstantId(true);
+                } else if (strcmp(cp, "-skip-symbols-without-default-localization") == 0) {
+                    bundle.setSkipSymbolsWithoutDefaultLocalization(true);
                 } else if (strcmp(cp, "-shared-lib") == 0) {
                     bundle.setNonConstantId(true);
                     bundle.setBuildSharedLibrary(true);
