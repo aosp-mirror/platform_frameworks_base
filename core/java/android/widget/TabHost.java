@@ -188,32 +188,9 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         mLocalActivityManager = activityGroup;
     }
 
-
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        final ViewTreeObserver treeObserver = getViewTreeObserver();
-        treeObserver.addOnTouchModeChangeListener(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        final ViewTreeObserver treeObserver = getViewTreeObserver();
-        treeObserver.removeOnTouchModeChangeListener(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void onTouchModeChanged(boolean isInTouchMode) {
-        if (!isInTouchMode) {
-            // leaving touch mode.. if nothing has focus, let's give it to
-            // the indicator of the current tab
-            if (mCurrentView != null && (!mCurrentView.hasFocus() || mCurrentView.isFocused())) {
-                mTabWidget.getChildTabViewAt(mCurrentTab).requestFocus();
-            }
-        }
+        // No longer used, but kept to maintain API compatibility.
     }
 
     /**
