@@ -16,6 +16,6 @@
   -->
 
 <resources>
-    <string name="activity_title">Assistant</string>
+    <string name="activity_title">Camera Prewarm test</string>
     <string name="search_label">Orilla Search Engine</string>
 </resources>

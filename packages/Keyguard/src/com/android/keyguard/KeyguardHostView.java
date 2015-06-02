@@ -60,6 +60,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     protected ViewMediatorCallback mViewMediatorCallback;
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
+    private Runnable mCancelAction;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -126,8 +127,17 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      *
      * @param action
      */
-    public void setOnDismissAction(OnDismissAction action) {
+    public void setOnDismissAction(OnDismissAction action, Runnable cancelAction) {
+        if (mCancelAction != null) {
+            mCancelAction.run();
+            mCancelAction = null;
+        }
         mDismissAction = action;
+        mCancelAction = cancelAction;
+    }
+
+    public void cancelDismissAction() {
+        setOnDismissAction(null, null);
     }
 
     @Override
@@ -197,6 +207,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         if (mDismissAction != null) {
             deferKeyguardDone = mDismissAction.onDismiss();
             mDismissAction = null;
+            mCancelAction = null;
         }
         if (mViewMediatorCallback != null) {
             if (deferKeyguardDone) {
