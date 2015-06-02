@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
         <include layout="@layout/recents_task_view_header" />
-        <FrameLayout
+        <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/lock_to_app_fab"
             android:layout_width="@dimen/recents_lock_to_app_size"
             android:layout_height="@dimen/recents_lock_to_app_size"
@@ -42,7 +42,7 @@
                 android:layout_height="@dimen/recents_lock_to_app_icon_size"
                 android:layout_gravity="center"
                 android:src="@drawable/recents_lock_to_app_pin" />
-        </FrameLayout>
+        </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
     </FrameLayout>
 </com.android.systemui.recents.views.TaskView>
 
