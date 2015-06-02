@@ -17,6 +17,7 @@
 package com.android.server.accounts;
 
 import android.Manifest;
+import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountAuthenticatorResponse;
@@ -49,6 +50,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -84,6 +86,11 @@ import com.google.android.collect.Sets;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -93,6 +100,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -166,6 +174,10 @@ public class AccountManagerService
     private static final String[] ACCOUNT_TYPE_COUNT_PROJECTION =
             new String[] { ACCOUNTS_TYPE, ACCOUNTS_TYPE_COUNT};
     private static final Intent ACCOUNTS_CHANGED_INTENT;
+    static {
+        ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
+        ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    }
 
     private static final String COUNT_OF_MATCHING_GRANTS = ""
             + "SELECT COUNT(*) FROM " + TABLE_GRANTS + ", " + TABLE_ACCOUNTS
@@ -177,6 +189,7 @@ public class AccountManagerService
 
     private static final String SELECTION_AUTHTOKENS_BY_ACCOUNT =
             AUTHTOKENS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?)";
+
     private static final String[] COLUMNS_AUTHTOKENS_TYPE_AND_AUTHTOKEN = {AUTHTOKENS_TYPE,
             AUTHTOKENS_AUTHTOKEN};
 
@@ -205,6 +218,10 @@ public class AccountManagerService
         /** protected by the {@link #cacheLock} */
         private final HashMap<Account, HashMap<String, String>> authTokenCache =
                 new HashMap<Account, HashMap<String, String>>();
+
+        /** protected by the {@link #cacheLock} */
+        private final HashMap<Account, WeakReference<TokenCache>> accountTokenCaches = new HashMap<>();
+
         /**
          * protected by the {@link #cacheLock}
          *
@@ -236,12 +253,6 @@ public class AccountManagerService
     private static AtomicReference<AccountManagerService> sThis =
             new AtomicReference<AccountManagerService>();
     private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
-
-    static {
-        ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
-        ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-    }
-
 
     /**
      * This should only be called by system code. One should only call this after the service
@@ -425,6 +436,7 @@ public class AccountManagerService
                         final Account account = new Account(accountName, accountType);
                         accounts.userDataCache.remove(account);
                         accounts.authTokenCache.remove(account);
+                        accounts.accountTokenCaches.remove(account);
                     } else {
                         ArrayList<String> accountNames = accountNamesByType.get(accountType);
                         if (accountNames == null) {
@@ -1337,9 +1349,10 @@ public class AccountManagerService
 
     @Override
     public void invalidateAuthToken(String accountType, String authToken) {
+        int callerUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "invalidateAuthToken: accountType " + accountType
-                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", caller's uid " + callerUid
                     + ", pid " + Binder.getCallingPid());
         }
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
@@ -1353,6 +1366,7 @@ public class AccountManagerService
                 db.beginTransaction();
                 try {
                     invalidateAuthTokenLocked(accounts, db, accountType, authToken);
+                    invalidateCustomTokenLocked(accounts, accountType, authToken);
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -1360,6 +1374,26 @@ public class AccountManagerService
             }
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void invalidateCustomTokenLocked(
+            UserAccounts accounts,
+            String accountType,
+            String authToken) {
+        if (authToken == null || accountType == null) {
+            return;
+        }
+        // Also wipe out cached token in memory.
+        for (Account a : accounts.accountTokenCaches.keySet()) {
+            if (a.type.equals(accountType)) {
+                WeakReference<TokenCache> tokenCacheRef =
+                        accounts.accountTokenCaches.get(a);
+                TokenCache cache = null;
+                if (tokenCacheRef != null && (cache = tokenCacheRef.get()) != null) {
+                    cache.remove(authToken);
+                }
+            }
         }
     }
 
@@ -1385,11 +1419,38 @@ public class AccountManagerService
                 String accountName = cursor.getString(1);
                 String authTokenType = cursor.getString(2);
                 db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ID + "=" + authTokenId, null);
-                writeAuthTokenIntoCacheLocked(accounts, db, new Account(accountName, accountType),
-                        authTokenType, null);
+                writeAuthTokenIntoCacheLocked(
+                        accounts,
+                        db,
+                        new Account(accountName, accountType),
+                        authTokenType,
+                        null);
             }
         } finally {
             cursor.close();
+        }
+    }
+
+    private void saveCachedToken(
+            UserAccounts accounts,
+            Account account,
+            String callerPkg,
+            byte[] callerSigDigest,
+            String tokenType,
+            String token,
+            long expiryMillis) {
+
+        if (account == null || tokenType == null || callerPkg == null || callerSigDigest == null) {
+            return;
+        }
+        cancelNotification(getSigninRequiredNotificationId(accounts, account),
+                new UserHandle(accounts.userId));
+        synchronized (accounts.cacheLock) {
+            TokenCache cache = getTokenCacheForAccountLocked(accounts, account);
+            if (cache != null) {
+                cache.put(token, tokenType, callerPkg, callerSigDigest, expiryMillis);
+            }
+            return;
         }
     }
 
@@ -1510,6 +1571,7 @@ public class AccountManagerService
                     db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
                     db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
                     accounts.authTokenCache.remove(account);
+                    accounts.accountTokenCaches.remove(account);
                     db.setTransactionSuccessful();
 
                     String action = (password == null || password.length() == 0) ?
@@ -1673,9 +1735,14 @@ public class AccountManagerService
     }
 
     @Override
-    public void getAuthToken(IAccountManagerResponse response, final Account account,
-            final String authTokenType, final boolean notifyOnAuthFailure,
-            final boolean expectActivityLaunch, Bundle loginOptionsIn) {
+    public void getAuthToken(
+            IAccountManagerResponse response,
+            final Account account,
+            final String authTokenType,
+            final boolean notifyOnAuthFailure,
+            final boolean expectActivityLaunch,
+            final Bundle loginOptions) {
+
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAuthToken: " + account
                     + ", response " + response
@@ -1707,19 +1774,33 @@ public class AccountManagerService
         final RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo;
         authenticatorInfo = mAuthenticatorCache.getServiceInfo(
                 AuthenticatorDescription.newKey(account.type), accounts.userId);
+
         final boolean customTokens =
-            authenticatorInfo != null && authenticatorInfo.type.customTokens;
+                authenticatorInfo != null && authenticatorInfo.type.customTokens;
 
         // skip the check if customTokens
         final int callerUid = Binder.getCallingUid();
         final boolean permissionGranted = customTokens ||
             permissionIsGranted(account, authTokenType, callerUid);
 
-        final Bundle loginOptions = (loginOptionsIn == null) ? new Bundle() :
-            loginOptionsIn;
+        // Get the calling package. We will use it for the purpose of caching.
+        final String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
+        List<String> callerOwnedPackageNames = Arrays.asList(mPackageManager.getPackagesForUid(callerUid));
+        if (callerPkg == null || !callerOwnedPackageNames.contains(callerPkg)) {
+            String msg = String.format(
+                    "Uid %s is attempting to illegally masquerade as package %s!",
+                    callerUid,
+                    callerPkg);
+            throw new SecurityException(msg);
+        }
+
         // let authenticator know the identity of the caller
         loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
         loginOptions.putInt(AccountManager.KEY_CALLER_PID, Binder.getCallingPid());
+
+        // Distill the caller's package signatures into a single digest.
+        final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
+
         if (notifyOnAuthFailure) {
             loginOptions.putBoolean(AccountManager.KEY_NOTIFY_ON_FAILURE, true);
         }
@@ -1733,6 +1814,28 @@ public class AccountManagerService
                 if (authToken != null) {
                     Bundle result = new Bundle();
                     result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+                    result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+                    result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+                    onResult(response, result);
+                    return;
+                }
+            }
+
+            if (customTokens) {
+                /*
+                 * Look up tokens in the new cache only if the loginOptions don't have parameters
+                 * outside of those expected to be injected by the AccountManager, e.g.
+                 * ANDORID_PACKAGE_NAME.
+                 */
+                String token = readCachedTokenInternal(
+                        accounts,
+                        account,
+                        authTokenType,
+                        callerPkg,
+                        callerPkgSigDigest);
+                if (token != null) {
+                    Bundle result = new Bundle();
+                    result.putString(AccountManager.KEY_AUTHTOKEN, token);
                     result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
                     result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
                     onResult(response, result);
@@ -1786,9 +1889,26 @@ public class AccountManagerService
                                         "the type and name should not be empty");
                                 return;
                             }
+                            Account resultAccount = new Account(name, type);
                             if (!customTokens) {
-                                saveAuthTokenToDatabase(mAccounts, new Account(name, type),
-                                        authTokenType, authToken);
+                                saveAuthTokenToDatabase(
+                                        mAccounts,
+                                        resultAccount,
+                                        authTokenType,
+                                        authToken);
+                            }
+                            long expiryMillis = result.getLong(
+                                    AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY, 0L);
+                            if (customTokens
+                                    && expiryMillis > System.currentTimeMillis()) {
+                                saveCachedToken(
+                                        mAccounts,
+                                        account,
+                                        callerPkg,
+                                        callerPkgSigDigest,
+                                        authTokenType,
+                                        authToken,
+                                        expiryMillis);
                             }
                         }
 
@@ -1805,6 +1925,25 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private byte[] calculatePackageSignatureDigest(String callerPkg) {
+        MessageDigest digester;
+        try {
+            digester = MessageDigest.getInstance("SHA-256");
+            PackageInfo pkgInfo = mPackageManager.getPackageInfo(
+                    callerPkg, PackageManager.GET_SIGNATURES);
+            for (Signature sig : pkgInfo.signatures) {
+                digester.update(sig.toByteArray());
+            }
+        } catch (NoSuchAlgorithmException x) {
+            Log.wtf(TAG, "SHA-256 should be available", x);
+            digester = null;
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Could not find packageinfo for: " + callerPkg);
+            digester = null;
+        }
+        return (digester == null) ? null : digester.digest();
     }
 
     private void createNoCredentialsPermissionNotification(Account account, Intent intent,
@@ -2745,13 +2884,13 @@ public class AccountManagerService
             if (result != null) {
                 boolean isSuccessfulConfirmCreds = result.getBoolean(
                         AccountManager.KEY_BOOLEAN_RESULT, false);
-                boolean isSuccessfulUpdateCreds = 
+                boolean isSuccessfulUpdateCreds =
                         result.containsKey(AccountManager.KEY_ACCOUNT_NAME)
                         && result.containsKey(AccountManager.KEY_ACCOUNT_TYPE);
-                // We should only update lastAuthenticated time, if 
+                // We should only update lastAuthenticated time, if
                 // mUpdateLastAuthenticatedTime is true and the confirmRequest
                 // or updateRequest was successful
-                boolean needUpdate = mUpdateLastAuthenticatedTime 
+                boolean needUpdate = mUpdateLastAuthenticatedTime
                         && (isSuccessfulConfirmCreds || isSuccessfulUpdateCreds);
                 if (needUpdate || mAuthDetailsRequired) {
                     boolean accountPresent = isAccountPresentForCaller(mAccountName, mAccountType);
@@ -3398,7 +3537,6 @@ public class AccountManagerService
                 return;
             }
         }
-
         String msg = "caller uid " + uid + " lacks any of " + TextUtils.join(",", permissions);
         Log.w(TAG, "  " + msg);
         throw new SecurityException(msg);
@@ -3796,6 +3934,18 @@ public class AccountManagerService
         }
     }
 
+    protected String readCachedTokenInternal(
+            UserAccounts accounts,
+            Account account,
+            String tokenType,
+            String callingPackage,
+            byte[] pkgSigDigest) {
+        synchronized (accounts.cacheLock) {
+            TokenCache cache = getTokenCacheForAccountLocked(accounts, account);
+            return cache.get(tokenType, callingPackage, pkgSigDigest);
+        }
+    }
+
     protected void writeAuthTokenIntoCacheLocked(UserAccounts accounts, final SQLiteDatabase db,
             Account account, String key, String value) {
         HashMap<String, String> authTokensForAccount = accounts.authTokenCache.get(account);
@@ -3875,6 +4025,17 @@ public class AccountManagerService
             cursor.close();
         }
         return authTokensForAccount;
+    }
+
+    protected TokenCache getTokenCacheForAccountLocked(UserAccounts accounts, Account account) {
+        WeakReference<TokenCache> cacheRef = accounts.accountTokenCaches.get(account);
+        TokenCache cache;
+        if (cacheRef == null || (cache = cacheRef.get()) == null) {
+            cache = new TokenCache();
+            cacheRef = new WeakReference<>(cache);
+            accounts.accountTokenCaches.put(account, cacheRef);
+        }
+        return cache;
     }
 
     private Context getContextForUser(UserHandle user) {
