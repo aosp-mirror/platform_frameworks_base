@@ -61,6 +61,7 @@ public:
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mReplaceVersion(false), mCustomPackage(NULL),
           mExtraPackages(NULL), mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false),
+          mSkipSymbolsWithoutDefaultLocalization(false),
           mProduct(NULL), mUseCrunchCache(false), mErrorOnFailedInsert(false),
           mErrorOnMissingConfigEntry(false), mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
@@ -191,6 +192,8 @@ public:
     void setDebugMode(bool val) { mDebugMode = val; }
     bool getNonConstantId() const { return mNonConstantId; }
     void setNonConstantId(bool val) { mNonConstantId = val; }
+    bool getSkipSymbolsWithoutDefaultLocalization() const { return mSkipSymbolsWithoutDefaultLocalization; }
+    void setSkipSymbolsWithoutDefaultLocalization(bool val) { mSkipSymbolsWithoutDefaultLocalization = val; }
     const char* getProduct() const { return mProduct; }
     void setProduct(const char * val) { mProduct = val; }
     void setUseCrunchCache(bool val) { mUseCrunchCache = val; }
@@ -315,6 +318,7 @@ private:
     const char* mMaxResVersion;
     bool        mDebugMode;
     bool        mNonConstantId;
+    bool        mSkipSymbolsWithoutDefaultLocalization;
     const char* mProduct;
     bool        mUseCrunchCache;
     bool        mErrorOnFailedInsert;
