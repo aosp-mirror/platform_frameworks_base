@@ -2539,6 +2539,19 @@ public abstract class PackageManager {
             @NonNull UserHandle user);
 
     /**
+     * Gets whether you should show UI with rationale for requesting a permission.
+     * You should do this only if you do not have the permission and the context in
+     * which the permission is requested does not clearly communicate to the user
+     * what would be the benefit from grating this permission.
+     *
+     * @param permission A permission your app wants to request.
+     * @return Whether you can show permission rationale UI.
+     *
+     * @hide
+     */
+    public abstract boolean shouldShowRequestPermissionRationale(String permission);
+
+    /**
      * Returns an {@link android.content.Intent} suitable for passing to
      * {@link android.app.Activity#startActivityForResult(android.content.Intent, int)}
      * which prompts the user to grant permissions to this application.
