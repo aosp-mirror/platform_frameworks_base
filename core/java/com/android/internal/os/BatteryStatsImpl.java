@@ -211,6 +211,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     final SparseArray<ArrayList<StopwatchTimer>> mWifiBatchedScanTimers = new SparseArray<>();
     final ArrayList<StopwatchTimer> mAudioTurnedOnTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mVideoTurnedOnTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mFlashlightTurnedOnTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mCameraTurnedOnTimers = new ArrayList<>();
 
     // Last partial timers we use for distributing CPU usage.
     final ArrayList<StopwatchTimer> mLastPartialTimers = new ArrayList<>();
@@ -343,8 +345,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mVideoOnNesting;
     StopwatchTimer mVideoOnTimer;
 
-    boolean mFlashlightOn;
+    int mFlashlightOnNesting;
     StopwatchTimer mFlashlightOnTimer;
+
+    int mCameraOnNesting;
+    StopwatchTimer mCameraOnTimer;
 
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
@@ -3710,29 +3715,99 @@ public final class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteVibratorOffLocked();
     }
 
-    public void noteFlashlightOnLocked() {
-        if (!mFlashlightOn) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
+    public void noteFlashlightOnLocked(int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (mFlashlightOnNesting++ == 0) {
             mHistoryCur.states2 |= HistoryItem.STATE2_FLASHLIGHT_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Flashlight on to: "
-                    + Integer.toHexString(mHistoryCur.states));
+                    + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mFlashlightOn = true;
             mFlashlightOnTimer.startRunningLocked(elapsedRealtime);
+        }
+        getUidStatsLocked(uid).noteFlashlightTurnedOnLocked(elapsedRealtime);
+    }
+
+    public void noteFlashlightOffLocked(int uid) {
+        if (mFlashlightOnNesting == 0) {
+            return;
+        }
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (--mFlashlightOnNesting == 0) {
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_FLASHLIGHT_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Flashlight off to: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mFlashlightOnTimer.stopRunningLocked(elapsedRealtime);
+        }
+        getUidStatsLocked(uid).noteFlashlightTurnedOffLocked(elapsedRealtime);
+    }
+
+    public void noteCameraOnLocked(int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (mCameraOnNesting++ == 0) {
+            mHistoryCur.states2 |= HistoryItem.STATE2_CAMERA_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Camera on to: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mCameraOnTimer.startRunningLocked(elapsedRealtime);
+        }
+        getUidStatsLocked(uid).noteCameraTurnedOnLocked(elapsedRealtime);
+    }
+
+    public void noteCameraOffLocked(int uid) {
+        if (mCameraOnNesting == 0) {
+            return;
+        }
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (--mCameraOnNesting == 0) {
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_CAMERA_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Camera off to: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mCameraOnTimer.stopRunningLocked(elapsedRealtime);
+        }
+        getUidStatsLocked(uid).noteCameraTurnedOffLocked(elapsedRealtime);
+    }
+
+    public void noteResetCameraLocked() {
+        if (mCameraOnNesting > 0) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mCameraOnNesting = 0;
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_CAMERA_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Camera off to: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mCameraOnTimer.stopAllRunningLocked(elapsedRealtime);
+            for (int i=0; i<mUidStats.size(); i++) {
+                BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
+                uid.noteResetCameraLocked(elapsedRealtime);
+            }
         }
     }
 
-    public void noteFlashlightOffLocked() {
-        final long elapsedRealtime = SystemClock.elapsedRealtime();
-        final long uptime = SystemClock.uptimeMillis();
-        if (mFlashlightOn) {
+    public void noteResetFlashlightLocked() {
+        if (mFlashlightOnNesting > 0) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mFlashlightOnNesting = 0;
             mHistoryCur.states2 &= ~HistoryItem.STATE2_FLASHLIGHT_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Flashlight off to: "
-                    + Integer.toHexString(mHistoryCur.states));
+                    + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mFlashlightOn = false;
-            mFlashlightOnTimer.stopRunningLocked(elapsedRealtime);
+            mFlashlightOnTimer.stopAllRunningLocked(elapsedRealtime);
+            for (int i=0; i<mUidStats.size(); i++) {
+                BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
+                uid.noteResetFlashlightLocked(elapsedRealtime);
+            }
         }
     }
 
@@ -4350,6 +4425,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         StopwatchTimer mAudioTurnedOnTimer;
         StopwatchTimer mVideoTurnedOnTimer;
+        StopwatchTimer mFlashlightTurnedOnTimer;
+        StopwatchTimer mCameraTurnedOnTimer;
+
 
         StopwatchTimer mForegroundActivityTimer;
 
@@ -4650,6 +4728,54 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        public StopwatchTimer createFlashlightTurnedOnTimerLocked() {
+            if (mFlashlightTurnedOnTimer == null) {
+                mFlashlightTurnedOnTimer = new StopwatchTimer(Uid.this, FLASHLIGHT_TURNED_ON,
+                        mFlashlightTurnedOnTimers, mOnBatteryTimeBase);
+            }
+            return mFlashlightTurnedOnTimer;
+        }
+
+        public void noteFlashlightTurnedOnLocked(long elapsedRealtimeMs) {
+            createFlashlightTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+        }
+
+        public void noteFlashlightTurnedOffLocked(long elapsedRealtimeMs) {
+            if (mFlashlightTurnedOnTimer != null) {
+                mFlashlightTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteResetFlashlightLocked(long elapsedRealtimeMs) {
+            if (mFlashlightTurnedOnTimer != null) {
+                mFlashlightTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public StopwatchTimer createCameraTurnedOnTimerLocked() {
+            if (mCameraTurnedOnTimer == null) {
+                mCameraTurnedOnTimer = new StopwatchTimer(Uid.this, CAMERA_TURNED_ON,
+                        mCameraTurnedOnTimers, mOnBatteryTimeBase);
+            }
+            return mCameraTurnedOnTimer;
+        }
+
+        public void noteCameraTurnedOnLocked(long elapsedRealtimeMs) {
+            createCameraTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+        }
+
+        public void noteCameraTurnedOffLocked(long elapsedRealtimeMs) {
+            if (mCameraTurnedOnTimer != null) {
+                mCameraTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteResetCameraLocked(long elapsedRealtimeMs) {
+            if (mCameraTurnedOnTimer != null) {
+                mCameraTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
         public StopwatchTimer createForegroundActivityTimerLocked() {
             if (mForegroundActivityTimer == null) {
                 mForegroundActivityTimer = new StopwatchTimer(
@@ -4762,19 +4888,23 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public long getAudioTurnedOnTime(long elapsedRealtimeUs, int which) {
-            if (mAudioTurnedOnTimer == null) {
-                return 0;
-            }
-            return mAudioTurnedOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+        public Timer getAudioTurnedOnTimer() {
+            return mAudioTurnedOnTimer;
         }
 
         @Override
-        public long getVideoTurnedOnTime(long elapsedRealtimeUs, int which) {
-            if (mVideoTurnedOnTimer == null) {
-                return 0;
-            }
-            return mVideoTurnedOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+        public Timer getVideoTurnedOnTimer() {
+            return mVideoTurnedOnTimer;
+        }
+
+        @Override
+        public Timer getFlashlightTurnedOnTimer() {
+            return mFlashlightTurnedOnTimer;
+        }
+
+        @Override
+        public Timer getCameraTurnedOnTimer() {
+            return mCameraTurnedOnTimer;
         }
 
         @Override
@@ -4994,6 +5124,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mVideoTurnedOnTimer != null) {
                 active |= !mVideoTurnedOnTimer.reset(false);
             }
+            if (mFlashlightTurnedOnTimer != null) {
+                active |= !mFlashlightTurnedOnTimer.reset(false);
+            }
+            if (mCameraTurnedOnTimer != null) {
+                active |= !mCameraTurnedOnTimer.reset(false);
+            }
             if (mForegroundActivityTimer != null) {
                 active |= !mForegroundActivityTimer.reset(false);
             }
@@ -5155,6 +5291,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mVideoTurnedOnTimer.detach();
                     mVideoTurnedOnTimer = null;
                 }
+                if (mFlashlightTurnedOnTimer != null) {
+                    mFlashlightTurnedOnTimer.detach();
+                    mFlashlightTurnedOnTimer = null;
+                }
+                if (mCameraTurnedOnTimer != null) {
+                    mCameraTurnedOnTimer.detach();
+                    mCameraTurnedOnTimer = null;
+                }
                 if (mForegroundActivityTimer != null) {
                     mForegroundActivityTimer.detach();
                     mForegroundActivityTimer = null;
@@ -5288,6 +5432,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mVideoTurnedOnTimer != null) {
                 out.writeInt(1);
                 mVideoTurnedOnTimer.writeToParcel(out, elapsedRealtimeUs);
+            } else {
+                out.writeInt(0);
+            }
+            if (mFlashlightTurnedOnTimer != null) {
+                out.writeInt(1);
+                mFlashlightTurnedOnTimer.writeToParcel(out, elapsedRealtimeUs);
+            } else {
+                out.writeInt(0);
+            }
+            if (mCameraTurnedOnTimer != null) {
+                out.writeInt(1);
+                mCameraTurnedOnTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
@@ -5467,6 +5623,18 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mVideoTurnedOnTimers, mOnBatteryTimeBase, in);
             } else {
                 mVideoTurnedOnTimer = null;
+            }
+            if (in.readInt() != 0) {
+                mFlashlightTurnedOnTimer = new StopwatchTimer(Uid.this, FLASHLIGHT_TURNED_ON,
+                        mFlashlightTurnedOnTimers, mOnBatteryTimeBase, in);
+            } else {
+                mFlashlightTurnedOnTimer = null;
+            }
+            if (in.readInt() != 0) {
+                mCameraTurnedOnTimer = new StopwatchTimer(Uid.this, CAMERA_TURNED_ON,
+                        mCameraTurnedOnTimers, mOnBatteryTimeBase, in);
+            } else {
+                mCameraTurnedOnTimer = null;
             }
             if (in.readInt() != 0) {
                 mForegroundActivityTimer = new StopwatchTimer(
@@ -6700,6 +6868,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
         mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
+        mCameraOnTimer = new StopwatchTimer(null, -13, null, mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
         long uptime = SystemClock.uptimeMillis() * 1000;
         long realtime = SystemClock.elapsedRealtime() * 1000;
@@ -7285,6 +7454,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mAudioOnTimer.reset(false);
         mVideoOnTimer.reset(false);
         mFlashlightOnTimer.reset(false);
+        mCameraOnTimer.reset(false);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].reset(false);
         }
@@ -8811,8 +8981,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         mNumConnectivityChange = mLoadedNumConnectivityChange = in.readInt();
-        mFlashlightOn = false;
+        mFlashlightOnNesting = 0;
         mFlashlightOnTimer.readSummaryFromParcelLocked(in);
+        mCameraOnNesting = 0;
+        mCameraOnTimer.readSummaryFromParcelLocked(in);
 
         int NKW = in.readInt();
         if (NKW > 10000) {
@@ -8881,6 +9053,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (in.readInt() != 0) {
                 u.createVideoTurnedOnTimerLocked().readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
+                u.createFlashlightTurnedOnTimerLocked().readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
+                u.createCameraTurnedOnTimerLocked().readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
                 u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
@@ -9132,6 +9310,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         out.writeInt(mNumConnectivityChange);
         mFlashlightOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mCameraOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
@@ -9205,6 +9384,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (u.mVideoTurnedOnTimer != null) {
                 out.writeInt(1);
                 u.mVideoTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mFlashlightTurnedOnTimer != null) {
+                out.writeInt(1);
+                u.mFlashlightTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mCameraTurnedOnTimer != null) {
+                out.writeInt(1);
+                u.mCameraTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -9453,8 +9644,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOnNesting = 0;
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
-        mFlashlightOn = false;
+        mFlashlightOnNesting = 0;
         mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
+        mCameraOnNesting = 0;
+        mCameraOnTimer = new StopwatchTimer(null, -13, null, mOnBatteryTimeBase, in);
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
@@ -9499,6 +9692,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mWifiMulticastTimers.clear();
         mAudioTurnedOnTimers.clear();
         mVideoTurnedOnTimers.clear();
+        mFlashlightTurnedOnTimers.clear();
+        mCameraTurnedOnTimers.clear();
 
         sNumSpeedSteps = in.readInt();
 
@@ -9598,6 +9793,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mLoadedNumConnectivityChange);
         out.writeInt(mUnpluggedNumConnectivityChange);
         mFlashlightOnTimer.writeToParcel(out, uSecRealtime);
+        mCameraOnTimer.writeToParcel(out, uSecRealtime);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);
@@ -9732,6 +9928,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             pr.println("*** Flashlight timer:");
             mFlashlightOnTimer.logState(pr, "  ");
+            pr.println("*** Camera timer:");
+            mCameraOnTimer.logState(pr, "  ");
         }
         super.dumpLocked(context, pw, flags, reqUid, histStart);
     }
