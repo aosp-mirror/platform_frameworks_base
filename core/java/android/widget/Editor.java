@@ -390,6 +390,7 @@ public class Editor {
 
         mPreserveDetachedSelection = true;
         hideControllers();
+        stopSelectionActionMode();
         mPreserveDetachedSelection = false;
         mTemporaryDetach = false;
     }
@@ -624,7 +625,6 @@ public class Editor {
             mSuggestionsPopupWindow.hide();
         }
         hideInsertionPointCursorController();
-        stopSelectionActionMode();
     }
 
     /**
@@ -1101,10 +1101,12 @@ public class Editor {
                 final int selStart = mTextView.getSelectionStart();
                 final int selEnd = mTextView.getSelectionEnd();
                 hideControllers();
+                stopSelectionActionMode();
                 Selection.setSelection((Spannable) mTextView.getText(), selStart, selEnd);
             } else {
                 if (mTemporaryDetach) mPreserveDetachedSelection = true;
                 hideControllers();
+                stopSelectionActionMode();
                 if (mTemporaryDetach) mPreserveDetachedSelection = false;
                 downgradeEasyCorrectionSpans();
             }
@@ -1147,6 +1149,7 @@ public class Editor {
         // We do not hide the span controllers, since they can be added when a new text is
         // inserted into the text view (voice IME).
         hideCursorControllers();
+        stopSelectionActionMode();
     }
 
     private int getLastTapPosition() {
@@ -1878,6 +1881,7 @@ public class Editor {
     void onTouchUpEvent(MotionEvent event) {
         boolean selectAllGotFocus = mSelectAllOnFocus && mTextView.didTouchFocusSelect();
         hideControllers();
+        stopSelectionActionMode();
         CharSequence text = mTextView.getText();
         if (!selectAllGotFocus && text.length() > 0) {
             // Move cursor
@@ -1998,6 +2002,7 @@ public class Editor {
             mSuggestionsPopupWindow = new SuggestionsPopupWindow();
         }
         hideControllers();
+        stopSelectionActionMode();
         mSuggestionsPopupWindow.show();
     }
 
