@@ -180,7 +180,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             .setColor(r.getColor(com.android.internal.R.color.system_notification_accent_color));
 
         mNotificationStyle = new Notification.BigPictureStyle()
-            .bigPicture(picture);
+            .bigPicture(picture.createAshmemBitmap());
         mNotificationBuilder.setStyle(mNotificationStyle);
 
         // For "public" situations we want to show all the same info but
@@ -203,7 +203,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         // On the tablet, the large icon makes the notification appear as if it is clickable (and
         // on small devices, the large icon is not shown) so defer showing the large icon until
         // we compose the final post-save notification below.
-        mNotificationBuilder.setLargeIcon(icon);
+        mNotificationBuilder.setLargeIcon(icon.createAshmemBitmap());
         // But we still don't set it for the expanded view, allowing the smallIcon to show here.
         mNotificationStyle.bigLargeIcon((Bitmap) null);
     }
