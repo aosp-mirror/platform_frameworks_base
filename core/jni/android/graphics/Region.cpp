@@ -181,7 +181,12 @@ static SkRegion* Region_createFromParcel(JNIEnv* env, jobject clazz, jobject par
         return NULL;
     }
     SkRegion* region = new SkRegion;
-    region->readFromMemory(regionData, size);
+    size_t actualSize = region->readFromMemory(regionData, size);
+
+    if (size != actualSize) {
+        delete region;
+        return NULL;
+    }
 
     return region;
 }
