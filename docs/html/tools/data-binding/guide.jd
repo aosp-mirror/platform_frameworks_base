@@ -141,7 +141,8 @@ page.tags="databinding", "layouts"
 &mdash; it's a support library, so you can use it with all Android platform
 versions back to <strong>Android 2.1</strong> (API level 7+).</p>
 
-<p>Android Studio <strong>1.3.0-beta1</strong> or higher is required.</p>
+<p>To use data binding, Android Plugin for Gradle <strong>1.3.0-beta1</strong>
+or higher is required.</p>
 
 <h4>Beta release</h4>
 
@@ -156,7 +157,7 @@ versions back to <strong>Android 2.1</strong> (API level 7+).</p>
     so use it at your own risk. That said, we do want your feedback! Please
     let us know what is or isn’t working for you using the <a
     href="https://code.google.com/p/android-developer-preview/">issue
-    tracker</a>. 
+    tracker</a>.
     </li>
     <li>
     The Data Binding library beta release is subject to significant changes,
@@ -174,7 +175,7 @@ versions back to <strong>Android 2.1</strong> (API level 7+).</p>
     Further Android Studio support will come in the future.
     </li>
     <li>
-    By using the Data Binding library beta release, you acknowledge these 
+    By using the Data Binding library beta release, you acknowledge these
     caveats.</li>
   </ul>
 </div>
@@ -186,16 +187,13 @@ versions back to <strong>Android 2.1</strong> (API level 7+).</p>
 <p>To get started with Data Binding, download the library from the Support
 repository in the Android SDK manager. </p>
 
-<p>Make sure you are using a compatible version of Android Studio.
-The Data Binding plugin for Android Studio requires Android Studio <strong>1.3.0-beta1
-or higher</strong>.</p>
-<h2 id="build_environment">
-  Build Environment
-</h2>
+<p>The Data Binding plugin requires Android Plugin for Gradle <strong>1.3.0-beta1
+or higher</strong>, so update your build dependencies (in
+<code>build.gradle</code>) as needed.</p>
 
-<p>To get started with Data Binding, download the library from the Support repository in the Android SDK manager. </p>
-
-<p>Make sure you are using a <strong>compatible version of Android Studio</strong>. The Data Binding plugin for Android Studio requires <strong>Android 1.3.0-beta1 or higher</strong>.</p>
+<p>Also, make sure you are using a compatible version of Android Studio.
+<strong>Android Studio 1.3</strong> adds the code-completion and layout-preview
+support for data binding.</p>
 
 <p>
   <strong>Setting Up Work Environment:</strong>
@@ -203,12 +201,12 @@ or higher</strong>.</p>
 
 <p>
   To set up your application to use data binding, add data binding to the class
-  path of your build gradle file, right below "android".
+  path of your <code>build.gradle</code> file, right below "android".
 </p>
 
 <pre>
    dependencies {
-       classpath <strong>"com.android.tools.build:gradle:1.2.3"
+       classpath <strong>"com.android.tools.build:gradle:1.3.0-beta1"
        </strong>classpath <strong>"com.android.databinding:dataBinder:</strong>1.0-rc0"
    }
 }
