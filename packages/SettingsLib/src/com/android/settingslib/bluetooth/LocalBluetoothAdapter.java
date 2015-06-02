@@ -217,4 +217,8 @@ public final class LocalBluetoothAdapter {
             syncBluetoothState();
         }
     }
+
+    public BluetoothDevice getRemoteDevice(String address) {
+        return mAdapter.getRemoteDevice(address);
+    }
 }
