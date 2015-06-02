@@ -156,10 +156,18 @@ void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
     }
 }
 
+static bool wasSkipped(FrameInfo* info) {
+    return info && ((*info)[FrameInfoIndex::kFlags] & FrameInfoFlags::kSkippedFrame);
+}
+
 void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
     mRenderThread.removeFrameCallback(this);
 
-    mCurrentFrameInfo = &mFrames.next();
+    // If the previous frame was dropped we don't need to hold onto it, so
+    // just keep using the previous frame's structure instead
+    if (!wasSkipped(mCurrentFrameInfo)) {
+        mCurrentFrameInfo = &mFrames.next();
+    }
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
     mCurrentFrameInfo->markSyncStart();
 
