@@ -3115,35 +3115,30 @@ public class Editor {
             if (mTextView.canCut()) {
                 menu.add(0, TextView.ID_CUT, 0, com.android.internal.R.string.cut).
                     setAlphabeticShortcut('x').
-                    setShowAsAction(
-                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                    setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canCopy()) {
                 menu.add(0, TextView.ID_COPY, 0, com.android.internal.R.string.copy).
                     setAlphabeticShortcut('c').
-                    setShowAsAction(
-                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                    setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canPaste()) {
                 menu.add(0, TextView.ID_PASTE, 0, com.android.internal.R.string.paste).
                         setAlphabeticShortcut('v').
-                        setShowAsAction(
-                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                        setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canShare()) {
                 menu.add(0, TextView.ID_SHARE, 0, com.android.internal.R.string.share).
-                        setShowAsAction(
-                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                        setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
 
             if (mTextView.canSelectAllText()) {
                 menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                         setAlphabeticShortcut('a').
-                        setShowAsAction(
-                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                        setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
 
             updateReplaceItem(menu);
@@ -3157,8 +3152,7 @@ public class Editor {
                 for (ResolveInfo info : supportedActivities) {
                     menu.add(info.loadLabel(packageManager))
                         .setIntent(createProcessTextIntentForResolveInfo(info))
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM
-                                | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
                 }
             }
         }
@@ -3190,8 +3184,7 @@ public class Editor {
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
                 menu.add(0, TextView.ID_REPLACE, 0, com.android.internal.R.string.replace).
-                setShowAsAction(
-                        MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                    setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             } else if (!canReplace && replaceItemExists) {
                 menu.removeItem(TextView.ID_REPLACE);
             }
