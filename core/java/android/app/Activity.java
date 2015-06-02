@@ -3746,7 +3746,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #onRequestPermissionsResult(int, String[], int[])
      * @see #checkSelfPermission(String)
-     * @see #canShowRequestPermissionRationale(String)
+     * @see #shouldShowRequestPermissionRationale(String)
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
         Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
