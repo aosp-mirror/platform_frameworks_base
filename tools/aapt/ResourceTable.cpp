@@ -913,6 +913,7 @@ status_t compileResourceFile(Bundle* bundle,
         if (code == ResXMLTree::START_TAG) {
             const String16* curTag = NULL;
             String16 curType;
+            String16 curName;
             int32_t curFormat = ResTable_map::TYPE_ANY;
             bool curIsBag = false;
             bool curIsBagReplaceOnOverwrite = false;
@@ -1321,6 +1322,10 @@ status_t compileResourceFile(Bundle* bundle,
                 ssize_t attri = block.indexOfAttribute(NULL, "type");
                 if (attri >= 0) {
                     curType = String16(block.getAttributeStringValue(attri, &len));
+                    ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                    if (nameIdx >= 0) {
+                        curName = String16(block.getAttributeStringValue(nameIdx, &len));
+                    }
                     ssize_t formatIdx = block.indexOfAttribute(NULL, "format");
                     if (formatIdx >= 0) {
                         String16 formatStr = String16(block.getAttributeStringValue(
@@ -1363,6 +1368,9 @@ status_t compileResourceFile(Bundle* bundle,
                 }
                 
                 if (name.size() > 0) {
+                    if (locale.size() == 0) {
+                        outTable->addDefaultLocalization(name);
+                    }
                     if (translatable == false16) {
                         curIsFormatted = false;
                         // Untranslatable strings must only exist in the default [empty] locale
@@ -1658,6 +1666,9 @@ status_t compileResourceFile(Bundle* bundle,
                     hasErrors = localHasErrors = true;
                 }
                 else if (err == NO_ERROR) {
+                    if (curType == string16 && !curParams.language[0] && !curParams.country[0]) {
+                        outTable->addDefaultLocalization(curName);
+                    }
                     if (curIsPseudolocalizable && localeIsDefined(curParams)
                             && bundle->getPseudolocalize() > 0) {
                         // pseudolocalize here
@@ -2622,8 +2633,11 @@ status_t ResourceTable::assignResourceIds()
     return firstError;
 }
 
-status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
+status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols,
+        bool skipSymbolsWithoutDefaultLocalization) {
     const size_t N = mOrderedPackages.size();
+    const String8 defaultLocale;
+    const String16 stringType("string");
     size_t pi;
 
     for (pi=0; pi<N; pi++) {
@@ -2664,6 +2678,19 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
                     return UNKNOWN_ERROR;
                 }
                 if (Res_GETPACKAGE(rid) + 1 == p->getAssignedId()) {
+
+                    if (skipSymbolsWithoutDefaultLocalization &&
+                            t->getName() == stringType) {
+
+                        // Don't generate symbols for strings without a default localization.
+                        if (mHasDefaultLocalization.find(c->getName())
+                                == mHasDefaultLocalization.end()) {
+                            // printf("Skip symbol [%08x] %s\n", rid,
+                            //          String8(c->getName()).string());
+                            continue;
+                        }
+                    }
+
                     typeSymbols->addSymbol(String8(c->getName()), rid, c->getPos());
                     
                     String16 comment(c->getComment());
@@ -2684,6 +2711,12 @@ void
 ResourceTable::addLocalization(const String16& name, const String8& locale, const SourcePos& src)
 {
     mLocalizations[name][locale] = src;
+}
+
+void
+ResourceTable::addDefaultLocalization(const String16& name)
+{
+    mHasDefaultLocalization.insert(name);
 }
 
 
