@@ -7937,8 +7937,6 @@ public final class ContactsContract {
 
     /**
      * API for inquiring about the general status of the provider.
-     *
-     * @hide
      */
     public static final class ProviderStatus {
 
@@ -7972,21 +7970,16 @@ public final class ContactsContract {
         public static final int STATUS_NORMAL = 0;
 
         /**
-         * The status used when the provider is in the process of upgrading.  Contacts
-         * are temporarily unaccessible.
+         * The provider won't respond to queries. It is in the middle of a long running task, such
+         * as a database upgrade or locale change.
          */
-        public static final int STATUS_UPGRADING = 1;
-
-        /**
-         * The status used during a locale change.
-         */
-        public static final int STATUS_CHANGING_LOCALE = 3;
+        public static final int STATUS_BUSY = 1;
 
         /**
          * The status that indicates that there are no accounts and no contacts
          * on the device.
          */
-        public static final int STATUS_NO_ACCOUNTS_NO_CONTACTS = 4;
+        public static final int STATUS_EMPTY = 2;
     }
 
     /**
