@@ -6351,7 +6351,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             View next = rootView.findViewInsideOutShouldExist(this,
                     mAccessibilityTraversalBeforeId);
-            if (next != null) {
+            if (next != null && next.includeForAccessibility()) {
                 info.setTraversalBefore(next);
             }
         }
@@ -6363,7 +6363,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             View next = rootView.findViewInsideOutShouldExist(this,
                     mAccessibilityTraversalAfterId);
-            if (next != null) {
+            if (next != null && next.includeForAccessibility()) {
                 info.setTraversalAfter(next);
             }
         }
