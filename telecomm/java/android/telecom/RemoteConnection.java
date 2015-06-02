@@ -635,7 +635,7 @@ public final class RemoteConnection {
      *         ringback tone on its behalf.
      */
     public boolean isRingbackRequested() {
-        return false;
+        return mRingbackRequested;
     }
 
     /**
