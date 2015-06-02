@@ -880,8 +880,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     }
 
                     // Start the focus animation when alt-tabbing
-                    if (mConfig.launchedWithAltTab && !mConfig.launchedHasConfigurationChanged) {
-                        TaskView tv = getChildViewForTask(mStack.getTasks().get(mFocusedTaskIndex));
+                    ArrayList<Task> tasks = mStack.getTasks();
+                    if (mConfig.launchedWithAltTab && !mConfig.launchedHasConfigurationChanged &&
+                            0 <= mFocusedTaskIndex && mFocusedTaskIndex < tasks.size()) {
+                        TaskView tv = getChildViewForTask(tasks.get(mFocusedTaskIndex));
                         if (tv != null) {
                             tv.setFocusedTask(true);
                         }
