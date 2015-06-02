@@ -400,7 +400,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     private void notifyLease() {
         mController.sendMessage(DhcpStateMachine.CMD_POST_DHCP_ACTION,
-                DhcpStateMachine.DHCP_SUCCESS, 0, mDhcpLease);
+                DhcpStateMachine.DHCP_SUCCESS, 0, new DhcpResults(mDhcpLease));
     }
 
     private void notifyFailure() {
@@ -747,14 +747,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
-            if (!setIpAddress(mDhcpLease.ipAddress)) {
+            if (setIpAddress(mDhcpLease.ipAddress)) {
+                notifyLease();
+                // TODO: DhcpStateMachine only supports renewing at 50% of the lease time,
+                // and does not support rebinding. Fix this.
+                scheduleRenew();
+            } else {
                 notifyFailure();
                 transitionTo(mStoppedState);
             }
-            notifyLease();
-            // TODO: DhcpStateMachine only supports renewing at 50% of the lease time, and does not
-            // support rebinding. Fix this.
-            scheduleRenew();
         }
 
         @Override
