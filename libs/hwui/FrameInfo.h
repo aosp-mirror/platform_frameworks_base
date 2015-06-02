@@ -69,6 +69,12 @@ public:
     UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync) {
         set(FrameInfoIndex::kVsync) = vsyncTime;
         set(FrameInfoIndex::kIntendedVsync) = intendedVsync;
+        // Pretend the other fields are all at vsync, too, so that naive
+        // duration calculations end up being 0 instead of very large
+        set(FrameInfoIndex::kHandleInputStart) = vsyncTime;
+        set(FrameInfoIndex::kAnimationStart) = vsyncTime;
+        set(FrameInfoIndex::kPerformTraversalsStart) = vsyncTime;
+        set(FrameInfoIndex::kDrawStart) = vsyncTime;
         return *this;
     }
 

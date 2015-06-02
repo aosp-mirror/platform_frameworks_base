@@ -18,6 +18,7 @@
 #include "OpenGLRenderer.h"
 
 #include <cutils/compiler.h>
+#include <array>
 
 #define RETURN_IF_PROFILING_DISABLED() if (CC_LIKELY(mType == ProfileType::None)) return
 #define RETURN_IF_DISABLED() if (CC_LIKELY(mType == ProfileType::None && !mShowDirtyRegions)) return
@@ -26,19 +27,10 @@
 #define PROFILE_DRAW_THRESHOLD_STROKE_WIDTH 2
 #define PROFILE_DRAW_DP_PER_MS 7
 
-// Number of floats we want to display from FrameTimingData
-// If this is changed make sure to update the indexes below
-#define NUM_ELEMENTS 4
-
-#define RECORD_INDEX 0
-#define PREPARE_INDEX 1
-#define PLAYBACK_INDEX 2
-#define SWAPBUFFERS_INDEX 3
-
 // Must be NUM_ELEMENTS in size
-static const SkColor ELEMENT_COLORS[] = { 0xcf3e66cc, 0xcf8f00ff, 0xcfdc3912, 0xcfe69800 };
 static const SkColor CURRENT_FRAME_COLOR = 0xcf5faa4d;
 static const SkColor THRESHOLD_COLOR = 0xff5faa4d;
+static const SkColor BAR_ALPHA = 0xCF000000;
 
 // We could get this from TimeLord and use the actual frame interval, but
 // this is good enough
@@ -46,6 +38,24 @@ static const SkColor THRESHOLD_COLOR = 0xff5faa4d;
 
 namespace android {
 namespace uirenderer {
+
+struct BarSegment {
+    FrameInfoIndex start;
+    FrameInfoIndex end;
+    SkColor color;
+};
+
+static const std::array<BarSegment,9> Bar {{
+    { FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kVsync, 0x00695C },
+    { FrameInfoIndex::kVsync, FrameInfoIndex::kHandleInputStart, 0x00796B },
+    { FrameInfoIndex::kHandleInputStart, FrameInfoIndex::kAnimationStart, 0x00897B },
+    { FrameInfoIndex::kAnimationStart, FrameInfoIndex::kPerformTraversalsStart, 0x009688 },
+    { FrameInfoIndex::kPerformTraversalsStart, FrameInfoIndex::kDrawStart, 0x26A69A},
+    { FrameInfoIndex::kDrawStart, FrameInfoIndex::kSyncStart, 0x2196F3},
+    { FrameInfoIndex::kSyncStart, FrameInfoIndex::kIssueDrawCommandsStart, 0x4FC3F7},
+    { FrameInfoIndex::kIssueDrawCommandsStart, FrameInfoIndex::kSwapBuffers, 0xF44336},
+    { FrameInfoIndex::kSwapBuffers, FrameInfoIndex::kFrameCompleted, 0xFF9800},
+}};
 
 static int dpToPx(int dp, float density) {
     return (int) (dp * density + 0.5f);
@@ -93,9 +103,9 @@ void FrameInfoVisualizer::draw(OpenGLRenderer* canvas) {
     }
 
     if (mType == ProfileType::Bars) {
-        prepareShapes(canvas->getViewportHeight());
+        initializeRects(canvas->getViewportHeight());
         drawGraph(canvas);
-        drawCurrentFrame(canvas);
+        drawCurrentFrame(canvas->getViewportHeight(), canvas);
         drawThreshold(canvas);
     }
 }
@@ -103,57 +113,61 @@ void FrameInfoVisualizer::draw(OpenGLRenderer* canvas) {
 void FrameInfoVisualizer::createData() {
     if (mRects.get()) return;
 
-    mRects.reset(new float*[mFrameSource.capacity()]);
-    for (int i = 0; i < NUM_ELEMENTS; i++) {
-        // 4 floats per rect
-        mRects.get()[i] = (float*) calloc(mFrameSource.capacity(), 4 * sizeof(float));
-    }
+    mRects.reset(new float[mFrameSource.capacity() * 4]);
 }
 
 void FrameInfoVisualizer::destroyData() {
     mRects.reset(nullptr);
 }
 
-void FrameInfoVisualizer::addRect(Rect& r, float data, float* shapeOutput) {
-    r.top = r.bottom - (data * mVerticalUnit);
-    shapeOutput[0] = r.left;
-    shapeOutput[1] = r.top;
-    shapeOutput[2] = r.right;
-    shapeOutput[3] = r.bottom;
-    r.bottom = r.top;
+void FrameInfoVisualizer::initializeRects(const int baseline) {
+    float left = 0;
+    // Set the bottom of all the shapes to the baseline
+    for (size_t i = 0; i < (mFrameSource.capacity() * 4); i += 4) {
+        // Rects are LTRB
+        mRects[i + 0] = left;
+        mRects[i + 1] = baseline;
+        left += mHorizontalUnit;
+        mRects[i + 2] = left;
+        mRects[i + 3] = baseline;
+    }
 }
 
-void FrameInfoVisualizer::prepareShapes(const int baseline) {
-    Rect r;
-    r.right = mHorizontalUnit;
-    for (size_t i = 0; i < mFrameSource.size(); i++) {
-        const int shapeIndex = i * 4;
-        r.bottom = baseline;
-        addRect(r, recordDuration(i), mRects.get()[RECORD_INDEX] + shapeIndex);
-        addRect(r, prepareDuration(i), mRects.get()[PREPARE_INDEX] + shapeIndex);
-        addRect(r, issueDrawDuration(i), mRects.get()[PLAYBACK_INDEX] + shapeIndex);
-        addRect(r, swapBuffersDuration(i), mRects.get()[SWAPBUFFERS_INDEX] + shapeIndex);
-        r.translate(mHorizontalUnit, 0);
+void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex end) {
+    for (size_t fi = 0, ri = 0; fi < mFrameSource.size(); fi++, ri += 4) {
+        // TODO: Skipped frames will leave little holes in the graph, but this
+        // is better than bogus and freaky lines, so...
+        if (mFrameSource[fi][FrameInfoIndex::kFlags] & FrameInfoFlags::kSkippedFrame) {
+            continue;
+        }
+
+        // Set the bottom to the old top (build upwards)
+        mRects[ri + 3] = mRects[ri + 1];
+        // Move the top up by the duration
+        mRects[ri + 1] -= mVerticalUnit * duration(fi, start, end);
     }
 }
 
 void FrameInfoVisualizer::drawGraph(OpenGLRenderer* canvas) {
     SkPaint paint;
-    for (int i = 0; i < NUM_ELEMENTS; i++) {
-        paint.setColor(ELEMENT_COLORS[i]);
-        canvas->drawRects(mRects.get()[i], mFrameSource.capacity() * 4, &paint);
+    for (size_t i = 0; i < Bar.size(); i++) {
+        paint.setColor(Bar[i].color | BAR_ALPHA);
+        nextBarSegment(Bar[i].start, Bar[i].end);
+        canvas->drawRects(mRects.get(), (mFrameSource.size() - 1) * 4, &paint);
     }
 }
 
-void FrameInfoVisualizer::drawCurrentFrame(OpenGLRenderer* canvas) {
+void FrameInfoVisualizer::drawCurrentFrame(const int baseline, OpenGLRenderer* canvas) {
     // This draws a solid rect over the entirety of the current frame's shape
     // To do so we use the bottom of mRects[0] and the top of mRects[NUM_ELEMENTS-1]
     // which will therefore fully overlap the previously drawn rects
     SkPaint paint;
     paint.setColor(CURRENT_FRAME_COLOR);
-    const int i = (mFrameSource.size() - 1) * 4;
-    canvas->drawRect(mRects.get()[0][i], mRects.get()[NUM_ELEMENTS-1][i+1],
-            mRects.get()[0][i+2], mRects.get()[0][i+3], &paint);
+    size_t fi = mFrameSource.size() - 1;
+    size_t ri = fi * 4;
+    float top = baseline - (mVerticalUnit * duration(fi,
+            FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kIssueDrawCommandsStart));
+    canvas->drawRect(mRects[ri], top, mRects[ri + 2], baseline, &paint);
 }
 
 void FrameInfoVisualizer::drawThreshold(OpenGLRenderer* canvas) {
@@ -205,8 +219,10 @@ void FrameInfoVisualizer::dumpData(int fd) {
         }
         mLastFrameLogged = mFrameSource[i][FrameInfoIndex::kIntendedVsync];
         fprintf(file, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-                recordDuration(i), prepareDuration(i),
-                issueDrawDuration(i), swapBuffersDuration(i));
+                duration(i, FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kSyncStart),
+                duration(i, FrameInfoIndex::kSyncStart, FrameInfoIndex::kIssueDrawCommandsStart),
+                duration(i, FrameInfoIndex::kIssueDrawCommandsStart, FrameInfoIndex::kSwapBuffers),
+                duration(i, FrameInfoIndex::kSwapBuffers, FrameInfoIndex::kFrameCompleted));
     }
 
     fflush(file);
