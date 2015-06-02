@@ -32849,20 +32849,6 @@ package android.telephony {
     field public static final java.lang.String BOOL_HAS_IN_CALL_NOISE_SUPPRESSION = "bool_has_in_call_noise_suppression";
     field public static final java.lang.String BOOL_HIDE_CARRIER_NETWORK_SETTINGS = "bool_hide_carrier_network_settings";
     field public static final java.lang.String BOOL_IGNORE_SIM_NETWORK_LOCKED_EVENTS = "bool_ignore_sim_network_locked_events";
-    field public static final java.lang.String BOOL_MMS_ALIAS_ENABLED = "aliasEnabled";
-    field public static final java.lang.String BOOL_MMS_ALLOW_ATTACH_AUDIO = "allowAttachAudio";
-    field public static final java.lang.String BOOL_MMS_APPEND_TRANSACTION_ID = "enabledTransID";
-    field public static final java.lang.String BOOL_MMS_GROUP_MMS_ENABLED = "enableGroupMms";
-    field public static final java.lang.String BOOL_MMS_MMS_DELIVERY_REPORT_ENABLED = "enableMMSDeliveryReports";
-    field public static final java.lang.String BOOL_MMS_MMS_ENABLED = "enabledMMS";
-    field public static final java.lang.String BOOL_MMS_MMS_READ_REPORT_ENABLED = "enableMMSReadReports";
-    field public static final java.lang.String BOOL_MMS_MULTIPART_SMS_ENABLED = "enableMultipartSMS";
-    field public static final java.lang.String BOOL_MMS_NOTIFY_WAP_MMSC_ENABLED = "enabledNotifyWapMMSC";
-    field public static final java.lang.String BOOL_MMS_SEND_MULTIPART_SMS_AS_SEPARATE_MESSAGES = "sendMultipartSmsAsSeparateMessages";
-    field public static final java.lang.String BOOL_MMS_SHOW_CELL_BROADCAST_APP_LINKS = "config_cellBroadcastAppLinks";
-    field public static final java.lang.String BOOL_MMS_SMS_DELIVERY_REPORT_ENABLED = "enableSMSDeliveryReports";
-    field public static final java.lang.String BOOL_MMS_SUPPORT_HTTP_CHARSET_HEADER = "supportHttpCharsetHeader";
-    field public static final java.lang.String BOOL_MMS_SUPPORT_MMS_CONTENT_DISPOSITION = "supportMmsContentDisposition";
     field public static final java.lang.String BOOL_OPERATOR_SELECTION_EXPAND = "bool_operator_selection_expand";
     field public static final java.lang.String BOOL_PREFER_2G = "bool_prefer_2g";
     field public static final java.lang.String BOOL_SHOW_APN_SETTING_CDMA = "bool_show_apn_setting_cdma";
@@ -32876,24 +32862,7 @@ package android.telephony {
     field public static final java.lang.String BOOL_VOICEMAIL_NOTIFICATION_PERSISTENT = "bool_voicemail_notification_persistent";
     field public static final java.lang.String BOOL_VOICE_PRIVACY_DISABLE = "bool_voice_privacy_disable";
     field public static final java.lang.String BOOL_WORLD_PHONE = "bool_world_phone";
-    field public static final java.lang.String INT_MMS_ALIAS_MAX_CHARS = "aliasMaxChars";
-    field public static final java.lang.String INT_MMS_ALIAS_MIN_CHARS = "aliasMinChars";
-    field public static final java.lang.String INT_MMS_HTTP_SOCKET_TIMEOUT = "httpSocketTimeout";
-    field public static final java.lang.String INT_MMS_MAX_IMAGE_HEIGHT = "maxImageHeight";
-    field public static final java.lang.String INT_MMS_MAX_IMAGE_WIDTH = "maxImageWidth";
-    field public static final java.lang.String INT_MMS_MAX_MESSAGE_SIZE = "maxMessageSize";
-    field public static final java.lang.String INT_MMS_MESSAGE_TEXT_MAX_SIZE = "maxMessageTextSize";
-    field public static final java.lang.String INT_MMS_RECIPIENT_LIMIT = "recipientLimit";
-    field public static final java.lang.String INT_MMS_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD = "smsToMmsTextLengthThreshold";
-    field public static final java.lang.String INT_MMS_SMS_TO_MMS_TEXT_THRESHOLD = "smsToMmsTextThreshold";
-    field public static final java.lang.String INT_MMS_SUBJECT_MAX_LENGTH = "maxSubjectLength";
     field public static final java.lang.String INT_VOLTE_REPLACEMENT_RAT = "int_volte_replacement_rat";
-    field public static final java.lang.String STRING_MMS_EMAIL_GATEWAY_NUMBER = "emailGatewayNumber";
-    field public static final java.lang.String STRING_MMS_HTTP_PARAMS = "httpParams";
-    field public static final java.lang.String STRING_MMS_NAI_SUFFIX = "naiSuffix";
-    field public static final java.lang.String STRING_MMS_UA_PROF_TAG_NAME = "uaProfTagName";
-    field public static final java.lang.String STRING_MMS_UA_PROF_URL = "uaProfUrl";
-    field public static final java.lang.String STRING_MMS_USER_AGENT = "userAgent";
   }
 
   public final class CellIdentityCdma implements android.os.Parcelable {
@@ -33243,7 +33212,6 @@ package android.telephony {
     field public static final java.lang.String MMS_CONFIG_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD = "smsToMmsTextLengthThreshold";
     field public static final java.lang.String MMS_CONFIG_SMS_TO_MMS_TEXT_THRESHOLD = "smsToMmsTextThreshold";
     field public static final java.lang.String MMS_CONFIG_SUBJECT_MAX_LENGTH = "maxSubjectLength";
-    field public static final java.lang.String MMS_CONFIG_SUPPORT_HTTP_CHARSET_HEADER = "supportHttpCharsetHeader";
     field public static final java.lang.String MMS_CONFIG_SUPPORT_MMS_CONTENT_DISPOSITION = "supportMmsContentDisposition";
     field public static final java.lang.String MMS_CONFIG_UA_PROF_TAG_NAME = "uaProfTagName";
     field public static final java.lang.String MMS_CONFIG_UA_PROF_URL = "uaProfUrl";
