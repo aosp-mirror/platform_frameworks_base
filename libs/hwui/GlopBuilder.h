@@ -16,6 +16,7 @@
 #ifndef RENDERSTATE_GLOPBUILDER_H
 #define RENDERSTATE_GLOPBUILDER_H
 
+#include "Glop.h"
 #include "OpenGLRenderer.h"
 #include "Program.h"
 #include "renderstate/Blend.h"
@@ -32,14 +33,14 @@ class Matrix4;
 class RenderState;
 class Texture;
 class VertexBuffer;
-struct Glop;
 
-enum class TextureFillFlags {
-    kNone = 0,
-    kIsAlphaMaskTexture = 1 << 0,
-    kForceFilter = 1 << 1,
-};
-MAKE_FLAGS_ENUM(TextureFillFlags);
+namespace TextureFillFlags {
+    enum {
+        None = 0,
+        IsAlphaMaskTexture = 1 << 0,
+        ForceFilter = 1 << 1,
+    };
+}
 
 class GlopBuilder {
     PREVENT_COPY_AND_ASSIGN(GlopBuilder);
@@ -57,7 +58,7 @@ public:
     GlopBuilder& setMeshPatchQuads(const Patch& patch);
 
     GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
-    GlopBuilder& setFillTexturePaint(Texture& texture, int textureFillFlags,
+    GlopBuilder& setFillTexturePaint(Texture& texture, const int textureFillFlags,
             const SkPaint* paint, float alphaScale);
     GlopBuilder& setFillPathTexturePaint(PathTexture& texture,
             const SkPaint& paint, float alphaScale);
@@ -69,7 +70,10 @@ public:
             float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage);
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
 
-    GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
+    GlopBuilder& setTransform(const Snapshot& snapshot, const int transformFlags) {
+        setTransform(snapshot.getOrthoMatrix(), *snapshot.transform, transformFlags);
+        return *this;
+    }
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
@@ -98,6 +102,8 @@ private:
     void setFill(int color, float alphaScale,
             SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
+    void setTransform(const Matrix4& ortho, const Matrix4& canvas,
+            const int transformFlags);
 
     enum StageFlags {
         kInitialStage = 0,
