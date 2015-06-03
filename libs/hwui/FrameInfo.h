@@ -50,7 +50,7 @@ enum class FrameInfoIndex {
     kNumIndexes
 };
 
-extern std::string FrameInfoNames[];
+extern const std::string FrameInfoNames[];
 
 enum class FrameInfoFlags {
     kWindowLayoutChanged = 1 << 0,
