@@ -243,13 +243,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"soittaa ja hallinnoida puheluita"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Anturit"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"käyttää antureiden ja puettavien laitteiden tietoja"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nouda ikkunan sisältöä"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tarkista käyttämäsi ikkunan sisältö."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ota kosketuksella tutkiminen käyttöön"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Noutaa ikkunan sisältöä"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tarkistaa käyttämäsi ikkunan sisältö."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ottaa kosketuksella tutkiminen käyttöön"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Kosketetut kohteet sanotaan ääneen ja ruudulla voi liikkua eleiden avulla."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ota parannettu verkon esteettömyys käyttöön"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ottaa parannettu verkon esteettömyys käyttöön"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Sovellus voi asentaa ohjelmia tehdäkseen sisällöstään esteettömämmän."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tarkkaile kirjoittamaasi tekstiä"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tarkkailla kirjoittamaasi tekstiä"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisältää henkilökohtaisia tietoja, kuten luottokortin numeroita ja salasanoja."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
@@ -425,7 +425,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Antaa sovelluksen tarkastella puhelimen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tagien, -korttien ja -lukijoiden kanssa."</string>
-    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"poista ruudun lukitus käytöstä"</string>
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"poista näytön lukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"sormenjälkilaitteiston hallinnointi"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Sallii sovelluksen käyttää menetelmiä, joilla voidaan lisätä tai poistaa sormenjälkimalleja."</string>
@@ -520,14 +520,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse tabletti tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse televisio tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse puhelin tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuta ruudun lukitus"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuta ruudun lukitus."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Lukitse ruutu"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoi, milloin ja miten ruutu lukittuu."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhi kaikki tiedot"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuta näytön lukitus"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuta näytön lukitus."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Lukita ruutu"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoida, milloin ja miten ruutu lukittuu."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhkiä kaikki tiedot"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Palauta tehdasasetukset ja poista television tiedot ilman varoitusta."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Tyhjennä puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Tyhjentää puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Pyyhi käyttäjän tiedot"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Pyyhi tämän käyttäjän tiedot tabletista ilman varoitusta."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Pyyhi tämän käyttäjän tiedot televisiosta ilman varoitusta."</string>
@@ -543,7 +543,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Poista ruudun lukituksen ominaisuudet"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Estä joidenkin ruudun lukituksen ominaisuuksien käyttö."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Puhelinnumero (koti)"</item>
+    <item msgid="8901098336658710359">"Koti"</item>
     <item msgid="869923650527136615">"Mobiili"</item>
     <item msgid="7897544654242874543">"Työ"</item>
     <item msgid="1103601433382158155">"Faksi (työ)"</item>
@@ -559,7 +559,7 @@
     <item msgid="2374913952870110618">"Muokattu"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Osoite (koti)"</item>
+    <item msgid="6880257626740047286">"Koti"</item>
     <item msgid="5629153956045109251">"Työ"</item>
     <item msgid="4966604264500343469">"Muu"</item>
     <item msgid="4932682847595299369">"Muokattu"</item>
@@ -586,7 +586,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Muokattu"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Puhelinnumero (koti)"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Koti"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobiili"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Työ"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faksi (työ)"</string>
@@ -616,7 +616,7 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Muu"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobiili"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Muokattu"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Osoite (koti)"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Koti"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Työ"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Muu"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Muokattu"</string>
@@ -643,7 +643,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Avopuoliso"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Isä"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Ystävä"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Johtaja"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Pomo"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Äiti"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Vanhempi"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Kumppani"</string>
@@ -1062,7 +1062,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kaikki kortilla olevat tiedot menetetään."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Muoto"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-vianetsintä yhdistetty"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Poista USB-vianetsintä käytöstä koskettamalla tätä."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Sulje USB-vianetsintä koskettamalla tätä."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Vaihda näppäimistö"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Valitse näppäimistöt"</string>
     <string name="show_ime" msgid="9157568568695230830">"Näytä syöttötapa"</string>
@@ -1075,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Valmistellaan kohdetta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Tarkistetaan virheiden varalta."</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Uusi <xliff:g id="NAME">%s</xliff:g> on havaittu."</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Kuvien ja mediatiedostojen siirtämiseen"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Kuvien ja median siirtämiseen"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> on vahingoittunut"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> on vahingoittunut. Kokeile alustaa se uudelleen."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> poistettiin yllättäen"</string>
@@ -1143,7 +1143,7 @@
     <string name="submit" msgid="1602335572089911941">"Lähetä"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Autotila käytössä"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Poistu autotilasta koskettamalla tätä."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetyhteyden jakaminen tai yhteyspiste käytössä"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetin jakaminen tai yhteyspiste käytössä"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Määritä asetukset koskettamalla."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Takaisin"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Seuraava"</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Kunnes kello on <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kunnes poistat tämän käytöstä"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Kutista"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Älä häiritse"</string>

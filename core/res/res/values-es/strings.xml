@@ -390,7 +390,7 @@
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"crear cuentas y establecer contraseñas"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Permite que la aplicación utilice las funciones de autenticador de cuentas del administrador de cuentas, incluida la creación de cuentas y la obtención y el establecimiento de sus contraseñas."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"añadir o eliminar cuentas"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Permite que la aplicación lleve a cabo operaciones como añadir y eliminar cuentas y eliminar su contraseña."</string>
+    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Permite que la aplicación lleve a cabo operaciones como añadir y quitar cuentas, así como quitar su contraseña."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"usar cuentas del dispositivo"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permite que la aplicación solicite tokens de autenticación."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ver conexiones de red"</string>
@@ -955,7 +955,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Tono de silencio establecido"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volumen de la llamada"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volumen de la llamada de Bluetooth"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Volumen de alarma"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Volumen de la alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volumen de notificaciones"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volumen"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volumen de Bluetooth"</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hasta apagar el dispositivo"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"No molestar"</string>

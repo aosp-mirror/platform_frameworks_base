@@ -1075,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparazione della <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Ricerca errori"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nuova <xliff:g id="NAME">%s</xliff:g> rilevata"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Per il trasferimento di foto e contenuti multimediali"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Per trasferire foto e altri file"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> danneggiata"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"La <xliff:g id="NAME">%s</xliff:g> è danneggiata. Prova a riformattarla."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Rimozione imprevista della <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Fino alle ore <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Fino alla disattivazione"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non disturbare"</string>

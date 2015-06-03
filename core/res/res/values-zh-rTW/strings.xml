@@ -72,7 +72,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"連接的線路 ID"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"連接的線路 ID 限制"</string>
     <string name="CfMmi" msgid="5123218989141573515">"來電轉接"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"來電待接"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"來電等待"</string>
     <string name="BaMmi" msgid="455193067926770581">"通話限制"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"變更密碼"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN 已變更"</string>
@@ -1049,7 +1049,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您開啟 USB 儲存裝置，則某些正在使用中的應用程式會停止運作，而且可能無法使用，直到關閉 USB 儲存裝置後才會恢復正常。"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失敗"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB 充電"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"正在透過 USB 充電"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB 檔案傳輸"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB 相片傳輸"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI"</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"手動關閉這項設定前一律啟用"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"零打擾"</string>

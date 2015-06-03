@@ -608,7 +608,7 @@
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"सानुकूल"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"वाढदिवस"</string>
-    <string name="eventTypeAnniversary" msgid="3876779744518284000">"वर्धापन दिन"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"वर्षदिन"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"अन्य"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"सानुकूल"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"घर"</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"आपण हे बंद करेपर्यंत"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"व्यत्यय आणू नका"</string>

@@ -72,7 +72,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"Qo‘ng‘iroq qiluvchining raqami"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Qo‘ng‘iroq qiluvchining raqamini cheklash"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Boshqa raqamga yo‘naltirish"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Kutayotgan qo‘ng‘iroq"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Qo‘ng‘iroqni kutish"</string>
     <string name="BaMmi" msgid="455193067926770581">"Qo‘ng‘iroqlarni taqiqlash"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Parolni o‘zgartirish"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN kodni o‘zgartirish"</string>
@@ -1062,7 +1062,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kartadagi barcha ma`lumotlar o‘chirib tashlanadi."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozlikni tuzatish"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"USB orqali sozlashni o‘chirib qo‘yish uchun bosing."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"O‘chirib qo‘yish uchun bosing"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Klaviaturani tanlash"</string>
     <string name="show_ime" msgid="9157568568695230830">"Kiritish usulini ko‘rish"</string>
@@ -1075,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> tayyorlanmoqda"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Xatolar tekshirilmoqda"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Yangi <xliff:g id="NAME">%s</xliff:g> kartasi aniqlandi"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Rasm va boshqa fayllarni o‘tkazish uchun"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Rasm va boshqa fayllarni o‘tkazish"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"“<xliff:g id="NAME">%s</xliff:g>” kartasi shikastlangan"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"“<xliff:g id="NAME">%s</xliff:g>” kartasi shikastlangan; qayta formatlab ko‘ring"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> kutilmaganda chiqarib olindi"</string>
@@ -1243,7 +1243,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mob. trafik cheg-dan oshib ketdi"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ma’lumot cheklovdan o‘tdi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Chegaradan <xliff:g id="SIZE">%s</xliff:g> oshib ketdi."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Orqa fon ma’lumotlari cheklangan"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Fon rejimi cheklangan"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Cheklovni olib tashlash…"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Xavfsizlik sertifikati"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Ushbu sertifikat - to‘g‘ri."</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ushbu vaqtgacha: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Men o‘chirmaguncha"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Bezovta qilinmasin"</string>

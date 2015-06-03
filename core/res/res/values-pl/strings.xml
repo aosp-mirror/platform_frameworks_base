@@ -522,11 +522,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie tabletu albo kasowanie wszystkich danych tego użytkownika, gdy zbyt wiele razy wpisano błędne hasło."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie telewizora albo kasowanie wszystkich danych tego użytkownika, gdy zbyt wiele razy wpisano błędne hasło."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie telefonu albo kasowanie wszystkich danych tego użytkownika, gdy zbyt wiele razy wpisano błędne hasło."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Zmień blokadę ekranu"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Zmiana blokady ekranu."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Zablokuj ekran"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Zmiana blokady ekranu"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Zmiana blokady ekranu"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Blokowanie ekranu"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolowanie sposobu i warunków blokowania ekranu"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Usuń wszystkie dane"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Usuwanie wszystkich danych"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Wymazywanie danych z tabletu bez ostrzeżenia przez przywrócenie danych fabrycznych"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Skasowanie danych w telewizorze bez ostrzeżenia przez przywrócenie danych fabrycznych."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wymazywanie danych z telefonu bez ostrzeżenia przez przywrócenie danych fabrycznych"</string>
@@ -1099,7 +1099,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Nadal wysuwam: <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Nie wyjmuj"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Skonfiguruj"</string>
-    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Wysuń"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odłącz"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Przeglądaj"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Brak: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"Ponownie włóż urządzenie"</string>
@@ -1483,7 +1483,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacja jest przypięta. Nie możesz jej odpiąć na tym urządzeniu."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran przypięty"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran odpięty"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Aby odpiąć, poproś o PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Podaj PIN, aby odpiąć"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Aby odpiąć, poproś o wzór odblokowania"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Aby odpiąć, poproś o hasło"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Zainstalowany przez administratora"</string>
@@ -1540,6 +1540,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dopóki nie wyłączysz"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zwiń"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nie przeszkadzać"</string>
