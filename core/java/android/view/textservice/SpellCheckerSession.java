@@ -98,11 +98,11 @@ public class SpellCheckerSession {
     private final InternalListener mInternalListener;
     private final ITextServicesManager mTextServicesManager;
     private final SpellCheckerInfo mSpellCheckerInfo;
+    private final SpellCheckerSessionListener mSpellCheckerSessionListener;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
     private final SpellCheckerSubtype mSubtype;
 
     private boolean mIsUsed;
-    private SpellCheckerSessionListener mSpellCheckerSessionListener;
 
     /** Handler that will execute the main tasks */
     private final Handler mHandler = new Handler() {
