@@ -165,6 +165,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private State mDhcpInitState = new DhcpInitState();
     private State mDhcpSelectingState = new DhcpSelectingState();
     private State mDhcpRequestingState = new DhcpRequestingState();
+    private State mDhcpHaveAddressState = new DhcpHaveAddressState();
     private State mDhcpBoundState = new DhcpBoundState();
     private State mDhcpRenewingState = new DhcpRenewingState();
     private State mDhcpRebindingState = new DhcpRebindingState();
@@ -186,10 +187,11 @@ public class DhcpClient extends BaseDhcpStateMachine {
             addState(mWaitBeforeStartState, mDhcpState);
             addState(mDhcpSelectingState, mDhcpState);
             addState(mDhcpRequestingState, mDhcpState);
-            addState(mDhcpBoundState, mDhcpState);
-            addState(mWaitBeforeRenewalState, mDhcpState);
-            addState(mDhcpRenewingState, mDhcpState);
-            addState(mDhcpRebindingState, mDhcpState);
+            addState(mDhcpHaveAddressState, mDhcpState);
+                addState(mDhcpBoundState, mDhcpHaveAddressState);
+                addState(mWaitBeforeRenewalState, mDhcpHaveAddressState);
+                addState(mDhcpRenewingState, mDhcpHaveAddressState);
+                addState(mDhcpRebindingState, mDhcpHaveAddressState);
             addState(mDhcpInitRebootState, mDhcpState);
             addState(mDhcpRebootingState, mDhcpState);
 
@@ -402,7 +404,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
-    private void notifyLease() {
+    private void notifySuccess() {
         mController.sendMessage(DhcpStateMachine.CMD_POST_DHCP_ACTION,
                 DhcpStateMachine.DHCP_SUCCESS, 0, new DhcpResults(mDhcpLease));
     }
@@ -752,19 +754,30 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
+    class DhcpHaveAddressState extends LoggingState {
+        @Override
+        public void enter() {
+            super.enter();
+            if (!setIpAddress(mDhcpLease.ipAddress)) {
+                notifyFailure();
+                transitionTo(mStoppedState);
+            }
+        }
+
+        @Override
+        public void exit() {
+            setIpAddress(new LinkAddress("0.0.0.0/0"));
+        }
+    }
+
     class DhcpBoundState extends LoggingState {
         @Override
         public void enter() {
             super.enter();
-            if (setIpAddress(mDhcpLease.ipAddress)) {
-                notifyLease();
-                // TODO: DhcpStateMachine only supports renewing at 50% of the lease time,
-                // and does not support rebinding. Fix this.
-                scheduleRenew();
-            } else {
-                notifyFailure();
-                transitionTo(mStoppedState);
-            }
+            notifySuccess();
+            // TODO: DhcpStateMachine only supports renewing at 50% of the lease time, and does not
+            // support rebinding. Fix this.
+            scheduleRenew();
         }
 
         @Override
