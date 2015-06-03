@@ -4028,7 +4028,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // If the device has a chin (e.g. some watches), a dead area at the bottom of the screen we
         // need to provide information to the clients that want to pretend that you can draw there.
-        if (isDefaultDisplay && (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0) {
+        // We only want to apply outsets to certain types of windows. For example, we never want to
+        // apply the outsets to floating dialogs, because they wouldn't make sense there.
+        final boolean useOutsets = attrs.type == TYPE_WALLPAPER
+                || (fl & (WindowManager.LayoutParams.FLAG_FULLSCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)) != 0;
+        if (isDefaultDisplay && useOutsets) {
             osf = mTmpOutsetFrame;
             osf.set(cf.left, cf.top, cf.right, cf.bottom);
             int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
