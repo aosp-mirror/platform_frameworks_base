@@ -9335,7 +9335,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean canSelectAllText() {
-        return canSelectText() && !hasPasswordTransformationMethod();
+        return canSelectText() && !hasPasswordTransformationMethod()
+                && !(getSelectionStart() == 0 && getSelectionEnd() == mText.length());
     }
 
     boolean selectAllText() {
