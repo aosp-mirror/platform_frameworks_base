@@ -2178,4 +2178,13 @@
          Defaults to the older, deprecated config_windowIsRound already used in
          some existing device-specific resource overlays. -->
     <bool name="config_mainBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
+
+    <!-- Ultrasound support for Mic/speaker path -->
+    <!-- Whether the default microphone audio source supports near-ultrasound frequencies
+         (range of 18 - 21 kHz). -->
+    <bool name="config_supportMicNearUltrasound">true</bool>
+    <!-- Whether the default speaker audio output path supports near-ultrasound frequencies
+         (range of 18 - 21 kHz). -->
+    <bool name="config_supportSpeakerNearUltrasound">true</bool>
+
 </resources>
