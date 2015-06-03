@@ -289,7 +289,6 @@ public final class FloatingToolbar {
                     public void onAnimationRepeat(Animation animation) {
                     }
                 };
-        private final AnimatorSet mShowAnimation;
         private final AnimatorSet mDismissAnimation;
         private final AnimatorSet mHideAnimation;
         private final AnimationSet mOpenOverflowAnimation = new AnimationSet(true) {
@@ -353,14 +352,9 @@ public final class FloatingToolbar {
          *      from.
          */
         public FloatingToolbarPopup(View parent) {
-            mMarginHorizontal = parent.getResources()
-                    .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
-            mMarginVertical = parent.getResources()
-                    .getDimensionPixelSize(R.dimen.floating_toolbar_vertical_margin);
             mParent = Preconditions.checkNotNull(parent);
             mContentContainer = createContentContainer(parent.getContext());
             mPopupWindow = createPopupWindow(mContentContainer);
-            mShowAnimation = createGrowFadeInFromBottom(mContentContainer, mMarginHorizontal);
             mDismissAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
                     150,  // startDelay
@@ -380,6 +374,10 @@ public final class FloatingToolbar {
                             mPopupWindow.dismiss();
                         }
                     });
+            mMarginHorizontal = parent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
+            mMarginVertical = parent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_vertical_margin);
         }
 
         /**
@@ -549,7 +547,7 @@ public final class FloatingToolbar {
          * Performs the "show" animation on the floating popup.
          */
         private void runShowAnimation() {
-            mShowAnimation.start();
+            createGrowFadeInFromBottom(mContentContainer).start();
         }
 
         /**
@@ -597,7 +595,6 @@ public final class FloatingToolbar {
             final float startY = mContentContainer.getY();
             final float left = mContentContainer.getX();
             final float right = left + mContentContainer.getWidth();
-            final boolean rtl = mContentContainer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
             Animation widthAnimation = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -605,7 +602,7 @@ public final class FloatingToolbar {
                     int deltaWidth = (int) (interpolatedTime * (targetWidth - startWidth));
                     params.width = startWidth + deltaWidth;
                     mContentContainer.setLayoutParams(params);
-                    if (rtl) {
+                    if (isRTL()) {
                         mContentContainer.setX(left);
                     } else {
                         mContentContainer.setX(right - mContentContainer.getWidth());
@@ -656,7 +653,6 @@ public final class FloatingToolbar {
             final boolean morphedUpwards = (mOverflowDirection == OVERFLOW_DIRECTION_UP);
             final float left = mContentContainer.getX();
             final float right = left + mContentContainer.getWidth();
-            final boolean rtl = mContentContainer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
             Animation widthAnimation = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -664,7 +660,7 @@ public final class FloatingToolbar {
                     int deltaWidth = (int) (interpolatedTime * (targetWidth - startWidth));
                     params.width = startWidth + deltaWidth;
                     mContentContainer.setLayoutParams(params);
-                    if (rtl) {
+                    if (isRTL()) {
                         mContentContainer.setX(left);
                     } else {
                         mContentContainer.setX(right - mContentContainer.getWidth());
@@ -777,8 +773,13 @@ public final class FloatingToolbar {
          */
         private void positionOverflowPanel() {
             Preconditions.checkNotNull(mOverflowPanel);
-            float x = mPopupWindow.getWidth()
+            float x;
+            if (isRTL()) {
+                x = mMarginHorizontal;
+            } else {
+                x = mPopupWindow.getWidth()
                     - (mOverflowPanel.getView().getMeasuredWidth() + mMarginHorizontal);
+            }
             mContentContainer.setX(x);
             mContentContainer.setY(mMarginVertical);
             setContentAreaAsTouchableSurface();
@@ -855,6 +856,10 @@ public final class FloatingToolbar {
                     .getViewTreeObserver();
             viewTreeObserver.removeOnComputeInternalInsetsListener(mInsetsComputer);
             viewTreeObserver.addOnComputeInternalInsetsListener(mInsetsComputer);
+        }
+
+        private boolean isRTL() {
+            return mContentContainer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
         }
     }
 
@@ -1332,14 +1337,14 @@ public final class FloatingToolbar {
      *
      * @param view  The view to animate
      */
-    private static AnimatorSet createGrowFadeInFromBottom(View view, int x) {
+    private static AnimatorSet createGrowFadeInFromBottom(View view) {
         AnimatorSet growFadeInFromBottomAnimation =  new AnimatorSet();
         growFadeInFromBottomAnimation.playTogether(
                 ObjectAnimator.ofFloat(view, View.SCALE_X, 0.5f, 1).setDuration(125),
                 ObjectAnimator.ofFloat(view, View.SCALE_Y, 0.5f, 1).setDuration(125),
                 ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(75),
                 // Make sure that view.x is always fixed throughout the duration of this animation.
-                ObjectAnimator.ofFloat(view, View.X, x, x));
+                ObjectAnimator.ofFloat(view, View.X, view.getX(), view.getX()));
         growFadeInFromBottomAnimation.setStartDelay(50);
         return growFadeInFromBottomAnimation;
     }
