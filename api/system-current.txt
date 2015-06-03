@@ -32804,6 +32804,13 @@ package android.telecom {
     method public int describeContents();
     method public int getQuality();
     method public int getVideoState();
+    method public static boolean isAudioOnly(int);
+    method public static boolean isBidirectional(int);
+    method public static boolean isPaused(int);
+    method public static boolean isReceptionEnabled(int);
+    method public static boolean isTransmissionEnabled(int);
+    method public static boolean isVideo(int);
+    method public static java.lang.String videoStateToString(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.VideoProfile> CREATOR;
     field public static final int QUALITY_DEFAULT = 4; // 0x4
@@ -32824,15 +32831,6 @@ package android.telecom {
     method public int getWidth();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.VideoProfile.CameraCapabilities> CREATOR;
-  }
-
-  public static class VideoProfile.VideoState {
-    method public static boolean isAudioOnly(int);
-    method public static boolean isBidirectional(int);
-    method public static boolean isPaused(int);
-    method public static boolean isReceptionEnabled(int);
-    method public static boolean isTransmissionEnabled(int);
-    method public static java.lang.String videoStateToString(int);
   }
 
 }
