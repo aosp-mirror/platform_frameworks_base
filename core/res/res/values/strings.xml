@@ -414,8 +414,14 @@
     <string name="silent_mode_ring">Ringer on</string>
 
     <!-- Reboot to Recovery Progress Dialog. This is shown before it reboots to recovery. -->
-    <string name="reboot_to_recovery_title">Prepare for update</string>
-    <string name="reboot_to_recovery_progress">Processing the update package\u2026</string>
+    <string name="reboot_to_update_title">Android system update</string>
+    <string name="reboot_to_update_prepare">Preparing to update\u2026</string>
+    <string name="reboot_to_update_package">Processing the update package\u2026</string>
+    <string name="reboot_to_update_reboot">Restarting\u2026</string>
+
+    <!-- Reboot to Recovery for factory reset. -->
+    <string name="reboot_to_reset_title">Factory data reset</string>
+    <string name="reboot_to_reset_message">Restarting\u2026</string>
 
     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. -->
     <string name="shutdown_progress">Shutting down\u2026</string>

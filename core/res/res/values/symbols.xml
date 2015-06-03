@@ -820,8 +820,12 @@
   <java-symbol type="string" name="mobile_provisioning_url" />
   <java-symbol type="string" name="mobile_redirected_provisioning_url" />
   <java-symbol type="string" name="quick_contacts_not_available" />
-  <java-symbol type="string" name="reboot_to_recovery_progress" />
-  <java-symbol type="string" name="reboot_to_recovery_title" />
+  <java-symbol type="string" name="reboot_to_update_package" />
+  <java-symbol type="string" name="reboot_to_update_prepare" />
+  <java-symbol type="string" name="reboot_to_update_title" />
+  <java-symbol type="string" name="reboot_to_update_reboot" />
+  <java-symbol type="string" name="reboot_to_reset_title" />
+  <java-symbol type="string" name="reboot_to_reset_message" />
   <java-symbol type="string" name="reboot_safemode_confirm" />
   <java-symbol type="string" name="reboot_safemode_title" />
   <java-symbol type="string" name="relationTypeAssistant" />
