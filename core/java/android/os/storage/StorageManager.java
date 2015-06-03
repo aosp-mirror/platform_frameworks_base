@@ -902,6 +902,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public void createNewUserDir(int userHandle, File path) {
+        try {
+            mMountService.createNewUserDir(userHandle, path.getAbsolutePath());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         final IMountService mountService = IMountService.Stub.asInterface(
                 ServiceManager.getService("mount"));

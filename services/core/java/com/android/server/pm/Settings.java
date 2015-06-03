@@ -37,13 +37,17 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.IBinder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PatternMatcher;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.AtomicFile;
 import android.text.TextUtils;
@@ -3493,9 +3497,8 @@ final class Settings {
 
     void createNewUserLILPw(PackageManagerService service, Installer installer,
             int userHandle, File path) {
-        path.mkdir();
-        FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                | FileUtils.S_IXOTH, -1, -1);
+        service.mContext.getSystemService(StorageManager.class)
+            .createNewUserDir(userHandle, path);
         for (PackageSetting ps : mPackages.values()) {
             if (ps.pkg == null || ps.pkg.applicationInfo == null) {
                 continue;
