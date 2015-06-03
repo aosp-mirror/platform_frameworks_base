@@ -83,11 +83,11 @@ The <em>Android</em> project view:</p>
      <img src="{@docRoot}images/tools/projectview01.png" />
      <p class="img-caption"><strong>Figure 1.</strong> Show the Android project view.</p>
      <img src="{@docRoot}images/tools/studio-projectview_scripts.png"  />
-     <p class="img-caption"><strong>Figure 2.</strong> Show project build Files.</p>
+     <p class="img-caption"><strong>Figure 2.</strong> Show project build files.</p>
 
 <p>The <em>Android</em> project view shows all the build files at the top level of the project
 hierarchy under <strong>Gradle Scripts</strong>. Each project module appears as a folder at the
-top level of the project hierarchy and contains these three elements at the top level:</p>
+top level of the project hierarchy and contains these four elements at the top level:</p>
 
 <ul>
   <li><code>java/</code> - Source files for the module.</li>
@@ -110,10 +110,10 @@ from the <strong>Project</strong> drop-down. </p>
 should notice that the project structure appears different than you may be used to in Eclipse. Each
 instance of Android Studio contains a project with one or more application modules. Each
 application module folder contains the complete source sets for that module, including
-{@code src/main} and {@code src/androidTest} directories, resources, build
+{@code src/main/} and {@code src/androidTest/} directories, resources, build
 file and the Android manifest. For the most part, you will need to modify the files under each
-module's {@code src/main} directory for source code updates, the gradle.build file for build
-specification and the files under {@code src/androidTest} directory for test case creation.
+module's {@code src/main/} directory for source code updates, the gradle.build file for build
+specification and the files under {@code src/androidTest/} directory for test case creation.
 
     <p>  <img src="{@docRoot}images/tools/studio-project-layout.png" alt="" /></p>
     <p>  <class="img-caption"><strong>Figure 3.</strong> View Android Studio <em>Project</em>
@@ -132,7 +132,7 @@ development: </p>
 </ul>
 
 <p>For example, selecting the <strong>Problems</strong> view of your project displays links to the
-source files containing any recognized coding and syntax errors, such as missing a XML element
+source files containing any recognized coding and syntax errors, such as missing an XML element
 closing tag in a layout file.<p>
 
 <p>For more information, see
@@ -200,7 +200,7 @@ uniquely identify application packages for publishing. The application ID is set
     </pre>
 
 <p class="note"><strong>Note:</strong> The <em>applicationId</em> is specified only in your
-build.gradle file, and not in the AndroidManifest.xml file.</p>
+{@code build.gradle} file, and not in the AndroidManifest.xml file.</p>
 
 <p>When using build variants, the build system enables you to uniquely identify different
 packages for each product flavors and build types. The application ID in the build type is added as
@@ -644,7 +644,7 @@ When running the Android Plugin from the command line or on machines where Andro
 installed, set the Android Plugin for Gradle proxy settings in the Gradle build file.</p>
 
 <p>For application-specific HTTP proxy settings, set the proxy settings in the
-<strong>build.gradle</strong> file as required for each application module.</p>
+{@code build.gradle} file as required for each application module.</p>
 <pre>
 apply plugin: 'com.android.application'
 
