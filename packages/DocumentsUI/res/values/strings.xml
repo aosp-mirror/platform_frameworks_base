@@ -167,5 +167,5 @@
         <item quantity="other">Copied <xliff:g id="count" example="3">%1$d</xliff:g> files to clipboard.</item>
     </plurals>
     <!-- Toast shown when a user tries to paste files into an unsupported location. -->
-    <string name="clipboard_files_cannot_paste">Cannot past the selected files in this location.</string>
+    <string name="clipboard_files_cannot_paste">Cannot paste the selected files in this location.</string>
 </resources>
