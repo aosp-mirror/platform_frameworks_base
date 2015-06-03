@@ -1467,10 +1467,31 @@ public final class BluetoothAdapter {
      * @hide
      */
     public BluetoothServerSocket listenUsingRfcommOn(int channel) throws IOException {
+        return listenUsingRfcommOn(channel, false);
+    }
+
+    /**
+     * Create a listening, secure RFCOMM Bluetooth socket.
+     * <p>A remote device connecting to this socket will be authenticated and
+     * communication on this socket will be encrypted.
+     * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+     * connections from a listening {@link BluetoothServerSocket}.
+     * <p>Valid RFCOMM channels are in range 1 to 30.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>To auto assign a channel without creating a SDP record use
+     * {@link SOCKET_CHANNEL_AUTO_STATIC_NO_SDP} as channel number.
+     * @param channel RFCOMM channel to listen on
+     * @param mitm    enforce man-in-the-middle protection for authentication.
+     * @return a listening RFCOMM BluetoothServerSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions, or channel in use.
+     * @hide
+     */
+    public BluetoothServerSocket listenUsingRfcommOn(int channel, boolean mitm) throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_RFCOMM, true, true, channel);
+                BluetoothSocket.TYPE_RFCOMM, true, true, channel, mitm);
         int errno = socket.mSocket.bindListen();
-        if(channel == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
+        if (channel == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
             socket.setChannel(socket.mSocket.getPort());
         }
         if (errno != 0) {
@@ -1669,14 +1690,18 @@ public final class BluetoothAdapter {
     /**
      * Construct an encrypted, authenticated, L2CAP server socket.
      * Call #accept to retrieve connections to this socket.
+     * <p>To auto assign a port without creating a SDP record use
+     * {@link SOCKET_CHANNEL_AUTO_STATIC_NO_SDP} as port number.
+     * @param port    the PSM to listen on
+     * @param mitm    enforce man-in-the-middle protection for authentication.
      * @return An L2CAP BluetoothServerSocket
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient permissions.
      * @hide
      */
-    public BluetoothServerSocket listenUsingL2capOn(int port) throws IOException {
+    public BluetoothServerSocket listenUsingL2capOn(int port, boolean mitm) throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_L2CAP, true, true, port);
+                BluetoothSocket.TYPE_L2CAP, true, true, port, mitm);
         int errno = socket.mSocket.bindListen();
         if(port == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
             socket.setChannel(socket.mSocket.getPort());
@@ -1688,6 +1713,21 @@ public final class BluetoothAdapter {
             throw new IOException("Error: " + errno);
         }
         return socket;
+    }
+
+    /**
+     * Construct an encrypted, authenticated, L2CAP server socket.
+     * Call #accept to retrieve connections to this socket.
+     * <p>To auto assign a port without creating a SDP record use
+     * {@link SOCKET_CHANNEL_AUTO_STATIC_NO_SDP} as port number.
+     * @param port    the PSM to listen on
+     * @return An L2CAP BluetoothServerSocket
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     * @hide
+     */
+    public BluetoothServerSocket listenUsingL2capOn(int port) throws IOException {
+        return listenUsingL2capOn(port, false);
     }
 
     /**
