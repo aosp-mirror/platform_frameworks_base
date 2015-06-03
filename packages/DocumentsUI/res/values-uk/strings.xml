@@ -54,7 +54,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Ярлики"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Пристрої"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Інші програми"</string>
-    <string name="empty" msgid="7858882803708117596">"Немає елементів"</string>
+    <string name="empty" msgid="7858882803708117596">"Нічого немає"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Не вдалося відкрити файл"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Не вдалося видалити деякі документи"</string>
     <string name="share_via" msgid="8966594246261344259">"Надіслати через"</string>
