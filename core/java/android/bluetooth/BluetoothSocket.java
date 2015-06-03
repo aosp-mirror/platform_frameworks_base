@@ -106,6 +106,7 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ static final int SEC_FLAG_ENCRYPT = 1;
     /*package*/ static final int SEC_FLAG_AUTH = 1 << 1;
     /*package*/ static final int BTSOCK_FLAG_NO_SDP  = 1 << 2;
+    /*package*/ static final int SEC_FLAG_AUTH_MITM  = 1 << 3;
 
     private final int mType;  /* one of TYPE_RFCOMM etc */
     private BluetoothDevice mDevice;    /* remote device */
@@ -115,7 +116,8 @@ public final class BluetoothSocket implements Closeable {
     private final BluetoothInputStream mInputStream;
     private final BluetoothOutputStream mOutputStream;
     private final ParcelUuid mUuid;
-    private boolean mExcludeSdp = false;
+    private boolean mExcludeSdp = false; /* when true no SPP SDP record will be created */
+    private boolean mAuthMitm = false;   /* when true Man-in-the-middle protection will be enabled*/
     private ParcelFileDescriptor mPfd;
     private LocalSocket mSocket;
     private InputStream mSocketIS;
@@ -158,6 +160,24 @@ public final class BluetoothSocket implements Closeable {
      */
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
             BluetoothDevice device, int port, ParcelUuid uuid) throws IOException {
+        this(type, fd, auth, encrypt, device, port, uuid, false);
+    }
+
+    /**
+     * Construct a BluetoothSocket.
+     * @param type    type of socket
+     * @param fd      fd to use for connected socket, or -1 for a new socket
+     * @param auth    require the remote device to be authenticated
+     * @param encrypt require the connection to be encrypted
+     * @param device  remote device that this socket can connect to
+     * @param port    remote port
+     * @param uuid    SDP uuid
+     * @param mitm    enforce man-in-the-middle protection.
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient privileges
+     */
+    /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
+            BluetoothDevice device, int port, ParcelUuid uuid, boolean mitm) throws IOException {
         if (VDBG) Log.d(TAG, "Creating new BluetoothSocket of type: " + type);
         if (type == BluetoothSocket.TYPE_RFCOMM && uuid == null && fd == -1
                 && port != BluetoothAdapter.SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
@@ -170,6 +190,7 @@ public final class BluetoothSocket implements Closeable {
         else mUuid = new ParcelUuid(new UUID(0, 0));
         mType = type;
         mAuth = auth;
+        mAuthMitm = mitm;
         mEncrypt = encrypt;
         mDevice = device;
         mPort = port;
@@ -201,6 +222,7 @@ public final class BluetoothSocket implements Closeable {
 
         mServiceName = s.mServiceName;
         mExcludeSdp = s.mExcludeSdp;
+        mAuthMitm = s.mAuthMitm;
     }
     private BluetoothSocket acceptSocket(String RemoteAddr) throws IOException {
         BluetoothSocket as = new BluetoothSocket(this);
@@ -232,7 +254,7 @@ public final class BluetoothSocket implements Closeable {
      */
     private BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
             int port) throws IOException {
-        this(type, fd, auth, encrypt, new BluetoothDevice(address), port, null);
+        this(type, fd, auth, encrypt, new BluetoothDevice(address), port, null, false);
     }
 
     /** @hide */
@@ -252,6 +274,8 @@ public final class BluetoothSocket implements Closeable {
             flags |= SEC_FLAG_ENCRYPT;
         if(mExcludeSdp)
             flags |= BTSOCK_FLAG_NO_SDP;
+        if(mAuthMitm)
+            flags |= SEC_FLAG_AUTH_MITM;
         return flags;
     }
 
