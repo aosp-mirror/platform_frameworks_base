@@ -247,9 +247,9 @@
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"dostop do podatkov tipal in nosljivih naprav"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobiti vsebino okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklop raziskovanja z dotikom"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Elementi, ki se jih dotaknete, bodo izrečeni naglas, zaslon pa lahko raziskujete s potezami."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Vklop izboljšanja dostopnosti spleta za ljudi s posebnimi potrebami"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Vklopiti izboljšano dostopnost spleta za ljudi s posebnimi potrebami"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za boljšo dostopnost vsebine aplikacije je mogoče namestiti skripte."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Opazovati besedilo, ki ga natipkate"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Vključuje osebne podatke, kot so številke kreditnih kartic in gesla."</string>
@@ -1240,7 +1240,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Notranji pomnilnik"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Notranja shramba"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Kartica SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Kartica SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Pogon USB"</string>
@@ -1483,7 +1483,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacija je pripeta: v tej napravi odpenjanje ni dovoljeno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je odpet"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred odpenjanjem vprašaj za PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zahtevaj PIN pred odpenjanjem"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred odpenjanjem vprašaj za vzorec za odklepanje"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred odpenjanjem vprašaj za geslo"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Namestil skrbnik"</string>
@@ -1544,7 +1544,7 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Strni"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne moti"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Čas nedelovanja"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Večer med tednom"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Noč med tednom"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Konec tedna"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Dogodek"</string>
     <string name="muted_by" msgid="6147073845094180001">"Izklop zvoka: <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>

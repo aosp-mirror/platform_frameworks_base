@@ -1452,8 +1452,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Топтомдорду орнотууну талап кылуу"</string>
-    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Колдонмого топтомдорду орнотууну өтүнүүсүнө жол ачат."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Топтомдорду орнотууга уруксат суроо"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Колдонмо топтомдорду орнотууга уруксат сурай алат."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>
     <!-- no translation found for ime_action_go (8320845651737369027) -->

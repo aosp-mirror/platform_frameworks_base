@@ -431,7 +431,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление сканером отпечатков"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Приложение сможет добавлять и удалять шаблоны отпечатков пальцев."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"использование сканера отпечатков"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"Использование сканера отпечатков"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Приложение сможет использовать сканер отпечатков пальцев для аутентификации."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Отсканирована только часть пальца. Повторите попытку."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не удалось распознать отпечаток. Повторите попытку."</string>

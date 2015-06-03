@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"O"</string>
-    <string name="kilobyteShort" msgid="5973789783504771878">"KO"</string>
+    <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TO"</string>
@@ -228,7 +228,7 @@
     <string name="permgroupdesc_location" msgid="536889867433972794">"accesează locația dvs."</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informaţiile dvs. sociale"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acces direct la informaţii despre persoanele de contact și conexiunile dvs. sociale."</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendarul"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accesează calendarul"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="3714409903876407981">"vede și gestionează mesajele SMS"</string>
@@ -904,7 +904,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Deschideți cu %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editați cu"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editați cu %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Distribuiți cu"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Trimiteți prin"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Distribuiți cu %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Selectați o aplicație de pe ecranul de pornire"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilizați %1$s ca ecran de pornire"</string>

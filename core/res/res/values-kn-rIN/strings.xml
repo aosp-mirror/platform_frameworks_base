@@ -243,13 +243,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"ಸಂವೇದಕಗಳು"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ಸೆನ್ಸಾರ್‌ಗಳು ಹಾಗೂ ಧರಿಸುವಂತಹ ಸಾಧನಗಳಿಂದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳಿ"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಸಂವಹನ ನಡೆಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯವನ್ನು ಪರೀಕ್ಷಿಸಿ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶಿಸುವ ಮೂಲಕ ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡಿ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ಸ್ಪರ್ಶಿಸಲಾದ ಐಟಂಗಳನ್ನು ಗಟ್ಟಿಯಾಗಿ ಹೇಳಲಾಗುತ್ತದೆ ಮತ್ತು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಪರದೆಯನ್ನು ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಮಾಡಬಹುದಾಗಿದೆ."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ವರ್ಧಿತ ವೆಬ್ ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ಅಪ್ಲಿಕೇಶನ್ ವಿಷಯವನ್ನು ಇನ್ನಷ್ಟು ಪ್ರವೇಶಿಸುವಂತೆ ಮಾಡಲು ಸ್ಕ್ರಿಪ್ಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಬಹುದಾಗಿದೆ."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ನೀವು ಟೈಪ್ ಮಾಡುವ ಪಠ್ಯವನ್ನು ಗಮನಿಸಿ"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ನೀವು ಟೈಪ್ ಮಾಡುವ ಪಠ್ಯವನ್ನು ಗಮನಿಸುತ್ತದೆ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್‌ಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇಲ್ಲವೇ ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಥವಾ ಸೇರಿಸಲು ಮತ್ತು ಸಿಸ್ಟಂ ಐಕಾನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>

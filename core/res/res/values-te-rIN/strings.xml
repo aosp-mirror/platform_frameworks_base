@@ -204,7 +204,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"స్క్రీన్ లాక్"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"పవర్ ఆఫ్ చేయి"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"బగ్ నివేదిక"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను తీయి"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"నిశ్శబ్ద మోడ్"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ధ్వని ఆఫ్‌లో ఉంది"</string>
@@ -243,13 +243,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లను చేస్తుంది మరియు నిర్వహిస్తుంది"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"సెన్సార్‌లు"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"సెన్సార్‌లు మరియు వేరబుల్ పరికరాల డేటాను ప్రాప్యత చేస్తుంది"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను మరలా పొందండి"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలించండి."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభించండి"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"తాకిన అంశాలు బిగ్గరగా చదివి వినిపించబడతాయి మరియు సంజ్ఞలను ఉపయోగించి స్క్రీన్‌ను విశ్లేషించవచ్చు."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"మెరుగైన వెబ్ ప్రాప్యతను ప్రారంభించండి"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"మెరుగైన వెబ్ ప్రాప్యతను ప్రారంభిస్తుంది"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"అనువర్తన కంటెంట్‌కు మరింత సులభ ప్రాప్యత సౌలభ్యం అందించడానికి స్క్రిప్ట్‌లు ఇన్‌స్టాల్ చేయబడవచ్చు."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"మీరు టైప్ చేస్తున్న వచనాన్ని పరిశీలించండి"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"మీరు టైప్ చేస్తున్న వచనాన్ని పరిశీలిస్తుంది"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"క్రెడిట్ కార్డు నంబర్‌లు మరియు పాస్‌వర్డ్‌ల వంటి వ్యక్తిగత డేటాను కలిగి ఉంటుంది."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>

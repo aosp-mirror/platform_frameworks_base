@@ -509,8 +509,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Programai leidžiama gauti informaciją apie dabartinius „Android“ perdavimo funkcijos perkėlimus"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"pašalinti DRM sertifikatus"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Programai leidžiama pašalinti DRM sertifikatus. Neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"susaistyti su operatoriaus susirašinėjimo žinutėmis paslauga"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Leidžiama savininkui susisaistyti su aukščiausio lygio operatoriaus susirašinėjimo žinutėmis paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"susaistyti su operatoriaus susirašinėjimo paslauga"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Leidžiama savininkui susisaistyti su aukščiausio lygio operatoriaus susirašinėjimo paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"susaistyti su operatoriaus paslaugomis"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Savininkui leidžiama susisaistyti su operatoriaus paslaugomis. To niekada neturėtų prireikti naudojant įprastas programas."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
@@ -523,7 +523,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite TV arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite telefoną arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekrano užrakto pakeitimas"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Pakeiskite ekrano užraktą."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Pakeisti ekrano užraktą."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Užrakinti ekraną"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Valdyti, kaip ir kada užrakinamas ekranas."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Trinti visus duomenis"</string>
@@ -1489,7 +1489,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Įdiegė administratorius"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo žinutėmis ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d minutę (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d minutes (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
