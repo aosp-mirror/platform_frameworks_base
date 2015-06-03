@@ -2724,14 +2724,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             final AppWindowToken appToken = win.mAppToken;
+            // Prevent an immediate window exit only for a real animation, ignoring e.g.
+            // dummy animations.
+            final boolean inAnimation = win.mWinAnimator.isWindowAnimatingNow();
             // The starting window is the last window in this app token and it isn't animating.
             // Allow it to be removed now as there is no additional window or animation that will
             // trigger its removal.
             final boolean lastWinStartingNotAnimating = startingWindow && appToken!= null
-                    && appToken.allAppWindows.size() == 1 && !win.mWinAnimator.isWindowAnimating();
-            if (!lastWinStartingNotAnimating && (win.mExiting || win.mWinAnimator.isAnimating())) {
+                    && appToken.allAppWindows.size() == 1 && !inAnimation;
+            if (!lastWinStartingNotAnimating && (win.mExiting || inAnimation)) {
                 // The exit animation is running... wait for it!
-                //Slog.i(TAG, "*** Running exit animation...");
                 win.mExiting = true;
                 win.mRemoveOnExit = true;
                 final DisplayContent displayContent = win.getDisplayContent();
@@ -2747,7 +2749,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (focusChanged) {
                     mInputMonitor.updateInputWindowsLw(false /*force*/);
                 }
-                //dump();
                 Binder.restoreCallingIdentity(origId);
                 return;
             }
