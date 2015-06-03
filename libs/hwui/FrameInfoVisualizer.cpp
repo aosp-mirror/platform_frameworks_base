@@ -46,15 +46,15 @@ struct BarSegment {
 };
 
 static const std::array<BarSegment,9> Bar {{
-    { FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kVsync, 0x00695C },
-    { FrameInfoIndex::kVsync, FrameInfoIndex::kHandleInputStart, 0x00796B },
-    { FrameInfoIndex::kHandleInputStart, FrameInfoIndex::kAnimationStart, 0x00897B },
-    { FrameInfoIndex::kAnimationStart, FrameInfoIndex::kPerformTraversalsStart, 0x009688 },
-    { FrameInfoIndex::kPerformTraversalsStart, FrameInfoIndex::kDrawStart, 0x26A69A},
-    { FrameInfoIndex::kDrawStart, FrameInfoIndex::kSyncStart, 0x2196F3},
-    { FrameInfoIndex::kSyncStart, FrameInfoIndex::kIssueDrawCommandsStart, 0x4FC3F7},
-    { FrameInfoIndex::kIssueDrawCommandsStart, FrameInfoIndex::kSwapBuffers, 0xF44336},
-    { FrameInfoIndex::kSwapBuffers, FrameInfoIndex::kFrameCompleted, 0xFF9800},
+    { FrameInfoIndex::IntendedVsync, FrameInfoIndex::Vsync, 0x00695C },
+    { FrameInfoIndex::Vsync, FrameInfoIndex::HandleInputStart, 0x00796B },
+    { FrameInfoIndex::HandleInputStart, FrameInfoIndex::AnimationStart, 0x00897B },
+    { FrameInfoIndex::AnimationStart, FrameInfoIndex::PerformTraversalsStart, 0x009688 },
+    { FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, 0x26A69A},
+    { FrameInfoIndex::DrawStart, FrameInfoIndex::SyncStart, 0x2196F3},
+    { FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart, 0x4FC3F7},
+    { FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers, 0xF44336},
+    { FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted, 0xFF9800},
 }};
 
 static int dpToPx(int dp, float density) {
@@ -137,7 +137,7 @@ void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex en
     for (size_t fi = 0, ri = 0; fi < mFrameSource.size(); fi++, ri += 4) {
         // TODO: Skipped frames will leave little holes in the graph, but this
         // is better than bogus and freaky lines, so...
-        if (mFrameSource[fi][FrameInfoIndex::kFlags] & FrameInfoFlags::kSkippedFrame) {
+        if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
             continue;
         }
 
@@ -166,7 +166,7 @@ void FrameInfoVisualizer::drawCurrentFrame(const int baseline, OpenGLRenderer* c
     size_t fi = mFrameSource.size() - 1;
     size_t ri = fi * 4;
     float top = baseline - (mVerticalUnit * duration(fi,
-            FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kIssueDrawCommandsStart));
+            FrameInfoIndex::IntendedVsync, FrameInfoIndex::IssueDrawCommandsStart));
     canvas->drawRect(mRects[ri], top, mRects[ri + 2], baseline, &paint);
 }
 
@@ -214,15 +214,15 @@ void FrameInfoVisualizer::dumpData(int fd) {
     fprintf(file, "\n\tDraw\tPrepare\tProcess\tExecute\n");
 
     for (size_t i = 0; i < mFrameSource.size(); i++) {
-        if (mFrameSource[i][FrameInfoIndex::kIntendedVsync] <= mLastFrameLogged) {
+        if (mFrameSource[i][FrameInfoIndex::IntendedVsync] <= mLastFrameLogged) {
             continue;
         }
-        mLastFrameLogged = mFrameSource[i][FrameInfoIndex::kIntendedVsync];
+        mLastFrameLogged = mFrameSource[i][FrameInfoIndex::IntendedVsync];
         fprintf(file, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-                duration(i, FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kSyncStart),
-                duration(i, FrameInfoIndex::kSyncStart, FrameInfoIndex::kIssueDrawCommandsStart),
-                duration(i, FrameInfoIndex::kIssueDrawCommandsStart, FrameInfoIndex::kSwapBuffers),
-                duration(i, FrameInfoIndex::kSwapBuffers, FrameInfoIndex::kFrameCompleted));
+                duration(i, FrameInfoIndex::IntendedVsync, FrameInfoIndex::SyncStart),
+                duration(i, FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart),
+                duration(i, FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers),
+                duration(i, FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted));
     }
 
     fflush(file);
