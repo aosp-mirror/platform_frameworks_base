@@ -24,6 +24,7 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -59,6 +60,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 /**
  * Central system API to the overall input method framework (IMF) architecture,
@@ -1976,6 +1979,7 @@ public final class InputMethodManager {
      * @return true if the current subtype was successfully switched. When the specified subtype is
      * null, this method returns false.
      */
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
         synchronized (mH) {
             try {
