@@ -52,18 +52,20 @@ import java.util.List;
  */
 public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSpinnerAdapter {
     /**
-     * Contains the list of objects that represent the data of this ArrayAdapter.
-     * The content of this list is referred to as "the array" in the documentation.
-     */
-    private List<T> mObjects;
-
-    /**
      * Lock used to modify the content of {@link #mObjects}. Any write operation
      * performed on the array should be synchronized on this lock. This lock is also
      * used by the filter (see {@link #getFilter()} to make a synchronized copy of
      * the original array of data.
      */
     private final Object mLock = new Object();
+
+    private final LayoutInflater mInflater;
+
+    /**
+     * Contains the list of objects that represent the data of this ArrayAdapter.
+     * The content of this list is referred to as "the array" in the documentation.
+     */
+    private List<T> mObjects;
 
     /**
      * The resource indicating what views to inflate to display the content of this
@@ -96,8 +98,6 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
     // the mFilter ArrayFilter is used. mObjects will then only contain the filtered values.
     private ArrayList<T> mOriginalValues;
     private ArrayFilter mFilter;
-
-    private LayoutInflater mInflater;
 
     /** Layout inflater used for {@link #getDropDownView(int, View, ViewGroup)}. */
     private LayoutInflater mDropDownInflater;
@@ -442,9 +442,6 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
         return mDropDownInflater == null ? null : mDropDownInflater.getContext().getTheme();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         final LayoutInflater inflater = mDropDownInflater == null ? mInflater : mDropDownInflater;
