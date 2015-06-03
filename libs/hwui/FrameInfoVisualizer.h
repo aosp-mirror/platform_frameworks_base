@@ -54,10 +54,9 @@ private:
     void createData();
     void destroyData();
 
-    void initializeRects(const int baseline);
+    void initializeRects(const int baseline, const int width);
     void nextBarSegment(FrameInfoIndex start, FrameInfoIndex end);
     void drawGraph(OpenGLRenderer* canvas);
-    void drawCurrentFrame(const int baseline, OpenGLRenderer* canvas);
     void drawThreshold(OpenGLRenderer* canvas);
 
     inline float duration(size_t index, FrameInfoIndex start, FrameInfoIndex end) {
@@ -75,17 +74,12 @@ private:
     FrameInfoSource& mFrameSource;
 
     int mVerticalUnit = 0;
-    int mHorizontalUnit = 0;
     int mThresholdStroke = 0;
 
-    /*
-     * mRects represents an array of rect shapes, divided into NUM_ELEMENTS
-     * groups such that each group is drawn with the same paint.
-     * For example mRects[0] is the array of rect floats suitable for
-     * OpenGLRenderer:drawRects() that makes up all the FrameTimingData:record
-     * information.
-     */
-    std::unique_ptr<float[]> mRects;
+    int mNumFastRects;
+    std::unique_ptr<float[]> mFastRects;
+    int mNumJankyRects;
+    std::unique_ptr<float[]> mJankyRects;
 
     bool mShowDirtyRegions = false;
     SkRect mDirtyRegion;
