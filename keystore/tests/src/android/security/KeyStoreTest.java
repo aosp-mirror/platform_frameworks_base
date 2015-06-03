@@ -814,13 +814,12 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
-        KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, null, out);
+                true, args, null);
         IBinder token = result.token;
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
@@ -849,9 +848,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 new KeyCharacteristics());
     }
     private byte[] doOperation(String name, int purpose, byte[] in, KeymasterArguments beginArgs) {
-        KeymasterArguments out = new KeymasterArguments();
         OperationResult result = mKeyStore.begin(name, purpose,
-                true, beginArgs, null, out);
+                true, beginArgs, null);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         IBinder token = result.token;
         result = mKeyStore.update(token, null, in);
@@ -916,19 +914,17 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
-        KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, null, out);
+                true, args, null);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         IBinder first = result.token;
         // Implementation detail: softkeymaster supports 16 concurrent operations
         for (int i = 0; i < 16; i++) {
-            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, null,
-                    out);
+            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, null);
             assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         }
         // At this point the first operation should be pruned.
@@ -949,10 +945,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
-        KeymasterArguments out = new KeymasterArguments();
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, null, out);
+                true, args, null);
         assertEquals("Begin should expect authorization", KeyStore.OP_AUTH_NEEDED,
                 result.resultCode);
         IBinder token = result.token;

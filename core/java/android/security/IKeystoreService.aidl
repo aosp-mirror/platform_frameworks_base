@@ -65,7 +65,7 @@ interface IKeystoreService {
     ExportResult exportKey(String alias, int format, in KeymasterBlob clientId,
         in KeymasterBlob appId);
     OperationResult begin(IBinder appToken, String alias, int purpose, boolean pruneable,
-        in KeymasterArguments params, in byte[] entropy, out KeymasterArguments operationParams);
+        in KeymasterArguments params, in byte[] entropy);
     OperationResult update(IBinder token, in KeymasterArguments params, in byte[] input);
     OperationResult finish(IBinder token, in KeymasterArguments params, in byte[] signature);
     int abort(IBinder handle);

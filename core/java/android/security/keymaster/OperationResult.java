@@ -31,6 +31,7 @@ public class OperationResult implements Parcelable {
     public final long operationHandle;
     public final int inputConsumed;
     public final byte[] output;
+    public final KeymasterArguments outParams;
 
     public static final Parcelable.Creator<OperationResult> CREATOR = new
             Parcelable.Creator<OperationResult>() {
@@ -49,6 +50,7 @@ public class OperationResult implements Parcelable {
         operationHandle = in.readLong();
         inputConsumed = in.readInt();
         output = in.createByteArray();
+        outParams = KeymasterArguments.CREATOR.createFromParcel(in);
     }
 
     @Override
@@ -63,5 +65,6 @@ public class OperationResult implements Parcelable {
         out.writeLong(operationHandle);
         out.writeInt(inputConsumed);
         out.writeByteArray(output);
+        outParams.writeToParcel(out, flags);
     }
 }
