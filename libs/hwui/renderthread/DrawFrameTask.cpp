@@ -110,7 +110,7 @@ void DrawFrameTask::run() {
 
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
-    int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::kVsync)];
+    int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::Vsync)];
     mRenderThread->timeLord().vsyncReceived(vsync);
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
