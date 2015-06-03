@@ -54,39 +54,19 @@ private:
     void createData();
     void destroyData();
 
-    void addRect(Rect& r, float data, float* shapeOutput);
-    void prepareShapes(const int baseline);
+    void initializeRects(const int baseline);
+    void nextBarSegment(FrameInfoIndex start, FrameInfoIndex end);
     void drawGraph(OpenGLRenderer* canvas);
-    void drawCurrentFrame(OpenGLRenderer* canvas);
+    void drawCurrentFrame(const int baseline, OpenGLRenderer* canvas);
     void drawThreshold(OpenGLRenderer* canvas);
 
-    static inline float duration(nsecs_t start, nsecs_t end) {
-        float duration = ((end - start) * 0.000001f);
+    inline float duration(size_t index, FrameInfoIndex start, FrameInfoIndex end) {
+        nsecs_t ns_start = mFrameSource[index][start];
+        nsecs_t ns_end = mFrameSource[index][end];
+        float duration = ((ns_end - ns_start) * 0.000001f);
+        // Clamp to large to avoid spiking off the top of the screen
+        duration = duration > 50.0f ? 50.0f : duration;
         return duration > 0.0f ? duration : 0.0f;
-    }
-
-    inline float recordDuration(size_t index) {
-        return duration(
-                mFrameSource[index][FrameInfoIndex::kIntendedVsync],
-                mFrameSource[index][FrameInfoIndex::kSyncStart]);
-    }
-
-    inline float prepareDuration(size_t index) {
-        return duration(
-                mFrameSource[index][FrameInfoIndex::kSyncStart],
-                mFrameSource[index][FrameInfoIndex::kIssueDrawCommandsStart]);
-    }
-
-    inline float issueDrawDuration(size_t index) {
-        return duration(
-                mFrameSource[index][FrameInfoIndex::kIssueDrawCommandsStart],
-                mFrameSource[index][FrameInfoIndex::kSwapBuffers]);
-    }
-
-    inline float swapBuffersDuration(size_t index) {
-        return duration(
-                mFrameSource[index][FrameInfoIndex::kSwapBuffers],
-                mFrameSource[index][FrameInfoIndex::kFrameCompleted]);
     }
 
     ProfileType mType = ProfileType::None;
@@ -105,7 +85,7 @@ private:
      * OpenGLRenderer:drawRects() that makes up all the FrameTimingData:record
      * information.
      */
-    std::unique_ptr<float*> mRects;
+    std::unique_ptr<float[]> mRects;
 
     bool mShowDirtyRegions = false;
     SkRect mDirtyRegion;
