@@ -228,7 +228,9 @@ public abstract class Image implements AutoCloseable {
 
         if (cropRect != null) {
             cropRect = new Rect(cropRect);  // make a copy
-            cropRect.intersect(0, 0, getWidth(), getHeight());
+            if (!cropRect.intersect(0, 0, getWidth(), getHeight())) {
+                cropRect.setEmpty();
+            }
         }
         mCropRect = cropRect;
     }
