@@ -63,6 +63,8 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unele documente nu au putut fi șterse"</string>
     <string name="share_via" msgid="8966594246261344259">"Distribuiți prin"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Se copiază fișierele"</string>
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"Timp rămas: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="few">Se copiază <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere.</item>
@@ -75,14 +77,19 @@
       <item quantity="one">Se mută <xliff:g id="COUNT_0">%1$d</xliff:g> fișier.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Se pregătește copierea..."</string>
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Nu s-au putut copia <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere</item>
       <item quantity="other">Nu s-au putut copia <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere</item>
       <item quantity="one">Nu s-a putut copia <xliff:g id="COUNT_0">%1$d</xliff:g> fișier</item>
     </plurals>
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Atingeți pentru a afișa detaliile"</string>
     <string name="retry" msgid="7564024179122207376">"Reîncercați"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aceste fișiere nu au fost copiate: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="few">Au fost copiate <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere în clipboard.</item>
       <item quantity="other">Au fost copiate <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere în clipboard.</item>

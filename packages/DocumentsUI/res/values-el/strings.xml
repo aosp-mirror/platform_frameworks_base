@@ -63,6 +63,8 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Δεν είναι δυνατή η διαγραφή ορισμένων εγγράφων"</string>
     <string name="share_via" msgid="8966594246261344259">"Κοινή χρήση μέσω"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Αντιγραφή αρχείων"</string>
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"Απομένουν <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">Αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων.</item>
@@ -73,13 +75,18 @@
       <item quantity="one">Μετακίνηση <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Προετοιμασία για αντιγραφή…"</string>
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων</item>
       <item quantity="one">Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου</item>
     </plurals>
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Αγγίξτε για προβολή λεπτομερειών"</string>
     <string name="retry" msgid="7564024179122207376">"Επανάληψη"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Αυτά τα αρχεία δεν αντιγράφηκαν: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> αρχεία αντιγράφηκαν στο πρόχειρο.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> αρχείο αντιγράφηκε στο πρόχειρο.</item>
