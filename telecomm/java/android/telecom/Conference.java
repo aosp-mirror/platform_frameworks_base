@@ -206,7 +206,7 @@ public abstract class Conference extends Conferenceable {
      * Returns video state of the primary call.
      */
     public int getVideoState() {
-        return VideoProfile.VideoState.AUDIO_ONLY;
+        return VideoProfile.STATE_AUDIO_ONLY;
     }
 
     /**

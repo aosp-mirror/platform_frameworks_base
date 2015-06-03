@@ -313,28 +313,28 @@ public class ImsCallProfile implements Parcelable {
      * @return The video state.
      */
     public static int getVideoStateFromImsCallProfile(ImsCallProfile callProfile) {
-        int videostate = VideoProfile.VideoState.AUDIO_ONLY;
+        int videostate = VideoProfile.STATE_AUDIO_ONLY;
         switch (callProfile.mCallType) {
             case CALL_TYPE_VT_TX:
-                videostate = VideoProfile.VideoState.TX_ENABLED;
+                videostate = VideoProfile.STATE_TX_ENABLED;
                 break;
             case CALL_TYPE_VT_RX:
-                videostate = VideoProfile.VideoState.RX_ENABLED;
+                videostate = VideoProfile.STATE_RX_ENABLED;
                 break;
             case CALL_TYPE_VT:
-                videostate = VideoProfile.VideoState.BIDIRECTIONAL;
+                videostate = VideoProfile.STATE_BIDIRECTIONAL;
                 break;
             case CALL_TYPE_VOICE:
-                videostate = VideoProfile.VideoState.AUDIO_ONLY;
+                videostate = VideoProfile.STATE_AUDIO_ONLY;
                 break;
             default:
-                videostate = VideoProfile.VideoState.AUDIO_ONLY;
+                videostate = VideoProfile.STATE_AUDIO_ONLY;
                 break;
         }
-        if (callProfile.isVideoPaused() && videostate != VideoProfile.VideoState.AUDIO_ONLY) {
-            videostate |= VideoProfile.VideoState.PAUSED;
+        if (callProfile.isVideoPaused() && videostate != VideoProfile.STATE_AUDIO_ONLY) {
+            videostate |= VideoProfile.STATE_PAUSED;
         } else {
-            videostate &= ~VideoProfile.VideoState.PAUSED;
+            videostate &= ~VideoProfile.STATE_PAUSED;
         }
         return videostate;
     }
@@ -347,9 +347,9 @@ public class ImsCallProfile implements Parcelable {
      * @return The call type.
      */
     public static int getCallTypeFromVideoState(int videoState) {
-        boolean videoTx = isVideoStateSet(videoState, VideoProfile.VideoState.TX_ENABLED);
-        boolean videoRx = isVideoStateSet(videoState, VideoProfile.VideoState.RX_ENABLED);
-        boolean isPaused = isVideoStateSet(videoState, VideoProfile.VideoState.PAUSED);
+        boolean videoTx = isVideoStateSet(videoState, VideoProfile.STATE_TX_ENABLED);
+        boolean videoRx = isVideoStateSet(videoState, VideoProfile.STATE_RX_ENABLED);
+        boolean isPaused = isVideoStateSet(videoState, VideoProfile.STATE_PAUSED);
         if (isPaused) {
             return ImsCallProfile.CALL_TYPE_VT_NODIR;
         } else if (videoTx && !videoRx) {
