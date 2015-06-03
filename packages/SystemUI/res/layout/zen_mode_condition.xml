@@ -17,6 +17,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_detail_item_height"
+    android:clipChildren="false"
     android:layout_marginBottom="@dimen/zen_mode_condition_detail_item_spacing"
     android:layout_marginStart="1dp"
     android:layout_marginEnd="0dp" >
@@ -63,6 +64,7 @@
     <ImageView
         android:id="@android:id/button1"
         style="@style/QSBorderlessButton"
+        android:background="@drawable/ripple_drawable_20dp"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_centerVertical="true"
@@ -74,6 +76,7 @@
     <ImageView
         android:id="@android:id/button2"
         style="@style/QSBorderlessButton"
+        android:background="@drawable/ripple_drawable_20dp"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentEnd="true"
