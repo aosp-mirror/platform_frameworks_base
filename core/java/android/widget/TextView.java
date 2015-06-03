@@ -6680,7 +6680,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 StaticLayout.Builder builder = StaticLayout.Builder.obtain(mHint, 0,
                         mHint.length(), mTextPaint, hintWidth)
                         .setAlignment(alignment)
-                        .setTextDir(mTextDir)
+                        .setTextDirection(mTextDir)
                         .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy)
@@ -6771,7 +6771,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             StaticLayout.Builder builder = StaticLayout.Builder.obtain(mTransformed,
                     0, mTransformed.length(), mTextPaint, wantWidth)
                     .setAlignment(alignment)
-                    .setTextDir(mTextDir)
+                    .setTextDirection(mTextDir)
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy)

@@ -32458,7 +32458,7 @@ package android.text {
     method public android.text.StaticLayout.Builder setLineSpacing(float, float);
     method public android.text.StaticLayout.Builder setMaxLines(int);
     method public android.text.StaticLayout.Builder setText(java.lang.CharSequence);
-    method public android.text.StaticLayout.Builder setTextDir(android.text.TextDirectionHeuristic);
+    method public android.text.StaticLayout.Builder setTextDirection(android.text.TextDirectionHeuristic);
   }
 
   public abstract interface TextDirectionHeuristic {
