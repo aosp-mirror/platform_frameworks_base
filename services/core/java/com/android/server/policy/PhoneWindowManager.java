@@ -2116,7 +2116,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_KEYGUARD_SCRIM:
                 return false;
             default:
-                return true;
+                // Hide only windows below the keyguard host window.
+                return windowTypeToLayerLw(win.getBaseType())
+                        < windowTypeToLayerLw(TYPE_STATUS_BAR);
         }
     }
 
@@ -5513,6 +5515,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean isKeyguardSecure() {
         if (mKeyguardDelegate == null) return false;
         return mKeyguardDelegate.isSecure();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isKeyguardShowingOrOccluded() {
+        return mKeyguardDelegate == null ? false : mKeyguardDelegate.isShowing();
     }
 
     /** {@inheritDoc} */
