@@ -841,7 +841,7 @@ public class LockPatternUtils {
 
         final byte[] bytes = string.getBytes();
         for (int i = 0; i < bytes.length; i++) {
-            byte b = bytes[i];
+            byte b = (byte) (bytes[i] - '1');
             result.add(LockPatternView.Cell.of(b / 3, b % 3));
         }
         return result;
@@ -861,7 +861,21 @@ public class LockPatternUtils {
         byte[] res = new byte[patternSize];
         for (int i = 0; i < patternSize; i++) {
             LockPatternView.Cell cell = pattern.get(i);
-            res[i] = (byte) (cell.getRow() * 3 + cell.getColumn());
+            res[i] = (byte) (cell.getRow() * 3 + cell.getColumn() + '1');
+        }
+        return new String(res);
+    }
+
+    public static String patternStringToBaseZero(String pattern) {
+        if (pattern == null) {
+            return "";
+        }
+        final int patternSize = pattern.length();
+
+        byte[] res = new byte[patternSize];
+        final byte[] bytes = pattern.getBytes();
+        for (int i = 0; i < patternSize; i++) {
+            res[i] = (byte) (bytes[i] - '1');
         }
         return new String(res);
     }
