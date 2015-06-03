@@ -4071,9 +4071,14 @@ public class Editor {
                     offset = getNextCursorOffset(selectionEnd, false);
                     mTouchWordDelta = 0.0f;
                 }
-                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionAtCursorOffset(offset, false);
             }
+        }
+
+        @Override
+        protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
+            super.positionAtCursorOffset(offset, parentScrolled);
+            mInWord = !getWordIteratorWithText().isBoundary(offset);
         }
 
         @Override
@@ -4193,9 +4198,14 @@ public class Editor {
                     offset = getNextCursorOffset(selectionStart, true);
                     mTouchWordDelta = 0.0f;
                 }
-                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionAtCursorOffset(offset, false);
             }
+        }
+
+        @Override
+        protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
+            super.positionAtCursorOffset(offset, parentScrolled);
+            mInWord = !getWordIteratorWithText().isBoundary(offset);
         }
 
         @Override
