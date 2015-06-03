@@ -44,12 +44,12 @@ import java.io.IOException;
  *
  * @hide
  */
-public class KeyStoreCryptoOperationChunkedStreamer {
+class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationStreamer {
 
     /**
      * Bidirectional chunked data stream over a KeyStore crypto operation.
      */
-    public interface Stream {
+    interface Stream {
         /**
          * Returns the result of the KeyStore {@code update} operation or null if keystore couldn't
          * be reached.
@@ -66,12 +66,11 @@ public class KeyStoreCryptoOperationChunkedStreamer {
     // Binder buffer is about 1MB, but it's shared between all active transactions of the process.
     // Thus, it's safer to use a much smaller upper bound.
     private static final int DEFAULT_MAX_CHUNK_SIZE = 64 * 1024;
-    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     private final Stream mKeyStoreStream;
     private final int mMaxChunkSize;
 
-    private byte[] mBuffered = EMPTY_BYTE_ARRAY;
+    private byte[] mBuffered = EmptyArray.BYTE;
     private int mBufferedOffset;
     private int mBufferedLength;
 
@@ -84,10 +83,11 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         mMaxChunkSize = maxChunkSize;
     }
 
+    @Override
     public byte[] update(byte[] input, int inputOffset, int inputLength) throws KeyStoreException {
         if (inputLength == 0) {
             // No input provided
-            return EMPTY_BYTE_ARRAY;
+            return EmptyArray.BYTE;
         }
 
         ByteArrayOutputStream bufferedOutput = null;
@@ -129,7 +129,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
 
             if (opResult.inputConsumed == chunk.length) {
                 // The whole chunk was consumed
-                mBuffered = EMPTY_BYTE_ARRAY;
+                mBuffered = EmptyArray.BYTE;
                 mBufferedOffset = 0;
                 mBufferedLength = 0;
             } else if (opResult.inputConsumed == 0) {
@@ -185,17 +185,18 @@ public class KeyStoreCryptoOperationChunkedStreamer {
 
         if (bufferedOutput == null) {
             // No output produced
-            return EMPTY_BYTE_ARRAY;
+            return EmptyArray.BYTE;
         } else {
             return bufferedOutput.toByteArray();
         }
     }
 
+    @Override
     public byte[] doFinal(byte[] input, int inputOffset, int inputLength)
             throws KeyStoreException {
         if (inputLength == 0) {
             // No input provided -- simplify the rest of the code
-            input = EMPTY_BYTE_ARRAY;
+            input = EmptyArray.BYTE;
             inputOffset = 0;
         }
 
