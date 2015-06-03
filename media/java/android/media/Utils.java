@@ -209,6 +209,9 @@ class Utils {
     }
 
     static int parseIntSafely(Object o, int fallback) {
+        if (o == null) {
+            return fallback;
+        }
         try {
             String s = (String)o;
             return Integer.parseInt(s);
