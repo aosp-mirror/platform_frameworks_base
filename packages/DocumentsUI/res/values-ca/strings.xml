@@ -43,7 +43,7 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Amaga la mida del fitxer"</string>
     <string name="button_copy" msgid="8706475544635021302">"Copia"</string>
     <string name="button_move" msgid="2202666023104202232">"Desplaça"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Seleccionats: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> seleccionats"</string>
     <string name="sort_name" msgid="9183560467917256779">"Per nom"</string>
     <string name="sort_date" msgid="586080032956151448">"Per data de modificació"</string>
     <string name="sort_size" msgid="3350681319735474741">"Per mida"</string>
@@ -63,6 +63,8 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"No es poden suprimir alguns documents."</string>
     <string name="share_via" msgid="8966594246261344259">"Comparteix mitjançant"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"S\'estan copiant fitxers"</string>
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"Temps restant: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">S\'estan copiant <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers.</item>
@@ -73,13 +75,18 @@
       <item quantity="one">S\'està movent <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"S\'està preparant una còpia…"</string>
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">No s\'han pogut copiar <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
       <item quantity="one">No s\'ha pogut copiar <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
     </plurals>
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Toca per veure els detalls"</string>
     <string name="retry" msgid="7564024179122207376">"Torna-ho a provar"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aquests fitxers no s\'han copiat: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">S\'han copiat <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers al porta-retalls.</item>
       <item quantity="one">S\'ha copiat <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer al porta-retalls.</item>

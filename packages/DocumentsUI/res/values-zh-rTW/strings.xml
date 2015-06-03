@@ -63,6 +63,8 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"無法刪除部分文件"</string>
     <string name="share_via" msgid="8966594246261344259">"分享方式："</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"複製檔案"</string>
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"剩餘 <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">正在複製 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案。</item>
@@ -73,13 +75,18 @@
       <item quantity="one">正在移動 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案。</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"正在準備複製…"</string>
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">無法複製 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
       <item quantity="one">無法複製 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"輕觸即可查看詳細資料"</string>
     <string name="retry" msgid="7564024179122207376">"重試"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"未複製這些檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">已將 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案複製到剪貼簿。</item>
       <item quantity="one">已將 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案複製到剪貼簿。</item>

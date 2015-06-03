@@ -43,7 +43,7 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ukryj rozmiar pliku"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiuj"</string>
     <string name="button_move" msgid="2202666023104202232">"Przenieś"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Wybrano: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Wybrano <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Według nazwy"</string>
     <string name="sort_date" msgid="586080032956151448">"Według daty edycji"</string>
     <string name="sort_size" msgid="3350681319735474741">"Według rozmiaru"</string>
@@ -63,6 +63,8 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nie można usunąć niektórych dokumentów"</string>
     <string name="share_via" msgid="8966594246261344259">"Udostępnij przez"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiowanie plików"</string>
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"Pozostało: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="few">Kopiowanie <xliff:g id="COUNT_1">%1$d</xliff:g> plików.</item>
@@ -77,15 +79,20 @@
       <item quantity="one">Przenoszę <xliff:g id="COUNT_0">%1$d</xliff:g> plik.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Przygotowuję do kopiowania…"</string>
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Nie można skopiować <xliff:g id="COUNT_1">%1$d</xliff:g> plików</item>
       <item quantity="many">Nie można skopiować <xliff:g id="COUNT_1">%1$d</xliff:g> plików</item>
       <item quantity="other">Nie można skopiować <xliff:g id="COUNT_1">%1$d</xliff:g> pliku</item>
       <item quantity="one">Nie można skopiować <xliff:g id="COUNT_0">%1$d</xliff:g> pliku</item>
     </plurals>
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Kliknij, by zobaczyć szczegóły"</string>
     <string name="retry" msgid="7564024179122207376">"Ponów"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Te pliki nie zostały skopiowane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="few">Skopiowano <xliff:g id="COUNT_1">%1$d</xliff:g> pliki do schowka.</item>
       <item quantity="many">Skopiowano <xliff:g id="COUNT_1">%1$d</xliff:g> plików do schowka.</item>

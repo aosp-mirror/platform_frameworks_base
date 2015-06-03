@@ -63,6 +63,8 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Niektoré dokumenty sa nepodarilo odstrániť"</string>
     <string name="share_via" msgid="8966594246261344259">"Zdieľať pomocou"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírovanie súborov"</string>
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"Zostáva: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="few">Kopírujú sa <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>
@@ -77,15 +79,20 @@
       <item quantity="one">Presúva sa <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravuje sa na kopírovanie..."</string>
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
       <item quantity="many">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
       <item quantity="other">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
       <item quantity="one">Zlyhalo kopírovanie <xliff:g id="COUNT_0">%1$d</xliff:g> súboru</item>
     </plurals>
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Klepnutím zobrazíte podrobné informácie"</string>
     <string name="retry" msgid="7564024179122207376">"Skúsiť znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="few">Do schránky boli skopírované <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>
       <item quantity="many">Do schránky bolo skopírovaného <xliff:g id="COUNT_1">%1$d</xliff:g> súboru.</item>
