@@ -387,7 +387,10 @@
 
      <!-- Floating toolbar dimensions -->
      <dimen name="floating_toolbar_height">48dp</dimen>
+     <dimen name="floating_toolbar_menu_image_button_width">56dp</dimen>
+     <dimen name="floating_toolbar_menu_image_button_vertical_padding">12dp</dimen>
      <dimen name="floating_toolbar_menu_button_side_padding">16dp</dimen>
+     <dimen name="floating_toolbar_overflow_image_button_width">60dp</dimen>
      <dimen name="floating_toolbar_overflow_side_padding">18dp</dimen>
      <dimen name="floating_toolbar_text_size">14sp</dimen>
      <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
