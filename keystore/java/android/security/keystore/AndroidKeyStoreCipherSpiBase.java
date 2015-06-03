@@ -66,7 +66,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
      */
     private IBinder mOperationToken;
     private long mOperationHandle;
-    private KeyStoreCryptoOperationChunkedStreamer mMainDataStreamer;
+    private KeyStoreCryptoOperationStreamer mMainDataStreamer;
 
     /**
      * Encountered exception which could not be immediately thrown because it was encountered inside
@@ -210,7 +210,6 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         byte[] additionalEntropy = KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                 mRng, getAdditionalEntropyAmountForBegin());
 
-        KeymasterArguments keymasterOutputArgs = new KeymasterArguments();
         OperationResult opResult = mKeyStore.begin(
                 mKey.getAlias(),
                 mEncrypting ? KeymasterDefs.KM_PURPOSE_ENCRYPT : KeymasterDefs.KM_PURPOSE_DECRYPT,
@@ -247,9 +246,21 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         }
 
         loadAlgorithmSpecificParametersFromBeginResult(opResult.outParams);
-        mMainDataStreamer = new KeyStoreCryptoOperationChunkedStreamer(
+        mMainDataStreamer = createMainDataStreamer(mKeyStore, opResult.token);
+    }
+
+    /**
+     * Creates a streamer which sends plaintext/ciphertext into the provided KeyStore and receives
+     * the corresponding ciphertext/plaintext from the KeyStore.
+     *
+     * <p>This implementation returns a working streamer.
+     */
+    @NonNull
+    protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
+            KeyStore keyStore, IBinder operationToken) {
+        return new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
-                        mKeyStore, opResult.token));
+                        keyStore, operationToken));
     }
 
     @Override
