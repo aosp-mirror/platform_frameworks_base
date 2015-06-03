@@ -17115,6 +17115,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Also calls {@link StateListAnimator#jumpToCurrentState()} if there is a StateListAnimator
      * attached to this view.
      */
+    @CallSuper
     public void jumpDrawablesToCurrentState() {
         if (mBackground != null) {
             mBackground.jumpToCurrentState();

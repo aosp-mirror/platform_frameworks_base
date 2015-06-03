@@ -630,13 +630,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.NumberPicker" parent="Widget.NumberPicker">
-        <item name="internalLayout">@layout/number_picker_with_selector_wheel</item>
+        <item name="internalLayout">@layout/number_picker_material</item>
         <item name="solidColor">@color/transparent</item>
-        <item name="selectionDivider">@drawable/numberpicker_selection_divider</item>
-        <item name="selectionDividerHeight">2dip</item>
-        <item name="selectionDividersDistance">48dip</item>
-        <item name="internalMinWidth">64dip</item>
-        <item name="internalMaxHeight">180dip</item>
+        <item name="selectionDivider">@drawable/number_picker_divider_material</item>
+        <item name="selectionDividerHeight">2dp</item>
+        <item name="selectionDividersDistance">48dp</item>
+        <item name="internalMinWidth">64dp</item>
+        <item name="internalMaxHeight">180dp</item>
         <item name="virtualButtonPressedDrawable">?attr/selectableItemBackground</item>
     </style>
 
