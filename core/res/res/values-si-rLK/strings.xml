@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"හඬ නඟනය අක්‍රියයි"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"හඬ නඟනය කම්පනය"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"හඬ නඟනය සක්‍රීයයි"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"යාවත්කාලීනය සඳහා සූදානම් වන්න"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"යාවත්කාලීන පැකේජය සකසමින්…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"වසා දමමින්…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ඔබගේ ටැබ්ලටය වැසේ."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ඔබගේ රූපවාහිනිය වසා දැමෙනු ඇත."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS පණිවිඩ ලැබීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. මෙහි තේරුම යෙදුමට ඔබගේ උපාංගයට ලැබෙන පණිවිඩ අධීක්ෂණය කිරීමට හැකිවීම වන අතර, ඒවා ඔබට නොපෙන්වා මකා දැමීමටද හැකි වීමයි."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"පෙළ පණිවුඩ ලබාගන්න (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"සෙල් ප්‍රචාරණ පණිවිඩ කියවීම"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ඔබගේ උපාංගයට ලැබුණු සෙල් විකාශන පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. ඔබට හදිසි අවස්ථාවන් පිළිබඳ අනතුරු ඇඟවීමට සෙල් විකාශන පණිවිඩ ඇතැම් ස්ථානවල සිට යවනු ලබයි. හදිසි සෙල් විකාශන ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම් මඟින් ඔබගේ උපාංගයට කාර්ය සාධනයට හෝ ක්‍රියකරණයට බාධා සිදුවිය හැක."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"ඔබගේ ගිණුම්"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ලබාගත හැකි ගිණුම් වලට ප්‍රවේශ වීම."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"දායක වූ සංග්‍රහ කියවීම"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"වර්තමාන සමමුහුර්ත සංග්‍රහ ගැන විස්තර ලැබීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS පණිවිඩ යැවීම"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS පණිවිඩ යැවීමට යෙදුමට අවසර දෙන්න. මෙමඟින් බලාපොරොත්තු නොවූ ප්‍රතිඵල අත් විය හැක. අනිෂ්ට යෙදුම් ඔබගේ තහවුරුවකින් තොරව පණිවිඩ යැවීම මඟින් ඔබගේ මුදල් වැය කල හැක."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ඔබගේ පෙළ පණිවුඩ කියවන්න (SMS හෝ MMS)"</string>
@@ -1094,6 +1102,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"වෙනත් බාහිර උපාංග වෙත මාධ්‍ය ප්‍රතිදානය යැවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ස්ථාපන සැසියන් කියවන්න"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ස්ථාපන සැසිය කියවීමට යෙදුමට ඉඩ දෙන්න. සක්‍රිය පැකේජ ස්ථාපනය පිළිබඳ විස්තර බැලීමට එයට මෙයින් ඉඩ දෙයි."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ස්ථාපන පැකේජ ඉල්ලීම"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ස්ථාපන පැකේජ ඉල්ලීමට යෙදුමකට අවසර දීම."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"විශාලන පාලනය සඳහා දෙවරක් ස්පර්ශ කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"විජටය එකතු කිරීමට නොහැකි විය."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"යන්න"</string>

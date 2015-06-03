@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"रिंगर बंद"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"रिंगर कंपन"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"रिंगर चालू"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"अपडेट के लिए तैयार रहें"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"अपडेट पैकेज को संसाधित कर रहा है…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"शट डाउन हो रहा है..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"आपकी टेबलेट शट डाउन हो जाएगी."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"आपका टीवी बंद हो जाएगा."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ऐप्स  को SMS संदेशों को प्राप्‍त और संसाधित करने देता है. इसका अर्थ है कि ऐप्स  आपके डिवाइस पर भेजे गए संदेशों की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"लेख संदेश (MMS) प्राप्त करें"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ऐप्स  को MMS संदेशों को प्राप्‍त और संसाधित करने देता है. इसका अर्थ है कि ऐप्स  आपके डिवाइस पर भेजे गए संदेशों की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारण संदेश पढ़ें"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ऐप्स को आपके डिवाइस द्वारा प्राप्त सेल प्रसारण संदेशों को पढ़ने देता है. कुछ स्‍थानों पर आपको आपातकालीन स्‍थितियों की चेतावनी देने के लिए सेल प्रसारण अलर्ट वितरित किए जाते हैं. आपातकालीन सेल प्रसारण प्राप्त होने पर दुर्भावनापूर्ण ऐप्स आपके डिवाइस के निष्‍पादन या संचालन में हस्‍तक्षेप कर सकते हैं."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"आपके खाते"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्‍ध खातों में पहुंचें."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता-प्राप्त फ़ीड पढ़ें"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ऐप्स को वर्तमान में समन्वयित फ़ीड के बारे में विवरण प्राप्त करने देता है."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS संदेश भेजें"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ऐप्स  को SMS संदेशों को भेजने देता है. इसके परिणामस्वरूप अप्रत्‍याशित शुल्‍क लागू हो सकते हैं. दुर्भावनापूर्ण ऐप्स  आपकी पुष्टि के बिना संदेश भेजकर आपका धन व्‍यय कर सकते हैं."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"अपने लेख संदेश (SMS या MMS) पढ़ें"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ऐप्स  को मीडिया आउटपुट को अन्य बाहरी डिवाइस पर रूट करने देता है."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"इंस्टॉल सत्रों को पढ़ें"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ऐप्लिकेशन को इंस्टॉल सत्रों को पढ़ने देती है. इससे उसे सक्रिय पैकेज इंस्टॉलेशन के बारे में विवरण देखने की अनुमति मिल जाती है."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"पैकेज इंस्टॉल करने का अनुरोध"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"किसी ऐप्लिकेशन को पैकेज इंस्टॉल करने के अनुरोध की अनुमति देता है."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ज़ूम नियंत्रण के लिए दो बार स्पर्श करें"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट नहीं जोड़ा जा सका."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जाएं"</string>

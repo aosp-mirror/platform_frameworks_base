@@ -187,6 +187,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Звоно је искључено"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибрација звона"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звоно је укључено"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Припрема за ажурирање"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Пакет ажурирања се обрађује..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Искључивање…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблет ће се искључити."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ТВ ће се искључити."</string>
@@ -266,6 +268,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Дозвољава апликацији да прима и обрађује SMS поруке. То значи да апликација може да надгледа или брише поруке које се шаљу уређају, а да вам их не прикаже."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"пријем текстуалних порука (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Дозвољава апликацији да прима и обрађује MMS поруке. То значи да апликација може да надгледа или брише поруке које се шаљу уређају, а да вам их не прикаже."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"читање порука инфо сервиса"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Омогућава апликацији да чита поруке инфо сервиса које уређај прима. Упозорења инфо сервиса се на неким локацијама примају као упозорења на хитне случајеве. Злонамерне апликације могу да утичу на учинак или ометају функционисање уређаја када се прими порука инфо сервиса о хитном случају."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Налози"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Приступ доступним налозима."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читање пријављених фидова"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозвољава апликацији да преузима детаље о тренутно синхронизованим фидовима."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Дозвољава апликацији да шаље SMS поруке. Ово може да доведе до неочекиваних трошкова. Злонамерне апликације могу да шаљу поруке без ваше потврде, што може да изазове трошкове."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"читање текстуалних порука (SMS или MMS)"</string>
@@ -1099,6 +1107,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Дозвољава апликацији да усмерава излаз медија на друге спољне уређаје."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Читај сесије инсталирања"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дозвољава апликацији да чита сесије инсталирања. То јој дозвољава да види детаље о активним инсталацијама пакета."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Захтевај инсталирање пакета"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Омогућава да апликација захтева инсталацију пакета."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Додирните двапут да бисте контролисали зум"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Није могуће додати виџет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Иди"</string>

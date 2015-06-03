@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Sonnerie désactivée"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Sonnerie en mode vibreur"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Sonnerie activée"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Préparation de la mise à jour"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Traitement du package de mises à jour en cours…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Arrêt en cours..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Votre tablette va s\'éteindre."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Votre téléviseur va s\'éteindre."</string>
@@ -255,7 +257,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permet à l\'application de faire office de barre d\'état."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Agrandir/réduire la barre d\'état"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permet à l\'application de réduire ou de développer la barre d\'état."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installer des raccourcis"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"Installer des raccourcis"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permettre à une application d\'ajouter des raccourcis à l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"désinstaller des raccourcis"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permettre à l\'application de supprimer des raccourcis de l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permet à l\'application de recevoir et de traiter les SMS. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recevoir des messages texte (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permet à l\'application de recevoir et de traiter les MMS. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lire les messages reçus via un canal de diffusion cellulaire"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet à l\'application de lire les messages que votre appareil reçoit via un canal de diffusion cellulaire. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Les applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lorsqu\'un message est reçu via un canal de diffusion cellulaire."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vos comptes"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accéder aux comptes disponibles"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lire les flux auxquels vous êtes abonné"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet à l\'application d\'obtenir des informations sur les flux en cours de synchronisation."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Envoi de messages SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet à l\'application d\'envoyer des messages SMS. Cette autorisation peut entraîner des frais inattendus. Les applications malveillantes peuvent générer des frais en envoyant des messages sans votre consentement."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"voir les messages texte (SMS ou MMS)"</string>
@@ -395,13 +403,13 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet à l\'application de modifier l\'état de la connectivité du partage de connexion."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"afficher les connexions Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permet à l\'application d\'accéder à des informations sur les réseaux Wi-Fi afin de savoir si une connexion Wi-Fi est activée et pour connaître le nom des appareils connectés au Wi-Fi, par exemple."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"activer/désactiver la connexion Wi-Fi"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Activer/désactiver la connexion Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Permet à l\'application de se connecter à des points d\'accès Wi-Fi, de s\'en déconnecter et de modifier la configuration de l\'appareil pour les réseaux Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"autoriser la réception de données en Wi-Fi multidiffusion"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permet à l\'application de recevoir des paquets envoyés à tous les appareils (et pas seulement à votre tablette) d\'un réseau Wi-Fi qui utilise des adresses de multidiffusion. Cette autorisation entraîne une consommation d\'énergie supérieure au mode de diffusion simple."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Permet à l\'application de recevoir les paquets envoyés à tous les appareils sur un réseau Wi-Fi via des adresses multicast, et pas seulement sur le téléviseur. Cette fonctionnalité utilise plus d\'énergie que le mode non multicast."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permet à l\'application de recevoir des paquets envoyés à tous les appareils (et pas seulement à votre téléphone) d\'un réseau Wi-Fi qui utilise des adresses de multidiffusion. Cette autorisation entraîne une consommation d\'énergie supérieure au mode de diffusion simple."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accéder aux paramètres Bluetooth"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Accéder aux paramètres Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet à l\'application de configurer la tablette Bluetooth locale, d\'identifier des appareils distants et de les associer à la tablette."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Permet à l\'application de configurer le téléviseur Bluetooth local et de l\'associer à des appareils à distance."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet à l\'application de configurer le téléphone Bluetooth local, d\'identifier des appareils distants et de les associer au téléphone."</string>
@@ -411,7 +419,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permet à l\'application de connecter la tablette aux réseaux WiMAX et de l\'en déconnecter."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Permet à l\'application de connecter le téléviseur et de le déconnecter des réseaux WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permet à l\'application de connecter le téléphone aux réseaux WiMAX et de l\'en déconnecter."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"associer à des appareils Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"Associer à appareils Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet à l\'application d\'accéder à la configuration du Bluetooth sur la tablette, et d\'établir et accepter des connexions avec les appareils associés."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permet à l\'application d\'accéder à la configuration Bluetooth du téléviseur et d\'associer ce dernier à des appareils."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet à l\'application d\'accéder à la configuration du Bluetooth sur le téléphone, et d\'établir et accepter des connexions avec les appareils associés."</string>
@@ -445,7 +453,7 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet à une application de modifier les paramètres de synchronisation d\'un compte. Cette autorisation peut, par exemple, être utilisée pour activer la synchronisation de l\'application Contacts avec un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Lecture des statistiques de synchronisation"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permet à une application d\'accéder aux statistiques de synchronisation d\'un compte, y compris l\'historique des événements de synchronisation et le volume de données synchronisées."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"écrire les flux auxquels vous êtes abonné"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"Écrire les flux avec abonnement"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Permet à l\'application de modifier les flux en cours de synchronisation. Des applications malveillantes peuvent exploiter cette fonctionnalité pour modifier vos flux synchronisés."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"voir les termes ajoutés au dictionnaire"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet à l\'application d\'accéder aux mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permet à une application de diriger la sortie multimédia vers d\'autres appareils externes."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Accéder aux sessions d\'installation"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permet à une application d\'accéder aux sessions d\'installation. Cela lui permet de consulter les détails relatifs à l\'installation des packages actifs."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Demander l\'installation de packages"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permet à une application de demander l\'installation de packages."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Appuyez deux fois pour régler le zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Impossible d\'ajouter le widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"OK"</string>

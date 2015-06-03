@@ -188,6 +188,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Vyzvánění vypnuto"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrační vyzvánění"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Vyzvánění zapnuto"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Příprava na aktualizaci"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Zpracovávání balíčku aktualizací…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televize se vypne."</string>
@@ -246,11 +248,11 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načíst obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Můžete prozkoumat obsah okna, se kterým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnout funkci Prozkoumání dotykem"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Položky, na které klepnete, budou přečteny nahlas a obrazovku bude možné procházet pomocí gest."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Položky, na které klepnete, budou přečteny nahlas a obrazovku bude možné procházet pomocí gest."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za účelem usnadnění přístupu k obsahu aplikací mohou být nainstalovány skripty."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovat zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový řádek"</string>
@@ -267,6 +269,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Umožňuje aplikaci přijmout a zpracovat zprávy SMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"příjem textových zpráv (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čtení zpráv informačních služeb"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Přístup k dostupným účtům."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čtení zdrojů přihlášených k odběru"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čtení textových zpráv (SMS nebo MMS)"</string>
@@ -1067,7 +1075,7 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všechny soubory uložené v úložišti USB budou vymazány. Tuto akci nelze vrátit zpět."</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Vyberte klávesnice"</string>
@@ -1106,6 +1114,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikaci směrovat výstup médií do dalších externích zařízení."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Čtení instalačních relací"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Povoluje aplikaci číst instalační relace. Díky tomu můžete zobrazit podrobnosti o aktivních instalacích balíčku."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Žádat o instalaci balíčků"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Umožňuje aplikaci požádat o instalaci balíčků."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dvojitým dotykem můžete ovládat přiblížení"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nelze přidat."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Přejít"</string>

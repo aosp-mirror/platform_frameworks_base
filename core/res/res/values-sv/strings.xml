@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringsignal av"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrerande ringsignal"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringsignal på"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Förbered för uppdatering"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Uppdateringspaketet behandlas ..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Tv:n stängs av."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillåter att appen tar emot och hanterar SMS. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ta emot textmeddelanden (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillåter att appen tar emot och hanterar MMS-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"läsa SMS-meddelanden"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dina konton"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få åtkomst till tillgängliga konton."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"läsa flöden som du prenumererar på"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillåter att appen får information om aktuella synkroniserade flöden."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"skicka SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Tillåter att appen omdirigerar medieuppspelningar till andra externa enheter."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Läsa installationssessioner"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillåt appen att läsa installationssessioner. Det ger den tillgång till uppgifter om aktiva paketinstallationer."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Begär installationspaket"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Tillåter att en app begär paketinstallation."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryck två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Det gick inte att lägga till widgeten."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Kör"</string>

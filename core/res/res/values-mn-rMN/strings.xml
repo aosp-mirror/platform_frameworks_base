@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Хонх унтраах"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Хонхны чичиргээ."</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Хонх ассан"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Шинэчлэлд бэлдэх"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Шинэчлэх багц боловсруулах..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Унтрааж байна…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таны таблет унтрах болно."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Таны телевиз унтрах болно."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Апп нь SMS мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"текст мессеж(МMS) хүлээж авах"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Апп нь MMS мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"үүрэн өргөн дамжууллын мессеж унших"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Апп нь таны төхөөрөмжийн хүлээн авсан үүрэн өргөн дамжуулах мессежийг унших боломжтой. Үүрэн өргөн дамжууллын мэдэгдэл нь яаралтай нөхцөл байдлыг анхааруулах зорилгоор зарим байршлуудад хүрдэг. Хортой апп нь яаралтай үүрэн өргөн дамжууллыг хүлээн авсан үед таны төхөөрөмжийн ажиллагаа болон чадамжид нөлөөлөх боломжтой."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Таны акаунт"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Боломжит акаунтад хандах."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"бүртгүүлсэн хангамжийг унших"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Апп нь одоогийн синк хийгдсэн хангамжийн талаарх мэдээллийг авах боломжтой."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS мессеж илгээх"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Апп нь SMS мессеж илгээх боломжтой. Энэ нь санаандгүй төлбөрт оруулж болзошгүй. Хортой апп нь таны зөвшөөрөлгүйгээр мессеж илгээн таныг төлбөрт оруулж болзошгүй."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"таны текст мессежийг унших(SMS эсвэл MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликешн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Суулгах сешн унших"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Багц суулгахыг хүсэх"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Аппликейшн нь багц суулгахыг хүсэх боломжтой."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Очих"</string>

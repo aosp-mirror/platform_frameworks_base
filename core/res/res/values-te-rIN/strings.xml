@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"రింగర్ ఆఫ్‌లో ఉంది"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"రింగర్ వైబ్రేట్‌లో ఉంది"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"రింగర్ ఆన్‌లో ఉంది"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"నవీకరణ కోసం సిద్ధం చేయండి"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"నవీకరణ ప్యాకేజీని ప్రాసెస్ చేస్తోంది…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"షట్ డౌన్ చేయబడుతోంది…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"మీ టాబ్లెట్ షట్‌డౌన్ చేయబడుతుంది."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"మీ టీవీ షట్ డౌన్ చేయబడుతుంది."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"వచన సందేశాలను (MMS) స్వీకరించడం"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"సెల్ ప్రసార సందేశాలను చదవడం"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సెల్ ప్రసార హెచ్చరికలు అత్యవసర పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని స్థానాల్లో అందించబడతాయి. అత్యవసర సెల్ ప్రసారం స్వీకరించినప్పుడు హానికరమైన అనువర్తనాలు మీ పరికరం యొక్క పనితీరు లేదా నిర్వహణకు అంతరాయం కలిగించవచ్చు."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"మీ ఖాతాలు"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"అందుబాటులో ఉన్న ఖాతాలను ప్రాప్యత చేయండి."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ప్రస్తుతం సమకాలీకరించిన ఫీడ్‌ల గురించి వివరాలను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS సందేశాలను పంపడం"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS సందేశాలు పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఊహించని ఛార్జీలు విధించబడవచ్చు. హానికరమైన అనువర్తనాలు మీ నిర్ధారణ లేకుండానే సందేశాలను పంపడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"మీ వచన సందేశాలు (SMS లేదా MMS) చదవడం"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"మీడియా అవుట్‌పుట్‌ను ఇతర బాహ్య పరికరాలకు మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ఇన్‌స్టాల్ ప్యాకేజీలను అభ్యర్థించడానికి అనుమతి"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ప్యాకేజీల ఇన్‌స్టాలేషన్ అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"జూమ్ నియంత్రణ కోసం రెండుసార్లు తాకండి"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"వెళ్లు"</string>

@@ -187,6 +187,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvanītājs izslēgts"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Zvanītājs vibrācijas režīmā"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvanītājs ieslēgts"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Sagatavošanās atjauninājumam"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Notiek pakotņu atjaunināšanas apstrāde…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks beidzēts."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizors tiks izslēgts."</string>
@@ -266,6 +268,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ļauj lietotnei saņemt un apstrādāt īsziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"saņemt ziņojumus (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ļauj lietotnei saņemt un apstrādāt multiziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"šūnu apraides ziņojumu lasīšana"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ļauj lietotnei lasīt ierīcē saņemtos šūnu apraides ziņojumus. Šūnu apraides brīdinājumi tiek piegādāti dažās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jūsu konti"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Piekļūstiet pieejamajiem kontiem."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lasīt abonētās plūsmas"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ļauj lietotnei iegūt informāciju par pašlaik sinhronizētajām plūsmām."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sūtīt īsziņas"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ļauj lietotnei sūtīt īsziņas. Tas var radīt neparedzētas izmaksas. Ļaunprātīgas lietotnes var radīt jums izmaksas, sūtot ziņojumus bez jūsu apstiprinājuma."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lasīt ziņojumus (SMS vai MMS)"</string>
@@ -643,7 +651,7 @@
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Norādīja:"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Radinieks"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Māsa"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"Laul. draugs/draudz."</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Laulātais"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Pielāgotas"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Mājās"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Darbs"</string>
@@ -1061,7 +1069,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Visi jūsu kartes dati tiks zaudēti."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatēt"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB atkļūdošana ir pievienota."</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Pieskarieties, lai atspējotu USB atkļūdošanu."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Iespējot USB atkļūdošanu."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatūras maiņa"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izvēlēties tastatūru"</string>
     <string name="show_ime" msgid="9157568568695230830">"Rādīt ievades metodi"</string>
@@ -1074,7 +1082,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Notiek <xliff:g id="NAME">%s</xliff:g> sagatavošana"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Tiek meklētas kļūdas"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Tika atrasta jauna <xliff:g id="NAME">%s</xliff:g>."</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Varat to izmantot fotoattēlu un satura pārsūtīšanai."</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotoattēlu un satura pārsūtīšanai."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> ir bojāta"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> atmiņa ir bojāta. Mēģiniet to atkārtoti formatēt."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> tika negaidīti izņemta"</string>
@@ -1099,6 +1107,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ļauj lietojumprogrammai maršrutēt multivides datu izeju uz citām ārējām ierīcēm."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Instalēšanas sesiju lasīšana"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ļauj lietojumprogrammai lasīt instalēšanas sesijas. Tādējādi lietojumprogrammai ir pieejama informācija par aktīvajām pakotņu instalācijām."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Pieprasīt pakotņu instalēšanu"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Ļauj lietojumprogrammai pieprasīt pakotņu instalēšanu."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pieskarieties divreiz, lai kontrolētu tālummaiņu."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nevarēja pievienot logrīku."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Doties uz"</string>

@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"鈴聲震動"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"鈴聲開啟"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"準備進行更新"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"正在處理更新套件…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在關機..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板電腦將會關機。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的電視即將關閉。"</string>
@@ -212,7 +214,7 @@
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛行模式為 [關閉]"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"協助"</string>
-    <string name="global_action_voice_assist" msgid="7751191495200504480">"語音小幫手"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"語音助手"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理短訊。這表示應用程式可監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收短訊 (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理 MMS 訊息。這表示應用程式可監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允許應用程式讀取您裝置接收的區域廣播訊息。某些地點會發出區域廣播警報，警告您發生緊急狀況。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的性能或運作。"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帳戶"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"讀取訂閱的資訊提供"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允許應用程式取得目前已同步的資訊提供的詳細資料。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"傳送 SMS 短訊"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允許應用程式傳送短訊，但可能產生未預期的費用。惡意應用程式可能會未經您確認擅自傳送短訊，增加您的支出。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"讀取您的短訊 (SMS 或 MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允許應用程式將媒體輸出轉送至其他外部裝置。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"讀取安裝工作階段"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允許應用程式讀取安裝工作階段。應用程式將可查看目前安裝套裝的詳細資料。"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"要求安裝套件"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"允許應用程式要求安裝套件"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"輕觸兩下即可控制縮放"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>
