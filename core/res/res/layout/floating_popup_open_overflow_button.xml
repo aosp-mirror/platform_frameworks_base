@@ -20,6 +20,10 @@
     android:layout_height="match_parent"
     android:minWidth="@dimen/floating_toolbar_menu_button_minimum_width"
     android:minHeight="@dimen/floating_toolbar_height"
+    android:paddingStart="0dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    android:paddingEnd="4dp"
     android:src="@drawable/ic_menu_moreoverflow_material"
     android:contentDescription="@string/floating_toolbar_open_overflow_description"
     android:background="?attr/selectableItemBackgroundBorderless" />
