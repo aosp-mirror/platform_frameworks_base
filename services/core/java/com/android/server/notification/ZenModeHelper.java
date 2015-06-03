@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.media.AudioAttributes.USAGE_ALARM;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
@@ -49,8 +50,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
@@ -404,6 +405,10 @@ public class ZenModeHelper {
         final boolean muteCalls = zen && !mConfig.allowCalls && !mConfig.allowRepeatCallers
                 || mEffectsSuppressed;
         applyRestrictions(muteCalls, USAGE_NOTIFICATION_RINGTONE);
+
+        // alarm restrictions
+        final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        applyRestrictions(muteAlarms, USAGE_ALARM);
     }
 
     private void applyRestrictions(boolean mute, int usage) {
