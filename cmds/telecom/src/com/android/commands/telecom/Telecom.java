@@ -68,9 +68,9 @@ public final class Telecom extends BaseCommand {
                 "telecom set-phone-account-disabled: Disables the given phone account, if it \n" +
                 " has already been registered with telecom.\n" +
                 "\n" +
-                "telecom set-default_dialer: Sets the default dialer to the given component. \n" +
+                "telecom set-default-dialer: Sets the default dialer to the given component. \n" +
                 "\n" +
-                "telecom get-default_dialer: Displays the current default dialer. \n"
+                "telecom get-default-dialer: Displays the current default dialer. \n"
                 );
     }
 
