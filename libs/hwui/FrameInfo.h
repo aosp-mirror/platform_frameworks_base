@@ -22,6 +22,7 @@
 #include <utils/Timers.h>
 
 #include <memory.h>
+#include <string>
 
 namespace android {
 namespace uirenderer {
@@ -48,6 +49,8 @@ enum class FrameInfoIndex {
     // Must be the last value!
     kNumIndexes
 };
+
+extern std::string FrameInfoNames[];
 
 enum class FrameInfoFlags {
     kWindowLayoutChanged = 1 << 0,
