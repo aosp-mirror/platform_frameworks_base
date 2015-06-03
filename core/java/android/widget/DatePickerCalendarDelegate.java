@@ -115,7 +115,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
                 R.styleable.DatePicker_internalLayout, R.layout.date_picker_material);
 
         // Set up and attach container.
-        mContainer = (ViewGroup) inflater.inflate(layoutResourceId, mDelegator);
+        mContainer = (ViewGroup) inflater.inflate(layoutResourceId, mDelegator, false);
+        mDelegator.addView(mContainer);
 
         // Set up header views.
         final ViewGroup header = (ViewGroup) mContainer.findViewById(R.id.date_picker_header);
@@ -471,7 +472,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     @Override
     public void setEnabled(boolean enabled) {
-        mContainer.setEnabled(false);
+        mContainer.setEnabled(enabled);
+        mDayPickerView.setEnabled(enabled);
+        mYearPickerView.setEnabled(enabled);
+        mHeaderYear.setEnabled(enabled);
+        mHeaderMonthDay.setEnabled(enabled);
     }
 
     @Override
@@ -481,8 +486,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     @Override
     public CalendarView getCalendarView() {
-        throw new UnsupportedOperationException(
-                "CalendarView does not exists for the new DatePicker");
+        throw new UnsupportedOperationException("Not supported by calendar-mode DatePicker");
     }
 
     @Override
