@@ -41,13 +41,32 @@ class Texture;
  * Position is always enabled by MeshState, these other attributes
  * are enabled/disabled dynamically based on mesh content.
  */
-enum class VertexAttribFlags {
-    kNone = 0,
-    kTextureCoord = 1 << 0,
-    kColor = 1 << 1,
-    kAlpha = 1 << 2,
+
+namespace VertexAttribFlags {
+    enum {
+        None = 0,
+        TextureCoord = 1 << 0,
+        Color = 1 << 1,
+        Alpha = 1 << 2,
+    };
 };
-MAKE_FLAGS_ENUM(VertexAttribFlags)
+
+/*
+ * Enumerates transform features
+ */
+namespace TransformFlags {
+    enum {
+        None = 0,
+
+        // offset the eventual drawing matrix by a tiny amount to
+        // disambiguate sampling patterns with non-AA rendering
+        OffsetByFudgeFactor = 1 << 0,
+
+        // Canvas transform isn't applied to the mesh at draw time,
+        //since it's already built in.
+        MeshIgnoresCanvasTransform = 1 << 1,
+    };
+};
 
 /**
  * Structure containing all data required to issue an OpenGL draw
@@ -116,10 +135,22 @@ struct Glop {
     } fill;
 
     struct Transform {
-        Matrix4 ortho; // TODO: out of op, since this is static per FBO
+        // Orthographic projection matrix for current FBO
+        // TODO: move out of Glop, since this is static per FBO
+        Matrix4 ortho;
+
+        // modelView transform, accounting for delta between mesh transform and content of the mesh
+        // often represents x/y offsets within command, or scaling for mesh unit size
         Matrix4 modelView;
+
+        // Canvas transform of Glop - not necessarily applied to geometry (see flags)
         Matrix4 canvas;
-        bool fudgingOffset;
+        int transformFlags;
+
+       const Matrix4& meshTransform() const {
+           return (transformFlags & TransformFlags::MeshIgnoresCanvasTransform)
+                   ? Matrix4::identity() : canvas;
+       }
     } transform;
 
     const RoundRectClipState* roundRectClipState;
