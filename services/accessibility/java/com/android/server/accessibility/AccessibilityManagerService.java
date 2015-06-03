@@ -3240,8 +3240,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // Clip to the window bounds.
                 Rect windowBounds = mTempRect1;
                 getWindowBounds(focus.getWindowId(), windowBounds);
-                boundsInScreen.intersect(windowBounds);
-                if (boundsInScreen.isEmpty()) {
+                if (!boundsInScreen.intersect(windowBounds)) {
                     return false;
                 }
 
@@ -3255,8 +3254,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // Clip to the screen bounds.
                 Point screenSize = mTempPoint;
                 mDefaultDisplay.getRealSize(screenSize);
-                boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y);
-                if (boundsInScreen.isEmpty()) {
+                if (!boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y)) {
                     return false;
                 }
 
