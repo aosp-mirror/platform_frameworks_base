@@ -48,6 +48,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.IState;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -1684,7 +1685,9 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump ConnectivityService.Tether " +
@@ -1693,19 +1696,23 @@ public class Tethering extends BaseNetworkObserver {
                     return;
         }
 
+        pw.println("Tethering:");
+        pw.increaseIndent();
+        pw.print("mUpstreamIfaceTypes:");
         synchronized (mPublicSync) {
-            pw.println("mUpstreamIfaceTypes: ");
             for (Integer netType : mUpstreamIfaceTypes) {
-                pw.println(" " + netType);
+                pw.print(" " + ConnectivityManager.getNetworkTypeName(netType));
             }
-
             pw.println();
+
             pw.println("Tether state:");
+            pw.increaseIndent();
             for (Object o : mIfaces.values()) {
-                pw.println(" " + o);
+                pw.println(o);
             }
+            pw.decreaseIndent();
         }
-        pw.println();
+        pw.decreaseIndent();
         return;
     }
 }
