@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Widget;
 import android.content.Context;
@@ -608,7 +609,16 @@ public class NumberPicker extends LinearLayout {
 
         mSolidColor = attributesArray.getColor(R.styleable.NumberPicker_solidColor, 0);
 
-        mSelectionDivider = attributesArray.getDrawable(R.styleable.NumberPicker_selectionDivider);
+        final Drawable selectionDivider = attributesArray.getDrawable(
+                R.styleable.NumberPicker_selectionDivider);
+        if (selectionDivider != null) {
+            selectionDivider.setCallback(this);
+            selectionDivider.setLayoutDirection(getLayoutDirection());
+            if (selectionDivider.isStateful()) {
+                selectionDivider.setState(getDrawableState());
+            }
+        }
+        mSelectionDivider = selectionDivider;
 
         final int defSelectionDividerHeight = (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, UNSCALED_DEFAULT_SELECTION_DIVIDER_HEIGHT,
@@ -1497,6 +1507,38 @@ public class NumberPicker extends LinearLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         removeAllCallbacks();
+    }
+
+    @CallSuper
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+
+        final int[] state = getDrawableState();
+
+        if (mSelectionDivider != null && mSelectionDivider.isStateful()) {
+            mSelectionDivider.setState(state);
+        }
+    }
+
+    @CallSuper
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+
+        if (mSelectionDivider != null) {
+            mSelectionDivider.jumpToCurrentState();
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void onResolveDrawables(@ResolvedLayoutDir int layoutDirection) {
+        super.onResolveDrawables(layoutDirection);
+
+        if (mSelectionDivider != null) {
+            mSelectionDivider.setLayoutDirection(layoutDirection);
+        }
     }
 
     @Override
