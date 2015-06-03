@@ -4386,6 +4386,7 @@ package android.app {
     method public void setSharedElementReturnTransition(android.transition.Transition);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void setUserVisibleHint(boolean);
+    method public boolean shouldShowRequestPermissionRationale(java.lang.String);
     method public void startActivity(android.content.Intent);
     method public void startActivity(android.content.Intent, android.os.Bundle);
     method public void startActivityForResult(android.content.Intent, int);
