@@ -20,9 +20,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"bajt"</string>
+    <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"kilobajt"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"megabajt"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"gigabajt"</string>
     <string name="terabyteShort" msgid="231613018159186962">"terabajt"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"petabajt"</string>
@@ -205,7 +205,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Fik"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raporti i defekteve në kod"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Merr raportin e defekteve në kod"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Kjo do të mbledhë informacione rreth gjendjes aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defektit në kod. Faleminderit për durimin."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ky funksion mundëson mbledhjen e informacioneve mbi gjendjen aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defekteve në kod. Faleminderit për durimin."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modaliteti \"në heshtje\""</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zëri është çaktivizuar"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zëri është i aktivizuar"</string>
@@ -243,14 +243,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"kryej dhe menaxho telefonata"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorët"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"qasu te të dhënat nga sensorët dhe pajisjet që vishen"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Gjej përmbajtjen e dritares"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekto përmbajtjen e dritares me të cilën po bashkëvepron."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"nxjerrë përmbajtjen e dritares"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po bashkëvepron."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizo \"Eksploro me prekje\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Artikujt e prekur do të lexohen me zë të lartë dhe ekrani mund të eksplorohet duke përdorur gjeste."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivizo qasjen e zgjeruar në ueb"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skriptet mund të instalohen për ta bërë përmbajtjen e aplikacionit më të qasshme."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Vëzhgo tekstin që shkruan"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Përfshin të dhëna personale si numra kartash krediti dhe fjalëkalime."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"vëzhgojë tekstin që shkruan"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Përfshi të dhënat personale si numrat e kartave të kreditit si dhe fjalëkalimet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"shiriti i statusit"</string>
@@ -882,7 +882,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Veprimet e tekstit"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Disa funksione të sistemit mund të mos punojnë"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që ke 250 megabajt hapësirë të lirë dhe rifillo."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> është në punë."</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Prek për më shumë informacion ose për të ndaluar aplikacionin."</string>
     <string name="ok" msgid="5970060430562524910">"Në rregull"</string>
@@ -1124,7 +1124,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Këtë aplikacion po e përdor në profilin tënd të punës"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metoda e hyrjeve"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkronizo"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Qasja"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Qasshmëria"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imazhi i sfondit"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ndrysho imazhin e sfondit"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Dëgjues njoftimesh"</string>
@@ -1471,7 +1471,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"U instalua nga administratori yt"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"U fshi nga administratori yt"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde dhe kufizon dridhjen, shërbimet e vendndodhjes dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacione të tjera që mbështeten në sinkronizim mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Për një minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Deri sa ta çaktivizosh këtë"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Shpalos"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Mos shqetëso"</string>

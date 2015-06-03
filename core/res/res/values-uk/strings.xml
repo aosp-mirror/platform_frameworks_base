@@ -223,7 +223,7 @@
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Особисті додатки"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Службовий профіль"</string>
-    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контактні дані"</string>
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"отримувати доступ до контактів"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Геодані"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"використовувати геодані"</string>
@@ -259,7 +259,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дозволяє програмі бути рядком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"розгорнути/згорн. рядок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"установлювати ярлики"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"створення ярликів"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Дозволяє програмі самостійно додавати ярлики на головний екран."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"видаляти ярлики"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Дозволяє програмі самостійно вилучати ярлики з головного екрана."</string>
@@ -293,7 +293,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Дозволяє програмі вмикати режим автомобіля."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"закривати інші програми"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Дозволяє програмі припиняти фонові процеси інших програм. Це може зупиняти запущені програми."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"відображатися над іншими програмами"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"відображення поверх інших вікон"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Дозволяє програмі відображатися поверх інших програм або частин інтерфейсу користувача. Це може заважати користуватися інтерфейсом інших програм або змінювати те, що ви бачите в інших програмах."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"заставляти програму постійно функціонувати"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Дозволяє програмі робити свої частини сталими в пам’яті. Це може зменшувати обсяг пам’яті, доступної для інших програм, і сповільнювати роботу планшетного ПК."</string>
@@ -411,7 +411,7 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Дозволяє програмі отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш планшетний ПК. Використовує більше заряду, ніж режим небагатоадресних пакетів."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Додаток може отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш телевізор. Використовує більше живлення, ніж режим небагатоадресних пакетів."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Дозволяє програмі отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш телефон. Використовує більше заряду, ніж режим небагатоадресних пакетів."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"отримувати доступ до налаштувань Bluetooth"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"доступ до налаштувань Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозволяє програмі налаштовувати планшетний ПК із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Додаток може налаштовувати локальний телевізор із Bluetooth, а також знаходити віддалені пристрої та під’єднуватися до них."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозволяє програмі налаштовувати телефон із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
@@ -421,7 +421,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Дозволяє програмі під’єднувати планшетний ПК до мереж WiMAX і від’єднувати його від них."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Додаток може під’єднувати телевізор до мереж WiMAX і від’єднувати його від них."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Дозволяє програмі під’єднувати телефон до мереж WiMAX і від’єднувати його від них."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"створювати пару з пристроями Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"створення пари з пристроями Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Дозволяє програмі переглядати конфігурацію Bluetooth на планшетному ПК, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Додаток може переглядати конфігурацію Bluetooth на телевізорі, а також створювати та приймати з’єднання з під’єднаними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Дозволяє програмі переглядати конфігурацію Bluetooth на телефоні, а також створювати та приймати з’єднання зі спареними пристроями."</string>
@@ -431,7 +431,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"керувати апаратним забезпеченням для цифрових відбитків"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Увімкнути в додатку функції для додавання й видалення шаблонів цифрових відбитків."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"користуватися апаратним забезпеченням для цифрових відбитків"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"використання сканера цифрових відбитків"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозволити додатку використовувати апаратне забезпечення для автентифікації"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
@@ -455,7 +455,7 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Дозволяє програмі змінювати налаштування синхронізації для облікового запису, наприклад, вмикати синхронізацію програми Люди з обліковим записом."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Перегляд статистики синхронізації"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Дозволяє програмі читати статистику синхронізації облікового запису, зокрема історію синхронізацій і обсяг синхронізованих даних."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"запис. підписані канали"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"змінення даних про канали користувача"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Дозволяє програмі змінювати поточно синхронізовані канали. Шкідливі програми можуть змінювати ваші синхронізовані канали."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"читати додані в словник терміни"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Дозволяє програмі читати всі слова, назви та фрази, які користувач міг зберегти у своєму словнику."</string>
@@ -1540,6 +1540,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Доки ви не вимкнете"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Згорнути"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не турбувати"</string>

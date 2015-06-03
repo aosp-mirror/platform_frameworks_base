@@ -1061,8 +1061,8 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer som er lagret på USB-lagringen blir slettet. Denne handlingen kan ikke angres."</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data på kortet fjernes."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatér"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-debugging tilkoblet"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Trykk for å deaktivere USB-feilsøking."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-feilsøking tilkoblet"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Trykk for å slå av USB-feilsøking."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Endre tastatur"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Velg tastatur"</string>
     <string name="show_ime" msgid="9157568568695230830">"Vis inndatametode"</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Inntil du slår av funksjonen"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"«Ikke forstyrr»"</string>

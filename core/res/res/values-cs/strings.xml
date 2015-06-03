@@ -642,9 +642,9 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Bratr"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dítě"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Druh/družka"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner(ka)"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otec"</string>
-    <string name="relationTypeFriend" msgid="7313106762483391262">"Známý"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Kamarád(ka)"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Vedoucí"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Matka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Rodič"</string>
@@ -975,7 +975,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hlasitost oznámení"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Výchozí vyzváněcí tón"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Výchozí tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Žádné"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Žádný"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváněcí tóny"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámý vyzváněcí tón"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1540,6 +1540,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokud tuto funkci nevypnete"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nerušit"</string>

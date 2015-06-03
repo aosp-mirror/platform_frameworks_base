@@ -431,7 +431,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление сканером отпечатков"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Приложение сможет добавлять и удалять шаблоны отпечатков пальцев."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"использование сканера отпечатков"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"Использование сканера отпечатков"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Приложение сможет использовать сканер отпечатков пальцев для аутентификации."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Отсканирована только часть пальца. Повторите попытку."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не удалось распознать отпечаток. Повторите попытку."</string>
@@ -1540,6 +1540,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Свернуть"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не беспокоить"</string>

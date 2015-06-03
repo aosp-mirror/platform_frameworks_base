@@ -429,7 +429,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pinapayagan ang app na huwag paganahin ang keylock at anumang nauugnay na seguridad sa password. Halimbawa, hindi pinapagana ng telepono ang keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pinapagana ang keylock kapag tapos na ang tawag."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"pamahalaan ang hardware ng fingerprint"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Pinapayagan ang app na mag-invoke ng mga paraan upang magdagdag at mag-delete ng mga template ng fingerprint na magagamit."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"gamitina ng hardware ng fingerprint"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"gamitin ang hardware ng fingerprint"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Pinapayagan ang app na gumamit ng hardware ng fingerprint para sa pagpapatotoo"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hanggang sa i-off mo ito"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"I-collapse"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Huwag istorbohin"</string>

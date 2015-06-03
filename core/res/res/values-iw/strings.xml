@@ -207,7 +207,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"דיווח על באג"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. התאזר בסבלנות."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. אנא המתן בסבלנות."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"מצב שקט"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"הקול כבוי"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"קול מופעל"</string>
@@ -524,9 +524,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטלפון או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"שינוי נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"שינוי של נעילת המסך."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"נעל את המסך"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"לנעול את המסך"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"שלוט באופן ובתזמון של נעילת המסך"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"מחק את כל הנתונים"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"למחוק את כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"מחק את נתוני הטאבלט ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"מחיקה של נתוני הטלוויזיה ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"מחק את נתוני הטלפון ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
@@ -1483,7 +1483,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"האפליקציה מוצמדת: ביטול ההצמדה אסור במכשיר הזה."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"הצמדת המסך בוטלה"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"בקש קוד אימות לפני ביטול הצמדה"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏בקש PIN לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"בקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"הותקנה על ידי מנהל המערכת שלך"</string>
@@ -1540,6 +1540,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"עד שתכבה"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"כווץ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"נא לא להפריע"</string>

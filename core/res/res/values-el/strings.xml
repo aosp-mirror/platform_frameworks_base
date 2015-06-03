@@ -72,7 +72,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"Αναγνωριστικό συνδεδεμένης γραμμής"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Περιορισμός αναγνωριστικού συνδεδεμένης πρόσβασης"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Προώθηση κλήσεων"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Αναμ. κλήσ."</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Αναμονή"</string>
     <string name="BaMmi" msgid="455193067926770581">"Φραγή κλήσεων"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Αλλαγή κωδικού πρόσβασης"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Αλλαγή αριθμού PIN"</string>
@@ -640,13 +640,13 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Βοηθός"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Αδερφός"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Παιδί"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Σύντρ. ελεύθ. συμβ."</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Σύνοικος"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Πατέρας"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Φίλος"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Διευθυντής"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Μητέρα"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Γονέας"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Συνεργάτης"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Σύντροφος"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Συστήθηκε από"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Συγγενής"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Αδερφή"</string>
@@ -671,7 +671,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Πατήστε \"Menu\" για ξεκλείδωμα ή για κλήση έκτακτης ανάγκης."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Σχεδιασμός μοτίβου για ξεκλείδωμα"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Επείγοντα περιστατικά"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Κλήση έκτακτης ανάγκης"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Επιστροφή στην κλήση"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Σωστό!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Προσπαθήστε ξανά"</string>
@@ -1062,7 +1062,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Όλα τα δεδομένα που υπάρχουν στην κάρτα σας θα χαθούν."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Διαμόρφωση"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Αγγίξτε για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Απεν. του εντοπ. σφαλμάτων USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Αλλαγή πληκτρολογίου"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Επιλογή πληκτρολογίων"</string>
     <string name="show_ime" msgid="9157568568695230830">"Εμφάνιση μεθόδου εισαγ."</string>
@@ -1075,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Προετοιμασία <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Έλεγχος για σφάλματα"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Εντοπίστηκε νέο μέσο αποθήκευσης <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Για μεταφορά φωτογραφιών και πολυμέσων"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Για μεταφορά φωτ./πολυμέσων"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Κατεστραμμένος χώρος αποθήκευσης <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Ο χώρος αποθήκευσης <xliff:g id="NAME">%s</xliff:g> είναι κατεστραμμένος. Δοκιμάστε να τον διαμορφώσετε ξανά."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Μη αναμενόμενη αφαίρεση <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1295,7 +1295,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ασφαλές"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Ξεχάσατε το μοτίβο"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Εσφαλμένο μοτίβο"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Λάθος μοτίβο"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Εσφαλμένος κωδικός πρόσβασης"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Εσφαλμένος κωδικός PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%1$d</xliff:g> δευτερόλεπτα."</string>
@@ -1506,6 +1506,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Μέχρι να το απενεργοποιήσετε"</string>
+    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
+    <skip />
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Σύμπτυξη"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Μην ενοχλείτε"</string>
