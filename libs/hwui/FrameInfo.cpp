@@ -20,7 +20,7 @@
 namespace android {
 namespace uirenderer {
 
-std::string FrameInfoNames[] = {
+const std::string FrameInfoNames[] = {
     "Flags",
     "IntendedVsync",
     "Vsync",
