@@ -1100,7 +1100,7 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Laat \'n program toe om media-uitvoere na ander eksterne toestelle te roeteer."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lees installasiesessies"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Laat \'n program toe om installasiesessies te lees. Dit laat dit toe om besonderhede van aktiewe pakketinstallasies te sien."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Versoek dat pakkette geïnstalleer word"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Versoek installeer-pakette"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Laat \'n program toe om te versoek dat pakkette geïnstalleer word."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>

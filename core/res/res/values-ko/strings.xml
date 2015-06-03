@@ -547,7 +547,7 @@
     <item msgid="869923650527136615">"모바일"</item>
     <item msgid="7897544654242874543">"회사"</item>
     <item msgid="1103601433382158155">"회사 팩스"</item>
-    <item msgid="1735177144948329370">"집(팩스)"</item>
+    <item msgid="1735177144948329370">"집 팩스"</item>
     <item msgid="603878674477207394">"호출기"</item>
     <item msgid="1650824275177931637">"기타"</item>
     <item msgid="9192514806975898961">"맞춤설정"</item>
@@ -590,7 +590,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"휴대전화"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"직장"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"직장 팩스"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"집(팩스)"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"집 팩스"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"호출기"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"기타"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"콜백"</string>

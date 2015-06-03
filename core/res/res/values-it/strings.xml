@@ -1075,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparazione della <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Ricerca errori"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nuova <xliff:g id="NAME">%s</xliff:g> rilevata"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Per il trasferimento di foto e contenuti multimediali"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Per trasferire foto e altri file"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> danneggiata"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"La <xliff:g id="NAME">%s</xliff:g> è danneggiata. Prova a riformattarla."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Rimozione imprevista della <xliff:g id="NAME">%s</xliff:g>"</string>

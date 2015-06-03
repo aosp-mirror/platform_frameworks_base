@@ -1075,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> előkészítése"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Hibák keresése"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Új <xliff:g id="NAME">%s</xliff:g> észlelve"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotók és más médiatartalmak átviteléhez"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotók és más tartalmak átviteléhez"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"A(z) <xliff:g id="NAME">%s</xliff:g> sérült"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"A(z) <xliff:g id="NAME">%s</xliff:g> sérült, próbálja meg újraformázni"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"A(z) <xliff:g id="NAME">%s</xliff:g> váratlanul eltávolítva"</string>
@@ -1321,7 +1321,7 @@
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Elfelejtette a felhasználónevét vagy jelszavát?\nKeresse fel a "<b>"google.com/accounts/recovery"</b>" webhelyet."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Fiók ellenőrzése..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg PIN kódját. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal rosszul rajzolta le feloldási mintát. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"A táblagépet <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal próbálta meg sikertelenül feloldani. <xliff:g id="NUMBER_1">%d</xliff:g> további sikertelen próbálkozás után a rendszer visszaállítja a táblagép gyári alapértelmezett beállításait, és minden felhasználói adat elvész."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal sikertelenül próbálta feloldani a tévét. A tévé <xliff:g id="NUMBER_1">%d</xliff:g> további sikertelen kísérlet esetén visszaáll a gyári alapbeállításokra, és minden felhasználói adat elvész."</string>

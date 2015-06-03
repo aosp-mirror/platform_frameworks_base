@@ -205,7 +205,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Matikan daya"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan bug"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpulkan informasi tentang status perangkat Anda saat ini, untuk dikirimkan sebagai pesan email. Akan memakan sedikit waktu dari memulai laporan bug hingga siap untuk dikirim; bersabarlah."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpulkan informasi status perangkat Anda saat ini, untuk dikirimkan sebagai pesan email. Harap bersabar, mungkin perlu waktu untuk memulai laporan bug hingga siap dikirim."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mode senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Suara MATI"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Suara AKTIF"</string>
