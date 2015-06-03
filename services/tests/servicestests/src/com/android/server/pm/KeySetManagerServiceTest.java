@@ -118,7 +118,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -145,10 +145,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         /* add again, to represent upgrade of package */
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -175,13 +175,13 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         /* now upgrade with new key */
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         signingKeys.removeAt(0);
         signingKeys.add(keyB);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
@@ -212,14 +212,14 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys);
-        mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps1, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps2, signingKeys);
 
         /* now upgrade with new key */
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         signingKeys.removeAt(0);
         signingKeys.add(keyB);
-        mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps1, signingKeys);
 
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
@@ -255,13 +255,13 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys1 = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys1.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys1);
+        mKsms.addSigningKeySetToPackageLPw(ps1, signingKeys1);
 
         /* collect second signing key and add */
         ArraySet<PublicKey> signingKeys2 = new ArraySet<PublicKey>();
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         signingKeys2.add(keyB);
-        mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys2);
+        mKsms.addSigningKeySetToPackageLPw(ps2, signingKeys2);
 
         /* verify first is unchanged */
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
@@ -300,10 +300,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps1, signingKeys);
 
         /* add again for second package */
-        mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps2, signingKeys);
 
         assertEquals(2, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -333,12 +333,12 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps1, signingKeys);
 
         /* give ps2 a superset (add keyB) */
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         signingKeys.add(keyB);
-        mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps2, signingKeys);
 
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
@@ -374,12 +374,12 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         /* now with additional key */
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         signingKeys.add(keyB);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
@@ -413,7 +413,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys.add(keyA);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -441,7 +441,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         keys.add(keyA);
         definedKS.put("aliasA", keys);
         definedKS.put("aliasA2", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         assertEquals(2, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -470,7 +470,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys.add(keyA);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         /* now upgrade to different defined key-set */
         keys = new ArraySet<PublicKey>();
@@ -478,7 +478,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         keys.add(keyB);
         definedKS.remove("aliasA");
         definedKS.put("aliasB", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -510,14 +510,14 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys.add(keyA);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         /* now upgrade to different set w/same alias as before */
         keys = new ArraySet<PublicKey>();
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         keys.add(keyB);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
@@ -551,7 +551,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         keys2.add(keyB);
         definedKS.put("aliasA", keys1);
         definedKS.put("aliasB", keys2);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         /* now upgrade to different set (B, C) */
         keys1 = new ArraySet<PublicKey>();
@@ -559,7 +559,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         keys1.add(keyC);
         definedKS.remove("aliasA");
         definedKS.put("aliasC", keys1);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 3));
         assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 3));
@@ -612,7 +612,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys1.add(keyA);
         definedKS.put("aliasA", keys1);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         /* now upgrade to different set */
         ArraySet<PublicKey> keys2 = new ArraySet<PublicKey>();
@@ -620,12 +620,12 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         keys2.add(keyB);
         definedKS.remove("aliasA");
         definedKS.put("aliasB", keys2);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         /* upgrade back to original */
         definedKS.remove("aliasB");
         definedKS.put("aliasA", keys1);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
 
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 2));
@@ -655,10 +655,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys.add(keyA);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
         ArraySet<String> upgradeKS = new ArraySet<String>();
         upgradeKS.add("aliasA");
-        mKsms.addUpgradeKeySetsToPackageLPw(ps.name, upgradeKS);
+        mKsms.addUpgradeKeySetsToPackageLPw(ps, upgradeKS);
 
         assertEquals(1, ps.keySetData.getUpgradeKeySets().length);
         assertEquals(1, ps.keySetData.getUpgradeKeySets()[0]);
@@ -677,11 +677,11 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys.add(keyA);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
         ArraySet<String> upgradeKS = new ArraySet<String>();
         upgradeKS.add("aliasB");
         try {
-            mKsms.addUpgradeKeySetsToPackageLPw(ps.name, upgradeKS);
+            mKsms.addUpgradeKeySetsToPackageLPw(ps, upgradeKS);
         } catch (IllegalArgumentException e) {
 
             /* should have been caught in packagemanager, so exception thrown */
@@ -704,17 +704,17 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         keys.add(keyA);
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
         ArraySet<String> upgradeKS = new ArraySet<String>();
         upgradeKS.add("aliasA");
-        mKsms.addUpgradeKeySetsToPackageLPw(ps.name, upgradeKS);
+        mKsms.addUpgradeKeySetsToPackageLPw(ps, upgradeKS);
 
         keys = new ArraySet<PublicKey>();
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         keys.add(keyB);
         definedKS.remove("aliasA");
         definedKS.put("aliasB", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
         assertNull(ps.keySetData.getUpgradeKeySets());
     }
 
@@ -729,7 +729,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps, signingKeys);
 
         /* remove its references */
         mKsms.removeAppKeySetDataLPw(ps.name);
@@ -754,8 +754,8 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         ArraySet<PublicKey> signingKeys = new ArraySet<PublicKey>();
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         signingKeys.add(keyA);
-        mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys);
-        mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps1, signingKeys);
+        mKsms.addSigningKeySetToPackageLPw(ps2, signingKeys);
 
         /* remove references from first package */
         mKsms.removeAppKeySetDataLPw(ps1.name);
@@ -784,13 +784,13 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         /* removal requires signing keyset to be specified (since all apps are
          * assumed to have it).  We skipped this in the defined tests, but can't
          * here. */
-        mKsms.addSigningKeySetToPackageLPw(ps.name, keys);
+        mKsms.addSigningKeySetToPackageLPw(ps, keys);
 
         definedKS.put("aliasA", keys);
-        mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
+        mKsms.addDefinedKeySetsToPackageLPw(ps, definedKS);
         ArraySet<String> upgradeKS = new ArraySet<String>();
         upgradeKS.add("aliasA");
-        mKsms.addUpgradeKeySetsToPackageLPw(ps.name, upgradeKS);
+        mKsms.addUpgradeKeySetsToPackageLPw(ps, upgradeKS);
         mKsms.removeAppKeySetDataLPw(ps.name);
 
         assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));

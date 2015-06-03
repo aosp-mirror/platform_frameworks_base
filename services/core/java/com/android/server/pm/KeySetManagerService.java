@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
+
+import com.android.internal.util.Preconditions;
 import android.content.pm.PackageParser;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -98,6 +101,7 @@ public class KeySetManagerService {
             mRefCount++;
             return;
         }
+
         public long decrRefCountLPw() {
             mRefCount--;
             return mRefCount;
@@ -168,25 +172,82 @@ public class KeySetManagerService {
     }
 
     /**
+     * addScannedPackageLPw directly modifies the package metadata in  pm.Settings
+     * at a point of no-return.  We need to make sure that the scanned package does
+     * not contain bad keyset meta-data that could generate an incorrect
+     * PackageSetting. Verify that there is a signing keyset, there are no issues
+     * with null objects, and the upgrade and defined keysets match.
+     *
+     * Returns true if the package can safely be added to the keyset metadata.
+     */
+    public void assertScannedPackageValid(PackageParser.Package pkg)
+            throws PackageManagerException {
+        if (pkg == null || pkg.packageName == null) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Passed invalid package to keyset validation.");
+        }
+        ArraySet<PublicKey> signingKeys = pkg.mSigningKeys;
+        if (signingKeys == null || !(signingKeys.size() > 0) || signingKeys.contains(null)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Package has invalid signing-key-set.");
+        }
+        ArrayMap<String, ArraySet<PublicKey>> definedMapping = pkg.mKeySetMapping;
+        if (definedMapping != null) {
+            if (definedMapping.containsKey(null) || definedMapping.containsValue(null)) {
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                        "Package has null defined key set.");
+            }
+            int defMapSize = definedMapping.size();
+            for (int i = 0; i < defMapSize; i++) {
+                if (!(definedMapping.valueAt(i).size() > 0)
+                        || definedMapping.valueAt(i).contains(null)) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Package has null/no public keys for defined key-sets.");
+                }
+            }
+        }
+        ArraySet<String> upgradeAliases = pkg.mUpgradeKeySets;
+        if (upgradeAliases != null) {
+            if (definedMapping == null || !(definedMapping.keySet().containsAll(upgradeAliases))) {
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                        "Package has upgrade-key-sets without corresponding definitions.");
+            }
+        }
+    }
+
+    public void addScannedPackageLPw(PackageParser.Package pkg) {
+        Preconditions.checkNotNull(pkg, "Attempted to add null pkg to ksms.");
+        Preconditions.checkNotNull(pkg.packageName, "Attempted to add null pkg to ksms.");
+        PackageSetting ps = mPackages.get(pkg.packageName);
+        Preconditions.checkNotNull(ps, "pkg: " + pkg.packageName
+                    + "does not have a corresponding entry in mPackages.");
+        addSigningKeySetToPackageLPw(ps, pkg.mSigningKeys);
+        if (pkg.mKeySetMapping != null) {
+            addDefinedKeySetsToPackageLPw(ps, pkg.mKeySetMapping);
+            if (pkg.mUpgradeKeySets != null) {
+                addUpgradeKeySetsToPackageLPw(ps, pkg.mUpgradeKeySets);
+            }
+        }
+    }
+
+    /**
      * Informs the system that the given package was signed by the provided KeySet.
      */
-    public void addSigningKeySetToPackageLPw(String packageName,
+    void addSigningKeySetToPackageLPw(PackageSetting pkg,
             ArraySet<PublicKey> signingKeys) {
 
         /* check existing keyset for reuse or removal */
-        PackageSetting pkg = mPackages.get(packageName);
         long signingKeySetId = pkg.keySetData.getProperSigningKeySet();
 
         if (signingKeySetId != PackageKeySetData.KEYSET_UNASSIGNED) {
             ArraySet<PublicKey> existingKeys = getPublicKeysFromKeySetLPr(signingKeySetId);
-            if (existingKeys.equals(signingKeys)) {
+            if (existingKeys != null && existingKeys.equals(signingKeys)) {
 
                 /* no change in signing keys, leave PackageSetting alone */
                 return;
             } else {
 
                 /* old keyset no longer valid, remove ref */
-                KeySetHandle ksh = mKeySets.get(signingKeySetId);
                 decrementKeySetLPw(signingKeySetId);
             }
         }
@@ -212,13 +273,12 @@ public class KeySetManagerService {
         return KEYSET_NOT_FOUND;
     }
 
-    /*
+    /**
      * Inform the system that the given package defines the given KeySets.
      * Remove any KeySets the package no longer defines.
      */
-    public void addDefinedKeySetsToPackageLPw(String packageName,
+    void addDefinedKeySetsToPackageLPw(PackageSetting pkg,
             ArrayMap<String, ArraySet<PublicKey>> definedMapping) {
-        PackageSetting pkg = mPackages.get(packageName);
         ArrayMap<String, Long> prevDefinedKeySets = pkg.keySetData.getAliases();
 
         /* add all of the newly defined KeySets */
@@ -227,7 +287,7 @@ public class KeySetManagerService {
         for (int i = 0; i < defMapSize; i++) {
             String alias = definedMapping.keyAt(i);
             ArraySet<PublicKey> pubKeys = definedMapping.valueAt(i);
-            if (alias != null && pubKeys != null && pubKeys.size() > 0) {
+            if (alias != null && pubKeys != null || pubKeys.size() > 0) {
                 KeySetHandle ks = addKeySetLPw(pubKeys);
                 newKeySetAliases.put(alias, ks.getId());
             }
@@ -250,9 +310,8 @@ public class KeySetManagerService {
      * alias in its manifest to be an upgradeKeySet.  This must be called
      * after all of the defined KeySets have been added.
      */
-    public void addUpgradeKeySetsToPackageLPw(String packageName,
-        ArraySet<String> upgradeAliases) {
-        PackageSetting pkg = mPackages.get(packageName);
+    void addUpgradeKeySetsToPackageLPw(PackageSetting pkg,
+            ArraySet<String> upgradeAliases) {
         final int uaSize = upgradeAliases.size();
         for (int i = 0; i < uaSize; i++) {
             pkg.keySetData.addUpgradeKeySet(upgradeAliases.valueAt(i));
@@ -290,11 +349,11 @@ public class KeySetManagerService {
      * identify a {@link KeySetHandle}.
      */
     public ArraySet<PublicKey> getPublicKeysFromKeySetLPr(long id) {
-        if(mKeySetMapping.get(id) == null) {
+        ArraySet<Long> pkIds = mKeySetMapping.get(id);
+        if (pkIds == null) {
             return null;
         }
         ArraySet<PublicKey> mPubKeys = new ArraySet<PublicKey>();
-        ArraySet<Long> pkIds = mKeySetMapping.get(id);
         final int pkSize = pkIds.size();
         for (int i = 0; i < pkSize; i++) {
             mPubKeys.add(mPublicKeys.get(pkIds.valueAt(i)).getKey());
@@ -376,6 +435,10 @@ public class KeySetManagerService {
      */
     private void decrementKeySetLPw(long id) {
         KeySetHandle ks = mKeySets.get(id);
+        if (ks == null) {
+            /* nothing to do */
+            return;
+        }
         if (ks.decrRefCountLPw() <= 0) {
             ArraySet<Long> pubKeys = mKeySetMapping.get(id);
             final int pkSize = pubKeys.size();
@@ -385,7 +448,6 @@ public class KeySetManagerService {
             mKeySets.delete(id);
             mKeySetMapping.delete(id);
         }
-        return;
     }
 
     /*
@@ -394,16 +456,20 @@ public class KeySetManagerService {
      */
     private void decrementPublicKeyLPw(long id) {
         PublicKeyHandle pk = mPublicKeys.get(id);
+        if (pk == null) {
+            /* nothing to do */
+            return;
+        }
         if (pk.decrRefCountLPw() <= 0) {
             mPublicKeys.delete(id);
         }
-        return;
     }
 
     /**
      * Adds the given PublicKey to the system, deduping as it goes.
      */
     private long addPublicKeyLPw(PublicKey key) {
+        Preconditions.checkNotNull(key, "Cannot add null public key!");
         long id = getIdForPublicKeyLPr(key);
         if (id != PUBLIC_KEY_NOT_FOUND) {
 
@@ -473,6 +539,8 @@ public class KeySetManagerService {
 
         /* remove refs from common keysets and public keys */
         PackageSetting pkg = mPackages.get(packageName);
+        Preconditions.checkNotNull(pkg, "pkg name: " + packageName
+                + "does not have a corresponding entry in mPackages.");
         long signingKeySetId = pkg.keySetData.getProperSigningKeySet();
         decrementKeySetLPw(signingKeySetId);
         ArrayMap<String, Long> definedKeySets = pkg.keySetData.getAliases();
@@ -715,16 +783,36 @@ public class KeySetManagerService {
         final int numRefCounts = keySetRefCounts.size();
         for (int i = 0; i < numRefCounts; i++) {
             KeySetHandle ks = mKeySets.get(keySetRefCounts.keyAt(i));
+            if (ks == null) {
+                /* something went terribly wrong and we have references to a non-existent key-set */
+                Slog.wtf(TAG, "Encountered non-existent key-set reference when reading settings");
+                continue;
+            }
             ks.setRefCountLPw(keySetRefCounts.valueAt(i));
         }
 
+        /*
+         * In case something went terribly wrong and we have keysets with no associated packges
+         * that refer to them, record the orphaned keyset ids, and remove them using
+         * decrementKeySetLPw() after all keyset references have been set so that the associtaed
+         * public keys have the appropriate references from all keysets.
+         */
+        ArraySet<Long> orphanedKeySets = new ArraySet<Long>();
         final int numKeySets = mKeySets.size();
         for (int i = 0; i < numKeySets; i++) {
+            if (mKeySets.valueAt(i).getRefCountLPr() == 0) {
+                Slog.wtf(TAG, "Encountered key-set w/out package references when reading settings");
+                orphanedKeySets.add(mKeySets.keyAt(i));
+            }
             ArraySet<Long> pubKeys = mKeySetMapping.valueAt(i);
             final int pkSize = pubKeys.size();
             for (int j = 0; j < pkSize; j++) {
                 mPublicKeys.get(pubKeys.valueAt(j)).incrRefCountLPw();
             }
+        }
+        final int numOrphans = orphanedKeySets.size();
+        for (int i = 0; i < numOrphans; i++) {
+            decrementKeySetLPw(orphanedKeySets.valueAt(i));
         }
     }
 }
