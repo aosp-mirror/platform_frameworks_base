@@ -1034,6 +1034,21 @@
     <!-- Name of quick settings -->
     <string name="quick_settings">Quick Settings</string>
 
+    <!-- Name of status bar -->
+    <string name="status_bar">Status bar</string>
+
+    <!-- Name of the ethernet status bar icon. -->
+    <string name="status_bar_ethernet">Ethernet</string>
+
+    <!-- Name of the alarm status bar icon. -->
+    <string name="status_bar_alarm">Alarm</string>
+
+    <!-- Name of the work status bar icon. -->
+    <string name="status_bar_work">Work profile</string>
+
+    <!-- Name of the airplane status bar icon. -->
+    <string name="status_bar_airplane">Airplane mode</string>
+
     <!-- Description for adding  a quick settings tile -->
     <string name="add_tile">Add tile</string>
 
