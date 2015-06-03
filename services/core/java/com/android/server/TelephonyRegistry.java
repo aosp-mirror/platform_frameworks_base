@@ -92,13 +92,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         IPhoneStateListener callback;
         IOnSubscriptionsChangedListener onSubscriptionsChangedListenerCallback;
 
-        int callerUid;
+        int callerUserId;
 
         int events;
 
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
         int phoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+
+        boolean canReadPhoneState;
 
         boolean matchPhoneStateListenerEvent(int events) {
             return (callback != null) && ((events & this.events) != 0);
@@ -114,8 +116,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     + " callback=" + callback
                     + " onSubscriptionsChangedListenererCallback="
                                             + onSubscriptionsChangedListenerCallback
-                    + " callerUid=" + callerUid + " subId=" + subId + " phoneId=" + phoneId
-                    + " events=" + Integer.toHexString(events) + "}";
+                    + " callerUserId=" + callerUserId + " subId=" + subId + " phoneId=" + phoneId
+                    + " events=" + Integer.toHexString(events)
+                    + " canReadPhoneState=" + canReadPhoneState + "}";
         }
     }
 
@@ -190,13 +193,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private PreciseDataConnectionState mPreciseDataConnectionState =
                 new PreciseDataConnectionState();
 
-    static final int PHONE_STATE_PERMISSION_MASK =
+    static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
+                PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR |
+                PhoneStateListener.LISTEN_VOLTE_STATE;
+
+    static final int CHECK_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_STATE |
                 PhoneStateListener.LISTEN_DATA_ACTIVITY |
-                PhoneStateListener.LISTEN_DATA_CONNECTION_STATE |
-                PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR |
-                PhoneStateListener.LISTEN_VOLTE_STATE;;
+                PhoneStateListener.LISTEN_DATA_CONNECTION_STATE;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
@@ -348,11 +353,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     @Override
     public void addOnSubscriptionsChangedListener(String callingPackage,
             IOnSubscriptionsChangedListener callback) {
-        int callerUid = UserHandle.getCallingUserId();
-        int myUid = UserHandle.myUserId();
+        int callerUserId = UserHandle.getCallingUserId();
         if (VDBG) {
-            log("listen oscl: E pkg=" + callingPackage + " myUid=" + myUid
-                + " callerUid="  + callerUid + " callback=" + callback
+            log("listen oscl: E pkg=" + callingPackage + " myUserId=" + UserHandle.myUserId()
+                + " callerUserId="  + callerUserId + " callback=" + callback
                 + " callback.asBinder=" + callback.asBinder());
         }
 
@@ -364,7 +368,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        Record r = null;
+        final Record r;
 
         synchronized (mRecords) {
             // register
@@ -385,8 +389,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
             r.onSubscriptionsChangedListenerCallback = callback;
             r.callingPackage = callingPackage;
-            r.callerUid = callerUid;
+            r.callerUserId = callerUserId;
             r.events = 0;
+            r.canReadPhoneState = true; // permission has been enforced above
             if (DBG) {
                 log("listen oscl:  Register r=" + r);
             }
@@ -454,19 +459,18 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void listen(String callingPackage, IPhoneStateListener callback, int events,
             boolean notifyNow, int subId) {
-        int callerUid = UserHandle.getCallingUserId();
-        int myUid = UserHandle.myUserId();
+        int callerUserId = UserHandle.getCallingUserId();
         if (VDBG) {
             log("listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
-                + " notifyNow=" + notifyNow + " subId=" + subId + " myUid=" + myUid
-                + " callerUid=" + callerUid);
+                + " notifyNow=" + notifyNow + " subId=" + subId + " myUserId="
+                + UserHandle.myUserId() + " callerUserId=" + callerUserId);
         }
 
         if (events != PhoneStateListener.LISTEN_NONE) {
             /* Checks permission and throws Security exception */
             checkListenerPermission(events);
 
-            if ((events & PHONE_STATE_PERMISSION_MASK) != 0) {
+            if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
                 if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
                         callingPackage) != AppOpsManager.MODE_ALLOWED) {
                     return;
@@ -475,7 +479,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
             synchronized (mRecords) {
                 // register
-                Record r = null;
+                Record r;
                 find_and_add: {
                     IBinder b = callback.asBinder();
                     final int N = mRecords.size();
@@ -493,7 +497,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
                 r.callback = callback;
                 r.callingPackage = callingPackage;
-                r.callerUid = callerUid;
+                r.callerUserId = callerUserId;
+                boolean isPhoneStateEvent = (events & (CHECK_PHONE_STATE_PERMISSION_MASK
+                        | ENFORCE_PHONE_STATE_PERMISSION_MASK)) != 0;
+                r.canReadPhoneState = isPhoneStateEvent && canReadPhoneState(callingPackage);
                 // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
                 // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
                 if (!SubscriptionManager.isValidSubscriptionId(subId)) {
@@ -558,7 +565,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_CALL_STATE) != 0) {
                         try {
                             r.callback.onCallStateChanged(mCallState[phoneId],
-                                     mCallIncomingNumber[phoneId]);
+                                     getCallIncomingNumber(r, phoneId));
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -638,6 +645,22 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    private boolean canReadPhoneState(String callingPackage) {
+        boolean canReadPhoneState = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+        if (canReadPhoneState &&
+                mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
+                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return false;
+        }
+        return canReadPhoneState;
+    }
+
+    private String getCallIncomingNumber(Record record, int phoneId) {
+        // Hide the number if record's process has no READ_PHONE_STATE permission
+        return record.canReadPhoneState ? mCallIncomingNumber[phoneId] : "";
+    }
+
     private void remove(IBinder binder) {
         synchronized (mRecords) {
             final int recordCount = mRecords.size();
@@ -669,7 +692,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_CALL_STATE) &&
                         (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
                     try {
-                        r.callback.onCallStateChanged(state, incomingNumber);
+                        String incomingNumberOrEmpty = r.canReadPhoneState ? incomingNumber : "";
+                        r.callback.onCallStateChanged(state, incomingNumberOrEmpty);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -699,7 +723,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             (r.subId == subId) &&
                             (r.subId != SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
                         try {
-                            r.callback.onCallStateChanged(state, incomingNumber);
+                            String incomingNumberOrEmpty = getCallIncomingNumber(r, phoneId);
+                            r.callback.onCallStateChanged(state, incomingNumberOrEmpty);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -1538,7 +1563,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         }
 
-        if ((events & PHONE_STATE_PERMISSION_MASK) != 0) {
+        if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PHONE_STATE, null);
         }
@@ -1572,10 +1597,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         boolean valid = false;
         try {
             foregroundUser = ActivityManager.getCurrentUser();
-            valid = r.callerUid ==  foregroundUser && r.matchPhoneStateListenerEvent(events);
+            valid = r.callerUserId ==  foregroundUser && r.matchPhoneStateListenerEvent(events);
             if (DBG | DBG_LOC) {
                 log("validateEventsAndUserLocked: valid=" + valid
-                        + " r.callerUid=" + r.callerUid + " foregroundUser=" + foregroundUser
+                        + " r.callerUserId=" + r.callerUserId + " foregroundUser=" + foregroundUser
                         + " r.events=" + r.events + " events=" + events);
             }
         } finally {
