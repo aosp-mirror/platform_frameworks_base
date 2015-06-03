@@ -93,6 +93,7 @@ public final class BluetoothEventManager {
         addHandler(BluetoothDevice.ACTION_FOUND, new DeviceFoundHandler());
         addHandler(BluetoothDevice.ACTION_DISAPPEARED, new DeviceDisappearedHandler());
         addHandler(BluetoothDevice.ACTION_NAME_CHANGED, new NameChangedHandler());
+        addHandler(BluetoothDevice.ACTION_ALIAS_CHANGED, new NameChangedHandler());
 
         // Pairing broadcasts
         addHandler(BluetoothDevice.ACTION_BOND_STATE_CHANGED, new BondStateChangedHandler());
