@@ -184,7 +184,7 @@ public class StaticLayout extends Layout {
          * @param textDir text direction heuristic for resolving BiDi behavior.
          * @return this builder, useful for chaining
          */
-        public Builder setTextDir(TextDirectionHeuristic textDir) {
+        public Builder setTextDirection(TextDirectionHeuristic textDir) {
             mTextDir = textDir;
             return this;
         }
@@ -473,7 +473,7 @@ public class StaticLayout extends Layout {
 
         Builder b = Builder.obtain(source, bufstart, bufend, paint, outerwidth)
             .setAlignment(align)
-            .setTextDir(textDir)
+            .setTextDirection(textDir)
             .setLineSpacing(spacingadd, spacingmult)
             .setIncludePad(includepad)
             .setEllipsizedWidth(ellipsizedWidth)
