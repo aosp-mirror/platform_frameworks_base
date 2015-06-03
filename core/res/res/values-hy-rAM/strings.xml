@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Զանգակն անջատված է"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Զանգակի թրթռոց"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Զանգակը միացված է"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Պատրաստ է թարմացնելու"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Թարմացման փաթեթի մշակում…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Անջատվում է…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ձեր գրասալիկը կանջատվի:"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Հեռուստացույցը կանջատվի:"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Թույլ է տալիս հավելվածին ստանալ և մշակել SMS հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ստանալ տեքստային հաղորդագրություններ (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Թույլ է տալիս հավելվածին ստանալ և մշակել MMS հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"կարդալ բջջային զեկուցվող հաղորդագրությունները"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Թույլ է տալիս հավելվածին կարդալ ձեր սարքի կողմից ստացված բջջային հեռարձակվող հաղորդագրությունները: Բջջային հեռարձակվող զգուշացումները ուղարկվում են որոշ վայրերում` արտակարգ իրավիճակների մասին ձեզ զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի արդյունավետությանը կամ շահագործմանը, երբ ստացվում է արտակարգ իրավիճակի մասին բջջային հաղորդում:"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ձեր հաշիվները"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Մուտքի հնարավորություն առկա հաշիվներ:"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"կարդալ բաժանորդագրված հոսքերը"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Թույլ է տալիս հավելվածին մանրամասներ ստանալ ընթացիկ համաժամեցված հոսքերի մասին:"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ուղարկել SMS հաղորդագրություններ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Թույլ է տալիս հավելվածին ուղարկել SMS հաղորդագրություններ: Այն կարող է անսպասելի ծախսերի պատճառ դառնալ: Վնասարար հավելվածները կարող են ձեր հաշվից գումար ծախսել` ուղարկելով հաղորդագրություններ`  առանց ձեր հաստատման:"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"կարդալ ձեր տեքստային հաղորդագրությունները (SMS կամ MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Թույլ է տալիս հավելվածին մեդիա արտածումը երթուղել այլ արտաքին սարքեր:"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Կարդալ տեղադրման աշխատաշրջանները"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ծրագրին թույլ է տալիս կարդալ տեղադրման աշխատաշրջանները: Սա թույլ է տալիս տեղեկանալ փաթեթների ակտիվ տեղադրումների մանրամասներին:"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Պահանջել փաթեթների տեղադրում"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Թույլ է տալիս հավելվածին պահանջել փաթեթների տեղադրումը:"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Հպեք երկու անգամ` դիտափոխման կարգավորման համար"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Չհաջողվեց վիջեթ ավելացնել:"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Առաջ"</string>

@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"घन्टी बन्द भयो"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"घन्टी कम्पन गर्छ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"घन्टि चालु छ"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"अद्यावधिकको लागि तयारी गर्नुहोस्"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"अद्यावधिक प्याकेज प्रशोधन गर्दै ..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"बन्द गर्दै..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"तपाईँको ट्याब्लेट बन्द हुने छ।"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"तपाईंको TV बन्द हुनेछ।"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"अनुप्रयोगलाई SMS सन्देशहरू प्राप्त गर्न र प्रक्रिया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"पाठ सन्देश (MMS) प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"अनुप्रयोगलाई MMS सन्देशहरू प्राप्त गर्न र प्रकृया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारित सन्देशहरू पढ्नुहोस्"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"तपाईंको उपकरणद्वारा प्राप्त सेल प्रसारण सन्देशहरू अनुप्रयोगलाई पढ्न अनुमति दिन्छ। सेल प्रसारण चेतावनीहरू केही स्थानहरूमा तपाईंलाई आपतकालीन गतिविधिहरूको बारेमा सचेत गराउन गरिएका छन्। खराब अनुप्रयोगहरूले एउटा आपतकालीन सेल प्रसारण प्राप्त गर्दछ जब तपाईंको उपकरणको प्रदर्शन वा अपरेशनको साथ हस्तक्षेप गर्न सक्दछन्।"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"तपाईँका खाताहरू"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्ध खाताहरू पहुँच गर्नुहोस्।"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्य बनाइका फिडहरू पढ्नुहोस्"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"अनुप्रयोगलाई अहिलेको समीकरण गरिएका सूचकहरू बारे विवरणहरू लिने अनुमति दिन्छ।"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS सन्देशहरू पठाउनुहोस्"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"अनुप्रयोगलाई SMS सन्देशहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब अनुप्रयोगहरूले तपाईंको पुष्टि बिना सन्देशहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"तपाईंका पाठ सन्देशहरू (SMS वा MMS) पढ्नुहोस्"</string>
@@ -1098,6 +1106,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"मिडिया परिणामलाई अन्य बाहिरी उपकरणहरूसँग लैजानको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्थापना सत्रहरू पढ्नुहोस्"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"स्थापित सत्र पढ्न अनुप्रयोगलाई अनुमति दिनुहोस्। यसले सक्रिय प्याकेज प्रतिष्ठानहरू बारेमा विवरण हेर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"स्थापना प्याकेजहरू अनुरोध गर्नुहोस्"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"प्याकेजहरूको स्थापना अनुरोध गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जानुहोस्"</string>

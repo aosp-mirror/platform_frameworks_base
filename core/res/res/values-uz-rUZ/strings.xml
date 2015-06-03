@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Jiringlovchi o‘chirilgan"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Jiringlab tebranish"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Jiringlovchi yoqilgan"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Yangilashga tayyorgarlik"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Yangilanish paketiga ishlov berilmoqda…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"O‘chirilmoqda…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planshetingiz o‘chiriladi."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizoringiz o‘chadi."</string>
@@ -255,7 +257,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Ilova holat qatorining o‘rnini egallashi mumkin."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"holat panelini yoyish/yig‘ish"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Ilova holat panelini yoyishi va yig‘ishi mumkin."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"yorliqlarni yaratish"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"yorliqlar yaratish"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Dasturga foydalanuvchini aralashtirmasdan, Uy ekraniga yorliqlar qo‘shish imkonini beradi."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"yorliqlarni o‘chirish"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Dasturga foydalanuvchini aralashtirmasdan, uy ekranidagi yorliqlarni o‘chirishga ruxsat beradi."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ilovaga SMS xabarlarini qabul qilish va va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"matn xabarlarini qabul qilish (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ilovaga MMS xabarlarini qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"uyali tarmoq operatori xabarlarini o‘qish"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Hisoblaringiz"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Mavjud hisoblarga kirish."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"obunalarni o‘qish"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ilova hozirgi vaqtda sinxronlanayotgan elementlar to‘g‘risidagi ma’lumotlarni olishi mumkin."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS xabarlarni jo‘natish"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ilovaga SMS xabarlarini jo‘natish uchun ruxsat beradi. Bu kutilmagan xarajatlarga sabab bo‘lishi mumkin. Zararli ilovalar sizdan so‘roqsiz xabarlar jo‘natish orqali pulingizni sarflashi mumkin."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"matn xabarlaringizni o‘qish (SMS yoki MMS)"</string>
@@ -1092,12 +1100,14 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ilovaga media chiqish ovozini boshqa tashqi qurilmalarga yo‘naltirish uchun ruxsat beradi."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"O‘rnatilgan seanslarni o‘qish"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ilovaga o‘rnatilgan seanslarni o‘qish uchun ruxsat beradi. Bu unga faol paket o‘rnatmalari haqidagi ma’lumotlarni ko‘rish imkonini beradi."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Paketlarni o‘rnatish so‘rovini yuborish"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Ilovaga paketlarni o‘rnatish so‘rovini yuborish imkonini beradi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Masshtabni o‘zgartirish uchun ikki marta bosing"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidjet qo‘shilmadi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"O‘tish"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Izlash"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Jo‘natish"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Navbatdagi"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Keyingi"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Tayyor"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Old."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Bajarish"</string>
@@ -1136,7 +1146,7 @@
     <string name="tethered_notification_title" msgid="3146694234398202601">"Modem yoki ulanish nuqtasi - faol"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Sozlash uchun bosing."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Orqaga"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"Navbatdagi"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Keyingi"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Tashlab o‘tish"</string>
     <string name="no_matches" msgid="8129421908915840737">"Topilmadi"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Sahifadan topish"</string>
@@ -1174,7 +1184,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"O‘chirilganlarni tiklash"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Hozir hech nima qilinmasin"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Hisobni tanlang"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Hisob qo‘shish"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Yangi hisob qo‘shish"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Hisob qo‘shish"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Ko‘paytirish"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Kamaytirish"</string>

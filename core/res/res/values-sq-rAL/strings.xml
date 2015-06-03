@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zilja është çaktivizuar"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Zile me dridhje"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zilja u aktivizua"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Përgatit për përditësimin"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Po përpunon paketën e përditësimit…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Po fiket…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tableti yt do të fiket."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizori yt do të fiket."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lejon aplikacionin të marrë dhe përpunojë mesazhe SMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prano mesazhe në tekst (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lejon aplikacionin të marrë dhe përpunojë mesazhe MMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lexo mesazhet e transmetimit të qelizës"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lejon aplikacionin të lexojë mesazhet e transmetimit të qelizës, të marra nga pajisja jote. Alarmet e transmetimit të qelizës dërgohen në disa vendndodhje për të të paralajmëruar në situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në veprimtarinë ose operacionin e pajisjes tënde kur merret një transmetim urgjent i qelizës."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Llogaritë e tua"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Qasje në llogaritë e vlefshme."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lexo informacione të abonuara"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lejon aplikacionin të marrë detaje rreth çdo gjëje që sinkronizohet në pajisje."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"dërgo mesazhe SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lejon aplikacionin të dërgojë mesazhe SMS. Kjo mund të rezultojë me tarifa të papritura. Aplikacionet keqdashëse mund të të kushtojnë të holla duke dërguar mesazhe pa konfirmimin tënd."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lexo mesazhet e tua në tekst (SMS ose MMS)"</string>
@@ -421,8 +429,8 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"të menaxhojë harduerin e gjurmës së gishtit"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"E lejon aplikacionin që të aktivizojë metoda për të shtuar dhe për të fshirë shabllonet e gjurmës së gishtit për përdorim."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"të përdorë harduerin e gjurmës së gishtit"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"E lejon aplikacinin që të përdorë harduerin e gjurmës së gishtit për verifikimin"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"përdor harduerin e gjurmës së gishtit"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"E lejon aplikacionin që të përdorë harduerin e gjurmës së gishtit për verifikim"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"U zbulua një gjurmë gishti e pjesshme. Provo përsëri."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Gjurma e gishtit nuk mund të përpunohej. Provo përsëri."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensori i gjurmës së gishtit nuk është i pastër. Pastroje dhe provo përsëri."</string>
@@ -632,7 +640,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Ndihmës"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Vëlla"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Fëmijë"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner bashkëjetues"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Bashkëjetues"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Baba"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Shok"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Menaxher"</string>
@@ -642,7 +650,7 @@
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Referuar nga"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"I afërm"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Motër"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"Bashkëshort"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Bashkëshort/e"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"E personalizuar"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Shtëpia"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Puna"</string>
@@ -664,7 +672,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Shtyp \"Meny\" për të shkyçur."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Vizato modelin për ta shkyçur"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Urgjenca"</string>
-    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Kthehu për të telefonuar"</string>
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Kthehu te telefonata"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Saktë!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Provo sërish"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Provo sërish"</string>
@@ -851,7 +859,7 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem me videon"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Kjo video nuk ofrohet për transmetim në këtë pajisje."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Videoja nuk mund të luhet."</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"Në rregull!"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"Në rregull"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"mesditë"</string>
     <string name="Noon" msgid="3342127745230013127">"Mesditë"</string>
@@ -877,9 +885,9 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që ke 250 megabajt hapësirë të lirë dhe rifillo."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> është në punë."</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Prek për më shumë informacion ose për të ndaluar aplikacionin."</string>
-    <string name="ok" msgid="5970060430562524910">"Në rregull!"</string>
+    <string name="ok" msgid="5970060430562524910">"Në rregull"</string>
     <string name="cancel" msgid="6442560571259935130">"Anulo"</string>
-    <string name="yes" msgid="5362982303337969312">"Në rregull!"</string>
+    <string name="yes" msgid="5362982303337969312">"Në rregull"</string>
     <string name="no" msgid="5141531044935541497">"Anulo"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Kujdes!"</string>
     <string name="loading" msgid="7933681260296021180">"Po ngarkohet..."</string>
@@ -909,7 +917,7 @@
     <string name="anr_activity_process" msgid="5776209883299089767">"Aktiviteti <xliff:g id="ACTIVITY">%1$s</xliff:g> nuk përgjigjet.\n\nDëshiron ta mbyllësh?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> nuk po përgjigjet. Dëshiron ta mbyllësh?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> nuk po përgjigjet.\n\nDëshiron ta mbyllësh?"</string>
-    <string name="force_close" msgid="8346072094521265605">"Në rregull!"</string>
+    <string name="force_close" msgid="8346072094521265605">"Në rregull"</string>
     <string name="report" msgid="4060218260984795706">"Raporto"</string>
     <string name="wait" msgid="7147118217226317732">"Prit!"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Faqja nuk reagon.\n\nDëshiron ta mbyllësh?"</string>
@@ -1040,8 +1048,8 @@
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Aktivizo USB-në."</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Nëse aktivizon USB-në, disa aplikacione që po përdor do të ndalojnë. Ata mund të jenë të papërdorshëm derisa ta çaktivizosh sërish USB-në."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operacioni i USB-së nuk pati sukses"</string>
-    <string name="dlg_ok" msgid="7376953167039865701">"Në rregull!"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB për ngarkim"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"Në rregull"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB-ja për ngarkim"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB për transferimin e skedarëve"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB për transferimin e fotografive"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB për MIDI"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lejon një aplikacion të kalojë daljet mediatike në pajisje të tjera të jashtme."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lexo sesionet e instalimit"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lejon një aplikacion të lexojë sesionet e instalimit. Kjo e lejon atë të shohë detaje rreth instalimeve të paketave aktive."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Kërko paketat e instalimit"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lejon që një aplikacion të kërkojë instalimin e paketave."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Prek dy herë për të kontrolluar zmadhimin"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nuk mundi të shtonte miniaplikacion."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Shko"</string>
@@ -1311,7 +1321,7 @@
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Harrove emrin e përdoruesit apo fjalëkalimin?\nVizito "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Po kontrollon llogarinë…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"E ke shkruar <xliff:g id="NUMBER_0">%d</xliff:g> herë gabimisht PIN-in tënd.\n\n Provo sërish për <xliff:g id="NUMBER_1">%d</xliff:g> sekonda."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Ke shkruar <xliff:g id="NUMBER_0">%d</xliff:g> herë gabimisht fjalëkalimin.\n\nProvo sërish për <xliff:g id="NUMBER_1">%d</xliff:g> sekonda."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"E ke shkruar <xliff:g id="NUMBER_0">%d</xliff:g> herë gabimisht fjalëkalimin.\n\nProvo sërish për <xliff:g id="NUMBER_1">%d</xliff:g> sekonda."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Ke tentuar <xliff:g id="NUMBER_0">%d</xliff:g> herë pa sukses për të vizatuar motivin tënd. \n\nProvo sërish për <xliff:g id="NUMBER_1">%d</xliff:g> sekonda."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Ke tentuar <xliff:g id="NUMBER_0">%d</xliff:g> herë pa sukses për ta shkyçur tabletin tënd. Pas <xliff:g id="NUMBER_1">%d</xliff:g> tentativave të tjera të pasuksesshme, tableti do të rivendoset në gjendje fabrike dhe të gjitha të dhënat e përdoruesit do të humbasin."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Ke tentuar <xliff:g id="NUMBER_0">%d</xliff:g> herë pa sukses për ta shkyçur televizorin. Pas <xliff:g id="NUMBER_1">%d</xliff:g> tentativave të tjera të pasuksesshme, televizori do të rivendoset në gjendjen e fabrikës dhe të gjitha të dhënat e përdoruesit do të humben."</string>

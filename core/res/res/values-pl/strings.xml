@@ -188,6 +188,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Dzwonek wyłączony"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Dzwonek z wibracjami"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Dzwonek włączony"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Przygotowanie do aktualizacji"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Przetwarzam pakiet aktualizacji…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet zostanie wyłączony."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Telewizor zostanie wyłączony."</string>
@@ -267,6 +269,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pozwala aplikacji na odbieranie i przetwarzanie SMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"odbieranie wiadomości tekstowych (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Pozwala aplikacji na odbieranie i przetwarzanie MMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"odczyt komunikatów z sieci komórkowej"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Zezwala aplikacji na odczyt komunikatów z sieci komórkowej odebranych na urządzeniu. Komunikaty alarmowe z sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu komunikatu alarmowego z sieci komórkowej."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Twoje konta"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Dostęp do udostępnionych kont."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"czytanie subskrybowanych źródeł"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Pozwala aplikacji na pobieranie szczegółowych informacji na temat obecnie zsynchronizowanych kanałów."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"wysyłanie wiadomości SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pozwala aplikacji na wysyłanie SMS-ów. Może to skutkować nieoczekiwanymi opłatami. Złośliwe aplikacje mogą generować koszty, wysyłając wiadomości bez Twojego potwierdzenia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"odczytywanie wiadomości tekstowych (SMS i MMS)"</string>
@@ -1106,6 +1114,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Pozwala aplikacji na kierowanie wyjściowych danych multimedialnych do innych urządzeń zewnętrznych."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Odczyt sesji instalacji"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Pozwala aplikacji odczytywać sesje instalacji. Umożliwia to jej na poznanie szczegółów aktywnych instalacji pakietów."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Żądanie instalacji pakietów"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Zezwala aplikacji żądanie instalacji pakietów."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dotknij dwukrotnie, aby sterować powiększeniem."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nie można dodać widżetu."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"OK"</string>
@@ -1137,9 +1147,9 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"Obsługa sieci VPN została włączona przez aplikację <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Dotknij, aby zarządzać siecią."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"Nawiązano połączenie z: <xliff:g id="SESSION">%s</xliff:g>. Dotknij, aby zarządzać siecią."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Łączę z zawsze włączoną siecią VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Połączono z zawsze włączoną siecią VPN"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Błąd zawsze włączonej sieci VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Łączę ze stałą siecią VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Połączono ze stałą siecią VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Błąd stałej sieci VPN"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"Kliknij, by skonfigurować"</string>
     <string name="upload_file" msgid="2897957172366730416">"Wybierz plik"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie wybrano pliku"</string>
@@ -1326,9 +1336,9 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nieprawidłowa nazwa użytkownika lub hasło."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nie pamiętasz nazwy użytkownika lub hasła?\nWejdź na "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Sprawdzam konto"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowy PIN. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Wpisałeś nieprawidłowy kod PIN <xliff:g id="NUMBER_0">%d</xliff:g> razy. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowe hasło. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> razy narysowałeś nieprawidłowy wzór odblokowania. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Narysowałeś nieprawidłowy wzór odblokowania <xliff:g id="NUMBER_0">%d</xliff:g> razy. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> próbowałeś nieprawidłowo odblokować tablet. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach tablet zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Podałeś nieprawidłowe dane odblokowania telewizora <xliff:g id="NUMBER_0">%d</xliff:g> razy. Po jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telewizor zostanie zresetowany do stanu fabrycznego, a wszystkie dane użytkownika zostaną skasowane."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> próbowałeś nieprawidłowo odblokować telefon. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>

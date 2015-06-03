@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Звъненето е изключено"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибрира при звънене"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Подготвяне за актуализация"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Пакетът с актуализацията се обработва…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Телевизорът ви ще се изключи."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Разрешава на приложението да получава и обработва SMS съобщения. Това означава, че то може да наблюдава или изтрива изпратените до устройството ви, без да ви ги покаже."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"получаване на текстови съобщения (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Разрешава на приложението да получава и обработва MMS съобщения. Това означава, че то може да наблюдава или изтрива изпратените до устройството ви, без да ви ги покаже."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"четене на съобщения с клетъчно излъчване"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Разрешава на приложението да чете съобщения с клетъчно излъчване, получени от устройството ви. Сигналите с клетъчно излъчване се получават на някои местоположения, за да ви предупредят за спешни ситуации. Злонамерените приложения могат да възпрепятстват изпълнението или работата на устройството ви при получаване на такова спешно излъчване."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Вашите профили"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Достъп до наличните профили."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"четене на емисиите с абонамент"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Разрешава на приложението да получи подробности за текущо синхронизираните емисии."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"изпращане на SMS съобщения"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Разрешава на приложението да изпраща SMS съобщения. Това може да доведе до неочаквано таксуване. Злонамерените приложения могат да ви въвлекат в разходи, като изпращат съобщения без потвърждение от ваша страна."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"четене на текстовите ви съобщения (SMS или MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Разрешава на приложението да насочва изходящата мултимедия към други външни устройства."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Четене на сесии за инсталиране"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Разрешава на приложението да чете сесии за инсталиране. Това му позволява да вижда подробности за активните инсталирания на пакети."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Заявка за инсталиране на пакети"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Разрешава на приложението да заявява инсталиране на пакети."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Докоснете двукратно за управление на промяната на мащаба"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Приспособлението не можа да бъде добавено."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Старт"</string>

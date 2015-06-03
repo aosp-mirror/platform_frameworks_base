@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"მრეკავი გათიშულია"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ვიბრაციის რეჟიმი"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ზარი ჩართულია"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"განახლებისთვის მომზადება"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"განახლების პაკეტის დამუშავება..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"გამორთვა…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"თქვენი ტაბლეტი გაითიშება."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"თქვენი ტელევიზორი გამოირთვება."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"აპს შეეძლება SMS შეტყობინებების მიღება და დამუშავება. ეს ნიშნავს, რომ აპს შეეძლება თქვენ მოწყობილობაზე გამოგზავნილი შეტყობინებების მონიტორინგი და მათი წაშლა თქვენთვის ჩვენების გარეშე."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ტექსტური შეტყობინებების (MMS) მიღება"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"აპს შეეძლება MMS შეტყობინებების მიღება და დამუშავება. ეს ნიშნავს, რომ აპს შეეძლება შეტყობინებების მონიტორინგი და მათი წაშლა თქვენთვის ჩვენების გარეშე."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"მასიური დაგზავნის შეტყობინებების წაკითხვა"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"აპს შეეძლება, წაიკითხოს თქვენს მოწყობილობაზე გამოგზავნილი ქსელის სამაუწყებლო შეტყობინებები. სამაუწყებლო გაფრთხილებები მოგეწოდებათ ზოგიერთ ადგილზე ექსტრემალური სიტუაციების შესახებ გასაფრთხილებლად. ქსელის გადაუდებელი შეტყონიბენის მიღების დროს მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"თქვენი ანგარიშები"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ხელმისაწვდომ ანგარიშებზე წვდომა."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"გამოწერილი არხების წაკითხვა"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"აპს შეეძლება ინფორმაციის მოპოვება ბოლოს სინქრონიზებული არხების შესახებ."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS შეტყობის გაგზავნა"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"აპს შეეძლება, გაგზავნოს SMS შეტყობინებები, რამაც შეიძლება გაუთვალისწინებელი ხარჯები გამოიწვიოს. მავნე აპებმა შეიძლება დაგიხარჯონ ფული შეტყობინებების თქვენი თანხმობის გარეშე გაგზავნით."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"თქვენი ტექსტური შეტყობინებების (SMS ან MMS) წაკითხვა"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"აპლიკაციას შეეძლება გადაამისამართოს მულტიმედია მონაცემები სხვა გარე მოწყობილობებისკენ."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ინსტალაციის სესიების წაკითხვა"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"საშუალებას აძლევს აპლიკაციას წაიკითხოს ინსტალაციის სესიები. ამით მას საშუალება აქვს იხილოს პაკეტის აქტიური ინსტალაციები."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"პაკეტების ინსტალაციის მოთხოვნა"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"აპლიკაციას შეეძლება მოითხოვოს პაკეტების ინსტალაცია."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"მასშტაბის მართვისთვის შეეხეთ ორჯერ."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ვერ დაემატა ვიჯეტი."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"გადასვლა"</string>

@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"রিং বাজার শব্দ বন্ধ করা আছে"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"রিং বাজার সাথে স্পন্দিত করুন"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"রিং বাজার শব্দ চালু করা আছে"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"আপডেট করার জন্য প্রস্তুত"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"আপডেট প্যাকেজটি প্রক্রিয়া করা হচ্ছে..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"বন্ধ হচ্ছে…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"আপনার ট্যাবলেট বন্ধ হবে৷"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"আপনার টিভি বন্ধ হবে৷"</string>
@@ -218,7 +220,7 @@
     <string name="safeMode" msgid="2788228061547930246">"নিরাপদ মোড"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android সিস্টেম"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"ব্যক্তিগত অ্যাপ্লিকেশানগুলি"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"কর্মক্ষেত্র্র"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"কর্মক্ষেত্র"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"পরিচিতি"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"আপনার পরিচিতিগুলিতে অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"অবস্থান"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"অ্যাপ্লিকেশানটিকে SMS বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"পাঠ্য বার্তা পান (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"অ্যাপ্লিকেশানটিকে MMS বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"সেল সম্প্রচার বার্তা পড়ুন"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"আপনার ডিভাইস দ্বারা প্রাপ্ত সেল সম্প্রচার পড়তে অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ কয়েকটি স্থানে আপনাকে জরুরি অবস্থার জন্য সতর্ক করতে জরুরি সতর্কতাগুলি বিতরণ করা হয়৷ যখন একটি জরুরি সেল সম্প্রচার প্রাপ্ত হয় তখন ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার ডিভাইসের কার্য সম্পাদনা বা কার্যকলাপে প্রতিবন্ধকতার সৃষ্টি করতে পারে৷"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"আপনার অ্যাকাউন্টগুলি"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"উপলব্ধ অ্যাকাউন্টগুলি অ্যাক্সেস করে৷"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসাবে নেওয়া ফিডগুলি পড়ে"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS বার্তাগুলি পাঠায়"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে SMS বার্তাগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
@@ -537,7 +545,7 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"হোম"</item>
     <item msgid="869923650527136615">"মোবাইল"</item>
-    <item msgid="7897544654242874543">"কর্মক্ষেত্র্র"</item>
+    <item msgid="7897544654242874543">"কর্মক্ষেত্র"</item>
     <item msgid="1103601433382158155">"কর্মক্ষেত্রের ফ্যাক্স"</item>
     <item msgid="1735177144948329370">"বাড়ির ফ্যাক্স"</item>
     <item msgid="603878674477207394">"পেজার"</item>
@@ -546,24 +554,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"হোম"</item>
-    <item msgid="7084237356602625604">"কর্মক্ষেত্র্র"</item>
+    <item msgid="7084237356602625604">"কর্মক্ষেত্র"</item>
     <item msgid="1112044410659011023">"অন্যান্য"</item>
     <item msgid="2374913952870110618">"কাস্টম"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"হোম"</item>
-    <item msgid="5629153956045109251">"কর্মক্ষেত্র্র"</item>
+    <item msgid="5629153956045109251">"কর্মক্ষেত্র"</item>
     <item msgid="4966604264500343469">"অন্যান্য"</item>
     <item msgid="4932682847595299369">"কাস্টম"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"হোম"</item>
-    <item msgid="1359644565647383708">"কর্মক্ষেত্র্র"</item>
+    <item msgid="1359644565647383708">"কর্মক্ষেত্র"</item>
     <item msgid="7868549401053615677">"অন্যান্য"</item>
     <item msgid="3145118944639869809">"কাস্টম"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"কর্মক্ষেত্র্র"</item>
+    <item msgid="7546335612189115615">"কর্মক্ষেত্র"</item>
     <item msgid="4378074129049520373">"অন্যান্য"</item>
     <item msgid="3455047468583965104">"কাস্টম"</item>
   </string-array>
@@ -580,7 +588,7 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"কাস্টম"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"হোম"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"মোবাইল"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"কর্মক্ষেত্র্র"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"কর্মক্ষেত্র"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"কর্মক্ষেত্রের ফ্যাক্স"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"বাড়ির ফ্যাক্স"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"পেজার"</string>
@@ -604,16 +612,16 @@
     <string name="eventTypeOther" msgid="7388178939010143077">"অন্যান্য"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"কাস্টম"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"হোম"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"কর্মক্ষেত্র্র"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"কর্মক্ষেত্র"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"অন্যান্য"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"মোবাইল"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"কাস্টম"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"হোম"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"কর্মক্ষেত্র্র"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"কর্মক্ষেত্র"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"অন্যান্য"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"কাস্টম"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"হোম"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"কর্মক্ষেত্র্র"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"কর্মক্ষেত্র"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"অন্যান্য"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"কাস্টম"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -625,17 +633,17 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"কর্মক্ষেত্র্র"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"কর্মক্ষেত্র"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"অন্যান্য"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"কাস্টম"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"কাস্টম"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"সহায়ক"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"ভাই"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"সন্তান"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"পারিবারিক অংশীদার"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"জীবনসাথি"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"পিতা"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"বন্ধু"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"পরিচালক"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"ম্যানেজার"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"মাতা"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"পিতা ও মাতা"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"অংশীদার"</string>
@@ -645,7 +653,7 @@
     <string name="relationTypeSpouse" msgid="394136939428698117">"স্বামী বা স্ত্রী"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"কাস্টম"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"হোম"</string>
-    <string name="sipAddressTypeWork" msgid="6920725730797099047">"কর্মক্ষেত্র্র"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"কর্মক্ষেত্র"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"অন্যান্য"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"এই পরিচিতিটি দেখার জন্য কোনো অ্যাপ্লিকেশান খুঁজে পাওয়া যায়নি৷"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN কোড লিখুন"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ইনস্টল সেশন পড়ুন"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"কোনো অ্যাপ্লিকেশানকে সেশনগুলি পড়ার অনুমতি দেয়। এটি সক্রিয় প্যাকেজ ইনস্টলেশনের বিশদ বিবরণ দেখতে দেয়।"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"প্যাকেজগুলি ইনস্টল করার অনুরোধ"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলির ইনস্টল করার অনুরোধ জানাতে অনুমতি দেয়৷"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"জুম নিয়ন্ত্রণের জন্য দুবার স্পর্শ করুন"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"যান"</string>

@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"રિંગર બંધ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"રિંગર વાઇબ્રેટ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"રિંગર ચાલુ"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"અપડેટ માટે તૈયાર થાય છે"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"અપડેટ પૅકેજ પર પ્રક્રિયા કરી રહ્યાં છે…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"શટ ડાઉન થઈ રહ્યું છે…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"તમારું ટેબ્લેટ શટ ડાઉન થઈ જશે."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"તમારું ટીવી શટ ડાઉન થઈ જશે."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"એપ્લિકેશનને SMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે એપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ટેક્સ્ટ સંદેશા (MMS) પ્રાપ્ત કરો"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"એપ્લિકેશનને MMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે એપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"સેલ બ્રોડકાસ્ટ સંદેશા વાંચો"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"એપ્લિકેશનને તમારા ઉપકરણ દ્વારા પ્રાપ્ત થયેલ સેલ બ્રોડકાસ્ટ સંદેશાને વાંચવાની મંજૂરી આપે છે. સેલ બ્રોડકાસ્ટ ચેતવણીઓ તમને કટોકટીની સ્થિતિઓ અંગે ચેતવવા માટે કેટલાક સ્થાનોમાં વિતરિત થાય છે. જ્યારે કટોકટીનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય ત્યારે દુર્ભાવનાપૂર્ણ એપ્લિકેશન્સ તમારા ઉપકરણના પ્રદર્શન અથવા ઓપરેશનમાં હસ્તક્ષેપ કરી શકે છે."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"તમારા એકાઉન્ટ્સ"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ઉપલબ્ધ એકાઉન્ટ્સ ઍક્સેસ કરો."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"સબ્સ્ક્રાઇબ કરેલ ફીડ્સ વાંચો"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"એપ્લિકેશનને હાલમાં સમન્વયિત ફીડ્સ વિશે વિગતો મેળવવાની મંજૂરી આપે છે."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS સંદેશા મોકલો"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"એપ્લિકેશનને SMS સંદેશા મોકલવાની મંજૂરી આપે છે. આના પરિણામે અનપેક્ષિત શુલ્ક લાગી શકે છે. દુર્ભાવનાપૂર્ણ એપ્લિકેશન્સ તમારી પુષ્ટિ વિના સંદેશા મોકલીને તમારા નાણા ખર્ચાવી શકે છે."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"તમારા ટેક્સ્ટ સંદેશા (SMS અથવા MMS) વાંચો"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"એપ્લિકેશનને અન્ય બાહ્ય ઉપકરણો પર મીડિયા આઉટપુટને રૂટ કરવની મંજૂરી આપે છે."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ઇન્સ્ટોલ સત્રો વાંચો"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"એપ્લિકેશનને ઇન્સ્ટોલ સત્રોને વાંચવાની મંજૂરી આપે છે. આ તેને સક્રિય પૅકેજ ઇન્સ્ટોલેશન્સ વિશે વિગતો જોવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"પૅકેજેસ ઇન્સ્ટોલ કરવાની વિનંતી કરો"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"એપ્લિકેશનને પૅકેજેસના ઇન્સ્ટોલેશનની વિનંતી કરવાની મંજૂરી આપો."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ઝૂમ નિયંત્રણ માટે બેવાર ટચ કરો"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"વિજેટ ઉમેરી શકાયું નથી."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"જાઓ"</string>
