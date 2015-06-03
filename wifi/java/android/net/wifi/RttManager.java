@@ -958,7 +958,7 @@ public class RttManager {
                     return;
                 }
 
-                sHandlerThread = new HandlerThread("WifiScanner");
+                sHandlerThread = new HandlerThread("RttManager");
                 sAsyncChannel = new AsyncChannel();
                 sConnected = new CountDownLatch(1);
 
