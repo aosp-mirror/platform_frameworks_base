@@ -1368,10 +1368,11 @@ public class AudioService extends IAudioService.Stub {
 
     private void onSetStreamVolume(int streamType, int index, int flags, int device,
             String caller) {
-        setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, false, caller);
+        final int stream = mStreamVolumeAlias[streamType];
+        setStreamVolumeInt(stream, index, device, false, caller);
         // setting volume on ui sounds stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
-                (mStreamVolumeAlias[streamType] == getUiSoundsStreamType())) {
+                (stream == getUiSoundsStreamType())) {
             int newRingerMode;
             if (index == 0) {
                 newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
@@ -1382,6 +1383,8 @@ public class AudioService extends IAudioService.Stub {
             }
             setRingerMode(newRingerMode, TAG + ".onSetStreamVolume", false /*external*/);
         }
+        // setting non-zero volume for a muted stream unmutes the stream and vice versa
+        mStreamStates[stream].mute(index == 0);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */

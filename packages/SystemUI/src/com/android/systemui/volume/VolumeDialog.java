@@ -726,11 +726,6 @@ public class VolumeDialog {
                 }
                 row.slider.setProgress(newProgress);
             }
-            if (mAutomute && mShowing) {
-                if (vlevel == 0 && !row.ss.muted && row.stream == AudioManager.STREAM_MUSIC) {
-                    mController.setStreamMute(row.stream, true);
-                }
-            }
         }
     }
 
@@ -934,16 +929,6 @@ public class VolumeDialog {
             final int userLevel = getImpliedLevel(seekBar, progress);
             if (mRow.ss.level != userLevel || mRow.ss.muted && userLevel > 0) {
                 mRow.userAttempt = SystemClock.uptimeMillis();
-                if (mAutomute) {
-                    if (mRow.stream != AudioManager.STREAM_RING) {
-                        if (userLevel > 0 && mRow.ss.muted) {
-                            mController.setStreamMute(mRow.stream, false);
-                        }
-                        if (userLevel == 0 && mRow.ss.muteSupported && !mRow.ss.muted) {
-                            mController.setStreamMute(mRow.stream, true);
-                        }
-                    }
-                }
                 if (mRow.requestedLevel != userLevel) {
                     mController.setStreamVolume(mRow.stream, userLevel);
                     mRow.requestedLevel = userLevel;
