@@ -301,17 +301,19 @@ static void android_media_MediaCrypto_setMediaDrmSession(
 
     status_t err = crypto->setMediaDrmSession(sessionId);
 
-    String8 msg("setMediaDrmSession failed");
-    if (err == ERROR_DRM_SESSION_NOT_OPENED) {
-        msg += ": session not opened";
-    } else if (err == ERROR_UNSUPPORTED) {
-        msg += ": not supported by this crypto scheme";
-    } else if (err == NO_INIT) {
-        msg += ": crypto plugin not initialized";
-    } else if (err != OK) {
-        msg.appendFormat(": general failure (%d)", err);
+    if (err != OK) {
+        String8 msg("setMediaDrmSession failed");
+        if (err == ERROR_DRM_SESSION_NOT_OPENED) {
+            msg += ": session not opened";
+        } else if (err == ERROR_UNSUPPORTED) {
+            msg += ": not supported by this crypto scheme";
+        } else if (err == NO_INIT) {
+            msg += ": crypto plugin not initialized";
+        } else {
+            msg.appendFormat(": general failure (%d)", err);
+        }
+        jniThrowException(env, "android/media/MediaCryptoException", msg.string());
     }
-    jniThrowException(env, "android/media/MediaCryptoException", msg.string());
 }
 
 static JNINativeMethod gMethods[] = {
