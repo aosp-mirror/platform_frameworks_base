@@ -86,11 +86,13 @@ public abstract class CarrierService extends Service {
     /** @hide */
     @Override
     public final IBinder onBind(Intent intent) {
-        if (!CONFIG_SERVICE_INTERFACE.equals(intent.getAction())
-            || !BIND_SERVICE_INTERFACE.equals(intent.getAction())) {
-            return null;
+        switch (intent.getAction()) {
+            case CONFIG_SERVICE_INTERFACE:
+            case BIND_SERVICE_INTERFACE:
+                return mStubWrapper;
+            default:
+                null;
         }
-        return mStubWrapper;
     }
 
     /**
