@@ -18,9 +18,9 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumente"</string>
     <string name="title_open" msgid="4353228937663917801">"Hap nga"</string>
-    <string name="title_save" msgid="2433679664882857999">"Ruaje në"</string>
+    <string name="title_save" msgid="2433679664882857999">"Ruaje te"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Krijo dosje"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"Pamje \"sitë\""</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Pamje rrjete"</string>
     <string name="menu_list" msgid="7279285939892417279">"Pamje liste"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Rendit sipas"</string>
     <string name="menu_search" msgid="3816712084502856974">"Kërko"</string>
@@ -39,7 +39,7 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fshih madhësinë e skedarit"</string>
     <string name="button_select" msgid="527196987259139214">"Zgjidh"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopjo"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> dokumente u përzgjodhën"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Zgjedhur: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Sipas emrit"</string>
     <string name="sort_date" msgid="586080032956151448">"Sipas datës së modifikimit"</string>
     <string name="sort_size" msgid="3350681319735474741">"Sipas madhësisë"</string>

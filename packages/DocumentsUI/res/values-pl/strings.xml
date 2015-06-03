@@ -39,7 +39,7 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ukryj rozmiar pliku"</string>
     <string name="button_select" msgid="527196987259139214">"Wybierz"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiuj"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Wybrano: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Wybrano <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Według nazwy"</string>
     <string name="sort_date" msgid="586080032956151448">"Według daty edycji"</string>
     <string name="sort_size" msgid="3350681319735474741">"Według rozmiaru"</string>

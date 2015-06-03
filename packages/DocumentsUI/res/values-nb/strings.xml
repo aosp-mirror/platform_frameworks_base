@@ -41,7 +41,7 @@
     <string name="button_copy" msgid="8706475544635021302">"Kopiér"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> valgt"</string>
     <string name="sort_name" msgid="9183560467917256779">"Etter navn"</string>
-    <string name="sort_date" msgid="586080032956151448">"«Etter dato» endret"</string>
+    <string name="sort_date" msgid="586080032956151448">"Etter endringsdato"</string>
     <string name="sort_size" msgid="3350681319735474741">"Etter størrelse"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Vis røtter"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Skjul røtter"</string>

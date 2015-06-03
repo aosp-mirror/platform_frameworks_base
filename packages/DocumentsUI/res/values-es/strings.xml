@@ -35,8 +35,8 @@
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostrar tarjeta SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ocultar almac. interno"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Ocultar tarjeta SD"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostrar tamaño archivo"</string>
-    <string name="menu_file_size_hide" msgid="8881975928502581042">"Ocultar tamaño archivo"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostrar tamaño del archivo"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Ocultar tamaño del archivo"</string>
     <string name="button_select" msgid="527196987259139214">"Seleccionar"</string>
     <string name="button_copy" msgid="8706475544635021302">"Copiar"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Seleccionado: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
@@ -54,7 +54,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Accesos directos"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivos"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Más aplicaciones"</string>
-    <string name="empty" msgid="7858882803708117596">"Sin elementos"</string>
+    <string name="empty" msgid="7858882803708117596">"No hay elementos"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Error al abrir el archivo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"No es posible eliminar algunos documentos"</string>
     <string name="share_via" msgid="8966594246261344259">"Compartir a través de"</string>

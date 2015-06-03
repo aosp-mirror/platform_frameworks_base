@@ -32,14 +32,14 @@
     <string name="menu_select_all" msgid="4320518282375109902">"Vybrať všetko"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopírovať do…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Zobraziť interné úložisko"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Zobraziť kartu SD"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Zobraziť SD kartu"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Skryť interné úložisko"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skryť kartu SD"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skryť SD kartu"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Zobraziť veľkosť súboru"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Skryť veľkosť súboru"</string>
     <string name="button_select" msgid="527196987259139214">"Vybrať"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopírovať"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Vybraté: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Vybrané: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Podľa názvu"</string>
     <string name="sort_date" msgid="586080032956151448">"Podľa dátumu zmeny"</string>
     <string name="sort_size" msgid="3350681319735474741">"Podľa veľkosti"</string>
@@ -57,7 +57,7 @@
     <string name="empty" msgid="7858882803708117596">"Žiadne položky"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Súbor sa nepodarilo otvoriť"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Niektoré dokumenty sa nepodarilo odstrániť"</string>
-    <string name="share_via" msgid="8966594246261344259">"Zdieľať pomocou"</string>
+    <string name="share_via" msgid="8966594246261344259">"Zdieľať"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírovanie súborov"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Zostáva: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
