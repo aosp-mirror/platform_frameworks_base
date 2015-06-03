@@ -827,7 +827,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
         // the layer contains screen buffer content that shouldn't be alpha modulated
         // (and any necessary alpha modulation was handled drawing into the layer)
         writableSnapshot()->alpha = 1.0f;
-        composeLayerRect(layer, rect, true);
+        composeLayerRectSwapped(layer, rect);
         restore();
     }
 
@@ -849,31 +849,40 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
             .setFillTextureLayer(*layer, getLayerAlpha(layer))
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(), TransformFlags::None)
             .setModelViewMapUnitToRectOptionalSnap(tryToSnap, rect)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
     renderGlop(glop);
 }
 
-void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
+void OpenGLRenderer::composeLayerRectSwapped(Layer* layer, const Rect& rect) {
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedUvQuad(nullptr, layer->texCoords)
+            .setFillLayer(layer->getTexture(), layer->getColorFilter(),
+                    getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::Swap)
+            .setTransform(*currentSnapshot(), TransformFlags::MeshIgnoresCanvasTransform)
+            .setModelViewMapUnitToRect(rect)
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
+}
+
+void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect) {
     if (layer->isTextureLayer()) {
         EVENT_LOGD("composeTextureLayerRect");
         drawTextureLayer(layer, rect);
     } else {
         EVENT_LOGD("composeHardwareLayerRect");
 
-        Blend::ModeOrderSwap modeUsage = swap ?
-                Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap;
-        const Matrix4& transform = swap ? Matrix4::identity() : *currentTransform();
-        const bool tryToSnap = !swap
-                && layer->getWidth() == static_cast<uint32_t>(rect.getWidth())
+        const bool tryToSnap = layer->getWidth() == static_cast<uint32_t>(rect.getWidth())
                 && layer->getHeight() == static_cast<uint32_t>(rect.getHeight());
         Glop glop;
         GlopBuilder(mRenderState, mCaches, &glop)
                 .setMeshTexturedUvQuad(nullptr, layer->texCoords)
-                .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), modeUsage)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+                .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
+                .setTransform(*currentSnapshot(), TransformFlags::None)
                 .setModelViewMapUnitToRectOptionalSnap(tryToSnap, rect)
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -1014,7 +1023,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedIndexedQuads(&quadVertices[0], count * 6)
             .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewOffsetRectSnap(rect.left, rect.top, modelRect)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1128,11 +1137,12 @@ void OpenGLRenderer::clearLayerRegions() {
         // stencil setup from doing the same thing again
         mLayers.clear();
 
+        const int transformFlags = TransformFlags::MeshIgnoresCanvasTransform;
         Glop glop;
         GlopBuilder(mRenderState, mCaches, &glop)
                 .setMeshIndexedQuads(&mesh[0], quadCount)
                 .setFillClear()
-                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                .setTransform(*currentSnapshot(), transformFlags)
                 .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getClipRect()))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -1316,13 +1326,13 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
 
     mRenderState.scissor().set(scissorBox.left, getViewportHeight() - scissorBox.bottom,
             scissorBox.getWidth(), scissorBox.getHeight());
-
+    const int transformFlags = TransformFlags::MeshIgnoresCanvasTransform;
     Glop glop;
     Vertex* vertices = &rectangleVertices[0];
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshIndexedQuads(vertices, rectangleVertices.size() / 4)
             .setFillBlack()
-            .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+            .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRect(0, 0, scissorBox)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1518,13 +1528,15 @@ void OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entr
     bool snap = pureTranslate;
     const float x = floorf(bounds.left + 0.5f);
     const float y = floorf(bounds.top + 0.5f);
-    int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
-            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+
+    const int textureFillFlags = (bitmap->colorType() == kAlpha_8_SkColorType)
+            ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
+    const int transformFlags = TransformFlags::MeshIgnoresCanvasTransform;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedMesh(vertices, bitmapCount * 6)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+            .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(0, 0, bounds.getWidth(), bounds.getHeight()))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1541,13 +1553,13 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
-            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    const int textureFillFlags = (bitmap->colorType() == kAlpha_8_SkColorType)
+            ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1632,11 +1644,12 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
      * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
      * shader in that case to mimic the behavior in SkiaCanvas::drawBitmapMesh.
      */
+    const int textureFillFlags = TextureFillFlags::None;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshColoredTexturedMesh(mesh.get(), elementCount)
-            .setFillTexturePaint(*texture, static_cast<int>(TextureFillFlags::kNone), paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1657,16 +1670,15 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
             fmin(1.0f, src.right / texture->width),
             fmin(1.0f, src.bottom / texture->height));
 
-    const int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
-            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    const int textureFillFlags = (bitmap->colorType() == kAlpha_8_SkColorType)
+            ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
     const bool tryToSnap = MathUtils::areEqual(src.getWidth(), dst.getWidth())
             && MathUtils::areEqual(src.getHeight(), dst.getHeight());
-
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedUvQuad(texture->uvMapper, uv)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewMapUnitToRectOptionalSnap(tryToSnap, dst)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1684,15 +1696,15 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
     if (!texture) return;
 
     // 9 patches are built for stretching - always filter
-    int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
+    int textureFillFlags = TextureFillFlags::ForceFilter;
     if (bitmap->colorType() == kAlpha_8_SkColorType) {
-        textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
+        textureFillFlags |= TextureFillFlags::IsAlphaMaskTexture;
     }
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshPatchQuads(*mesh)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewOffsetRectSnap(left, top, Rect(0, 0, right - left, bottom - top)) // TODO: get minimal bounds from patch
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1712,16 +1724,17 @@ void OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entr
     const AutoTexture autoCleanup(texture);
 
     // TODO: get correct bounds from caller
+    const int transformFlags = TransformFlags::MeshIgnoresCanvasTransform;
     // 9 patches are built for stretching - always filter
-    int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
+    int textureFillFlags = TextureFillFlags::ForceFilter;
     if (bitmap->colorType() == kAlpha_8_SkColorType) {
-        textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
+        textureFillFlags |= TextureFillFlags::IsAlphaMaskTexture;
     }
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedIndexedQuads(vertices, elementCount)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+            .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -1736,13 +1749,13 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         return;
     }
 
-    bool fudgeOffset = displayFlags & kVertexBuffer_Offset;
     bool shadowInterp = displayFlags & kVertexBuffer_ShadowInterp;
+    const int transformFlags = TransformFlags::OffsetByFudgeFactor;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshVertexBuffer(vertexBuffer, shadowInterp)
             .setFillPaint(*paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), fudgeOffset)
+            .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -2028,7 +2041,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedUnitQuad(nullptr)
             .setFillShadowTexturePaint(*texture, textShadow.color, *paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -2353,7 +2366,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             GlopBuilder(mRenderState, mCaches, &glop)
                     .setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
                     .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
-                    .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                    .setTransform(*currentSnapshot(),  TransformFlags::None)
                     .setModelViewOffsetRectSnap(x, y, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
                     .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                     .build();
@@ -2411,7 +2424,7 @@ void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedUnitQuad(nullptr)
             .setFillPathTexturePaint(*texture, *paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setTransform(*currentSnapshot(),  TransformFlags::None)
             .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -2543,12 +2556,13 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
         return;
     }
 
-    const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
+    const int transformFlags = ignoreTransform
+            ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshIndexedQuads(&mesh[0], count / 4)
             .setFillPaint(*paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+            .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
@@ -2557,12 +2571,13 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         const SkPaint* paint, bool ignoreTransform) {
-    const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
+    const int transformFlags = ignoreTransform
+            ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshUnitQuad()
             .setFillPaint(*paint, currentSnapshot()->alpha)
-            .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+            .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewMapUnitToRect(Rect(left, top, right, bottom))
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();

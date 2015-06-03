@@ -640,13 +640,20 @@ private:
     void composeLayerRegion(Layer* layer, const Rect& rect);
 
     /**
-     * Compose the specified layer as a simple rectangle.
+     * Restores the content in layer to the screen, swapping the blend mode,
+     * specifically used in the restore() of a saveLayerAlpha().
      *
-     * @param layer The layer to compose
-     * @param rect The layer's bounds
-     * @param swap If true, the source and destination are swapped
+     * This allows e.g. a layer that would have been drawn on top of existing content (with SrcOver)
+     * to be drawn underneath.
+     *
+     * This will always ignore the canvas transform.
      */
-    void composeLayerRect(Layer* layer, const Rect& rect, bool swap = false);
+    void composeLayerRectSwapped(Layer* layer, const Rect& rect);
+
+    /**
+     * Draws the content in layer to the screen.
+     */
+    void composeLayerRect(Layer* layer, const Rect& rect);
 
     /**
      * Clears all the regions corresponding to the current list of layers.
