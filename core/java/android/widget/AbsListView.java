@@ -5317,6 +5317,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
+    void syncSelectedItem() {
+        if (mDataChanged) {
+            layoutChildren();
+        }
+    }
+
+    @Override
     protected void handleDataChanged() {
         int count = mItemCount;
         int lastHandledItemCount = mLastHandledItemCount;
