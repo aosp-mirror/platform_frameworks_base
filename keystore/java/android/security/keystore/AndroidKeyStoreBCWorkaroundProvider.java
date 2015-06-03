@@ -122,6 +122,106 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
                 PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA512AndMGF1Padding");
         put("Alg.Alias.Cipher.RSA/None/OAEPWithSHA-512AndMGF1Padding",
                 "RSA/ECB/OAEPWithSHA-512AndMGF1Padding");
+
+        // --------------------- java.security.Signature
+        putSignatureImpl("NONEwithRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$NONEWithPKCS1Padding");
+
+        putSignatureImpl("MD5withRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$MD5WithPKCS1Padding");
+        put("Alg.Alias.Signature.MD5WithRSAEncryption", "MD5WithRSA");
+        put("Alg.Alias.Signature.MD5/RSA", "MD5WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.4", "MD5WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.2.5with1.2.840.113549.1.1.1", "MD5WithRSA");
+
+        putSignatureImpl("SHA1withRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA1WithPKCS1Padding");
+        put("Alg.Alias.Signature.SHA1WithRSAEncryption", "SHA1WithRSA");
+        put("Alg.Alias.Signature.SHA1/RSA", "SHA1WithRSA");
+        put("Alg.Alias.Signature.SHA-1/RSA", "SHA1WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.5", "SHA1WithRSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.1", "SHA1WithRSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.5", "SHA1WithRSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.29", "SHA1WithRSA");
+
+        putSignatureImpl("SHA224withRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA224WithPKCS1Padding");
+        put("Alg.Alias.Signature.SHA224WithRSAEncryption", "SHA224WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.11", "SHA224WithRSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.4with1.2.840.113549.1.1.1",
+                "SHA224WithRSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.4with1.2.840.113549.1.1.11",
+                "SHA224WithRSA");
+
+        putSignatureImpl("SHA256withRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA256WithPKCS1Padding");
+        put("Alg.Alias.Signature.SHA256WithRSAEncryption", "SHA256WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.11", "SHA256WithRSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.1with1.2.840.113549.1.1.1",
+                "SHA256WithRSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.1with1.2.840.113549.1.1.11",
+                "SHA256WithRSA");
+
+        putSignatureImpl("SHA384withRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA384WithPKCS1Padding");
+        put("Alg.Alias.Signature.SHA384WithRSAEncryption", "SHA384WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.12", "SHA384WithRSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.2with1.2.840.113549.1.1.1",
+                "SHA384WithRSA");
+
+        putSignatureImpl("SHA512withRSA",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA512WithPKCS1Padding");
+        put("Alg.Alias.Signature.SHA512WithRSAEncryption", "SHA512WithRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.13", "SHA512WithRSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.3with1.2.840.113549.1.1.1",
+                "SHA512WithRSA");
+
+        putSignatureImpl("SHA1withRSA/PSS",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA1WithPSSPadding");
+        putSignatureImpl("SHA224withRSA/PSS",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA224WithPSSPadding");
+        putSignatureImpl("SHA256withRSA/PSS",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA256WithPSSPadding");
+        putSignatureImpl("SHA384withRSA/PSS",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA384WithPSSPadding");
+        putSignatureImpl("SHA512withRSA/PSS",
+                PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA512WithPSSPadding");
+
+        putSignatureImpl("NONEwithECDSA",
+                PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$NONE");
+
+        putSignatureImpl("ECDSA", PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$SHA1");
+        put("Alg.Alias.Signature.SHA1withECDSA", "ECDSA");
+        put("Alg.Alias.Signature.ECDSAwithSHA1", "ECDSA");
+        // iso(1) member-body(2) us(840) ansi-x962(10045) signatures(4) ecdsa-with-SHA1(1)
+        put("Alg.Alias.Signature.1.2.840.10045.4.1", "ECDSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10045.2.1", "ECDSA");
+
+        // iso(1) member-body(2) us(840) ansi-x962(10045) signatures(4) ecdsa-with-SHA2(3)
+        putSignatureImpl("SHA224withECDSA",
+                PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$SHA224");
+        // ecdsa-with-SHA224(1)
+        put("Alg.Alias.Signature.1.2.840.10045.4.3.1", "SHA224withECDSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.4with1.2.840.10045.2.1", "SHA224withECDSA");
+
+        // iso(1) member-body(2) us(840) ansi-x962(10045) signatures(4) ecdsa-with-SHA2(3)
+        putSignatureImpl("SHA256withECDSA",
+                PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$SHA256");
+        // ecdsa-with-SHA256(2)
+        put("Alg.Alias.Signature.1.2.840.10045.4.3.2", "SHA256withECDSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.1with1.2.840.10045.2.1", "SHA256withECDSA");
+
+        putSignatureImpl("SHA384withECDSA",
+                PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$SHA384");
+        // ecdsa-with-SHA384(3)
+        put("Alg.Alias.Signature.1.2.840.10045.4.3.3", "SHA384withECDSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.2with1.2.840.10045.2.1", "SHA384withECDSA");
+
+        putSignatureImpl("SHA512withECDSA",
+                PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$SHA512");
+        // ecdsa-with-SHA512(4)
+        put("Alg.Alias.Signature.1.2.840.10045.4.3.4", "SHA512withECDSA");
+        put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.3with1.2.840.10045.2.1", "SHA512withECDSA");
     }
 
     private void putMacImpl(String algorithm, String implClass) {
@@ -137,6 +237,12 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     private void putAsymmetricCipherImpl(String transformation, String implClass) {
         put("Cipher." + transformation, implClass);
         put("Cipher." + transformation + " SupportedKeyClasses",
+                KEYSTORE_PRIVATE_KEY_CLASS_NAME + "|" + KEYSTORE_PUBLIC_KEY_CLASS_NAME);
+    }
+
+    private void putSignatureImpl(String algorithm, String implClass) {
+        put("Signature." + algorithm, implClass);
+        put("Signature." + algorithm + " SupportedKeyClasses",
                 KEYSTORE_PRIVATE_KEY_CLASS_NAME + "|" + KEYSTORE_PUBLIC_KEY_CLASS_NAME);
     }
 }
