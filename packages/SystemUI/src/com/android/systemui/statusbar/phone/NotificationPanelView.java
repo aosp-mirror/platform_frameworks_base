@@ -196,6 +196,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mCollapsedOnDown;
     private int mPositionMinSideMargin;
     private int mLastOrientation = -1;
+    private boolean mClosingWithAlphaFadeOut;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -527,6 +528,7 @@ public class NotificationPanelView extends PanelView implements
     protected void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         mHeadsUpTouchHelper.notifyFling(!expand);
+        setClosingWithAlphaFadeout(!expand && getFadeoutAlpha() == 1.0f);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
@@ -1584,24 +1586,20 @@ public class NotificationPanelView extends PanelView implements
         }
     }
     private void updateNotificationTranslucency() {
-        float alpha;
-        if (mExpandingFromHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
-            alpha = 1f;
-        } else {
-            alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
-                    / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
-                    - mNotificationStackScroller.getCollapseSecondCardPadding());
-            alpha = Math.max(0, Math.min(alpha, 1));
-            alpha = (float) Math.pow(alpha, 0.75);
-        }
-
-        if (alpha != 1f && mNotificationStackScroller.getLayerType() != LAYER_TYPE_HARDWARE) {
-            mNotificationStackScroller.setLayerType(LAYER_TYPE_HARDWARE, null);
-        } else if (alpha == 1f
-                && mNotificationStackScroller.getLayerType() == LAYER_TYPE_HARDWARE) {
-            mNotificationStackScroller.setLayerType(LAYER_TYPE_NONE, null);
+        float alpha = 1f;
+        if (mClosingWithAlphaFadeOut && !mExpandingFromHeadsUp && !mHeadsUpManager.hasPinnedHeadsUp()) {
+            alpha = getFadeoutAlpha();
         }
         mNotificationStackScroller.setAlpha(alpha);
+    }
+
+    private float getFadeoutAlpha() {
+        float alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
+                / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
+                - mNotificationStackScroller.getCollapseSecondCardPadding());
+        alpha = Math.max(0, Math.min(alpha, 1));
+        alpha = (float) Math.pow(alpha, 0.75);
+        return alpha;
     }
 
     @Override
@@ -2260,6 +2258,12 @@ public class NotificationPanelView extends PanelView implements
     protected void onClosingFinished() {
         super.onClosingFinished();
         resetVerticalPanelPosition();
+        setClosingWithAlphaFadeout(false);
+    }
+
+    private void setClosingWithAlphaFadeout(boolean closing) {
+        mClosingWithAlphaFadeOut = closing;
+        mNotificationStackScroller.forceNoOverlappingRendering(closing);
     }
 
     /**
