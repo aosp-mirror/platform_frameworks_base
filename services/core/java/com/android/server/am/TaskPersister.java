@@ -33,6 +33,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.os.Process;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -471,6 +472,7 @@ public class TaskPersister {
 
         @Override
         public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             ArraySet<Integer> persistentTaskIds = new ArraySet<Integer>();
             while (true) {
                 // We can't lock mService while holding TaskPersister.this, but we don't want to
