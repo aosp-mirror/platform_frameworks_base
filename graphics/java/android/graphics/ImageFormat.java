@@ -587,10 +587,29 @@ public class ImageFormat {
     public static final int RAW12 = 0x26;
 
     /**
-     * Android dense depth image format.
+     * <p>Android dense depth image format.</p>
      *
-     * Each pixel is 16 bits, representing a depth ranging measurement from
-     * a depth camera or similar sensor.
+     * <p>Each pixel is 16 bits, representing a depth ranging measurement from a depth camera or
+     * similar sensor. The 16-bit sample consists of a confidence value and the actual ranging
+     * measurement.</p>
+     *
+     * <p>The confidence value is an estimate of correctness for this sample.  It is encoded in the
+     * 3 most significant bits of the sample, with a value of 0 representing 100% confidence, a
+     * value of 1 representing 0% confidence, a value of 2 representing 1/7, a value of 3
+     * representing 2/7, and so on.</p>
+     *
+     * <p>As an example, the following sample extracts the range and confidence from the first pixel
+     * of a DEPTH16-format {@link android.media.Image}, and converts the confidence to a
+     * floating-point value between 0 and 1.f inclusive, with 1.f representing maximum confidence:
+     *
+     * <pre>
+     *    ShortBuffer shortDepthBuffer = img.getPlanes()[0].getBuffer().asShortBuffer();
+     *    short depthSample = shortDepthBuffer.get()
+     *    short depthRange = (short) (depthSample & 0x1FFF);
+     *    short depthConfidence = (short) ((depthSample >> 13) & 0x7);
+     *    float depthPercentage = depthConfidence == 0 ? 1.f : (depthConfidence - 1) / 7.f;
+     * </pre>
+     * </p>
      *
      * <p>This format assumes
      * <ul>
@@ -602,19 +621,32 @@ public class ImageFormat {
      *
      * <pre> y_size = stride * height </pre>
      *
-     * When produced by a camera, the units are millimeters.
+     * When produced by a camera, the units for the range are millimeters.
      */
     public static final int DEPTH16 = 0x44363159;
 
     /**
      * Android sparse depth point cloud format.
      *
-     * <p>A variable-length list of 3D points, with each point represented
-     * by a triple of floats.</p>
+     * <p>A variable-length list of 3D points plus a confidence value, with each point represented
+     * by four floats; first the X, Y, Z position coordinates, and then the confidence value.</p>
      *
-     * <p>The number of points is {@code (size of the buffer in bytes) / 12}.
+     * <p>The number of points is {@code (size of the buffer in bytes) / 16}.
      *
-     * The coordinate system and units depend on the source of the point cloud data.
+     * <p>The coordinate system and units of the position values depend on the source of the point
+     * cloud data. The confidence value is between 0.f and 1.f, inclusive, with 0 representing 0%
+     * confidence and 1.f representing 100% confidence in the measured position values.</p>
+     *
+     * <p>As an example, the following code extracts the first depth point in a DEPTH_POINT_CLOUD
+     * format {@link android.media.Image}:
+     * <pre>
+     *    FloatBuffer floatDepthBuffer = img.getPlanes()[0].getBuffer().asFloatBuffer();
+     *    float x = floatDepthBuffer.get();
+     *    float y = floatDepthBuffer.get();
+     *    float z = floatDepthBuffer.get();
+     *    float confidence = floatDepthBuffer.get();
+     * </pre>
+     *
      */
     public static final int DEPTH_POINT_CLOUD = 0x101;
 
