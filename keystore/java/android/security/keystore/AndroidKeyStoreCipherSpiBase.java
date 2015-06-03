@@ -216,8 +216,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
                 mEncrypting ? KeymasterDefs.KM_PURPOSE_ENCRYPT : KeymasterDefs.KM_PURPOSE_DECRYPT,
                 true, // permit aborting this operation if keystore runs out of resources
                 keymasterInputArgs,
-                additionalEntropy,
-                keymasterOutputArgs);
+                additionalEntropy);
         if (opResult == null) {
             throw new KeyStoreConnectException();
         }
@@ -247,7 +246,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             throw new ProviderException("Keystore returned invalid operation handle");
         }
 
-        loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
+        loadAlgorithmSpecificParametersFromBeginResult(opResult.outParams);
         mMainDataStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, opResult.token));
