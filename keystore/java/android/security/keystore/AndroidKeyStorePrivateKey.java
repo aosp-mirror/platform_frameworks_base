@@ -16,16 +16,16 @@
 
 package android.security.keystore;
 
-import javax.crypto.SecretKey;
+import java.security.PrivateKey;
 
 /**
- * {@link SecretKey} backed by Android Keystore.
+ * {@link PrivateKey} backed by Android Keystore.
  *
  * @hide
  */
-public class AndroidKeyStoreSecretKey extends AndroidKeyStoreKey implements SecretKey {
+public class AndroidKeyStorePrivateKey extends AndroidKeyStoreKey implements PrivateKey {
 
-    public AndroidKeyStoreSecretKey(String alias, String algorithm) {
+    public AndroidKeyStorePrivateKey(String alias, String algorithm) {
         super(alias, algorithm);
     }
 }

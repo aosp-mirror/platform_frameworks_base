@@ -43,13 +43,17 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     private static final String PACKAGE_NAME = "android.security.keystore";
     private static final String KEYSTORE_SECRET_KEY_CLASS_NAME =
             PACKAGE_NAME + ".AndroidKeyStoreSecretKey";
+    private static final String KEYSTORE_PRIVATE_KEY_CLASS_NAME =
+            PACKAGE_NAME + ".AndroidKeyStorePrivateKey";
+    private static final String KEYSTORE_PUBLIC_KEY_CLASS_NAME =
+            PACKAGE_NAME + ".AndroidKeyStorePublicKey";
 
     AndroidKeyStoreBCWorkaroundProvider() {
         super("AndroidKeyStoreBCWorkaround",
                 1.0,
                 "Android KeyStore security provider to work around Bouncy Castle");
 
-        // javax.crypto.Mac
+        // --------------------- javax.crypto.Mac
         putMacImpl("HmacSHA1", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA1");
         put("Alg.Alias.Mac.1.2.840.113549.2.7", "HmacSHA1");
         put("Alg.Alias.Mac.HMAC-SHA1", "HmacSHA1");
@@ -75,7 +79,7 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
         put("Alg.Alias.Mac.HMAC-SHA512", "HmacSHA512");
         put("Alg.Alias.Mac.HMAC/SHA512", "HmacSHA512");
 
-        // javax.crypto.Cipher
+        // --------------------- javax.crypto.Cipher
         putSymmetricCipherImpl("AES/ECB/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$ECB$NoPadding");
         putSymmetricCipherImpl("AES/ECB/PKCS7Padding",
@@ -88,6 +92,36 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
 
         putSymmetricCipherImpl("AES/CTR/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CTR$NoPadding");
+
+        putAsymmetricCipherImpl("RSA/ECB/NoPadding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$NoPadding");
+        put("Alg.Alias.Cipher.RSA/None/NoPadding", "RSA/ECB/NoPadding");
+        putAsymmetricCipherImpl("RSA/ECB/PKCS1Padding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$PKCS1Padding");
+        put("Alg.Alias.Cipher.RSA/None/PKCS1Padding", "RSA/ECB/PKCS1Padding");
+        putAsymmetricCipherImpl("RSA/ECB/OAEPPadding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA1AndMGF1Padding");
+        put("Alg.Alias.Cipher.RSA/None/OAEPPadding", "RSA/ECB/OAEPPadding");
+        putAsymmetricCipherImpl("RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA1AndMGF1Padding");
+        put("Alg.Alias.Cipher.RSA/None/OAEPWithSHA-1AndMGF1Padding",
+                "RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
+        putAsymmetricCipherImpl("RSA/ECB/OAEPWithSHA-224AndMGF1Padding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA224AndMGF1Padding");
+        put("Alg.Alias.Cipher.RSA/None/OAEPWithSHA-224AndMGF1Padding",
+                "RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        putAsymmetricCipherImpl("RSA/ECB/OAEPWithSHA-256AndMGF1Padding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA256AndMGF1Padding");
+        put("Alg.Alias.Cipher.RSA/None/OAEPWithSHA-256AndMGF1Padding",
+                "RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        putAsymmetricCipherImpl("RSA/ECB/OAEPWithSHA-384AndMGF1Padding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA384AndMGF1Padding");
+        put("Alg.Alias.Cipher.RSA/None/OAEPWithSHA-384AndMGF1Padding",
+                "RSA/ECB/OAEPWithSHA-384AndMGF1Padding");
+        putAsymmetricCipherImpl("RSA/ECB/OAEPWithSHA-512AndMGF1Padding",
+                PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$OAEPWithSHA512AndMGF1Padding");
+        put("Alg.Alias.Cipher.RSA/None/OAEPWithSHA-512AndMGF1Padding",
+                "RSA/ECB/OAEPWithSHA-512AndMGF1Padding");
     }
 
     private void putMacImpl(String algorithm, String implClass) {
@@ -98,5 +132,11 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     private void putSymmetricCipherImpl(String transformation, String implClass) {
         put("Cipher." + transformation, implClass);
         put("Cipher." + transformation + " SupportedKeyClasses", KEYSTORE_SECRET_KEY_CLASS_NAME);
+    }
+
+    private void putAsymmetricCipherImpl(String transformation, String implClass) {
+        put("Cipher." + transformation, implClass);
+        put("Cipher." + transformation + " SupportedKeyClasses",
+                KEYSTORE_PRIVATE_KEY_CLASS_NAME + "|" + KEYSTORE_PUBLIC_KEY_CLASS_NAME);
     }
 }
