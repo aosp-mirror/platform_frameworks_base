@@ -18291,7 +18291,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (accessibilityId < 0) {
             return null;
         }
-        return findViewByAccessibilityIdTraversal(accessibilityId);
+        View view = findViewByAccessibilityIdTraversal(accessibilityId);
+        if (view != null) {
+            return view.includeForAccessibility() ? view : null;
+        }
+        return null;
     }
 
     /**
