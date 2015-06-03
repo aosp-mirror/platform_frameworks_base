@@ -40,11 +40,11 @@ struct Comparison {
 };
 
 static const Comparison COMPARISONS[] = {
-        {FrameInfoIndex::kIntendedVsync, FrameInfoIndex::kVsync},
-        {FrameInfoIndex::kOldestInputEvent, FrameInfoIndex::kVsync},
-        {FrameInfoIndex::kVsync, FrameInfoIndex::kSyncStart},
-        {FrameInfoIndex::kSyncStart, FrameInfoIndex::kIssueDrawCommandsStart},
-        {FrameInfoIndex::kIssueDrawCommandsStart, FrameInfoIndex::kFrameCompleted},
+        {FrameInfoIndex::IntendedVsync, FrameInfoIndex::Vsync},
+        {FrameInfoIndex::OldestInputEvent, FrameInfoIndex::Vsync},
+        {FrameInfoIndex::Vsync, FrameInfoIndex::SyncStart},
+        {FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart},
+        {FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::FrameCompleted},
 };
 
 // If the event exceeds 10 seconds throw it away, this isn't a jank event
@@ -64,8 +64,8 @@ static const int64_t IGNORE_EXCEEDING = seconds_to_nanoseconds(10);
  * time on the RenderThread, figure out how to attribute that as a jank-causer
  */
 static const int64_t EXEMPT_FRAMES_FLAGS
-        = FrameInfoFlags::kWindowLayoutChanged
-        | FrameInfoFlags::kSurfaceCanvas;
+        = FrameInfoFlags::WindowLayoutChanged
+        | FrameInfoFlags::SurfaceCanvas;
 
 // The bucketing algorithm controls so to speak
 // If a frame is <= to this it goes in bucket 0
@@ -206,7 +206,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     mData->totalFrameCount++;
     // Fast-path for jank-free frames
     int64_t totalDuration =
-            frame[FrameInfoIndex::kFrameCompleted] - frame[FrameInfoIndex::kIntendedVsync];
+            frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::IntendedVsync];
     uint32_t framebucket = frameCountIndexForFrameTime(
             totalDuration, mData->frameCounts.size());
     // Keep the fast path as fast as possible.
@@ -215,7 +215,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
         return;
     }
 
-    if (frame[FrameInfoIndex::kFlags] & EXEMPT_FRAMES_FLAGS) {
+    if (frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS) {
         return;
     }
 
