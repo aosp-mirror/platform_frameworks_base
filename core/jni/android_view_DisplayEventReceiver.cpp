@@ -77,7 +77,7 @@ NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
         jobject receiverWeak, const sp<MessageQueue>& messageQueue) :
         mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
         mMessageQueue(messageQueue), mWaitingForVsync(false) {
-    ALOGV("receiver %p ~ Initializing input event receiver.", this);
+    ALOGV("receiver %p ~ Initializing display event receiver.", this);
 }
 
 NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
