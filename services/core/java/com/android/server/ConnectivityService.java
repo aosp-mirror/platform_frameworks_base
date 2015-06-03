@@ -543,16 +543,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         public void dump(IndentingPrintWriter pw) {
+            pw.println("mLegacyTypeTracker:");
+            pw.increaseIndent();
+            pw.print("Supported types:");
             for (int type = 0; type < mTypeLists.length; type++) {
-                if (mTypeLists[type] == null) continue;
-                pw.print(type + " ");
-                pw.increaseIndent();
-                if (mTypeLists[type].size() == 0) pw.println("none");
-                for (NetworkAgentInfo nai : mTypeLists[type]) {
-                    pw.println(naiToString(nai));
-                }
-                pw.decreaseIndent();
+                if (mTypeLists[type] != null) pw.print(" " + type);
             }
+            pw.println();
+            pw.println("Current state:");
+            pw.increaseIndent();
+            for (int type = 0; type < mTypeLists.length; type++) {
+                if (mTypeLists[type] == null|| mTypeLists[type].size() == 0) continue;
+                for (NetworkAgentInfo nai : mTypeLists[type]) {
+                    pw.println(type + " " + naiToString(nai));
+                }
+            }
+            pw.decreaseIndent();
+            pw.decreaseIndent();
+            pw.println();
         }
 
         // This class needs its own log method because it has a different TAG.
@@ -1750,12 +1758,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        pw.println("NetworkFactories for:");
-        pw.increaseIndent();
+        pw.print("NetworkFactories for:");
         for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-            pw.println(nfi.name);
+            pw.print(" " + nfi.name);
         }
-        pw.decreaseIndent();
+        pw.println();
         pw.println();
 
         NetworkAgentInfo defaultNai = mNetworkForRequestId.get(mDefaultRequest.requestId);
@@ -1795,22 +1802,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println();
         pw.decreaseIndent();
 
-        pw.println("mLegacyTypeTracker:");
-        pw.increaseIndent();
         mLegacyTypeTracker.dump(pw);
-        pw.decreaseIndent();
-        pw.println();
 
         synchronized (this) {
-            pw.println("NetworkTransitionWakeLock is currently " +
-                    (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held.");
-            pw.println("It was last requested for "+mNetTransitionWakeLockCausedBy);
+            pw.print("mNetTransitionWakeLock: currently " +
+                    (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held");
+            if (!TextUtils.isEmpty(mNetTransitionWakeLockCausedBy)) {
+                pw.println(", last requested for " + mNetTransitionWakeLockCausedBy);
+            } else {
+                pw.println(", last requested never");
+            }
         }
         pw.println();
 
         mTethering.dump(fd, pw, args);
 
-        if (mInetLog != null) {
+        if (mInetLog != null && mInetLog.size() > 0) {
             pw.println();
             pw.println("Inet condition reports:");
             pw.increaseIndent();
