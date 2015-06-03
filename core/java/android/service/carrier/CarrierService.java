@@ -91,7 +91,7 @@ public abstract class CarrierService extends Service {
             case BIND_SERVICE_INTERFACE:
                 return mStubWrapper;
             default:
-                null;
+                return null;
         }
     }
 
