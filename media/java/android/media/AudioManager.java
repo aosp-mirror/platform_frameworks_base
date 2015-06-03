@@ -38,7 +38,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -67,16 +66,6 @@ public class AudioManager {
     private final boolean mUseFixedVolume;
     private static String TAG = "AudioManager";
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
-
-    /**
-     * System properties for whether the default microphone and speaker paths support
-     * near-ultrasound frequencies (range of 18 - 21 kHz).
-     */
-    private static final String SYSTEM_PROPERTY_MIC_NEAR_ULTRASOUND =
-            "persist.audio.mic.ultrasound";
-    private static final String SYSTEM_PROPERTY_SPEAKER_NEAR_ULTRASOUND =
-            "persist.audio.spkr.ultrasound";
-    private static final String DEFAULT_RESULT_FALSE_STRING = "false";
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -3213,11 +3202,13 @@ public class AudioManager {
             int outputFramesPerBuffer = AudioSystem.getPrimaryOutputFrameCount();
             return outputFramesPerBuffer > 0 ? Integer.toString(outputFramesPerBuffer) : null;
         } else if (PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND.equals(key)) {
-            return SystemProperties.get(SYSTEM_PROPERTY_MIC_NEAR_ULTRASOUND,
-                    DEFAULT_RESULT_FALSE_STRING);
+            // Will throw a RuntimeException Resources.NotFoundException if this config value is
+            // not found.
+            return String.valueOf(getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.config_supportMicNearUltrasound));
         } else if (PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND.equals(key)) {
-            return SystemProperties.get(SYSTEM_PROPERTY_SPEAKER_NEAR_ULTRASOUND,
-                    DEFAULT_RESULT_FALSE_STRING);
+            return String.valueOf(getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.config_supportSpeakerNearUltrasound));
         } else {
             // null or unknown key
             return null;
