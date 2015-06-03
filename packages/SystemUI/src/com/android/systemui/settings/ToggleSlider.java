@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -123,6 +124,16 @@ public class ToggleSlider extends RelativeLayout {
         }
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mMirror != null) {
+            MotionEvent copy = ev.copy();
+            mMirror.dispatchTouchEvent(copy);
+            copy.recycle();
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     private final OnCheckedChangeListener mCheckListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton toggle, boolean checked) {
@@ -146,10 +157,6 @@ public class ToggleSlider extends RelativeLayout {
                 mListener.onChanged(
                         ToggleSlider.this, mTracking, mToggle.isChecked(), progress);
             }
-
-            if (mMirror != null) {
-                mMirror.setValue(progress);
-            }
         }
 
         @Override
@@ -162,10 +169,6 @@ public class ToggleSlider extends RelativeLayout {
             }
 
             mToggle.setChecked(false);
-
-            if (mMirror != null) {
-                mMirror.mSlider.setPressed(true);
-            }
 
             if (mMirrorController != null) {
                 mMirrorController.showMirror();
@@ -180,10 +183,6 @@ public class ToggleSlider extends RelativeLayout {
             if (mListener != null) {
                 mListener.onChanged(
                         ToggleSlider.this, mTracking, mToggle.isChecked(), mSlider.getProgress());
-            }
-
-            if (mMirror != null) {
-                mMirror.mSlider.setPressed(false);
             }
 
             if (mMirrorController != null) {
