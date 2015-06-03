@@ -56,7 +56,8 @@ class LockSettingsStorage {
     };
 
     private static final String SYSTEM_DIRECTORY = "/system/";
-    private static final String LOCK_PATTERN_FILE = "gatekeeper.gesture.key";
+    private static final String LOCK_PATTERN_FILE = "gatekeeper.pattern.key";
+    private static final String BASE_ZERO_LOCK_PATTERN_FILE = "gatekeeper.gesture.key";
     private static final String LEGACY_LOCK_PATTERN_FILE = "gesture.key";
     private static final String LOCK_PASSWORD_FILE = "gatekeeper.password.key";
     private static final String LEGACY_LOCK_PASSWORD_FILE = "password.key";
@@ -81,10 +82,18 @@ class LockSettingsStorage {
         CredentialHash(byte[] hash, int version) {
             this.hash = hash;
             this.version = version;
+            this.isBaseZeroPattern = false;
+        }
+
+        CredentialHash(byte[] hash, boolean isBaseZeroPattern) {
+            this.hash = hash;
+            this.version = VERSION_GATEKEEPER;
+            this.isBaseZeroPattern = isBaseZeroPattern;
         }
 
         byte[] hash;
         int version;
+        boolean isBaseZeroPattern;
     }
 
     public LockSettingsStorage(Context context, Callback callback) {
@@ -219,6 +228,11 @@ class LockSettingsStorage {
             return new CredentialHash(stored, CredentialHash.VERSION_GATEKEEPER);
         }
 
+        stored = readFile(getBaseZeroLockPatternFilename(userId));
+        if (stored != null && stored.length > 0) {
+            return new CredentialHash(stored, true);
+        }
+
         stored = readFile(getLegacyLockPatternFilename(userId));
         if (stored != null && stored.length > 0) {
             return new CredentialHash(stored, CredentialHash.VERSION_LEGACY);
@@ -227,6 +241,7 @@ class LockSettingsStorage {
         return null;
     }
 
+
     public boolean hasPassword(int userId) {
         return hasFile(getLockPasswordFilename(userId)) ||
             hasFile(getLegacyLockPasswordFilename(userId));
@@ -234,6 +249,7 @@ class LockSettingsStorage {
 
     public boolean hasPattern(int userId) {
         return hasFile(getLockPatternFilename(userId)) ||
+            hasFile(getBaseZeroLockPatternFilename(userId)) ||
             hasFile(getLegacyLockPatternFilename(userId));
     }
 
@@ -301,6 +317,13 @@ class LockSettingsStorage {
         }
     }
 
+    private void deleteFile(String name) {
+        File f = new File(name);
+        if (f != null) {
+            f.delete();
+        }
+    }
+
     public void writePatternHash(byte[] hash, int userId) {
         mStoredCredentialType = hash == null
             ? CredentialHash.TYPE_NONE
@@ -343,6 +366,10 @@ class LockSettingsStorage {
     @VisibleForTesting
     String getLegacyLockPasswordFilename(int userId) {
         return getLockCredentialFilePathForUser(userId, LEGACY_LOCK_PASSWORD_FILE);
+    }
+
+    private String getBaseZeroLockPatternFilename(int userId) {
+        return getLockCredentialFilePathForUser(userId, BASE_ZERO_LOCK_PATTERN_FILE);
     }
 
     private String getLockCredentialFilePathForUser(int userId, String basename) {
