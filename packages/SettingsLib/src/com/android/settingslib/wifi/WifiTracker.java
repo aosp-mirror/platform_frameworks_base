@@ -357,19 +357,17 @@ public class WifiTracker {
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
-        if (mScanner != null) {
-            /* sticky broadcasts can call this when wifi is disabled */
-            if (!mWifiManager.isWifiEnabled()) {
-                mScanner.pause();
-                return;
-            }
+        /* sticky broadcasts can call this when wifi is disabled */
+        if (!mWifiManager.isWifiEnabled()) {
+            mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
+            return;
+        }
 
-            if (networkInfo != null &&
-                    networkInfo.getDetailedState() == DetailedState.OBTAINING_IPADDR) {
-                mScanner.pause();
-            } else {
-                mScanner.resume();
-            }
+        if (networkInfo != null &&
+                networkInfo.getDetailedState() == DetailedState.OBTAINING_IPADDR) {
+            mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
+        } else {
+            mMainHandler.sendEmptyMessage(MainHandler.MSG_RESUME_SCANNING);
         }
 
         mLastInfo = mWifiManager.getConnectionInfo();
@@ -448,6 +446,8 @@ public class WifiTracker {
         private static final int MSG_CONNECTED_CHANGED = 0;
         private static final int MSG_WIFI_STATE_CHANGED = 1;
         private static final int MSG_ACCESS_POINT_CHANGED = 2;
+        private static final int MSG_RESUME_SCANNING = 3;
+        private static final int MSG_PAUSE_SCANNING = 4;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -467,6 +467,16 @@ public class WifiTracker {
                     break;
                 case MSG_ACCESS_POINT_CHANGED:
                     mListener.onAccessPointsChanged();
+                    break;
+                case MSG_RESUME_SCANNING:
+                    if (mScanner != null) {
+                        mScanner.resume();
+                    }
+                    break;
+                case MSG_PAUSE_SCANNING:
+                    if (mScanner != null) {
+                        mScanner.pause();
+                    }
                     break;
             }
         }
