@@ -99,16 +99,10 @@ public class IpReachabilityMonitor {
     public static boolean probeNeighbor(int ifIndex, InetAddress ip) {
         final long IO_TIMEOUT = 300L;
         final String msgSnippet = "probing ip=" + ip.getHostAddress() + "%" + ifIndex;
-        // This currently does not cause neighbor probing if the target |ip|
-        // has been confirmed reachable within the past "delay_probe_time"
-        // seconds, i.e. within the past 5 seconds.
-        //
-        // TODO: replace with a transition directly to NUD_PROBE state once
-        // kernels are updated to do so correctly.
         if (DBG) { Log.d(TAG, msgSnippet); }
 
         final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
-                1, ip, StructNdMsg.NUD_DELAY, ifIndex, null);
+                1, ip, StructNdMsg.NUD_PROBE, ifIndex, null);
         boolean returnValue = false;
 
         try (NetlinkSocket nlSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE)) {
