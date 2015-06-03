@@ -496,9 +496,9 @@ public class KeyStore {
     }
 
     public OperationResult begin(String alias, int purpose, boolean pruneable,
-            KeymasterArguments args, byte[] entropy, KeymasterArguments outArgs) {
+            KeymasterArguments args, byte[] entropy) {
         try {
-            return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, outArgs);
+            return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;

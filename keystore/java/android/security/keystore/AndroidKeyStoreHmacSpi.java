@@ -163,14 +163,13 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mMacSizeBits);
 
-        KeymasterArguments keymasterOutputArgs = new KeymasterArguments();
         OperationResult opResult = mKeyStore.begin(
                 mKey.getAlias(),
                 KeymasterDefs.KM_PURPOSE_SIGN,
                 true,
                 keymasterArgs,
-                null, // no additional entropy needed for HMAC because it's deterministic
-                keymasterOutputArgs);
+                null); // no additional entropy needed for HMAC because it's deterministic
+
         if (opResult == null) {
             throw new KeyStoreConnectException();
         }
