@@ -199,7 +199,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
-    private Object mDnsLock = new Object();
     private int mNumDnsEntries;
 
     private boolean mTestMode;
