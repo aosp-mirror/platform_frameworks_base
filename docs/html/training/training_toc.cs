@@ -596,10 +596,6 @@ include the action bar on devices running Android 2.1 or higher."
             Using the Backup API
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/cloudsync/gcm.html">
-            Making the Most of Google Cloud Messaging
-          </a>
-          </li>
         </ul>
         <li><a href="<?cs var:toroot ?>training/cloudsave/conflict-res.html"
            description=
