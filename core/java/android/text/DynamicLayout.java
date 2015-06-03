@@ -291,7 +291,7 @@ public class DynamicLayout extends Layout
         b.setText(text, where, where + after)
                 .setPaint(getPaint())
                 .setWidth(getWidth())
-                .setTextDir(getTextDirectionHeuristic())
+                .setTextDirection(getTextDirectionHeuristic())
                 .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
                 .setEllipsizedWidth(mEllipsizedWidth)
                 .setEllipsize(mEllipsizeAt)
