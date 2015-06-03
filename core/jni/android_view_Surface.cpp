@@ -499,7 +499,7 @@ static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
     nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
     UiFrameInfoBuilder(proxy->frameInfo())
             .setVsync(vsync, vsync)
-            .addFlag(FrameInfoFlags::kSurfaceCanvas);
+            .addFlag(FrameInfoFlags::SurfaceCanvas);
     proxy->syncAndDrawFrame();
 }
 

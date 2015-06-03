@@ -157,7 +157,7 @@ void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
 }
 
 static bool wasSkipped(FrameInfo* info) {
-    return info && ((*info)[FrameInfoIndex::kFlags] & FrameInfoFlags::kSkippedFrame);
+    return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
 }
 
 void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
@@ -185,7 +185,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
     }
 
     if (CC_UNLIKELY(!mNativeWindow.get())) {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         info.out.canDrawThisFrame = false;
         return;
     }
@@ -199,7 +199,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
     info.out.canDrawThisFrame = !runningBehind;
 
     if (!info.out.canDrawThisFrame) {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
     }
 
     if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
@@ -228,7 +228,7 @@ void CanvasContext::draw() {
     mDamageAccumulator.finish(&dirty);
 
     if (dirty.isEmpty() && Properties::skipEmptyFrames) {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         return;
     }
 
@@ -288,7 +288,7 @@ void CanvasContext::doFrame() {
 
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
     UiFrameInfoBuilder(frameInfo)
-        .addFlag(FrameInfoFlags::kRTAnimation)
+        .addFlag(FrameInfoFlags::RTAnimation)
         .setVsync(mRenderThread.timeLord().computeFrameTimeNanos(),
                 mRenderThread.timeLord().latestVsync());
 
@@ -400,17 +400,17 @@ void CanvasContext::setTextureAtlas(RenderThread& thread,
 void CanvasContext::dumpFrames(int fd) {
     FILE* file = fdopen(fd, "a");
     fprintf(file, "\n\n---PROFILEDATA---\n");
-    for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::kNumIndexes); i++) {
+    for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
         fprintf(file, "%s", FrameInfoNames[i].c_str());
         fprintf(file, ",");
     }
     for (size_t i = 0; i < mFrames.size(); i++) {
         FrameInfo& frame = mFrames[i];
-        if (frame[FrameInfoIndex::kSyncStart] == 0) {
+        if (frame[FrameInfoIndex::SyncStart] == 0) {
             continue;
         }
         fprintf(file, "\n");
-        for (int i = 0; i < static_cast<int>(FrameInfoIndex::kNumIndexes); i++) {
+        for (int i = 0; i < static_cast<int>(FrameInfoIndex::NumIndexes); i++) {
             fprintf(file, "%" PRId64 ",", frame[i]);
         }
     }
