@@ -66,6 +66,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private NetworkCallback mNetworkCallback;
     private ConnectivityManager mCm;
     private boolean mLaunchBrowser = false;
+    private MyWebViewClient mWebViewClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,8 @@ public class CaptivePortalLoginActivity extends Activity {
         myWebView.clearCache(true);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        myWebView.setWebViewClient(new MyWebViewClient());
+        mWebViewClient = new MyWebViewClient();
+        myWebView.setWebViewClient(mWebViewClient);
         myWebView.setWebChromeClient(new MyWebChromeClient());
         // Start initial page load so WebView finishes loading proxy settings.
         // Actual load of mUrl is initiated by MyWebViewClient.
@@ -174,7 +176,7 @@ public class CaptivePortalLoginActivity extends Activity {
     @Override
     public void onBackPressed() {
         WebView myWebView = (WebView) findViewById(R.id.webview);
-        if (myWebView.canGoBack()) {
+        if (myWebView.canGoBack() && mWebViewClient.allowBack()) {
             myWebView.goBack();
         } else {
             super.onBackPressed();
@@ -255,7 +257,12 @@ public class CaptivePortalLoginActivity extends Activity {
                     getResources().getDisplayMetrics()) /
                     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1,
                     getResources().getDisplayMetrics());
-        private boolean mFirstPageLoad = true;
+        private int mPagesLoaded;
+
+        // If we haven't finished cleaning up the history, don't allow going back.
+        public boolean allowBack() {
+            return mPagesLoaded > 1;
+        }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -264,26 +271,32 @@ public class CaptivePortalLoginActivity extends Activity {
                 done(Result.WANTED_AS_IS);
                 return;
             }
-            if (mFirstPageLoad) return;
+            // The first page load is used only to cause the WebView to
+            // fetch the proxy settings.  Don't update the URL bar, and
+            // don't check if the captive portal is still there.
+            if (mPagesLoaded == 0) return;
+            // For internally generated pages, leave URL bar listing prior URL as this is the URL
+            // the page refers to.
+            if (!url.startsWith(INTERNAL_ASSETS)) {
+                final TextView myUrlBar = (TextView) findViewById(R.id.url_bar);
+                myUrlBar.setText(url);
+            }
             testForCaptivePortal();
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            if (mFirstPageLoad) {
-                mFirstPageLoad = false;
+            mPagesLoaded++;
+            if (mPagesLoaded == 1) {
                 // Now that WebView has loaded at least one page we know it has read in the proxy
                 // settings.  Now prompt the WebView read the Network-specific proxy settings.
                 setWebViewProxy();
                 // Load the real page.
                 view.loadUrl(mURL.toString());
                 return;
-            }
-            // For internally generated pages, leave URL bar listing prior URL as this is the URL
-            // the page refers to.
-            if (!url.startsWith(INTERNAL_ASSETS)) {
-                final TextView myUrlBar = (TextView) findViewById(R.id.url_bar);
-                myUrlBar.setText(url);
+            } else if (mPagesLoaded == 2) {
+                // Prevent going back to empty first page.
+                view.clearHistory();
             }
             testForCaptivePortal();
         }
