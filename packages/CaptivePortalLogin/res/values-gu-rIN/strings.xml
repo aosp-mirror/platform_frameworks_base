@@ -5,4 +5,10 @@
     <string name="action_use_network" msgid="6076184727448466030">"આ નેટવર્કનો જેમનો તેમ ઉપયોગ કરો"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"આ નેટવર્કનો ઉપયોગ કરશો નહીં"</string>
     <string name="action_bar_label" msgid="917235635415966620">"નેટવર્ક પર સાઇન ઇન કરો"</string>
+    <!-- no translation found for ssl_error_warning (6653188881418638872) -->
+    <skip />
+    <!-- no translation found for ssl_error_example (647898534624078900) -->
+    <skip />
+    <!-- no translation found for ssl_error_continue (6492718244923937110) -->
+    <skip />
 </resources>

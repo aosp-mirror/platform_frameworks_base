@@ -5,4 +5,10 @@
     <string name="action_use_network" msgid="6076184727448466030">"Nota þetta net óbreytt"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Ekki nota þetta net"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Skrá inn á net"</string>
+    <!-- no translation found for ssl_error_warning (6653188881418638872) -->
+    <skip />
+    <!-- no translation found for ssl_error_example (647898534624078900) -->
+    <skip />
+    <!-- no translation found for ssl_error_continue (6492718244923937110) -->
+    <skip />
 </resources>
