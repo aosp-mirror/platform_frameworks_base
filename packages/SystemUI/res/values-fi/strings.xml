@@ -148,7 +148,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ei SIM-korttia."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internetyhteyden jakaminen Bluetoothin kautta."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internetin jakaminen Bluetoothin kautta."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lentokonetila."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Operaattorin verkko muuttuu."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akun virta <xliff:g id="NUMBER">%d</xliff:g> prosenttia."</string>
@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähemmän kiireelliset ilmoitukset ovat alla"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Avaa koskettamalla uudelleen"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Avaa lukitus pyyhkäisemällä ylös"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Avaa puhelu pyyhkäisemällä kuvakkeesta."</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Avaa puhelu pyyhkäisemällä."</string>
     <string name="voice_hint" msgid="8939888732119726665">"Avaa ääniapuri pyyhkäisemällä kuvakkeesta."</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Avaa kamera pyyhkäisemällä kuvakkeesta."</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Avaa kamera pyyhkäisemällä."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Täydellinen hiljaisuus"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Vain tärkeät"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Vain herätykset"</string>
@@ -397,19 +397,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Palauta alkuperäinen koskettamalla."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Olet Work-profiilissa"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI-viritin"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Näytä akun varaus kuvakkeessa"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Näyttää akun varausprosentin tilapalkin kuvakkeessa, kun laitetta ei ladata."</string>
     <string name="quick_settings" msgid="10042998191725428">"Pika-asetukset"</string>
+    <string name="status_bar" msgid="4877645476959324760">"Tilapalkki"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Herätys"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Työprofiili"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Lentokonetila"</string>
     <string name="add_tile" msgid="2995389510240786221">"Lisää ruutu"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Lähetysruutu"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Et kuule seuraavaa hälytystäsi (<xliff:g id="WHEN">%1$s</xliff:g>), ellet poista tätä tilaa käytöstä ennen sitä."</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Et kuule seuraavaa hälytystäsi (<xliff:g id="WHEN">%1$s</xliff:g>)."</string>
+    <string name="alarm_template" msgid="3980063409350522735">"kello <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"ajankohtana <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

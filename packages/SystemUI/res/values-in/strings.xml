@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Sistem UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Bersihkan"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Hapus dari daftar"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info apl"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info aplikasi"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Layar terkini Anda muncul di sini"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Tutup aplikasi terbaru"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -83,11 +83,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Telusuri"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telepon"</string>
-    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Bantuan"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Bantuan Suara"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Buka kunci"</string>
     <string name="unlock_label" msgid="8779712358041029439">"buka kunci"</string>
     <string name="phone_label" msgid="2320074140205331708">"buka ponsel"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"buka voice bantuan"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"buka bantuan suara"</string>
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pilih tata letak tugas baru"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
@@ -315,7 +315,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"Sentuh lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Gesek ke atas untuk membuka kunci"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Gesek dari ikon untuk telepon"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Gesek dari ikon untuk voice bantuan"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Gesek dari ikon untuk mengaktifkan bantuan suara"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Gesek dari ikon untuk kamera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Senyap total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Hanya untuk prioritas"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Sentuh untuk memulihkan aslinya."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Anda berada di Profil kerja"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Penyetel Antarmuka Sistem"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Tampilkan persentase baterai yang tersemat"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Tampilkan persentase tingkat baterai dalam ikon bilah status saat tidak mengisi daya"</string>
     <string name="quick_settings" msgid="10042998191725428">"Setelan Cepat"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Tambahkan ubin"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Ubin Siaran"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Anda tidak akan mendengar alarm berikutnya <xliff:g id="WHEN">%1$s</xliff:g> jika Anda tidak menonaktifkannya sebelum waktu tersebut"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Anda tidak akan mendengar alarm berikutnya <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"pukul <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"pada <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

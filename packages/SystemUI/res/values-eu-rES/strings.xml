@@ -397,19 +397,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Ukitu jatorrizkora leheneratzeko"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Work profil bat erabiltzen ari zara"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Erakutsi txertatutako bateriaren ehunekoa"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Erakutsi bateria-mailaren ehunekoa egoera-barraren ikonoan, kargatzen ari ez denean"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ezarpen bizkorrak"</string>
+    <string name="status_bar" msgid="4877645476959324760">"Egoera-barra"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Work profila"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Hegaldi modua"</string>
     <string name="add_tile" msgid="2995389510240786221">"Gehitu lauza"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Igorpen-lauza"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>) aukera hau hori baino lehen desaktibatzen ez baduzu"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

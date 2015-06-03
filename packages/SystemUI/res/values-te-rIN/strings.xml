@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"తక్కువ అత్యవసర నోటిఫికేషన్‌లు దిగువన"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"తెరవడానికి మళ్లీ తాకండి"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"అన్‌లాక్ చేయడానికి ఎగువకు స్వైప్ చేయండి"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"ఫోన్ చిహ్నం నుండి స్వైప్"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="voice_hint" msgid="8939888732119726665">"వాయిస్ సహాయకం చిహ్నం నుండి స్వైప్"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"కెమెరా చిహ్నం నుండి స్వైప్"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"మొత్తం నిశ్శబ్దం"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"అలారాలు మాత్రమే"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"మీరు కార్యాలయ ప్రొఫైల్‌లో ఉన్నారు"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"సిస్టమ్ UI ట్యూనర్"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"పొందుపరిచిన బ్యాటరీ శాతం చూపు"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ఛార్జింగ్‌లో లేనప్పుడు స్థితి పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
     <string name="quick_settings" msgid="10042998191725428">"శీఘ్ర సెట్టింగ్‌లు"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"టైల్‌ను జోడించండి"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"ప్రసార టైల్"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తదుపరి అలారం మీరు ఆ లోపల దీన్ని ఆఫ్ చేయకుంటే వినిపించదు"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తదుపరి అలారం మీకు వినిపించదు"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
 </resources>

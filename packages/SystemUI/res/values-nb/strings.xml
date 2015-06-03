@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende varsler nedenfor"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Trykk på nytt for å åpne"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Sveip oppover for å låse opp"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Sveip fra ikonet for å åpne telefonen"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Sveip ikonet for å åpne telefon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Sveip fra ikonet for å åpne talehjelp"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Sveip fra ikonet for å åpne kameraet"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Sveip ikonet for å åpne kamera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stillhet"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bare prioritet"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Bare alarmer"</string>
@@ -397,19 +397,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du er i Work-profilen"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Vis kapasitet for det innebygde batteriet"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis batterinivåprosenten inni statusfeltikonet når du ikke lader"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtiginnstillinger"</string>
+    <string name="status_bar" msgid="4877645476959324760">"Statusrad"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Work-profil"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Flymodus"</string>
     <string name="add_tile" msgid="2995389510240786221">"Legg til felt"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Publiser feltet"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g> med mindre du slår dette av i forkant"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

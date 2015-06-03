@@ -397,19 +397,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Snertu til að færa í upprunalegt horf."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Þú ert í vinnusniðinu"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Fínstillingar kerfisviðmóts"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Sýna innfellda rafhlöðustöðu"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Sýna rafhlöðustöðuna í stöðustikunni þegar tækið er ekki í hleðslu"</string>
     <string name="quick_settings" msgid="10042998191725428">"Flýtistillingar"</string>
+    <string name="status_bar" msgid="4877645476959324760">"Stöðustika"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Vekjari"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Vinnusnið"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Flugstilling"</string>
     <string name="add_tile" msgid="2995389510240786221">"Bæta reit við"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Útsendingarreitur"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Ekki mun heyrast í vekjaranum <xliff:g id="WHEN">%1$s</xliff:g> nema þú slökkvir á þessu áður"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Ekki mun heyrast í vekjaranum <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

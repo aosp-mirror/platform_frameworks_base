@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"UI tizimi"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Tozalash"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Ro‘yxatdan o‘chirish"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Ilova xaqida"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Ilova haqida"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Yaqinda ish-gan ilovalar bu yerda ko‘rinadi"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"So‘nggi dasturlarni tozalash"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -252,7 +252,7 @@
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Eniga"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Joylashuv"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuv o‘chiq"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuv xizmati o‘chiq"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media qurilma"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Faqat favqulodda qo‘ng‘iroqlar"</string>
@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Kam ahamiyatli bildirishnomalarni pastda ko‘rsatish"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Ochish uchun yana bosing"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Qulfdan chiqarish uchun tepaga suring"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Telefon: ekranni ikonkadan boshlab istalgan tomonga suring"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Telefonni ochish uchun suring"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Ovozli yordam: belgidan boshlab suring"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Kamera: ekranni ikonkadan boshlab istalgan tomonga suring"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Kamerani ochish uchun suring"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Tinchlik saqlansin"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Faqat muhimlari"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Faqat signallar"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Siz Android for Work profiliga kirgansiz"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Batareya foizi ko‘rsatilsin"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Batareya quvvat olmayotgan vaqtda uning foizi holat qatorida ko‘rsatilsin"</string>
     <string name="quick_settings" msgid="10042998191725428">"Tezkor sozlamalar"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Tezkor sozlamalar tugmasini qo‘shish"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Translatsiya tugmasi"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Agar uni o‘chirib qo‘ymasangiz, keyingi signal (qachon: <xliff:g id="WHEN">%1$s</xliff:g>) chalinmaydi"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Keyingi signal (<xliff:g id="WHEN">%1$s</xliff:g>) chalinmaydi"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"qachon: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"qachon: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

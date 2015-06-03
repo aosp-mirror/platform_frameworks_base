@@ -313,7 +313,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende underretninger nedenfor"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryk igen for at åbne"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg for at låse op"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg opad for at låse op"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Stryg fra ikonet for voice assist"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Stryg fra kameraikonet"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryk for at gendanne originalen."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du er i arbejdsprofilen"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Vis procent for det indbyggede batteri"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis procenttallet for batteriniveauet i ikonet for statusbjælken, når der ikke oplades"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtige indstillinger"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Tilføj et felt"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Felt for udsendelser"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>, medmindre du slår funktionen fra inden da"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>
