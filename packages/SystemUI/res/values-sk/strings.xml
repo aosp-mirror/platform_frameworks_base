@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"UI systému"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazať"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odstrániť zo zoznamu"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informácie o aplikácii"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"O aplikácii"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vaše nedávne obrazovky sa zobrazia tu."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zatvoriť nedávne aplikácie"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -149,7 +149,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"Žiadna karta SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Žiadna SIM karta."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pripojenie cez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim v lietadle."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Zmena siete operátora"</string>
@@ -317,7 +317,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Menej naliehavé upozornenia sa nachádzajú nižšie"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Otvorte opätovným klepnutím"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Zariadenie odomknete prejdením prstom nahor"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Odomknete prejdením prstom nahor"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefón otvoríte prejdením prstom od ikony"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Hlasového asistenta otvoríte prejdením prstom od ikony"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Fotoaparát otvoríte prejdením prstom od ikony"</string>
@@ -401,19 +401,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Klepnutím obnovíte originál."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Nachádzate sa v pracovnom profile"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Tuner používateľského rozhrania systému"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Zobraziť percentá vloženej batérie"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Percentuálne zobrazenie nabitia batérie vnútri ikony v stavovom riadku, keď neprebieha nabíjanie"</string>
     <string name="quick_settings" msgid="10042998191725428">"Rýchle nastavenia"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Pridať dlaždicu"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Dlaždica Vysielanie"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Pokiaľ toto nastavenie nevypnete, váš budík o <xliff:g id="WHEN">%1$s</xliff:g> sa nespustí"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Váš budík o <xliff:g id="WHEN">%1$s</xliff:g> sa nespustí"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"o <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

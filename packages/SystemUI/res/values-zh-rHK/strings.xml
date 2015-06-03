@@ -83,11 +83,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"搜尋"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"相機"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"電話"</string>
-    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"語音小幫手"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"語音助手"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"解鎖"</string>
     <string name="unlock_label" msgid="8779712358041029439">"解鎖"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"開啟語音小幫手"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"開啟語音助手"</string>
     <string name="camera_label" msgid="7261107956054836961">"開啟相機"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"選取新的工作版面配置"</string>
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
@@ -317,7 +317,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"再次輕觸即可開啟"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上快速滑動即可解鎖"</string>
     <string name="phone_hint" msgid="4872890986869209950">"從圖示快速滑動即可使用手機功能"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"從圖示快速滑動即可使用語音小幫手"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"從圖示快速滑動即可使用語音助手"</string>
     <string name="camera_hint" msgid="7939688436797157483">"從圖示快速滑動即可使用相機功能"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全靜音"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"僅限優先"</string>
@@ -399,19 +399,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸即可復原。"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"您正在「工作設定檔」頁面"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"系統使用者介面調諧器"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"顯示嵌入的電池百分比"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"非充電時，在狀態列圖示顯示電量百分比"</string>
     <string name="quick_settings" msgid="10042998191725428">"快速設定"</string>
+    <string name="status_bar" msgid="4877645476959324760">"狀態列"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"以太網"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"鬧鐘"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"工作設定檔"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"飛行模式"</string>
     <string name="add_tile" msgid="2995389510240786221">"加入圖塊"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"廣播圖塊"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"除非<xliff:g id="WHEN">%1$s</xliff:g>前關閉「請勿騷擾」功能，否則您不會聽到鬧鐘"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"您不會<xliff:g id="WHEN">%1$s</xliff:g>聽到鬧鐘"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"在 <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"在<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

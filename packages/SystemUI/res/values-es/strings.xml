@@ -60,7 +60,7 @@
     <string name="label_view" msgid="6304565553218192990">"Ver"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Usar de forma predeterminada para este dispositivo USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Usar de forma predeterminada para este accesorio USB"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración por USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"La huella digital de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir siempre desde este ordenador"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ajustar"</string>
@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Vuelve a tocar para abrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Desliza el dedo hacia arriba para desbloquear"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Desliza el dedo desde el icono para abrir el teléfono"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Desliza el dedo desde el icono para abrir asistente de voz"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Desliza el dedo desde el icono para abrir la cámara"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Desliza desde el icono para abrir el teléfono"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Desliza desde el icono para abrir asistente de voz"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Desliza desde el icono para abrir la cámara"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silencio total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Solo prioritarias"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Solo alarmas"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar la versión original."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Estás en el perfil de trabajo"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Configurador de IU del sistema"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaje de batería insertado"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ajustes rápidos"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Añadir mosaico"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Mosaico de emisión"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

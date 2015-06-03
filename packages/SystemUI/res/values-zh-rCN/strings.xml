@@ -301,7 +301,7 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"充电完成"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已充满"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"正在充电"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"还需<xliff:g id="CHARGING_TIME">%s</xliff:g>充满"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"未在充电"</string>
@@ -316,7 +316,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"再次触摸即可打开"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"滑动图标即可打开电话"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"滑动图标即可拨打电话"</string>
     <string name="voice_hint" msgid="8939888732119726665">"滑动图标即可打开语音助理"</string>
     <string name="camera_hint" msgid="7939688436797157483">"滑动图标即可打开相机"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全静音"</string>
@@ -399,19 +399,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"触摸即可恢复原始设置。"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"您正在使用工作资料"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"系统界面调谐器"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"嵌入式显示电池电量百分比 显示嵌入的电池电量百分比"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"未充电时在状态栏图标内显示电池电量百分比"</string>
     <string name="quick_settings" msgid="10042998191725428">"快速设置"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"添加图块"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"播送图块"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"您在<xliff:g id="WHEN">%1$s</xliff:g>将不会听到下次闹钟响铃，除非您在该时间之前关闭此模式"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"您在<xliff:g id="WHEN">%1$s</xliff:g>将不会听到下次闹钟响铃"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

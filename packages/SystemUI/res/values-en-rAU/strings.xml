@@ -397,19 +397,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Touch to restore the original."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"You are in the Work profile"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Show embedded battery percentage"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Show battery level percentage inside the status bar icon when not charging"</string>
     <string name="quick_settings" msgid="10042998191725428">"Quick Settings"</string>
+    <string name="status_bar" msgid="4877645476959324760">"Status bar"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Work profile"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Aeroplane mode"</string>
     <string name="add_tile" msgid="2995389510240786221">"Add tile"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Broadcast Tile"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g> unless you turn this off before then"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"at <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"on <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

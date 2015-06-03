@@ -87,7 +87,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"باز کردن قفل"</string>
     <string name="unlock_label" msgid="8779712358041029439">"بازکردن قفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"باز کردن تلفن"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"دستیار صوتی را باز کنید"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"«دستیار صوتی» را باز کنید"</string>
     <string name="camera_label" msgid="7261107956054836961">"باز کردن دوربین"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"انتخاب طرح‌بندی جدید کار"</string>
     <string name="cancel" msgid="6442560571259935130">"لغو"</string>
@@ -315,7 +315,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"برای باز کردن دوباره لمس کنید"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"برای باز کردن قفل سریع به بالا بکشید"</string>
     <string name="phone_hint" msgid="4872890986869209950">"انگشتتان را از نماد تلفن تند بکشید"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"از نماد دستیار صوتی انگشتتان را تند بکشید"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"برای «دستیار صوتی»، تند بکشید"</string>
     <string name="camera_hint" msgid="7939688436797157483">"انگشتتان را از نماد دوربین تند بکشید"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"سکوت کامل"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"فقط اولویت‌دار"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"برای بازیابی کنترل‌کننده اصلی، لمس کنید."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"در نمایه کاری هستید"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"تنظیم‌کننده واسط کاربری سیستم"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"نمایش درصد شارژ باتری جاسازی شده"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"نمایش درصد سطح باتری در نماد نوار وضعیت، هنگامی که باتری شارژ نمی‌شود"</string>
     <string name="quick_settings" msgid="10042998191725428">"تنظیمات سریع"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"افزودن کاشی"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"کاشی پخش عمومی"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"در ساعت <xliff:g id="WHEN">%1$s</xliff:g> صدای زنگ ساعت بعدی‌تان را نمی‌شنوید، مگر اینکه قبل از آن، این تنظیم را خاموش کنید"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"در ساعت <xliff:g id="WHEN">%1$s</xliff:g>، صدای زنگ ساعت بعدی‌تان را نمی‌شنوید"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"در <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"در <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

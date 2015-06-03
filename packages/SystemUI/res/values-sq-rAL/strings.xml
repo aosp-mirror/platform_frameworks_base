@@ -208,8 +208,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Elektriku u aktivizua."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Elektriku u çaktivizua."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Elektriku është i aktivizuar."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Ndërrimi i ngjyrës u çaktivizua."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Ndërrimi i ngjyrës u aktivizua."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Kthimi i ngjyrës u çaktivizua."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Kthimi i ngjyrës u aktivizua."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Qasja në zona publike interneti është e çaktivizuar."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Zona e qasjes publike për internet është e aktivizuar."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Transmetimi i ekranit ndaloi."</string>
@@ -235,7 +235,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Tani ekrani është i kyçur në orientimin horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ekrani tani është i kyçur në orientimin vertikal."</string>
     <string name="dessert_case" msgid="1295161776223959221">"\"Kutia e ëmbëlsirës\""</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Mbrojtësi \"Daydream\""</string>
+    <string name="start_dreams" msgid="7219575858348719790">"Mbrojtësi atraktiv i ekranit"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Eternet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Mos shqetëso"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Vetëm me prioritet"</string>
@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Njoftimet më pak urgjente, më poshtë!"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Prek sërish për ta hapur"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Rrëshqit për të shkyçur"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Rrëshqit nga ikona për telefonin"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Rrëshqit nga ikona për ndihmën zanore"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Rrëshqit nga ikona për kamerën"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Rrëshqit për të hapur telefonin"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Rrëshqit për të hapur ndihmën zanore"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Rrëshqit për të hapur kamerën"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Heshtje e plotë"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Vetëm me prioritet"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Vetëm alarmet"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Prek për të restauruar origjinalin."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Ndodhesh në profilin e Punës"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sintonizuesi SystemUI"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Shfaq përqindjen e baterisë së integruar"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Shfaq përqindjen e nivelit të baterisë brenda ikonës së shiritit të statusit kur nuk është duke u ngarkuar."</string>
     <string name="quick_settings" msgid="10042998191725428">"Cilësimet e shpejta"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Shto një pllakëz"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Pllakëza e transmetimit"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Nuk do ta dëgjosh alarmin e radhës në <xliff:g id="WHEN">%1$s</xliff:g> nëse nuk e çaktivizon këtë përpara asaj ore."</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Nuk do ta dëgjosh alarmin e radhës në <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"në <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"në <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>
