@@ -315,10 +315,10 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Torna a tocar per obrir"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Fes lliscar el dit cap amunt per desbloquejar el teclat."</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Fes lliscar el dit des de la icona per obrir el telèfon"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Fes lliscar el dit des de la icona per obrir l\'ass. per veu"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Fes lliscar el dit des de la icona per obrir la càmera"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Llisca cap amunt per desbloquejar el teclat"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Llisca des de la icona per obrir el telèfon"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Llisca des de la icona per obrir l\'assistent de veu"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Llisca des de la icona per obrir la càmera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silenci total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Només amb prioritat"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Només alarmes"</string>
@@ -399,19 +399,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca per restaurar l\'original."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Estàs utilitzant el perfil professional"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Configurador de la IU del sistema"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra el percentatge de la bateria inserit"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra el percentatge del nivell de bateria dins de la icona de la barra d\'estat quan no s\'estigui carregant"</string>
     <string name="quick_settings" msgid="10042998191725428">"Configuració ràpida"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Afegeix un mosaic"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Mosaic d\'emissió"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Si no desactives aquesta opció abans, <xliff:g id="WHEN">%1$s</xliff:g> no sentiràs la pròxima alarma"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g> no sentiràs la pròxima alarma"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"Hora: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"Dia: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

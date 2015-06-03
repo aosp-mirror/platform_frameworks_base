@@ -200,7 +200,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯು ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯನ್ನು ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> ಗಂಟೆಗೆ ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> ಗಂಟೆಗೆ ಅಲಾರಂ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"ಪ್ಯಾನಲ್ ಮುಚ್ಚಿ."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ಹೆಚ್ಚು ಸಮಯ."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"ಕಡಿಮೆ ಸಮಯ."</string>
@@ -374,7 +374,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ನೀವಾಗಿಯೇ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವವರೆಗೆ ಸಾಧನವು ಲಾಕ್‌ ಆಗಿಯೇ ಇರುತ್ತದೆ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ವೇಗವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ನೀವು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಮೊದಲೇ ಅವುಗಳನ್ನು ನೋಡಿ"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ಧನ್ಯವಾದಗಳು"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ಹೊಂದಿಸು"</string>
     <string name="notification_expand_button_text" msgid="1037425494153780718">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"ಎಲ್ಲ ಮರೆಮಾಡಿ"</string>
@@ -386,7 +386,7 @@
     <string name="screen_pinning_description" msgid="1346522416878235405">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಒಂದೇ ಸಮಯದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅವಲೋಕಿಸಿ."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ತಿಳಿಯಿತು"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"ಧನ್ಯವಾದಗಳು"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ಮರೆಮಾಡುವುದೇ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅದನ್ನು ಆನ್ ಮಾಡಿದಾಗ ಅದು ಮರುಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ಮರೆಮಾಡಿ"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ಮೂಲ ಮರುಸ್ಥಾಪಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"ನೀವು ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿರುವಿರಿ"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"ಎಂಬೆಡ್ ಮಾಡಲಾದ ಬ್ಯಾಟರಿ ಶೇಕಡಾ ತೋರಿಸಿ"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ಚಾರ್ಜ್ ಮಾಡದಿರುವಾಗ ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಒಳಗೆ ಬ್ಯಾಟರಿ ಮಟ್ಟದ ಶೇಕಡಾವನ್ನು ತೋರಿಸಿ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"ಟೈಲ್ ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿ"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"ನೀವು ಈ ಅಲಾರಮ್ ಆಫ್ ಮಾಡುವವರೆಗೆ ನಿಮ್ಮ ಮುಂದಿನ <xliff:g id="WHEN">%1$s</xliff:g> ಅಲಾರಮ್ ಅನ್ನು ನೀವು ಆಲಿಸುವುದಿಲ್ಲ"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"ನಿಮ್ಮ ಮುಂದಿನ <xliff:g id="WHEN">%1$s</xliff:g> ಅಲಾರಮ್ ಅನ್ನು ನೀವು ಆಲಿಸುವುದಿಲ್ಲ"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> ರಲ್ಲಿ"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> ರಂದು"</string>
 </resources>

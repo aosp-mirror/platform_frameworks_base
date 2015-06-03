@@ -399,19 +399,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸這裡即可恢復原始設定。"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"您目前在 Work 設定檔"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"系統使用者介面調整精靈"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"顯示嵌入式電池百分比"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"未充電時在狀態列圖示中顯示電量百分比"</string>
     <string name="quick_settings" msgid="10042998191725428">"快速設定"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"新增圖塊"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"播送圖塊"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"您不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘，除非您預先關閉這項功能"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"您不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"於<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"於<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

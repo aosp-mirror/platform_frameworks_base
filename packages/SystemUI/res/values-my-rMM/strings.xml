@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"မူရင်းအားပြန်လည်သိမ်းဆည်းရန် ထိပါ။"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"သင်သည် အလုပ်ပရိုဖိုင်တွင် ဖြစ်သည်"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"မြုတ်ထားသည့် ဘတ်ထရီ ရာခိုင်နှုန်းကို ပြပါ"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"အားမသွင်းနေစဉ်တွင် ဘတ်ထရီအဆင့် ရာခိုင်နှုန်းကို အခြေနေပြဘား အိုင်ကွန်တွင် ပြပါ"</string>
     <string name="quick_settings" msgid="10042998191725428">"အမြန် ဆက်တင်များ"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"လေးထောင့်ကွက် ထည့်ရန်"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"လေးထောင့်ကွက် ထုတ်လွှင့်ရန်"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"သင့်ရဲ့ နောက်ထပ်နှိုးစက် <xliff:g id="WHEN">%1$s</xliff:g> ကိုသင်ကြားမည်မဟုတ်ပါ အကယ်၍ သင်၎င်းအချိန်မတိုင်"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g> ၌သင့်နောက်ထပ် နှိုးစက်ကို ကြားမည်မဟုတ်ပါ"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> ၌"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
 </resources>
