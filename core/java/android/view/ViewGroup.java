@@ -1173,6 +1173,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (foundView != null) {
             return foundView;
         }
+
+        if (getAccessibilityNodeProvider() != null) {
+            return null;
+        }
+
         final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < childrenCount; i++) {
@@ -1182,6 +1187,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 return foundView;
             }
         }
+
         return null;
     }
 
