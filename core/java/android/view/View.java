@@ -1661,8 +1661,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /** {@hide} */
     static final int PFLAG_SKIP_DRAW                   = 0x00000080;
     /** {@hide} */
-    static final int PFLAG_ONLY_DRAWS_BACKGROUND       = 0x00000100;
-    /** {@hide} */
     static final int PFLAG_REQUEST_TRANSPARENT_REGIONS = 0x00000200;
     /** {@hide} */
     static final int PFLAG_DRAWABLE_STATE_DIRTY        = 0x00000400;
@@ -10619,9 +10617,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if ((changed & DRAW_MASK) != 0) {
             if ((mViewFlags & WILL_NOT_DRAW) != 0) {
-                if (mBackground != null) {
+                if (mBackground != null
+                        || (mForegroundInfo != null && mForegroundInfo.mDrawable != null)) {
                     mPrivateFlags &= ~PFLAG_SKIP_DRAW;
-                    mPrivateFlags |= PFLAG_ONLY_DRAWS_BACKGROUND;
                 } else {
                     mPrivateFlags |= PFLAG_SKIP_DRAW;
                 }
@@ -17260,20 +17258,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) != 0) {
                 mPrivateFlags &= ~PFLAG_SKIP_DRAW;
-                mPrivateFlags |= PFLAG_ONLY_DRAWS_BACKGROUND;
                 requestLayout = true;
             }
         } else {
             /* Remove the background */
             mBackground = null;
-
-            if ((mPrivateFlags & PFLAG_ONLY_DRAWS_BACKGROUND) != 0) {
-                /*
-                 * This view ONLY drew the background before and we're removing
-                 * the background, so now it won't draw anything
-                 * (hence we SKIP_DRAW)
-                 */
-                mPrivateFlags &= ~PFLAG_ONLY_DRAWS_BACKGROUND;
+            if ((mViewFlags & WILL_NOT_DRAW) != 0
+                    && (mForegroundInfo == null || mForegroundInfo.mDrawable == null)) {
                 mPrivateFlags |= PFLAG_SKIP_DRAW;
             }
 
@@ -17447,13 +17438,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mForegroundInfo.mDrawable = foreground;
         mForegroundInfo.mBoundsChanged = true;
         if (foreground != null) {
-            setWillNotDraw(false);
+            if ((mPrivateFlags & PFLAG_SKIP_DRAW) != 0) {
+                mPrivateFlags &= ~PFLAG_SKIP_DRAW;
+            }
             foreground.setCallback(this);
             foreground.setLayoutDirection(getLayoutDirection());
             if (foreground.isStateful()) {
                 foreground.setState(getDrawableState());
             }
             applyForegroundTint();
+        } else if ((mViewFlags & WILL_NOT_DRAW) != 0 && mBackground == null) {
+            mPrivateFlags |= PFLAG_SKIP_DRAW;
         }
         requestLayout();
         invalidate();
@@ -19181,16 +19176,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 getLocationInWindow(location);
                 region.op(location[0], location[1], location[0] + mRight - mLeft,
                         location[1] + mBottom - mTop, Region.Op.DIFFERENCE);
-            } else if ((pflags & PFLAG_ONLY_DRAWS_BACKGROUND) != 0 && mBackground != null &&
-                    mBackground.getOpacity() != PixelFormat.TRANSPARENT) {
-                // The ONLY_DRAWS_BACKGROUND flag IS set and the background drawable
-                // exists, so we remove the background drawable's non-transparent
-                // parts from this transparent region.
-                applyDrawableToTransparentRegion(mBackground, region);
-            }
-            final Drawable foreground = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
-            if (foreground != null) {
-                applyDrawableToTransparentRegion(mForegroundInfo.mDrawable, region);
+            } else {
+                if (mBackground != null && mBackground.getOpacity() != PixelFormat.TRANSPARENT) {
+                    // The SKIP_DRAW flag IS set and the background drawable exists, we remove
+                    // the background drawable's non-transparent parts from this transparent region.
+                    applyDrawableToTransparentRegion(mBackground, region);
+                }
+                if (mForegroundInfo != null && mForegroundInfo.mDrawable != null
+                        && mForegroundInfo.mDrawable.getOpacity() != PixelFormat.TRANSPARENT) {
+                    // Similarly, we remove the foreground drawable's non-transparent parts.
+                    applyDrawableToTransparentRegion(mForegroundInfo.mDrawable, region);
+                }
             }
         }
         return true;
