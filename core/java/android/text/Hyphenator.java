@@ -16,6 +16,9 @@
 
 package android.text;
 
+import com.android.internal.annotations.GuardedBy;
+
+import android.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
@@ -36,6 +39,9 @@ public class Hyphenator {
 
     private static String TAG = "Hyphenator";
 
+    private final static Object sLock = new Object();
+
+    @GuardedBy("sLock")
     static HashMap<Locale, Hyphenator> sMap = new HashMap<Locale, Hyphenator>();
 
     private long mNativePtr;
@@ -44,34 +50,93 @@ public class Hyphenator {
         mNativePtr = nativePtr;
     }
 
-    public static long get(Locale locale) {
-        Hyphenator result = sMap.get(locale);
-        return result == null ? 0 : result.mNativePtr;
+    public static long get(@Nullable Locale locale) {
+        synchronized (sLock) {
+            if (sMap.containsKey(locale)) {
+                Hyphenator result = sMap.get(locale);
+                return (result == null) ? 0 : result.mNativePtr;
+            }
+
+            // TODO: Convert this a proper locale-fallback system
+
+            // Fall back to language-only, if available
+            Locale languageOnlyLocale = new Locale(locale.getLanguage());
+            if (sMap.containsKey(languageOnlyLocale)) {
+                Hyphenator result = sMap.get(languageOnlyLocale);
+                sMap.put(locale, result);
+                return (result == null) ? 0 : result.mNativePtr;
+            }
+
+            // Fall back to script-only, if available
+            String script = locale.getScript();
+            if (!script.equals("")) {
+                Locale scriptOnlyLocale = new Locale.Builder()
+                        .setLanguage("und")
+                        .setScript(script)
+                        .build();
+                if (sMap.containsKey(scriptOnlyLocale)) {
+                    Hyphenator result = sMap.get(scriptOnlyLocale);
+                    sMap.put(locale, result);
+                    return (result == null) ? 0 : result.mNativePtr;
+                }
+            }
+
+            sMap.put(locale, null); // To remember we found nothing.
+        }
+        return 0;
     }
 
-    private static Hyphenator loadHyphenator(Locale locale) {
-        // TODO: find pattern dictionary (from system location) that best matches locale
-        if (Locale.US.equals(locale)) {
-            File f = new File(getSystemHyphenatorLocation(), "hyph-en-us.pat.txt");
-            try {
-                RandomAccessFile rf = new RandomAccessFile(f, "r");
-                byte[] buf = new byte[(int)rf.length()];
-                rf.read(buf);
-                rf.close();
-                String patternData = new String(buf);
-                long nativePtr = StaticLayout.nLoadHyphenator(patternData);
-                return new Hyphenator(nativePtr);
-            } catch (IOException e) {
-                Log.e(TAG, "error loading hyphenation " + f, e);
-            }
+    private static Hyphenator loadHyphenator(String languageTag) {
+        String patternFilename = "hyph-"+languageTag.toLowerCase(Locale.US)+".pat.txt";
+        File patternFile = new File(getSystemHyphenatorLocation(), patternFilename);
+        try {
+            RandomAccessFile rf = new RandomAccessFile(patternFile, "r");
+            byte[] buf = new byte[(int)rf.length()];
+            rf.read(buf);
+            rf.close();
+            String patternData = new String(buf);
+            long nativePtr = StaticLayout.nLoadHyphenator(patternData);
+            return new Hyphenator(nativePtr);
+        } catch (IOException e) {
+            Log.e(TAG, "error loading hyphenation " + patternFile, e);
         }
         return null;
     }
 
     private static File getSystemHyphenatorLocation() {
-        // TODO: move to a sensible location under system
         return new File("/system/usr/hyphen-data");
     }
+
+    // This array holds pairs of language tags that are used to prefill the map from locale to
+    // hyphenation data: The hyphenation data for the first field will be prefilled from the
+    // hyphenation data for the second field.
+    //
+    // The aliases that are computable by the get() method above are not included.
+    private static final String[][] LOCALE_FALLBACK_DATA = {
+        // English locales that fall back to en-US. The data is
+        // from CLDR. It's all English locales, minus the locales whose
+        // parent is en-001 (from supplementalData.xml, under <parentLocales>).
+        // TODO: Figure out how to get this from ICU.
+        {"en-AS", "en-US"}, // English (American Samoa)
+        {"en-GU", "en-US"}, // English (Guam)
+        {"en-MH", "en-US"}, // English (Marshall Islands)
+        {"en-MP", "en-US"}, // English (Northern Mariana Islands)
+        {"en-PR", "en-US"}, // English (Puerto Rico)
+        {"en-UM", "en-US"}, // English (United States Minor Outlying Islands)
+        {"en-VI", "en-US"}, // English (Virgin Islands)
+
+        // Norwegian is very probably Norwegian Bokmål.
+        {"no", "nb"},
+
+        // Fall back to Ethiopic script for languages likely to be written in Ethiopic.
+        // Data is from CLDR's likelySubtags.xml.
+        // TODO: Convert this to a mechanism using ICU4J's ULocale#addLikelySubtags().
+        {"am", "und-Ethi"}, // Amharic
+        {"byn", "und-Ethi"}, // Blin
+        {"gez", "und-Ethi"}, // Geʻez
+        {"ti", "und-Ethi"}, // Tigrinya
+        {"wal", "und-Ethi"}, // Wolaytta
+    };
 
     /**
      * Load hyphenation patterns at initialization time. We want to have patterns
@@ -81,7 +146,22 @@ public class Hyphenator {
      * @hide
      */
     public static void init() {
-        Locale l = Locale.US;
-        sMap.put(l, loadHyphenator(l));
+        sMap.put(null, null);
+
+        // TODO: replace this with a discovery-based method that looks into /system/usr/hyphen-data
+        String[] availableLanguages = {"en-US", "eu", "hu", "hy", "nb", "nn", "sa", "und-Ethi"};
+        for (int i = 0; i < availableLanguages.length; i++) {
+            String languageTag = availableLanguages[i];
+            Hyphenator h = loadHyphenator(languageTag);
+            if (h != null) {
+                sMap.put(Locale.forLanguageTag(languageTag), h);
+            }
+        }
+
+        for (int i = 0; i < LOCALE_FALLBACK_DATA.length; i++) {
+            String language = LOCALE_FALLBACK_DATA[i][0];
+            String fallback = LOCALE_FALLBACK_DATA[i][1];
+            sMap.put(Locale.forLanguageTag(language), sMap.get(Locale.forLanguageTag(fallback)));
+        }
     }
 }
