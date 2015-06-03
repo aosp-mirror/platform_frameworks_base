@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
@@ -323,6 +324,19 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     /**
+     * @return The normalized {@link Locale} object of the subtype. The returned locale may or may
+     * not equal to "locale" string parameter passed to the constructor.
+     *
+     * <p>TODO: Consider to make this a public API.</p>
+     * @hide
+     */
+    @Nullable
+    public Locale getLocaleObject() {
+        // TODO: Move the following method from InputMethodUtils to InputMethodSubtype.
+        return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
+    }
+
+    /**
      * @return The mode of the subtype.
      */
     public String getMode() {
@@ -381,7 +395,7 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
-        final Locale locale = InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
+        final Locale locale = getLocaleObject();
         final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
         if (mSubtypeNameResId == 0) {
             return localeStr;
