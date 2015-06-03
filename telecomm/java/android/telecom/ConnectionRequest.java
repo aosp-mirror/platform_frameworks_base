@@ -42,7 +42,7 @@ public final class ConnectionRequest implements Parcelable {
             PhoneAccountHandle accountHandle,
             Uri handle,
             Bundle extras) {
-        this(accountHandle, handle, extras, VideoProfile.VideoState.AUDIO_ONLY);
+        this(accountHandle, handle, extras, VideoProfile.STATE_AUDIO_ONLY);
     }
 
     /**

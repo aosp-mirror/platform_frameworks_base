@@ -605,7 +605,7 @@ public final class RemoteConnection {
     /**
      * Obtains the video state of this {@code RemoteConnection}.
      *
-     * @return The video state of the {@code RemoteConnection}. See {@link VideoProfile.VideoState}.
+     * @return The video state of the {@code RemoteConnection}. See {@link VideoProfile}.
      */
     public int getVideoState() {
         return mVideoState;
