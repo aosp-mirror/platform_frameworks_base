@@ -316,9 +316,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"הודעות בדחיפות נמוכה יותר בהמשך"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"גע שוב כדי לפתוח"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"החלק מעלה כדי לבטל את הנעילה"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"החלק מהסמל להפעלת הטלפון"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"החלק מהסמל להפעלת המסייע הקולי"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"החלק מהסמל להפעלת המצלמה"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"החלק מהסמל כדי להפעיל את הטלפון"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"החלק מהסמל כדי להפעיל את המסייע הקולי"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"החלק מהסמל כדי להפעיל את המצלמה"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"שקט מוחלט"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"עדיפות בלבד"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"התראות בלבד"</string>
@@ -399,19 +399,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"גע כדי לשחזר את עוצמת הקול המקורית."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"אתה נמצא בפרופיל העבודה"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"הצג בשורת הסטטוס את אחוז עוצמת הסוללה"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"הצג את אחוז עוצמת הסוללה בתוך הסמל שבשורת הסטטוס כשהמכשיר אינו בטעינה"</string>
     <string name="quick_settings" msgid="10042998191725428">"הגדרות מהירות"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"הוסף אריח"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"אריח שידור"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"לא תשמע את ההתראה הבאה שלך <xliff:g id="WHEN">%1$s</xliff:g>, אלא אם תשבית קודם את ההגדרה הזו"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"לא תשמע את ההתראה הבאה שלך <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

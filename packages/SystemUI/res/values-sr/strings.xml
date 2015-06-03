@@ -398,19 +398,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Додирните да бисте вратили оригинал."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Налазите се на профилу за Work"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Тјунер за кориснички интерфејс система"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Приказуј уграђени проценат батерије"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Приказивање нивоа напуњености батерије у процентима унутар иконе на статусној траци када се батерија не пуни"</string>
     <string name="quick_settings" msgid="10042998191725428">"Брза подешавања"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"Додај плочицу"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Плочица за емитовање"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g> ако не искључите ово пре тога"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

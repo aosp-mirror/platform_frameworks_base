@@ -48,7 +48,7 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"नि:शब्द करा"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वयं"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचना"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"ब टिथर केले"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटुथ टिथर केले"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट पद्धती सेट करा"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"वास्तविक कीबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB डिव्हाइसवर प्रवेश करण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> अॅप ला अनुमती द्यायची?"</string>
@@ -93,8 +93,8 @@
     <string name="cancel" msgid="6442560571259935130">"रद्द करा"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"सुसंगतता झूम बटण."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"लहानपासून मोठ्‍या स्‍क्रीनवर झूम करा."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब कनेक्‍ट केले."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ब डिस्कनेक्ट केले."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लूटुथ कनेक्‍ट केले."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ब्लूटुथ डिस्कनेक्ट केले."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"बॅटरी नाही."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"बॅटरी एक बार."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"बॅटरी दोन बार."</string>
@@ -148,7 +148,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाय-फाय"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"सिम नाही."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब टिथरिंग."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटुथ टिथरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"विमान मोड."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क बदलणे."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"बॅटरी <xliff:g id="NUMBER">%d</xliff:g> टक्के."</string>
@@ -190,12 +190,12 @@
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"व्यत्यय आणू नका बंद."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"व्यत्यय आणू नका बंद करा"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"व्यत्यय आणू नका चालू करा"</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ब बंद."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ब चालू."</string>
-    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ब कनेक्ट करत आहे."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ब कनेक्‍ट केले."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ब बंद केले."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ब चालू केले."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ब्लूटुथ बंद."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ब्लूटुथ चालू."</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ब्लूटुथ कनेक्ट करत आहे."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ब्लूटुथ कनेक्‍ट केले."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ब्लूटुथ बंद केले."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ब्लूटुथ चालू केले."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"स्थान अहवाल बंद."</string>
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"स्थान अहवाल चालू."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"स्थान अहवाल बंद केला."</string>
@@ -242,8 +242,8 @@
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"केवळ अलार्म"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"संपूर्ण शांतता"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटुथ"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब (<xliff:g id="NUMBER">%d</xliff:g> डिव्हाइसेस)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब बंद"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटुथ (<xliff:g id="NUMBER">%d</xliff:g> डिव्हाइसेस)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लूटुथ बंद"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोणतेही जोडलेले डिव्हाइसेस उपलब्ध नाहीत"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वयं-फिरवा"</string>
@@ -397,19 +397,23 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"आपण कार्य प्रोफाईल मध्‍ये आहात"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"सिस्टीम UI ट्यूनर"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
     <string name="quick_settings" msgid="10042998191725428">"दृत सेटिंग्ज"</string>
+    <!-- no translation found for status_bar (4877645476959324760) -->
+    <skip />
+    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
+    <skip />
+    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
+    <skip />
+    <!-- no translation found for status_bar_work (6022553324802866373) -->
+    <skip />
+    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
+    <skip />
     <string name="add_tile" msgid="2995389510240786221">"टाइल जोडा"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"प्रसारण टाइल"</string>
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"आपण त्यापूर्वी हे बंद केल्याशिय आपला पुढील <xliff:g id="WHEN">%1$s</xliff:g> होणारा अलार्म ऐकणार नाही"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"आपण आपला <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा पुढील अलार्म ऐकणार नाही"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> वाजता"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> रोजी"</string>
 </resources>
