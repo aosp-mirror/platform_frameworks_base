@@ -217,8 +217,8 @@ void RenderState::render(const Glop& glop) {
 
     fill.program->set(glop.transform.ortho,
             glop.transform.modelView,
-            glop.transform.canvas,
-            glop.transform.fudgingOffset);
+            glop.transform.meshTransform(),
+            glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);
 
     // Color filter uniforms
     if (fill.filterMode == ProgramDescription::kColorBlend) {
@@ -260,7 +260,7 @@ void RenderState::render(const Glop& glop) {
     // indices
     meshState().bindIndicesBufferInternal(indices.bufferObject);
 
-    if (vertices.attribFlags & VertexAttribFlags::kTextureCoord) {
+    if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
         const Glop::Fill::TextureData& texture = fill.texture;
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
@@ -284,13 +284,13 @@ void RenderState::render(const Glop& glop) {
         meshState().disableTexCoordsVertexArray();
     }
     int colorLocation = -1;
-    if (vertices.attribFlags & VertexAttribFlags::kColor) {
+    if (vertices.attribFlags & VertexAttribFlags::Color) {
         colorLocation = fill.program->getAttrib("colors");
         glEnableVertexAttribArray(colorLocation);
         glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, vertices.stride, vertices.color);
     }
     int alphaLocation = -1;
-    if (vertices.attribFlags & VertexAttribFlags::kAlpha) {
+    if (vertices.attribFlags & VertexAttribFlags::Alpha) {
         // NOTE: alpha vertex position is computed assuming no VBO
         const void* alphaCoords = ((const GLbyte*) vertices.position) + kVertexAlphaOffset;
         alphaLocation = fill.program->getAttrib("vtxAlpha");
@@ -318,7 +318,7 @@ void RenderState::render(const Glop& glop) {
 
             // rebind pointers without forcing, since initial bind handled above
             meshState().bindPositionVertexPointer(false, vertexData, vertices.stride);
-            if (vertices.attribFlags & VertexAttribFlags::kTextureCoord) {
+            if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
                 meshState().bindTexCoordsVertexPointer(false,
                         vertexData + kMeshTextureOffset, vertices.stride);
             }
@@ -336,10 +336,10 @@ void RenderState::render(const Glop& glop) {
     // -----------------------------------
     // ---------- Mesh teardown ----------
     // -----------------------------------
-    if (vertices.attribFlags & VertexAttribFlags::kAlpha) {
+    if (vertices.attribFlags & VertexAttribFlags::Alpha) {
         glDisableVertexAttribArray(alphaLocation);
     }
-    if (vertices.attribFlags & VertexAttribFlags::kColor) {
+    if (vertices.attribFlags & VertexAttribFlags::Color) {
         glDisableVertexAttribArray(colorLocation);
     }
 }

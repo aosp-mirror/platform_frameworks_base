@@ -87,7 +87,7 @@ struct SkiaShaderData {
 
 class SkiaShader {
 public:
-    static void store(Caches& caches, const SkShader* shader, const Matrix4& modelViewMatrix,
+    static void store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
             GLuint* textureUnit, ProgramDescription* description,
             SkiaShaderData* outData);
     static void apply(Caches& caches, const SkiaShaderData& data);

@@ -346,33 +346,28 @@ void applyLayer(Caches& caches, const SkiaShaderData::LayerShaderData& data) {
     glUniform2fv(caches.program().getUniform("textureDimension"), 1, &data.textureDimension[0]);
 }
 
-void SkiaShader::store(Caches& caches, const SkShader* shader, const Matrix4& modelViewMatrix,
+void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
         GLuint* textureUnit, ProgramDescription* description,
         SkiaShaderData* outData) {
-    if (!shader) {
-        outData->skiaShaderType = kNone_SkiaShaderType;
-        return;
-    }
-
-    if (tryStoreGradient(caches, *shader, modelViewMatrix,
+    if (tryStoreGradient(caches, shader, modelViewMatrix,
             textureUnit, description, &outData->gradientData)) {
         outData->skiaShaderType = kGradient_SkiaShaderType;
         return;
     }
 
-    if (tryStoreBitmap(caches, *shader, modelViewMatrix,
+    if (tryStoreBitmap(caches, shader, modelViewMatrix,
             textureUnit, description, &outData->bitmapData)) {
         outData->skiaShaderType = kBitmap_SkiaShaderType;
         return;
     }
 
-    if (tryStoreCompose(caches, *shader, modelViewMatrix,
+    if (tryStoreCompose(caches, shader, modelViewMatrix,
             textureUnit, description, outData)) {
         outData->skiaShaderType = kCompose_SkiaShaderType;
         return;
     }
 
-    if (tryStoreLayer(caches, *shader, modelViewMatrix,
+    if (tryStoreLayer(caches, shader, modelViewMatrix,
             textureUnit, description, &outData->layerData)) {
         outData->skiaShaderType = kLayer_SkiaShaderType;
     }
