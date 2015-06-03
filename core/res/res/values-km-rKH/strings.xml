@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"បិទ​កម្ម​វិធី​រោទ៍"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"កម្មវិធី​រោទ៍​ញ័រ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"បើក​កម្មវិធី​រោទ៍"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"រៀបចំធ្វើបច្ចុប្បន្នភាព"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"កំពុងដំណើរការកញ្ចប់នេះ…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"កំពុង​បិទ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​នឹង​បិទ។"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ទូរទស្សន៍របស់អ្នកបិទ។"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​​សារ MMS ។ មាន​ន័យ​ថា កម្មវិធី​អាច​ត្រួតពិនិត្យ​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក ដោយ​​មិន​បង្ហាញ​អ្នក។"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ទទួល​សារ​អត្ថបទ (MMS​)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​​សារ​ MMS ។ វា​មាន​ន័យ​ថា កម្មវិធី​អាច​តាមដាន​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក​ដោយ​មិន​បង្ហាញ​ពួកវា។"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"អាន​សារ​ប្រកាស​ចល័ត"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ឲ្យ​កម្មវិធី​អាន​សារ​ប្រកាស​ការ​ហៅ​ដែល​ឧបករណ៍​របស់​​អ្នក​បាន​ទទួល។ ការ​ជូន​ដំណឹង​ប្រកាស​ចល័ត​ត្រូវ​បាន​បញ្ជូន​ទៅ​ទីតាំង​មួយ​ចំនួន ដើម្បី​ព្រមាន​អ្នក​អំពី​ស្ថានភាព​អាសន្ន។ កម្មវិធី​ព្យាបាទ​អាច​ជ្រៀតជ្រែក​ការ​អនុវត្ត ឬ​ប្រតិបត្តិការ​ឧបករណ៍​របស់​អ្នក​​ពេល​ទទួល​ការ​ប្រកាស​ចល័ត​ពេល​អាសន្ន។"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"គណនី​របស់​អ្នក"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ចូល​ដំណើរការ​គណនី​ដែល​មាន។"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"អាន​អត្ថបទ​ព័ត៌មាន​បាន​ជាវ"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​លម្អិត​អំពី​អត្ថបទ​ព័ត៌មាន​​បាន​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្ន។"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ផ្ញើ​សារ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ឲ្យ​កម្មវិធី​ផ្ញើ​សារ​ SMS ។ វា​អាច​គិត​ថ្លៃ​សេវាកម្ម​ដែល​មិន​រំពឹង​ទុក។ កម្មវិធី​ព្យាបាទ​អាច​គិត​ថ្លៃ​សេវាកម្ម​ពី​អ្នក​ ដោយ​ផ្ញើ​សារ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"អាន​សារ​អត្ថបទ​របស់​អ្នក (SMS ឬ MMS​)"</string>
@@ -1094,6 +1102,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"អាន​សម័យ​ដំឡើង"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ឲ្យ​កម្មវិធី​អាន​សម័យ​ដំឡើង។ វា​អនុញ្ញាត​ឲ្យ​ឃើញ​ព័ត៌មាន​លម្អិត​អំពី​​ការដំឡើង​កញ្ចប់​សកម្ម។"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ស្នើសុំដំឡើងកញ្ចប់"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"អនុញ្ញាតឲ្យកម្មវិធីស្នើសុំដំឡើងកញ្ចប់ (ឯកសារ/មាតិកា)។"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ប៉ះ​ពីរ​ដង ​​ដើម្បី​គ្រប់គ្រង​ការ​ពង្រីក"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"មិន​អាច​បន្ថែម​ធាតុ​ក្រាហ្វិក។"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ទៅ"</string>

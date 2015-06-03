@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"I-off ang ringer"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"I-vibrate ang ringer"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"I-on ang ringer"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Maghanda para sa pag-update"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Pinoproseso ang package ng update…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Mag-shut down ang iyong tablet."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Magsa-shut down ang iyong TV."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng SMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"tumanggap ng mga text message (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng MMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"basahin ang mga mensahe ng cell broadcast"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Binibigyang-daan ang app na magbasa ng mga mensahe ng cell broadcast na natanggap ng iyong device. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon upang balaan ka tungkol sa mga emergency na sitwasyon. Maaaring makaabala ang nakakahamak na apps sa pagganap o pagpapatakbo ng iyong device kapag nakatanggap ng emergency na cell broadcast."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Iyong mga account"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"I-access ang mga available na account."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"magbasa ng mga na-subscribe na feed"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Pinapayagan ang app na kumuha ng mga detalye tungkol sa kasalukuyang naka-sync na mga feed."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"basahin ang iyong mga text message (SMS o MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Pinapayagan ang application na mag-route ng output ng media sa iba pang mga panlabas na device."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Basahin ang mga session ng pag-install"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Pinapayagan ang isang application na magbasa ng mga session ng pag-install. Nagbibigay-daan ito upang makita ang mga detalye tungkol sa mga aktibong pag-install ng package."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Humiling ng mga package sa pag-install"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Pinapayagan ang isang application na hilingin ang pag-install ng mga package."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>

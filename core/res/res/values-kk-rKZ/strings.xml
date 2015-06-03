@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Атаусыз&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Телефон нөмірі жоқ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Белгісіз"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Дауыс-хабар"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Дауыстық пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Байланыс мәселесі немесе MMИ коды жарамсыз."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Әрекет анықталған сандарды теруге шектелген."</string>
@@ -81,7 +81,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Қоңырау шалудың үш жолы"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Мазаны алатын, қалаусыз қоңыраулардан бас тарту"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Қоңырау шалған нөмірді жеткізу"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Мазаламаңыз"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Мазаламау"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Қоңырау өшірулі"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Қоңырау тербелісі"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Қоңырау қосулы"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Жаңартуға дайындау"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Жаңарту жиынтығы өңделуде…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Өшірілуде…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшет өшіріледі."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ТД өшіріледі."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Қолданбаға SMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"мәтін хабарларын алу (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Қолданбаға MMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ұялы хабар тарату хабарларын оқу"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Қолданбаға ұялы таратылым хабарларын оқу мүмкіндігін береді. Ұялы таратылым дабылдары кейбір аймақтарда төтенше жағдай туралы ескерту үшін қолданылады. Төтенше ұялы хабарлар келгенде залалды қолданбалар құрылғының жұмысына кедергі жасауы мүмкін."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Сіздің есептік жазбаларыңыз"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Қол жетімді есептік жазбаларға кіру."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылған ағындарды оқу"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Қолданбаға қазіргі уақытта синхрондалған арналар туралы мәліметтерді алуға рұқсат береді."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS хабарларын жіберу"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Қолданбаға SMS хабарларын жіберу мүмкіндігін береді. Бұл қосымша төлемдерге себеп болуы мүмкін. Залалды қолданбалар сіздің құптауыңызсыз хабар жіберіп, қосымша шығынға себеп болуы мүмкін."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"өзіңіздің мәтін хабарларыңызды оқу (SMS немесе MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Қолданбаға медиа шығысын басқа сыртқы құрылғыларға бағыттау мүмкіндігін береді."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнату сеанстарын оқу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Қолданбаға орнату сеанстарын оқуға рұқсат етеді. Бұл оған белсенді бума орнатулары туралы мәліметтерді көруге рұқсат етеді."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Жиынтықтарды орнатуды сұрау"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Қолданбаның жиынтықтарды орнатуды сұрауына мүмкіндік береді."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Масштабтауды басқару үшін екі рет түртіңіз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетті қосу."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Өту"</string>
@@ -1163,8 +1173,8 @@
     <string name="websearch" msgid="4337157977400211589">"Веб іздеу"</string>
     <string name="find_next" msgid="5742124618942193978">"Келесіні табу"</string>
     <string name="find_previous" msgid="2196723669388360506">"Алдыңғыны табу"</string>
-    <string name="gpsNotifTicker" msgid="5622683912616496172">"Аймақ туралы өтініші жіберген <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Аймақ туралы өтініш"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Орын туралы өтініші жіберген <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Орын туралы өтініш"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Өтініш жіберген <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Иә"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Жоқ"</string>

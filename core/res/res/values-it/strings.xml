@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Suoneria disattivata"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Suoneria vibrazione"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Suoneria attiva"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Preparazione per l\'aggiornamento"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Elaborazione del pacchetto di aggiornamento…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Spegnimento..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Il tablet verrà spento."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"La TV verrà spenta."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Consente all\'applicazione di ricevere ed elaborare messaggi SMS. Significa che l\'applicazione potrebbe monitorare o eliminare i messaggi inviati al tuo dispositivo senza mostrarteli."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ricezione messaggi di testo (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Consente all\'applicazione di ricevere ed elaborare messaggi MMS. Significa che l\'applicazione potrebbe monitorare o eliminare i messaggi inviati al tuo dispositivo senza mostrarteli."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lettura di messaggi cell broadcast"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le applicazioni dannose potrebbero interferire con il rendimento o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"I tuoi account"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedere agli account disponibili."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lettura feed sottoscritti"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Consente all\'applicazione di ottenere dettagli sui feed attualmente sincronizzati."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"invio SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Consente all\'applicazione di inviare messaggi SMS. Ciò potrebbe comportare costi imprevisti. Applicazioni dannose potrebbero generare dei costi inviando messaggi senza la tua conferma."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lettura messaggi di testo personali (SMS o MMS)"</string>
@@ -421,7 +429,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestisci hardware per il riconoscimento delle impronte digitali"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Consente all\'app di richiamare metodi per aggiungere e rimuovere modelli di impronte digitali da utilizzare."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizza hardware per il riconoscimento delle impronte digitali"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizzo di hardware per il riconoscimento delle impronte digitali"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Consente all\'app di utilizzare l\'hardware per il riconoscimento delle impronte digitali per eseguire l\'autenticazione"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta digitale parziale. Riprova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta digitale. Riprova."</string>
@@ -601,7 +609,7 @@
     <string name="eventTypeCustom" msgid="7837586198458073404">"Personalizzato"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Compleanno"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Anniversario"</string>
-    <string name="eventTypeOther" msgid="7388178939010143077">"Altri"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Altro"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizzato"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Lavoro"</string>
@@ -621,7 +629,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangout"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -821,7 +829,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Ultimo mese"</string>
     <string name="older" msgid="5211975022815554840">"Precedente"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"in data <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"alle ore <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"nel <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"giorno"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Consente a un\'applicazione di indirizzare l\'uscita di media verso altri dispositivi esterni."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lettura di sessioni di installazione"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Richiesta di pacchetti di installazione"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Consente a un\'applicazione di richiedere l\'installazione di pacchetti."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tocca due volte per il comando dello zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Aggiunta del widget non riuscita."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vai"</string>

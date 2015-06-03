@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringervibrering"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringeren er aktiveret"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Gør klar til opdatering"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Behandler opdateringspakken…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din tablet slukkes nu."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Dit tv vil lukke ned."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillader, at appen kan modtage og behandle sms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-beskeder"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-beskeder, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-beskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-besked om en nødsituation."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dine konti"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få adgang til de tilgængelige konti."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læse feeds, jeg abonnerer på"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillader, at appen kan hente oplysninger om de feeds, der synkroniseres."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sende sms-beskeder"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (sms eller mms)"</string>
@@ -421,7 +429,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Tillader, at appen kan deaktivere tastaturlåsen og anden form for tilknyttet adgangskodesikkerhed. Telefonen deaktiverer f.eks. tastaturlåsen ved indgående telefonopkald og aktiverer tastaturlåsen igen, når opkaldet er afsluttet."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrer fingeraftrykhardware"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Tillader, at appen kan køre metoder til at tilføje og slette fingeraftryksskabeloner"</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"brug fingeraftrykhardware"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"bruge fingeraftrykhardware"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Tillader, at appen kan bruge fingeraftrykhardware til godkendelse"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Der blev registreret et delvist fingeraftryk. Prøv igen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingeraftrykket kunne ikke behandles. Prøv igen."</string>
@@ -1067,7 +1075,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Forbereder <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Kontrollerer for fejl"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Der blev registreret et nyt <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Til at overføre billeder og medier"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Til overførsel af billeder og medier"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Beskadiget <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> er beskadiget. Prøv at omformatere det."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> blev fjernet uventet"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Tillader, at en applikation viderefører medieoutput til andre eksterne enheder."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Læs installationssessioner"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillader, at en applikation læser installationssessioner. Dermed kan applikationen se oplysninger om aktive pakkeinstallationer."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Anmod om installation af pakker"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Tillader, at en app anmoder om installation af pakker."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryk to gange for zoomstyring"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget kunne ikke tilføjes."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>
@@ -1150,7 +1160,7 @@
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Sletter USB-lageret..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Sletter SD-kortet..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Kunne ikke slette USB-lager."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Kunne ikke slette SD-kort."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"SD-kortet kunne ikke formateres."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD-kortet blev fjernet, før det blev demonteret."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-lager bliver kontrolleret."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kortet bliver kontrolleret."</string>

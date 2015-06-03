@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ειδοποίηση ήχου ανενεργή"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Δόνηση ειδοποίησης ήχου"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ειδοποίηση ήχου ενεργή"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Προετοιμασία για ενημέρωση"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Επεξεργασία πακέτου ενημέρωσης…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Απενεργοποίηση..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Το tablet σας θα απενεργοποιηθεί."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Η τηλεόρασή σας θα κλείσει."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων SMS. Αυτό σημαίνει ότι η εφαρμογή θα μπορούσε να παρακολουθήσει ή να διαγράψει τα μηνύματα που αποστέλλονται στη συσκευή σας χωρίς αυτά να εμφανιστούν σε εσάς."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"λήψη μηνυμάτων κειμένου (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων MMS. Αυτό σημαίνει ότι η εφαρμογή θα μπορούσε να παρακολουθήσει ή να διαγράψει τα μηνύματα που αποστέλλονται στη συσκευή σας χωρίς αυτά να εμφανιστούν σε εσάς."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ανάγνωση μηνυμάτων που έχουν μεταδοθεί μέσω κινητού τηλεφώνου"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Επιτρέπει στην εφαρμογή την ανάγνωση μηνυμάτων που έχουν μεταδοθεί μέσω κινητού τηλεφώνου και έχουν ληφθεί από τη συσκευή σας. Ειδοποιήσεις που μεταδίδονται μέσω κινητού παραδίδονται σε ορισμένες τοποθεσίες για να σας προειδοποιήσουν για καταστάσεις έκτακτης ανάγκης. Κακόβουλες εφαρμογές ενδέχεται να παρεμποδίσουν την απόδοση ή τη λειτουργία της συσκευής σας κατά τη λήψη μετάδοσης μέσω κινητού σχετικά με μια επείγουσα κατάσταση."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Οι λογαριασμοί σας"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Πρόσβαση στους διαθέσιμους λογαριασμούς."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ανάγνωση ροών δεδομένων στις οποίες έχετε εγγραφεί"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Επιτρέπει στην εφαρμογή τη λήψη λεπτομερειών σχετικά με τις τρέχουσες συγχρονισμένες ροές δεδομένων."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"αποστολή μηνυμάτων SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Επιτρέπει στην εφαρμογή των αποστολή μηνυμάτων SMS. Αυτό μπορεί να προκαλέσει μη αναμενόμενες χρεώσεις. Οι κακόβουλες εφαρμογές ενδέχεται να σας κοστίσουν χρήματα, αποστέλλοντας μηνύματα χωρίς την έγκρισή σας."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ανάγνωση των μηνυμάτων κειμένου σας (SMS ή MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Επιτρέπει σε μια εφαρμογή τη διαγραφή διαδρομής δεδομένων εξόδου μέσων σε άλλες εξωτερικές συσκευές."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Ανάγνωση περιόδων σύνδεσης εγκατάστασης"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Επιτρέπει σε μια εφαρμογή την ανάγνωση των περιόδων σύνδεσης εγκατάστασης. Αυτό της επιτρέπει να βλέπει λεπτομέρειες σχετικά με τις εγκαταστάσεις του ενεργού πακέτου."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Αίτημα εγκατάστασης πακέτων."</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Επιτρέπει σε μια εφαρμογή να ζητά εγκατάσταση πακέτων."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Αγγίξτε δύο φορές για έλεγχο εστίασης"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Δεν ήταν δυνατή η προσθήκη του γραφικού στοιχείου."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Μετάβαση"</string>

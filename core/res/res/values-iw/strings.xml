@@ -188,6 +188,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"צלצול כבוי"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"צלצול ורטט"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"צלצול מופעל"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"הכן לעדכון"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"מעבד את חבילת העדכון…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"מכבה..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטאבלט שלך יכבה."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"הטלוויזיה שלך תיכבה."</string>
@@ -243,13 +245,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"התקשרות וניהול של שיחות טלפון"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"חיישנים"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"גישה לנתונים מחיישנים וממכשירים לבישים"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזר תוכן של חלון"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"לאחזר תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעל את \'גילוי באמצעות מגע\'"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"להפעיל את \'גילוי באמצעות מגע\'"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"פריטים שנגעת בהם ייאמרו בקול וניתן לנווט במסך באמצעות תנועות."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"הפעל גישה משופרת לאינטרנט"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"להפעיל גישה משופרת לאינטרנט"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של אפליקציות."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצג טקסט שאתה מקליד"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"להציג טקסט בזמן הקלדה"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
@@ -267,6 +269,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏מאפשר לאפליקציה לקבל ולעבד הודעות SMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"‏קבלת הודעות טקסט (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"‏מאפשר לאפליקציה לקבל ולעבד הודעות MMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"קריאת הודעות שידור סלולרי"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"מאפשר לאפליקציה לקרוא הודעות שידור סלולרי שהתקבלו במכשיר שלך. התראות שידור סלולרי נשלחות במקומות מסוימים על מנת להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר שלך כאשר מתקבל שידור חירום סלולרי."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"החשבונות שלך"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"גישה לכל החשבונות הזמינים."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"קרא עדכוני מנויים"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"מאפשר לאפליקציה לקבל פרטים על ההזנות הנוכחיות שמסונכרנות."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"‏שלוח הודעות SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏מאפשר לאפליקציה לשלוח הודעות SMS. הדבר עשוי לגרום לחיובים בלתי צפויים. אפליקציות זדוניות עלולות לגרום לעלויות על ידי שליחת הודעות ללא אישורך."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏קריאת הודעות הטקסט שלך (SMS או MMS)"</string>
@@ -423,7 +431,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"מאפשר לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון משבית את נעילת המקשים בעת קבלה של שיחת טלפון נכנסת, ולאחר מכן מפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ניהול חומרה של טביעות אצבעות"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"מאפשר לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות טביעות אצבעות שבהן ייעשה שימוש."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"שימוש בחומרה של טביעות אצבעות"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"חומרה של טביעות אצבעות"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"מאפשר לאפליקציה להשתמש בחומרה של טביעות אצבעות לצורך אימות"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. נסה שוב."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
@@ -447,7 +455,7 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"מאפשר לאפליקציה לשנות את הגדרות הסנכרון של חשבון. לדוגמה, ניתן להשתמש בכך על מנת להפעיל סנכרון של האפליקציה \'אנשים\' עם חשבון כלשהו."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"קרא את הנתונים הסטטיסטיים של הסינכרון"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"מאפשר לאפליקציה לקרוא את סטטיסטיקת הסנכרון של חשבון, כולל היסטוריית אירועי הסנכרון וכמות הנתונים שסונכרנה."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"כתוב עדכונים מנויים"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"כתיבת עדכוני מנויים"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"מאפשר לאפליקציה לשנות את ההזנות הנוכחיות שלך שמסונכרנות. אפליקציות זדוניות עלולות לשמות את ההזנות המסונכרנות שלך."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"קריאת מונחים שהוספת למילון"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"מאפשר לאפליקציה לקרוא את כל המילים, השמות והביטויים שהמשתמש אחסן במילון המשתמש."</string>
@@ -1068,7 +1076,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"כל הנתונים שמאוחסנים בכרטיס יאבדו."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"פרמוט"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏ניקוי באגים של USB מחובר"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏גע כדי להשבית את ניקוי הבאגים בהתקן ה-USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏גע כדי להשבית ניקוי באגים בהתקן ה-USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"בחר מקלדות"</string>
     <string name="show_ime" msgid="9157568568695230830">"הצג שיטת קלט"</string>
@@ -1106,6 +1114,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"מאפשר לאפליקציה לנתב פלט מדיה למכשירים חיצוניים אחרים."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"קריאת פעילות התקנה"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"מאפשר לאפליקציה לקרוא הפעלות התקנה. הרשאה זו מאפשרת לה לראות פרטים על התקנות פעילות של חבילות."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"בקשה להתקנת חבילות"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"מתיר לאפליקציה לבקש התקנה של חבילות."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"גע פעמיים לבקרת מרחק מתצוגה"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"‏לא ניתן להוסיף widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"התחל"</string>

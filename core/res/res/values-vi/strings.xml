@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Tắt chuông"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Chuông rung"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Bật chuông"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Chuẩn bị cập nhật"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Đang xử lý gói cập nhật..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Đang tắt…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Máy tính bảng của bạn sẽ tắt."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV của bạn sẽ tắt."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Cho phép ứng dụng nhận và xử lý tin nhắn SMS. Điều này có nghĩa là ứng dụng có thể theo dõi hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"nhận tin nhắn văn bản (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Cho phép ứng dụng nhận và xử lý tin nhắn MMS. Điều này có nghĩa là ứng dụng có thể theo dõi hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"đọc tin nhắn quảng bá"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Cho phép ứng dụng đọc tin nhắn quảng bá mà thiết bị của bạn nhận được. Tin nhắn quảng bá cảnh báo được gửi ở một số địa điểm nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể gây ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị của bạn khi nhận được tin nhắn quảng bá khẩn cấp."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tài khoản của bạn"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Truy cập các tài khoản khả dụng."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"đọc nguồn cấp dữ liệu đã đăng ký"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Cho phép ứng dụng lấy thông tin chi tiết về nguồn cấp dữ liệu hiện được đồng bộ hóa."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"gửi tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Cho phép ứng dụng gửi tin nhắn SMS. Việc này có thể dẫn đến các khoản phí không mong muốn. Các ứng dụng độc hai có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"đọc tin nhắn văn bản của bạn (SMS hoặc MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Cho phép ứng dụng định tuyến thiết bị ra phương tiện đến các thiết bị bên ngoài khác."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Đọc phiên cài đặt"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Cho phép ứng dụng đọc phiên cài đặt. Thao tác này sẽ cho phép ứng dụng xem chi tiết về gói cài đặt đang hoạt động."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Yêu cầu gói cài đặt"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Cho phép ứng dụng yêu cầu cài đặt gói."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Chạm hai lần để kiểm soát thu phóng"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Không thể thêm tiện ích."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Đến"</string>

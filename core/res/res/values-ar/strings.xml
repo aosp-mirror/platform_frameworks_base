@@ -190,6 +190,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"التحضير للتحديث"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"جارٍ معالجة حزم التحديث…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"سيتم إيقاف التلفزيون."</string>
@@ -269,6 +271,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏للسماح للتطبيق بتلقي ومعالجة الرسائل القصيرة SMS. وهذا يعني أنه يمكن للتطبيق مراقبة الرسائل التي يتم إرسالها إلى جهازك أو حذفها بدون عرضها لك."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"تلقي رسائل نصية (رسائل وسائط متعددة)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"للسماح للتطبيق بتلقي ومعالجة رسائل الوسائط المتعددة. وهذا يعني أنه يمكن للتطبيق مراقبة الرسائل التي يتم إرسالها لجهازك أو حذفها بدون عرضها لك."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"قراءة رسائل بث الخلية"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم اشعارات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"حساباتك"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"الوصول إلى الحسابات المتاحة."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"قراءة الخلاصات المشتركة"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"للسماح للتطبيق بالحصول على تفاصيل حول الخلاصات المتزامنة في الوقت الحالي."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"‏إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏للسماح للتطبيق بإرسال رسائل قصيرة SMS. وقد يؤدي هذا إلى تحمل رسوم غير متوقعة. وقد تكلفك التطبيقات الضارة أموالاً من خلال إرسال رسائل بدون موافقة منك."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏قراءة الرسائل النصية (الرسائل القصيرة SMS أو رسائل الوسائط المتعددة)"</string>
@@ -1120,6 +1128,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"للسماح للتطبيق بتوجيه إخراج الوسائط إلى أجهزة خارجية أخرى."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"قراءة جلسات التثبيت"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"للسماح لأحد التطبيقات بقراءة جلسات التثبيت. ويسمح لك هذا بالاطلاع على تفاصيل بشأن عمليات تثبيت الحزم النشطة."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"طلب تثبيت الحزم"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"للسماح لتطبيق ما بطلب تثبيت الحزم."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"تنفيذ"</string>

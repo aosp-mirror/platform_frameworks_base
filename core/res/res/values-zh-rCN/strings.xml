@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"振铃器关闭"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"振铃器振动"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"振铃器开启"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"准备更新"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"正在处理更新文件包…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的电视即将关闭。"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允许该应用接收和处理短信。这就意味着，该应用可能会监视发送到您设备的短信，或删除发送到您设备的短信而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收讯息（彩信）"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允许该应用接收和处理彩信。这就意味着，该应用可能会监视发送到您设备的彩信，或删除发送到您设备的彩信而不向您显示。"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"读取小区广播消息"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允许应用读取您的设备收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帐户"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"读取订阅的供稿"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"发送短信"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允许该应用发送短信。此权限可能会导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"读取您的讯息（短信或彩信）"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"读取安装会话"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允许应用读取安装会话。这样，应用将可以查看有关当前软件包安装的详情。"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"请求安装文件包"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"允许应用请求安装文件包。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>

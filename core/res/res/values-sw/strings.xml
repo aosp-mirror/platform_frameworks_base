@@ -188,6 +188,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Programu ya milio imezimwa"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Mtetemo wa programu ya milio"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Programu ya milio imewashwa"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Tayarisha kwa usasishaji"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Inachakata kifurushi cha kusasisha…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Inafunga..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Kompyuta kibao yako itazima."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Runinga yako itazimwa."</string>
@@ -267,6 +269,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Inaruhusu programu kupokea na kuchakata ujumbe wa SMS. Hii inamaanisha programu hii inaweza kuchunguza na kufuta ujumbe uliotumwa katika kifaa chako bila ya kukuonyesha."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"pokea ujumbe wa maandishi wa MMS"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Inaruhusu programu kupokea na kuchakata ujumbe medianwai (MMS). Hii inamaanisha uwezo wa kuchunguza na kufuta ujumbe uliotumwa kwa kifaa chako bila ya kukuonyesha."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"soma mawasiliano ya matangazo ya simu"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Huruhusu programu kusoma mawasiliano ya matangazo ya simu yaliyoingia kwenye kifaa chako. Arifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendajikazi au shughuli ya kifaa chako wakati matangazo ya simu ya dharura yameingia."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Akaunti zako"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Fikia akaunti zinazopatikana."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"kusoma mipasho kutoka vyanzo unavyofuatilia"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Inaruhusu programu kupata maelezo kuhusu mlisho iliyolandanishwa kwa sasa."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"kutuma SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Inaruhusu programu kutuma ujumbe wa SMS. Hii inaweza ikasababisha malipo yasiyotarajiwa. Programu hasidi zinaweza kukugharimu pesa kwa kutuma ujumbe bila uthibitisho wako."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"soma SMS au MMS zako"</string>
@@ -1094,6 +1102,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Inaruhusu programu kufuatilia utoaji wa habari kwa vifaa vingine vya nje."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Soma vipindi vya kusanikisha"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Huruhusu programu kusoma vipindi vya kusanikisha. Hii huiruhusu kuona maelezo kuhusu usanikishaji wa programu unaoendelea."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Omba idhini ya kusakinisha vifurushi"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Huruhusu programu kuomba idhini ya kusakinisha vifurushi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Gusa mara mbili kwa udhibiti cha kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>

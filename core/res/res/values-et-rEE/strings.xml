@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Helin on väljas"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibreeriv helin"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Helin on sees"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Värskenduseks valmistumine"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Värskenduspaketi töötlemine …"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Väljalülitamine ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Teie tahvelarvuti lülitub välja."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Teler suletakse."</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Võimaldab rakendusel vastu võtta ja töödelda SMS-sõnumeid. See tähendab, et rakendus võib jälgida või kustutada teie seadmele saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"võtke vastu tekstisõnumeid (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Võimaldab rakendusel vastu võtta ja töödelda multimeediumsõnumeid. See tähendab, et rakendus võib jälgida või kustutada teie seadmele saadetud sõnumeid neid teile näitamata."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"mobiilsidesõnumite lugemine"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Võimaldab rakendusel lugeda seadme vastu võetud mobiilsidesõnumeid. Mobiilsidemärguandeid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad segada seadme toimivust või tööd eriolukorra sõnumi vastuvõtmisel."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Teie kontod"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Juurdepääs saadaolevatele kontodele."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"loe tellitud kanaleid"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Võimaldab rakendusel saada üksikasju praegu sünkroonitavate voogude kohta."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"saada SMS-sõnumeid"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Võimaldab rakendusel saata SMS-sõnumeid. See võib kaasa tuua ootamatuid tasusid. Pahatahtlikud rakendused võivad teile tekitada kulusid, saates sõnumeid teie kinnituseta."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lugege oma tekstisõnumeid (SMS või MMS)"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Võimaldab rakendusel koostada teekonna meediaväljundist teistesse välistesse seadmetesse."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Installiseansside lugemine"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lubab rakendusel lugeda installiseansse. See võimaldab näha aktiivse paketi installimise üksikasju."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Installipakettide taotlemine"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Võimaldab rakendusel pakettide installimist taotleda."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Suumi juhtimiseks puudutage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>

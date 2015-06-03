@@ -186,6 +186,8 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"رنگر آف ہے"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"رنگر مرتعش کریں"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"رنگر آن ہے"</string>
+    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"اپ ڈیٹ کیلئے تیار کریں"</string>
+    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"اپ ڈیٹ پیکج پر کاروائی جاری ہے…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"بند ہو رہا ہے…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"آپ کا ٹیبلیٹ بند ہو جائے گا۔"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"‏آپ کا TV بند ہو جائے گا۔"</string>
@@ -265,6 +267,12 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏ایپ کو SMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"‏متنی پیغامات (MMS) حاصل کریں"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"‏ایپ کو MMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"سیل کے نشریاتی پیغامات پڑھیں"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"آپ کے اکاؤنٹس"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"دستیاب اکاؤنٹس تک رسائی حاصل کریں۔"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"سبسکرائب کردہ فیڈز پڑھیں"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے فیڈز کے بارے میں تفصیلات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"‏SMS پیغامات بھیجیں"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏ایپ کو SMS پیغامات بھیجنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز لگ سکتے ہیں۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر پیغامات بھیج کر آپ کی رقم خرچ کروا سکتی ہیں۔"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏اپنے متنی پیغامات (SMS یا MMS) کو پڑھیں"</string>
@@ -1092,6 +1100,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"کسی ایپلیکیشن کو دوسرے خارجی آلات تک میڈیا آؤٹ پٹ کا راستہ بنانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"انسٹال سیشنز پڑھیں"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ایک ایپلیکیشن کو انسٹال سیشنز پڑھنے کی اجازت دیتا ہے۔ یہ اسے فعال پیکیج انسٹالیشنز کے بارے میں تفصیلات دیکھنے کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"پیکجز انسٹال کرنے کی درخواست کریں"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ایک ایپلیکیشن کو پیکجز انسٹال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"زوم کے کنٹرول کیلئے دو بار ٹچ کریں"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ویجٹس کو شامل نہیں کرسکا۔"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"جائیں"</string>
