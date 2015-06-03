@@ -104,13 +104,9 @@ public class RecentsTaskLoadPlan {
         if (mRawTasks == null) {
             preloadRawTasks(isTopTaskHome);
         }
-        int firstStackId = -1;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
-            if (firstStackId < 0) {
-                firstStackId = t.stackId;
-            }
 
             // Compose the task key
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
@@ -158,17 +154,17 @@ public class RecentsTaskLoadPlan {
 
             if (!mConfig.multiStackEnabled ||
                     Constants.DebugFlags.App.EnableMultiStackToSingleStack) {
-                firstStackId = 0;
+                int firstStackId = 0;
                 ArrayList<Task> stackTasks = stacksTasks.get(firstStackId);
                 if (stackTasks == null) {
-                    stackTasks = new ArrayList<Task>();
+                    stackTasks = new ArrayList<>();
                     stacksTasks.put(firstStackId, stackTasks);
                 }
                 stackTasks.add(task);
             } else {
                 ArrayList<Task> stackTasks = stacksTasks.get(t.stackId);
                 if (stackTasks == null) {
-                    stackTasks = new ArrayList<Task>();
+                    stackTasks = new ArrayList<>();
                     stacksTasks.put(t.stackId, stackTasks);
                 }
                 stackTasks.add(task);
