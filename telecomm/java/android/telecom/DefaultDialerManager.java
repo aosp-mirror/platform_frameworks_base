@@ -41,10 +41,13 @@ public class DefaultDialerManager {
      * The caller of this method needs to have permission to write to secure settings and
      * manage users on the device.
      *
+     * @return {@code true} if the default dialer application was successfully changed,
+     *         {@code false} otherwise.
+     *
      * @hide
      * */
-    public static void setDefaultDialerApplication(Context context, String packageName) {
-        setDefaultDialerApplication(context, packageName, ActivityManager.getCurrentUser());
+    public static boolean setDefaultDialerApplication(Context context, String packageName) {
+        return setDefaultDialerApplication(context, packageName, ActivityManager.getCurrentUser());
     }
 
     /**
@@ -52,16 +55,20 @@ public class DefaultDialerManager {
      * The caller of this method needs to have permission to write to secure settings and
      * manage users on the device.
      *
+     * @return {@code true} if the default dialer application was successfully changed,
+     *         {@code false} otherwise.
+     *
      * @hide
      * */
-    public static void setDefaultDialerApplication(Context context, String packageName, int user) {
+    public static boolean setDefaultDialerApplication(Context context, String packageName,
+            int user) {
         // Get old package name
         String oldPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
                 Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
 
         if (packageName != null && oldPackageName != null && packageName.equals(oldPackageName)) {
             // No change
-            return;
+            return false;
         }
 
         // Only make the change if the new package belongs to a valid phone application
@@ -71,7 +78,9 @@ public class DefaultDialerManager {
             // Update the secure setting.
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.DIALER_DEFAULT_APPLICATION, packageName, user);
+            return true;
         }
+        return false;
     }
 
     /**
