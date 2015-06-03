@@ -24,7 +24,7 @@
         android:id="@+id/zen_embedded_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="12dp"
         android:layout_marginTop="8dp"
         android:background="@color/qs_tile_divider" />
 
@@ -53,26 +53,34 @@
                 android:id="@+id/volume_zen_summary_line_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textDirection="locale"
                 android:textAppearance="@style/TextAppearance.Volume.ZenSummary" />
 
             <TextView
                 android:id="@+id/volume_zen_summary_line_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textDirection="locale"
                 android:textAppearance="@style/TextAppearance.Volume.ZenDetail" />
+
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/volume_zen_end_now"
-            style="@style/QSBorderlessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:minWidth="91dp"
-            android:text="@string/volume_zen_end_now"
-            android:textColor="@color/system_accent_color"
-            android:textAppearance="@style/TextAppearance.QS.DetailButton" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/volume_zen_end_now"
+        style="@style/QSBorderlessButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:text="@string/volume_zen_end_now"
+        android:textColor="@color/system_accent_color"
+        android:textAppearance="@style/TextAppearance.QS.DetailButton" />
 
 </com.android.systemui.volume.ZenFooter>
