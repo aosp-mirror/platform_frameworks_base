@@ -30,35 +30,36 @@ namespace uirenderer {
 #define UI_THREAD_FRAME_INFO_SIZE 9
 
 enum class FrameInfoIndex {
-    kFlags = 0,
-    kIntendedVsync,
-    kVsync,
-    kOldestInputEvent,
-    kNewestInputEvent,
-    kHandleInputStart,
-    kAnimationStart,
-    kPerformTraversalsStart,
-    kDrawStart,
+    Flags = 0,
+    IntendedVsync,
+    Vsync,
+    OldestInputEvent,
+    NewestInputEvent,
+    HandleInputStart,
+    AnimationStart,
+    PerformTraversalsStart,
+    DrawStart,
     // End of UI frame info
 
-    kSyncStart,
-    kIssueDrawCommandsStart,
-    kSwapBuffers,
-    kFrameCompleted,
+    SyncStart,
+    IssueDrawCommandsStart,
+    SwapBuffers,
+    FrameCompleted,
 
     // Must be the last value!
-    kNumIndexes
+    NumIndexes
 };
 
 extern const std::string FrameInfoNames[];
 
-enum class FrameInfoFlags {
-    kWindowLayoutChanged = 1 << 0,
-    kRTAnimation = 1 << 1,
-    kSurfaceCanvas = 1 << 2,
-    kSkippedFrame = 1 << 3,
+namespace FrameInfoFlags {
+    enum {
+        WindowLayoutChanged = 1 << 0,
+        RTAnimation = 1 << 1,
+        SurfaceCanvas = 1 << 2,
+        SkippedFrame = 1 << 3,
+    };
 };
-MAKE_FLAGS_ENUM(FrameInfoFlags)
 
 class ANDROID_API UiFrameInfoBuilder {
 public:
@@ -67,19 +68,19 @@ public:
     }
 
     UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync) {
-        set(FrameInfoIndex::kVsync) = vsyncTime;
-        set(FrameInfoIndex::kIntendedVsync) = intendedVsync;
+        set(FrameInfoIndex::Vsync) = vsyncTime;
+        set(FrameInfoIndex::IntendedVsync) = intendedVsync;
         // Pretend the other fields are all at vsync, too, so that naive
         // duration calculations end up being 0 instead of very large
-        set(FrameInfoIndex::kHandleInputStart) = vsyncTime;
-        set(FrameInfoIndex::kAnimationStart) = vsyncTime;
-        set(FrameInfoIndex::kPerformTraversalsStart) = vsyncTime;
-        set(FrameInfoIndex::kDrawStart) = vsyncTime;
+        set(FrameInfoIndex::HandleInputStart) = vsyncTime;
+        set(FrameInfoIndex::AnimationStart) = vsyncTime;
+        set(FrameInfoIndex::PerformTraversalsStart) = vsyncTime;
+        set(FrameInfoIndex::DrawStart) = vsyncTime;
         return *this;
     }
 
-    UiFrameInfoBuilder& addFlag(FrameInfoFlags flag) {
-        set(FrameInfoIndex::kFlags) |= static_cast<uint64_t>(flag);
+    UiFrameInfoBuilder& addFlag(int frameInfoFlag) {
+        set(FrameInfoIndex::Flags) |= static_cast<uint64_t>(frameInfoFlag);
         return *this;
     }
 
@@ -96,32 +97,32 @@ public:
     void importUiThreadInfo(int64_t* info);
 
     void markSyncStart() {
-        set(FrameInfoIndex::kSyncStart) = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::SyncStart) = systemTime(CLOCK_MONOTONIC);
     }
 
     void markIssueDrawCommandsStart() {
-        set(FrameInfoIndex::kIssueDrawCommandsStart) = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::IssueDrawCommandsStart) = systemTime(CLOCK_MONOTONIC);
     }
 
     void markSwapBuffers() {
-        set(FrameInfoIndex::kSwapBuffers) = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::SwapBuffers) = systemTime(CLOCK_MONOTONIC);
     }
 
     void markFrameCompleted() {
-        set(FrameInfoIndex::kFrameCompleted) = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::FrameCompleted) = systemTime(CLOCK_MONOTONIC);
     }
 
-    void addFlag(FrameInfoFlags flag) {
-        set(FrameInfoIndex::kFlags) |= static_cast<uint64_t>(flag);
+    void addFlag(int frameInfoFlag) {
+        set(FrameInfoIndex::Flags) |= static_cast<uint64_t>(frameInfoFlag);
     }
 
     int64_t operator[](FrameInfoIndex index) const {
-        if (index == FrameInfoIndex::kNumIndexes) return 0;
+        if (index == FrameInfoIndex::NumIndexes) return 0;
         return mFrameInfo[static_cast<int>(index)];
     }
 
     int64_t operator[](int index) const {
-        if (index < 0 || index >= static_cast<int>(FrameInfoIndex::kNumIndexes)) return 0;
+        if (index < 0 || index >= static_cast<int>(FrameInfoIndex::NumIndexes)) return 0;
         return mFrameInfo[index];
     }
 
@@ -130,7 +131,7 @@ private:
         return mFrameInfo[static_cast<int>(index)];
     }
 
-    int64_t mFrameInfo[static_cast<int>(FrameInfoIndex::kNumIndexes)];
+    int64_t mFrameInfo[static_cast<int>(FrameInfoIndex::NumIndexes)];
 };
 
 } /* namespace uirenderer */
