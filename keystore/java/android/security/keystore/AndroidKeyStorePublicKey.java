@@ -16,40 +16,29 @@
 
 package android.security.keystore;
 
-import java.security.Key;
+import java.security.PublicKey;
 
 /**
- * {@link Key} backed by Android Keystore.
+ * {@link PublicKey} backed by Android Keystore.
  *
  * @hide
  */
-public class AndroidKeyStoreKey implements Key {
-    private final String mAlias;
-    private final String mAlgorithm;
+public class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implements PublicKey {
 
-    public AndroidKeyStoreKey(String alias, String algorithm) {
-        mAlias = alias;
-        mAlgorithm = algorithm;
-    }
+    private final byte[] mEncoded;
 
-    String getAlias() {
-        return mAlias;
-    }
-
-    @Override
-    public String getAlgorithm() {
-        return mAlgorithm;
+    public AndroidKeyStorePublicKey(String alias, String algorithm, byte[] x509EncodedForm) {
+        super(alias, algorithm);
+        mEncoded = ArrayUtils.cloneIfNotEmpty(x509EncodedForm);
     }
 
     @Override
     public String getFormat() {
-        // This key does not export its key material
-        return null;
+        return "X.509";
     }
 
     @Override
     public byte[] getEncoded() {
-        // This key does not export its key material
-        return null;
+        return ArrayUtils.cloneIfNotEmpty(mEncoded);
     }
 }
