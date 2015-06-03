@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,20 +25,21 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
-import android.os.Handler;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.util.Slog;
+import android.os.UserManager;
 import android.util.Base64;
+import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.server.FgThread;
 
-import java.lang.Thread;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -319,28 +321,39 @@ public class UsbDebuggingManager {
     }
 
     private void startConfirmation(String key, String fingerprints) {
-        String nameString = Resources.getSystem().getString(
-                com.android.internal.R.string.config_customAdbPublicKeyConfirmationComponent);
-        ComponentName componentName = ComponentName.unflattenFromString(nameString);
-        if (startConfirmationActivity(componentName, key, fingerprints)
-                || startConfirmationService(componentName, key, fingerprints)) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        UserHandle userHandle =
+                UserManager.get(mContext).getUserInfo(currentUserId).getUserHandle();
+        String componentString;
+        if (currentUserId == UserHandle.USER_OWNER) {
+            componentString = Resources.getSystem().getString(
+                    com.android.internal.R.string.config_customAdbPublicKeyConfirmationComponent);
+        } else {
+            // If the current foreground user is not the primary user we send a different
+            // notification specific to secondary users.
+            componentString = Resources.getSystem().getString(
+                    R.string.config_customAdbPublicKeyConfirmationSecondaryUserComponent);
+        }
+        ComponentName componentName = ComponentName.unflattenFromString(componentString);
+        if (startConfirmationActivity(componentName, userHandle, key, fingerprints)
+                || startConfirmationService(componentName, userHandle, key, fingerprints)) {
             return;
         }
-        Slog.e(TAG, "unable to start customAdbPublicKeyConfirmationComponent "
-                + nameString + " as an Activity or a Service");
+        Slog.e(TAG, "unable to start customAdbPublicKeyConfirmation[SecondaryUser]Component "
+                + componentString + " as an Activity or a Service");
     }
 
     /**
      * @returns true if the componentName led to an Activity that was started.
      */
-    private boolean startConfirmationActivity(ComponentName componentName, String key,
-            String fingerprints) {
+    private boolean startConfirmationActivity(ComponentName componentName, UserHandle userHandle,
+            String key, String fingerprints) {
         PackageManager packageManager = mContext.getPackageManager();
         Intent intent = createConfirmationIntent(componentName, key, fingerprints);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
             try {
-                mContext.startActivityAsUser(intent, UserHandle.OWNER);
+                mContext.startActivityAsUser(intent, userHandle);
                 return true;
             } catch (ActivityNotFoundException e) {
                 Slog.e(TAG, "unable to start adb whitelist activity: " + componentName, e);
@@ -352,11 +365,11 @@ public class UsbDebuggingManager {
     /**
      * @returns true if the componentName led to a Service that was started.
      */
-    private boolean startConfirmationService(ComponentName componentName, String key,
-            String fingerprints) {
+    private boolean startConfirmationService(ComponentName componentName, UserHandle userHandle,
+            String key, String fingerprints) {
         Intent intent = createConfirmationIntent(componentName, key, fingerprints);
         try {
-            if (mContext.startService(intent) != null) {
+            if (mContext.startServiceAsUser(intent, userHandle) != null) {
                 return true;
             }
         } catch (SecurityException e) {

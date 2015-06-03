@@ -276,6 +276,11 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
+        <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
 
         <!-- started from NetworkPolicyManagerService -->
         <activity
