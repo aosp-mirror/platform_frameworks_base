@@ -52,6 +52,8 @@ import java.util.Map;
  * If no appropriate binding can be found, an {@link IllegalStateException} is thrown.
  */
 public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpinnerAdapter {
+    private final LayoutInflater mInflater;
+
     private int[] mTo;
     private String[] mFrom;
     private ViewBinder mViewBinder;
@@ -60,7 +62,6 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
 
     private int mResource;
     private int mDropDownResource;
-    private LayoutInflater mInflater;
 
     /** Layout inflater used for {@link #getDropDownView(int, View, ViewGroup)}. */
     private LayoutInflater mDropDownInflater;
@@ -174,8 +175,8 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(
-                mDropDownInflater, position, convertView, parent, mDropDownResource);
+        final LayoutInflater inflater = mDropDownInflater == null ? mInflater : mDropDownInflater;
+        return createViewFromResource(inflater, position, convertView, parent, mDropDownResource);
     }
 
     private void bindView(int position, View view) {
