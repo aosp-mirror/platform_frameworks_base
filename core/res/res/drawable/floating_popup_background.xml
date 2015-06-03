@@ -15,11 +15,9 @@
 ** limitations under the License.
 */
 -->
-<ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/floating_toolbar_menu_button_minimum_width"
-    android:layout_height="match_parent"
-    android:minWidth="@dimen/floating_toolbar_menu_button_minimum_width"
-    android:minHeight="@dimen/floating_toolbar_height"
-    android:src="?android:attr/actionModeCloseDrawable"
-    android:contentDescription="@string/floating_toolbar_close_overflow_description"
-    android:background="?attr/selectableItemBackgroundBorderless" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorBackgroundFloating" />
+    <corners android:radius="2dp" />
+</shape>
+
