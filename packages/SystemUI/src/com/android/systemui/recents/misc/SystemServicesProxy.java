@@ -54,6 +54,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
@@ -67,12 +68,9 @@ import com.android.systemui.recents.Recents;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -192,7 +190,7 @@ public class SystemServicesProxy {
 
         // Break early if we can't get a valid set of tasks
         if (tasks == null) {
-            return new ArrayList<ActivityManager.RecentTaskInfo>();
+            return new ArrayList<>();
         }
 
         boolean isFirstValidTask = true;
@@ -235,7 +233,7 @@ public class SystemServicesProxy {
 
     /** Returns whether the recents is currently running */
     public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
-            AtomicBoolean isHomeTopMost) {
+            MutableBoolean isHomeTopMost) {
         if (topTask != null) {
             ComponentName topActivity = topTask.topActivity;
 
@@ -243,13 +241,13 @@ public class SystemServicesProxy {
             if (topActivity.getPackageName().equals(Recents.sRecentsPackage) &&
                     topActivity.getClassName().equals(Recents.sRecentsActivity)) {
                 if (isHomeTopMost != null) {
-                    isHomeTopMost.set(false);
+                    isHomeTopMost.value = false;
                 }
                 return true;
             }
 
             if (isHomeTopMost != null) {
-                isHomeTopMost.set(isInHomeStack(topTask.id));
+                isHomeTopMost.value = isInHomeStack(topTask.id);
             }
         }
         return false;
