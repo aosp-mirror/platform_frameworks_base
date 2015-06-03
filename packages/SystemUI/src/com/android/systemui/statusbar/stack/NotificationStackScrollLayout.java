@@ -812,8 +812,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
-        if (mIsExpanded && !mSwipingInProgress && !mOnlyScrollingInThisMotion
-                && isScrollingEnabled()) {
+        if (mIsExpanded && !mSwipingInProgress && !mOnlyScrollingInThisMotion) {
             if (isCancelOrUp) {
                 mExpandHelper.onlyObserveMovements(false);
             }
@@ -1567,7 +1566,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         initDownStates(ev);
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
-        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion && isScrollingEnabled()) {
+        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
             expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
         }
         boolean scrollWantsIt = false;
@@ -2268,11 +2267,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            if (row.isUserLocked()) {
+            if (row.isUserLocked() && row != getFirstChildNotGone()) {
                 // We are actually expanding this view
                 float endPosition = row.getTranslationY() + row.getActualHeight();
                 int stackEnd = mMaxLayoutHeight - mBottomStackPeekSize -
-                        mBottomStackSlowDownHeight;
+                        mBottomStackSlowDownHeight + (int) mStackTranslation;
                 if (endPosition > stackEnd) {
                     mOwnScrollY += endPosition - stackEnd;
                     mDisallowScrollingInThisMotion = true;
