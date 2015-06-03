@@ -1055,7 +1055,8 @@ public:
         // TODO performance: optimize JNI array access
         jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = doRunAdvance(paint, typeface, textArray + contextStart,
-                start - contextStart, end - start, contextEnd - contextStart, isRtl, offset);
+                start - contextStart, end - start, contextEnd - contextStart, isRtl,
+                offset - contextStart);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
