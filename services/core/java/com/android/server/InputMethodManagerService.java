@@ -428,19 +428,39 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final IPackageManager mIPackageManager;
 
     class SettingsObserver extends ContentObserver {
+        int mUserId;
+        boolean mRegistered = false;
         String mLastEnabled = "";
 
+        /**
+         * <em>This constructor must be called within the lock.</em>
+         */
         SettingsObserver(Handler handler) {
             super(handler);
+        }
+
+        public void registerContentObserverLocked(int userId) {
+            if (mRegistered && mUserId == userId) {
+                return;
+            }
             ContentResolver resolver = mContext.getContentResolver();
+            if (mRegistered) {
+                mContext.getContentResolver().unregisterContentObserver(this);
+                mRegistered = false;
+            }
+            if (mUserId != userId) {
+                mLastEnabled = "";
+                mUserId = userId;
+            }
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
+                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this, userId);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ENABLED_INPUT_METHODS), false, this);
+                    Settings.Secure.ENABLED_INPUT_METHODS), false, this, userId);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this);
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this, userId);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this);
+                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this, userId);
+            mRegistered = true;
         }
 
         @Override public void onChange(boolean selfChange, Uri uri) {
@@ -459,6 +479,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     updateInputMethodsFromSettingsLocked(enabledChanged);
                 }
             }
+        }
+
+        @Override
+        public String toString() {
+            return "SettingsObserver{mUserId=" + mUserId + " mRegistered=" + mRegistered
+                    + " mLastEnabled=" + mLastEnabled + "}";
         }
     }
 
@@ -756,6 +782,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mContext = context;
         mRes = context.getResources();
         mHandler = new Handler(this);
+        // Note: SettingsObserver doesn't register observers in its constructor.
+        mSettingsObserver = new SettingsObserver(mHandler);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
@@ -860,8 +888,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        mSettingsObserver = new SettingsObserver(mHandler);
         synchronized (mMethodMap) {
+            mSettingsObserver.registerContentObserverLocked(userId);
             updateFromSettingsLocked(true);
         }
 
@@ -963,6 +991,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
 
+        // ContentObserver should be registered again when the user is changed
+        mSettingsObserver.registerContentObserverLocked(newUserId);
         mSettings.setCurrentUserId(newUserId);
         updateCurrentProfileIds();
         // InputMethodFileManager should be reset when the user is changed
@@ -3713,6 +3743,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurUserActionNotificationSequenceNumber="
                     + mCurUserActionNotificationSequenceNumber);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mScreenOn);
+            p.println("  mSettingsObserver=" + mSettingsObserver);
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
         }
