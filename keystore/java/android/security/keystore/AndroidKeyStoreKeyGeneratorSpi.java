@@ -296,19 +296,33 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         int flags = 0;
         String keyAliasInKeystore = Credentials.USER_SECRET_KEY + spec.getKeystoreAlias();
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
-        int errorCode = mKeyStore.generateKey(
-                keyAliasInKeystore, args, additionalEntropy, flags, resultingKeyCharacteristics);
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw new ProviderException(
-                    "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
-        }
-        @KeyProperties.KeyAlgorithmEnum String keyAlgorithmJCA;
+        boolean success = false;
         try {
-            keyAlgorithmJCA = KeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
-                    mKeymasterAlgorithm, mKeymasterDigest);
-        } catch (IllegalArgumentException e) {
-            throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
+            Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias());
+            int errorCode = mKeyStore.generateKey(
+                    keyAliasInKeystore,
+                    args,
+                    additionalEntropy,
+                    flags,
+                    resultingKeyCharacteristics);
+            if (errorCode != KeyStore.NO_ERROR) {
+                throw new ProviderException(
+                        "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
+            }
+            @KeyProperties.KeyAlgorithmEnum String keyAlgorithmJCA;
+            try {
+                keyAlgorithmJCA = KeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
+                        mKeymasterAlgorithm, mKeymasterDigest);
+            } catch (IllegalArgumentException e) {
+                throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
+            }
+            SecretKey result = new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
+            success = true;
+            return result;
+        } finally {
+            if (!success) {
+                Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias());
+            }
         }
-        return new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
     }
 }
