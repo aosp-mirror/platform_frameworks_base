@@ -121,7 +121,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     public KeyPair generateKeyPair() {
         if (mKeyStore == null || mSpec == null) {
             throw new IllegalStateException("Not initialized");
-
         }
 
         final int flags = (mEncryptionAtRestRequired) ? KeyStore.FLAG_ENCRYPTED : 0;
@@ -134,62 +133,65 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         final String alias = mSpec.getKeystoreAlias();
 
-        Credentials.deleteAllTypesForAlias(mKeyStore, alias);
-
         byte[][] args = getArgsForKeyType(mKeyType, mSpec.getAlgorithmParameterSpec());
 
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
 
-        if (!mKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF, mKeyType, mKeySize,
-                flags, args)) {
-            throw new IllegalStateException("could not generate key in keystore");
-        }
-
-        Credentials.deleteSecretKeyTypeForAlias(mKeyStore, alias);
-
-        final PrivateKey privKey;
-        final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
+        boolean success = false;
         try {
-            privKey = engine.getPrivateKeyById(privateKeyAlias);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException("Can't get key", e);
-        }
-
-        final byte[] pubKeyBytes = mKeyStore.getPubkey(privateKeyAlias);
-
-        final PublicKey pubKey;
-        try {
-            final KeyFactory keyFact = KeyFactory.getInstance(mKeyAlgorithm);
-            pubKey = keyFact.generatePublic(new X509EncodedKeySpec(pubKeyBytes));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Can't instantiate key generator", e);
-        } catch (InvalidKeySpecException e) {
-            throw new IllegalStateException("keystore returned invalid key encoding", e);
-        }
-
-        final X509Certificate cert;
-        try {
-            cert = generateCertificate(privKey, pubKey);
-        } catch (Exception e) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
-            throw new IllegalStateException("Can't generate certificate", e);
-        }
+            if (!mKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF, mKeyType, mKeySize,
+                    flags, args)) {
+                throw new IllegalStateException("could not generate key in keystore");
+            }
 
-        byte[] certBytes;
-        try {
-            certBytes = cert.getEncoded();
-        } catch (CertificateEncodingException e) {
-            Credentials.deleteAllTypesForAlias(mKeyStore, alias);
-            throw new IllegalStateException("Can't get encoding of certificate", e);
-        }
+            final PrivateKey privKey;
+            final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
+            try {
+                privKey = engine.getPrivateKeyById(privateKeyAlias);
+            } catch (InvalidKeyException e) {
+                throw new RuntimeException("Can't get key", e);
+            }
 
-        if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, certBytes, KeyStore.UID_SELF,
-                flags)) {
-            Credentials.deleteAllTypesForAlias(mKeyStore, alias);
-            throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
-        }
+            final byte[] pubKeyBytes = mKeyStore.getPubkey(privateKeyAlias);
 
-        return new KeyPair(pubKey, privKey);
+            final PublicKey pubKey;
+            try {
+                final KeyFactory keyFact = KeyFactory.getInstance(mKeyAlgorithm);
+                pubKey = keyFact.generatePublic(new X509EncodedKeySpec(pubKeyBytes));
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException("Can't instantiate key generator", e);
+            } catch (InvalidKeySpecException e) {
+                throw new IllegalStateException("keystore returned invalid key encoding", e);
+            }
+
+            final X509Certificate cert;
+            try {
+                cert = generateCertificate(privKey, pubKey);
+            } catch (Exception e) {
+                throw new IllegalStateException("Can't generate certificate", e);
+            }
+
+            byte[] certBytes;
+            try {
+                certBytes = cert.getEncoded();
+            } catch (CertificateEncodingException e) {
+                throw new IllegalStateException("Can't get encoding of certificate", e);
+            }
+
+            if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, certBytes, KeyStore.UID_SELF,
+                    flags)) {
+                throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
+            }
+
+            KeyPair result = new KeyPair(pubKey, privKey);
+            success = true;
+            return result;
+        } finally {
+            if (!success) {
+                Credentials.deleteAllTypesForAlias(mKeyStore, alias);
+            }
+        }
     }
 
     @SuppressWarnings("deprecation")
