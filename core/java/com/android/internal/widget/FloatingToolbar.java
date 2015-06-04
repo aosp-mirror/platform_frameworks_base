@@ -37,6 +37,7 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -323,6 +324,7 @@ public final class FloatingToolbar {
             }
         };
 
+        private final Rect mViewPort = new Rect();
         private final Point mCoords = new Point();
 
         private final Region mTouchableRegion = new Region();
@@ -394,7 +396,7 @@ public final class FloatingToolbar {
                 mMainPanel = new FloatingToolbarMainPanel(mParent.getContext(), mOpenOverflow);
             }
             List<MenuItem> overflowMenuItems =
-                    mMainPanel.layoutMenuItems(menuItems, suggestedWidth);
+                    mMainPanel.layoutMenuItems(menuItems, getToolbarWidth(suggestedWidth));
             mMainPanel.setOnMenuItemClickListener(menuItemClickListener);
             if (!overflowMenuItems.isEmpty()) {
                 if (mOverflowPanel == null) {
@@ -430,7 +432,8 @@ public final class FloatingToolbar {
                 // The "show" animation will make this visible.
                 mContentContainer.setAlpha(0);
             }
-            updateOverflowHeight(contentRect.top - (mMarginVertical * 2));
+            refreshViewPort();
+            updateOverflowHeight(contentRect.top - (mMarginVertical * 2) - mViewPort.top);
             refreshCoordinatesAndOverflowDirection(contentRect);
             preparePopupContent();
             mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, mCoords.x, mCoords.y);
@@ -494,6 +497,7 @@ public final class FloatingToolbar {
             }
 
             cancelOverflowAnimations();
+            refreshViewPort();
             refreshCoordinatesAndOverflowDirection(contentRect);
             preparePopupContent();
             mPopupWindow.update(mCoords.x, mCoords.y, getWidth(), getHeight());
@@ -521,18 +525,24 @@ public final class FloatingToolbar {
         }
 
         private void refreshCoordinatesAndOverflowDirection(Rect contentRect) {
+            // NOTE: Ensure that mViewPort has been refreshed before this.
+
             int x = contentRect.centerX() - getWidth() / 2;
             int y;
-            if (contentRect.top > getHeight()) {
+            if (contentRect.top - getHeight() > mViewPort.top) {
                 y = contentRect.top - getHeight();
                 mOverflowDirection = FloatingToolbarPopup.OVERFLOW_DIRECTION_UP;
-            } else if (contentRect.top > getToolbarHeightWithVerticalMargin()) {
+            } else if (contentRect.top - getToolbarHeightWithVerticalMargin() > mViewPort.top) {
                 y = contentRect.top - getToolbarHeightWithVerticalMargin();
                 mOverflowDirection = FloatingToolbarPopup.OVERFLOW_DIRECTION_DOWN;
             } else {
                 y = contentRect.bottom;
                 mOverflowDirection = FloatingToolbarPopup.OVERFLOW_DIRECTION_DOWN;
             }
+
+            // Update x so that the toolbar isn't rendered behind the nav bar in landscape.
+            x = Math.max(0, Math.min(x, mViewPort.right - getWidth()));
+
             mCoords.set(x, y);
             if (mOverflowPanel != null) {
                 mOverflowPanel.setOverflowDirection(mOverflowDirection);
@@ -821,6 +831,29 @@ public final class FloatingToolbar {
             mPopupWindow.setHeight(height + mMarginVertical * 2);
         }
 
+
+        private void refreshViewPort() {
+            mParent.getGlobalVisibleRect(mViewPort);
+            WindowInsets windowInsets = mParent.getRootWindowInsets();
+            mViewPort.set(
+                    mViewPort.left + windowInsets.getStableInsetLeft(),
+                    mViewPort.top + windowInsets.getStableInsetTop(),
+                    mViewPort.right - windowInsets.getStableInsetRight(),
+                    mViewPort.bottom - windowInsets.getStableInsetBottom());
+        }
+
+        private int getToolbarWidth(int suggestedWidth) {
+            int width = suggestedWidth;
+            refreshViewPort();
+            int maximumWidth = mViewPort.width() - 2 * mParent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
+            if (width <= 0) {
+                width = mParent.getResources()
+                        .getDimensionPixelSize(R.dimen.floating_toolbar_preferred_width);
+            }
+            return Math.min(width, maximumWidth);
+        }
+
         /**
          * Sets the touchable region of this popup to be zero. This means that all touch events on
          * this popup will go through to the surface behind it.
@@ -906,12 +939,11 @@ public final class FloatingToolbar {
          *
          * @return The menu items that are not included in this main panel.
          */
-        public List<MenuItem> layoutMenuItems(List<MenuItem> menuItems, int suggestedWidth) {
+        public List<MenuItem> layoutMenuItems(List<MenuItem> menuItems, int width) {
             Preconditions.checkNotNull(menuItems);
 
-            final int toolbarWidth = getAdjustedToolbarWidth(mContext, suggestedWidth)
-                    // Reserve space for the "open overflow" button.
-                    - getEstimatedOpenOverflowButtonWidth(mContext);
+            // Reserve space for the "open overflow" button.
+            final int toolbarWidth = width - getEstimatedOpenOverflowButtonWidth(mContext);
 
             int availableWidth = toolbarWidth;
             final LinkedList<MenuItem> remainingMenuItems = new LinkedList<MenuItem>(menuItems);
