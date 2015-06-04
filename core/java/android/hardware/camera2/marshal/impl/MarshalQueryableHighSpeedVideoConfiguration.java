@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
  */
 public class MarshalQueryableHighSpeedVideoConfiguration
         implements MarshalQueryable<HighSpeedVideoConfiguration> {
-    private static final int SIZE = SIZEOF_INT32 * 4;
+    private static final int SIZE = SIZEOF_INT32 * 5;
 
     private class MarshalerHighSpeedVideoConfiguration
             extends Marshaler<HighSpeedVideoConfiguration> {
@@ -49,6 +49,7 @@ public class MarshalQueryableHighSpeedVideoConfiguration
             buffer.putInt(value.getHeight());
             buffer.putInt(value.getFpsMin());
             buffer.putInt(value.getFpsMax());
+            buffer.putInt(value.getBatchSizeMax());
         }
 
         @Override
@@ -57,8 +58,9 @@ public class MarshalQueryableHighSpeedVideoConfiguration
             int height = buffer.getInt();
             int fpsMin = buffer.getInt();
             int fpsMax = buffer.getInt();
+            int batchSizeMax = buffer.getInt();
 
-            return new HighSpeedVideoConfiguration(width, height, fpsMin, fpsMax);
+            return new HighSpeedVideoConfiguration(width, height, fpsMin, fpsMax, batchSizeMax);
         }
 
         @Override
