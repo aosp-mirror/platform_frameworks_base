@@ -11504,7 +11504,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
                 || (args.volumeUuid != null));
         boolean replace = false;
-        int scanFlags = SCAN_NEW_INSTALL | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE;
+        int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
@@ -11705,7 +11705,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Run dexopt before old package gets removed, to minimize time when app is unavailable
             int result = mPackageDexOptimizer
-                    .performDexOpt(pkg, null /* instruction sets */, true /* forceDex */,
+                    .performDexOpt(pkg, null /* instruction sets */, false /* forceDex */,
                             false /* defer */, false /* inclDependencies */);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 res.setError(INSTALL_FAILED_DEXOPT, "Dexopt failed for " + pkg.codePath);
