@@ -229,6 +229,14 @@ public class CarrierConfigManager {
      */
     public static final String STRING_VVM_TYPE = "string_vvm_type";
 
+    /**
+     * The package name of the carrier's visual voicemail app to ensure that dialer visual voicemail
+     * and carrier visual voicemail are not active at the same time.
+     *
+     * @hide
+     */
+    public static final String STRING_CARRIER_VVM_PACKAGE_NAME = "string_carrier_vvm_package_name";
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String BOOL_MMS_ALIAS_ENABLED = "aliasEnabled";
