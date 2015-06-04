@@ -906,7 +906,6 @@ public class CameraDeviceImpl extends CameraDevice {
             }
 
             mRemoteDevice = null;
-            mInError = false;
         }
     }
 
@@ -1889,12 +1888,12 @@ public class CameraDeviceImpl extends CameraDevice {
     }
 
     private void checkIfCameraClosedOrInError() throws CameraAccessException {
+        if (mRemoteDevice == null) {
+            throw new IllegalStateException("CameraDevice was already closed");
+        }
         if (mInError) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
                     "The camera device has encountered a serious error");
-        }
-        if (mRemoteDevice == null) {
-            throw new IllegalStateException("CameraDevice was already closed");
         }
     }
 
