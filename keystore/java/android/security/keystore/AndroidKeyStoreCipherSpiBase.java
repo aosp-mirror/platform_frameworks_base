@@ -56,6 +56,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     // Fields below are populated by Cipher.init and KeyStore.begin and should be preserved after
     // doFinal finishes.
     private boolean mEncrypting;
+    private int mKeymasterPurposeOverride = -1;
     private AndroidKeyStoreKey mKey;
     private SecureRandom mRng;
 
@@ -165,6 +166,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             mKeyStore.abort(operationToken);
         }
         mEncrypting = false;
+        mKeymasterPurposeOverride = -1;
         mKey = null;
         mRng = null;
         mOperationToken = null;
@@ -210,9 +212,16 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         byte[] additionalEntropy = KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                 mRng, getAdditionalEntropyAmountForBegin());
 
+        int purpose;
+        if (mKeymasterPurposeOverride != -1) {
+            purpose = mKeymasterPurposeOverride;
+        } else {
+            purpose = mEncrypting
+                    ? KeymasterDefs.KM_PURPOSE_ENCRYPT : KeymasterDefs.KM_PURPOSE_DECRYPT;
+        }
         OperationResult opResult = mKeyStore.begin(
                 mKey.getAlias(),
-                mEncrypting ? KeymasterDefs.KM_PURPOSE_ENCRYPT : KeymasterDefs.KM_PURPOSE_DECRYPT,
+                purpose,
                 true, // permit aborting this operation if keystore runs out of resources
                 keymasterInputArgs,
                 additionalEntropy);
@@ -346,11 +355,11 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         } catch (KeyStoreException e) {
             switch (e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH:
-                    throw new IllegalBlockSizeException();
+                    throw (IllegalBlockSizeException) new IllegalBlockSizeException().initCause(e);
                 case KeymasterDefs.KM_ERROR_INVALID_ARGUMENT:
-                    throw new BadPaddingException();
+                    throw (BadPaddingException) new BadPaddingException().initCause(e);
                 case KeymasterDefs.KM_ERROR_VERIFICATION_FAILED:
-                    throw new AEADBadTagException();
+                    throw (AEADBadTagException) new AEADBadTagException().initCause(e);
                 default:
                     throw (IllegalBlockSizeException) new IllegalBlockSizeException().initCause(e);
             }
@@ -434,6 +443,17 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
 
     protected final void setKey(@NonNull AndroidKeyStoreKey key) {
         mKey = key;
+    }
+
+    /**
+     * Overrides the default purpose/type of the crypto operation.
+     */
+    protected final void setKeymasterPurposeOverride(int keymasterPurpose) {
+        mKeymasterPurposeOverride = keymasterPurpose;
+    }
+
+    protected final int getKeymasterPurposeOverride() {
+        return mKeymasterPurposeOverride;
     }
 
     /**
