@@ -17,6 +17,8 @@
 package android.app;
 
 import android.app.ActivityManager.StackInfo;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;

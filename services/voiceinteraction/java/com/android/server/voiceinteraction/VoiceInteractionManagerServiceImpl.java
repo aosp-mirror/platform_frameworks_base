@@ -201,7 +201,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.w(TAG, "finish does not match active session");
             return;
         }
-        mActiveSession.cancel();
+        mActiveSession.cancelLocked();
         mActiveSession = null;
     }
 
@@ -251,7 +251,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         // If there is an active session, cancel it to allow it to clean up its window and other
         // state.
         if (mActiveSession != null) {
-            mActiveSession.cancel();
+            mActiveSession.cancelLocked();
             mActiveSession = null;
         }
         try {

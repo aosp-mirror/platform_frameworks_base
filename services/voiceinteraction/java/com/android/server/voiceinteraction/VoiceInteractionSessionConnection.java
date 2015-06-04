@@ -19,9 +19,9 @@ package com.android.server.voiceinteraction;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
-import android.app.AssistContent;
-import android.app.AssistStructure;
 import android.app.IActivityManager;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -376,6 +376,40 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         return false;
     }
 
+    public void cancelLocked() {
+        hideLocked();
+        mCanceled = true;
+        if (mBound) {
+            if (mSession != null) {
+                try {
+                    mSession.destroy();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Voice interation session already dead");
+                }
+            }
+            if (mSession != null) {
+                try {
+                    mAm.finishVoiceTask(mSession);
+                } catch (RemoteException e) {
+                }
+            }
+            mContext.unbindService(this);
+            try {
+                mIWindowManager.removeWindowToken(mToken);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed removing window token", e);
+            }
+            mBound = false;
+            mService = null;
+            mSession = null;
+            mInteractor = null;
+        }
+        if (mFullyBound) {
+            mContext.unbindService(mFullConnection);
+            mFullyBound = false;
+        }
+    }
+
     public boolean deliverNewSessionLocked(IVoiceInteractionSession session,
             IVoiceInteractor interactor) {
         mSession = session;
@@ -430,39 +464,6 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     public void onServiceDisconnected(ComponentName name) {
         mCallback.sessionConnectionGone(this);
         mService = null;
-    }
-
-    public void cancel() {
-        mCanceled = true;
-        if (mBound) {
-            if (mSession != null) {
-                try {
-                    mSession.destroy();
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Voice interation session already dead");
-                }
-            }
-            if (mSession != null) {
-                try {
-                    mAm.finishVoiceTask(mSession);
-                } catch (RemoteException e) {
-                }
-            }
-            mContext.unbindService(this);
-            try {
-                mIWindowManager.removeWindowToken(mToken);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed removing window token", e);
-            }
-            mBound = false;
-            mService = null;
-            mSession = null;
-            mInteractor = null;
-        }
-        if (mFullyBound) {
-            mContext.unbindService(mFullConnection);
-            mFullyBound = false;
-        }
     }
 
     private boolean isStructureEnabled() {
