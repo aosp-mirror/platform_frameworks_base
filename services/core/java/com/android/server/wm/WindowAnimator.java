@@ -191,7 +191,8 @@ public class WindowAnimator {
     private boolean shouldForceHide(WindowState win) {
         final WindowState imeTarget = mService.mInputMethodTarget;
         final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleNow() &&
-                (imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+                ((imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0
+                        || !mPolicy.canBeForceHidden(imeTarget, imeTarget.mAttrs));
 
         final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
         final AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
@@ -203,7 +204,11 @@ public class WindowAnimator {
                         || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.isAnimatingLw()
                         // Show error dialogs over apps that dismiss keyguard.
                         || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
-        return (mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked;
+
+        // Only hide windows if the keyguard is active and not animating away.
+        boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()
+                && mForceHiding != KEYGUARD_ANIMATING_OUT;
+        return keyguardOn && hideWhenLocked;
     }
 
     private void updateWindowsLocked(final int displayId) {
@@ -228,6 +233,7 @@ public class WindowAnimator {
                         winAnimator.mAnimation.setDuration(KEYGUARD_ANIM_TIMEOUT_MS);
                         winAnimator.mAnimationIsEntrance = false;
                         winAnimator.mAnimationStartTime = -1;
+                        winAnimator.mKeyguardGoingAwayAnimation = true;
                     }
                 } else {
                     if (DEBUG_KEYGUARD) Slog.d(TAG,
@@ -310,7 +316,7 @@ public class WindowAnimator {
                         mKeyguardGoingAway = false;
                     }
                     if (win.isReadyForDisplay()) {
-                        if (nowAnimating) {
+                        if (nowAnimating && win.mWinAnimator.mKeyguardGoingAwayAnimation) {
                             mForceHiding = KEYGUARD_ANIMATING_OUT;
                         } else {
                             mForceHiding = win.isDrawnLw() ? KEYGUARD_SHOWN : KEYGUARD_NOT_SHOWN;
