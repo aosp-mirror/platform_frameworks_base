@@ -1552,23 +1552,21 @@ public abstract class ContentResolver {
      *
      * @param uri The URI to watch for changes. This can be a specific row URI, or a base URI
      * for a whole class of content.
-     * @param notifyForDescendents If <code>true</code> changes to URIs beginning with <code>uri</code>
-     * will also cause notifications to be sent. If <code>false</code> only changes to the exact URI
-     * specified by <em>uri</em> will cause notifications to be sent. If <code>true</code>, any URI values
-     * at or below the specified URI will also trigger a match.
+     * @param notifyForDescendents When false, the observer will be notified whenever a
+     * change occurs to the exact URI specified by <code>uri</code> or to one of the
+     * URI's ancestors in the path hierarchy.  When true, the observer will also be notified
+     * whenever a change occurs to the URI's descendants in the path hierarchy.
      * @param observer The object that receives callbacks when changes occur.
      * @see #unregisterContentObserver
      */
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
-            ContentObserver observer)
-    {
+            ContentObserver observer) {
         registerContentObserver(uri, notifyForDescendents, observer, UserHandle.myUserId());
     }
 
     /** @hide - designated user version */
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
-            ContentObserver observer, int userHandle)
-    {
+            ContentObserver observer, int userHandle) {
         try {
             getContentService().registerContentObserver(uri, notifyForDescendents,
                     observer.getContentObserver(), userHandle);
