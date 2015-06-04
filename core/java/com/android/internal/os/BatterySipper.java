@@ -42,6 +42,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public long wifiRunningTimeMs;
     public long cpuFgTimeMs;
     public long wakeLockTimeMs;
+    public long cameraTimeMs;
+    public long flashlightTimeMs;
 
     public long mobileRxPackets;
     public long mobileTxPackets;
@@ -67,6 +69,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double mobileRadioPowerMah;
     public double gpsPowerMah;
     public double sensorPowerMah;
+    public double cameraPowerMah;
+    public double flashlightPowerMah;
 
     public enum DrainType {
         IDLE,
@@ -79,7 +83,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
         APP,
         USER,
         UNACCOUNTED,
-        OVERCOUNTED
+        OVERCOUNTED,
+        CAMERA
     }
 
     public BatterySipper(DrainType drainType, Uid uid, double value) {
@@ -135,6 +140,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
         wifiRunningTimeMs += other.wifiRunningTimeMs;
         cpuFgTimeMs += other.cpuFgTimeMs;
         wakeLockTimeMs += other.wakeLockTimeMs;
+        cameraTimeMs += other.cameraTimeMs;
+        flashlightTimeMs += other.flashlightTimeMs;
         mobileRxPackets += other.mobileRxPackets;
         mobileTxPackets += other.mobileTxPackets;
         mobileActive += other.mobileActive;
@@ -151,6 +158,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
         sensorPowerMah += other.sensorPowerMah;
         mobileRadioPowerMah += other.mobileRadioPowerMah;
         wakeLockPowerMah += other.wakeLockPowerMah;
+        cameraPowerMah += other.cameraPowerMah;
+        flashlightPowerMah += other.flashlightPowerMah;
     }
 
     /**
@@ -158,7 +167,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
      * @return the sum of all the power in this BatterySipper.
      */
     public double sumPower() {
-        return totalPowerMah = usagePowerMah + wifiPowerMah + gpsPowerMah + cpuPowerMah + sensorPowerMah
-                + mobileRadioPowerMah + wakeLockPowerMah;
+        return totalPowerMah = usagePowerMah + wifiPowerMah + gpsPowerMah + cpuPowerMah +
+                sensorPowerMah + mobileRadioPowerMah + wakeLockPowerMah + cameraPowerMah +
+                flashlightPowerMah;
     }
 }

@@ -122,6 +122,8 @@ public final class BatteryStatsHelper {
     PowerCalculator mWifiPowerCalculator;
     PowerCalculator mBluetoothPowerCalculator;
     PowerCalculator mSensorPowerCalculator;
+    PowerCalculator mCameraPowerCalculator;
+    PowerCalculator mFlashlightPowerCalculator;
 
     public static boolean checkWifiOnly(Context context) {
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
@@ -365,6 +367,16 @@ public final class BatteryStatsHelper {
         }
         mSensorPowerCalculator.reset();
 
+        if (mCameraPowerCalculator == null) {
+            mCameraPowerCalculator = new CameraPowerCalculator(mPowerProfile);
+        }
+        mCameraPowerCalculator.reset();
+
+        if (mFlashlightPowerCalculator == null) {
+            mFlashlightPowerCalculator = new FlashlightPowerCalculator(mPowerProfile);
+        }
+        mFlashlightPowerCalculator.reset();
+
         mStatsType = statsType;
         mRawUptime = rawUptimeUs;
         mRawRealtime = rawRealtimeUs;
@@ -480,6 +492,8 @@ public final class BatteryStatsHelper {
             mWifiPowerCalculator.calculateApp(app, u, mRawRealtime, mRawUptime, mStatsType);
             mBluetoothPowerCalculator.calculateApp(app, u, mRawRealtime, mRawUptime, mStatsType);
             mSensorPowerCalculator.calculateApp(app, u, mRawRealtime, mRawUptime, mStatsType);
+            mCameraPowerCalculator.calculateApp(app, u, mRawRealtime, mRawUptime, mStatsType);
+            mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtime, mRawUptime, mStatsType);
 
             final double totalPower = app.sumPower();
             if (DEBUG && totalPower != 0) {
@@ -619,15 +633,6 @@ public final class BatteryStatsHelper {
         }
     }
 
-    private void addFlashlightUsage() {
-        long flashlightOnTimeMs = mStats.getFlashlightOnTime(mRawRealtime, mStatsType) / 1000;
-        double flashlightPower = flashlightOnTimeMs
-                * mPowerProfile.getAveragePower(PowerProfile.POWER_FLASHLIGHT) / (60*60*1000);
-        if (flashlightPower != 0) {
-            addEntry(BatterySipper.DrainType.FLASHLIGHT, flashlightOnTimeMs, flashlightPower);
-        }
-    }
-
     private void addUserUsage() {
         for (int i = 0; i < mUserSippers.size(); i++) {
             final int userId = mUserSippers.keyAt(i);
@@ -643,7 +648,6 @@ public final class BatteryStatsHelper {
         addUserUsage();
         addPhoneUsage();
         addScreenUsage();
-        addFlashlightUsage();
         addWiFiUsage();
         addBluetoothUsage();
         addIdleUsage(); // Not including cellular idle power

@@ -4337,12 +4337,19 @@ public final class BatteryStatsImpl extends BatteryStats {
         return 0;
     }
 
-    @Override public long getFlashlightOnTime(long elapsedRealtimeUs, int which) {
+    @Override
+    public long getFlashlightOnTime(long elapsedRealtimeUs, int which) {
         return mFlashlightOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
-    @Override public long getFlashlightOnCount(int which) {
+    @Override
+    public long getFlashlightOnCount(int which) {
         return mFlashlightOnTimer.getCountLocked(which);
+    }
+
+    @Override
+    public long getCameraOnTime(long elapsedRealtimeUs, int which) {
+        return mCameraOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override
