@@ -622,8 +622,7 @@ public class TextUtils {
      * Flatten a CharSequence and whatever styles can be copied across processes
      * into the parcel.
      */
-    public static void writeToParcel(CharSequence cs, Parcel p,
-            int parcelableFlags) {
+    public static void writeToParcel(CharSequence cs, Parcel p, int parcelableFlags) {
         if (cs instanceof Spanned) {
             p.writeInt(0);
             p.writeString(cs.toString());
@@ -645,15 +644,15 @@ public class TextUtils {
                 }
 
                 if (prop instanceof ParcelableSpan) {
-                    ParcelableSpan ps = (ParcelableSpan)prop;
-                    int spanTypeId = ps.getSpanTypeId();
+                    final ParcelableSpan ps = (ParcelableSpan) prop;
+                    final int spanTypeId = ps.getSpanTypeIdInternal();
                     if (spanTypeId < FIRST_SPAN || spanTypeId > LAST_SPAN) {
-                        Log.e(TAG, "external class \"" + ps.getClass().getSimpleName()
+                        Log.e(TAG, "External class \"" + ps.getClass().getSimpleName()
                                 + "\" is attempting to use the frameworks-only ParcelableSpan"
                                 + " interface");
                     } else {
                         p.writeInt(spanTypeId);
-                        ps.writeToParcel(p, parcelableFlags);
+                        ps.writeToParcelInternal(p, parcelableFlags);
                         writeWhere(p, sp, o);
                     }
                 }

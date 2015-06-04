@@ -40,6 +40,11 @@ public class URLSpan extends ClickableSpan implements ParcelableSpan {
     }
     
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.URL_SPAN;
     }
     
@@ -48,6 +53,11 @@ public class URLSpan extends ClickableSpan implements ParcelableSpan {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeString(mURL);
     }
 
