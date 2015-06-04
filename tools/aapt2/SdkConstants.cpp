@@ -14,10 +14,50 @@
  * limitations under the License.
  */
 
+#include "SdkConstants.h"
+
+#include <algorithm>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace aapt {
+
+static const std::vector<std::pair<uint16_t, size_t>> sAttrIdMap = {
+    { 0x021c, 1 },
+    { 0x021d, 2 },
+    { 0x0269, SDK_CUPCAKE },
+    { 0x028d, SDK_DONUT },
+    { 0x02ad, SDK_ECLAIR },
+    { 0x02b3, SDK_ECLAIR_0_1 },
+    { 0x02b5, SDK_ECLAIR_MR1 },
+    { 0x02bd, SDK_FROYO },
+    { 0x02cb, SDK_GINGERBREAD },
+    { 0x0361, SDK_HONEYCOMB },
+    { 0x0366, SDK_HONEYCOMB_MR1 },
+    { 0x03a6, SDK_HONEYCOMB_MR2 },
+    { 0x03ae, SDK_JELLY_BEAN },
+    { 0x03cc, SDK_JELLY_BEAN_MR1 },
+    { 0x03da, SDK_JELLY_BEAN_MR2 },
+    { 0x03f1, SDK_KITKAT },
+    { 0x03f6, SDK_KITKAT_WATCH },
+    { 0x04ce, SDK_LOLLIPOP },
+};
+
+static bool lessEntryId(const std::pair<uint16_t, size_t>& p, uint16_t entryId) {
+    return p.first < entryId;
+}
+
+size_t findAttributeSdkLevel(ResourceId id) {
+    if (id.packageId() != 0x01 && id.typeId() != 0x01) {
+        return 0;
+    }
+    auto iter = std::lower_bound(sAttrIdMap.begin(), sAttrIdMap.end(), id.entryId(), lessEntryId);
+    if (iter == sAttrIdMap.end()) {
+        return SDK_LOLLIPOP_MR1;
+    }
+    return iter->second;
+}
 
 static const std::unordered_map<std::u16string, size_t> sAttrMap = {
     { u"marqueeRepeatLimit", 2 },
@@ -682,12 +722,16 @@ static const std::unordered_map<std::u16string, size_t> sAttrMap = {
     { u"colorEdgeEffect", 21 }
 };
 
-size_t findAttributeSdkLevel(const std::u16string& name) {
-    auto iter = sAttrMap.find(name);
+size_t findAttributeSdkLevel(const ResourceName& name) {
+    if (name.package != u"android" && name.type != ResourceType::kAttr) {
+        return 0;
+    }
+
+    auto iter = sAttrMap.find(name.entry);
     if (iter != sAttrMap.end()) {
         return iter->second;
     }
-    return 0;
+    return SDK_LOLLIPOP_MR1;
 }
 
 } // namespace aapt
