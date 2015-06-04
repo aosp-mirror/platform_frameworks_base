@@ -1193,6 +1193,21 @@ public interface IMountService extends IInterface {
                     _data.recycle();
                 }
             }
+
+            @Override
+            public void deleteUserKey(int userHandle) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userHandle);
+                    mRemote.transact(Stub.TRANSACTION_deleteUserKey, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -1309,6 +1324,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_setDebugFlags = IBinder.FIRST_CALL_TRANSACTION + 60;
 
         static final int TRANSACTION_createNewUserDir = IBinder.FIRST_CALL_TRANSACTION + 61;
+
+        static final int TRANSACTION_deleteUserKey = IBinder.FIRST_CALL_TRANSACTION + 62;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1871,6 +1888,13 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_deleteUserKey: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userHandle = data.readInt();
+                    deleteUserKey(userHandle);
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -2187,5 +2211,12 @@ public interface IMountService extends IInterface {
      * @param path Path at which to create the directory.
      */
     public void createNewUserDir(int userHandle, String path)
+        throws RemoteException;
+
+    /**
+     * Securely delete the user's encryption key
+     * @param userHandle Handle of the user whose key we are deleting
+     */
+    public void deleteUserKey(int userHandle)
         throws RemoteException;
 }

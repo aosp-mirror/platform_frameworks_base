@@ -2336,6 +2336,35 @@ class MountService extends IMountService.Stub
         }
     }
 
+    // ext4enc:TODO duplication between this and createNewUserDir is nasty
+    @Override
+    public void deleteUserKey(int userHandle) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only SYSTEM_UID can delete user keys");
+        }
+
+        waitForReady();
+
+        if (DEBUG_EVENTS) {
+            Slog.i(TAG, "Deleting user key");
+        }
+
+        try {
+            NativeDaemonEvent event = mConnector.execute(
+                "cryptfs", "deleteuserkey", userHandle);
+            if (!"0".equals(event.getMessage())) {
+                String error = "deleteuserkey sent unexpected message: "
+                    + event.getMessage();
+                Slog.e(TAG,  error);
+                // ext4enc:TODO is this the right exception?
+                throw new RuntimeException(error);
+            }
+        } catch (NativeDaemonConnectorException e) {
+            Slog.e(TAG, "deleteuserkey threw exception", e);
+            throw new RuntimeException("deleteuserkey threw exception", e);
+        }
+    }
+
     @Override
     public int mkdirs(String callingPkg, String appPath) {
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
