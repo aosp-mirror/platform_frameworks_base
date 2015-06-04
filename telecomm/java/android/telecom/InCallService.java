@@ -413,6 +413,8 @@ public abstract class InCallService extends Service {
 
         /**
          * Clears the video call callback set via {@link #registerCallback}.
+         *
+         * @param callback The video call callback to clear.
          */
         public abstract void unregisterCallback(VideoCall.Callback callback);
 
@@ -524,7 +526,8 @@ public abstract class InCallService extends Service {
 
         /**
          * The {@link InCallService} extends this class to provide a means of receiving callbacks
-         * from the {@link Connection.VideoProvider}.<p>
+         * from the {@link Connection.VideoProvider}.
+         * <p>
          * When the {@link InCallService} receives the
          * {@link Call.Callback#onVideoCallChanged(Call, VideoCall)} callback, it should create an
          * instance its {@link VideoCall.Callback} implementation and set it on the
@@ -533,7 +536,7 @@ public abstract class InCallService extends Service {
         public static abstract class Callback {
             /**
              * Called when the {@link Connection.VideoProvider} receives a session modification
-             * request is received from the peer device.
+             * request from the peer device.
              * <p>
              * The {@link InCallService} may potentially prompt the user to confirm whether they
              * wish to accept the request, or decide to automatically accept the request.  In either
