@@ -781,13 +781,7 @@ public final class SystemServer {
                 }
             }
 
-            try {
-                Slog.i(TAG, "DropBox Service");
-                ServiceManager.addService(Context.DROPBOX_SERVICE,
-                        new DropBoxManagerService(context, new File("/data/system/dropbox")));
-            } catch (Throwable e) {
-                reportWtf("starting DropBoxManagerService", e);
-            }
+            mSystemServiceManager.startService(DropBoxManagerService.class);
 
             if (!disableNonCoreServices && context.getResources().getBoolean(
                         R.bool.config_enableWallpaperService)) {
