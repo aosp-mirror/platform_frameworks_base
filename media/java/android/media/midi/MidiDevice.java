@@ -16,8 +16,6 @@
 
 package android.media.midi;
 
-import android.content.Context;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -40,9 +38,9 @@ public final class MidiDevice implements Closeable {
 
     private final MidiDeviceInfo mDeviceInfo;
     private final IMidiDeviceServer mDeviceServer;
-    private Context mContext;
-    private ServiceConnection mServiceConnection;
-
+    private final IMidiManager mMidiManager;
+    private final IBinder mClientToken;
+    private final IBinder mDeviceToken;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -71,16 +69,13 @@ public final class MidiDevice implements Closeable {
         }
     }
 
-    /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
-        this(deviceInfo, server, null, null);
-    }
-
     /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server,
-            Context context, ServiceConnection serviceConnection) {
+            IMidiManager midiManager, IBinder clientToken, IBinder deviceToken) {
         mDeviceInfo = deviceInfo;
         mDeviceServer = server;
-        mContext = context;
-        mServiceConnection = serviceConnection;
+        mMidiManager = midiManager;
+        mClientToken = clientToken;
+        mDeviceToken = deviceToken;
         mGuard.open("close");
     }
 
@@ -170,10 +165,10 @@ public final class MidiDevice implements Closeable {
     public void close() throws IOException {
         synchronized (mGuard) {
             mGuard.close();
-            if (mContext != null && mServiceConnection != null) {
-                mContext.unbindService(mServiceConnection);
-                mContext = null;
-                mServiceConnection = null;
+            try {
+                mMidiManager.closeDevice(mClientToken, mDeviceToken);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in closeDevice");
             }
         }
     }

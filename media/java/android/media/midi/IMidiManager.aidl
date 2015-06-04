@@ -16,7 +16,10 @@
 
 package android.media.midi;
 
+import android.bluetooth.BluetoothDevice;
 import android.media.midi.IMidiDeviceListener;
+import android.media.midi.IMidiDeviceOpenCallback;
+import android.media.midi.IMidiDeviceServer;
 import android.media.midi.IMidiDeviceServer;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceStatus;
@@ -29,11 +32,13 @@ interface IMidiManager
     MidiDeviceInfo[] getDevices();
 
     // for device creation & removal notifications
-    void registerListener(IBinder token, in IMidiDeviceListener listener);
-    void unregisterListener(IBinder token, in IMidiDeviceListener listener);
+    void registerListener(IBinder clientToken, in IMidiDeviceListener listener);
+    void unregisterListener(IBinder clientToken, in IMidiDeviceListener listener);
 
-    // for opening built-in MIDI devices
-    IMidiDeviceServer openDevice(IBinder token, in MidiDeviceInfo device);
+    void openDevice(IBinder clientToken, in MidiDeviceInfo device, in IMidiDeviceOpenCallback callback);
+    void openBluetoothDevice(IBinder clientToken, in BluetoothDevice bluetoothDevice,
+            in IMidiDeviceOpenCallback callback);
+    void closeDevice(IBinder clientToken, IBinder deviceToken);
 
     // for registering built-in MIDI devices
     MidiDeviceInfo registerDeviceServer(in IMidiDeviceServer server, int numInputPorts,
@@ -52,5 +57,5 @@ interface IMidiManager
 
     // used by MIDI devices to report their status
     // the token is used by MidiService for death notification
-    void setDeviceStatus(IBinder token, in MidiDeviceStatus status);
+    void setDeviceStatus(in IMidiDeviceServer server, in MidiDeviceStatus status);
 }

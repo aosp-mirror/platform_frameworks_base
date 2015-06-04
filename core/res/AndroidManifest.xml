@@ -1828,6 +1828,11 @@
     <permission android:name="android.permission.BIND_INPUT_METHOD"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.media.midi.MidiDeviceService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_MIDI_DEVICE_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by an {@link android.accessibilityservice.AccessibilityService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
