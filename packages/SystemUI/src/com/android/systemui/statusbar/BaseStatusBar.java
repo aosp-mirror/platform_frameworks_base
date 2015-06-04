@@ -1904,7 +1904,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             logUpdate(entry, n);
         }
         boolean applyInPlace = shouldApplyInPlace(entry, n);
-        boolean shouldInterrupt = shouldInterrupt(notification);
+        boolean shouldInterrupt = shouldInterrupt(entry);
         boolean alertAgain = alertAgain(entry, n);
 
         entry.notification = notification;
@@ -2075,7 +2075,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 || (newNotification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0;
     }
 
-    protected boolean shouldInterrupt(StatusBarNotification sbn) {
+    protected boolean shouldInterrupt(Entry entry) {
+        StatusBarNotification sbn = entry.notification;
         if (mNotificationData.shouldFilterOut(sbn)) {
             if (DEBUG) {
                 Log.d(TAG, "Skipping HUN check for " + sbn.getKey() + " since it's filtered out.");
@@ -2100,10 +2101,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Notification.HEADS_UP_ALLOWED) != Notification.HEADS_UP_NEVER;
         boolean accessibilityForcesLaunch = isFullscreen
                 && mAccessibilityManager.isTouchExplorationEnabled();
+        boolean justLaunchedFullScreenIntent = entry.hasJustLaunchedFullScreenIntent();
 
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && !accessibilityForcesLaunch
+                && !justLaunchedFullScreenIntent
                 && mPowerManager.isScreenOn()
                 && (!mStatusBarKeyguardViewManager.isShowing()
                         || mStatusBarKeyguardViewManager.isOccluded())
