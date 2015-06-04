@@ -2614,7 +2614,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    private boolean isBelowLastNotification(float touchX, float touchY) {
+    public boolean isBelowLastNotification(float touchX, float touchY) {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableView child = (ExpandableView) getChildAt(i);
@@ -2640,7 +2640,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
             }
         }
-        return touchY > mIntrinsicPadding;
+        return touchY > mTopPadding + mStackTranslation;
     }
 
     private void updateExpandButtons() {
