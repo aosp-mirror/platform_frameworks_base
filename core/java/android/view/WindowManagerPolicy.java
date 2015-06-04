@@ -1058,6 +1058,13 @@ public interface WindowManagerPolicy {
     public boolean isKeyguardSecure();
 
     /**
+     * Return whether the keyguard is on.
+     *
+     * @return true if in keyguard is on.
+     */
+    public boolean isKeyguardShowingOrOccluded();
+
+    /**
      * inKeyguardRestrictedKeyInputMode
      *
      * if keyguard screen is showing or in restricted key input mode (i.e. in
