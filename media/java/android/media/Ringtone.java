@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -29,6 +30,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Ringtone provides a quick method for playing a ringtone, notification, or
@@ -49,6 +51,9 @@ public class Ringtone {
         MediaStore.Audio.Media.TITLE
     };
 
+    // keep references on active Ringtones until stopped or completion listener called.
+    private static final ArrayList<Ringtone> sActiveRingtones = new ArrayList<Ringtone>();
+
     private final Context mContext;
     private final AudioManager mAudioManager;
 
@@ -62,6 +67,7 @@ public class Ringtone {
     private final Binder mRemoteToken;
 
     private MediaPlayer mLocalPlayer;
+    private final MyOnCompletionListener mCompletionListener = new MyOnCompletionListener();
 
     private Uri mUri;
     private String mTitle;
@@ -247,7 +253,7 @@ public class Ringtone {
             // (typically because ringer mode is silent).
             if (mAudioManager.getStreamVolume(
                     AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
-                mLocalPlayer.start();
+                startLocalPlayer();
             }
         } else if (mAllowRemote && (mRemotePlayer != null)) {
             final Uri canonicalUri = mUri.getCanonicalUri();
@@ -285,7 +291,21 @@ public class Ringtone {
             mLocalPlayer.reset();
             mLocalPlayer.release();
             mLocalPlayer = null;
+            synchronized (sActiveRingtones) {
+                sActiveRingtones.remove(this);
+            }
         }
+    }
+
+    private void startLocalPlayer() {
+        if (mLocalPlayer == null) {
+            return;
+        }
+        synchronized (sActiveRingtones) {
+            sActiveRingtones.add(this);
+        }
+        mLocalPlayer.setOnCompletionListener(mCompletionListener);
+        mLocalPlayer.start();
     }
 
     /**
@@ -330,7 +350,7 @@ public class Ringtone {
                         }
                         mLocalPlayer.setAudioAttributes(mAudioAttributes);
                         mLocalPlayer.prepare();
-                        mLocalPlayer.start();
+                        startLocalPlayer();
                         afd.close();
                         return true;
                     } else {
@@ -351,5 +371,21 @@ public class Ringtone {
 
     void setTitle(String title) {
         mTitle = title;
+    }
+
+    @Override
+    protected void finalize() {
+        if (mLocalPlayer != null) {
+            mLocalPlayer.release();
+        }
+    }
+
+    class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
+        public void onCompletion(MediaPlayer mp)
+        {
+            synchronized (sActiveRingtones) {
+                sActiveRingtones.remove(Ringtone.this);
+            }
+        }
     }
 }
