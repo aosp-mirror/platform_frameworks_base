@@ -4509,7 +4509,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             info.setDetailedState(DetailedState.CONNECTED, null, info.getExtraInfo());
             sendConnectedBroadcast(info);
         } else {
-            info.setDetailedState(DetailedState.DISCONNECTED, null, info.getExtraInfo());
+            info.setDetailedState(DetailedState.DISCONNECTED, info.getReason(), info.getExtraInfo());
             Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
