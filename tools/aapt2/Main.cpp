@@ -17,7 +17,6 @@
 #include "AppInfo.h"
 #include "BigBuffer.h"
 #include "BinaryResourceParser.h"
-#include "BinaryXmlPullParser.h"
 #include "BindingXmlPullParser.h"
 #include "Debug.h"
 #include "Files.h"
@@ -128,7 +127,7 @@ void versionStylesForCompat(const std::shared_ptr<ResourceTable>& table) {
                     auto iter = style.entries.begin();
                     while (iter != style.entries.end()) {
                         if (iter->key.name.package == u"android") {
-                            size_t sdkLevel = findAttributeSdkLevel(iter->key.name.entry);
+                            size_t sdkLevel = findAttributeSdkLevel(iter->key.name);
                             if (sdkLevel > 1 && sdkLevel > configValue.config.sdkVersion) {
                                 // Record that we are about to strip this.
                                 stripped.emplace_back(std::move(*iter));
@@ -300,6 +299,42 @@ struct AaptOptions {
     ResourceName dumpStyleTarget;
 };
 
+struct IdCollector : public xml::Visitor {
+    IdCollector(const Source& source, const std::shared_ptr<ResourceTable>& table) :
+            mSource(source), mTable(table) {
+    }
+
+    virtual void visit(xml::Text* node) override {}
+
+    virtual void visit(xml::Namespace* node) override {
+        for (const auto& child : node->children) {
+            child->accept(this);
+        }
+    }
+
+    virtual void visit(xml::Element* node) override {
+        for (const xml::Attribute& attr : node->attributes) {
+            bool create = false;
+            bool priv = false;
+            ResourceNameRef nameRef;
+            if (ResourceParser::tryParseReference(attr.value, &nameRef, &create, &priv)) {
+                if (create) {
+                    mTable->addResource(nameRef, {}, mSource.line(node->lineNumber),
+                                        util::make_unique<Id>());
+                }
+            }
+        }
+
+        for (const auto& child : node->children) {
+            child->accept(this);
+        }
+    }
+
+private:
+    Source mSource;
+    std::shared_ptr<ResourceTable> mTable;
+};
+
 bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
                 const CompileItem& item, ZipFile* outApk) {
     std::ifstream in(item.source.path, std::ifstream::binary);
@@ -308,20 +343,19 @@ bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>
         return false;
     }
 
+    SourceLogger logger(item.source);
+    std::unique_ptr<xml::Node> root = xml::inflate(&in, &logger);
+    if (!root) {
+        return false;
+    }
+
+    // Collect any resource ID's declared here.
+    IdCollector idCollector(item.source, table);
+    root->accept(&idCollector);
+
     BigBuffer outBuffer(1024);
-
-    // No resolver, since we are not compiling attributes here.
-    XmlFlattener flattener(table, {});
-
-    XmlFlattener::Options xmlOptions;
-    xmlOptions.defaultPackage = table->getPackage();
-    xmlOptions.keepRawValues = true;
-
-    std::shared_ptr<XmlPullParser> parser = std::make_shared<SourceXmlPullParser>(in);
-
-    Maybe<size_t> minStrippedSdk = flattener.flatten(item.source, parser, &outBuffer,
-                                                     xmlOptions);
-    if (!minStrippedSdk) {
+    if (!xml::flatten(root.get(), options.appInfo.package, &outBuffer)) {
+        logger.error() << "failed to encode XML." << std::endl;
         return false;
     }
 
@@ -369,19 +403,13 @@ bool shouldGenerateVersionedResource(const std::shared_ptr<const ResourceTable>&
 bool linkXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
              const std::shared_ptr<IResolver>& resolver, const LinkItem& item,
              const void* data, size_t dataLen, ZipFile* outApk, std::queue<LinkItem>* outQueue) {
-    std::shared_ptr<android::ResXMLTree> tree = std::make_shared<android::ResXMLTree>();
-    if (tree->setTo(data, dataLen, false) != android::NO_ERROR) {
+    SourceLogger logger(item.source);
+    std::unique_ptr<xml::Node> root = xml::inflate(data, dataLen, &logger);
+    if (!root) {
         return false;
     }
 
-    std::shared_ptr<XmlPullParser> parser = std::make_shared<BinaryXmlPullParser>(tree);
-
-    BigBuffer outBuffer(1024);
-    XmlFlattener flattener({}, resolver);
-
-    XmlFlattener::Options xmlOptions;
-    xmlOptions.defaultPackage = item.originalPackage;
-
+    xml::FlattenOptions xmlOptions;
     if (options.packageType == AaptOptions::PackageType::StaticLibrary) {
         xmlOptions.keepRawValues = true;
     }
@@ -392,16 +420,12 @@ bool linkXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& t
         xmlOptions.maxSdkAttribute = item.config.sdkVersion ? item.config.sdkVersion : 1;
     }
 
-    std::shared_ptr<BindingXmlPullParser> binding;
-    if (item.name.type == ResourceType::kLayout) {
-        // Layouts may have defined bindings, so we need to make sure they get processed.
-        binding = std::make_shared<BindingXmlPullParser>(parser);
-        parser = binding;
-    }
-
-    Maybe<size_t> minStrippedSdk = flattener.flatten(item.source, parser, &outBuffer,
-                                                     xmlOptions);
+    BigBuffer outBuffer(1024);
+    Maybe<size_t> minStrippedSdk = xml::flattenAndLink(item.source, root.get(),
+                                                       item.originalPackage, resolver,
+                                                       xmlOptions, &outBuffer);
     if (!minStrippedSdk) {
+        logger.error() << "failed to encode XML." << std::endl;
         return false;
     }
 
@@ -430,30 +454,6 @@ bool linkXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& t
         Logger::error(options.output) << "failed to write linked file '"
                                       << buildFileReference(item) << "' to apk." << std::endl;
         return false;
-    }
-
-    if (binding && !options.bindingOutput.path.empty()) {
-        // We generated a binding xml file, write it out.
-        Source bindingOutput = options.bindingOutput;
-        appendPath(&bindingOutput.path, buildFileReference(item));
-
-        if (!mkdirs(bindingOutput.path)) {
-            Logger::error(bindingOutput) << strerror(errno) << std::endl;
-            return false;
-        }
-
-        appendPath(&bindingOutput.path, "bind.xml");
-
-        std::ofstream bout(bindingOutput.path);
-        if (!bout) {
-            Logger::error(bindingOutput) << strerror(errno) << std::endl;
-            return false;
-        }
-
-        if (!binding->writeToFile(bout)) {
-            Logger::error(bindingOutput) << strerror(errno) << std::endl;
-            return false;
-        }
     }
     return true;
 }
@@ -504,13 +504,15 @@ bool compileManifest(const AaptOptions& options, const std::shared_ptr<IResolver
         return false;
     }
 
-    BigBuffer outBuffer(1024);
-    std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(in);
-    XmlFlattener flattener({}, resolver);
+    SourceLogger logger(options.manifest);
+    std::unique_ptr<xml::Node> root = xml::inflate(&in, &logger);
+    if (!root) {
+        return false;
+    }
 
-    XmlFlattener::Options xmlOptions;
-    xmlOptions.defaultPackage = options.appInfo.package;
-    if (!flattener.flatten(options.manifest, xmlParser, &outBuffer, xmlOptions)) {
+    BigBuffer outBuffer(1024);
+    if (!xml::flattenAndLink(options.manifest, root.get(), options.appInfo.package, resolver, {},
+                &outBuffer)) {
         return false;
     }
 
