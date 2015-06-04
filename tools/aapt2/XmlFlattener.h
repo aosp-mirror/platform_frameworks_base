@@ -21,64 +21,49 @@
 #include "Maybe.h"
 #include "Resolver.h"
 #include "Source.h"
-#include "XmlPullParser.h"
+#include "XmlDom.h"
 
 #include <string>
 
 namespace aapt {
+namespace xml {
 
 /**
  * Flattens an XML file into a binary representation parseable by
- * the Android resource system. References to resources are checked
- * and string values are transformed to typed data where possible.
+ * the Android resource system.
  */
-class XmlFlattener {
-public:
-    struct Options {
-        /**
-         * The package to use when a reference has no package specified
-         * (or a namespace URI equals "http://schemas.android.com/apk/res-auto").
-         */
-        std::u16string defaultPackage;
+bool flatten(Node* root, const std::u16string& defaultPackage, BigBuffer* outBuffer);
 
-        /**
-         * If set, tells the XmlFlattener to strip out
-         * attributes that have been introduced after
-         * max SDK.
-         */
-        Maybe<size_t> maxSdkAttribute;
-
-        /**
-         * Setting this to true will keep the raw string value of
-         * an attribute's value when it has been resolved.
-         */
-        bool keepRawValues = false;
-    };
+/**
+ * Options for flattenAndLink.
+ */
+struct FlattenOptions {
+    /**
+     * Keep attribute raw string values along with typed values.
+     */
+    bool keepRawValues = false;
 
     /**
-     * Creates a flattener with a Resolver to resolve references
-     * and attributes.
+     * If set, any attribute introduced in a later SDK will not be encoded.
      */
-    XmlFlattener(const std::shared_ptr<ResourceTable>& table,
-                 const std::shared_ptr<IResolver>& resolver);
-
-    XmlFlattener(const XmlFlattener&) = delete; // Not copyable.
-
-    /**
-     * Flatten an XML file, reading from the XML parser and writing to the
-     * BigBuffer. The source object is mainly for logging errors. If the
-     * function succeeds, returns the smallest SDK version of an attribute that
-     * was stripped out. If no attributes were stripped out, the return value
-     * is 0.
-     */
-    Maybe<size_t> flatten(const Source& source, const std::shared_ptr<XmlPullParser>& parser,
-                          BigBuffer* outBuffer, Options options);
-
-private:
-    std::shared_ptr<ResourceTable> mTable;
-    std::shared_ptr<IResolver> mResolver;
+    Maybe<size_t> maxSdkAttribute;
 };
 
+/**
+ * Like flatten(Node*,BigBuffer*), but references to resources are checked
+ * and string values are transformed to typed data where possible.
+ *
+ * `defaultPackage` is used when a reference has no package or the namespace URI
+ * "http://schemas.android.com/apk/res-auto" is used.
+ *
+ * `resolver` is used to resolve references to resources.
+ */
+Maybe<size_t> flattenAndLink(const Source& source, Node* root,
+                             const std::u16string& defaultPackage,
+                             const std::shared_ptr<IResolver>& resolver,
+                             const FlattenOptions& options, BigBuffer* outBuffer);
+
+} // namespace xml
 } // namespace aapt
 
 #endif // AAPT_XML_FLATTENER_H

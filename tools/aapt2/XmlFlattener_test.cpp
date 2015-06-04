@@ -17,7 +17,6 @@
 #include "MockResolver.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
-#include "SourceXmlPullParser.h"
 #include "Util.h"
 #include "XmlFlattener.h"
 
@@ -30,13 +29,14 @@
 using namespace android;
 
 namespace aapt {
+namespace xml {
 
 constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
 class XmlFlattenerTest : public ::testing::Test {
 public:
     virtual void SetUp() override {
-        std::shared_ptr<IResolver> resolver = std::make_shared<MockResolver>(
+        mResolver = std::make_shared<MockResolver>(
                 std::make_shared<ResourceTable>(),
                 std::map<ResourceName, ResourceId>({
                         { ResourceName{ u"android", ResourceType::kAttr, u"attr" },
@@ -47,18 +47,21 @@ public:
                           ResourceId{ 0x01010001u } },
                         { ResourceName{ u"com.lib", ResourceType::kId, u"id" },
                           ResourceId{ 0x01020001u } }}));
-
-        mFlattener = std::make_shared<XmlFlattener>(nullptr, resolver);
     }
 
     ::testing::AssertionResult testFlatten(const std::string& in, ResXMLTree* outTree) {
         std::stringstream input(kXmlPreamble);
         input << in << std::endl;
-        std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(input);
+
+        SourceLogger logger(Source{ "test.xml" });
+        std::unique_ptr<Node> root = inflate(&input, &logger);
+        if (!root) {
+            return ::testing::AssertionFailure();
+        }
+
         BigBuffer outBuffer(1024);
-        XmlFlattener::Options xmlOptions;
-        xmlOptions.defaultPackage = u"android";
-        if (!mFlattener->flatten(Source{ "test" }, xmlParser, &outBuffer, xmlOptions)) {
+        if (!flattenAndLink(Source{ "test.xml" }, root.get(), std::u16string(u"android"),
+                    mResolver, {}, &outBuffer)) {
             return ::testing::AssertionFailure();
         }
 
@@ -69,15 +72,47 @@ public:
         return ::testing::AssertionSuccess();
     }
 
-    std::shared_ptr<XmlFlattener> mFlattener;
+    std::shared_ptr<IResolver> mResolver;
 };
 
 TEST_F(XmlFlattenerTest, ParseSimpleView) {
-    std::string input = "<View xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
-                        "      android:attr=\"@id/id\">\n"
-                        "</View>";
+    std::string input = R"EOF(
+        <View xmlns:android="http://schemas.android.com/apk/res/android"
+              android:attr="@id/id"
+              class="str"
+              style="@id/id">
+        </View>
+    )EOF";
     ResXMLTree tree;
     ASSERT_TRUE(testFlatten(input, &tree));
+
+    while (tree.next() != ResXMLTree::START_TAG) {
+        ASSERT_NE(tree.getEventType(), ResXMLTree::END_DOCUMENT);
+        ASSERT_NE(tree.getEventType(), ResXMLTree::BAD_DOCUMENT);
+    }
+
+    const StringPiece16 androidNs = u"http://schemas.android.com/apk/res/android";
+    const StringPiece16 attrName = u"attr";
+    ssize_t idx = tree.indexOfAttribute(androidNs.data(), androidNs.size(), attrName.data(),
+                                        attrName.size());
+    ASSERT_GE(idx, 0);
+    EXPECT_EQ(tree.getAttributeNameResID(idx), 0x01010000u);
+    EXPECT_EQ(tree.getAttributeDataType(idx), android::Res_value::TYPE_REFERENCE);
+
+    const StringPiece16 class16 = u"class";
+    idx = tree.indexOfAttribute(nullptr, 0, class16.data(), class16.size());
+    ASSERT_GE(idx, 0);
+    EXPECT_EQ(tree.getAttributeNameResID(idx), 0u);
+    EXPECT_EQ(tree.getAttributeDataType(idx), android::Res_value::TYPE_STRING);
+    EXPECT_EQ(tree.getAttributeData(idx), tree.getAttributeValueStringID(idx));
+
+    const StringPiece16 style16 = u"style";
+    idx = tree.indexOfAttribute(nullptr, 0, style16.data(), style16.size());
+    ASSERT_GE(idx, 0);
+    EXPECT_EQ(tree.getAttributeNameResID(idx), 0u);
+    EXPECT_EQ(tree.getAttributeDataType(idx), android::Res_value::TYPE_REFERENCE);
+    EXPECT_EQ((uint32_t) tree.getAttributeData(idx), 0x01020000u);
+    EXPECT_EQ(tree.getAttributeValueStringID(idx), -1);
 
     while (tree.next() != ResXMLTree::END_DOCUMENT) {
         ASSERT_NE(tree.getEventType(), ResXMLTree::BAD_DOCUMENT);
@@ -193,4 +228,5 @@ TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
     EXPECT_GE(tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size()), 0);
 }
 
+} // namespace xml
 } // namespace aapt
