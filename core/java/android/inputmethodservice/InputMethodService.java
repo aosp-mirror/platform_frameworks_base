@@ -1565,11 +1565,17 @@ public class InputMethodService extends AbstractInputMethodService {
         if (DEBUG) Log.v(TAG, "clearInsetOfPreviousIme() "
                 + " mShouldClearInsetOfPreviousIme=" + mShouldClearInsetOfPreviousIme);
         if (!mShouldClearInsetOfPreviousIme || mWindow == null) return;
-        // We do not call onWindowShown() and onWindowHidden() so as not to make the IME author
-        // confused.
-        // TODO: Find out a better way which has less side-effect.
-        mWindow.show();
-        mWindow.hide();
+        try {
+            // We do not call onWindowShown() and onWindowHidden() so as not to make the IME author
+            // confused.
+            // TODO: Find out a better way which has less side-effect.
+            mWindow.show();
+            mWindow.hide();
+        } catch (WindowManager.BadTokenException e) {
+            if (DEBUG) Log.v(TAG, "clearInsetOfPreviousIme: BadTokenException: IME is done.");
+            mWindowVisible = false;
+            mWindowAdded = false;
+        }
         mShouldClearInsetOfPreviousIme = false;
     }
 
