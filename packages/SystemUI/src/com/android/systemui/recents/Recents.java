@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -40,6 +41,7 @@ import android.util.Pair;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
@@ -184,11 +186,15 @@ public class Recents extends SystemUI
 
     // Header (for transition)
     TaskViewHeader mHeaderBar;
+    final Object mHeaderBarLock = new Object();
     TaskStackView mDummyStackView;
 
     // Variables to keep track of if we need to start recents after binding
     boolean mTriggeredFromAltTab;
     long mLastToggleTime;
+
+    Bitmap mThumbnailTransitionBitmapCache;
+    Task mThumbnailTransitionBitmapCacheKey;
 
     public Recents() {
     }
@@ -360,13 +366,16 @@ public class Recents extends SystemUI
     void preloadRecentsInternal() {
         // Preload only the raw task list into a new load plan (which will be consumed by the
         // RecentsActivity)
+        ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
+        MutableBoolean topTaskHome = new MutableBoolean(true);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         sInstanceLoadPlan = loader.createLoadPlan(mContext);
-
-        ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
-        MutableBoolean isTopTaskHome = new MutableBoolean(true);
-        if (topTask != null && mSystemServicesProxy.isRecentsTopMost(topTask, isTopTaskHome)) {
-            sInstanceLoadPlan.preloadRawTasks(isTopTaskHome.value);
+        if (topTask != null && !mSystemServicesProxy.isRecentsTopMost(topTask, topTaskHome)) {
+            sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
+            loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
+            TaskStack top = sInstanceLoadPlan.getAllTaskStacks().get(0);
+            preCacheThumbnailTransitionBitmapAsync(topTask, top, mDummyStackView,
+                    topTaskHome.value);
         }
     }
 
@@ -513,12 +522,14 @@ public class Recents extends SystemUI
         algo.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
         Rect taskViewSize = algo.getUntransformedTaskViewSize();
         int taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-        mHeaderBar = (TaskViewHeader) mInflater.inflate(R.layout.recents_task_view_header, null,
-                false);
-        mHeaderBar.measure(
-                View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(taskBarHeight, View.MeasureSpec.EXACTLY));
-        mHeaderBar.layout(0, 0, taskViewSize.width(), taskBarHeight);
+        synchronized (mHeaderBarLock) {
+            mHeaderBar = (TaskViewHeader) mInflater.inflate(R.layout.recents_task_view_header, null,
+                    false);
+            mHeaderBar.measure(
+                    View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(taskBarHeight, View.MeasureSpec.EXACTLY));
+            mHeaderBar.layout(0, 0, taskViewSize.width(), taskBarHeight);
+        }
     }
 
     /** Prepares the search bar app widget */
@@ -607,35 +618,98 @@ public class Recents extends SystemUI
      */
     ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask,
             TaskStack stack, TaskStackView stackView) {
+
         // Update the destination rect
         Task toTask = new Task();
         TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
                 topTask.id, toTask);
-        if (toTransform != null && toTask.key != null) {
-            Rect toTaskRect = toTransform.rect;
-            int toHeaderWidth = (int) (mHeaderBar.getMeasuredWidth() * toTransform.scale);
-            int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
-            Bitmap thumbnail = Bitmap.createBitmap(toHeaderWidth, toHeaderHeight,
-                    Bitmap.Config.ARGB_8888);
-            if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
-                thumbnail.eraseColor(0xFFff0000);
-            } else {
-                Canvas c = new Canvas(thumbnail);
-                c.scale(toTransform.scale, toTransform.scale);
-                mHeaderBar.rebindToTask(toTask);
-                mHeaderBar.draw(c);
-                c.setBitmap(null);
-            }
-            Bitmap thumbnailImmutable = thumbnail.createAshmemBitmap();
-
+        Rect toTaskRect = toTransform.rect;
+        Bitmap thumbnail;
+        if (mThumbnailTransitionBitmapCacheKey != null
+                && mThumbnailTransitionBitmapCacheKey.key != null
+                && mThumbnailTransitionBitmapCacheKey.key.equals(toTask.key)) {
+            thumbnail = mThumbnailTransitionBitmapCache;
+            mThumbnailTransitionBitmapCacheKey = null;
+            mThumbnailTransitionBitmapCache = null;
+        } else {
+            preloadIcon(topTask);
+            thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform);
+        }
+        if (thumbnail != null) {
             mStartAnimationTriggered = false;
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    thumbnailImmutable, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
+                    thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
                     toTaskRect.height(), mHandler, this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
         return getUnknownTransitionActivityOptions();
+    }
+
+    /**
+     * Preloads the icon of a task.
+     */
+    void preloadIcon(ActivityManager.RunningTaskInfo task) {
+
+        // Ensure that we load the running task's icon
+        RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+        launchOpts.runningTaskId = task.id;
+        launchOpts.loadThumbnails = false;
+        launchOpts.onlyLoadForCache = true;
+        RecentsTaskLoader.getInstance().loadTasks(mContext, sInstanceLoadPlan, launchOpts);
+    }
+
+    /**
+     * Caches the header thumbnail used for a window animation asynchronously into
+     * {@link #mThumbnailTransitionBitmapCache}.
+     */
+    void preCacheThumbnailTransitionBitmapAsync(ActivityManager.RunningTaskInfo topTask,
+            TaskStack stack, TaskStackView stackView, boolean isTopTaskHome) {
+        preloadIcon(topTask);
+
+        // Update the destination rect
+        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
+        final Task toTask = new Task();
+        final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
+                topTask.id, toTask);
+        new AsyncTask<Void, Void, Bitmap>() {
+            @Override
+            protected Bitmap doInBackground(Void... params) {
+                return drawThumbnailTransitionBitmap(toTask, toTransform);
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                mThumbnailTransitionBitmapCache = bitmap;
+                mThumbnailTransitionBitmapCacheKey = toTask;
+            }
+        }.execute();
+    }
+
+    /**
+     * Draws the header of a task used for the window animation into a bitmap.
+     */
+    Bitmap drawThumbnailTransitionBitmap(Task toTask, TaskViewTransform toTransform) {
+        if (toTransform != null && toTask.key != null) {
+            Bitmap thumbnail;
+            synchronized (mHeaderBarLock) {
+                int toHeaderWidth = (int) (mHeaderBar.getMeasuredWidth() * toTransform.scale);
+                int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
+                thumbnail = Bitmap.createBitmap(toHeaderWidth, toHeaderHeight,
+                        Bitmap.Config.ARGB_8888);
+                if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
+                    thumbnail.eraseColor(0xFFff0000);
+                } else {
+                    Canvas c = new Canvas(thumbnail);
+                    c.scale(toTransform.scale, toTransform.scale);
+                    mHeaderBar.rebindToTask(toTask);
+                    mHeaderBar.draw(c);
+                    c.setBitmap(null);
+                }
+            }
+            return thumbnail.createAshmemBitmap();
+        }
+        return null;
     }
 
     /** Returns the transition rect for the given task id. */
@@ -694,7 +768,9 @@ public class Recents extends SystemUI
             return;
         }
 
-        loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
+        if (!sInstanceLoadPlan.hasTasks()) {
+            loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
+        }
         ArrayList<TaskStack> stacks = sInstanceLoadPlan.getAllTaskStacks();
         TaskStack stack = stacks.get(0);
 
@@ -706,12 +782,6 @@ public class Recents extends SystemUI
         boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 
         if (useThumbnailTransition) {
-            // Ensure that we load the running task's icon
-            RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-            launchOpts.runningTaskId = topTask.id;
-            launchOpts.loadThumbnails = false;
-            launchOpts.onlyLoadForCache = true;
-            loader.loadTasks(mContext, sInstanceLoadPlan, launchOpts);
 
             // Try starting with a thumbnail transition
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, stack,

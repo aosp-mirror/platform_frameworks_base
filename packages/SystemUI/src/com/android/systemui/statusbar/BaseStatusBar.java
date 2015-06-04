@@ -1030,9 +1030,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     public void toggleRecentApps() {
-        int msg = MSG_TOGGLE_RECENTS_APPS;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
+        toggleRecents();
     }
 
     @Override
