@@ -36270,6 +36270,7 @@ package android.util {
     method public void setTo(android.util.DisplayMetrics);
     method public void setToDefaults();
     field public static final int DENSITY_280 = 280; // 0x118
+    field public static final int DENSITY_360 = 360; // 0x168
     field public static final int DENSITY_400 = 400; // 0x190
     field public static final int DENSITY_560 = 560; // 0x230
     field public static final int DENSITY_DEFAULT = 160; // 0xa0
