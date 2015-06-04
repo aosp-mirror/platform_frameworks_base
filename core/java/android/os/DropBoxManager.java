@@ -225,7 +225,8 @@ public class DropBoxManager {
                 if ((flags & HAS_BYTE_ARRAY) != 0) {
                     return new Entry(tag, millis, in.createByteArray(), flags & ~HAS_BYTE_ARRAY);
                 } else {
-                    return new Entry(tag, millis, in.readFileDescriptor(), flags);
+                    ParcelFileDescriptor pfd = ParcelFileDescriptor.CREATOR.createFromParcel(in);
+                    return new Entry(tag, millis, pfd, flags);
                 }
             }
         };

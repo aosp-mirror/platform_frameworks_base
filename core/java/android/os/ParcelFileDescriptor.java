@@ -915,8 +915,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        // WARNING: This must stay in sync with Parcel::readParcelFileDescriptor()
-        // in frameworks/native/libs/binder/Parcel.cpp
         if (mWrapped != null) {
             try {
                 mWrapped.writeToParcel(out, flags);
@@ -924,12 +922,13 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 releaseResources();
             }
         } else {
-            out.writeFileDescriptor(mFd);
             if (mCommFd != null) {
                 out.writeInt(1);
+                out.writeFileDescriptor(mFd);
                 out.writeFileDescriptor(mCommFd);
             } else {
                 out.writeInt(0);
+                out.writeFileDescriptor(mFd);
             }
             if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0 && !mClosed) {
                 // Not a real close, so emit no status
@@ -942,11 +941,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             = new Parcelable.Creator<ParcelFileDescriptor>() {
         @Override
         public ParcelFileDescriptor createFromParcel(Parcel in) {
-            // WARNING: This must stay in sync with Parcel::writeParcelFileDescriptor()
-            // in frameworks/native/libs/binder/Parcel.cpp
+            int hasCommChannel = in.readInt();
             final FileDescriptor fd = in.readRawFileDescriptor();
             FileDescriptor commChannel = null;
-            if (in.readInt() != 0) {
+            if (hasCommChannel != 0) {
                 commChannel = in.readRawFileDescriptor();
             }
             return new ParcelFileDescriptor(fd, commChannel);
