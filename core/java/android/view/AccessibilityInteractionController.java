@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -158,7 +159,9 @@ final class AccessibilityInteractionController {
             try {
                 mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
                 applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
-                if (spec != null) {
+                // Recycle if called from another process. Specs are cached in the
+                // system process and obtained from a pool when read from parcel.
+                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
                     spec.recycle();
                 }
                 adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
@@ -166,6 +169,12 @@ final class AccessibilityInteractionController {
                 infos.clear();
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
+            }
+
+            // Recycle if called from the same process. Regions are obtained in
+            // the system process and instantiated  when read from parcel.
+            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
+                interactiveRegion.recycle();
             }
         }
     }
@@ -244,13 +253,21 @@ final class AccessibilityInteractionController {
             try {
                 mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
                 applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
-                if (spec != null) {
+                // Recycle if called from another process. Specs are cached in the
+                // system process and obtained from a pool when read from parcel.
+                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
                     spec.recycle();
                 }
                 adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
+            }
+
+            // Recycle if called from the same process. Regions are obtained in
+            // the system process and instantiated  when read from parcel.
+            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
+                interactiveRegion.recycle();
             }
         }
     }
@@ -354,13 +371,21 @@ final class AccessibilityInteractionController {
             try {
                 mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
                 applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
-                if (spec != null) {
+                // Recycle if called from another process. Specs are cached in the
+                // system process and obtained from a pool when read from parcel.
+                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
                     spec.recycle();
                 }
                 adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
+            }
+
+            // Recycle if called from the same process. Regions are obtained in
+            // the system process and instantiated  when read from parcel.
+            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
+                interactiveRegion.recycle();
             }
         }
     }
@@ -468,13 +493,21 @@ final class AccessibilityInteractionController {
             try {
                 mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
                 applyAppScaleAndMagnificationSpecIfNeeded(focused, spec);
-                if (spec != null) {
+                // Recycle if called from another process. Specs are cached in the
+                // system process and obtained from a pool when read from parcel.
+                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
                     spec.recycle();
                 }
                 adjustIsVisibleToUserIfNeeded(focused, interactiveRegion);
                 callback.setFindAccessibilityNodeInfoResult(focused, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
+            }
+
+            // Recycle if called from the same process. Regions are obtained in
+            // the system process and instantiated  when read from parcel.
+            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
+                interactiveRegion.recycle();
             }
         }
     }
@@ -545,13 +578,21 @@ final class AccessibilityInteractionController {
             try {
                 mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
                 applyAppScaleAndMagnificationSpecIfNeeded(next, spec);
-                if (spec != null) {
+                // Recycle if called from another process. Specs are cached in the
+                // system process and obtained from a pool when read from parcel.
+                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
                     spec.recycle();
                 }
                 adjustIsVisibleToUserIfNeeded(next, interactiveRegion);
                 callback.setFindAccessibilityNodeInfoResult(next, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
+            }
+
+            // Recycle if called from the same process. Regions are obtained in
+            // the system process and instantiated  when read from parcel.
+            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
+                interactiveRegion.recycle();
             }
         }
     }
