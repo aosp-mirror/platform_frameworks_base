@@ -180,6 +180,7 @@ class MountService extends IMountService.Stub
     private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
 
     private static final String VOLD_TAG = "VoldConnector";
+    private static final String CRYPTD_TAG = "CryptdConnector";
 
     /** Maximum number of ASEC containers allowed to be mounted. */
     private static final int MAX_CONTAINERS = 250;
@@ -367,6 +368,7 @@ class MountService extends IMountService.Stub
 
     private final Context mContext;
     private final NativeDaemonConnector mConnector;
+    private final NativeDaemonConnector mCryptConnector;
 
     private volatile boolean mSystemReady = false;
     private volatile boolean mDaemonConnected = false;
@@ -375,7 +377,8 @@ class MountService extends IMountService.Stub
 
     private final Callbacks mCallbacks;
 
-    private final CountDownLatch mConnectedSignal = new CountDownLatch(1);
+    // Two connectors - mConnector & mCryptConnector
+    private final CountDownLatch mConnectedSignal = new CountDownLatch(2);
     private final CountDownLatch mAsecsScanned = new CountDownLatch(1);
 
     private final Object mUnmountLock = new Object();
@@ -754,6 +757,10 @@ class MountService extends IMountService.Stub
          * the hounds!
          */
         mConnectedSignal.countDown();
+        if (mConnectedSignal.getCount() != 0) {
+            // More daemons need to connect
+            return;
+        }
 
         // On an encrypted device we can't see system properties yet, so pull
         // the system locale out of the mount service.
@@ -1186,12 +1193,21 @@ class MountService extends IMountService.Stub
          * amount of containers we'd ever expect to have. This keeps an
          * "asec list" from blocking a thread repeatedly.
          */
+
         mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG, 25,
                 null);
         mConnector.setDebug(true);
 
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();
+
+        // Reuse parameters from first connector since they are tested and safe
+        mCryptConnector = new NativeDaemonConnector(this, "cryptd",
+                MAX_CONTAINERS * 2, CRYPTD_TAG, 25, null);
+        mCryptConnector.setDebug(true);
+
+        Thread crypt_thread = new Thread(mCryptConnector, CRYPTD_TAG);
+        crypt_thread.start();
 
         // Add ourself to the Watchdog monitors if enabled.
         if (WATCHDOG_ENABLE) {
@@ -2049,7 +2065,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "cryptocomplete");
+            event = mCryptConnector.execute("cryptfs", "cryptocomplete");
             return Integer.parseInt(event.getMessage());
         } catch (NumberFormatException e) {
             // Bad result - unexpected.
@@ -2096,7 +2112,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "checkpw", new SensitiveArg(toHex(password)));
+            event = mCryptConnector.execute("cryptfs", "checkpw", new SensitiveArg(toHex(password)));
 
             final int code = Integer.parseInt(event.getMessage());
             if (code == 0) {
@@ -2105,7 +2121,7 @@ class MountService extends IMountService.Stub
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
                         try {
-                            mConnector.execute("cryptfs", "restart");
+                            mCryptConnector.execute("cryptfs", "restart");
                         } catch (NativeDaemonConnectorException e) {
                             Slog.e(TAG, "problem executing in background", e);
                         }
@@ -2135,7 +2151,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mConnector.execute("cryptfs", "enablecrypto", "inplace", CRYPTO_TYPES[type],
+            mCryptConnector.execute("cryptfs", "enablecrypto", "inplace", CRYPTO_TYPES[type],
                                new SensitiveArg(toHex(password)));
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
@@ -2160,7 +2176,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            NativeDaemonEvent event = mConnector.execute("cryptfs", "changepw", CRYPTO_TYPES[type],
+            NativeDaemonEvent event = mCryptConnector.execute("cryptfs", "changepw", CRYPTO_TYPES[type],
                         new SensitiveArg(toHex(password)));
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
@@ -2194,7 +2210,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "verifypw", new SensitiveArg(toHex(password)));
+            event = mCryptConnector.execute("cryptfs", "verifypw", new SensitiveArg(toHex(password)));
             Slog.i(TAG, "cryptfs verifypw => " + event.getMessage());
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
@@ -2214,7 +2230,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "getpwtype");
+            event = mCryptConnector.execute("cryptfs", "getpwtype");
             for (int i = 0; i < CRYPTO_TYPES.length; ++i) {
                 if (CRYPTO_TYPES[i].equals(event.getMessage()))
                     return i;
@@ -2238,7 +2254,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "setfield", field, contents);
+            event = mCryptConnector.execute("cryptfs", "setfield", field, contents);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2257,7 +2273,7 @@ class MountService extends IMountService.Stub
         final NativeDaemonEvent event;
         try {
             final String[] contents = NativeDaemonEvent.filterMessageList(
-                    mConnector.executeForList("cryptfs", "getfield", field),
+                    mCryptConnector.executeForList("cryptfs", "getfield", field),
                     VoldResponseCode.CryptfsGetfieldResult);
             String result = new String();
             for (String content : contents) {
@@ -2279,7 +2295,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "getpw");
+            event = mCryptConnector.execute("cryptfs", "getpw");
             if ("-1".equals(event.getMessage())) {
                 // -1 equals no password
                 return null;
@@ -2301,7 +2317,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "clearpw");
+            event = mCryptConnector.execute("cryptfs", "clearpw");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -3113,6 +3129,9 @@ class MountService extends IMountService.Stub
     public void monitor() {
         if (mConnector != null) {
             mConnector.monitor();
+        }
+        if (mCryptConnector != null) {
+            mCryptConnector.monitor();
         }
     }
 }
