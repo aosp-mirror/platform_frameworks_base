@@ -225,6 +225,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private HeadsUpManager mHeadsUpManager;
     private boolean mTrackingHeadsUp;
     private ScrimController mScrimController;
+    private boolean mForceNoOverlappingRendering;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -2730,6 +2731,15 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setScrimController(ScrimController scrimController) {
         mScrimController = scrimController;
+    }
+
+    public void forceNoOverlappingRendering(boolean force) {
+        mForceNoOverlappingRendering = force;
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return !mForceNoOverlappingRendering && super.hasOverlappingRendering();
     }
 
     /**
