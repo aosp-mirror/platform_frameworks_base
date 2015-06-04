@@ -1604,7 +1604,7 @@ public abstract class Connection extends Conferenceable {
      * a request to accept.
      */
     public void onAnswer() {
-        onAnswer(VideoProfile.VideoState.AUDIO_ONLY);
+        onAnswer(VideoProfile.STATE_AUDIO_ONLY);
     }
 
     /**

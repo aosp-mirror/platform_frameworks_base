@@ -341,10 +341,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     /**
      * Sets the video state associated with a call.
      *
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @param callId The unique ID of the call to set the video state for.
      * @param videoState The video state.
