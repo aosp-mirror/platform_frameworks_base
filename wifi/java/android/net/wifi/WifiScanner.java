@@ -1007,7 +1007,7 @@ public class WifiScanner {
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_SINGLE_SCAN_COMPLETED:
-                    Log.d(TAG, "removing listener for single scan");
+                    if (DBG) Log.d(TAG, "removing listener for single scan");
                     removeListener(msg.arg2);
                     break;
                 default:
