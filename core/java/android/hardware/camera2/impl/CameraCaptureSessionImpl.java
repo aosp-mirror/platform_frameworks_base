@@ -721,4 +721,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         }
     }
 
+    @Override
+    public boolean isConstrainedHighSpeed() {
+        // TODO: to be implemented
+        return false;
+    }
+
 }
