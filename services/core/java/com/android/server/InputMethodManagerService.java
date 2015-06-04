@@ -960,26 +960,33 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void switchUserLocked(int newUserId) {
+        if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
+                + " currentUserId=" + mSettings.getCurrentUserId());
+
         mSettings.setCurrentUserId(newUserId);
         updateCurrentProfileIds();
         // InputMethodFileManager should be reset when the user is changed
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
+
+        if (DEBUG) Slog.d(TAG, "Switching user stage 2/3. newUserId=" + newUserId
+                + " defaultImiId=" + defaultImiId);
+
         // For secondary users, the list of enabled IMEs may not have been updated since the
         // callbacks to PackageMonitor are ignored for the secondary user. Here, defaultImiId may
         // not be empty even if the IME has been uninstalled by the primary user.
         // Even in such cases, IMMS works fine because it will find the most applicable
         // IME for that user.
         final boolean initialUserSwitch = TextUtils.isEmpty(defaultImiId);
-        if (DEBUG) {
-            Slog.d(TAG, "Switch user: " + newUserId + " current ime = " + defaultImiId);
-        }
         resetAllInternalStateLocked(false  /* updateOnlyWhenLocaleChanged */,
                 initialUserSwitch /* needsToResetDefaultIme */);
         if (initialUserSwitch) {
             InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mContext.getPackageManager(),
                     mSettings.getEnabledInputMethodListLocked());
         }
+
+        if (DEBUG) Slog.d(TAG, "Switching user stage 3/3. newUserId=" + newUserId
+                + " selectedIme=" + mSettings.getSelectedInputMethod());
     }
 
     void updateCurrentProfileIds() {
