@@ -921,13 +921,19 @@ interface ITelephony {
      * Returns the Status of Wi-Fi Calling
      *@hide
      */
-    boolean isWifiCallingEnabled();
-
-     /**
+    boolean isWifiCallingAvailable();
+    
+    /**
      * Returns the Status of Volte
      *@hide
      */
-    boolean isVolteEnabled();
+    boolean isVolteAvailable();
+
+     /**
+     * Returns the Status of VT (video telephony)
+     *@hide
+     */
+    boolean isVideoTelephonyAvailable();
 
     /**
       * Returns the unique device ID of phone, for example, the IMEI for
