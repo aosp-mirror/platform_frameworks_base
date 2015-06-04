@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Printer;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -314,6 +315,15 @@ public class InputMethodSubtypeSwitchingController {
             }
             return null;
         }
+
+        protected void dump(final Printer pw, final String prefix) {
+            final int N = mImeSubtypeList.size();
+            for (int i = 0; i < N; ++i) {
+                final int rank = i;
+                final ImeSubtypeListItem item = mImeSubtypeList.get(i);
+                pw.println(prefix + "rank=" + rank + " item=" + item);
+            }
+        }
     }
 
     private static class DynamicRotationList {
@@ -387,6 +397,14 @@ public class InputMethodSubtypeSwitchingController {
                 return subtypeListItem;
             }
             return null;
+        }
+
+        protected void dump(final Printer pw, final String prefix) {
+            for (int i = 0; i < mUsageHistoryOfSubtypeListItemIndex.length; ++i) {
+                final int rank = mUsageHistoryOfSubtypeListItemIndex[i];
+                final ImeSubtypeListItem item = mImeSubtypeList.get(i);
+                pw.println(prefix + "rank=" + rank + " item=" + item);
+            }
         }
     }
 
@@ -478,6 +496,13 @@ public class InputMethodSubtypeSwitchingController {
             }
             return result;
         }
+
+        protected void dump(final Printer pw) {
+            pw.println("    mSwitchingAwareRotationList:");
+            mSwitchingAwareRotationList.dump(pw, "      ");
+            pw.println("    mSwitchingUnawareRotationList:");
+            mSwitchingUnawareRotationList.dump(pw, "      ");
+        }
     }
 
     private final InputMethodSettings mSettings;
@@ -525,5 +550,13 @@ public class InputMethodSubtypeSwitchingController {
             boolean includingAuxiliarySubtypes, boolean isScreenLocked) {
         return mSubtypeList.getSortedInputMethodAndSubtypeList(
                 showSubtypes, includingAuxiliarySubtypes, isScreenLocked);
+    }
+
+    public void dump(final Printer pw) {
+        if (mController != null) {
+            mController.dump(pw);
+        } else {
+            pw.println("    mController=null");
+        }
     }
 }
