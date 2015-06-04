@@ -5,28 +5,28 @@ page.image=images/cards/android-studio_2x.png
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=1.2.2.0
+studio.version=1.2.1.1
 
-studio.linux_bundle_download=android-studio-ide-141.1980579-linux.zip
-studio.linux_bundle_bytes=258628239
-studio.linux_bundle_checksum=1fcb226bcf71760296b07dc0db74216563ce83f7
+studio.linux_bundle_download=android-studio-ide-141.1903250-linux.zip
+studio.linux_bundle_bytes=258634089 
+studio.linux_bundle_checksum=61f576a24ac9aa00d498bb62942c028ef4a8905b
 
-studio.mac_bundle_download=android-studio-ide-141.1980579-mac.dmg
-studio.mac_bundle_bytes=260363204
-studio.mac_bundle_checksum=811a868958f8799a1c86a3acfab0fc5dc8de2f41
+studio.mac_bundle_download=android-studio-ide-141.1903250-mac.dmg
+studio.mac_bundle_bytes=260877150
+studio.mac_bundle_checksum=a5a6ba50e3590de0973230a238d17726a1d9395c
 
-studio.win_bundle_download=android-studio-ide-141.1980579-windows.zip
-studio.win_bundle_bytes=261036618
-studio.win_bundle_checksum=e61c9c27a92eff943f6bfdcdec3827199dd0c63d
+studio.win_bundle_download=android-studio-ide-141.1903250-windows.zip
+studio.win_bundle_bytes=261042465
+studio.win_bundle_checksum=ce924e0e4cff4b7f24df3f7ce0c1ce2379347d72
 
 
-studio.win_bundle_exe_download=android-studio-bundle-141.1980579-windows.exe
-studio.win_bundle_exe_bytes=930456592
-studio.win_bundle_exe_checksum=964959e5165e90aaf693e868d5d1c2f7b38e8754
+studio.win_bundle_exe_download=android-studio-bundle-141.1903250-windows.exe
+studio.win_bundle_exe_bytes=930462136
+studio.win_bundle_exe_checksum=680668b6b4a51c519efda814b96c2b61541a50f2
 
-studio.win_notools_exe_download=android-studio-ide-141.1980579-windows.exe
-studio.win_notools_exe_bytes=243741776
-studio.win_notools_exe_checksum=ae09797db2537afb572a00b7eacc292bb66d539e
+studio.win_notools_exe_download=android-studio-ide-141.1903250-windows.exe
+studio.win_notools_exe_bytes=243747312
+studio.win_notools_exe_checksum=d89917dd044e0559c87d6a05d49780ab110269f7
 
 
 
