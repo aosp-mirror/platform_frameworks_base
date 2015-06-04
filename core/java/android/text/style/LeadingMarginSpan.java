@@ -125,6 +125,11 @@ extends ParagraphStyle
         }
         
         public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
             return TextUtils.LEADING_MARGIN_SPAN;
         }
         
@@ -133,6 +138,11 @@ extends ParagraphStyle
         }
 
         public void writeToParcel(Parcel dest, int flags) {
+            writeToParcelInternal(dest, flags);
+        }
+
+        /** @hide */
+        public void writeToParcelInternal(Parcel dest, int flags) {
             dest.writeInt(mFirst);
             dest.writeInt(mRest);
         }

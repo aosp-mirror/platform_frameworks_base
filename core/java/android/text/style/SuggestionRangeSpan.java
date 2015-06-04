@@ -46,11 +46,21 @@ public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpa
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeInt(mBackgroundColor);
     }
 
     @Override
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.SUGGESTION_RANGE_SPAN;
     }
 

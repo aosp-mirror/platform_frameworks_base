@@ -91,12 +91,22 @@ public class EasyEditSpan implements ParcelableSpan {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeParcelable(mPendingIntent, 0);
         dest.writeByte((byte) (mDeleteEnabled ? 1 : 0));
     }
 
     @Override
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.EASY_EDIT_SPAN;
     }
 
