@@ -694,9 +694,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private boolean mForceTranscriptScroll;
 
-    private int mGlowPaddingLeft;
-    private int mGlowPaddingRight;
-
     /**
      * Used for interacting with list items from an accessibility service.
      */
@@ -3489,17 +3486,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     if (!mEdgeGlowBottom.isFinished()) {
                                         mEdgeGlowBottom.onRelease();
                                     }
-                                    invalidate(0, 0, getWidth(),
-                                            mEdgeGlowTop.getMaxHeight() + getPaddingTop());
+                                    invalidateTopGlow();
                                 } else if (incrementalDeltaY < 0) {
                                     mEdgeGlowBottom.onPull((float) overscroll / getHeight(),
                                             1.f - (float) x / getWidth());
                                     if (!mEdgeGlowTop.isFinished()) {
                                         mEdgeGlowTop.onRelease();
                                     }
-                                    invalidate(0, getHeight() - getPaddingBottom() -
-                                            mEdgeGlowBottom.getMaxHeight(), getWidth(),
-                                            getHeight());
+                                    invalidateBottomGlow();
                                 }
                             }
                         }
@@ -3539,17 +3533,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
-                            invalidate(0, 0, getWidth(),
-                                    mEdgeGlowTop.getMaxHeight() + getPaddingTop());
+                            invalidateTopGlow();
                         } else if (rawDeltaY < 0) {
                             mEdgeGlowBottom.onPull((float) overScrollDistance / getHeight(),
                                     1.f - (float) x / getWidth());
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
-                            invalidate(0, getHeight() - getPaddingBottom() -
-                                    mEdgeGlowBottom.getMaxHeight(), getWidth(),
-                                    getHeight());
+                            invalidateBottomGlow();
                         }
                     }
                 }
@@ -3579,6 +3570,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mDirection = newDirection;
             }
         }
+    }
+
+    private void invalidateTopGlow() {
+        if (mEdgeGlowTop == null) {
+            return;
+        }
+        final boolean clipToPadding = getClipToPadding();
+        final int top = clipToPadding ? mPaddingTop : 0;
+        final int left = clipToPadding ? mPaddingLeft : 0;
+        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
+        invalidate(left, top, right, top + mEdgeGlowTop.getMaxHeight());
+    }
+
+    private void invalidateBottomGlow() {
+        if (mEdgeGlowBottom == null) {
+            return;
+        }
+        final boolean clipToPadding = getClipToPadding();
+        final int bottom = clipToPadding ? getHeight() - mPaddingBottom : getHeight();
+        final int left = clipToPadding ? mPaddingLeft : 0;
+        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
+        invalidate(left, bottom - mEdgeGlowBottom.getMaxHeight(), right, bottom);
     }
 
     @Override
@@ -4142,45 +4155,51 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.draw(canvas);
         if (mEdgeGlowTop != null) {
             final int scrollY = mScrollY;
+            final boolean clipToPadding = getClipToPadding();
+            final int width;
+            final int height;
+            final int translateX;
+            final int translateY;
+
+            if (clipToPadding) {
+                width = getWidth() - mPaddingLeft - mPaddingRight;
+                height = getHeight() - mPaddingTop - mPaddingBottom;
+                translateX = mPaddingLeft;
+                translateY = mPaddingTop;
+            } else {
+                width = getWidth();
+                height = getHeight();
+                translateX = 0;
+                translateY = 0;
+            }
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth();
-
-                int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess);
-                canvas.translate(0, edgeY);
-                mEdgeGlowTop.setSize(width, getHeight());
+                canvas.clipRect(translateX, translateY,
+                         translateX + width ,translateY + mEdgeGlowTop.getMaxHeight());
+                final int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess) + translateY;
+                canvas.translate(translateX, edgeY);
+                mEdgeGlowTop.setSize(width, height);
                 if (mEdgeGlowTop.draw(canvas)) {
-                    invalidate(0, 0, getWidth(),
-                            mEdgeGlowTop.getMaxHeight() + getPaddingTop());
+                    invalidateTopGlow();
                 }
                 canvas.restoreToCount(restoreCount);
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth();
-                final int height = getHeight();
-
-                int edgeX = -width;
-                int edgeY = Math.max(height, scrollY + mLastPositionDistanceGuess);
+                canvas.clipRect(translateX, translateY + height - mEdgeGlowBottom.getMaxHeight(),
+                        translateX + width, translateY + height);
+                final int edgeX = -width + translateX;
+                final int edgeY = Math.max(getHeight(), scrollY + mLastPositionDistanceGuess)
+                        - (clipToPadding ? mPaddingBottom : 0);
                 canvas.translate(edgeX, edgeY);
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
-                    invalidate(0, getHeight() - getPaddingBottom() -
-                            mEdgeGlowBottom.getMaxHeight(), getWidth(),
-                            getHeight());
+                    invalidateBottomGlow();
                 }
                 canvas.restoreToCount(restoreCount);
             }
         }
-    }
-
-    /**
-     * @hide
-     */
-    public void setOverScrollEffectPadding(int leftPadding, int rightPadding) {
-        mGlowPaddingLeft = leftPadding;
-        mGlowPaddingRight = rightPadding;
     }
 
     private void initOrResetVelocityTracker() {
