@@ -2291,7 +2291,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the voice mail count. Return 0 if unavailable.
+     * Returns the voice mail count. Return 0 if unavailable, -1 if there are unread voice messages
+     * but the count is unknown,
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
