@@ -29,9 +29,9 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
@@ -443,6 +443,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
                                   final TaskStack stack, final Task task, final boolean lockToTask) {
+
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
             mCb.onTaskViewClicked();
@@ -483,6 +484,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 float scale = tv.getScaleX();
                 int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
                 int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
+
                 b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
                         Bitmap.Config.ARGB_8888);
                 if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
