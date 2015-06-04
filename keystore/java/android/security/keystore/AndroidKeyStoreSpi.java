@@ -674,12 +674,13 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     @Override
     public void engineDeleteEntry(String alias) throws KeyStoreException {
-        if (!isKeyEntry(alias) && !isCertificateEntry(alias)) {
+        if (!engineContainsAlias(alias)) {
             return;
         }
+        // At least one entry corresponding to this alias exists in keystore
 
         if (!Credentials.deleteAllTypesForAlias(mKeyStore, alias)) {
-            throw new KeyStoreException("No such entry " + alias);
+            throw new KeyStoreException("Failed to delete entry: " + alias);
         }
     }
 
@@ -849,9 +850,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new KeyStoreException("entry == null");
         }
 
-        if (engineContainsAlias(alias)) {
-            engineDeleteEntry(alias);
-        }
+        Credentials.deleteAllTypesForAlias(mKeyStore, alias);
 
         if (entry instanceof KeyStore.TrustedCertificateEntry) {
             KeyStore.TrustedCertificateEntry trE = (KeyStore.TrustedCertificateEntry) entry;
