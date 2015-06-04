@@ -471,6 +471,17 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract boolean isReprocessable();
 
     /**
+     * Return if this capture session is constrained high speed session that is created by
+     * {@link CameraDevice#createConstrainedHighSpeedCaptureSession}.
+     *
+     * @return {@code true} if this session is constrained high speed capture session,
+     *         {@code false} otherwise.
+     *
+     * @see CameraDevice#createConstrainedHighSpeedCaptureSession
+     */
+    public abstract boolean isConstrainedHighSpeed();
+
+    /**
      * Get the input Surface associated with a reprocessable capture session.
      *
      * <p>Each reprocessable capture session has an input {@link Surface} where the reprocess

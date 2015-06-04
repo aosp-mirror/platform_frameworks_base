@@ -1906,4 +1906,18 @@ public class CameraDeviceImpl extends CameraDevice {
     private CameraCharacteristics getCharacteristics() {
         return mCharacteristics;
     }
+
+    @Override
+    public void createConstrainedHighSpeedCaptureSession(List<Surface> outputs,
+            android.hardware.camera2.CameraCaptureSession.StateCallback callback, Handler handler)
+            throws CameraAccessException {
+        // TODO: to be implemented
+        throw new UnsupportedOperationException("To be implemented!!!!");
+    }
+
+    @Override
+    public List<CaptureRequest> createConstrainedHighSpeedRequestList(CaptureRequest request)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("To be implemented!!!!");
+    }
 }
