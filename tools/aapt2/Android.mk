@@ -27,7 +27,6 @@ main := Main.cpp
 sources := \
 	BigBuffer.cpp \
 	BinaryResourceParser.cpp \
-	BinaryXmlPullParser.cpp \
 	BindingXmlPullParser.cpp \
 	ConfigDescription.cpp \
 	Debug.cpp \
@@ -53,6 +52,7 @@ sources := \
 	ScopedXmlPullParser.cpp \
 	SourceXmlPullParser.cpp \
 	XliffXmlPullParser.cpp \
+	XmlDom.cpp \
 	XmlFlattener.cpp \
 	ZipEntry.cpp \
 	ZipFile.cpp
@@ -76,6 +76,7 @@ testSources := \
 	StringPool_test.cpp \
 	Util_test.cpp \
 	XliffXmlPullParser_test.cpp \
+	XmlDom_test.cpp \
 	XmlFlattener_test.cpp
 
 cIncludes := \
