@@ -58,7 +58,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
-import libcore.io.IoUtils;
+import libcore.io.IoBridge;
 
 import static android.system.OsConstants.*;
 import static android.net.dhcp.DhcpPacket.*;
@@ -297,9 +297,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
         return true;
     }
 
+    private static void closeQuietly(FileDescriptor fd) {
+        try {
+            IoBridge.closeAndSignalBlockedThreads(fd);
+        } catch (IOException ignored) {}
+    }
+
     private void closeSockets() {
-        IoUtils.closeQuietly(mUdpSock);
-        IoUtils.closeQuietly(mPacketSock);
+        closeQuietly(mUdpSock);
+        closeQuietly(mPacketSock);
     }
 
     private boolean setIpAddress(LinkAddress address) {
@@ -326,7 +332,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         @Override
         public void run() {
-            maybeLog("Starting receive thread");
+            maybeLog("Receive thread started");
             while (!stopped) {
                 try {
                     int length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
@@ -345,7 +351,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
                     }
                 }
             }
-            maybeLog("Stopping receive thread");
+            maybeLog("Receive thread stopped");
         }
     }
 
@@ -463,6 +469,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
                     return "CMD_KICK";
                 case CMD_RECEIVED_PACKET:
                     return "CMD_RECEIVED_PACKET";
+                case CMD_TIMEOUT:
+                    return "CMD_TIMEOUT";
                 default:
                     return Integer.toString(what);
             }
