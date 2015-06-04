@@ -16,27 +16,29 @@
 
 package android.security.keystore;
 
-import java.math.BigInteger;
-import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
 
 /**
- * {@link RSAPublicKey} backed by Android Keystore.
+ * {@link ECPublicKey} backed by keystore.
  *
  * @hide
  */
-public class AndroidKeyStoreRSAPublicKey extends AndroidKeyStorePublicKey implements RSAPublicKey {
-    private final BigInteger mModulus;
-    private final BigInteger mPublicExponent;
+public class AndroidKeyStoreECPublicKey extends AndroidKeyStorePublicKey implements ECPublicKey {
 
-    public AndroidKeyStoreRSAPublicKey(String alias, byte[] x509EncodedForm, BigInteger modulus,
-            BigInteger publicExponent) {
-        super(alias, KeyProperties.KEY_ALGORITHM_RSA, x509EncodedForm);
-        mModulus = modulus;
-        mPublicExponent = publicExponent;
+    private final ECParameterSpec mParams;
+    private final ECPoint mW;
+
+    public AndroidKeyStoreECPublicKey(String alias, byte[] x509EncodedForm, ECParameterSpec params,
+            ECPoint w) {
+        super(alias, KeyProperties.KEY_ALGORITHM_EC, x509EncodedForm);
+        mParams = params;
+        mW = w;
     }
 
-    public AndroidKeyStoreRSAPublicKey(String alias, RSAPublicKey info) {
-        this(alias, info.getEncoded(), info.getModulus(), info.getPublicExponent());
+    public AndroidKeyStoreECPublicKey(String alias, ECPublicKey info) {
+        this(alias, info.getEncoded(), info.getParams(), info.getW());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());
@@ -44,12 +46,12 @@ public class AndroidKeyStoreRSAPublicKey extends AndroidKeyStorePublicKey implem
     }
 
     @Override
-    public BigInteger getModulus() {
-        return mModulus;
+    public ECParameterSpec getParams() {
+        return mParams;
     }
 
     @Override
-    public BigInteger getPublicExponent() {
-        return mPublicExponent;
+    public ECPoint getW() {
+        return mW;
     }
 }
