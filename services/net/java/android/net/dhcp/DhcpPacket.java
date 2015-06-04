@@ -919,7 +919,7 @@ abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_OFFER:
                 newPacket = new DhcpOfferPacket(
-                    transactionId, secs, broadcast, ipSrc, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_REQUEST:
                 newPacket = new DhcpRequestPacket(
@@ -932,7 +932,7 @@ abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_ACK:
                 newPacket = new DhcpAckPacket(
-                    transactionId, secs, broadcast, ipSrc, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_NAK:
                 newPacket = new DhcpNakPacket(
@@ -982,9 +982,9 @@ abstract class DhcpPacket {
      */
     public DhcpResults toDhcpResults() {
         Inet4Address ipAddress = mYourIp;
-        if (ipAddress == Inet4Address.ANY) {
+        if (ipAddress.equals(Inet4Address.ANY)) {
             ipAddress = mClientIp;
-            if (ipAddress == Inet4Address.ANY) {
+            if (ipAddress.equals(Inet4Address.ANY)) {
                 return null;
             }
         }
@@ -1052,7 +1052,7 @@ abstract class DhcpPacket {
         Inet4Address gateway, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpOfferPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, clientIpAddr, mac);
+            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
         pkt.mGateway = gateway;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1072,7 +1072,7 @@ abstract class DhcpPacket {
         Inet4Address gateway, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpAckPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, clientIpAddr, mac);
+            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
         pkt.mGateway = gateway;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
