@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityManager;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
@@ -672,7 +673,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mThumbnailView.rebindToTask(mTask);
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
-            mHeaderView.mApplicationIcon.setOnClickListener(this);
+            AccessibilityManager am = (AccessibilityManager) getContext().
+                    getSystemService(Context.ACCESSIBILITY_SERVICE);
+            if (Constants.DebugFlags.App.EnableTaskFiltering || (am != null && am.isEnabled())) {
+                mHeaderView.mApplicationIcon.setOnClickListener(this);
+            }
             mHeaderView.mDismissButton.setOnClickListener(this);
             if (mConfig.multiStackEnabled) {
                 mHeaderView.mMoveTaskButton.setOnClickListener(this);
@@ -718,9 +723,19 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (Constants.DebugFlags.App.EnableTaskFiltering && v == mHeaderView.mApplicationIcon) {
-                        if (mCb != null) {
-                            mCb.onTaskViewAppIconClicked(tv);
+                    if (v == mHeaderView.mApplicationIcon) {
+                        if (Constants.DebugFlags.App.EnableTaskFiltering) {
+                            if (mCb != null) {
+                                mCb.onTaskViewAppIconClicked(tv);
+                            }
+                        } else {
+                            AccessibilityManager am = (AccessibilityManager) getContext().
+                                    getSystemService(Context.ACCESSIBILITY_SERVICE);
+                            if (am != null && am.isEnabled()) {
+                                if (mCb != null) {
+                                    mCb.onTaskViewAppInfoClicked(tv);
+                                }
+                            }
                         }
                     } else if (v == mHeaderView.mDismissButton) {
                         dismissTask();
