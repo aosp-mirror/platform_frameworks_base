@@ -626,35 +626,54 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.control.maxRegionsAf", int.class);
 
     /**
-     * <p>List of available high speed video size and fps range configurations
-     * supported by the camera device, in the format of (width, height, fps_min, fps_max).</p>
-     * <p>When HIGH_SPEED_VIDEO is supported in {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}, this metadata
-     * will list the supported high speed video size and fps range configurations. All the sizes
-     * listed in this configuration will be a subset of the sizes reported by {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } for processed
-     * non-stalling formats.</p>
-     * <p>For the high speed video use case, where the application will set
-     * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the application must
+     * <p>List of available high speed video size, fps range and max batch size configurations
+     * supported by the camera device, in the format of (width, height, fps_min, fps_max, batch_size_max).</p>
+     * <p>When CONSTRAINED_HIGH_SPEED_VIDEO is supported in android.control.availableCapabilities,
+     * this metadata will list the supported high speed video size, fps range and max batch size
+     * configurations. All the sizes listed in this configuration will be a subset of the sizes
+     * reported by {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes }
+     * for processed non-stalling formats.</p>
+     * <p>For the high speed video use case, the application must
      * select the video size and fps range from this metadata to configure the recording and
      * preview streams and setup the recording requests. For example, if the application intends
      * to do high speed recording, it can select the maximum size reported by this metadata to
      * configure output streams. Once the size is selected, application can filter this metadata
      * by selected size and get the supported fps ranges, and use these fps ranges to setup the
      * recording requests. Note that for the use case of multiple output streams, application
-     * must select one unique size from this metadata to use. Otherwise a request error might
-     * occur.</p>
-     * <p>For normal video recording use case, where some application will NOT set
-     * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the fps ranges
-     * reported in this metadata must not be used to setup capture requests, or it will cause
-     * request error.</p>
+     * must select one unique size from this metadata to use (e.g., preview and recording streams
+     * must have the same size). Otherwise, the high speed capture session creation will fail.</p>
+     * <p>The min and max fps will be multiple times of 30fps.</p>
+     * <p>High speed video streaming extends significant performance pressue to camera hardware,
+     * to achieve efficient high speed streaming, the camera device may have to aggregate
+     * multiple frames together and send to camera device for processing where the request
+     * controls are same for all the frames in this batch. Max batch size indicates
+     * the max possible number of frames the camera device will group together for this high
+     * speed stream configuration. This max batch size will be used to generate a high speed
+     * recording request list by
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList }.
+     * The max batch size for each configuration will satisfy below conditions:</p>
+     * <ul>
+     * <li>Each max batch size will be a divisor of its corresponding fps_max / 30. For example,
+     * if max_fps is 300, max batch size will only be 1, 2, 5, or 10.</li>
+     * <li>The camera device may choose smaller internal batch size for each configuration, but
+     * the actual batch size will be a divisor of max batch size. For example, if the max batch
+     * size is 8, the actual batch size used by camera device will only be 1, 2, 4, or 8.</li>
+     * <li>The max batch size in each configuration entry must be no larger than 32.</li>
+     * </ul>
+     * <p>The camera device doesn't have to support batch mode to achieve high speed video recording,
+     * in such case, batch_size_max will be reported as 1 in each configuration entry.</p>
+     * <p>This fps ranges in this configuration list can only be used to create requests
+     * that are submitted to a high speed camera capture session created by
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }.
+     * The fps ranges reported in this metadata must not be used to setup capture requests for
+     * normal capture session, or it will cause request error.</p>
      * <p><b>Range of valid values:</b><br></p>
-     * <p>For each configuration, the fps_max &gt;= 60fps.</p>
+     * <p>For each configuration, the fps_max &gt;= 120fps.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
-     * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
-     * @see CaptureRequest#CONTROL_SCENE_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
@@ -1308,7 +1327,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the max pipeline depth.</p>
      * <p>A pipeline depth of X stages is equivalent to a pipeline latency of
      * X frame intervals.</p>
-     * <p>This value will be 8 or less.</p>
+     * <p>This value will normally be 8 or less, however, for high speed capture session,
+     * the max pipeline depth will be up to 8 x size of high speed capture request list.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureResult#REQUEST_PIPELINE_DEPTH
@@ -1371,6 +1391,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING YUV_REPROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO CONSTRAINED_HIGH_SPEED_VIDEO}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1384,6 +1405,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE
      * @see #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =

@@ -13444,7 +13444,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1; // 0x1
     field public static final int CONTROL_SCENE_MODE_FIREWORKS = 12; // 0xc
     field public static final int CONTROL_SCENE_MODE_HDR = 18; // 0x12
-    field public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17; // 0x11
+    field public static final deprecated int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17; // 0x11
     field public static final int CONTROL_SCENE_MODE_LANDSCAPE = 4; // 0x4
     field public static final int CONTROL_SCENE_MODE_NIGHT = 5; // 0x5
     field public static final int CONTROL_SCENE_MODE_NIGHT_PORTRAIT = 6; // 0x6
@@ -13491,6 +13491,7 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6; // 0x6
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9; // 0x9
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8; // 0x8
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 1; // 0x1
