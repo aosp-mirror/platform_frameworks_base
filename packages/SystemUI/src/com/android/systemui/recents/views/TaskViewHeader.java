@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -200,7 +201,8 @@ public class TaskViewHeader extends FrameLayout {
         mActivityDescription.setContentDescription(t.contentDescription);
 
         // Try and apply the system ui tint
-        int existingBgColor = getBackgroundColor();
+        int existingBgColor = (getBackground() instanceof ColorDrawable) ?
+                ((ColorDrawable) getBackground()).getColor() : 0;
         if (existingBgColor != t.colorPrimary) {
             mBackgroundColorDrawable.setColor(t.colorPrimary);
             mBackgroundColor = t.colorPrimary;
