@@ -601,12 +601,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     /**
      * Retransmits packets using jittered exponential backoff with an optional timeout. Packet
-     * transmission is triggered by CMD_KICK, which is sent by an AlarmManager alarm.
+     * transmission is triggered by CMD_KICK, which is sent by an AlarmManager alarm. If a subclass
+     * sets mTimeout to a positive value, then timeout() is called by an AlarmManager alarm mTimeout
+     * milliseconds after entering the state. Kicks and timeouts are cancelled when leaving the
+     * state.
      *
      * Concrete subclasses must implement sendPacket, which is called when the alarm fires and a
      * packet needs to be transmitted, and receivePacket, which is triggered by CMD_RECEIVED_PACKET
-     * sent by the receive thread. They may implement timeout, which is called when the timeout
-     * fires.
+     * sent by the receive thread. They may also set mTimeout and if desired override the default
+     * timeout implementation.
      */
     abstract class PacketRetransmittingState extends LoggingState {
 
@@ -647,7 +650,19 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         abstract protected boolean sendPacket();
         abstract protected void receivePacket(DhcpPacket packet);
-        protected void timeout() {}
+
+        // Default implementation of timeout. This is only invoked if mTimeout > 0, so it will never
+        // be called if the subclass does not set a timeout.
+        protected void timeout() {
+            maybeLog("Timeout in " + getName());
+            notifyFailure();
+            if (this != mDhcpInitState) {
+                // Only transition to INIT if we're not already there. Otherwise, we'll exit the
+                // state and re-enter it, which will reset the packet transmission interval, re-set
+                // the timeout, etc.
+                transitionTo(mDhcpInitState);
+            }
+        }
 
         protected void initTimer() {
             mTimer = FIRST_TIMEOUT_MS;
@@ -696,11 +711,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
             return sendDiscoverPacket();
         }
 
-        protected void timeout() {
-            maybeLog("Timeout");
-            notifyFailure();
-        }
-
         protected void receivePacket(DhcpPacket packet) {
             if (!isValidPacket(packet)) return;
             if (!(packet instanceof DhcpOfferPacket)) return;
@@ -747,11 +757,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 transitionTo(mDhcpInitState);
             }
         }
-
-        protected void timeout() {
-            notifyFailure();
-            transitionTo(mDhcpInitState);
-        }
     }
 
     class DhcpHaveAddressState extends LoggingState {
@@ -760,6 +765,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
             super.enter();
             if (!setIpAddress(mDhcpLease.ipAddress)) {
                 notifyFailure();
+                // There's likely no point in going into DhcpInitState here, we'll probably just
+                // repeat the transaction, get the same IP address as before, and fail.
                 transitionTo(mStoppedState);
             }
         }
@@ -797,7 +804,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
-    // TODO: timeout.
     class DhcpRenewingState extends PacketRetransmittingState {
         public DhcpRenewingState() {
             super();
