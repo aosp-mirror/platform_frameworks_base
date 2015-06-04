@@ -8320,12 +8320,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean superResult = super.onTouchEvent(event);
 
         /*
-         * Don't handle the release after a long press, because it will
-         * move the selection away from whatever the menu action was
-         * trying to affect.
+         * Don't handle the release after a long press, because it will move the selection away from
+         * whatever the menu action was trying to affect. If the long press should have triggered an
+         * insertion action mode, we can now actually show it.
          */
         if (mEditor != null && mEditor.mDiscardNextActionUp && action == MotionEvent.ACTION_UP) {
             mEditor.mDiscardNextActionUp = false;
+
+            if (mEditor.mIsInsertionActionModeStartPending) {
+                mEditor.startInsertionActionMode();
+                mEditor.mIsInsertionActionModeStartPending = false;
+            }
             return superResult;
         }
 
