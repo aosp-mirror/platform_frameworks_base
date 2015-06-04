@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 
@@ -39,8 +40,10 @@ public final class Telecom extends BaseCommand {
       (new Telecom()).run(args);
     }
 
-    private static final String COMMAND_SET_PHONE_ACOUNT_ENABLED = "set-phone-account-enabled";
-    private static final String COMMAND_SET_PHONE_ACOUNT_DISABLED = "set-phone-account-disabled";
+    private static final String COMMAND_SET_PHONE_ACCOUNT_ENABLED = "set-phone-account-enabled";
+    private static final String COMMAND_SET_PHONE_ACCOUNT_DISABLED = "set-phone-account-disabled";
+    private static final String COMMAND_REGISTER_PHONE_ACCOUNT = "register-phone-account";
+    private static final String COMMAND_UNREGISTER_PHONE_ACCOUNT = "unregister-phone-account";
     private static final String COMMAND_SET_DEFAULT_DIALER = "set-default-dialer";
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
 
@@ -54,6 +57,8 @@ public final class Telecom extends BaseCommand {
                 "usage: telecom [subcommand] [options]\n" +
                 "usage: telecom set-phone-account-enabled <COMPONENT> <ID>\n" +
                 "usage: telecom set-phone-account-disabled <COMPONENT> <ID>\n" +
+                "usage: telecom register-phone-account <COMPONENT> <ID> <LABEL>\n" +
+                "usage: telecom unregister-phone-account <COMPONENT> <ID>\n" +
                 "usage: telecom set-default-dialer <PACKAGE>\n" +
                 "usage: telecom get-default-dialer <PACKAGE>\n" +
                 "\n" +
@@ -63,9 +68,9 @@ public final class Telecom extends BaseCommand {
                 "telecom set-phone-account-disabled: Disables the given phone account, if it \n" +
                 " has already been registered with telecom.\n" +
                 "\n" +
-                "telecom set-default_dialer: Sets the default dialer to the given component. \n" +
+                "telecom set-default-dialer: Sets the default dialer to the given component. \n" +
                 "\n" +
-                "telecom get-default_dialer: Displays the current default dialer. \n"
+                "telecom get-default-dialer: Displays the current default dialer. \n"
                 );
     }
 
@@ -80,11 +85,17 @@ public final class Telecom extends BaseCommand {
 
         String command = nextArgRequired();
         switch (command) {
-            case COMMAND_SET_PHONE_ACOUNT_ENABLED:
+            case COMMAND_SET_PHONE_ACCOUNT_ENABLED:
                 runSetPhoneAccountEnabled(true);
                 break;
-            case COMMAND_SET_PHONE_ACOUNT_DISABLED:
+            case COMMAND_SET_PHONE_ACCOUNT_DISABLED:
                 runSetPhoneAccountEnabled(false);
+                break;
+            case COMMAND_REGISTER_PHONE_ACCOUNT:
+                runRegisterPhoneAccount();
+                break;
+            case COMMAND_UNREGISTER_PHONE_ACCOUNT:
+                runUnregisterPhoneAccount();
                 break;
             case COMMAND_SET_DEFAULT_DIALER:
                 runSetDefaultDialer();
@@ -98,15 +109,28 @@ public final class Telecom extends BaseCommand {
     }
 
     private void runSetPhoneAccountEnabled(boolean enabled) throws RemoteException {
-        final ComponentName component = parseComponentName(nextArgRequired());
-        final String accountId = nextArgRequired();
-        final PhoneAccountHandle handle = new PhoneAccountHandle(component, accountId);
+        final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
         final boolean success =  mTelecomService.enablePhoneAccount(handle, enabled);
         if (success) {
             System.out.println("Success - " + handle + (enabled ? " enabled." : " disabled."));
         } else {
             System.out.println("Error - is " + handle + " a valid PhoneAccount?");
         }
+    }
+
+    private void runRegisterPhoneAccount() throws RemoteException {
+        final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
+        final String label = nextArgRequired();
+        PhoneAccount account = PhoneAccount.builder(handle, label)
+                .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER).build();
+        mTelecomService.registerPhoneAccount(account);
+        System.out.println("Success - " + handle + " registered.");
+    }
+
+    private void runUnregisterPhoneAccount() throws RemoteException {
+        final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
+        mTelecomService.unregisterPhoneAccount(handle);
+        System.out.println("Success - " + handle + " unregistered.");
     }
 
     private void runSetDefaultDialer() throws RemoteException {
@@ -122,6 +146,12 @@ public final class Telecom extends BaseCommand {
 
     private void runGetDefaultDialer() throws RemoteException {
         System.out.println(mTelecomService.getDefaultDialerPackage());
+    }
+
+    private PhoneAccountHandle getPhoneAccountHandleFromArgs() {
+        final ComponentName component = parseComponentName(nextArgRequired());
+        final String accountId = nextArgRequired();
+        return new PhoneAccountHandle(component, accountId);
     }
 
     private ComponentName parseComponentName(String component) {
