@@ -551,80 +551,41 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     /**
-     * Returns the position of the currently selected item within the adapter's
-     * data set, or {@link #INVALID_POSITION} if there is nothing selected.
-     * <p>
-     * <strong>Note:</strong> Prior to {@link android.os.Build.VERSION_CODES#MNC},
-     * calling this method between an adapter data set change and a subsequent
-     * layout pass could return invalid data.
+     * Return the position of the currently selected item within the adapter's data set
      *
-     * @return the selected item's position (starting at 0), or
-     *         {@link #INVALID_POSITION} if there is nothing selected
+     * @return int Position (starting at 0), or {@link #INVALID_POSITION} if there is nothing selected.
      */
     @ViewDebug.CapturedViewProperty
     public int getSelectedItemPosition() {
-        syncSelectedItem();
         return mNextSelectedPosition;
     }
 
     /**
-     * Returns the row ID corresponding to the currently selected item, or
-     * {@link #INVALID_ROW_ID} if nothing is selected.
-     * <p>
-     * <strong>Note:</strong> Prior to {@link android.os.Build.VERSION_CODES#MNC},
-     * calling this method between an adapter data set change and a subsequent
-     * layout pass could return invalid data.
-     *
-     * @return the selected item's row ID, or {@link #INVALID_ROW_ID} if
-     *         nothing is selected
+     * @return The id corresponding to the currently selected item, or {@link #INVALID_ROW_ID}
+     * if nothing is selected.
      */
     @ViewDebug.CapturedViewProperty
     public long getSelectedItemId() {
-        syncSelectedItem();
         return mNextSelectedRowId;
     }
 
     /**
-     * Returns the view corresponding to the currently selected item, or
-     * {@code null} if nothing is selected.
-     * <p>
-     * <strong>Note:</strong> Prior to {@link android.os.Build.VERSION_CODES#MNC},
-     * calling this method between an adapter data set change and a subsequent
-     * layout pass could return inconsistent data.
-     *
-     * @return the selected item's view, or {@code null} if nothing is selected
+     * @return The view corresponding to the currently selected item, or null
+     * if nothing is selected
      */
-    @Nullable
     public abstract View getSelectedView();
 
     /**
-     * Returns the data corresponding to the currently selected item, or
-     * {@code null} if nothing is selected.
-     * <p>
-     * <strong>Note:</strong> Prior to {@link android.os.Build.VERSION_CODES#MNC},
-     * calling this method between an adapter data set change and a subsequent
-     * layout pass could return inconsistent data.
-     *
-     * @return the data corresponding to the currently selected item, or
-     *         {@code null} if there is nothing selected.
+     * @return The data corresponding to the currently selected item, or
+     * null if there is nothing selected.
      */
-    @Nullable
     public Object getSelectedItem() {
-        final T adapter = getAdapter();
-        final int selection = getSelectedItemPosition();
+        T adapter = getAdapter();
+        int selection = getSelectedItemPosition();
         if (adapter != null && adapter.getCount() > 0 && selection >= 0) {
             return adapter.getItem(selection);
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Synchronizes the selected item's position and ID, if necessary.
-     */
-    void syncSelectedItem() {
-        if (mDataChanged) {
-            onLayout(false, mLeft, mTop, mRight, mBottom);
         }
     }
 
