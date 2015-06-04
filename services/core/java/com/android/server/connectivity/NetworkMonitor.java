@@ -32,6 +32,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -48,6 +49,7 @@ import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -177,8 +179,8 @@ public class NetworkMonitor extends StateMachine {
     private static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = BASE + 11;
 
     private static final String LINGER_DELAY_PROPERTY = "persist.netmon.linger";
-    // Default to 30s linger time-out.
-    private static final int DEFAULT_LINGER_DELAY_MS = 30000;
+    // Default to 30s linger time-out.  Modifyable only for testing.
+    private static int DEFAULT_LINGER_DELAY_MS = 30000;
     private final int mLingerDelayMs;
     private int mLingerToken = 0;
 
@@ -770,5 +772,14 @@ public class NetworkMonitor extends StateMachine {
         }
         mContext.sendBroadcastAsUser(latencyBroadcast, UserHandle.CURRENT,
                 PERMISSION_ACCESS_NETWORK_CONDITIONS);
+    }
+
+    // Allow tests to override linger time.
+    @VisibleForTesting
+    public static void SetDefaultLingerTime(int time_ms) {
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            throw new SecurityException("SetDefaultLingerTime only for internal testing.");
+        }
+        DEFAULT_LINGER_DELAY_MS = time_ms;
     }
 }
