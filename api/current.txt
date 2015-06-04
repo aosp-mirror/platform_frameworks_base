@@ -12,6 +12,7 @@ package android {
     field public static final java.lang.String ACCESS_LOCATION_EXTRA_COMMANDS = "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS";
     field public static final java.lang.String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
     field public static final java.lang.String ACCESS_NETWORK_STATE = "android.permission.ACCESS_NETWORK_STATE";
+    field public static final java.lang.String ACCESS_NOTIFICATION_POLICY = "android.permission.ACCESS_NOTIFICATION_POLICY";
     field public static final java.lang.String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final java.lang.String ACCESS_WIFI_STATE = "android.permission.ACCESS_WIFI_STATE";
     field public static final java.lang.String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
@@ -5122,22 +5123,16 @@ package android.app {
     method public boolean isNotificationPolicyAccessGranted();
     method public void notify(int, android.app.Notification);
     method public void notify(java.lang.String, int, android.app.Notification);
-    method public void requestPolicyAccess(android.app.NotificationManager.NotificationPolicyAccessRequestCallback, android.os.Handler);
     method public final void setInterruptionFilter(int);
     method public void setNotificationPolicy(android.app.NotificationManager.Policy);
     field public static final java.lang.String ACTION_INTERRUPTION_FILTER_CHANGED = "android.app.action.INTERRUPTION_FILTER_CHANGED";
+    field public static final java.lang.String ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED = "android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED";
     field public static final java.lang.String ACTION_NOTIFICATION_POLICY_CHANGED = "android.app.action.NOTIFICATION_POLICY_CHANGED";
     field public static final int INTERRUPTION_FILTER_ALARMS = 4; // 0x4
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_NONE = 3; // 0x3
     field public static final int INTERRUPTION_FILTER_PRIORITY = 2; // 0x2
     field public static final int INTERRUPTION_FILTER_UNKNOWN = 0; // 0x0
-  }
-
-  public static abstract class NotificationManager.NotificationPolicyAccessRequestCallback {
-    ctor public NotificationManager.NotificationPolicyAccessRequestCallback();
-    method public abstract void onAccessDenied();
-    method public abstract void onAccessGranted();
   }
 
   public static class NotificationManager.Policy implements android.os.Parcelable {
@@ -26503,6 +26498,7 @@ package android.provider {
     field public static final java.lang.String ACTION_NFC_PAYMENT_SETTINGS = "android.settings.NFC_PAYMENT_SETTINGS";
     field public static final java.lang.String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
     field public static final java.lang.String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+    field public static final java.lang.String ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS";
     field public static final java.lang.String ACTION_PRINT_SETTINGS = "android.settings.ACTION_PRINT_SETTINGS";
     field public static final java.lang.String ACTION_PRIVACY_SETTINGS = "android.settings.PRIVACY_SETTINGS";
     field public static final java.lang.String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
@@ -26521,7 +26517,6 @@ package android.provider {
     field public static final java.lang.String ACTION_WIFI_IP_SETTINGS = "android.settings.WIFI_IP_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_SETTINGS = "android.settings.WIFI_SETTINGS";
     field public static final java.lang.String ACTION_WIRELESS_SETTINGS = "android.settings.WIRELESS_SETTINGS";
-    field public static final java.lang.String ACTION_ZEN_ACCESS_SETTINGS = "android.settings.ZEN_ACCESS_SETTINGS";
     field public static final java.lang.String AUTHORITY = "settings";
     field public static final java.lang.String EXTRA_ACCOUNT_TYPES = "account_types";
     field public static final java.lang.String EXTRA_AIRPLANE_MODE_ENABLED = "airplane_mode_enabled";

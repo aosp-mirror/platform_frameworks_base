@@ -101,6 +101,16 @@ public class NotificationManager
             = "android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of {@link #isNotificationPolicyAccessGranted()}
+     * changes.
+     *
+     * This broadcast is only sent to registered receivers, and only to the apps that have changed.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED
+            = "android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED";
+
+    /**
      * Intent that is broadcast when the state of getNotificationPolicy() changes.
      * This broadcast is only sent to registered receivers.
      */
@@ -403,55 +413,18 @@ public class NotificationManager
     }
 
     /**
-     * Requests the ability to read/modify notification policy for the calling package.
-     *
-     * @param callback required, used to receive the granted or the denied signal.
-     * @param handler The handler used when receiving the result.
-     *                If null, the current thread is used.
-     */
-    public void requestPolicyAccess(@NonNull final NotificationPolicyAccessRequestCallback callback,
-            @Nullable Handler handler) {
-        checkRequired("callback", callback);
-        final Handler h = handler != null ? handler : new Handler();
-        INotificationManager service = getService();
-        try {
-            service.requestNotificationPolicyAccess(mContext.getOpPackageName(),
-                    new INotificationManagerCallback.Stub() {
-                @Override
-                public void onPolicyRequestResult(final boolean granted) throws RemoteException {
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (granted) {
-                                callback.onAccessGranted();
-                            } else {
-                                callback.onAccessDenied();
-                            }
-                        }
-                    });
-                }
-            });
-        } catch (RemoteException e) {
-        }
-    }
-
-    /** Callback for receiving the result of a policy access request. */
-    public static abstract class NotificationPolicyAccessRequestCallback {
-        /**
-         * Received if the request was granted for this package.
-         */
-        public abstract void onAccessGranted();
-
-        /**
-         * Received if the request was denied for this package.
-         */
-        public abstract void onAccessDenied();
-    }
-
-    /**
      * Checks the ability to read/modify notification policy for the calling package.
      *
+     * <p>
      * Returns true if the calling package can read/modify notification policy.
+     *
+     * <p>
+     * Request policy access by sending the user to the activity that matches the system intent
+     * action {@link android.provider.Settings#ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS}.
+     *
+     * <p>
+     * Use {@link #ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED} to listen for
+     * user grant or denial of this access.
      */
     public boolean isNotificationPolicyAccessGranted() {
         INotificationManager service = getService();
@@ -476,7 +449,8 @@ public class NotificationManager
      * Gets the current notification policy.
      *
      * <p>
-     * Only available if policy access is granted.
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
      */
     public Policy getNotificationPolicy() {
         INotificationManager service = getService();
@@ -491,7 +465,8 @@ public class NotificationManager
      * Sets the current notification policy.
      *
      * <p>
-     * Only available if policy access is granted.
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
      *
      * @param policy The new desired policy.
      */
@@ -716,7 +691,8 @@ public class NotificationManager
      * unavailable.
      *
      * <p>
-     * Only available if policy access is granted.
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
      */
     public final int getCurrentInterruptionFilter() {
         final INotificationManager service = getService();
@@ -738,7 +714,8 @@ public class NotificationManager
      * unavailable.
      *
      * <p>
-     * Only available if policy access is granted.
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
      */
     public final void setInterruptionFilter(int interruptionFilter) {
         final INotificationManager service = getService();

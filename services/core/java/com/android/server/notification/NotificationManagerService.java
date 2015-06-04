@@ -29,7 +29,6 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
-import android.app.INotificationManagerCallback;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -130,6 +129,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
@@ -237,8 +237,7 @@ public class NotificationManagerService extends SystemService {
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
-    private final ArrayMap<String, Boolean> mPolicyAccess = new ArrayMap<>();
-
+    final PolicyAccess mPolicyAccess = new PolicyAccess();
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -787,7 +786,7 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    class SettingsObserver extends ContentObserver {
+    private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
 
@@ -1641,7 +1640,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPackagePolicyAccess(String pkg) {
-            return Boolean.TRUE.equals(mPolicyAccess.get(pkg));
+            return mPolicyAccess.isPackageGranted(pkg);
         }
 
         private boolean checkPolicyAccess(String pkg) {
@@ -1724,31 +1723,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void requestNotificationPolicyAccess(String pkg,
-                INotificationManagerCallback callback) throws RemoteException {
-            if (callback == null) {
-                Slog.w(TAG, "requestNotificationPolicyAccess: no callback specified");
-                return;
-            }
-            if (pkg == null) {
-                Slog.w(TAG, "requestNotificationPolicyAccess denied: no package specified");
-                callback.onPolicyRequestResult(false);
-                return;
-            }
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mNotificationList) {
-                    // immediately grant for now
-                    mPolicyAccess.put(pkg, true);
-                    if (DBG) Slog.w(TAG, "requestNotificationPolicyAccess granted for " + pkg);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-            callback.onPolicyRequestResult(true);
-        }
-
-        @Override
         public boolean isNotificationPolicyAccessGranted(String pkg) {
             return checkPolicyAccess(pkg);
         }
@@ -1765,13 +1739,7 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("request policy access packages");
             final long identity = Binder.clearCallingIdentity();
             try {
-                synchronized (mNotificationList) {
-                    final String[] rt = new String[mPolicyAccess.size()];
-                    for (int i = 0; i < mPolicyAccess.size(); i++) {
-                        rt[i] = mPolicyAccess.keyAt(i);
-                    }
-                    return rt;
-                }
+                return mPolicyAccess.getRequestingPackages();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3516,6 +3484,75 @@ public class NotificationManagerService extends SystemService {
             StatusBarNotification value = mValue;
             mValue = null;
             return value;
+        }
+    }
+
+    private final class PolicyAccess {
+        private static final String SEPARATOR = ":";
+        private final String[] PERM = {
+            android.Manifest.permission.ACCESS_NOTIFICATION_POLICY
+        };
+
+        public boolean isPackageGranted(String pkg) {
+            return pkg != null && getGrantedPackages().contains(pkg);
+        }
+
+        public void put(String pkg, boolean granted) {
+            if (pkg == null) return;
+            final ArraySet<String> pkgs = getGrantedPackages();
+            boolean changed;
+            if (granted) {
+                changed = pkgs.add(pkg);
+            } else {
+                changed = pkgs.remove(pkg);
+            }
+            if (!changed) return;
+            final String setting = TextUtils.join(SEPARATOR, pkgs);
+            final int currentUser = ActivityManager.getCurrentUser();
+            Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                    setting,
+                    currentUser);
+            getContext().sendBroadcastAsUser(new Intent(NotificationManager
+                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                .setPackage(pkg)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), new UserHandle(currentUser), null);
+        }
+
+        public ArraySet<String> getGrantedPackages() {
+            final ArraySet<String> pkgs = new ArraySet<>();
+            final String setting = Settings.Secure.getStringForUser(
+                    getContext().getContentResolver(),
+                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                    ActivityManager.getCurrentUser());
+            if (setting != null) {
+                final String[] tokens = setting.split(SEPARATOR);
+                for (int i = 0; i < tokens.length; i++) {
+                    String token = tokens[i];
+                    if (token != null) {
+                        token.trim();
+                    }
+                    if (TextUtils.isEmpty(token)) {
+                        continue;
+                    }
+                    pkgs.add(token);
+                }
+            }
+            return pkgs;
+        }
+
+        public String[] getRequestingPackages() throws RemoteException {
+            final ParceledListSlice list = AppGlobals.getPackageManager()
+                    .getPackagesHoldingPermissions(PERM, 0 /*flags*/,
+                            ActivityManager.getCurrentUser());
+            final List<PackageInfo> pkgs = list.getList();
+            if (pkgs == null || pkgs.isEmpty()) return new String[0];
+            final int N = pkgs.size();
+            final String[] rt = new String[N];
+            for (int i = 0; i < N; i++) {
+                rt[i] = pkgs.get(i).packageName;
+            }
+            return rt;
         }
     }
 }
