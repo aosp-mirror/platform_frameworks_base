@@ -21,9 +21,8 @@ import android.security.KeyStore;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
 
-import libcore.util.EmptyArray;
-
 import java.security.InvalidKeyException;
+import java.security.ProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ import javax.crypto.SecretKeyFactorySpi;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * {@link SecretKeyFactorySpi} backed by Android KeyStore.
+ * {@link SecretKeyFactorySpi} backed by Android Keystore.
  *
  * @hide
  */
@@ -60,7 +59,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         if (!KeyInfo.class.equals(keySpecClass)) {
             throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
         }
-        String keyAliasInKeystore = ((AndroidKeyStoreSecretKey) key).getAlias();
+        String keyAliasInKeystore = ((AndroidKeyStoreKey) key).getAlias();
         String entryAlias;
         if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
             entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
@@ -68,11 +67,15 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
         }
 
+        return getKeyInfo(mKeyStore, entryAlias, keyAliasInKeystore);
+    }
+
+    static KeyInfo getKeyInfo(KeyStore keyStore, String entryAlias, String keyAliasInKeystore) {
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
         int errorCode =
-                mKeyStore.getKeyCharacteristics(keyAliasInKeystore, null, null, keyCharacteristics);
+                keyStore.getKeyCharacteristics(keyAliasInKeystore, null, null, keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
-            throw new InvalidKeySpecException("Failed to obtain information about key."
+            throw new ProviderException("Failed to obtain information about key."
                     + " Keystore error: " + errorCode);
         }
 
@@ -81,6 +84,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         int keySize;
         @KeyProperties.PurposeEnum int purposes;
         String[] encryptionPaddings;
+        String[] signaturePaddings;
         @KeyProperties.DigestEnum String[] digests;
         @KeyProperties.BlockModeEnum String[] blockModes;
         int keymasterSwEnforcedUserAuthenticators;
@@ -95,29 +99,40 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 origin = KeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else {
-                throw new InvalidKeySpecException("Key origin not available");
+                throw new ProviderException("Key origin not available");
             }
             Integer keySizeInteger = keyCharacteristics.getInteger(KeymasterDefs.KM_TAG_KEY_SIZE);
             if (keySizeInteger == null) {
-                throw new InvalidKeySpecException("Key size not available");
+                throw new ProviderException("Key size not available");
             }
             keySize = keySizeInteger;
             purposes = KeyProperties.Purpose.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PURPOSE));
 
             List<String> encryptionPaddingsList = new ArrayList<String>();
+            List<String> signaturePaddingsList = new ArrayList<String>();
+            // Keymaster stores both types of paddings in the same array -- we split it into two.
             for (int keymasterPadding : keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PADDING)) {
-                @KeyProperties.EncryptionPaddingEnum String jcaPadding;
                 try {
-                    jcaPadding = KeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
+                    @KeyProperties.EncryptionPaddingEnum String jcaPadding =
+                            KeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
+                    encryptionPaddingsList.add(jcaPadding);
                 } catch (IllegalArgumentException e) {
-                    throw new InvalidKeySpecException(
-                            "Unsupported encryption padding: " + keymasterPadding);
+                    try {
+                        @KeyProperties.SignaturePaddingEnum String padding =
+                                KeyProperties.SignaturePadding.fromKeymaster(keymasterPadding);
+                        signaturePaddingsList.add(padding);
+                    } catch (IllegalArgumentException e2) {
+                        throw new ProviderException(
+                                "Unsupported encryption padding: " + keymasterPadding);
+                    }
                 }
-                encryptionPaddingsList.add(jcaPadding);
+
             }
             encryptionPaddings =
                     encryptionPaddingsList.toArray(new String[encryptionPaddingsList.size()]);
+            signaturePaddings =
+                    signaturePaddingsList.toArray(new String[signaturePaddingsList.size()]);
 
             digests = KeyProperties.Digest.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST));
@@ -128,7 +143,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             keymasterHwEnforcedUserAuthenticators =
                     keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
         } catch (IllegalArgumentException e) {
-            throw new InvalidKeySpecException("Unsupported key characteristic", e);
+            throw new ProviderException("Unsupported key characteristic", e);
         }
 
         Date keyValidityStart = keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME);
@@ -164,7 +179,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 keyValidityForConsumptionEnd,
                 purposes,
                 encryptionPaddings,
-                EmptyArray.STRING, // no signature paddings -- this is symmetric crypto
+                signaturePaddings,
                 digests,
                 blockModes,
                 userAuthenticationRequired,
@@ -175,12 +190,14 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
     @Override
     protected SecretKey engineGenerateSecret(KeySpec keySpec) throws InvalidKeySpecException {
         throw new UnsupportedOperationException(
-                "Key import into Android KeyStore is not supported");
+                "To generate secret key in Android KeyStore, use KeyGenerator initialized with "
+                        + KeyGenParameterSpec.class.getName());
     }
 
     @Override
     protected SecretKey engineTranslateKey(SecretKey key) throws InvalidKeyException {
         throw new UnsupportedOperationException(
-                "Key import into Android KeyStore is not supported");
+                "To import a secret key into Android KeyStore, use KeyStore.setEntry with "
+                + KeyProtection.class.getName());
     }
 }
