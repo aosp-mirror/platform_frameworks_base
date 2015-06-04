@@ -802,12 +802,9 @@ public final class CameraManager {
          */
         public ICameraService getCameraService() {
             synchronized(mLock) {
+                connectCameraServiceLocked();
                 if (mCameraService == null) {
-                    Log.i(TAG, "getCameraService: Reconnecting to camera service");
-                    connectCameraServiceLocked();
-                    if (mCameraService == null) {
-                        Log.e(TAG, "Camera service is unavailable");
-                    }
+                    Log.e(TAG, "Camera service is unavailable");
                 }
                 return mCameraService;
             }
@@ -815,11 +812,16 @@ public final class CameraManager {
 
         /**
          * Connect to the camera service if it's available, and set up listeners.
+         * If the service is already connected, do nothing.
          *
          * <p>Sets mCameraService to a valid pointer or null if the connection does not succeed.</p>
          */
         private void connectCameraServiceLocked() {
-            mCameraService = null;
+            // Only reconnect if necessary
+            if (mCameraService != null) return;
+
+            Log.i(TAG, "Connecting to camera service");
+
             IBinder cameraServiceBinder = ServiceManager.getService(CAMERA_SERVICE_BINDER_NAME);
             if (cameraServiceBinder == null) {
                 // Camera service is now down, leave mCameraService as null
@@ -1098,6 +1100,8 @@ public final class CameraManager {
          */
         public void registerAvailabilityCallback(AvailabilityCallback callback, Handler handler) {
             synchronized (mLock) {
+                connectCameraServiceLocked();
+
                 Handler oldHandler = mCallbackMap.put(callback, handler);
                 // For new callbacks, provide initial availability information
                 if (oldHandler == null) {
@@ -1120,6 +1124,8 @@ public final class CameraManager {
 
         public void registerTorchCallback(TorchCallback callback, Handler handler) {
             synchronized(mLock) {
+                connectCameraServiceLocked();
+
                 Handler oldHandler = mTorchCallbackMap.put(callback, handler);
                 // For new callbacks, provide initial torch information
                 if (oldHandler == null) {
