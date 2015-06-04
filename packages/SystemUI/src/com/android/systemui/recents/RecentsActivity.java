@@ -81,6 +81,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
+    // Runnable to be executed after we paused ourselves
+    Runnable mAfterPauseRunnable;
+
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
      * launching Home with some ActivityOptions.  Generally we always launch home when we exit
@@ -448,6 +451,15 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mAfterPauseRunnable != null) {
+            mRecentsView.post(mAfterPauseRunnable);
+            mAfterPauseRunnable = null;
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -626,6 +638,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
         Recents.startScreenPinning(this, ssp);
+    }
+
+    @Override
+    public void runAfterPause(Runnable r) {
+        mAfterPauseRunnable = r;
     }
 
     /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/
