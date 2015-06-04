@@ -32,8 +32,8 @@ class DhcpOfferPacket extends DhcpPacket {
      * Generates a OFFER packet with the specified parameters.
      */
     DhcpOfferPacket(int transId, short secs, boolean broadcast, Inet4Address serverAddress,
-                    Inet4Address clientIp, byte[] clientMac) {
-        super(transId, secs, INADDR_ANY, clientIp, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
+                    Inet4Address clientIp, Inet4Address yourIp, byte[] clientMac) {
+        super(transId, secs, clientIp, yourIp, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
         mSrcIp = serverAddress;
     }
 
