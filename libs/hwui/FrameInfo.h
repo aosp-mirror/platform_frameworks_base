@@ -116,14 +116,26 @@ public:
         set(FrameInfoIndex::Flags) |= static_cast<uint64_t>(frameInfoFlag);
     }
 
-    int64_t operator[](FrameInfoIndex index) const {
+    inline int64_t operator[](FrameInfoIndex index) const {
         if (index == FrameInfoIndex::NumIndexes) return 0;
         return mFrameInfo[static_cast<int>(index)];
     }
 
-    int64_t operator[](int index) const {
+    inline int64_t operator[](int index) const {
         if (index < 0 || index >= static_cast<int>(FrameInfoIndex::NumIndexes)) return 0;
         return mFrameInfo[index];
+    }
+
+    inline int64_t duration(FrameInfoIndex start, FrameInfoIndex end) const {
+        int64_t endtime = mFrameInfo[static_cast<int>(end)];
+        int64_t starttime = mFrameInfo[static_cast<int>(start)];
+        int64_t gap = endtime - starttime;
+        gap = starttime > 0 ? gap : 0;
+        return gap > 0 ? gap : 0;
+    }
+
+    inline int64_t totalDuration() const {
+        return duration(FrameInfoIndex::IntendedVsync, FrameInfoIndex::FrameCompleted);
     }
 
 private:
