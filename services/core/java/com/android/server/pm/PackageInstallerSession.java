@@ -52,6 +52,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -77,6 +78,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -163,6 +165,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final List<File> mResolvedStagedFiles = new ArrayList<>();
     @GuardedBy("mLock")
     private final List<File> mResolvedInheritedFiles = new ArrayList<>();
+    @GuardedBy("mLock")
+    private File mInheritedFilesBase;
 
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
@@ -511,8 +515,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final List<File> fromFiles = mResolvedInheritedFiles;
                 final File toDir = resolveStageDir();
 
+                if (LOGD) Slog.d(TAG, "Inherited files: " + mResolvedInheritedFiles);
+                if (!mResolvedInheritedFiles.isEmpty() && mInheritedFilesBase == null) {
+                    throw new IllegalStateException("mInheritedFilesBase == null");
+                }
+
                 if (isLinkPossible(fromFiles, toDir)) {
-                    linkFiles(fromFiles, toDir);
+                    createDirsAndLinkFiles(fromFiles, toDir, mInheritedFilesBase);
                 } else {
                     // TODO: this should delegate to DCS so the system process
                     // avoids holding open FDs into containers.
@@ -690,6 +699,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     }
                 }
             }
+
+            // Inherit compiled oat directory.
+            final File packageInstallDir = (new File(app.getBaseCodePath())).getParentFile();
+            mInheritedFilesBase = packageInstallDir;
+            final File oatDir = new File(packageInstallDir, "oat");
+            if (oatDir.exists()) {
+                final File[] archSubdirs = oatDir.listFiles();
+                // Only add "oatDir" if it contains arch specific subdirs.
+                if (archSubdirs != null && archSubdirs.length > 0) {
+                    mResolvedInheritedFiles.add(oatDir);
+                }
+                final String[] instructionSets = InstructionSets.getAllDexCodeInstructionSets();
+                for (File archSubDir : archSubdirs) {
+                    // Skip any directory that isn't an ISA subdir.
+                    if (!ArrayUtils.contains(instructionSets, archSubDir.getName())) {
+                        continue;
+                    }
+
+                    List<File> oatFiles = Arrays.asList(archSubDir.listFiles());
+                    if (!oatFiles.isEmpty()) {
+                        mResolvedInheritedFiles.add(archSubDir);
+                        mResolvedInheritedFiles.addAll(oatFiles);
+                    }
+                }
+            }
         }
     }
 
@@ -768,14 +802,69 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return true;
     }
 
-    private static void linkFiles(List<File> fromFiles, File toDir) throws IOException {
+    /**
+     * Reparents the path of {@code file} from {@code oldBase} to {@code newBase}. {@code file}
+     * must necessarily be a subpath of {@code oldBase}. It is an error for {@code file} to have
+     * relative path components such as {@code "."} or {@code ".."}. For example, for we will
+     * reparent {@code /foo/bar/baz} to {@code /foo2/bar/baz} if {@code oldBase} was {@code /foo}
+     * and {@code newBase} was {@code /foo2}.
+     */
+    private static File reparentPath(File file, File oldBase, File newBase) throws IOException {
+        final String oldBaseStr = oldBase.getAbsolutePath();
+        final String pathStr = file.getAbsolutePath();
+
+        // Don't allow relative paths.
+        if (pathStr.contains("/.") ) {
+            throw new IOException("Invalid path (was relative) : " + pathStr);
+        }
+
+        if (pathStr.startsWith(oldBaseStr)) {
+            final String relative = pathStr.substring(oldBaseStr.length());
+            return new File(newBase, relative);
+        }
+
+        throw new IOException("File: " + pathStr + " outside base: " + oldBaseStr);
+    }
+
+    /**
+     * Recreates a directory and file structure, specified by a list of files {@code fromFiles}
+     * which are subpaths of {@code fromDir} to {@code toDir}. Directories are created with the
+     * same permissions, and regular files are linked.
+     *
+     * TODO: Move this function to installd so that the system process doesn't have to
+     * manipulate / relabel directories.
+     */
+    private static void createDirsAndLinkFiles(List<File> fromFiles, File toDir, File fromDir)
+            throws IOException {
         for (File fromFile : fromFiles) {
-            final File toFile = new File(toDir, fromFile.getName());
+            final File toFile = reparentPath(fromFile, fromDir, toDir);
+            final StructStat stat;
             try {
-                if (LOGD) Slog.d(TAG, "Linking " + fromFile + " to " + toFile);
-                Os.link(fromFile.getAbsolutePath(), toFile.getAbsolutePath());
+                stat = Os.stat(fromFile.getAbsolutePath());
             } catch (ErrnoException e) {
-                throw new IOException("Failed to link " + fromFile + " to " + toFile, e);
+                throw new IOException("Failed to stat: " + fromFile.getAbsolutePath(), e);
+            }
+
+            if (OsConstants.S_ISDIR(stat.st_mode)) {
+                if (LOGD) Slog.d(TAG, "Creating directory " + toFile.getAbsolutePath());
+                try {
+                    Os.mkdir(toFile.getAbsolutePath(), stat.st_mode);
+                } catch (ErrnoException e) {
+                    throw new IOException("Failed to create dir: " + toFile.getAbsolutePath(), e);
+                }
+
+                // We do this to ensure that the oat/ directory is created with the right
+                // label (data_dalvikcache_file) instead of apk_tmpfile.
+                if (!SELinux.restorecon(toFile)) {
+                    throw new IOException("Failed to restorecon: " + toFile.getAbsolutePath());
+                }
+            } else {
+                if (LOGD) Slog.d(TAG, "Linking " + fromFile + " to " + toFile);
+                try {
+                    Os.link(fromFile.getAbsolutePath(), toFile.getAbsolutePath());
+                } catch (ErrnoException e) {
+                    throw new IOException("Failed to link " + fromFile + " to " + toFile, e);
+                }
             }
         }
         Slog.d(TAG, "Linked " + fromFiles.size() + " files into " + toDir);
