@@ -110,6 +110,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private static final int CMD_KICK             = BASE + 1;
     private static final int CMD_RECEIVED_PACKET  = BASE + 2;
     private static final int CMD_TIMEOUT          = BASE + 3;
+    private static final int CMD_ONESHOT_TIMEOUT  = BASE + 4;
 
     // DHCP parameters that we request.
     private static final byte[] REQUESTED_PARAMS = new byte[] {
@@ -147,6 +148,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private final PendingIntent mKickIntent;
     private final PendingIntent mTimeoutIntent;
     private final PendingIntent mRenewIntent;
+    private final PendingIntent mOneshotTimeoutIntent;
     private final String mIfaceName;
 
     private boolean mRegisteredForPreDhcpNotification;
@@ -203,9 +205,17 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         mRandom = new Random();
 
+        // Used to schedule packet retransmissions.
         mKickIntent = createStateMachineCommandIntent("KICK", CMD_KICK);
+        // Used to time out PacketRetransmittingStates.
         mTimeoutIntent = createStateMachineCommandIntent("TIMEOUT", CMD_TIMEOUT);
+        // Used to schedule DHCP renews.
         mRenewIntent = createStateMachineCommandIntent("RENEW", DhcpStateMachine.CMD_RENEW_DHCP);
+        // Used to tell the caller when its request (CMD_START_DHCP or CMD_RENEW_DHCP) timed out.
+        // TODO: when the legacy DHCP client is gone, make the client fully asynchronous and
+        // remove this.
+        mOneshotTimeoutIntent = createStateMachineCommandIntent("ONESHOT_TIMEOUT",
+                CMD_ONESHOT_TIMEOUT);
     }
 
     @Override
@@ -471,6 +481,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
                     return "CMD_RECEIVED_PACKET";
                 case CMD_TIMEOUT:
                     return "CMD_TIMEOUT";
+                case CMD_ONESHOT_TIMEOUT:
+                    return "CMD_ONESHOT_TIMEOUT";
                 default:
                     return Integer.toString(what);
             }
@@ -520,12 +532,34 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
+    // The one-shot timeout is used to implement the timeout for CMD_START_DHCP. We can't use a
+    // state timeout to do this because obtaining an IP address involves passing through more than
+    // one state (specifically, it passes at least once through DhcpInitState and once through
+    // DhcpRequestingState). The one-shot timeout is created when CMD_START_DHCP is received, and is
+    // cancelled when exiting DhcpState (either due to a CMD_STOP_DHCP, or because of an error), or
+    // when we get an IP address (when entering DhcpBoundState). If it fires, we send ourselves
+    // CMD_ONESHOT_TIMEOUT and notify the caller that DHCP failed, but we take no other action. For
+    // example, if we're in DhcpInitState and sending DISCOVERs, we continue to do so.
+    //
+    // The one-shot timeout is not used for CMD_RENEW_DHCP because that is implemented using only
+    // one state, so we can just use the state timeout.
+    private void scheduleOneshotTimeout() {
+        final long alarmTime = SystemClock.elapsedRealtime() + DHCP_TIMEOUT_MS;
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime,
+                mOneshotTimeoutIntent);
+    }
+
+    private void cancelOneshotTimeout() {
+        mAlarmManager.cancel(mOneshotTimeoutIntent);
+    }
+
     class StoppedState extends LoggingState {
         @Override
         public boolean processMessage(Message message) {
             super.processMessage(message);
             switch (message.what) {
                 case DhcpStateMachine.CMD_START_DHCP:
+                    scheduleOneshotTimeout();
                     if (mRegisteredForPreDhcpNotification) {
                         transitionTo(mWaitBeforeStartState);
                     } else {
@@ -568,6 +602,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         @Override
         public void exit() {
+            cancelOneshotTimeout();
             mReceiveThread.halt();  // Also closes sockets.
             clearDhcpState();
         }
@@ -578,6 +613,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
             switch (message.what) {
                 case DhcpStateMachine.CMD_STOP_DHCP:
                     transitionTo(mStoppedState);
+                    return HANDLED;
+                case CMD_ONESHOT_TIMEOUT:
+                    maybeLog("Timed out");
+                    notifyFailure();
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
@@ -616,8 +655,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
      *
      * Concrete subclasses must implement sendPacket, which is called when the alarm fires and a
      * packet needs to be transmitted, and receivePacket, which is triggered by CMD_RECEIVED_PACKET
-     * sent by the receive thread. They may also set mTimeout and if desired override the default
-     * timeout implementation.
+     * sent by the receive thread. They may also set mTimeout and implement timeout.
      */
     abstract class PacketRetransmittingState extends LoggingState {
 
@@ -658,19 +696,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         abstract protected boolean sendPacket();
         abstract protected void receivePacket(DhcpPacket packet);
-
-        // Default implementation of timeout. This is only invoked if mTimeout > 0, so it will never
-        // be called if the subclass does not set a timeout.
-        protected void timeout() {
-            maybeLog("Timeout in " + getName());
-            notifyFailure();
-            if (this != mDhcpInitState) {
-                // Only transition to INIT if we're not already there. Otherwise, we'll exit the
-                // state and re-enter it, which will reset the packet transmission interval, re-set
-                // the timeout, etc.
-                transitionTo(mDhcpInitState);
-            }
-        }
+        protected void timeout() {}
 
         protected void initTimer() {
             mTimer = FIRST_TIMEOUT_MS;
@@ -706,7 +732,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
     class DhcpInitState extends PacketRetransmittingState {
         public DhcpInitState() {
             super();
-            mTimeout = DHCP_TIMEOUT_MS;
         }
 
         @Override
@@ -765,13 +790,22 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 transitionTo(mDhcpInitState);
             }
         }
+
+        @Override
+        protected void timeout() {
+            // After sending REQUESTs unsuccessfully for a while, go back to init.
+            transitionTo(mDhcpInitState);
+        }
     }
 
     class DhcpHaveAddressState extends LoggingState {
         @Override
         public void enter() {
             super.enter();
-            if (!setIpAddress(mDhcpLease.ipAddress)) {
+            if (setIpAddress(mDhcpLease.ipAddress)) {
+                maybeLog("Configured IP address " + mDhcpLease.ipAddress);
+            } else {
+                Log.e(TAG, "Failed to configure IP address " + mDhcpLease.ipAddress);
                 notifyFailure();
                 // There's likely no point in going into DhcpInitState here, we'll probably just
                 // repeat the transaction, get the same IP address as before, and fail.
@@ -781,6 +815,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         @Override
         public void exit() {
+            maybeLog("Clearing IP address");
             setIpAddress(new LinkAddress("0.0.0.0/0"));
         }
     }
@@ -789,9 +824,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
+            cancelOneshotTimeout();
             notifySuccess();
             // TODO: DhcpStateMachine only supports renewing at 50% of the lease time, and does not
-            // support rebinding. Fix this.
+            // support rebinding. Once the legacy DHCP client is gone, fix this.
             scheduleRenew();
         }
 
@@ -840,6 +876,12 @@ public class DhcpClient extends BaseDhcpStateMachine {
             } else if (packet instanceof DhcpNakPacket) {
                 transitionTo(mDhcpInitState);
             }
+        }
+
+        @Override
+        protected void timeout() {
+            transitionTo(mDhcpInitState);
+            sendMessage(CMD_ONESHOT_TIMEOUT);
         }
     }
 
