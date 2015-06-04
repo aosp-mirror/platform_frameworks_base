@@ -16,8 +16,8 @@
 
 package android.service.voice;
 
-import android.app.AssistContent;
-import android.app.AssistStructure;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;

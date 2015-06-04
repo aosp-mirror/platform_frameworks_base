@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.app.assist;
 
-parcelable AssistContent;
+parcelable AssistStructure;
