@@ -36,10 +36,11 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     // Keyguard changes its state, it always triggers a layout in window manager. Because
     // IKeyguardStateCallback is synchronous and because these states are declared volatile, it's
     // guaranteed that window manager picks up the new state all the time in the layout caused by
-    // the state change of Keyguard.
-    private volatile boolean mIsShowing;
-    private volatile boolean mSimSecure;
-    private volatile boolean mInputRestricted;
+    // the state change of Keyguard. To be extra safe, assume most restrictive values until Keyguard
+    // tells us the actual value.
+    private volatile boolean mIsShowing = true;
+    private volatile boolean mSimSecure = true;
+    private volatile boolean mInputRestricted = true;
 
     private int mCurrentUserId;
 
