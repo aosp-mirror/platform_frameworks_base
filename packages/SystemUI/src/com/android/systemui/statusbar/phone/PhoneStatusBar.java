@@ -2923,6 +2923,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mZenModeController != null) {
             mZenModeController.setUserId(mCurrentUserId);
         }
+        if (mSecurityController != null) {
+            mSecurityController.onUserSwitched(mCurrentUserId);
+        }
     }
 
     private void resetUserSetupObserver() {
