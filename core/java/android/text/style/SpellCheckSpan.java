@@ -54,11 +54,21 @@ public class SpellCheckSpan implements ParcelableSpan {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeInt(mSpellCheckInProgress ? 1 : 0);
     }
 
     @Override
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.SPELL_CHECK_SPAN;
     }
 }

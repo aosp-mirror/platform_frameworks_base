@@ -29,6 +29,11 @@ public class SubscriptSpan extends MetricAffectingSpan implements ParcelableSpan
     }
     
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.SUBSCRIPT_SPAN;
     }
     
@@ -37,6 +42,11 @@ public class SubscriptSpan extends MetricAffectingSpan implements ParcelableSpan
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
     }
 
     @Override
