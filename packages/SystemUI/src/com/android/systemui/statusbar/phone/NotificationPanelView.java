@@ -1075,8 +1075,12 @@ public class NotificationPanelView extends PanelView implements
     };
 
     private void animateHeaderSlidingIn() {
-        mHeaderAnimating = true;
-        getViewTreeObserver().addOnPreDrawListener(mStartHeaderSlidingIn);
+        // If the QS is already expanded we don't need to slide in the header as it's already
+        // visible.
+        if (!mQsExpanded) {
+            mHeaderAnimating = true;
+            getViewTreeObserver().addOnPreDrawListener(mStartHeaderSlidingIn);
+        }
     }
 
     private void animateHeaderSlidingOut() {
