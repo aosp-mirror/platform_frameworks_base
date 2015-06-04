@@ -73,7 +73,6 @@ public class RecentsConfiguration {
     public int maxNumTasksToLoad;
 
     /** Search bar */
-    int searchBarAppWidgetId = -1;
     public int searchBarSpaceHeightPx;
 
     /** Task stack */
@@ -207,8 +206,6 @@ public class RecentsConfiguration {
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
-        searchBarAppWidgetId = Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID,
-                -1 /* defaultValue */);
 
         // Task stack
         taskStackScrollDuration =
@@ -279,12 +276,6 @@ public class RecentsConfiguration {
         systemInsets.set(insets);
     }
 
-    /** Updates the search bar app widget */
-    public void updateSearchBarAppWidgetId(Context context, int appWidgetId) {
-        searchBarAppWidgetId = appWidgetId;
-        Prefs.putInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, appWidgetId);
-    }
-
     /** Updates the states that need to be re-read whenever we re-initialize. */
     void updateOnReinitialize(Context context, SystemServicesProxy ssp) {
         // Check if the developer options are enabled
@@ -302,11 +293,6 @@ public class RecentsConfiguration {
         launchedReuseTaskStackViews = false;
         // Set this flag to indicate that the configuration has changed since Recents last launched
         launchedHasConfigurationChanged = true;
-    }
-
-    /** Returns whether the search bar app widget exists. */
-    public boolean hasSearchBarAppWidget() {
-        return searchBarAppWidgetId >= 0;
     }
 
     /** Returns whether the status bar scrim should be animated when shown for the first time. */
@@ -335,9 +321,7 @@ public class RecentsConfiguration {
      * the system insets.
      */
     public void getAvailableTaskStackBounds(int windowWidth, int windowHeight, int topInset,
-            int rightInset, Rect taskStackBounds) {
-        Rect searchBarBounds = new Rect();
-        getSearchBarBounds(windowWidth, windowHeight, topInset, searchBarBounds);
+            int rightInset, Rect searchBarBounds, Rect taskStackBounds) {
         if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left, but we overlay it on top
             taskStackBounds.set(0, topInset, windowWidth - rightInset, windowHeight);
@@ -355,10 +339,6 @@ public class RecentsConfiguration {
             Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
         int searchBarSize = searchBarSpaceHeightPx;
-        if (!Constants.DebugFlags.App.EnableSearchLayout || !hasSearchBarAppWidget()) {
-            searchBarSize = 0;
-        }
-
         if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left
             searchBarSpaceBounds.set(0, topInset, searchBarSize, windowHeight);
