@@ -30,6 +30,11 @@ public class StrikethroughSpan extends CharacterStyle
     }
     
     public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    public int getSpanTypeIdInternal() {
         return TextUtils.STRIKETHROUGH_SPAN;
     }
     
@@ -38,6 +43,11 @@ public class StrikethroughSpan extends CharacterStyle
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
+    }
+
+    /** @hide */
+    public void writeToParcelInternal(Parcel dest, int flags) {
     }
 
     @Override
