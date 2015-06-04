@@ -20,6 +20,10 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -30,20 +34,35 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkAgent;
+import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkMisc;
+import android.net.NetworkRequest;
 import android.net.RouteInfo;
+import android.os.ConditionVariable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.INetworkManagementService;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.util.LogPrinter;
+
+import com.android.server.connectivity.NetworkMonitor;
 
 import org.mockito.ArgumentCaptor;
 
@@ -52,8 +71,10 @@ import java.util.concurrent.Future;
 
 /**
  * Tests for {@link ConnectivityService}.
+ *
+ * Build, install and run with:
+ *  runtest frameworks-services -c com.android.server.ConnectivityServiceTest
  */
-@LargeTest
 public class ConnectivityServiceTest extends AndroidTestCase {
     private static final String TAG = "ConnectivityServiceTest";
 
@@ -75,73 +96,336 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private INetworkManagementService mNetManager;
     private INetworkStatsService mStatsService;
     private INetworkPolicyManager mPolicyService;
-//    private ConnectivityService.NetworkFactory mNetFactory;
 
     private BroadcastInterceptingContext mServiceContext;
     private ConnectivityService mService;
+    private ConnectivityManager mCm;
+    private MockNetworkAgent mWiFiNetworkAgent;
+    private MockNetworkAgent mCellNetworkAgent;
 
-// TODO: rework with network factory
-//    private MockNetwork mMobile;
-//    private MockNetwork mWifi;
-//
-//    private Handler mTrackerHandler;
-//
-//    private static class MockNetwork {
-//        public NetworkStateTracker tracker;
-//        public NetworkInfo info;
-//        public LinkProperties link;
-//
-//        public MockNetwork(int type) {
-//            tracker = mock(NetworkStateTracker.class);
-//            info = new NetworkInfo(type, -1, getNetworkTypeName(type), null);
-//            link = new LinkProperties();
-//        }
-//
-//        public void doReturnDefaults() {
-//            // TODO: eventually CS should make defensive copies
-//            doReturn(new NetworkInfo(info)).when(tracker).getNetworkInfo();
-//            doReturn(new LinkProperties(link)).when(tracker).getLinkProperties();
-//
-//            // fallback to default TCP buffers
-//            doReturn("").when(tracker).getTcpBufferSizesPropName();
-//        }
-//    }
-//
-//    @Override
-//    public void setUp() throws Exception {
-//        super.setUp();
-//
-//        mServiceContext = new BroadcastInterceptingContext(getContext());
-//
-//        mNetManager = mock(INetworkManagementService.class);
-//        mStatsService = mock(INetworkStatsService.class);
-//        mPolicyService = mock(INetworkPolicyManager.class);
-//        mNetFactory = mock(ConnectivityService.NetworkFactory.class);
-//
-//        mMobile = new MockNetwork(TYPE_MOBILE);
-//        mWifi = new MockNetwork(TYPE_WIFI);
-//
-//        // omit most network trackers
-//        doThrow(new IllegalArgumentException("Not supported in test environment"))
-//                .when(mNetFactory).createTracker(anyInt(), isA(NetworkConfig.class));
-//
-//        doReturn(mMobile.tracker)
-//                .when(mNetFactory).createTracker(eq(TYPE_MOBILE), isA(NetworkConfig.class));
-//        doReturn(mWifi.tracker)
-//                .when(mNetFactory).createTracker(eq(TYPE_WIFI), isA(NetworkConfig.class));
-//
-//        final ArgumentCaptor<Handler> trackerHandler = ArgumentCaptor.forClass(Handler.class);
-//        doNothing().when(mMobile.tracker)
-//                .startMonitoring(isA(Context.class), trackerHandler.capture());
-//
-//        mService = new ConnectivityService(
-//                mServiceContext, mNetManager, mStatsService, mPolicyService);
-//        mService.systemReady();
-//
-//        mTrackerHandler = trackerHandler.getValue();
-//        mTrackerHandler.getLooper().setMessageLogging(new LogPrinter(Log.INFO, TAG));
-//    }
-//
+    private class MockContext extends BroadcastInterceptingContext {
+        MockContext(Context base) {
+            super(base);
+        }
+
+        @Override
+        public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+            // PendingIntents sent by the AlarmManager are not intercepted by
+            // BroadcastInterceptingContext so we must really register the receiver.
+            // This shouldn't effect the real NetworkMonitors as the action contains a random token.
+            if (filter.getAction(0).startsWith("android.net.netmon.lingerExpired")) {
+                return getBaseContext().registerReceiver(receiver, filter);
+            } else {
+                return super.registerReceiver(receiver, filter);
+            }
+        }
+
+        @Override
+        public Object getSystemService (String name) {
+            if (name == Context.CONNECTIVITY_SERVICE) return mCm;
+            return super.getSystemService(name);
+        }
+    }
+
+    private class MockNetworkAgent {
+        private final NetworkInfo mNetworkInfo;
+        private final NetworkCapabilities mNetworkCapabilities;
+        private final Thread mThread;
+        private NetworkAgent mNetworkAgent;
+
+        MockNetworkAgent(int transport) {
+            final int type = transportToLegacyType(transport);
+            final String typeName = ConnectivityManager.getNetworkTypeName(type);
+            mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
+            mNetworkCapabilities = new NetworkCapabilities();
+            mNetworkCapabilities.addTransportType(transport);
+            final int score;
+            switch (transport) {
+                case TRANSPORT_WIFI:
+                    score = 60;
+                    break;
+                case TRANSPORT_CELLULAR:
+                    score = 50;
+                    break;
+                default:
+                    throw new UnsupportedOperationException("unimplemented network type");
+            }
+            final ConditionVariable initComplete = new ConditionVariable();
+            mThread = new Thread() {
+                public void run() {
+                    Looper.prepare();
+                    mNetworkAgent = new NetworkAgent(Looper.myLooper(), mServiceContext,
+                            "Mock" + typeName, mNetworkInfo, mNetworkCapabilities,
+                            new LinkProperties(), score, new NetworkMisc()) {
+                        public void unwanted() {}
+                    };
+                    initComplete.open();
+                    Looper.loop();
+                }
+            };
+            mThread.start();
+            initComplete.block();
+        }
+
+        /**
+         * Transition this NetworkAgent to CONNECTED state.
+         * @param validated Indicate if network should pretend to be validated.
+         */
+        public void connect(boolean validated) {
+            assertEquals(mNetworkInfo.getDetailedState(), DetailedState.IDLE);
+            assertFalse(mNetworkCapabilities.hasCapability(NET_CAPABILITY_INTERNET));
+
+            // To pretend network is validated, we transition it to the CONNECTED state without
+            // NET_CAPABILITY_INTERNET so NetworkMonitor doesn't bother trying to validate and
+            // just rubber stamps it as validated.  Afterwards we add NET_CAPABILITY_INTERNET so
+            // the network can satisfy the default request.
+            NetworkCallback callback = null;
+            final ConditionVariable validatedCv = new ConditionVariable();
+            if (validated) {
+                // If we connect a network without INTERNET capability, it'll get reaped.
+                // Prevent the reaping by adding a NetworkRequest.
+                NetworkRequest request = new NetworkRequest.Builder()
+                        .addTransportType(mNetworkCapabilities.getTransportTypes()[0])
+                        .build();
+                callback = new NetworkCallback() {
+                    public void onCapabilitiesChanged(Network network,
+                            NetworkCapabilities networkCapabilities) {
+                        if (networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                            validatedCv.open();
+                        }
+                    }
+                };
+                mCm.requestNetwork(request, callback);
+            } else {
+                mNetworkCapabilities.addCapability(NET_CAPABILITY_INTERNET);
+                mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+            }
+
+            mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+            mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+
+            if (validated) {
+                // Wait for network to validate.
+                validatedCv.block();
+                mNetworkCapabilities.addCapability(NET_CAPABILITY_INTERNET);
+                mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+            }
+
+            if (callback != null) mCm.unregisterNetworkCallback(callback);
+        }
+
+        public void disconnect() {
+            mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
+            mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        }
+
+        public Network getNetwork() {
+            return new Network(mNetworkAgent.netId);
+        }
+    }
+
+    private class WrappedConnectivityService extends ConnectivityService {
+        public WrappedConnectivityService(Context context, INetworkManagementService netManager,
+                INetworkStatsService statsService, INetworkPolicyManager policyManager) {
+            super(context, netManager, statsService, policyManager);
+        }
+
+        @Override
+        protected int getDefaultTcpRwnd() {
+            // Prevent wrapped ConnectivityService from trying to write to SystemProperties.
+            return 0;
+        }
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        mServiceContext = new MockContext(getContext());
+
+        mNetManager = mock(INetworkManagementService.class);
+        mStatsService = mock(INetworkStatsService.class);
+        mPolicyService = mock(INetworkPolicyManager.class);
+
+        mService = new WrappedConnectivityService(
+                mServiceContext, mNetManager, mStatsService, mPolicyService);
+        mService.systemReady();
+        mCm = new ConnectivityManager(mService);
+    }
+
+    private int transportToLegacyType(int transport) {
+        switch (transport) {
+            case TRANSPORT_WIFI:
+                return TYPE_WIFI;
+            case TRANSPORT_CELLULAR:
+                return TYPE_MOBILE;
+            default:
+                throw new IllegalStateException("Unknown transport" + transport);
+        }
+    }
+
+    private void verifyActiveNetwork(int transport) {
+        // Test getActiveNetworkInfo()
+        assertNotNull(mCm.getActiveNetworkInfo());
+        assertEquals(transportToLegacyType(transport), mCm.getActiveNetworkInfo().getType());
+        // Test getActiveNetwork()
+        assertNotNull(mCm.getActiveNetwork());
+        switch (transport) {
+            case TRANSPORT_WIFI:
+                assertEquals(mCm.getActiveNetwork(), mWiFiNetworkAgent.getNetwork());
+                break;
+            case TRANSPORT_CELLULAR:
+                assertEquals(mCm.getActiveNetwork(), mCellNetworkAgent.getNetwork());
+                break;
+            default:
+                throw new IllegalStateException("Unknown transport" + transport);
+        }
+        // Test getNetworkInfo(Network)
+        assertNotNull(mCm.getNetworkInfo(mCm.getActiveNetwork()));
+        assertEquals(transportToLegacyType(transport), mCm.getNetworkInfo(mCm.getActiveNetwork()).getType());
+        // Test getNetworkCapabilities(Network)
+        assertNotNull(mCm.getNetworkCapabilities(mCm.getActiveNetwork()));
+        assertTrue(mCm.getNetworkCapabilities(mCm.getActiveNetwork()).hasTransport(transport));
+    }
+
+    private void verifyNoNetwork() {
+        // Test getActiveNetworkInfo()
+        assertNull(mCm.getActiveNetworkInfo());
+        // Test getActiveNetwork()
+        assertNull(mCm.getActiveNetwork());
+        // Test getAllNetworks()
+        assertEquals(0, mCm.getAllNetworks().length);
+    }
+
+    /**
+     * Return a ConditionVariable that opens when {@code count} numbers of CONNECTIVITY_ACTION
+     * broadcasts are received.
+     */
+    private ConditionVariable waitForConnectivityBroadcasts(final int count) {
+        final ConditionVariable cv = new ConditionVariable();
+        mServiceContext.registerReceiver(new BroadcastReceiver() {
+                    private int remaining = count;
+                    public void onReceive(Context context, Intent intent) {
+                        if (--remaining == 0) {
+                            cv.open();
+                            mServiceContext.unregisterReceiver(this);
+                        }
+                    }
+                }, new IntentFilter(CONNECTIVITY_ACTION));
+        return cv;
+    }
+
+    @LargeTest
+    public void testLingering() throws Exception {
+        // Decrease linger timeout to the minimum allowed by AlarmManagerService.
+        NetworkMonitor.SetDefaultLingerTime(5000);
+        verifyNoNetwork();
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        assertNull(mCm.getActiveNetworkInfo());
+        assertNull(mCm.getActiveNetwork());
+        // Test bringing up validated cellular.
+        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        mCellNetworkAgent.connect(true);
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_CELLULAR);
+        assertEquals(2, mCm.getAllNetworks().length);
+        assertTrue(mCm.getAllNetworks()[0].equals(mCm.getActiveNetwork()) ||
+                mCm.getAllNetworks()[1].equals(mCm.getActiveNetwork()));
+        assertTrue(mCm.getAllNetworks()[0].equals(mWiFiNetworkAgent.getNetwork()) ||
+                mCm.getAllNetworks()[1].equals(mWiFiNetworkAgent.getNetwork()));
+        // Test bringing up validated WiFi.
+        cv = waitForConnectivityBroadcasts(2);
+        mWiFiNetworkAgent.connect(true);
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        assertEquals(2, mCm.getAllNetworks().length);
+        assertTrue(mCm.getAllNetworks()[0].equals(mCm.getActiveNetwork()) ||
+                mCm.getAllNetworks()[1].equals(mCm.getActiveNetwork()));
+        assertTrue(mCm.getAllNetworks()[0].equals(mCellNetworkAgent.getNetwork()) ||
+                mCm.getAllNetworks()[1].equals(mCellNetworkAgent.getNetwork()));
+        // Test cellular linger timeout.
+        try {
+            Thread.sleep(6000);
+        } catch (Exception e) {
+        }
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        assertEquals(1, mCm.getAllNetworks().length);
+        assertEquals(mCm.getAllNetworks()[0], mCm.getActiveNetwork());
+        // Test WiFi disconnect.
+        cv = waitForConnectivityBroadcasts(1);
+        mWiFiNetworkAgent.disconnect();
+        cv.block();
+        verifyNoNetwork();
+    }
+
+    @LargeTest
+    public void testValidatedCellularOutscoresUnvalidatedWiFi() throws Exception {
+        // Test bringing up unvalidated WiFi
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        mWiFiNetworkAgent.connect(false);
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        // Test bringing up unvalidated cellular
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(false);
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        // Test cellular disconnect.
+        mCellNetworkAgent.disconnect();
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        // Test bringing up validated cellular
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        cv = waitForConnectivityBroadcasts(2);
+        mCellNetworkAgent.connect(true);
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_CELLULAR);
+        // Test cellular disconnect.
+        cv = waitForConnectivityBroadcasts(2);
+        mCellNetworkAgent.disconnect();
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        // Test WiFi disconnect.
+        cv = waitForConnectivityBroadcasts(1);
+        mWiFiNetworkAgent.disconnect();
+        cv.block();
+        verifyNoNetwork();
+    }
+
+    @LargeTest
+    public void testUnvalidatedWifiOutscoresUnvalidatedCellular() throws Exception {
+        // Test bringing up unvalidated cellular.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        mCellNetworkAgent.connect(false);
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_CELLULAR);
+        // Test bringing up unvalidated WiFi.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        cv = waitForConnectivityBroadcasts(2);
+        mWiFiNetworkAgent.connect(false);
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        // Test WiFi disconnect.
+        cv = waitForConnectivityBroadcasts(2);
+        mWiFiNetworkAgent.disconnect();
+        cv.block();
+        verifyActiveNetwork(TRANSPORT_CELLULAR);
+        // Test cellular disconnect.
+        cv = waitForConnectivityBroadcasts(1);
+        mCellNetworkAgent.disconnect();
+        cv.block();
+        verifyNoNetwork();
+    }
+
 //    @Override
 //    public void tearDown() throws Exception {
 //        super.tearDown();
@@ -157,9 +441,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        mMobile.link.addRoute(MOBILE_ROUTE_V6);
 //        mMobile.doReturnDefaults();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
+//        cv = waitForConnectivityBroadcasts(1);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
-//        nextConnBroadcast.get();
+//        cv.block();
 //
 //        // verify that both routes were added
 //        int mobileNetId = mMobile.tracker.getNetwork().netId;
@@ -177,9 +461,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        mMobile.link.addRoute(MOBILE_ROUTE_V6);
 //        mMobile.doReturnDefaults();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
+//        cv = waitForConnectivityBroadcasts(1);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
-//        nextConnBroadcast.get();
+//        cv.block();
 //
 //        reset(mNetManager);
 //
@@ -193,9 +477,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        // expect that mobile will be torn down
 //        doReturn(true).when(mMobile.tracker).teardown();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
+//        cv = waitForConnectivityBroadcasts(1);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mWifi.info).sendToTarget();
-//        nextConnBroadcast.get();
+//        cv.block();
 //
 //        // verify that wifi routes added, and teardown requested
 //        int wifiNetId = mWifi.tracker.getNetwork().netId;
@@ -212,9 +496,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        mMobile.link.clear();
 //        mMobile.doReturnDefaults();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
+//        cv = waitForConnectivityBroadcasts(1);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
-//        nextConnBroadcast.get();
+//        cv.block();
 //
 //        verify(mNetManager).removeRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V4));
 //        verify(mNetManager).removeRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V6));
