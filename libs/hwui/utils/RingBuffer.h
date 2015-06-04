@@ -43,11 +43,11 @@ public:
     }
 
     T& front() {
-        return this[0];
+        return (*this)[0];
     }
 
     T& back() {
-        return this[size() - 1];
+        return (*this)[size() - 1];
     }
 
     T& operator[](size_t index) {

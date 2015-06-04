@@ -30,11 +30,13 @@
 // Must be NUM_ELEMENTS in size
 static const SkColor CURRENT_FRAME_COLOR = 0xcf5faa4d;
 static const SkColor THRESHOLD_COLOR = 0xff5faa4d;
-static const SkColor BAR_ALPHA = 0xCF000000;
+static const SkColor BAR_FAST_ALPHA = 0x8F000000;
+static const SkColor BAR_JANKY_ALPHA = 0xDF000000;
 
 // We could get this from TimeLord and use the actual frame interval, but
 // this is good enough
 #define FRAME_THRESHOLD 16
+#define FRAME_THRESHOLD_NS 16000000
 
 namespace android {
 namespace uirenderer {
@@ -45,12 +47,10 @@ struct BarSegment {
     SkColor color;
 };
 
-static const std::array<BarSegment,9> Bar {{
-    { FrameInfoIndex::IntendedVsync, FrameInfoIndex::Vsync, 0x00695C },
-    { FrameInfoIndex::Vsync, FrameInfoIndex::HandleInputStart, 0x00796B },
-    { FrameInfoIndex::HandleInputStart, FrameInfoIndex::AnimationStart, 0x00897B },
-    { FrameInfoIndex::AnimationStart, FrameInfoIndex::PerformTraversalsStart, 0x009688 },
-    { FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, 0x26A69A},
+static const std::array<BarSegment,7> Bar {{
+    { FrameInfoIndex::IntendedVsync, FrameInfoIndex::HandleInputStart, 0x00796B },
+    { FrameInfoIndex::HandleInputStart, FrameInfoIndex::PerformTraversalsStart, 0x388E3C },
+    { FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, 0x689F38},
     { FrameInfoIndex::DrawStart, FrameInfoIndex::SyncStart, 0x2196F3},
     { FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart, 0x4FC3F7},
     { FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers, 0xF44336},
@@ -74,7 +74,6 @@ void FrameInfoVisualizer::setDensity(float density) {
     if (CC_UNLIKELY(mDensity != density)) {
         mDensity = density;
         mVerticalUnit = dpToPx(PROFILE_DRAW_DP_PER_MS, density);
-        mHorizontalUnit = dpToPx(PROFILE_DRAW_WIDTH, density);
         mThresholdStroke = dpToPx(PROFILE_DRAW_THRESHOLD_STROKE_WIDTH, density);
     }
 }
@@ -103,71 +102,107 @@ void FrameInfoVisualizer::draw(OpenGLRenderer* canvas) {
     }
 
     if (mType == ProfileType::Bars) {
-        initializeRects(canvas->getViewportHeight());
+        // Patch up the current frame to pretend we ended here. CanvasContext
+        // will overwrite these values with the real ones after we return.
+        // This is a bit nicer looking than the vague green bar, as we have
+        // valid data for almost all the stages and a very good idea of what
+        // the issue stage will look like, too
+        FrameInfo& info = mFrameSource.back();
+        info.markSwapBuffers();
+        info.markFrameCompleted();
+
+        initializeRects(canvas->getViewportHeight(), canvas->getViewportWidth());
         drawGraph(canvas);
-        drawCurrentFrame(canvas->getViewportHeight(), canvas);
         drawThreshold(canvas);
     }
 }
 
 void FrameInfoVisualizer::createData() {
-    if (mRects.get()) return;
+    if (mFastRects.get()) return;
 
-    mRects.reset(new float[mFrameSource.capacity() * 4]);
+    mFastRects.reset(new float[mFrameSource.capacity() * 4]);
+    mJankyRects.reset(new float[mFrameSource.capacity() * 4]);
 }
 
 void FrameInfoVisualizer::destroyData() {
-    mRects.reset(nullptr);
+    mFastRects.reset(nullptr);
+    mJankyRects.reset(nullptr);
 }
 
-void FrameInfoVisualizer::initializeRects(const int baseline) {
-    float left = 0;
+void FrameInfoVisualizer::initializeRects(const int baseline, const int width) {
+    // Target the 95% mark for the current frame
+    float right = width * .95;
+    float baseLineWidth = right / mFrameSource.capacity();
+    mNumFastRects = 0;
+    mNumJankyRects = 0;
+    int fast_i = 0, janky_i = 0;
     // Set the bottom of all the shapes to the baseline
-    for (size_t i = 0; i < (mFrameSource.capacity() * 4); i += 4) {
+    for (int fi = mFrameSource.size() - 1; fi >= 0; fi--) {
+        if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
+            continue;
+        }
+        float lineWidth = baseLineWidth;
+        float* rect;
+        int ri;
         // Rects are LTRB
-        mRects[i + 0] = left;
-        mRects[i + 1] = baseline;
-        left += mHorizontalUnit;
-        mRects[i + 2] = left;
-        mRects[i + 3] = baseline;
+        if (mFrameSource[fi].totalDuration() <= FRAME_THRESHOLD_NS) {
+            rect = mFastRects.get();
+            ri = fast_i;
+            fast_i += 4;
+            mNumFastRects++;
+        } else {
+            rect = mJankyRects.get();
+            ri = janky_i;
+            janky_i += 4;
+            mNumJankyRects++;
+            lineWidth *= 2;
+        }
+
+        rect[ri + 0] = right - lineWidth;
+        rect[ri + 1] = baseline;
+        rect[ri + 2] = right;
+        rect[ri + 3] = baseline;
+        right -= lineWidth;
     }
 }
 
 void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex end) {
-    for (size_t fi = 0, ri = 0; fi < mFrameSource.size(); fi++, ri += 4) {
-        // TODO: Skipped frames will leave little holes in the graph, but this
-        // is better than bogus and freaky lines, so...
+    int fast_i = (mNumFastRects - 1) * 4;
+    int janky_i = (mNumJankyRects - 1) * 4;;
+    for (size_t fi = 0; fi < mFrameSource.size(); fi++) {
         if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
             continue;
         }
 
+        float* rect;
+        int ri;
+        // Rects are LTRB
+        if (mFrameSource[fi].totalDuration() <= FRAME_THRESHOLD_NS) {
+            rect = mFastRects.get();
+            ri = fast_i;
+            fast_i -= 4;
+        } else {
+            rect = mJankyRects.get();
+            ri = janky_i;
+            janky_i -= 4;
+        }
+
         // Set the bottom to the old top (build upwards)
-        mRects[ri + 3] = mRects[ri + 1];
+        rect[ri + 3] = rect[ri + 1];
         // Move the top up by the duration
-        mRects[ri + 1] -= mVerticalUnit * duration(fi, start, end);
+        rect[ri + 1] -= mVerticalUnit * duration(fi, start, end);
     }
 }
 
 void FrameInfoVisualizer::drawGraph(OpenGLRenderer* canvas) {
     SkPaint paint;
     for (size_t i = 0; i < Bar.size(); i++) {
-        paint.setColor(Bar[i].color | BAR_ALPHA);
         nextBarSegment(Bar[i].start, Bar[i].end);
-        canvas->drawRects(mRects.get(), (mFrameSource.size() - 1) * 4, &paint);
+        paint.setColor(Bar[i].color | BAR_FAST_ALPHA);
+        canvas->drawRects(mFastRects.get(), mNumFastRects * 4, &paint);
+        paint.setColor(Bar[i].color | BAR_JANKY_ALPHA);
+        canvas->drawRects(mJankyRects.get(), mNumJankyRects * 4, &paint);
     }
-}
-
-void FrameInfoVisualizer::drawCurrentFrame(const int baseline, OpenGLRenderer* canvas) {
-    // This draws a solid rect over the entirety of the current frame's shape
-    // To do so we use the bottom of mRects[0] and the top of mRects[NUM_ELEMENTS-1]
-    // which will therefore fully overlap the previously drawn rects
-    SkPaint paint;
-    paint.setColor(CURRENT_FRAME_COLOR);
-    size_t fi = mFrameSource.size() - 1;
-    size_t ri = fi * 4;
-    float top = baseline - (mVerticalUnit * duration(fi,
-            FrameInfoIndex::IntendedVsync, FrameInfoIndex::IssueDrawCommandsStart));
-    canvas->drawRect(mRects[ri], top, mRects[ri + 2], baseline, &paint);
 }
 
 void FrameInfoVisualizer::drawThreshold(OpenGLRenderer* canvas) {
