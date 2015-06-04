@@ -17,9 +17,9 @@
 package com.android.test.voiceinteraction;
 
 import android.app.ActivityManager;
+import android.app.VoiceInteractor;
 import android.app.AssistContent;
 import android.app.AssistStructure;
-import android.app.VoiceInteractor;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -71,7 +71,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     public void onCreate(Bundle args, int startFlags) {
         super.onCreate(args, startFlags);
         ActivityManager am = getContext().getSystemService(ActivityManager.class);
-        am.setWatchHeapLimit(40*1024*1024);
+        am.setWatchHeapLimit(40 * 1024 * 1024);
     }
 
     @Override
@@ -118,6 +118,30 @@ public class MainInteractionSession extends VoiceInteractionSession
         return mContentView;
     }
 
+    public void onHandleAssist(Bundle assistBundle) {
+        if (assistBundle != null) {
+            Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
+            if (assistContext != null) {
+                mAssistStructure = AssistStructure.getAssistStructure(assistContext);
+                if (mAssistStructure != null) {
+                    if (mAssistVisualizer != null) {
+                        mAssistVisualizer.setAssistStructure(mAssistStructure);
+                    }
+                }
+                AssistContent content = AssistContent.getAssistContent(assistContext);
+                if (content != null) {
+                    Log.i(TAG, "Assist intent: " + content.getIntent());
+                    Log.i(TAG, "Assist clipdata: " + content.getClipData());
+                }
+                return;
+            }
+        }
+        if (mAssistVisualizer != null) {
+            mAssistVisualizer.clearAssistData();
+        }
+    }
+
+    /*
     @Override
     public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
         mAssistStructure = structure;
@@ -131,6 +155,7 @@ public class MainInteractionSession extends VoiceInteractionSession
             Log.i(TAG, "Assist clipdata: " + content.getClipData());
         }
     }
+    */
 
     @Override
     public void onHandleScreenshot(Bitmap screenshot) {
