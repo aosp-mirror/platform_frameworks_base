@@ -1107,6 +1107,7 @@ final class BackStackRecord extends FragmentTransaction implements
                         }
 
                         if (enterTransition != null) {
+                            enterTransition.removeTarget(state.nonExistentView);
                             View view = inFragment.getView();
                             if (view != null) {
                                 view.captureTransitioningViews(enteringViews);
@@ -1115,7 +1116,6 @@ final class BackStackRecord extends FragmentTransaction implements
                                 }
                                 enteringViews.add(state.nonExistentView);
                                 // We added this earlier to prevent any views being targeted.
-                                enterTransition.removeTarget(state.nonExistentView);
                                 addTargets(enterTransition, enteringViews);
                             }
                             setSharedElementEpicenter(enterTransition, state);
@@ -1170,7 +1170,7 @@ final class BackStackRecord extends FragmentTransaction implements
             Transition exitTransition, Transition sharedElementTransition, Fragment inFragment,
             boolean isBack) {
         boolean overlap = true;
-        if (enterTransition != null && exitTransition != null) {
+        if (enterTransition != null && exitTransition != null && inFragment != null) {
             overlap = isBack ? inFragment.getAllowReturnTransitionOverlap() :
                     inFragment.getAllowEnterTransitionOverlap();
         }
@@ -1638,7 +1638,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
     private void setBackNameOverrides(TransitionState state, ArrayMap<String, View> namedViews,
             boolean isEnd) {
-        int count = mSharedElementTargetNames.size();
+        int count = mSharedElementTargetNames == null ? 0 : mSharedElementTargetNames.size();
         for (int i = 0; i < count; i++) {
             String source = mSharedElementSourceNames.get(i);
             String originalTarget = mSharedElementTargetNames.get(i);
@@ -1656,7 +1656,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
     private void setNameOverrides(TransitionState state, ArrayMap<String, View> namedViews,
             boolean isEnd) {
-        int count = namedViews.size();
+        int count = namedViews == null ? 0 : namedViews.size();
         for (int i = 0; i < count; i++) {
             String source = namedViews.keyAt(i);
             String target = namedViews.valueAt(i).getTransitionName();
