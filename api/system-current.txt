@@ -3533,7 +3533,7 @@ package android.app {
     method public void onPrepareNavigateUpTaskStack(android.app.TaskStackBuilder);
     method public boolean onPrepareOptionsMenu(android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
-    method public void onProvideAssistContent(android.app.AssistContent);
+    method public void onProvideAssistContent(android.app.assist.AssistContent);
     method public void onProvideAssistData(android.os.Bundle);
     method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method protected void onRestart();
@@ -4094,26 +4094,19 @@ package android.app {
     field public java.lang.String serviceDetails;
   }
 
-  public class AssistContent implements android.os.Parcelable {
+  public deprecated class AssistContent {
     ctor public AssistContent();
-    method public int describeContents();
     method public android.content.ClipData getClipData();
-    method public android.content.Intent getIntent();
     method public android.net.Uri getWebUri();
     method public void setClipData(android.content.ClipData);
     method public void setIntent(android.content.Intent);
     method public void setWebUri(android.net.Uri);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AssistContent> CREATOR;
   }
 
-  public final class AssistStructure implements android.os.Parcelable {
-    method public int describeContents();
+  public deprecated class AssistStructure {
+    ctor public AssistStructure();
     method public android.content.ComponentName getActivityComponent();
-    method public android.app.AssistStructure.WindowNode getWindowNodeAt(int);
     method public int getWindowNodeCount();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AssistStructure> CREATOR;
   }
 
   public static class AssistStructure.ViewNode {
@@ -6013,6 +6006,26 @@ package android.app.admin {
     field public static final int TYPE_INSTALL_AUTOMATIC = 1; // 0x1
     field public static final int TYPE_INSTALL_WINDOWED = 2; // 0x2
     field public static final int TYPE_POSTPONE = 3; // 0x3
+  }
+
+}
+
+package android.app.assist {
+
+  public final class AssistContent extends android.app.AssistContent implements android.os.Parcelable {
+    ctor public AssistContent(android.os.Parcel);
+    method public int describeContents();
+    method public android.content.Intent getIntent();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.assist.AssistContent> CREATOR;
+  }
+
+  public final class AssistStructure extends android.app.AssistStructure implements android.os.Parcelable {
+    ctor public AssistStructure();
+    method public int describeContents();
+    method public android.app.AssistStructure.WindowNode getWindowNodeAt(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.assist.AssistStructure> CREATOR;
   }
 
 }
@@ -31071,7 +31084,7 @@ package android.service.voice {
     method public android.view.View onCreateContentView();
     method public void onDestroy();
     method public boolean[] onGetSupportedCommands(java.lang.String[]);
-    method public void onHandleAssist(android.os.Bundle, android.app.AssistStructure, android.app.AssistContent);
+    method public void onHandleAssist(android.os.Bundle, android.app.assist.AssistStructure, android.app.assist.AssistContent);
     method public void onHide();
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);

@@ -16,11 +16,11 @@
 
 package android.service.voice;
 
-import android.app.AssistContent;
-import android.app.AssistStructure;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
@@ -386,7 +386,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         /**
-         * ASk the app to cancel this current request.
+         * ASk the app to cancelLocked this current request.
          */
         public void cancel() {
             try {
@@ -878,14 +878,34 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         show(null, 0);
     }
 
-    public void show(Bundle args, int showFlags) {
+    /**
+     * Show the UI for this session.  This asks the system to go through the process of showing
+     * your UI, which will eventually culminate in {@link #onShow}.  This is similar to calling
+     * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
+     * @param args Arbitrary arguments that will be propagated {@link #onShow}.
+     * @param flags Indicates additional optional behavior that should be performed.  May
+     * be {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST}
+     * to request that the system generate and deliver assist data on the current foreground
+     * app as part of showing the session UI.
+     */
+    public void show(Bundle args, int flags) {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
         try {
-            mSystemService.showSessionFromSession(mToken, null, 0);
+            mSystemService.showSessionFromSession(mToken, args, flags);
         } catch (RemoteException e) {
         }
     }
 
+    /**
+     * Hide the session's UI, if currently shown.  Call this when you are done with your
+     * user interaction.
+     */
     public void hide() {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
         try {
             mSystemService.hideSessionFromSession(mToken);
         } catch (RemoteException e) {
@@ -964,6 +984,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * {@link #startVoiceActivity}.</p>
      */
     public void setKeepAwake(boolean keepAwake) {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
         try {
             mSystemService.setKeepAwake(mToken, keepAwake);
         } catch (RemoteException e) {
@@ -985,7 +1008,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
-     * Finish the session.
+     * Finish the session.  This completely destroys the session -- the next time it is shown,
+     * an entirely new one will be created.  You do not normally call this function; instead,
+     * use {@link #hide} and allow the system to destroy your session if it needs its RAM.
      */
     public void finish() {
         if (mToken == null) {
@@ -1114,7 +1139,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * Called when the user presses the back button while focus is in the session UI.  Note
      * that this will only happen if the session UI has requested input focus in its window;
      * otherwise, the back key will go to whatever window has focus and do whatever behavior
-     * it normally has there.
+     * it normally has there.  The default implementation simply calls {@link #hide}.
      */
     public void onBackPressed() {
         hide();
@@ -1123,7 +1148,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     /**
      * Sessions automatically watch for requests that all system UI be closed (such as when
      * the user presses HOME), which will appear here.  The default implementation always
-     * calls {@link #finish}.
+     * calls {@link #hide}.
      */
     public void onCloseSystemDialogs() {
         hide();
@@ -1287,7 +1312,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
-     * Called when the {@link android.app.VoiceInteractor} has asked to cancel a {@link Request}
+     * Called when the {@link android.app.VoiceInteractor} has asked to cancelLocked a {@link Request}
      * that was previously delivered to {@link #onRequestConfirmation},
      * {@link #onRequestPickOption}, {@link #onRequestCompleteVoice}, {@link #onRequestAbortVoice},
      * or {@link #onRequestCommand}.

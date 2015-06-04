@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
