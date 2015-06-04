@@ -30426,7 +30426,7 @@ package android.security {
     method public static android.content.Intent createInstallIntent();
     method public static java.security.cert.X509Certificate[] getCertificateChain(android.content.Context, java.lang.String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method public static java.security.PrivateKey getPrivateKey(android.content.Context, java.lang.String) throws java.lang.InterruptedException, android.security.KeyChainException;
-    method public static boolean isBoundKeyAlgorithm(java.lang.String);
+    method public static deprecated boolean isBoundKeyAlgorithm(java.lang.String);
     method public static boolean isKeyAlgorithmSupported(java.lang.String);
     field public static final java.lang.String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
     field public static final java.lang.String EXTRA_CERTIFICATE = "CERT";
