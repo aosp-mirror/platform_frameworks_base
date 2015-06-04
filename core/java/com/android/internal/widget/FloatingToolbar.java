@@ -84,7 +84,7 @@ public final class FloatingToolbar {
     private final Rect mContentRect = new Rect();
 
     private Menu mMenu;
-    private List<CharSequence> mShowingTitles = new ArrayList<CharSequence>();
+    private List<Object> mShowingMenuItems = new ArrayList<Object>();
     private MenuItem.OnMenuItemClickListener mMenuItemClickListener = NO_OP_MENUITEM_CLICK_LISTENER;
 
     private int mSuggestedWidth;
@@ -156,7 +156,7 @@ public final class FloatingToolbar {
         if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
             mPopup.dismiss();
             mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
-            mShowingTitles = getMenuItemTitles(menuItems);
+            mShowingMenuItems = getShowingMenuItemsReferences(menuItems);
         }
         mPopup.updateCoordinates(mContentRect);
         if (!mPopup.isShowing()) {
@@ -211,7 +211,7 @@ public final class FloatingToolbar {
      * Returns true if this floating toolbar is currently showing the specified menu items.
      */
     private boolean isCurrentlyShowing(List<MenuItem> menuItems) {
-        return mShowingTitles.equals(getMenuItemTitles(menuItems));
+        return mShowingMenuItems.equals(getShowingMenuItemsReferences(menuItems));
     }
 
     /**
@@ -234,12 +234,16 @@ public final class FloatingToolbar {
         return menuItems;
     }
 
-    private List<CharSequence> getMenuItemTitles(List<MenuItem> menuItems) {
-        List<CharSequence> titles = new ArrayList<CharSequence>();
+    private List<Object> getShowingMenuItemsReferences(List<MenuItem> menuItems) {
+        List<Object> references = new ArrayList<Object>();
         for (MenuItem menuItem : menuItems) {
-            titles.add(menuItem.getTitle());
+            if (isIconOnlyMenuItem(menuItem)) {
+                references.add(menuItem.getIcon());
+            } else {
+                references.add(menuItem.getTitle());
+            }
         }
-        return titles;
+        return references;
     }
 
 
