@@ -367,7 +367,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 .setStartDelay(delay)
                 .setDuration(duration)
                 .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                .withLayer()
                 .start();
     }
 
@@ -416,7 +415,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .setStartDelay(0)
                     .setDuration(mConfig.taskViewExitToAppDuration)
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .withLayer()
                     .start();
         } else {
             // Hide the dismiss button
