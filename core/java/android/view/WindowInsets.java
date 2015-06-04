@@ -251,7 +251,7 @@ public final class WindowInsets {
      * @return true if any inset values are nonzero
      */
     public boolean hasInsets() {
-        return hasSystemWindowInsets() || hasWindowDecorInsets();
+        return hasSystemWindowInsets() || hasWindowDecorInsets() || hasStableInsets();
     }
 
     /**
