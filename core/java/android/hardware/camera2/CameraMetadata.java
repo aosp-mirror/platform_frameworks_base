@@ -648,6 +648,100 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8;
 
+    /**
+     * <p>The device supports constrained high speed video recording (frame rate &gt;=120fps)
+     * use case. The camera device will support high speed capture session created by
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }, which
+     * only accepts high speed request list created by
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList }.</p>
+     * <p>A camera device can still support high speed video streaming by advertising the high speed
+     * FPS ranges in {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}. For this case, all normal
+     * capture request per frame control and synchronization requirements will apply to
+     * the high speed fps ranges, the same as all other fps ranges. This capability describes
+     * the capability of a specialized operating mode with many limitations (see below), which
+     * is only targeted at high speed video recording.</p>
+     * <p>The supported high speed video sizes and fps ranges are specified in
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.
+     * To get desired output frame rates, the application is only allowed to select video size
+     * and FPS range combinations provided by
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.
+     * The fps range can be controlled via {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}.</p>
+     * <p>In this capability, the camera device will override aeMode, awbMode, and afMode to
+     * ON, ON, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
+     * controls will be overridden to be FAST. Therefore, no manual control of capture
+     * and post-processing parameters is possible. All other controls operate the
+     * same as when {@link CaptureRequest#CONTROL_MODE android.control.mode} == AUTO. This means that all other
+     * android.control.* fields continue to work, such as</p>
+     * <ul>
+     * <li>{@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION android.control.aeExposureCompensation}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</li>
+     * <li>{@link CaptureRequest#CONTROL_EFFECT_MODE android.control.effectMode}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}</li>
+     * </ul>
+     * <p>Outside of android.control.*, the following controls will work:</p>
+     * <ul>
+     * <li>{@link CaptureRequest#FLASH_MODE android.flash.mode} (TORCH mode only, automatic flash for still capture will not
+     * work since aeMode is ON)</li>
+     * <li>{@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} (if it is supported)</li>
+     * <li>{@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}</li>
+     * <li>{@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} (if it is supported)</li>
+     * </ul>
+     * <p>For high speed recording use case, the actual maximum supported frame rate may
+     * be lower than what camera can output, depending on the destination Surfaces for
+     * the image data. For example, if the destination surface is from video encoder,
+     * the application need check if the video encoder is capable of supporting the
+     * high frame rate for a given video size, or it will end up with lower recording
+     * frame rate. If the destination surface is from preview window, the actual preview frame
+     * rate will be bounded by the screen refresh rate.</p>
+     * <p>The camera device will only support up to 2 high speed simultaneous output surfaces
+     * (preview and recording surfaces)
+     * in this mode. Above controls will be effective only if all of below conditions are true:</p>
+     * <ul>
+     * <li>The application creates a camera capture session with no more than 2 surfaces via
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }. The
+     * targeted surfaces must be preview surface (either from
+     * {@link android.view.SurfaceView } or {@link android.graphics.SurfaceTexture }) or
+     * recording surface(either from {@link android.media.MediaRecorder#getSurface } or
+     * {@link android.media.MediaCodec#createInputSurface }).</li>
+     * <li>The stream sizes are selected from the sizes reported by
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.</li>
+     * <li>The FPS ranges are selected from
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.</li>
+     * </ul>
+     * <p>When above conditions are NOT satistied, the
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
+     * and {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList } will fail.</p>
+     * <p>Switching to a FPS range that has different maximum FPS may trigger some camera device
+     * reconfigurations, which may introduce extra latency. It is recommended that
+     * the application avoids unnecessary maximum target FPS changes as much as possible
+     * during high speed streaming.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
+     * @see CaptureRequest#CONTROL_AE_LOCK
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#FLASH_MODE
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -1725,6 +1819,10 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_BARCODE = 16;
 
     /**
+     * <p>This is deprecated, please use
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
+     * and {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList }
+     * for high speed video recording.</p>
      * <p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.</p>
      * <p>The supported high speed video sizes and fps ranges are specified in
      * android.control.availableHighSpeedVideoConfigurations. To get desired
@@ -1799,6 +1897,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @deprecated Please refer to this API documentation to find the alternatives
      */
     public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
 
