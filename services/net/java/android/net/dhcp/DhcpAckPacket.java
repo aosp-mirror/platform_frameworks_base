@@ -30,8 +30,8 @@ class DhcpAckPacket extends DhcpPacket {
     private final Inet4Address mSrcIp;
 
     DhcpAckPacket(int transId, short secs, boolean broadcast, Inet4Address serverAddress,
-                  Inet4Address clientIp, byte[] clientMac) {
-        super(transId, secs, INADDR_ANY, clientIp, serverAddress, INADDR_ANY, clientMac, broadcast);
+                  Inet4Address clientIp, Inet4Address yourIp, byte[] clientMac) {
+        super(transId, secs, clientIp, yourIp, serverAddress, INADDR_ANY, clientMac, broadcast);
         mBroadcast = broadcast;
         mSrcIp = serverAddress;
     }
