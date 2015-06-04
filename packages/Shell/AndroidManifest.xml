@@ -25,6 +25,7 @@
     <!-- Standard permissions granted to the shell. -->
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
@@ -97,6 +98,10 @@
     <uses-permission android:name="android.permission.CHANGE_APP_IDLE_STATE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <uses-permission android:name="android.permission.REGISTER_CALL_PROVIDER" />
+    <uses-permission android:name="android.permission.REGISTER_CONNECTION_MANAGER" />
+    <uses-permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION" />
 
     <application android:label="@string/app_label">
         <provider
