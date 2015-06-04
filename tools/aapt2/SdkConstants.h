@@ -19,8 +19,6 @@
 
 #include "Resource.h"
 
-#include <string>
-
 namespace aapt {
 
 enum {
@@ -46,7 +44,8 @@ enum {
     SDK_LOLLIPOP_MR1 = 22,
 };
 
-size_t findAttributeSdkLevel(const std::u16string& name);
+size_t findAttributeSdkLevel(ResourceId id);
+size_t findAttributeSdkLevel(const ResourceName& name);
 
 } // namespace aapt
 
