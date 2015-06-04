@@ -1785,7 +1785,13 @@ public class AccountManagerService
 
         // Get the calling package. We will use it for the purpose of caching.
         final String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
-        List<String> callerOwnedPackageNames = Arrays.asList(mPackageManager.getPackagesForUid(callerUid));
+        List<String> callerOwnedPackageNames;
+        long ident = Binder.clearCallingIdentity();
+        try {
+            callerOwnedPackageNames = Arrays.asList(mPackageManager.getPackagesForUid(callerUid));
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         if (callerPkg == null || !callerOwnedPackageNames.contains(callerPkg)) {
             String msg = String.format(
                     "Uid %s is attempting to illegally masquerade as package %s!",
@@ -1798,15 +1804,15 @@ public class AccountManagerService
         loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
         loginOptions.putInt(AccountManager.KEY_CALLER_PID, Binder.getCallingPid());
 
-        // Distill the caller's package signatures into a single digest.
-        final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
-
         if (notifyOnAuthFailure) {
             loginOptions.putBoolean(AccountManager.KEY_NOTIFY_ON_FAILURE, true);
         }
 
         long identityToken = clearCallingIdentity();
         try {
+            // Distill the caller's package signatures into a single digest.
+            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
+
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
             if (!customTokens && permissionGranted) {
