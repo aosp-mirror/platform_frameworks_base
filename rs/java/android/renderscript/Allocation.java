@@ -51,6 +51,7 @@ import android.os.Trace;
  * <a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a> developer guide.</p>
  * </div>
  **/
+
 public class Allocation extends BaseObj {
     Type mType;
     Bitmap mBitmap;
@@ -455,28 +456,31 @@ public class Allocation extends BaseObj {
      *
      */
     public void syncAll(int srcLocation) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "syncAll");
-        switch (srcLocation) {
-        case USAGE_GRAPHICS_TEXTURE:
-        case USAGE_SCRIPT:
-            if ((mUsage & USAGE_SHARED) != 0) {
-                copyFrom(mBitmap);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "syncAll");
+            switch (srcLocation) {
+                case USAGE_GRAPHICS_TEXTURE:
+                case USAGE_SCRIPT:
+                    if ((mUsage & USAGE_SHARED) != 0) {
+                        copyFrom(mBitmap);
+                    }
+                    break;
+                case USAGE_GRAPHICS_CONSTANTS:
+                case USAGE_GRAPHICS_VERTEX:
+                    break;
+                case USAGE_SHARED:
+                    if ((mUsage & USAGE_SHARED) != 0) {
+                        copyTo(mBitmap);
+                    }
+                    break;
+                default:
+                    throw new RSIllegalArgumentException("Source must be exactly one usage type.");
             }
-            break;
-        case USAGE_GRAPHICS_CONSTANTS:
-        case USAGE_GRAPHICS_VERTEX:
-            break;
-        case USAGE_SHARED:
-            if ((mUsage & USAGE_SHARED) != 0) {
-                copyTo(mBitmap);
-            }
-            break;
-        default:
-            throw new RSIllegalArgumentException("Source must be exactly one usage type.");
+            mRS.validate();
+            mRS.nAllocationSyncAll(getIDSafe(), srcLocation);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.validate();
-        mRS.nAllocationSyncAll(getIDSafe(), srcLocation);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -487,14 +491,17 @@ public class Allocation extends BaseObj {
      *
      */
     public void ioSend() {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "ioSend");
-        if ((mUsage & USAGE_IO_OUTPUT) == 0) {
-            throw new RSIllegalArgumentException(
-                "Can only send buffer if IO_OUTPUT usage specified.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "ioSend");
+            if ((mUsage & USAGE_IO_OUTPUT) == 0) {
+                throw new RSIllegalArgumentException(
+                    "Can only send buffer if IO_OUTPUT usage specified.");
+            }
+            mRS.validate();
+            mRS.nAllocationIoSend(getID(mRS));
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.validate();
-        mRS.nAllocationIoSend(getID(mRS));
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -503,14 +510,17 @@ public class Allocation extends BaseObj {
      *
      */
     public void ioReceive() {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "ioReceive");
-        if ((mUsage & USAGE_IO_INPUT) == 0) {
-            throw new RSIllegalArgumentException(
-                "Can only receive if IO_INPUT usage specified.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "ioReceive");
+            if ((mUsage & USAGE_IO_INPUT) == 0) {
+                throw new RSIllegalArgumentException(
+                    "Can only receive if IO_INPUT usage specified.");
+            }
+            mRS.validate();
+            mRS.nAllocationIoReceive(getID(mRS));
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.validate();
-        mRS.nAllocationIoReceive(getID(mRS));
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -519,28 +529,31 @@ public class Allocation extends BaseObj {
      * @param d Source array.
      */
     public void copyFrom(BaseObj[] d) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
-        mRS.validate();
-        validateIsObject();
-        if (d.length != mCurrentCount) {
-            throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
-                                                 mCurrentCount + ", array length = " + d.length);
-        }
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
+            mRS.validate();
+            validateIsObject();
+            if (d.length != mCurrentCount) {
+                throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
+                                                      mCurrentCount + ", array length = " + d.length);
+            }
 
-        if (RenderScript.sPointerSize == 8) {
-            long i[] = new long[d.length * 4];
-            for (int ct=0; ct < d.length; ct++) {
-                i[ct * 4] = d[ct].getID(mRS);
+            if (RenderScript.sPointerSize == 8) {
+                long i[] = new long[d.length * 4];
+                for (int ct=0; ct < d.length; ct++) {
+                    i[ct * 4] = d[ct].getID(mRS);
+                }
+                copy1DRangeFromUnchecked(0, mCurrentCount, i);
+            } else {
+                int i[] = new int[d.length];
+                for (int ct=0; ct < d.length; ct++) {
+                    i[ct] = (int) d[ct].getID(mRS);
+                }
+                copy1DRangeFromUnchecked(0, mCurrentCount, i);
             }
-            copy1DRangeFromUnchecked(0, mCurrentCount, i);
-        } else {
-            int i[] = new int[d.length];
-            for (int ct=0; ct < d.length; ct++) {
-                i[ct] = (int)d[ct].getID(mRS);
-            }
-            copy1DRangeFromUnchecked(0, mCurrentCount, i);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     private void validateBitmapFormat(Bitmap b) {
@@ -599,16 +612,19 @@ public class Allocation extends BaseObj {
     }
 
     private void copyFromUnchecked(Object array, Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyFromUnchecked");
-        mRS.validate();
-        if (mCurrentDimZ > 0) {
-            copy3DRangeFromUnchecked(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, array, dt, arrayLen);
-        } else if (mCurrentDimY > 0) {
-            copy2DRangeFromUnchecked(0, 0, mCurrentDimX, mCurrentDimY, array, dt, arrayLen);
-        } else {
-            copy1DRangeFromUnchecked(0, mCurrentCount, array, dt, arrayLen);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyFromUnchecked");
+            mRS.validate();
+            if (mCurrentDimZ > 0) {
+                copy3DRangeFromUnchecked(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, array, dt, arrayLen);
+            } else if (mCurrentDimY > 0) {
+                copy2DRangeFromUnchecked(0, 0, mCurrentDimX, mCurrentDimY, array, dt, arrayLen);
+            } else {
+                copy1DRangeFromUnchecked(0, mCurrentCount, array, dt, arrayLen);
+            }
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -619,10 +635,13 @@ public class Allocation extends BaseObj {
      * @param array The source data array
      */
     public void copyFromUnchecked(Object array) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyFromUnchecked");
-        copyFromUnchecked(array, validateObjectIsPrimitiveArray(array, false),
-                          java.lang.reflect.Array.getLength(array));
-        Trace.traceEnd(RenderScript.TRACE_TAG);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyFromUnchecked");
+            copyFromUnchecked(array, validateObjectIsPrimitiveArray(array, false),
+                              java.lang.reflect.Array.getLength(array));
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
+        }
     }
 
     /**
@@ -679,10 +698,13 @@ public class Allocation extends BaseObj {
      * @param array The source data array
      */
     public void copyFrom(Object array) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
-        copyFromUnchecked(array, validateObjectIsPrimitiveArray(array, true),
-                          java.lang.reflect.Array.getLength(array));
-        Trace.traceEnd(RenderScript.TRACE_TAG);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
+            copyFromUnchecked(array, validateObjectIsPrimitiveArray(array, true),
+                              java.lang.reflect.Array.getLength(array));
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
+        }
     }
 
     /**
@@ -747,19 +769,22 @@ public class Allocation extends BaseObj {
      * @param b the source bitmap
      */
     public void copyFrom(Bitmap b) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
-        mRS.validate();
-        if (b.getConfig() == null) {
-            Bitmap newBitmap = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(newBitmap);
-            c.drawBitmap(b, 0, 0, null);
-            copyFrom(newBitmap);
-            return;
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
+            mRS.validate();
+            if (b.getConfig() == null) {
+                Bitmap newBitmap = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas c = new Canvas(newBitmap);
+                c.drawBitmap(b, 0, 0, null);
+                copyFrom(newBitmap);
+                return;
+            }
+            validateBitmapSize(b);
+            validateBitmapFormat(b);
+            mRS.nAllocationCopyFromBitmap(getID(mRS), b);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        validateBitmapSize(b);
-        validateBitmapFormat(b);
-        mRS.nAllocationCopyFromBitmap(getID(mRS), b);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -769,13 +794,16 @@ public class Allocation extends BaseObj {
      * @param a the source allocation
      */
     public void copyFrom(Allocation a) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
-        mRS.validate();
-        if (!mType.equals(a.getType())) {
-            throw new RSIllegalArgumentException("Types of allocations must match.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
+            mRS.validate();
+            if (!mType.equals(a.getType())) {
+                throw new RSIllegalArgumentException("Types of allocations must match.");
+            }
+            copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, a, 0, 0);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, a, 0, 0);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -890,17 +918,20 @@ public class Allocation extends BaseObj {
 
     private void copy1DRangeFromUnchecked(int off, int count, Object array,
                                           Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
-        final int dataSize = mType.mElement.getBytesSize() * count;
-        // AutoPadding for Vec3 Element
-        boolean usePadding = false;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            usePadding = true;
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
+            final int dataSize = mType.mElement.getBytesSize() * count;
+            // AutoPadding for Vec3 Element
+            boolean usePadding = false;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                usePadding = true;
+            }
+            data1DChecks(off, count, arrayLen * dt.mSize, dataSize, usePadding);
+            mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt,
+                                  mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        data1DChecks(off, count, arrayLen * dt.mSize, dataSize, usePadding);
-        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt,
-                              mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -1074,28 +1105,31 @@ public class Allocation extends BaseObj {
 
     void copy2DRangeFromUnchecked(int xoff, int yoff, int w, int h, Object array,
                                   Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFromUnchecked");
-        mRS.validate();
-        validate2DRange(xoff, yoff, w, h);
-        final int dataSize = mType.mElement.getBytesSize() * w * h;
-        // AutoPadding for Vec3 Element
-        boolean usePadding = false;
-        int sizeBytes = arrayLen * dt.mSize;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            if (dataSize / 4 * 3 > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFromUnchecked");
+            mRS.validate();
+            validate2DRange(xoff, yoff, w, h);
+            final int dataSize = mType.mElement.getBytesSize() * w * h;
+            // AutoPadding for Vec3 Element
+            boolean usePadding = false;
+            int sizeBytes = arrayLen * dt.mSize;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                if (dataSize / 4 * 3 > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
+                usePadding = true;
+                sizeBytes = dataSize;
+            } else {
+                if (dataSize > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
             }
-            usePadding = true;
-            sizeBytes = dataSize;
-        } else {
-            if (dataSize > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
-            }
+            mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h,
+                                  array, sizeBytes, dt,
+                                  mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h,
-                              array, sizeBytes, dt,
-                              mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -1109,11 +1143,14 @@ public class Allocation extends BaseObj {
      * @param array Data to be placed into the Allocation
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, Object array) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFrom");
-        copy2DRangeFromUnchecked(xoff, yoff, w, h, array,
-                                 validateObjectIsPrimitiveArray(array, true),
-                                 java.lang.reflect.Array.getLength(array));
-        Trace.traceEnd(RenderScript.TRACE_TAG);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFrom");
+            copy2DRangeFromUnchecked(xoff, yoff, w, h, array,
+                                     validateObjectIsPrimitiveArray(array, true),
+                                     java.lang.reflect.Array.getLength(array));
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
+        }
     }
 
     /**
@@ -1194,14 +1231,17 @@ public class Allocation extends BaseObj {
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h,
                                 Allocation data, int dataXoff, int dataYoff) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFrom");
-        mRS.validate();
-        validate2DRange(xoff, yoff, w, h);
-        mRS.nAllocationData2D(getIDSafe(), xoff, yoff,
-                              mSelectedLOD, mSelectedFace.mID,
-                              w, h, data.getID(mRS), dataXoff, dataYoff,
-                              data.mSelectedLOD, data.mSelectedFace.mID);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFrom");
+            mRS.validate();
+            validate2DRange(xoff, yoff, w, h);
+            mRS.nAllocationData2D(getIDSafe(), xoff, yoff,
+                                  mSelectedLOD, mSelectedFace.mID,
+                                  w, h, data.getID(mRS), dataXoff, dataYoff,
+                                  data.mSelectedLOD, data.mSelectedFace.mID);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
+        }
     }
 
     /**
@@ -1258,28 +1298,31 @@ public class Allocation extends BaseObj {
      */
     private void copy3DRangeFromUnchecked(int xoff, int yoff, int zoff, int w, int h, int d,
                                           Object array, Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeFromUnchecked");
-        mRS.validate();
-        validate3DRange(xoff, yoff, zoff, w, h, d);
-        final int dataSize = mType.mElement.getBytesSize() * w * h * d;
-        // AutoPadding for Vec3 Element
-        boolean usePadding = false;
-        int sizeBytes = arrayLen * dt.mSize;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            if (dataSize / 4 * 3 > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeFromUnchecked");
+            mRS.validate();
+            validate3DRange(xoff, yoff, zoff, w, h, d);
+            final int dataSize = mType.mElement.getBytesSize() * w * h * d;
+            // AutoPadding for Vec3 Element
+            boolean usePadding = false;
+            int sizeBytes = arrayLen * dt.mSize;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                if (dataSize / 4 * 3 > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
+                usePadding = true;
+                sizeBytes = dataSize;
+            } else {
+                if (dataSize > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
             }
-            usePadding = true;
-            sizeBytes = dataSize;
-        } else {
-            if (dataSize > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
-            }
+            mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD, w, h, d,
+                                  array, sizeBytes, dt,
+                                  mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD, w, h, d,
-                              array, sizeBytes, dt,
-                              mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -1295,11 +1338,14 @@ public class Allocation extends BaseObj {
      * @param array to be placed into the allocation
      */
     public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d, Object array) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeFrom");
-        copy3DRangeFromUnchecked(xoff, yoff, zoff, w, h, d, array,
-                                 validateObjectIsPrimitiveArray(array, true),
-                                 java.lang.reflect.Array.getLength(array));
-        Trace.traceEnd(RenderScript.TRACE_TAG);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeFrom");
+            copy3DRangeFromUnchecked(xoff, yoff, zoff, w, h, d, array,
+                                     validateObjectIsPrimitiveArray(array, true),
+                                     java.lang.reflect.Array.getLength(array));
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
+        }
     }
 
     /**
@@ -1334,34 +1380,40 @@ public class Allocation extends BaseObj {
      * @param b The bitmap to be set from the Allocation.
      */
     public void copyTo(Bitmap b) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
-        mRS.validate();
-        validateBitmapFormat(b);
-        validateBitmapSize(b);
-        mRS.nAllocationCopyToBitmap(getID(mRS), b);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
+            mRS.validate();
+            validateBitmapFormat(b);
+            validateBitmapSize(b);
+            mRS.nAllocationCopyToBitmap(getID(mRS), b);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
+        }
     }
 
     private void copyTo(Object array, Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
-        mRS.validate();
-        boolean usePadding = false;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            usePadding = true;
-        }
-        if (usePadding) {
-            if (dt.mSize * arrayLen < mSize / 4 * 3) {
-                throw new RSIllegalArgumentException(
-                    "Size of output array cannot be smaller than size of allocation.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
+            mRS.validate();
+            boolean usePadding = false;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                usePadding = true;
             }
-        } else {
-            if (dt.mSize * arrayLen < mSize) {
-                throw new RSIllegalArgumentException(
-                    "Size of output array cannot be smaller than size of allocation.");
+            if (usePadding) {
+                if (dt.mSize * arrayLen < mSize / 4 * 3) {
+                    throw new RSIllegalArgumentException(
+                        "Size of output array cannot be smaller than size of allocation.");
+                }
+            } else {
+                if (dt.mSize * arrayLen < mSize) {
+                    throw new RSIllegalArgumentException(
+                        "Size of output array cannot be smaller than size of allocation.");
+                }
             }
+            mRS.nAllocationRead(getID(mRS), array, dt, mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.nAllocationRead(getID(mRS), array, dt, mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -1499,17 +1551,20 @@ public class Allocation extends BaseObj {
 
     private void copy1DRangeToUnchecked(int off, int count, Object array,
                                         Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeToUnchecked");
-        final int dataSize = mType.mElement.getBytesSize() * count;
-        // AutoPadding for Vec3 Element
-        boolean usePadding = false;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            usePadding = true;
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeToUnchecked");
+            final int dataSize = mType.mElement.getBytesSize() * count;
+            // AutoPadding for Vec3 Element
+            boolean usePadding = false;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                usePadding = true;
+            }
+            data1DChecks(off, count, arrayLen * dt.mSize, dataSize, usePadding);
+            mRS.nAllocationRead1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt,
+                                  mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        data1DChecks(off, count, arrayLen * dt.mSize, dataSize, usePadding);
-        mRS.nAllocationRead1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt,
-                              mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -1649,27 +1704,30 @@ public class Allocation extends BaseObj {
 
     void copy2DRangeToUnchecked(int xoff, int yoff, int w, int h, Object array,
                                 Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeToUnchecked");
-        mRS.validate();
-        validate2DRange(xoff, yoff, w, h);
-        final int dataSize = mType.mElement.getBytesSize() * w * h;
-        // AutoPadding for Vec3 Element
-        boolean usePadding = false;
-        int sizeBytes = arrayLen * dt.mSize;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            if (dataSize / 4 * 3 > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeToUnchecked");
+            mRS.validate();
+            validate2DRange(xoff, yoff, w, h);
+            final int dataSize = mType.mElement.getBytesSize() * w * h;
+            // AutoPadding for Vec3 Element
+            boolean usePadding = false;
+            int sizeBytes = arrayLen * dt.mSize;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                if (dataSize / 4 * 3 > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
+                usePadding = true;
+                sizeBytes = dataSize;
+            } else {
+                if (dataSize > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
             }
-            usePadding = true;
-            sizeBytes = dataSize;
-        } else {
-            if (dataSize > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
-            }
+            mRS.nAllocationRead2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h,
+                                  array, sizeBytes, dt, mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.nAllocationRead2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h,
-                              array, sizeBytes, dt, mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /**
@@ -1757,27 +1815,30 @@ public class Allocation extends BaseObj {
      */
     private void copy3DRangeToUnchecked(int xoff, int yoff, int zoff, int w, int h, int d,
                                         Object array, Element.DataType dt, int arrayLen) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeToUnchecked");
-        mRS.validate();
-        validate3DRange(xoff, yoff, zoff, w, h, d);
-        final int dataSize = mType.mElement.getBytesSize() * w * h * d;
-        // AutoPadding for Vec3 Element
-        boolean usePadding = false;
-        int sizeBytes = arrayLen * dt.mSize;
-        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
-            if (dataSize / 4 * 3 > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeToUnchecked");
+            mRS.validate();
+            validate3DRange(xoff, yoff, zoff, w, h, d);
+            final int dataSize = mType.mElement.getBytesSize() * w * h * d;
+            // AutoPadding for Vec3 Element
+            boolean usePadding = false;
+            int sizeBytes = arrayLen * dt.mSize;
+            if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+                if (dataSize / 4 * 3 > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
+                usePadding = true;
+                sizeBytes = dataSize;
+            } else {
+                if (dataSize > sizeBytes) {
+                    throw new RSIllegalArgumentException("Array too small for allocation type.");
+                }
             }
-            usePadding = true;
-            sizeBytes = dataSize;
-        } else {
-            if (dataSize > sizeBytes) {
-                throw new RSIllegalArgumentException("Array too small for allocation type.");
-            }
+            mRS.nAllocationRead3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD, w, h, d,
+                                  array, sizeBytes, dt, mType.mElement.mType.mSize, usePadding);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        mRS.nAllocationRead3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD, w, h, d,
-                              array, sizeBytes, dt, mType.mElement.mType.mSize, usePadding);
-        Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
     /*
@@ -1815,17 +1876,20 @@ public class Allocation extends BaseObj {
      *              utilized
      */
     static public Allocation createTyped(RenderScript rs, Type type, MipmapControl mips, int usage) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "createTyped");
-        rs.validate();
-        if (type.getID(rs) == 0) {
-            throw new RSInvalidStateException("Bad Type");
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "createTyped");
+            rs.validate();
+            if (type.getID(rs) == 0) {
+                throw new RSInvalidStateException("Bad Type");
+            }
+            long id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
+            if (id == 0) {
+                throw new RSRuntimeException("Allocation creation failed.");
+            }
+            return new Allocation(id, rs, type, usage);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        long id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
-        if (id == 0) {
-            throw new RSRuntimeException("Allocation creation failed.");
-        }
-        Trace.traceEnd(RenderScript.TRACE_TAG);
-        return new Allocation(id, rs, type, usage);
     }
 
     /**
@@ -1869,18 +1933,21 @@ public class Allocation extends BaseObj {
      */
     static public Allocation createSized(RenderScript rs, Element e,
                                          int count, int usage) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "createSized");
-        rs.validate();
-        Type.Builder b = new Type.Builder(rs, e);
-        b.setX(count);
-        Type t = b.create();
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "createSized");
+            rs.validate();
+            Type.Builder b = new Type.Builder(rs, e);
+            b.setX(count);
+            Type t = b.create();
 
-        long id = rs.nAllocationCreateTyped(t.getID(rs), MipmapControl.MIPMAP_NONE.mID, usage, 0);
-        if (id == 0) {
-            throw new RSRuntimeException("Allocation creation failed.");
+            long id = rs.nAllocationCreateTyped(t.getID(rs), MipmapControl.MIPMAP_NONE.mID, usage, 0);
+            if (id == 0) {
+                throw new RSRuntimeException("Allocation creation failed.");
+            }
+            return new Allocation(id, rs, t, usage);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-        Trace.traceEnd(RenderScript.TRACE_TAG);
-        return new Allocation(id, rs, t, usage);
     }
 
     /**
@@ -1939,44 +2006,47 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
                                               MipmapControl mips,
                                               int usage) {
-        Trace.traceBegin(RenderScript.TRACE_TAG, "createFromBitmap");
-        rs.validate();
+        try {
+            Trace.traceBegin(RenderScript.TRACE_TAG, "createFromBitmap");
+            rs.validate();
 
-        // WAR undocumented color formats
-        if (b.getConfig() == null) {
-            if ((usage & USAGE_SHARED) != 0) {
-                throw new RSIllegalArgumentException("USAGE_SHARED cannot be used with a Bitmap that has a null config.");
+            // WAR undocumented color formats
+            if (b.getConfig() == null) {
+                if ((usage & USAGE_SHARED) != 0) {
+                    throw new RSIllegalArgumentException("USAGE_SHARED cannot be used with a Bitmap that has a null config.");
+                }
+                Bitmap newBitmap = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas c = new Canvas(newBitmap);
+                c.drawBitmap(b, 0, 0, null);
+                return createFromBitmap(rs, newBitmap, mips, usage);
             }
-            Bitmap newBitmap = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(newBitmap);
-            c.drawBitmap(b, 0, 0, null);
-            return createFromBitmap(rs, newBitmap, mips, usage);
-        }
 
-        Type t = typeFromBitmap(rs, b, mips);
+            Type t = typeFromBitmap(rs, b, mips);
 
-        // enable optimized bitmap path only with no mipmap and script-only usage
-        if (mips == MipmapControl.MIPMAP_NONE &&
-            t.getElement().isCompatible(Element.RGBA_8888(rs)) &&
-            usage == (USAGE_SHARED | USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE)) {
-            long id = rs.nAllocationCreateBitmapBackedAllocation(t.getID(rs), mips.mID, b, usage);
+            // enable optimized bitmap path only with no mipmap and script-only usage
+            if (mips == MipmapControl.MIPMAP_NONE &&
+                 t.getElement().isCompatible(Element.RGBA_8888(rs)) &&
+                 usage == (USAGE_SHARED | USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE)) {
+                long id = rs.nAllocationCreateBitmapBackedAllocation(t.getID(rs), mips.mID, b, usage);
+                if (id == 0) {
+                    throw new RSRuntimeException("Load failed.");
+                }
+
+                // keep a reference to the Bitmap around to prevent GC
+                Allocation alloc = new Allocation(id, rs, t, usage);
+                alloc.setBitmap(b);
+                return alloc;
+            }
+
+
+            long id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
             if (id == 0) {
                 throw new RSRuntimeException("Load failed.");
             }
-
-            // keep a reference to the Bitmap around to prevent GC
-            Allocation alloc = new Allocation(id, rs, t, usage);
-            alloc.setBitmap(b);
-            return alloc;
+            return new Allocation(id, rs, t, usage);
+        } finally {
+            Trace.traceEnd(RenderScript.TRACE_TAG);
         }
-
-
-        long id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
-        if (id == 0) {
-            throw new RSRuntimeException("Load failed.");
-        }
-        Trace.traceEnd(RenderScript.TRACE_TAG);
-        return new Allocation(id, rs, t, usage);
     }
 
     /**
