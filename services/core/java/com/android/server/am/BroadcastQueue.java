@@ -1121,25 +1121,23 @@ public final class BroadcastQueue {
     }
 
     final void logBroadcastReceiverDiscardLocked(BroadcastRecord r) {
-        if (r.nextReceiver > 0) {
-            Object curReceiver = r.receivers.get(r.nextReceiver-1);
+        final int logIndex = r.nextReceiver - 1;
+        if (logIndex >= 0 && logIndex < r.receivers.size()) {
+            Object curReceiver = r.receivers.get(logIndex);
             if (curReceiver instanceof BroadcastFilter) {
                 BroadcastFilter bf = (BroadcastFilter) curReceiver;
                 EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_FILTER,
                         bf.owningUserId, System.identityHashCode(r),
-                        r.intent.getAction(),
-                        r.nextReceiver - 1,
-                        System.identityHashCode(bf));
+                        r.intent.getAction(), logIndex, System.identityHashCode(bf));
             } else {
-                ResolveInfo ri = (ResolveInfo)curReceiver;
+                ResolveInfo ri = (ResolveInfo) curReceiver;
                 EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
                         UserHandle.getUserId(ri.activityInfo.applicationInfo.uid),
-                        System.identityHashCode(r), r.intent.getAction(),
-                        r.nextReceiver - 1, ri.toString());
+                        System.identityHashCode(r), r.intent.getAction(), logIndex, ri.toString());
             }
         } else {
-            Slog.w(TAG, "Discarding broadcast before first receiver is invoked: "
-                    + r);
+            if (logIndex < 0) Slog.w(TAG,
+                    "Discarding broadcast before first receiver is invoked: " + r);
             EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
                     -1, System.identityHashCode(r),
                     r.intent.getAction(),
