@@ -171,7 +171,6 @@ public class StatusBarWindowView extends FrameLayout {
         if (mNotificationPanel.isFullyExpanded()
                 && mStackScrollLayout.getVisibility() == View.VISIBLE
                 && mService.getBarState() == StatusBarState.KEYGUARD
-                && !mService.isQsExpanded()
                 && !mService.isBouncerShowing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
             // wake up on a touch down event, if dozing
@@ -195,7 +194,7 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean handled = false;
-        if (mService.getBarState() == StatusBarState.KEYGUARD && !mService.isQsExpanded()) {
+        if (mService.getBarState() == StatusBarState.KEYGUARD) {
             handled = mDragDownHelper.onTouchEvent(ev);
         }
         if (!handled) {
