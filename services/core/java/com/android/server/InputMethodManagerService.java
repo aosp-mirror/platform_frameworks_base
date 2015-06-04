@@ -3713,6 +3713,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurUserActionNotificationSequenceNumber="
                     + mCurUserActionNotificationSequenceNumber);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mScreenOn);
+            p.println("  mSwitchingController:");
+            mSwitchingController.dump(p);
         }
 
         p.println(" ");
