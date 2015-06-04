@@ -24476,10 +24476,10 @@ package android.provider {
 
   public final class AlarmClock {
     ctor public AlarmClock();
+    field public static final java.lang.String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
     field public static final java.lang.String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
     field public static final java.lang.String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
     field public static final java.lang.String ACTION_SHOW_ALARMS = "android.intent.action.SHOW_ALARMS";
-    field public static final java.lang.String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
     field public static final java.lang.String ACTION_SNOOZE_ALARM = "android.intent.action.SNOOZE_ALARM";
     field public static final java.lang.String ALARM_SEARCH_MODE_ALL = "android.all";
     field public static final java.lang.String ALARM_SEARCH_MODE_LABEL = "android.label";
@@ -33746,7 +33746,6 @@ package android.transition {
     method public android.transition.Transition addTarget(java.lang.String);
     method public android.transition.Transition addTarget(java.lang.Class);
     method public android.transition.Transition addTarget(android.view.View);
-    method protected boolean areValuesChanged(android.transition.TransitionValues, android.transition.TransitionValues);
     method public boolean canRemoveViews();
     method public abstract void captureEndValues(android.transition.TransitionValues);
     method public abstract void captureStartValues(android.transition.TransitionValues);
@@ -33773,6 +33772,7 @@ package android.transition {
     method public java.util.List<android.view.View> getTargets();
     method public java.lang.String[] getTransitionProperties();
     method public android.transition.TransitionValues getTransitionValues(android.view.View, boolean);
+    method public boolean isTransitionRequired(android.transition.TransitionValues, android.transition.TransitionValues);
     method public android.transition.Transition removeListener(android.transition.Transition.TransitionListener);
     method public android.transition.Transition removeTarget(int);
     method public android.transition.Transition removeTarget(java.lang.String);
