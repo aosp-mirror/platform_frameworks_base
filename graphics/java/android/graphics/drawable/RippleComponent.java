@@ -233,6 +233,10 @@ abstract class RippleComponent {
 
         if (mHasPendingHardwareAnimator) {
             mHasPendingHardwareAnimator = false;
+
+            // Manually jump values to their exited state. Normally we'd do that
+            // later when starting the hardware exit, but we're aborting early.
+            jumpValuesToExit();
         }
     }
 
