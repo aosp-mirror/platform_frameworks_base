@@ -285,8 +285,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void timeShiftSeekTo(long timeMs) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SEEK_TO,
-                Long.valueOf(timeMs)));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SEEK_TO, timeMs));
     }
 
     @Override
@@ -298,7 +297,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void timeShiftEnablePositionTracking(boolean enable) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
-                DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, Boolean.valueOf(enable)));
+                DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, enable));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {
