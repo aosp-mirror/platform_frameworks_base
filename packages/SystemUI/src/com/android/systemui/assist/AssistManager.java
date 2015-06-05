@@ -20,6 +20,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -296,13 +297,7 @@ public class AssistManager {
     }
 
     private void vibrate() {
-        if (Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0) {
-            Resources res = mContext.getResources();
-            Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-            vibrator.vibrate(res.getInteger(R.integer.config_search_panel_view_vibration_duration),
-                    VIBRATION_ATTRIBUTES);
-        }
+        mView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
     public boolean isAssistantIntentAvailable() {
