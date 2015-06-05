@@ -284,22 +284,8 @@ adb logcat -b radio
   <h2 id="viewingStd">Viewing stdout and stderr</h2>
 
   <p>By default, the Android system sends <code>stdout</code> and <code>stderr</code>
-  (<code>System.out</code> and <code>System.err</code>) output to <code>/dev/null</code>. In
-  processes that run the Dalvik VM, you can have the system write a copy of the output to the log
-  file. In this case, the system writes the messages to the log using the log tags
-  <code>stdout</code> and <code>stderr</code>, both with priority <code>I</code>.</p>
-
-  <p>To route the output in this way, you stop a running emulator/device instance and then use the
-  shell command <code>setprop</code> to enable the redirection of output. Here's how you do it:</p>
-  <pre>
-$ adb shell stop
-$ adb shell setprop log.redirect-stdio true
-$ adb shell start
-</pre>
-
-  <p>The system retains this setting until you terminate the emulator/device instance. To use the
-  setting as a default on the emulator/device instance, you can add an entry to
-  <code>/data/local.prop</code> on the device.</p>
+  output to <code>/dev/null</code>. (The Java <code>System.out</code> and <code>System.err</code>
+  streams go to the log.)
 
   <h2 id="DebuggingWebPages">Debugging Web Apps</h2>
   <p>
