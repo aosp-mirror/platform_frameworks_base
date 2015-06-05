@@ -60,22 +60,18 @@ public class KeyguardAffordanceView extends ImageView {
     private final int mNormalColor;
     private final ArgbEvaluator mColorInterpolator;
     private final FlingAnimationUtils mFlingAnimationUtils;
-    private final Drawable mArrowDrawable;
-    private final int mHintChevronPadding;
     private float mCircleRadius;
     private int mCenterX;
     private int mCenterY;
     private ValueAnimator mCircleAnimator;
     private ValueAnimator mAlphaAnimator;
     private ValueAnimator mScaleAnimator;
-    private ValueAnimator mArrowAnimator;
     private float mCircleStartValue;
     private boolean mCircleWillBeHidden;
     private int[] mTempPoint = new int[2];
     private float mImageScale;
     private int mCircleColor;
     private boolean mIsLeft;
-    private float mArrowAlpha = 0.0f;
     private View mPreviewView;
     private float mCircleStartRadius;
     private float mMaxCircleSize;
@@ -113,12 +109,6 @@ public class KeyguardAffordanceView extends ImageView {
             mAlphaAnimator = null;
         }
     };
-    private AnimatorListenerAdapter mArrowEndListener = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mArrowAnimator = null;
-        }
-    };
 
     public KeyguardAffordanceView(Context context) {
         this(context, null);
@@ -144,17 +134,12 @@ public class KeyguardAffordanceView extends ImageView {
         mInverseColor = 0xff000000;
         mMinBackgroundRadius = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_affordance_min_background_radius);
-        mHintChevronPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.hint_chevron_circle_padding);
         mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.linear_out_slow_in);
         mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_linear_in);
         mColorInterpolator = new ArgbEvaluator();
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.3f);
-        mArrowDrawable = context.getDrawable(R.drawable.ic_chevron_left);
-        mArrowDrawable.setBounds(0, 0, mArrowDrawable.getIntrinsicWidth(),
-                mArrowDrawable.getIntrinsicHeight());
     }
 
     @Override
@@ -169,7 +154,6 @@ public class KeyguardAffordanceView extends ImageView {
     protected void onDraw(Canvas canvas) {
         mSupportHardware = canvas.isHardwareAccelerated();
         drawBackgroundCircle(canvas);
-        drawArrow(canvas);
         canvas.save();
         canvas.scale(mImageScale, mImageScale, getWidth() / 2, getHeight() / 2);
         super.onDraw(canvas);
@@ -180,22 +164,6 @@ public class KeyguardAffordanceView extends ImageView {
         mPreviewView = v;
         if (mPreviewView != null) {
             mPreviewView.setVisibility(INVISIBLE);
-        }
-    }
-
-    private void drawArrow(Canvas canvas) {
-        if (mArrowAlpha > 0) {
-            canvas.save();
-            canvas.translate(mCenterX, mCenterY);
-            if (mIsLeft) {
-                canvas.scale(-1.0f, 1.0f);
-            }
-            canvas.translate(- mCircleRadius - mHintChevronPadding
-                    - mArrowDrawable.getIntrinsicWidth() / 2,
-                    - mArrowDrawable.getIntrinsicHeight() / 2);
-            mArrowDrawable.setAlpha((int) (mArrowAlpha * 255));
-            mArrowDrawable.draw(canvas);
-            canvas.restore();
         }
     }
 
@@ -531,36 +499,6 @@ public class KeyguardAffordanceView extends ImageView {
 
     public float getCircleRadius() {
         return mCircleRadius;
-    }
-
-    public void showArrow(boolean show) {
-        cancelAnimator(mArrowAnimator);
-        float targetAlpha = show ? 1.0f : 0.0f;
-        if (mArrowAlpha == targetAlpha) {
-            return;
-        }
-        ValueAnimator animator = ValueAnimator.ofFloat(mArrowAlpha, targetAlpha);
-        mArrowAnimator = animator;
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mArrowAlpha = (float) animation.getAnimatedValue();
-                invalidate();
-            }
-        });
-        animator.addListener(mArrowEndListener);
-        Interpolator interpolator = show
-                    ? mAppearInterpolator
-                    : mDisappearInterpolator;
-        animator.setInterpolator(interpolator);
-        float durationFactor = Math.abs(mArrowAlpha - targetAlpha);
-        long duration = (long) (NORMAL_ANIMATION_DURATION * durationFactor);
-        animator.setDuration(duration);
-        animator.start();
-    }
-
-    public void setIsLeft(boolean left) {
-        mIsLeft = left;
     }
 
     @Override
