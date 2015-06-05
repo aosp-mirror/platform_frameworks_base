@@ -485,8 +485,7 @@ public final class TvContract {
         /** The video resolution for ultra high-definition. */
         public static final String VIDEO_RESOLUTION_UHD = "VIDEO_RESOLUTION_UHD";
 
-        private static final Map<String, String> VIDEO_FORMAT_TO_RESOLUTION_MAP =
-                new HashMap<String, String>();
+        private static final Map<String, String> VIDEO_FORMAT_TO_RESOLUTION_MAP = new HashMap<>();
 
         static {
             VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_480I, VIDEO_RESOLUTION_SD);
@@ -1128,7 +1127,7 @@ public final class TvContract {
             /** The genre for Tech/Science. */
             public static final String TECH_SCIENCE = "TECH_SCIENCE";
 
-            private static final ArraySet<String> CANONICAL_GENRES = new ArraySet<String>();
+            private static final ArraySet<String> CANONICAL_GENRES = new ArraySet<>();
             static {
                 CANONICAL_GENRES.add(FAMILY_KIDS);
                 CANONICAL_GENRES.add(SPORTS);
