@@ -74,6 +74,58 @@ package android.os {
 
 package android.provider {
 
+  public class Browser {
+    method public static final void addSearchUrl(android.content.ContentResolver, java.lang.String);
+    method public static final boolean canClearHistory(android.content.ContentResolver);
+    method public static final void clearHistory(android.content.ContentResolver);
+    method public static final void clearSearches(android.content.ContentResolver);
+    method public static final void deleteFromHistory(android.content.ContentResolver, java.lang.String);
+    method public static final void deleteHistoryTimeFrame(android.content.ContentResolver, long, long);
+    method public static final android.database.Cursor getAllBookmarks(android.content.ContentResolver) throws java.lang.IllegalStateException;
+    method public static final android.database.Cursor getAllVisitedUrls(android.content.ContentResolver) throws java.lang.IllegalStateException;
+    method public static final void requestAllIcons(android.content.ContentResolver, java.lang.String, android.webkit.WebIconDatabase.IconListener);
+    method public static final void saveBookmark(android.content.Context, java.lang.String, java.lang.String);
+    method public static final void truncateHistory(android.content.ContentResolver);
+    method public static final void updateVisitedHistory(android.content.ContentResolver, java.lang.String, boolean);
+    field public static final android.net.Uri BOOKMARKS_URI;
+    field public static final java.lang.String[] HISTORY_PROJECTION;
+    field public static final int HISTORY_PROJECTION_BOOKMARK_INDEX = 4; // 0x4
+    field public static final int HISTORY_PROJECTION_DATE_INDEX = 3; // 0x3
+    field public static final int HISTORY_PROJECTION_FAVICON_INDEX = 6; // 0x6
+    field public static final int HISTORY_PROJECTION_ID_INDEX = 0; // 0x0
+    field public static final int HISTORY_PROJECTION_TITLE_INDEX = 5; // 0x5
+    field public static final int HISTORY_PROJECTION_URL_INDEX = 1; // 0x1
+    field public static final int HISTORY_PROJECTION_VISITS_INDEX = 2; // 0x2
+    field public static final java.lang.String[] SEARCHES_PROJECTION;
+    field public static final int SEARCHES_PROJECTION_DATE_INDEX = 2; // 0x2
+    field public static final int SEARCHES_PROJECTION_SEARCH_INDEX = 1; // 0x1
+    field public static final android.net.Uri SEARCHES_URI;
+    field public static final java.lang.String[] TRUNCATE_HISTORY_PROJECTION;
+    field public static final int TRUNCATE_HISTORY_PROJECTION_ID_INDEX = 0; // 0x0
+    field public static final int TRUNCATE_N_OLDEST = 5; // 0x5
+  }
+
+  public static class Browser.BookmarkColumns implements android.provider.BaseColumns {
+    ctor public Browser.BookmarkColumns();
+    field public static final java.lang.String BOOKMARK = "bookmark";
+    field public static final java.lang.String CREATED = "created";
+    field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String FAVICON = "favicon";
+    field public static final java.lang.String THUMBNAIL = "thumbnail";
+    field public static final java.lang.String TITLE = "title";
+    field public static final java.lang.String TOUCH_ICON = "touch_icon";
+    field public static final java.lang.String URL = "url";
+    field public static final java.lang.String USER_ENTERED = "user_entered";
+    field public static final java.lang.String VISITS = "visits";
+  }
+
+  public static class Browser.SearchColumns implements android.provider.BaseColumns {
+    ctor public Browser.SearchColumns();
+    field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String SEARCH = "search";
+    field public static final deprecated java.lang.String URL = "url";
+  }
+
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
     field public static final java.lang.String VOLUME_ALARM = "volume_alarm";
