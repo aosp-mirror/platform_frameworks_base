@@ -348,8 +348,12 @@ public final class BluetoothEventManager {
                 Log.e(TAG, "ACTION_PAIRING_CANCEL with no EXTRA_DEVICE");
                 return;
             }
-            int errorMsg = R.string.bluetooth_pairing_error_message;
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice == null) {
+                Log.e(TAG, "ACTION_PAIRING_CANCEL with no cached device");
+                return;
+            }
+            int errorMsg = R.string.bluetooth_pairing_error_message;
             Utils.showError(context, cachedDevice.getName(), errorMsg);
         }
     }
