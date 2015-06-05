@@ -783,8 +783,8 @@
         <item>10</item>
     </integer-array>
 
-    <!-- Vibrator pattern for feedback about a stylus button press -->
-    <integer-array name="config_stylusButtonPressVibePattern">
+    <!-- Vibrator pattern for feedback about a context click -->
+    <integer-array name="config_contextClickVibePattern">
         <item>0</item>
         <item>1</item>
         <item>20</item>

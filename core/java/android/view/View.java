@@ -990,13 +990,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * <p>
-     * Indicates this view can be stylus button pressed. When stylus button
-     * pressable, a View reacts to stylus button presses by notifiying
-     * the OnStylusButtonPressListener.
+     * Indicates this view can be context clicked. When context clickable, a View reacts to a
+     * context click (e.g. a primary stylus button press or right mouse click) by notifying the
+     * OnContextClickListener.
      * </p>
      * {@hide}
      */
-    static final int STYLUS_BUTTON_PRESSABLE = 0x00800000;
+    static final int CONTEXT_CLICKABLE = 0x00800000;
 
 
     /** @hide */
@@ -3418,11 +3418,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         protected OnLongClickListener mOnLongClickListener;
 
         /**
-         * Listener used to dispatch stylus touch and button press events. This field should be made
-         * private, so it is hidden from the SDK.
+         * Listener used to dispatch context click events. This field should be made private, so it
+         * is hidden from the SDK.
          * {@hide}
          */
-        protected OnStylusButtonPressListener mOnStylusButtonPressListener;
+        protected OnContextClickListener mOnContextClickListener;
 
         /**
          * Listener used to build the context menu.
@@ -3515,11 +3515,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean mHasPerformedLongPress;
 
     /**
-     * Whether the stylus button is currently pressed down. This is true when
-     * the stylus is touching the screen and the button has been pressed, this
-     * is false once the stylus has been lifted.
+     * Whether a context click button is currently pressed down. This is true when the stylus is
+     * touching the screen and the primary button has been pressed, or if a mouse's right button is
+     * pressed. This is false once the button is released or if the stylus has been lifted.
      */
-    private boolean mInStylusButtonPress;
+    private boolean mInContextButtonPress;
 
     /**
      * Whether the next up event should be ignored for the purposes of gesture recognition. This is
@@ -4045,10 +4045,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         viewFlagMasks |= LONG_CLICKABLE;
                     }
                     break;
-                case com.android.internal.R.styleable.View_stylusButtonPressable:
+                case com.android.internal.R.styleable.View_contextClickable:
                     if (a.getBoolean(attr, false)) {
-                        viewFlagValues |= STYLUS_BUTTON_PRESSABLE;
-                        viewFlagMasks |= STYLUS_BUTTON_PRESSABLE;
+                        viewFlagValues |= CONTEXT_CLICKABLE;
+                        viewFlagMasks |= CONTEXT_CLICKABLE;
                     }
                     break;
                 case com.android.internal.R.styleable.View_saveEnabled:
@@ -4537,7 +4537,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         out.append((mViewFlags&SCROLLBARS_VERTICAL) != 0 ? 'V' : '.');
         out.append((mViewFlags&CLICKABLE) != 0 ? 'C' : '.');
         out.append((mViewFlags&LONG_CLICKABLE) != 0 ? 'L' : '.');
-        out.append((mViewFlags & STYLUS_BUTTON_PRESSABLE) != 0 ? 'S' : '.');
+        out.append((mViewFlags&CONTEXT_CLICKABLE) != 0 ? 'X' : '.');
         out.append(' ');
         out.append((mPrivateFlags&PFLAG_IS_ROOT_NAMESPACE) != 0 ? 'R' : '.');
         out.append((mPrivateFlags&PFLAG_FOCUSED) != 0 ? 'F' : '.');
@@ -5125,17 +5125,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Register a callback to be invoked when this view is touched with a stylus and the button is
-     * pressed.
+     * Register a callback to be invoked when this view is context clicked. If the view is not
+     * context clickable, it becomes context clickable.
      *
      * @param l The callback that will run
-     * @see #setStylusButtonPressable(boolean)
+     * @see #setContextClickable(boolean)
      */
-    public void setOnStylusButtonPressListener(@Nullable OnStylusButtonPressListener l) {
-        if (!isStylusButtonPressable()) {
-            setStylusButtonPressable(true);
+    public void setOnContextClickListener(@Nullable OnContextClickListener l) {
+        if (!isContextClickable()) {
+            setContextClickable(true);
         }
-        getListenerInfo().mOnStylusButtonPressListener = l;
+        getListenerInfo().mOnContextClickListener = l;
     }
 
     /**
@@ -5216,21 +5216,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Call this view's OnStylusButtonPressListener, if it is defined.
+     * Call this view's OnContextClickListener, if it is defined.
      *
-     * @return True if there was an assigned OnStylusButtonPressListener that consumed the event,
-     *         false otherwise.
+     * @return True if there was an assigned OnContextClickListener that consumed the event, false
+     *         otherwise.
      */
-    public boolean performStylusButtonPress() {
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_STYLUS_BUTTON_PRESSED);
+    public boolean performContextClick() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED);
 
         boolean handled = false;
         ListenerInfo li = mListenerInfo;
-        if (li != null && li.mOnStylusButtonPressListener != null) {
-            handled = li.mOnStylusButtonPressListener.onStylusButtonPress(View.this);
+        if (li != null && li.mOnContextClickListener != null) {
+            handled = li.mOnContextClickListener.onContextClick(View.this);
         }
         if (handled) {
-            performHapticFeedback(HapticFeedbackConstants.STYLUS_BUTTON_PRESS);
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         }
         return handled;
     }
@@ -6025,7 +6025,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>{@link AccessibilityNodeInfo#setFocused(boolean)},</li>
      *   <li>{@link AccessibilityNodeInfo#setLongClickable(boolean)},</li>
      *   <li>{@link AccessibilityNodeInfo#setSelected(boolean)},</li>
-     *   <li>{@link AccessibilityNodeInfo#setStylusButtonPressable(boolean)}</li>
+     *   <li>{@link AccessibilityNodeInfo#setContextClickable(boolean)}</li>
      * </ul>
      * <p>
      * Subclasses should override this method, call the super implementation,
@@ -6177,8 +6177,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setChecked(true);
             }
         }
-        if (isStylusButtonPressable()) {
-            structure.setStylusButtonPressable(true);
+        if (isContextClickable()) {
+            structure.setContextClickable(true);
         }
         structure.setClassName(getAccessibilityClassName().toString());
         structure.setContentDescription(getContentDescription());
@@ -6247,8 +6247,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setChecked(true);
             }
         }
-        if (info.isStylusButtonPressable()) {
-            structure.setStylusButtonPressable(true);
+        if (info.isContextClickable()) {
+            structure.setContextClickable(true);
         }
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
@@ -6379,7 +6379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setAccessibilityFocused(isAccessibilityFocused());
         info.setSelected(isSelected());
         info.setLongClickable(isLongClickable());
-        info.setStylusButtonPressable(isStylusButtonPressable());
+        info.setContextClickable(isContextClickable());
         info.setLiveRegion(getAccessibilityLiveRegion());
 
         // TODO: These make sense only if we are in an AdapterView but all
@@ -6410,8 +6410,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
         }
 
-        if (isStylusButtonPressable() && isEnabled()) {
-            info.addAction(AccessibilityAction.ACTION_STYLUS_BUTTON_PRESS);
+        if (isContextClickable() && isEnabled()) {
+            info.addAction(AccessibilityAction.ACTION_CONTEXT_CLICK);
         }
 
         CharSequence text = getIterableTextForAccessibility();
@@ -7801,28 +7801,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Indicates whether this view reacts to stylus button press events or not.
+     * Indicates whether this view reacts to context clicks or not.
      *
-     * @return true if the view is stylus button pressable, false otherwise
-     * @see #setStylusButtonPressable(boolean)
-     * @attr ref android.R.styleable#View_stylusButtonPressable
+     * @return true if the view is context clickable, false otherwise
+     * @see #setContextClickable(boolean)
+     * @attr ref android.R.styleable#View_contextClickable
      */
-    public boolean isStylusButtonPressable() {
-        return (mViewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE;
+    public boolean isContextClickable() {
+        return (mViewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE;
     }
 
     /**
-     * Enables or disables stylus button press events for this view. When a view is stylus button
-     * pressable it reacts to the user touching the screen with a stylus and pressing the first
-     * stylus button. This event can launch the listener.
+     * Enables or disables context clicking for this view. This event can launch the listener.
      *
-     * @param stylusButtonPressable true to make the view react to a stylus button press, false
-     *            otherwise
-     * @see #isStylusButtonPressable()
-     * @attr ref android.R.styleable#View_stylusButtonPressable
+     * @param contextClickable true to make the view react to a context click, false otherwise
+     * @see #isContextClickable()
+     * @attr ref android.R.styleable#View_contextClickable
      */
-    public void setStylusButtonPressable(boolean stylusButtonPressable) {
-        setFlags(stylusButtonPressable ? STYLUS_BUTTON_PRESSABLE : 0, STYLUS_BUTTON_PRESSABLE);
+    public void setContextClickable(boolean contextClickable) {
+        setFlags(contextClickable ? CONTEXT_CLICKABLE : 0, CONTEXT_CLICKABLE);
     }
 
     /**
@@ -8243,7 +8240,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int viewFlags = mViewFlags;
 
         if (((viewFlags & CLICKABLE) == CLICKABLE || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE
-                || (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE)
+                || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE)
                 && (viewFlags & ENABLED_MASK) == ENABLED) {
             views.add(this);
         }
@@ -8962,9 +8959,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return requestRectangleOnScreen(r, true);
                 }
             } break;
-            case R.id.accessibilityActionStylusButtonPress: {
-                if (isStylusButtonPressable()) {
-                    performStylusButtonPress();
+            case R.id.accessibilityActionContextClick: {
+                if (isContextClickable()) {
+                    performContextClick();
                     return true;
                 }
             } break;
@@ -9369,12 +9366,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return true;
         }
 
+        final int actionButton = event.getActionButton();
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_BUTTON_PRESS:
-                if (isStylusButtonPressable() && !mInStylusButtonPress && !mHasPerformedLongPress
-                        && event.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
-                    if (performStylusButtonPress()) {
-                        mInStylusButtonPress = true;
+                if (isContextClickable() && !mInContextButtonPress && !mHasPerformedLongPress
+                        && (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                        || actionButton == MotionEvent.BUTTON_SECONDARY)) {
+                    if (performContextClick()) {
+                        mInContextButtonPress = true;
                         setPressed(true, event.getX(), event.getY());
                         removeTapCallback();
                         removeLongPressCallback();
@@ -9384,9 +9383,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 break;
 
             case MotionEvent.ACTION_BUTTON_RELEASE:
-                if (mInStylusButtonPress
-                        && event.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
-                    mInStylusButtonPress = false;
+                if (mInContextButtonPress && (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                        || actionButton == MotionEvent.BUTTON_SECONDARY)) {
+                    mInContextButtonPress = false;
                     mIgnoreNextUpEvent = true;
                 }
                 break;
@@ -10145,7 +10144,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         return (viewFlags & CLICKABLE) == CLICKABLE
                 || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE
-                || (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE;
+                || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE;
     }
 
     /**
@@ -10238,7 +10237,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // events, it just doesn't respond to them.
             return (((viewFlags & CLICKABLE) == CLICKABLE
                     || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
-                    || (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE);
+                    || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE);
         }
 
         if (mTouchDelegate != null) {
@@ -10249,7 +10248,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (((viewFlags & CLICKABLE) == CLICKABLE ||
                 (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) ||
-                (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE) {
+                (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE) {
             switch (action) {
                 case MotionEvent.ACTION_UP:
                     boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
@@ -10335,7 +10334,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setPressed(false);
                     removeTapCallback();
                     removeLongPressCallback();
-                    mInStylusButtonPress = false;
+                    mInContextButtonPress = false;
                     mHasPerformedLongPress = false;
                     mIgnoreNextUpEvent = false;
                     break;
@@ -10643,7 +10642,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (accessibilityEnabled) {
             if ((changed & FOCUSABLE_MASK) != 0 || (changed & VISIBILITY_MASK) != 0
                     || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
-                    || (changed & STYLUS_BUTTON_PRESSABLE) != 0) {
+                    || (changed & CONTEXT_CLICKABLE) != 0) {
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
                     notifySubtreeAccessibilityStateChangedIfNeeded();
                 } else {
@@ -21301,17 +21300,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Interface definition for a callback to be invoked when a view is touched with a stylus while
-     * the stylus button is pressed.
+     * Interface definition for a callback to be invoked when a view is context clicked.
      */
-    public interface OnStylusButtonPressListener {
+    public interface OnContextClickListener {
         /**
-         * Called when a view is touched with a stylus while the stylus button is pressed.
+         * Called when a view is context clicked.
          *
-         * @param v The view that was touched.
-         * @return true if the callback consumed the stylus button press, false otherwise.
+         * @param v The view that has been context clicked.
+         * @return true if the callback consumed the context click, false otherwise.
          */
-        boolean onStylusButtonPress(View v);
+        boolean onContextClick(View v);
     }
 
     /**
