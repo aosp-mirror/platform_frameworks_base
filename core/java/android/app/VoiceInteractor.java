@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -257,7 +259,7 @@ public class VoiceInteractor {
      * so the user can give a confirmation.
      */
     public static class ConfirmationRequest extends Request {
-        final CharSequence mPrompt;
+        final Prompt mPrompt;
         final Bundle mExtras;
 
         /**
@@ -266,8 +268,20 @@ public class VoiceInteractor {
          *     should be spoken.
          * @param extras Additional optional information or null.
          */
-        public ConfirmationRequest(CharSequence prompt, Bundle extras) {
+        public ConfirmationRequest(@Nullable Prompt prompt, @Nullable Bundle extras) {
             mPrompt = prompt;
+            mExtras = extras;
+        }
+
+        /**
+         * Create a new confirmation request.
+         * @param prompt Optional confirmation to speak to the user or null if nothing
+         *     should be spoken.
+         * @param extras Additional optional information or null.
+         * @deprecated Prefer the version that takes a {@link Prompt}.
+         */
+        public ConfirmationRequest(CharSequence prompt, Bundle extras) {
+            mPrompt = (prompt != null ? new Prompt(prompt) : null);
             mExtras = extras;
         }
 
@@ -288,7 +302,7 @@ public class VoiceInteractor {
      * either {@link #onPickOptionResult} or {@link #onCancel()}.
      */
     public static class PickOptionRequest extends Request {
-        final CharSequence mPrompt;
+        final Prompt mPrompt;
         final Option[] mOptions;
         final Bundle mExtras;
 
@@ -417,8 +431,23 @@ public class VoiceInteractor {
          * @param options The set of {@link Option}s the user is selecting from.
          * @param extras Additional optional information or null.
          */
-        public PickOptionRequest(CharSequence prompt, Option[] options, Bundle extras) {
+        public PickOptionRequest(@Nullable Prompt prompt, Option[] options,
+                @Nullable Bundle extras) {
             mPrompt = prompt;
+            mOptions = options;
+            mExtras = extras;
+        }
+
+        /**
+         * Create a new pick option request.
+         * @param prompt Optional question to be asked of the user when the options are
+         *     presented or null if nothing should be asked.
+         * @param options The set of {@link Option}s the user is selecting from.
+         * @param extras Additional optional information or null.
+         * @deprecated Prefer the version that takes a {@link Prompt}.
+         */
+        public PickOptionRequest(CharSequence prompt, Option[] options, Bundle extras) {
+            mPrompt = (prompt != null ? new Prompt(prompt) : null);
             mOptions = options;
             mExtras = extras;
         }
@@ -451,17 +480,29 @@ public class VoiceInteractor {
      * interaction task.
      */
     public static class CompleteVoiceRequest extends Request {
-        final CharSequence mMessage;
+        final Prompt mPrompt;
         final Bundle mExtras;
+
+        /**
+         * Create a new completed voice interaction request.
+         * @param prompt Optional message to speak to the user about the completion status of
+         *     the task or null if nothing should be spoken.
+         * @param extras Additional optional information or null.
+         */
+        public CompleteVoiceRequest(@Nullable Prompt prompt, @Nullable Bundle extras) {
+            mPrompt = prompt;
+            mExtras = extras;
+        }
 
         /**
          * Create a new completed voice interaction request.
          * @param message Optional message to speak to the user about the completion status of
          *     the task or null if nothing should be spoken.
          * @param extras Additional optional information or null.
+         * @deprecated Prefer the version that takes a {@link Prompt}.
          */
         public CompleteVoiceRequest(CharSequence message, Bundle extras) {
-            mMessage = message;
+            mPrompt = (message != null ? new Prompt(message) : null);
             mExtras = extras;
         }
 
@@ -470,7 +511,7 @@ public class VoiceInteractor {
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
-            return interactor.startCompleteVoice(packageName, callback, mMessage, mExtras);
+            return interactor.startCompleteVoice(packageName, callback, mPrompt, mExtras);
         }
     }
 
@@ -486,17 +527,29 @@ public class VoiceInteractor {
      * interaction task.
      */
     public static class AbortVoiceRequest extends Request {
-        final CharSequence mMessage;
+        final Prompt mPrompt;
         final Bundle mExtras;
+
+        /**
+         * Create a new voice abort request.
+         * @param prompt Optional message to speak to the user indicating why the task could
+         *     not be completed by voice or null if nothing should be spoken.
+         * @param extras Additional optional information or null.
+         */
+        public AbortVoiceRequest(@Nullable Prompt prompt, @Nullable Bundle extras) {
+            mPrompt = prompt;
+            mExtras = extras;
+        }
 
         /**
          * Create a new voice abort request.
          * @param message Optional message to speak to the user indicating why the task could
          *     not be completed by voice or null if nothing should be spoken.
          * @param extras Additional optional information or null.
+         * @deprecated Prefer the version that takes a {@link Prompt}.
          */
         public AbortVoiceRequest(CharSequence message, Bundle extras) {
-            mMessage = message;
+            mPrompt = (message != null ? new Prompt(message) : null);
             mExtras = extras;
         }
 
@@ -505,7 +558,7 @@ public class VoiceInteractor {
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
-            return interactor.startAbortVoice(packageName, callback, mMessage, mExtras);
+            return interactor.startAbortVoice(packageName, callback, mPrompt, mExtras);
         }
     }
 
@@ -550,7 +603,101 @@ public class VoiceInteractor {
                 IVoiceInteractorCallback callback) throws RemoteException {
             return interactor.startCommand(packageName, callback, mCommand, mArgs);
         }
-   }
+    }
+
+    /**
+     * A set of voice prompts to use with the voice interaction system to confirm an action, select
+     * an option, or do similar operations. Multiple voice prompts may be provided for variety. A
+     * visual prompt must be provided, which might not match the spoken version. For example, the
+     * confirmation "Are you sure you want to purchase this item?" might use a visual label like
+     * "Purchase item".
+     */
+    public static class Prompt implements Parcelable {
+        // Mandatory voice prompt. Must contain at least one item, which must not be null.
+        private final CharSequence[] mVoicePrompts;
+
+        // Mandatory visual prompt.
+        private final CharSequence mVisualPrompt;
+
+        /**
+         * Constructs a prompt set.
+         * @param voicePrompts An array of one or more voice prompts. Must not be empty or null.
+         * @param visualPrompt A prompt to display on the screen. Must not be null.
+         */
+        public Prompt(@NonNull CharSequence[] voicePrompts, @NonNull CharSequence visualPrompt) {
+            if (voicePrompts == null) {
+                throw new NullPointerException("voicePrompts must not be null");
+            }
+            if (voicePrompts.length == 0) {
+                throw new IllegalArgumentException("voicePrompts must not be empty");
+            }
+            if (visualPrompt == null) {
+                throw new NullPointerException("visualPrompt must not be null");
+            }
+            this.mVoicePrompts = voicePrompts;
+            this.mVisualPrompt = visualPrompt;
+        }
+
+        /**
+         * Constructs a prompt set with single prompt used for all interactions. This is most useful
+         * in test apps. Non-trivial apps should prefer the detailed constructor.
+         */
+        public Prompt(@NonNull CharSequence prompt) {
+            this.mVoicePrompts = new CharSequence[] { prompt };
+            this.mVisualPrompt = prompt;
+        }
+
+        /**
+         * Returns a prompt to use for voice interactions.
+         */
+        @NonNull
+        public CharSequence getVoicePromptAt(int index) {
+            return mVoicePrompts[index];
+        }
+
+        /**
+         * Returns the number of different voice prompts.
+         */
+        public int countVoicePrompts() {
+            return mVoicePrompts.length;
+        }
+
+        /**
+         * Returns the prompt to use for visual display.
+         */
+        @NonNull
+        public CharSequence getVisualPrompt() {
+            return mVisualPrompt;
+        }
+
+        /** Constructor to support Parcelable behavior. */
+        Prompt(Parcel in) {
+            mVoicePrompts = in.readCharSequenceArray();
+            mVisualPrompt = in.readCharSequence();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeCharSequenceArray(mVoicePrompts);
+            dest.writeCharSequence(mVisualPrompt);
+        }
+
+        public static final Creator<Prompt> CREATOR
+                = new Creator<Prompt>() {
+            public Prompt createFromParcel(Parcel in) {
+                return new Prompt(in);
+            }
+
+            public Prompt[] newArray(int size) {
+                return new Prompt[size];
+            }
+        };
+    }
 
     VoiceInteractor(IVoiceInteractor interactor, Context context, Activity activity,
             Looper looper) {
@@ -631,7 +778,7 @@ public class VoiceInteractor {
     }
 
     /**
-     * Queries the supported commands available from the VoiceinteractionService.
+     * Queries the supported commands available from the VoiceInteractionService.
      * The command is a string that describes the generic operation to be performed.
      * An example might be "org.example.commands.PICK_DATE" to ask the user to pick
      * a date.  (Note: This is not an actual working example.)

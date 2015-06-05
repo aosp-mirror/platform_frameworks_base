@@ -17,3 +17,4 @@
 package android.app;
 
 parcelable VoiceInteractor.PickOptionRequest.Option;
+parcelable VoiceInteractor.Prompt;
