@@ -950,6 +950,16 @@ public class AppTransition implements Dump {
         return prepareThumbnailAnimation(a, appWidth, appHeight, transit);
     }
 
+    /**
+     * @return true if and only if the first frame of the transition can be skipped, i.e. the first
+     *         frame of the transition doesn't change the visuals on screen, so we can start
+     *         directly with the second one
+     */
+    boolean canSkipFirstFrame() {
+        return mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM
+                && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE
+                && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CLIP_REVEAL;
+    }
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
             int appWidth, int appHeight, int orientation, Rect containingFrame, Rect contentInsets,
