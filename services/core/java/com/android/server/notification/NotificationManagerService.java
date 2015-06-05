@@ -2261,7 +2261,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void buzzBeepBlinkLocked(NotificationRecord record) {
-        boolean buzzBeepBlinked = false;
+        boolean buzz = false;
+        boolean beep = false;
+        boolean blink = false;
+
         final Notification notification = record.sbn.getNotification();
 
         // Should this notification make noise, vibe, or use the LED?
@@ -2343,7 +2346,7 @@ public class NotificationManagerService extends SystemService {
                                     + " with attributes " + audioAttributes);
                             player.playAsync(soundUri, record.sbn.getUser(), looping,
                                     audioAttributes);
-                            buzzBeepBlinked = true;
+                            beep = true;
                         }
                     } catch (RemoteException e) {
                     } finally {
@@ -2383,7 +2386,7 @@ public class NotificationManagerService extends SystemService {
                                 : mFallbackVibrationPattern,
                             ((notification.flags & Notification.FLAG_INSISTENT) != 0)
                                 ? 0: -1, audioAttributesForNotification(notification));
-                        buzzBeepBlinked = true;
+                        buzz = true;
                     } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
@@ -2394,7 +2397,7 @@ public class NotificationManagerService extends SystemService {
                             notification.vibrate,
                         ((notification.flags & Notification.FLAG_INSISTENT) != 0)
                                 ? 0: -1, audioAttributesForNotification(notification));
-                    buzzBeepBlinked = true;
+                    buzz = true;
                 }
             }
         }
@@ -2408,11 +2411,13 @@ public class NotificationManagerService extends SystemService {
             if (mUseAttentionLight) {
                 mAttentionLight.pulse();
             }
-            buzzBeepBlinked = true;
+            blink = true;
         } else if (wasShowLights) {
             updateLightsLocked();
         }
-        if (buzzBeepBlinked) {
+        if (buzz || beep || blink) {
+            EventLogTags.writeNotificationAlert(record.getKey(),
+                    buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
             mHandler.post(mBuzzBeepBlinked);
         }
     }
