@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.view.menu.MenuBuilder;
@@ -30,7 +31,7 @@ import com.android.internal.widget.FloatingToolbar;
 
 public class FloatingActionMode extends ActionMode {
 
-    private static final int MAX_SNOOZE_TIME = 3000;
+    private static final int MAX_HIDE_DURATION = 3000;
     private static final int MOVING_HIDE_DELAY = 300;
 
     private final Context mContext;
@@ -50,9 +51,9 @@ public class FloatingActionMode extends ActionMode {
         }
     };
 
-    private final Runnable mSnoozeOff = new Runnable() {
+    private final Runnable mHideOff = new Runnable() {
         public void run() {
-            mFloatingToolbarVisibilityHelper.setSnoozed(false);
+            mFloatingToolbarVisibilityHelper.setHideRequested(false);
         }
     };
 
@@ -166,15 +167,19 @@ public class FloatingActionMode extends ActionMode {
     }
 
     @Override
-    public void snooze(int snoozeTime) {
+    public void hide(long duration) {
         checkToolbarInitialized();
-        snoozeTime = Math.min(MAX_SNOOZE_TIME, snoozeTime);
-        mOriginatingView.removeCallbacks(mSnoozeOff);
-        if (snoozeTime <= 0) {
-            mSnoozeOff.run();
+
+        if (duration == ActionMode.DEFAULT_HIDE_DURATION) {
+            duration = ViewConfiguration.getDefaultActionModeHideDuration();
+        }
+        duration = Math.min(MAX_HIDE_DURATION, duration);
+        mOriginatingView.removeCallbacks(mHideOff);
+        if (duration <= 0) {
+            mHideOff.run();
         } else {
-            mFloatingToolbarVisibilityHelper.setSnoozed(true);
-            mOriginatingView.postDelayed(mSnoozeOff, snoozeTime);
+            mFloatingToolbarVisibilityHelper.setHideRequested(true);
+            mOriginatingView.postDelayed(mHideOff, duration);
         }
     }
 
@@ -220,7 +225,7 @@ public class FloatingActionMode extends ActionMode {
 
     private void reset() {
         mOriginatingView.removeCallbacks(mMovingOff);
-        mOriginatingView.removeCallbacks(mSnoozeOff);
+        mOriginatingView.removeCallbacks(mHideOff);
     }
 
 
@@ -231,7 +236,7 @@ public class FloatingActionMode extends ActionMode {
 
         private final FloatingToolbar mToolbar;
 
-        private boolean mSnoozed;
+        private boolean mHideRequested;
         private boolean mMoving;
         private boolean mOutOfBounds;
 
@@ -239,8 +244,8 @@ public class FloatingActionMode extends ActionMode {
             mToolbar = Preconditions.checkNotNull(toolbar);
         }
 
-        public void setSnoozed(boolean snoozed) {
-            mSnoozed = snoozed;
+        public void setHideRequested(boolean hide) {
+            mHideRequested = hide;
             updateToolbarVisibility();
         }
 
@@ -255,7 +260,7 @@ public class FloatingActionMode extends ActionMode {
         }
 
         private void updateToolbarVisibility() {
-            if (mSnoozed || mMoving || mOutOfBounds) {
+            if (mHideRequested || mMoving || mOutOfBounds) {
                 mToolbar.hide();
             } else if (mToolbar.isHidden()) {
                 mToolbar.show();
