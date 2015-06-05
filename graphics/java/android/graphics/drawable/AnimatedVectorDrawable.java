@@ -16,6 +16,7 @@ package android.graphics.drawable;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.NonNull;
@@ -42,7 +43,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class uses {@link android.animation.ObjectAnimator} and
@@ -129,7 +129,7 @@ import java.util.List;
  * @attr ref android.R.styleable#AnimatedVectorDrawableTarget_name
  * @attr ref android.R.styleable#AnimatedVectorDrawableTarget_animation
  */
-public class AnimatedVectorDrawable extends Drawable implements Animatable {
+public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static final String LOGTAG = "AnimatedVectorDrawable";
 
     private static final String ANIMATED_VECTOR = "animated-vector";
@@ -152,6 +152,10 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     private boolean mHasAnimatorSet;
 
     private boolean mMutated;
+
+    /** Use a internal AnimatorListener to support callbacks during animation events. */
+    private ArrayList<Animatable2.AnimationCallback> mAnimationCallbacks = null;
+    private AnimatorListener mAnimatorListener = null;
 
     public AnimatedVectorDrawable() {
         this(null, null);
@@ -378,36 +382,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         if (mAnimatedVectorState.mPendingAnims == null) {
             mRes = null;
         }
-    }
-
-    /**
-     * Adds a listener to the set of listeners that are sent events through the life of an
-     * animation.
-     *
-     * @param listener the listener to be added to the current set of listeners for this animation.
-     */
-    public void addListener(AnimatorListener listener) {
-        mAnimatorSet.addListener(listener);
-    }
-
-    /**
-     * Removes a listener from the set listening to this animation.
-     *
-     * @param listener the listener to be removed from the current set of listeners for this
-     *                 animation.
-     */
-    public void removeListener(AnimatorListener listener) {
-        mAnimatorSet.removeListener(listener);
-    }
-
-    /**
-     * Gets the set of {@link android.animation.Animator.AnimatorListener} objects that are currently
-     * listening for events on this <code>AnimatedVectorDrawable</code> object.
-     *
-     * @return List<AnimatorListener> The set of listeners.
-     */
-    public List<AnimatorListener> getListeners() {
-        return mAnimatorSet.getListeners();
     }
 
     private static class AnimatedVectorDrawableState extends ConstantState {
@@ -674,4 +648,77 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
             unscheduleSelf(what);
         }
     };
+
+    @Override
+    public void registerAnimationCallback(@NonNull AnimationCallback callback) {
+        if (callback == null) {
+            return;
+        }
+
+        // Add listener accordingly.
+        if (mAnimationCallbacks == null) {
+            mAnimationCallbacks = new ArrayList<>();
+        }
+
+        mAnimationCallbacks.add(callback);
+
+        if (mAnimatorListener == null) {
+            // Create a animator listener and trigger the callback events when listener is
+            // triggered.
+            mAnimatorListener = new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    ArrayList<AnimationCallback> tmpCallbacks = new ArrayList<>(mAnimationCallbacks);
+                    int size = tmpCallbacks.size();
+                    for (int i = 0; i < size; i ++) {
+                        tmpCallbacks.get(i).onAnimationStart(AnimatedVectorDrawable.this);
+                    }
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    ArrayList<AnimationCallback> tmpCallbacks = new ArrayList<>(mAnimationCallbacks);
+                    int size = tmpCallbacks.size();
+                    for (int i = 0; i < size; i ++) {
+                        tmpCallbacks.get(i).onAnimationEnd(AnimatedVectorDrawable.this);
+                    }
+                }
+            };
+        }
+        mAnimatorSet.addListener(mAnimatorListener);
+    }
+
+    // A helper function to clean up the animator listener in the mAnimatorSet.
+    private void removeAnimatorSetListener() {
+        if (mAnimatorListener != null) {
+            mAnimatorSet.removeListener(mAnimatorListener);
+            mAnimatorListener = null;
+        }
+    }
+
+    @Override
+    public boolean unregisterAnimationCallback(@NonNull AnimationCallback callback) {
+        if (mAnimationCallbacks == null || callback == null) {
+            // Nothing to be removed.
+            return false;
+        }
+        boolean removed = mAnimationCallbacks.remove(callback);
+
+        //  When the last call back unregistered, remove the listener accordingly.
+        if (mAnimationCallbacks.size() == 0) {
+            removeAnimatorSetListener();
+        }
+        return removed;
+    }
+
+    @Override
+    public void clearAnimationCallbacks() {
+        removeAnimatorSetListener();
+        if (mAnimationCallbacks == null) {
+            return;
+        }
+
+        mAnimationCallbacks.clear();
+    }
+
 }
