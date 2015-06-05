@@ -110,7 +110,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private NextAlarmController mNextAlarmController;
     private QSPanel mQSPanel;
 
-
     private final Rect mClipBounds = new Rect();
 
     private boolean mCaptureValues;
@@ -121,6 +120,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private float mCurrentT;
     private boolean mShowingDetail;
+    private boolean mDetailTransitioning;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -623,7 +623,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSettingsButton.setTranslationX(values.settingsTranslation);
         mSettingsButton.setRotation(values.settingsRotation);
         applyAlpha(mEmergencyCallsOnly, values.emergencyCallsOnlyAlpha);
-        if (!mShowingDetail) {
+        if (!mShowingDetail && !mDetailTransitioning) {
             // Otherwise it needs to stay invisible
             applyAlpha(mAlarmStatus, values.alarmStatusAlpha);
         }
@@ -706,6 +706,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
         @Override
         public void onShowingDetail(final QSTile.DetailAdapter detail) {
+            mDetailTransitioning = true;
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -788,6 +789,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                             if (!in) {
                                 v.setVisibility(INVISIBLE);
                             }
+                            mDetailTransitioning = false;
                         }
                     })
                     .start();
