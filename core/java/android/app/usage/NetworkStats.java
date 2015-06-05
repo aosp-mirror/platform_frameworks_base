@@ -29,11 +29,11 @@ import android.util.Log;
 import dalvik.system.CloseGuard;
 
 /**
- * Class providing enumeration over buckets of network usage statistics. NetworkUsageStats objects
+ * Class providing enumeration over buckets of network usage statistics. {@link NetworkStats} objects
  * are returned as results to various queries in {@link NetworkStatsManager}.
  */
 public final class NetworkStats implements AutoCloseable {
-    private final static String TAG = "NetworkUsageStats";
+    private final static String TAG = "NetworkStats";
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
