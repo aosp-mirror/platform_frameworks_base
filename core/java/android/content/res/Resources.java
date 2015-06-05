@@ -2486,7 +2486,8 @@ public class Resources {
         return true;
     }
 
-    /*package*/ Drawable loadDrawable(TypedValue value, int id, Theme theme) throws NotFoundException {
+    @Nullable
+    Drawable loadDrawable(TypedValue value, int id, Theme theme) throws NotFoundException {
         if (TRACE_FOR_PRELOAD) {
             // Log only framework resources
             if ((id >>> 24) == 0x1) {
@@ -2541,7 +2542,7 @@ public class Resources {
         // Determine if the drawable has unresolved theme attributes. If it
         // does, we'll need to apply a theme and store it in a theme-specific
         // cache.
-        final boolean canApplyTheme = dr.canApplyTheme();
+        final boolean canApplyTheme = dr != null && dr.canApplyTheme();
         if (canApplyTheme && theme != null) {
             dr = dr.mutate();
             dr.applyTheme(theme);
