@@ -625,12 +625,6 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationVisibilityChanged(
                 String[] newlyVisibleKeys, String[] noLongerVisibleKeys) {
-            // Using ';' as separator since eventlogs uses ',' to separate
-            // args.
-            // TODO remove this: b/21248682
-            EventLogTags.writeNotificationVisibilityChanged(
-                    TextUtils.join(";", newlyVisibleKeys),
-                    TextUtils.join(";", noLongerVisibleKeys));
             synchronized (mNotificationList) {
                 for (String key : newlyVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(key);
