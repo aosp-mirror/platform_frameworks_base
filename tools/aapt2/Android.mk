@@ -36,6 +36,7 @@ sources := \
 	Linker.cpp \
 	Locale.cpp \
 	Logger.cpp \
+	ManifestMerger.cpp \
 	ManifestParser.cpp \
 	ManifestValidator.cpp \
 	Png.cpp \
@@ -65,6 +66,7 @@ testSources := \
 	JavaClassGenerator_test.cpp \
 	Linker_test.cpp \
 	Locale_test.cpp \
+	ManifestMerger_test.cpp \
 	ManifestParser_test.cpp \
 	Maybe_test.cpp \
 	NameMangler_test.cpp \
@@ -102,7 +104,7 @@ else
 endif
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
-cppFlags := -std=c++11 -Wno-missing-field-initializers
+cppFlags := -std=c++11 -Wno-missing-field-initializers -Wno-unused-private-field
 
 # ==========================================================
 # Build the host static library: libaapt2
