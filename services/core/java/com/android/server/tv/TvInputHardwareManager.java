@@ -88,7 +88,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final Map<String, TvInputInfo> mInputMap = new ArrayMap<>();
 
     private final AudioManager mAudioManager;
-    private IHdmiControlService mHdmiControlService;
     private final IHdmiHotplugEventListener mHdmiHotplugEventListener =
             new HdmiHotplugEventListener();
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
@@ -121,15 +120,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            mHdmiControlService = IHdmiControlService.Stub.asInterface(ServiceManager.getService(
-                    Context.HDMI_CONTROL_SERVICE));
-            if (mHdmiControlService != null) {
+            IHdmiControlService hdmiControlService = IHdmiControlService.Stub.asInterface(
+                    ServiceManager.getService(Context.HDMI_CONTROL_SERVICE));
+            if (hdmiControlService != null) {
                 try {
-                    mHdmiControlService.addHotplugEventListener(mHdmiHotplugEventListener);
-                    mHdmiControlService.addDeviceEventListener(mHdmiDeviceEventListener);
-                    mHdmiControlService.addSystemAudioModeChangeListener(
+                    hdmiControlService.addHotplugEventListener(mHdmiHotplugEventListener);
+                    hdmiControlService.addDeviceEventListener(mHdmiDeviceEventListener);
+                    hdmiControlService.addSystemAudioModeChangeListener(
                             mHdmiSystemAudioModeChangeListener);
-                    mHdmiDeviceList.addAll(mHdmiControlService.getInputDevices());
+                    mHdmiDeviceList.addAll(hdmiControlService.getInputDevices());
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error registering listeners to HdmiControlService:", e);
                 }
