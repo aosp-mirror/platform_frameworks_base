@@ -23,6 +23,7 @@
 #include "Flag.h"
 #include "JavaClassGenerator.h"
 #include "Linker.h"
+#include "ManifestMerger.h"
 #include "ManifestParser.h"
 #include "ManifestValidator.h"
 #include "NameMangler.h"
@@ -54,6 +55,20 @@
 constexpr const char* kAaptVersionStr = "2.0-alpha";
 
 using namespace aapt;
+
+/**
+ * Used with smart pointers to free malloc'ed memory.
+ */
+struct DeleteMalloc {
+    void operator()(void* ptr) {
+        free(ptr);
+    }
+};
+
+struct StaticLibraryData {
+    Source source;
+    std::unique_ptr<ZipFile> apk;
+};
 
 /**
  * Collect files from 'root', filtering out any files that do not
@@ -493,6 +508,7 @@ bool copyFile(const AaptOptions& options, const CompileItem& item, ZipFile* outA
 }
 
 bool compileManifest(const AaptOptions& options, const std::shared_ptr<IResolver>& resolver,
+                     const std::map<std::shared_ptr<ResourceTable>, StaticLibraryData>& libApks,
                      const android::ResTable& table, ZipFile* outApk) {
     if (options.verbose) {
         Logger::note(options.manifest) << "compiling AndroidManifest.xml." << std::endl;
@@ -510,9 +526,40 @@ bool compileManifest(const AaptOptions& options, const std::shared_ptr<IResolver
         return false;
     }
 
+    ManifestMerger merger({});
+    if (!merger.setAppManifest(options.manifest, options.appInfo.package, std::move(root))) {
+        return false;
+    }
+
+    for (const auto& entry : libApks) {
+        ZipFile* libApk = entry.second.apk.get();
+        const std::u16string& libPackage = entry.first->getPackage();
+        const Source& libSource = entry.second.source;
+
+        ZipEntry* zipEntry = libApk->getEntryByName("AndroidManifest.xml");
+        if (!zipEntry) {
+            continue;
+        }
+
+        std::unique_ptr<void, DeleteMalloc> uncompressedData = std::unique_ptr<void, DeleteMalloc>(
+                libApk->uncompress(zipEntry));
+        assert(uncompressedData);
+
+        SourceLogger logger(libSource);
+        std::unique_ptr<xml::Node> libRoot = xml::inflate(uncompressedData.get(),
+                                                          zipEntry->getUncompressedLen(), &logger);
+        if (!libRoot) {
+            return false;
+        }
+
+        if (!merger.mergeLibraryManifest(libSource, libPackage, std::move(libRoot))) {
+            return false;
+        }
+    }
+
     BigBuffer outBuffer(1024);
-    if (!xml::flattenAndLink(options.manifest, root.get(), options.appInfo.package, resolver, {},
-                &outBuffer)) {
+    if (!xml::flattenAndLink(options.manifest, merger.getMergedXml(), options.appInfo.package,
+                resolver, {}, &outBuffer)) {
         return false;
     }
 
@@ -667,17 +714,6 @@ static void addApkFilesToLinkQueue(const std::u16string& package, const Source& 
 static constexpr int kOpenFlags = ZipFile::kOpenCreate | ZipFile::kOpenTruncate |
         ZipFile::kOpenReadWrite;
 
-struct DeleteMalloc {
-    void operator()(void* ptr) {
-        free(ptr);
-    }
-};
-
-struct StaticLibraryData {
-    Source source;
-    std::unique_ptr<ZipFile> apk;
-};
-
 bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outTable,
           const std::shared_ptr<IResolver>& resolver) {
     std::map<std::shared_ptr<ResourceTable>, StaticLibraryData> apkFiles;
@@ -770,7 +806,7 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
     }
 
     android::ResTable binTable;
-    if (!compileManifest(options, resolver, binTable, &outApk)) {
+    if (!compileManifest(options, resolver, apkFiles, binTable, &outApk)) {
         return false;
     }
 
