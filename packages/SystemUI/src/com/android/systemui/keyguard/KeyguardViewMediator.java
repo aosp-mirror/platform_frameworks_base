@@ -658,7 +658,7 @@ public class KeyguardViewMediator extends SystemUI {
                 mPendingLock = true;
             }
 
-            if (mPendingLock || mPendingReset) {
+            if (mPendingLock) {
                 playSounds(true);
             }
         }
