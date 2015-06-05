@@ -9072,9 +9072,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (id) {
             case ID_SELECT_ALL:
-                // This does not enter text selection mode. Text is highlighted, so that it can be
-                // bulk edited, like selectAllOnFocus does. Returns true even if text is empty.
+                // This starts an action mode if triggered from another action mode. Text is
+                // highlighted, so that it can be bulk edited, like selectAllOnFocus does. Returns
+                // true even if text is empty.
+                boolean shouldRestartActionMode =
+                        mEditor != null && mEditor.mTextActionMode != null;
+                stopTextActionMode();
                 selectAllText();
+                if (shouldRestartActionMode) {
+                    mEditor.startSelectionActionMode();
+                }
                 return true;
 
             case ID_UNDO:
