@@ -12191,6 +12191,7 @@ package android.graphics.drawable {
     method public int getOpacity();
     method public boolean isRunning();
     method public void registerAnimationCallback(android.graphics.drawable.Animatable2.AnimationCallback);
+    method public void reset();
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void start();
