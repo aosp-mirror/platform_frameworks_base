@@ -214,7 +214,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns the requested key size or {@code -1} if default size should be used.
+     * Returns the requested key size. If {@code -1}, the size should be looked up from
+     * {@link #getAlgorithmParameterSpec()}, if provided, otherwise an algorithm-specific default
+     * size should be used.
      */
     public int getKeySize() {
         return mKeySize;
@@ -465,7 +467,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * the modulus size, for EC keys this selects a curve with a matching field size, and for
          * symmetric keys this sets the size of the bitstring which is their key material.
          *
-         * <p>The default key size is specific to each key algorithm.
+         * <p>The default key size is specific to each key algorithm. If key size is not set
+         * via this method, it should be looked up from the algorithm-specific parameters (if any)
+         * provided via
+         * {@link #setAlgorithmParameterSpec(AlgorithmParameterSpec) setAlgorithmParameterSpec}.
          */
         @NonNull
         public Builder setKeySize(int keySize) {
