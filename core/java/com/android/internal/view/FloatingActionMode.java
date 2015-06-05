@@ -127,11 +127,16 @@ public class FloatingActionMode extends ActionMode {
 
     private void repositionToolbar() {
         checkToolbarInitialized();
+
+        mContentRectOnWindow.set(mContentRect);
+        mContentRectOnWindow.offset(mViewPosition[0], mViewPosition[1]);
+        // Make sure that content rect is not out of the view's visible bounds.
         mContentRectOnWindow.set(
-                mContentRect.left + mViewPosition[0],
-                mContentRect.top + mViewPosition[1],
-                mContentRect.right + mViewPosition[0],
-                mContentRect.bottom + mViewPosition[1]);
+                Math.max(mContentRectOnWindow.left, mViewRect.left),
+                Math.max(mContentRectOnWindow.top, mViewRect.top),
+                Math.min(mContentRectOnWindow.right, mViewRect.right),
+                Math.min(mContentRectOnWindow.bottom, mViewRect.bottom));
+
         if (!mContentRectOnWindow.equals(mPreviousContentRectOnWindow)) {
             if (!mPreviousContentRectOnWindow.isEmpty()) {
                 notifyContentRectMoving();
