@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +25,7 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
 
 import java.util.Formatter;
@@ -58,6 +60,7 @@ public class Chronometer extends TextView {
     }
 
     private long mBase;
+    private long mNow; // the currently displayed time
     private boolean mVisible;
     private boolean mStarted;
     private boolean mRunning;
@@ -224,6 +227,7 @@ public class Chronometer extends TextView {
     }
 
     private synchronized void updateText(long now) {
+        mNow = now;
         long seconds = now - mBase;
         seconds /= 1000;
         String text = DateUtils.formatElapsedTime(mRecycle, seconds);
@@ -277,6 +281,60 @@ public class Chronometer extends TextView {
         if (mOnChronometerTickListener != null) {
             mOnChronometerTickListener.onChronometerTick(this);
         }
+    }
+
+    private static final int MIN_IN_SEC = 60;
+    private static final int HOUR_IN_SEC = MIN_IN_SEC*60;
+    private static String formatDuration(long ms) {
+        final Resources res = Resources.getSystem();
+        final StringBuilder text = new StringBuilder();
+
+        int duration = (int) (ms / DateUtils.SECOND_IN_MILLIS);
+        if (duration < 0) {
+            duration = -duration;
+        }
+
+        int h = 0;
+        int m = 0;
+
+        if (duration >= HOUR_IN_SEC) {
+            h = duration / HOUR_IN_SEC;
+            duration -= h * HOUR_IN_SEC;
+        }
+        if (duration >= MIN_IN_SEC) {
+            m = duration / MIN_IN_SEC;
+            duration -= m * MIN_IN_SEC;
+        }
+        int s = duration;
+
+        try {
+            if (h > 0) {
+                text.append(res.getQuantityString(
+                        com.android.internal.R.plurals.duration_hours, h, h));
+            }
+            if (m > 0) {
+                if (text.length() > 0) {
+                    text.append(' ');
+                }
+                text.append(res.getQuantityString(
+                        com.android.internal.R.plurals.duration_minutes, m, m));
+            }
+
+            if (text.length() > 0) {
+                text.append(' ');
+            }
+            text.append(res.getQuantityString(
+                    com.android.internal.R.plurals.duration_seconds, s, s));
+        } catch (Resources.NotFoundException e) {
+            // Ignore; plurals throws an exception for an untranslated quantity for a given locale.
+            return null;
+        }
+        return text.toString();
+    }
+
+    @Override
+    public CharSequence getContentDescription() {
+        return formatDuration(mNow - mBase);
     }
 
     @Override
