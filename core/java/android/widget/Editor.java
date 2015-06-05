@@ -1752,11 +1752,10 @@ public class Editor {
      * @return true if the drag was started.
      */
     private boolean selectCurrentWordAndStartDrag() {
+        if (mInsertionActionModeRunnable != null) {
+            mTextView.removeCallbacks(mInsertionActionModeRunnable);
+        }
         if (extractedTextModeWillBeStarted()) {
-            // Cancel the single tap delayed runnable.
-            if (mInsertionActionModeRunnable != null) {
-                mTextView.removeCallbacks(mInsertionActionModeRunnable);
-            }
             return false;
         }
         if (mTextActionMode != null) {
