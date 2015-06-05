@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
@@ -122,7 +123,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     final IVoiceInteractor mInteractor = new IVoiceInteractor.Stub() {
         @Override
         public IVoiceInteractorRequest startConfirmation(String callingPackage,
-                IVoiceInteractorCallback callback, CharSequence prompt, Bundle extras) {
+                IVoiceInteractorCallback callback, VoiceInteractor.Prompt prompt, Bundle extras) {
             ConfirmationRequest request = new ConfirmationRequest(callingPackage,
                     Binder.getCallingUid(), callback, VoiceInteractionSession.this,
                     prompt, extras);
@@ -134,7 +135,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         @Override
         public IVoiceInteractorRequest startPickOption(String callingPackage,
-                IVoiceInteractorCallback callback, CharSequence prompt,
+                IVoiceInteractorCallback callback, VoiceInteractor.Prompt prompt,
                 VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
             PickOptionRequest request = new PickOptionRequest(callingPackage,
                     Binder.getCallingUid(), callback, VoiceInteractionSession.this,
@@ -147,7 +148,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         @Override
         public IVoiceInteractorRequest startCompleteVoice(String callingPackage,
-                IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
+                IVoiceInteractorCallback callback, VoiceInteractor.Prompt message, Bundle extras) {
             CompleteVoiceRequest request = new CompleteVoiceRequest(callingPackage,
                     Binder.getCallingUid(), callback, VoiceInteractionSession.this,
                     message, extras);
@@ -159,7 +160,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         @Override
         public IVoiceInteractorRequest startAbortVoice(String callingPackage,
-                IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
+                IVoiceInteractorCallback callback, VoiceInteractor.Prompt message, Bundle extras) {
             AbortVoiceRequest request = new AbortVoiceRequest(callingPackage,
                     Binder.getCallingUid(), callback, VoiceInteractionSession.this,
                     message, extras);
@@ -404,10 +405,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * VoiceInteractor.ConfirmationRequest}.
      */
     public static final class ConfirmationRequest extends Request {
-        final CharSequence mPrompt;
+        final VoiceInteractor.Prompt mPrompt;
 
         ConfirmationRequest(String packageName, int uid, IVoiceInteractorCallback callback,
-                VoiceInteractionSession session, CharSequence prompt, Bundle extras) {
+                VoiceInteractionSession session, VoiceInteractor.Prompt prompt, Bundle extras) {
             super(packageName, uid, callback, session, extras);
             mPrompt = prompt;
         }
@@ -417,8 +418,20 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * {@link android.app.VoiceInteractor.ConfirmationRequest
          * VoiceInteractor.ConfirmationRequest}.
          */
-        public CharSequence getPrompt() {
+        @Nullable
+        public VoiceInteractor.Prompt getVoicePrompt() {
             return mPrompt;
+        }
+
+        /**
+         * Return the prompt informing the user of what will happen, as per
+         * {@link android.app.VoiceInteractor.ConfirmationRequest
+         * VoiceInteractor.ConfirmationRequest}.
+         * @deprecated Prefer {@link #getVoicePrompt()} which allows multiple voice prompts.
+         */
+        @Nullable
+        public CharSequence getPrompt() {
+            return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
         }
 
         /**
@@ -437,11 +450,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
      */
     public static final class PickOptionRequest extends Request {
-        final CharSequence mPrompt;
+        final VoiceInteractor.Prompt mPrompt;
         final VoiceInteractor.PickOptionRequest.Option[] mOptions;
 
         PickOptionRequest(String packageName, int uid, IVoiceInteractorCallback callback,
-                VoiceInteractionSession session, CharSequence prompt,
+                VoiceInteractionSession session, VoiceInteractor.Prompt prompt,
                 VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
             super(packageName, uid, callback, session, extras);
             mPrompt = prompt;
@@ -452,8 +465,19 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * Return the prompt informing the user of what they are picking, as per
          * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
          */
-        public CharSequence getPrompt() {
+        @Nullable
+        public VoiceInteractor.Prompt getVoicePrompt() {
             return mPrompt;
+        }
+
+        /**
+         * Return the prompt informing the user of what they are picking, as per
+         * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+         * @deprecated Prefer {@link #getVoicePrompt()} which allows multiple voice prompts.
+         */
+        @Nullable
+        public CharSequence getPrompt() {
+            return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
         }
 
         /**
@@ -494,12 +518,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * VoiceInteractor.CompleteVoiceRequest}.
      */
     public static final class CompleteVoiceRequest extends Request {
-        final CharSequence mMessage;
+        final VoiceInteractor.Prompt mPrompt;
 
         CompleteVoiceRequest(String packageName, int uid, IVoiceInteractorCallback callback,
-                VoiceInteractionSession session, CharSequence message, Bundle extras) {
+                VoiceInteractionSession session, VoiceInteractor.Prompt prompt, Bundle extras) {
             super(packageName, uid, callback, session, extras);
-            mMessage = message;
+            mPrompt = prompt;
         }
 
         /**
@@ -507,8 +531,20 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * {@link android.app.VoiceInteractor.CompleteVoiceRequest
          * VoiceInteractor.CompleteVoiceRequest}.
          */
+        @Nullable
+        public VoiceInteractor.Prompt getVoicePrompt() {
+            return mPrompt;
+        }
+
+        /**
+         * Return the message informing the user of the completion, as per
+         * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+         * VoiceInteractor.CompleteVoiceRequest}.
+         * @deprecated Prefer {@link #getVoicePrompt()} which allows a separate visual message.
+         */
+        @Nullable
         public CharSequence getMessage() {
-            return mMessage;
+            return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
         }
 
         /**
@@ -527,20 +563,31 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
      */
     public static final class AbortVoiceRequest extends Request {
-        final CharSequence mMessage;
+        final VoiceInteractor.Prompt mPrompt;
 
         AbortVoiceRequest(String packageName, int uid, IVoiceInteractorCallback callback,
-                VoiceInteractionSession session, CharSequence message, Bundle extras) {
+                VoiceInteractionSession session, VoiceInteractor.Prompt prompt, Bundle extras) {
             super(packageName, uid, callback, session, extras);
-            mMessage = message;
+            mPrompt = prompt;
         }
 
         /**
          * Return the message informing the user of the problem, as per
          * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
          */
+        @Nullable
+        public VoiceInteractor.Prompt getVoicePrompt() {
+            return mPrompt;
+        }
+
+        /**
+         * Return the message informing the user of the problem, as per
+         * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+         * @deprecated Prefer {@link #getVoicePrompt()} which allows a separate visual message.
+         */
+        @Nullable
         public CharSequence getMessage() {
-            return mMessage;
+            return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
         }
 
         /**
@@ -1035,7 +1082,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     public void onCreate(Bundle args) {
         doOnCreate();
     }
-    
+
     /** @hide */
     public void onCreate(Bundle args, int showFlags) {
         doOnCreate();
