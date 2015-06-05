@@ -97,7 +97,7 @@ public abstract class TvInputService extends Service {
      */
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
-            new RemoteCallbackList<ITvInputServiceCallback>();
+            new RemoteCallbackList<>();
 
     private TvInputManager mTvInputManager;
 
@@ -377,7 +377,7 @@ public abstract class TvInputService extends Service {
          * @throws IllegalArgumentException if {@code tracks} contains redundant tracks.
          */
         public void notifyTracksChanged(final List<TvTrackInfo> tracks) {
-            Set<String> trackIdSet = new HashSet<String>();
+            Set<String> trackIdSet = new HashSet<>();
             for (TvTrackInfo track : tracks) {
                 String trackId = track.getId();
                 if (trackIdSet.contains(trackId)) {

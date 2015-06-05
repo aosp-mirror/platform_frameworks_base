@@ -221,16 +221,15 @@ public final class TvInputManager {
     private final Object mLock = new Object();
 
     // @GuardedBy("mLock")
-    private final List<TvInputCallbackRecord> mCallbackRecords =
-            new LinkedList<TvInputCallbackRecord>();
+    private final List<TvInputCallbackRecord> mCallbackRecords = new LinkedList<>();
 
     // A mapping from TV input ID to the state of corresponding input.
     // @GuardedBy("mLock")
-    private final Map<String, Integer> mStateMap = new ArrayMap<String, Integer>();
+    private final Map<String, Integer> mStateMap = new ArrayMap<>();
 
     // A mapping from the sequence number of a session to its SessionCallbackRecord.
     private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap =
-            new SparseArray<SessionCallbackRecord>();
+            new SparseArray<>();
 
     // A sequence number for the next session to be created. Should be protected by a lock
     // {@code mSessionCallbackRecordMap}.
@@ -983,7 +982,7 @@ public final class TvInputManager {
                 Log.w(TAG, "Unrecognized input ID: " + inputId);
                 return INPUT_STATE_DISCONNECTED;
             }
-            return state.intValue();
+            return state;
         }
     }
 
@@ -1074,7 +1073,7 @@ public final class TvInputManager {
     @SystemApi
     public List<TvContentRating> getBlockedRatings() {
         try {
-            List<TvContentRating> ratings = new ArrayList<TvContentRating>();
+            List<TvContentRating> ratings = new ArrayList<>();
             for (String rating : mService.getBlockedRatings(mUserId)) {
                 ratings.add(TvContentRating.unflattenFromString(rating));
             }
@@ -1332,8 +1331,8 @@ public final class TvInputManager {
         // protect pending input events and the input channel.
         private final InputEventHandler mHandler = new InputEventHandler(Looper.getMainLooper());
 
-        private final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
-        private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
+        private final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
+        private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
         private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap;
 
         private IBinder mToken;
@@ -1342,11 +1341,11 @@ public final class TvInputManager {
 
         private final Object mMetadataLock = new Object();
         // @GuardedBy("mMetadataLock")
-        private final List<TvTrackInfo> mAudioTracks = new ArrayList<TvTrackInfo>();
+        private final List<TvTrackInfo> mAudioTracks = new ArrayList<>();
         // @GuardedBy("mMetadataLock")
-        private final List<TvTrackInfo> mVideoTracks = new ArrayList<TvTrackInfo>();
+        private final List<TvTrackInfo> mVideoTracks = new ArrayList<>();
         // @GuardedBy("mMetadataLock")
-        private final List<TvTrackInfo> mSubtitleTracks = new ArrayList<TvTrackInfo>();
+        private final List<TvTrackInfo> mSubtitleTracks = new ArrayList<>();
         // @GuardedBy("mMetadataLock")
         private String mSelectedAudioTrackId;
         // @GuardedBy("mMetadataLock")
@@ -1587,17 +1586,17 @@ public final class TvInputManager {
                     if (mAudioTracks == null) {
                         return null;
                     }
-                    return new ArrayList<TvTrackInfo>(mAudioTracks);
+                    return new ArrayList<>(mAudioTracks);
                 } else if (type == TvTrackInfo.TYPE_VIDEO) {
                     if (mVideoTracks == null) {
                         return null;
                     }
-                    return new ArrayList<TvTrackInfo>(mVideoTracks);
+                    return new ArrayList<>(mVideoTracks);
                 } else if (type == TvTrackInfo.TYPE_SUBTITLE) {
                     if (mSubtitleTracks == null) {
                         return null;
                     }
-                    return new ArrayList<TvTrackInfo>(mSubtitleTracks);
+                    return new ArrayList<>(mSubtitleTracks);
                 }
             }
             throw new IllegalArgumentException("invalid type: " + type);
