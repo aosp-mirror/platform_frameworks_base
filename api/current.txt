@@ -12168,24 +12168,36 @@ package android.graphics.drawable {
     method public abstract void stop();
   }
 
+  public abstract interface Animatable2 implements android.graphics.drawable.Animatable {
+    method public abstract void clearAnimationCallbacks();
+    method public abstract void registerAnimationCallback(android.graphics.drawable.Animatable2.AnimationCallback);
+    method public abstract boolean unregisterAnimationCallback(android.graphics.drawable.Animatable2.AnimationCallback);
+  }
+
+  public static abstract class Animatable2.AnimationCallback {
+    ctor public Animatable2.AnimationCallback();
+    method public void onAnimationEnd(android.graphics.drawable.Drawable);
+    method public void onAnimationStart(android.graphics.drawable.Drawable);
+  }
+
   public class AnimatedStateListDrawable extends android.graphics.drawable.StateListDrawable {
     ctor public AnimatedStateListDrawable();
     method public void addState(int[], android.graphics.drawable.Drawable, int);
     method public void addTransition(int, int, T, boolean);
   }
 
-  public class AnimatedVectorDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable {
+  public class AnimatedVectorDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable2 {
     ctor public AnimatedVectorDrawable();
-    method public void addListener(android.animation.Animator.AnimatorListener);
+    method public void clearAnimationCallbacks();
     method public void draw(android.graphics.Canvas);
-    method public java.util.List<android.animation.Animator.AnimatorListener> getListeners();
     method public int getOpacity();
     method public boolean isRunning();
-    method public void removeListener(android.animation.Animator.AnimatorListener);
+    method public void registerAnimationCallback(android.graphics.drawable.Animatable2.AnimationCallback);
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void start();
     method public void stop();
+    method public boolean unregisterAnimationCallback(android.graphics.drawable.Animatable2.AnimationCallback);
   }
 
   public class AnimationDrawable extends android.graphics.drawable.DrawableContainer implements android.graphics.drawable.Animatable java.lang.Runnable {
