@@ -31,6 +31,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayAdjustments;
+
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
@@ -42,7 +44,7 @@ public class ResourcesManager {
     private static ResourcesManager sResourcesManager;
     private final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources =
             new ArrayMap<>();
-    private final ArrayMap<Pair<Integer, Configuration>, WeakReference<Display>> mDisplays =
+    private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>> mDisplays =
             new ArrayMap<>();
 
     CompatibilityInfo mResCompatibilityInfo;
@@ -68,7 +70,8 @@ public class ResourcesManager {
 
     DisplayMetrics getDisplayMetricsLocked(int displayId) {
         DisplayMetrics dm = new DisplayMetrics();
-        final Display display = getAdjustedDisplay(displayId, Configuration.EMPTY);
+        final Display display =
+                getAdjustedDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
         if (display != null) {
             display.getMetrics(dm);
         } else {
@@ -113,12 +116,13 @@ public class ResourcesManager {
      * available.
      *
      * @param displayId display Id.
-     * @param overrideConfiguration override configurations.
+     * @param displayAdjustments display adjustments.
      */
-    public Display getAdjustedDisplay(final int displayId, Configuration overrideConfiguration) {
-        final Configuration configCopy = (overrideConfiguration != null)
-                ? new Configuration(overrideConfiguration) : new Configuration();
-        final Pair<Integer, Configuration> key = Pair.create(displayId, configCopy);
+    public Display getAdjustedDisplay(final int displayId, DisplayAdjustments displayAdjustments) {
+        final DisplayAdjustments displayAdjustmentsCopy = (displayAdjustments != null)
+                ? new DisplayAdjustments(displayAdjustments) : new DisplayAdjustments();
+        final Pair<Integer, DisplayAdjustments> key =
+                Pair.create(displayId, displayAdjustmentsCopy);
         synchronized (this) {
             WeakReference<Display> wd = mDisplays.get(key);
             if (wd != null) {
@@ -132,7 +136,7 @@ public class ResourcesManager {
                 // may be null early in system startup
                 return null;
             }
-            final Display display = dm.getRealDisplay(displayId, key.second);
+            final Display display = dm.getCompatibleDisplay(displayId, key.second);
             if (display != null) {
                 mDisplays.put(key, new WeakReference<>(display));
             }

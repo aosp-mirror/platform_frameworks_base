@@ -2438,7 +2438,8 @@ public final class ActivityThread {
                 && r.packageInfo.mPackageName.contains(pkgName)) {
             for (int id : dm.getDisplayIds()) {
                 if (id != Display.DEFAULT_DISPLAY) {
-                    Display display = dm.getRealDisplay(id, r.overrideConfig);
+                    Display display =
+                            dm.getCompatibleDisplay(id, appContext.getDisplayAdjustments(id));
                     baseContext = appContext.createDisplayContext(display);
                     break;
                 }
