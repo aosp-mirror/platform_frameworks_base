@@ -127,10 +127,8 @@ public class KeyguardAffordanceHelper {
 
     private void initIcons() {
         mLeftIcon = mCallback.getLeftIcon();
-        mLeftIcon.setIsLeft(true);
         mCenterIcon = mCallback.getCenterIcon();
         mRightIcon = mCallback.getRightIcon();
-        mRightIcon.setIsLeft(false);
         updatePreviews();
     }
 
@@ -261,7 +259,6 @@ public class KeyguardAffordanceHelper {
 
     private void startHintAnimationPhase1(final boolean right, final Runnable onFinishedListener) {
         final KeyguardAffordanceView targetView = right ? mRightIcon : mLeftIcon;
-        targetView.showArrow(true);
         ValueAnimator animator = getAnimatorToRadius(right, mHintGrowAmount);
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
@@ -277,7 +274,6 @@ public class KeyguardAffordanceHelper {
                     mSwipeAnimator = null;
                     mTargetedView = null;
                     onFinishedListener.run();
-                    targetView.showArrow(false);
                 } else {
                     startUnlockHintAnimationPhase2(right, onFinishedListener);
                 }
@@ -301,13 +297,7 @@ public class KeyguardAffordanceHelper {
             public void onAnimationEnd(Animator animation) {
                 mSwipeAnimator = null;
                 mTargetedView = null;
-                targetView.showArrow(false);
                 onFinishedListener.run();
-            }
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                targetView.showArrow(false);
             }
         });
         animator.setInterpolator(mDisappearInterpolator);
