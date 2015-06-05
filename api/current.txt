@@ -35986,7 +35986,6 @@ package android.view {
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
     method public android.graphics.drawable.Drawable getBackground();
-    method public int getBackgroundColor();
     method public android.content.res.ColorStateList getBackgroundTintList();
     method public android.graphics.PorterDuff.Mode getBackgroundTintMode();
     method public int getBaseline();
