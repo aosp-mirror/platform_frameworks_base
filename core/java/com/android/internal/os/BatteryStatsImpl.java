@@ -272,18 +272,19 @@ public final class BatteryStatsImpl extends BatteryStats {
     final HistoryStepDetails mCurHistoryStepDetails = new HistoryStepDetails();
     final HistoryStepDetails mReadHistoryStepDetails = new HistoryStepDetails();
     final HistoryStepDetails mTmpHistoryStepDetails = new HistoryStepDetails();
+
     /**
-     * Total time (in 1/100 sec) spent executing in user code.
+     * Total time (in milliseconds) spent executing in user code.
      */
     long mLastStepCpuUserTime;
     long mCurStepCpuUserTime;
     /**
-     * Total time (in 1/100 sec) spent executing in kernel code.
+     * Total time (in milliseconds) spent executing in kernel code.
      */
     long mLastStepCpuSystemTime;
     long mCurStepCpuSystemTime;
     /**
-     * Times from /proc/stat
+     * Times from /proc/stat (but measured in milliseconds).
      */
     long mLastStepStatUserTime;
     long mLastStepStatSystemTime;
