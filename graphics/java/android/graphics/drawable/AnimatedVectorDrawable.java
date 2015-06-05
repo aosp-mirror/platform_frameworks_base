@@ -578,6 +578,15 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         return mAnimatorSet.isStarted();
     }
 
+    /**
+     * Resets the AnimatedVectorDrawable to the start state as specified in the animators.
+     */
+    public void reset() {
+        // TODO: Use reverse or seek to implement reset, when AnimatorSet supports them.
+        start();
+        mAnimatorSet.cancel();
+    }
+
     @Override
     public void start() {
         ensureAnimatorSet();
