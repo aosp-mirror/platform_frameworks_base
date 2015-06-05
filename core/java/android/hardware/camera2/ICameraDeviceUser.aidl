@@ -61,7 +61,7 @@ interface ICameraDeviceUser
      * must be called before any requests can be submitted.
      * <p>
      */
-    int endConfigure();
+    int endConfigure(boolean isConstrainedHighSpeed);
 
     int deleteStream(int streamId);
 
