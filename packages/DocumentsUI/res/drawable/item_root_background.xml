@@ -16,10 +16,10 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true" android:state_activated="true">
-        <color android:color="?android:attr/colorAccent" />
+        <color android:color="@color/material_grey_300" />
     </item>
     <item android:state_focused="false" android:state_activated="true">
-        <color android:color="?android:attr/colorAccent" />
+        <color android:color="@color/material_grey_300" />
     </item>
     <item android:drawable="@android:color/transparent" />
 </selector>
