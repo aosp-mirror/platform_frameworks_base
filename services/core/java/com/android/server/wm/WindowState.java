@@ -627,6 +627,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // Now make sure the window fits in the overall display.
         Gravity.applyDisplay(mAttrs.gravity, df, mFrame);
 
+        // Calculate the outsets before the content frame gets shrinked to the window frame.
+        if (hasOutsets) {
+            mOutsets.set(Math.max(mContentFrame.left - mOutsetFrame.left, 0),
+                    Math.max(mContentFrame.top - mOutsetFrame.top, 0),
+                    Math.max(mOutsetFrame.right - mContentFrame.right, 0),
+                    Math.max(mOutsetFrame.bottom - mContentFrame.bottom, 0));
+        } else {
+            mOutsets.set(0, 0, 0, 0);
+        }
+
         // Make sure the content and visible frames are inside of the
         // final window frame.
         mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
@@ -663,15 +673,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 Math.max(mStableFrame.top - mFrame.top, 0),
                 Math.max(mFrame.right - mStableFrame.right, 0),
                 Math.max(mFrame.bottom - mStableFrame.bottom, 0));
-
-        if (hasOutsets) {
-            mOutsets.set(Math.max(mContentFrame.left - mOutsetFrame.left, 0),
-                    Math.max(mContentFrame.top - mOutsetFrame.top, 0),
-                    Math.max(mOutsetFrame.right - mContentFrame.right, 0),
-                    Math.max(mOutsetFrame.bottom - mContentFrame.bottom, 0));
-        } else {
-            mOutsets.set(0, 0, 0, 0);
-        }
 
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
