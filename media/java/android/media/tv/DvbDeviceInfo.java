@@ -16,13 +16,9 @@
 
 package android.media.tv;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.media.tv.TvInputManager;
 import android.util.Log;
-
-import java.lang.IllegalArgumentException;
 
 /**
  * Simple container for information about DVB device.
