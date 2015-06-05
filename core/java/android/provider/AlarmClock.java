@@ -86,7 +86,7 @@ public final class AlarmClock {
      * If the extra {@link #EXTRA_ALARM_SEARCH_MODE} is used, and the search results contain two or
      * more matching alarms, then the implementation should show an UI with the results and allow
      * the user to select the alarm to dismiss. If the implementation supports
-     * {@link android.content.Intent.CATEGORY_VOICE} and the activity is started in Voice
+     * {@link android.content.Intent#CATEGORY_VOICE} and the activity is started in Voice
      * Interaction mode (i.e. check {@link android.app.Activity#isVoiceInteraction}), then the
      * implementation should additionally use {@link android.app.VoiceInteractor.PickOptionRequest}
      * to start a voice interaction follow-on flow to help the user disambiguate the alarm by voice.
