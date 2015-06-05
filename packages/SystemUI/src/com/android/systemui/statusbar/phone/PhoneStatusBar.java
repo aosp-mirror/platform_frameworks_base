@@ -1153,7 +1153,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (shadeEntry == null) {
             return;
         }
-        boolean isHeadsUped = mUseHeadsUp && shouldInterrupt(notification);
+        boolean isHeadsUped = mUseHeadsUp && shouldInterrupt(shadeEntry);
         if (isHeadsUped) {
             mHeadsUpManager.showNotification(shadeEntry);
             // Mark as seen immediately
@@ -1171,6 +1171,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                         notification.getKey());
                 notification.getNotification().fullScreenIntent.send();
+                shadeEntry.notifyFullScreenIntentLaunched();
             } catch (PendingIntent.CanceledException e) {
             }
         }
@@ -2045,6 +2046,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
                             sbn.getKey());
                     notification.fullScreenIntent.send();
+                    entry.entry.notifyFullScreenIntentLaunched();
                 } catch (PendingIntent.CanceledException e) {
                 }
             }
