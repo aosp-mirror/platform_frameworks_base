@@ -139,6 +139,8 @@ public class ProcessCpuTracker {
     private float mLoad5 = 0;
     private float mLoad15 = 0;
 
+    // All times are in milliseconds. They are converted from jiffies to milliseconds
+    // when extracted from the kernel.
     private long mCurrentSampleTime;
     private long mLastSampleTime;
 
@@ -191,12 +193,34 @@ public class ProcessCpuTracker {
         // filter out kernel processes.
         public long vsize;
 
+        /**
+         * Time in milliseconds.
+         */
         public long base_uptime;
+
+        /**
+         * Time in milliseconds.
+         */
         public long rel_uptime;
 
+        /**
+         * Time in milliseconds.
+         */
         public long base_utime;
+
+        /**
+         * Time in milliseconds.
+         */
         public long base_stime;
+
+        /**
+         * Time in milliseconds.
+         */
         public int rel_utime;
+
+        /**
+         * Time in milliseconds.
+         */
         public int rel_stime;
 
         public long base_minfaults;
@@ -558,7 +582,7 @@ public class ProcessCpuTracker {
     }
 
     /**
-     * Returns the total time (in clock ticks, or 1/100 sec) spent executing in
+     * Returns the total time (in milliseconds) spent executing in
      * both user and system code.  Safe to call without lock held.
      */
     public long getCpuTimeForPid(int pid) {
@@ -575,26 +599,44 @@ public class ProcessCpuTracker {
         }
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastUserTime() {
         return mRelUserTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastSystemTime() {
         return mRelSystemTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastIoWaitTime() {
         return mRelIoWaitTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastIrqTime() {
         return mRelIrqTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastSoftIrqTime() {
         return mRelSoftIrqTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastIdleTime() {
         return mRelIdleTime;
     }
