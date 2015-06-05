@@ -194,7 +194,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Subhead.Inverse">
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
         <item name="textColorHint">?attr/textColorHintInverse</item>
         <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
         <item name="textColorLink">?attr/textColorLinkInverse</item>
