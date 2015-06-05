@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import android.graphics.Matrix;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
@@ -89,6 +90,8 @@ public class AppWindowAnimator {
      *  See {@link #transferCurrentAnimation}*/
     boolean usingTransferredAnimation = false;
 
+    private boolean mSkipFirstFrame = false;
+
     static final Animation sDummyAnimation = new DummyAnimation();
 
     public AppWindowAnimator(final AppWindowToken atoken) {
@@ -97,7 +100,7 @@ public class AppWindowAnimator {
         mAnimator = atoken.mAnimator;
     }
 
-    public void setAnimation(Animation anim, int width, int height) {
+    public void setAnimation(Animation anim, int width, int height, boolean skipFirstFrame) {
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting animation in " + mAppToken
                 + ": " + anim + " wxh=" + width + "x" + height
                 + " isVisible=" + mAppToken.isVisible());
@@ -124,6 +127,8 @@ public class AppWindowAnimator {
         transformation.clear();
         transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
+
+        this.mSkipFirstFrame = skipFirstFrame;
 
         if (!mAppToken.appFullscreen) {
             anim.setBackgroundColor(0);
@@ -271,6 +276,18 @@ public class AppWindowAnimator {
         return hasMoreFrames;
     }
 
+    private long getStartTimeCorrection() {
+        if (mSkipFirstFrame) {
+
+            // If the transition is an animation in which the first frame doesn't change the screen
+            // contents at all, we can just skip it and start at the second frame. So we shift the
+            // start time of the animation forward by minus the frame duration.
+            return -Choreographer.getInstance().getFrameIntervalNanos() / TimeUtils.NANOS_PER_MS;
+        } else {
+            return 0;
+        }
+    }
+
     // This must be called while inside a transaction.
     boolean stepAnimationLocked(long currentTime, final int displayId) {
         if (mService.okToDisplay()) {
@@ -292,12 +309,14 @@ public class AppWindowAnimator {
                         " @ " + currentTime + " scale="
                         + mService.getTransitionAnimationScaleLocked()
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
-                    animation.setStartTime(currentTime);
+                    long correction = getStartTimeCorrection();
+                    animation.setStartTime(currentTime + correction);
                     animating = true;
                     if (thumbnail != null) {
                         thumbnail.show();
-                        thumbnailAnimation.setStartTime(currentTime);
+                        thumbnailAnimation.setStartTime(currentTime + correction);
                     }
+                    mSkipFirstFrame = false;
                 }
                 if (stepAnimation(currentTime)) {
                     // animation isn't over, step any thumbnail and that's
