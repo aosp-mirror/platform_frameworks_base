@@ -13,9 +13,7 @@ parent.link=index.html
 <p>The Systrace tool is particularly useful in diagnosing display problems where an
   application is slow to draw or stutters while displaying motion or animation. For more information
   on how to use Systrace, see <a href="{@docRoot}tools/debugging/systrace.html">Analyzing
-  Display and Performance</a>.</p>
-
-
+  UI Performance with Systrace</a>.</p>
 
 <h2 id="requirements">Requirements</h2>
 
@@ -37,7 +35,7 @@ of these methods.</p>
 <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>,
 or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
 
-<p>To run the Systrace user interface:</p>
+<p>To run the Systrace capture user interface:</p>
 
 <div class="toggle-content closed">
 <p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
@@ -100,7 +98,6 @@ or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
 </div>
 
 
-
 <h2 id="options">Command Line Usage</h2>
 
 <p>The Systrace tool has different command line options for devices running Android 4.3 (API
@@ -118,9 +115,9 @@ $ python systrace.py [options] [category1] [category2] ... [categoryN]
 
 <h3 id="options-4.3">Android 4.3 and higher options</h3>
 
-<p>When you use Systrace on devices running Android 4.3 and higher, you must specify at least one
-trace category tag. Here is an example execution run that sets trace tags and generates a trace
-from a connected device.</p>
+<p>When you use Systrace on devices running Android 4.3 and higher, you can omit trace category tags
+to get the defaults, or you may manually specify tags for inclusion. Here is an example execution
+run that sets trace tags and generates a trace from a connected device.</p>
 
 <pre>
 $ cd <em>android-sdk</em>/platform-tools/systrace
@@ -220,30 +217,14 @@ $ python systrace.py --time=10 -o mynewtrace.html sched gfx view wm
     <a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package names</a>.
     The apps must contain tracing instrumentation calls from the {@link android.os.Trace} class.
     For more information, see <a href="{@docRoot}tools/debugging/systrace.html#app-trace">Analyzing
-    Display and Performance</a>.
+    UI Performance with Systrace</a>.
     </td>
-  </tr>
-
-
-
-  <tr>
-    <td><code>--link-assets</code></td>
-
-    <td>Link to the original CSS or JavaScript resources instead of embedding them in the HTML
-      trace report.</td>
   </tr>
 
   <tr>
     <td><code>--from-file=&lt;<em>FROM_FILE</em>&gt;</code></td>
 
     <td>Create the interactive Systrace report from a file, instead of running a live trace.</td>
-  </tr>
-
-  <tr>
-    <td><code>--asset-dir=&lt;<em>ASSET_DIR</em>&gt;</code></td>
-
-    <td>Specify a directory for the trace report assets. This option is useful for maintaining a
-      single set of assets for multiple Systrace reports.</td>
   </tr>
 
   <tr>
@@ -375,13 +356,6 @@ $ python systrace.py --disk --time=10 -o mynewtrace.html
     </td>
   </tr>
 
-  <tr>
-    <td><code>--link-assets</code></td>
-
-    <td>Link to the original CSS or JS resources instead of embedding them in the HTML trace
-    report.</td>
-  </tr>
-
 </table>
 
 <p>You can set the trace <a href="#tags">tags</a> for Systrace on
@@ -453,18 +427,6 @@ trace HTML report.</p>
     <td><strong>Left Arrow</strong></td>
 
     <td>Select the previous event on the currently selected timeline.</td>
-  </tr>
-
-  <tr>
-    <td><strong>Double Click</strong></td>
-
-    <td>Zoom into the trace timeline.</td>
-  </tr>
-
-  <tr>
-    <td><strong>Shift+Double Click</strong></td>
-
-    <td>Zoom out of the trace timeline.</td>
   </tr>
 
 </table>
