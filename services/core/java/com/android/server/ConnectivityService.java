@@ -908,14 +908,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // network is blocked; clone and override state
             info = new NetworkInfo(info);
             info.setDetailedState(DetailedState.BLOCKED, null, null);
-            if (DBG) {
+            if (VDBG) {
                 log("returning Blocked NetworkInfo for ifname=" +
                         lp.getInterfaceName() + ", uid=" + uid);
             }
         }
         if (info != null && mLockdownTracker != null) {
             info = mLockdownTracker.augmentNetworkInfo(info);
-            if (DBG) log("returning Locked NetworkInfo");
+            if (VDBG) log("returning Locked NetworkInfo");
         }
         return info;
     }
