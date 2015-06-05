@@ -15,7 +15,5 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true" android:state_activated="true" android:color="@*android:color/primary_text_default_material_dark" />
-    <item android:state_focused="false" android:state_activated="true" android:color="@*android:color/primary_text_default_material_dark" />
     <item android:color="@*android:color/secondary_text_material_light" />
 </selector>
