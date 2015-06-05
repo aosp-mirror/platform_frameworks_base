@@ -17148,6 +17148,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * drawable.
      *
      * @return The color of the ColorDrawable background, if set, otherwise 0.
+     * @hide
      */
     @ColorInt
     public int getBackgroundColor() {
