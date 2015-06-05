@@ -688,7 +688,7 @@
     <string name="permdesc_subscribedFeedsRead">Allows the app to get details about the currently synced feeds.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sendSms">send SMS messages</string>
+    <string name="permlab_sendSms">send and view SMS messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sendSms">Allows the app to send SMS messages.
      This may result in unexpected charges. Malicious apps may cost you money by
