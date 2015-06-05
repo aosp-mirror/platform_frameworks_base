@@ -20,8 +20,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #include "fpdfview.h"
-#include "fpdfedit.h"
-#include "fpdfsave.h"
+#include "fpdf_edit.h"
+#include "fpdf_save.h"
 #include "fsdk_rendercontext.h"
 #include "fpdf_transformpage.h"
 #pragma GCC diagnostic pop
@@ -58,7 +58,7 @@ static int sUnmatchedInitRequestCount = 0;
 static void initializeLibraryIfNeeded() {
     Mutex::Autolock _l(sLock);
     if (sUnmatchedInitRequestCount == 0) {
-        FPDF_InitLibrary(NULL);
+        FPDF_InitLibrary();
     }
     sUnmatchedInitRequestCount++;
 }

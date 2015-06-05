@@ -183,6 +183,7 @@ LOCAL_C_INCLUDES += \
     external/pdfium/core/include/fpdfapi \
     external/pdfium/core/include/fpdfdoc \
     external/pdfium/fpdfsdk/include \
+    external/pdfium/public \
     external/skia/src/core \
     external/skia/src/effects \
     external/skia/src/images \
