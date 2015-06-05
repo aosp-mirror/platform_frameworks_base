@@ -2734,15 +2734,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             final AppWindowToken appToken = win.mAppToken;
-            // Prevent an immediate window exit only for a real animation, ignoring e.g.
-            // dummy animations.
-            final boolean inAnimation = win.mWinAnimator.isWindowAnimatingNow();
             // The starting window is the last window in this app token and it isn't animating.
             // Allow it to be removed now as there is no additional window or animation that will
             // trigger its removal.
             final boolean lastWinStartingNotAnimating = startingWindow && appToken!= null
-                    && appToken.allAppWindows.size() == 1 && !inAnimation;
-            if (!lastWinStartingNotAnimating && (win.mExiting || inAnimation)) {
+                    && appToken.allAppWindows.size() == 1 && !win.mWinAnimator.isAnimating();
+            if (!lastWinStartingNotAnimating && (win.mExiting || win.mWinAnimator.isAnimating())) {
                 // The exit animation is running... wait for it!
                 win.mExiting = true;
                 win.mRemoveOnExit = true;
@@ -4674,7 +4671,12 @@ public class WindowManagerService extends IWindowManager.Stub
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
-                if (!wtoken.startingDisplayed || mSkipAppTransitionAnimation) {
+                // A dummy animation is a placeholder animation which informs others that an
+                // animation is going on (in this case an application transition). If the animation
+                // was transferred from another application/animator, no dummy animator should be
+                // created since an animation is already in progress.
+                if (!wtoken.mAppAnimator.usingTransferredAnimation &&
+                        (!wtoken.startingDisplayed || mSkipAppTransitionAnimation)) {
                     if (DEBUG_APP_TRANSITIONS) Slog.v(
                             TAG, "Setting dummy animation on: " + wtoken);
                     wtoken.mAppAnimator.setDummyAnimation();
