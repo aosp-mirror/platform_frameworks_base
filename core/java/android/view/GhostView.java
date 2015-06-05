@@ -39,7 +39,7 @@ public class GhostView extends View {
         mView = view;
         mView.mGhostView = this;
         final ViewGroup parent = (ViewGroup) mView.getParent();
-        setGhostedVisibility(View.INVISIBLE);
+        mView.setTransitionVisibility(View.INVISIBLE);
         parent.invalidate();
     }
 
@@ -66,19 +66,15 @@ public class GhostView extends View {
         super.setVisibility(visibility);
         if (mView.mGhostView == this) {
             int inverseVisibility = (visibility == View.VISIBLE) ? View.INVISIBLE : View.VISIBLE;
-            setGhostedVisibility(inverseVisibility);
+            mView.setTransitionVisibility(inverseVisibility);
         }
-    }
-
-    private void setGhostedVisibility(int visibility) {
-        mView.mViewFlags = (mView.mViewFlags & ~View.VISIBILITY_MASK) | visibility;
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (!mBeingMoved) {
-            setGhostedVisibility(View.VISIBLE);
+            mView.setTransitionVisibility(View.VISIBLE);
             mView.mGhostView = null;
             final ViewGroup parent = (ViewGroup) mView.getParent();
             if (parent != null) {

@@ -8786,6 +8786,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Change the visibility of the View without triggering any other changes. This is
+     * important for transitions, where visibility changes should not adjust focus or
+     * trigger a new layout. This is only used when the visibility has already been changed
+     * and we need a transient value during an animation. When the animation completes,
+     * the original visibility value is always restored.
+     *
+     * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
+     * @hide
+     */
+    public void setTransitionVisibility(@Visibility int visibility) {
+        mViewFlags = (mViewFlags & ~View.VISIBILITY_MASK) | visibility;
+    }
+
+    /**
      * Reset the flag indicating the accessibility state of the subtree rooted
      * at this view changed.
      */
