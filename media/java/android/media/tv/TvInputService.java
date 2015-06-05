@@ -933,6 +933,10 @@ public abstract class TvInputService extends Service {
          * Returns {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if the position is unknown at the
          * moment.
          *
+         * <p>Note that the current playback position should be equal to or greater than the start
+         * playback position reported by {@link #onTimeShiftGetStartPosition}. Failure to notifying
+         * the correct current position might lead to bad user experience.
+         *
          * @see #onTimeShiftResume
          * @see #onTimeShiftPause
          * @see #onTimeShiftSeekTo
@@ -1396,6 +1400,12 @@ public abstract class TvInputService extends Service {
                     notifyTimeShiftStartPositionChanged(startPositionMs);
                 }
                 long currentPositionMs = onTimeShiftGetCurrentPosition();
+                if (currentPositionMs < mStartPositionMs) {
+                    Log.w(TAG, "Current position (" + currentPositionMs + ") cannot be earlier than"
+                            + " start position (" + mStartPositionMs + "). Reset to the start "
+                            + "position.");
+                    currentPositionMs = mStartPositionMs;
+                }
                 if (mCurrentPositionMs != currentPositionMs) {
                     mCurrentPositionMs = currentPositionMs;
                     notifyTimeShiftCurrentPositionChanged(currentPositionMs);
