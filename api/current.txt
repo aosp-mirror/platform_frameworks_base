@@ -26919,8 +26919,7 @@ package android.provider {
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final java.lang.String APN = "apn";
     field public static final java.lang.String AUTH_TYPE = "authtype";
-    field public static final deprecated java.lang.String BEARER = "bearer";
-    field public static final java.lang.String BEARER_BITMASK = "bearer_bitmask";
+    field public static final java.lang.String BEARER = "bearer";
     field public static final java.lang.String CARRIER_ENABLED = "carrier_enabled";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String CURRENT = "current";
