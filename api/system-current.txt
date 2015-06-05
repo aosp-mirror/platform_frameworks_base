@@ -4096,6 +4096,7 @@ package android.app {
     ctor public AssistContent();
     method public android.content.ClipData getClipData();
     method public android.net.Uri getWebUri();
+    method public boolean isAppProvidedIntent();
     method public void setClipData(android.content.ClipData);
     method public void setIntent(android.content.Intent);
     method public void setWebUri(android.net.Uri);
@@ -26418,10 +26419,10 @@ package android.provider {
 
   public final class AlarmClock {
     ctor public AlarmClock();
+    field public static final java.lang.String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
     field public static final java.lang.String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
     field public static final java.lang.String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
     field public static final java.lang.String ACTION_SHOW_ALARMS = "android.intent.action.SHOW_ALARMS";
-    field public static final java.lang.String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
     field public static final java.lang.String ACTION_SNOOZE_ALARM = "android.intent.action.SNOOZE_ALARM";
     field public static final java.lang.String ALARM_SEARCH_MODE_ALL = "android.all";
     field public static final java.lang.String ALARM_SEARCH_MODE_LABEL = "android.label";
