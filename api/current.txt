@@ -41542,6 +41542,7 @@ package android.widget {
     method public int getCompoundPaddingTop();
     method public final int getCurrentHintTextColor();
     method public final int getCurrentTextColor();
+    method public android.view.ActionMode.Callback getCustomInsertionActionModeCallback();
     method public android.view.ActionMode.Callback getCustomSelectionActionModeCallback();
     method protected boolean getDefaultEditable();
     method protected android.text.method.MovementMethod getDefaultMovementMethod();
@@ -41644,6 +41645,7 @@ package android.widget {
     method public void setCompoundDrawablesWithIntrinsicBounds(int, int, int, int);
     method public void setCompoundDrawablesWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCursorVisible(boolean);
+    method public void setCustomInsertionActionModeCallback(android.view.ActionMode.Callback);
     method public void setCustomSelectionActionModeCallback(android.view.ActionMode.Callback);
     method public final void setEditableFactory(android.text.Editable.Factory);
     method public void setElegantTextHeight(boolean);
