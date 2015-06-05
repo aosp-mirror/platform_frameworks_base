@@ -82,5 +82,9 @@
         <attr name="fillColor" format="integer" />
         <attr name="singleToneColor" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="StatusBarWindowView_Layout">
+        <attr name="ignoreRightInset" format="boolean" />
+    </declare-styleable>
 </resources>
 
