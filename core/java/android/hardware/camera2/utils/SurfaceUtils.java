@@ -52,7 +52,7 @@ public class SurfaceUtils {
      * @param surface The surface to be queried for size.
      * @return Size of the surface.
      *
-     * @throw IllegalArgumentException if the surface is already abandoned.
+     * @throws IllegalArgumentException if the surface is already abandoned.
      */
     public static Size getSurfaceSize(Surface surface) {
         try {
@@ -68,7 +68,7 @@ public class SurfaceUtils {
      * @param surface The surface to be queried for format.
      * @return format of the surface.
      *
-     * @throw IllegalArgumentException if the surface is already abandoned.
+     * @throws IllegalArgumentException if the surface is already abandoned.
      */
     public static int getSurfaceFormat(Surface surface) {
         try {
