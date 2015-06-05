@@ -26,7 +26,7 @@ footer.hide=1
 
         <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Get Started!
+          Get started
         </a><br>
       </div>
     </div>
@@ -44,7 +44,7 @@ footer.hide=1
   <div class="dac-section-subtitle">
     Essential information to help you get your apps ready for Android M.
   </div>
- 
+
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:preview/landing/more"
        data-cardSizes="6x6"
@@ -56,7 +56,7 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           Report Issues
         </a>
-      </li> 
+      </li>
       <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
         <span class="dac-sprite dac-auto-chevron"></span>
         Join G+ Community

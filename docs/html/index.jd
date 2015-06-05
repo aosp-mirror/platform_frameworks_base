@@ -26,9 +26,9 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <p class="dac-hero-description">Get your apps ready for the next version
         of Android. Test on Nexus 5, 6, 9, and Player. </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Learn more
+          Get started
         </a>
       </div>
     </div>
