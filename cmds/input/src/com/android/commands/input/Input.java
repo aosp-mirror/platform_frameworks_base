@@ -234,6 +234,18 @@ public class Input {
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
+    private int getInputDeviceId(int inputSource) {
+        final int DEFAULT_DEVICE_ID = 0;
+        int[] devIds = InputDevice.getDeviceIds();
+        for (int devId : devIds) {
+            InputDevice inputDev = InputDevice.getDevice(devId);
+            if (inputDev.supportsSource(inputSource)) {
+                return devId;
+            }
+        }
+        return DEFAULT_DEVICE_ID;
+    }
+
     /**
      * Builds a MotionEvent and injects it into the event stream.
      *
@@ -249,11 +261,10 @@ public class Input {
         final int DEFAULT_META_STATE = 0;
         final float DEFAULT_PRECISION_X = 1.0f;
         final float DEFAULT_PRECISION_Y = 1.0f;
-        final int DEFAULT_DEVICE_ID = 0;
         final int DEFAULT_EDGE_FLAGS = 0;
         MotionEvent event = MotionEvent.obtain(when, when, action, x, y, pressure, DEFAULT_SIZE,
-                DEFAULT_META_STATE, DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y, DEFAULT_DEVICE_ID,
-                DEFAULT_EDGE_FLAGS);
+                DEFAULT_META_STATE, DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y,
+                getInputDeviceId(inputSource), DEFAULT_EDGE_FLAGS);
         event.setSource(inputSource);
         Log.i(TAG, "injectMotionEvent: " + event);
         InputManager.getInstance().injectInputEvent(event,
