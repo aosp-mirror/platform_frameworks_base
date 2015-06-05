@@ -10643,7 +10643,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
-                UserHandle.getCallingUserId(), PENDING_ASSIST_EXTRAS_TIMEOUT);
+                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
         if (pae == null) {
             return null;
         }
@@ -10666,11 +10666,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void requestAssistContextExtras(int requestType, IResultReceiver receiver) {
         enqueueAssistContext(requestType, null, null, receiver, UserHandle.getCallingUserId(),
-                PENDING_ASSIST_EXTRAS_LONG_TIMEOUT);
+                null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT);
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            IResultReceiver receiver, int userHandle, long timeout) {
+            IResultReceiver receiver, int userHandle, Bundle args, long timeout) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "enqueueAssistContext()");
         synchronized (this) {
@@ -10689,6 +10689,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             PendingAssistExtras pae;
             Bundle extras = new Bundle();
+            if (args != null) {
+                extras.putAll(args);
+            }
             extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
             extras.putInt(Intent.EXTRA_ASSIST_UID, activity.app.uid);
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, userHandle);
@@ -10774,8 +10777,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle) {
-        return enqueueAssistContext(requestType, intent, hint, null, userHandle,
+    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
+            Bundle args) {
+        return enqueueAssistContext(requestType, intent, hint, null, userHandle, args,
                 PENDING_ASSIST_EXTRAS_TIMEOUT) != null;
     }
 

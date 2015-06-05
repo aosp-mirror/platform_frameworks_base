@@ -2208,7 +2208,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int requestType = data.readInt();
             String hint = data.readString();
             int userHandle = data.readInt();
-            boolean res = launchAssistIntent(intent, requestType, hint, userHandle);
+            Bundle args = data.readBundle();
+            boolean res = launchAssistIntent(intent, requestType, hint, userHandle, args);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -5378,8 +5379,8 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle)
-            throws RemoteException {
+    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
+            Bundle args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -5387,6 +5388,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(requestType);
         data.writeString(hint);
         data.writeInt(userHandle);
+        data.writeBundle(args);
         mRemote.transact(LAUNCH_ASSIST_INTENT_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;

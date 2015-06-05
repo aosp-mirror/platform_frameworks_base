@@ -8277,6 +8277,7 @@ package android.content {
     field public static final deprecated java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
     field public static final java.lang.String EXTRA_ALTERNATE_INTENTS = "android.intent.extra.ALTERNATE_INTENTS";
     field public static final java.lang.String EXTRA_ASSIST_CONTEXT = "android.intent.extra.ASSIST_CONTEXT";
+    field public static final java.lang.String EXTRA_ASSIST_INPUT_DEVICE_ID = "android.intent.extra.ASSIST_INPUT_DEVICE_ID";
     field public static final java.lang.String EXTRA_ASSIST_INPUT_HINT_KEYBOARD = "android.intent.extra.ASSIST_INPUT_HINT_KEYBOARD";
     field public static final java.lang.String EXTRA_ASSIST_PACKAGE = "android.intent.extra.ASSIST_PACKAGE";
     field public static final java.lang.String EXTRA_ASSIST_UID = "android.intent.extra.ASSIST_UID";
@@ -24476,10 +24477,10 @@ package android.provider {
 
   public final class AlarmClock {
     ctor public AlarmClock();
+    field public static final java.lang.String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
     field public static final java.lang.String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
     field public static final java.lang.String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
     field public static final java.lang.String ACTION_SHOW_ALARMS = "android.intent.action.SHOW_ALARMS";
-    field public static final java.lang.String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
     field public static final java.lang.String ACTION_SNOOZE_ALARM = "android.intent.action.SNOOZE_ALARM";
     field public static final java.lang.String ALARM_SEARCH_MODE_ALL = "android.all";
     field public static final java.lang.String ALARM_SEARCH_MODE_LABEL = "android.label";
