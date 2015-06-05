@@ -1640,6 +1640,10 @@ public final class ActivityThread {
         return sCurrentActivityThread;
     }
 
+    public static boolean isSystem() {
+        return (sCurrentActivityThread != null) ? sCurrentActivityThread.mSystemThread : false;
+    }
+
     public static String currentOpPackageName() {
         ActivityThread am = currentActivityThread();
         return (am != null && am.getApplication() != null)

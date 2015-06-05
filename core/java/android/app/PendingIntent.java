@@ -25,11 +25,13 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.AndroidException;
 
@@ -206,10 +208,20 @@ public final class PendingIntent implements Parcelable {
         private int mResultCode;
         private String mResultData;
         private Bundle mResultExtras;
+        private static Handler sDefaultSystemHandler;
         FinishedDispatcher(PendingIntent pi, OnFinished who, Handler handler) {
             mPendingIntent = pi;
             mWho = who;
-            mHandler = handler;
+            if (handler == null && ActivityThread.isSystem()) {
+                // We assign a default handler for the system process to avoid deadlocks when
+                // processing receivers in various components that hold global service locks.
+                if (sDefaultSystemHandler == null) {
+                    sDefaultSystemHandler = new Handler(Looper.getMainLooper());
+                }
+                mHandler = sDefaultSystemHandler;
+            } else {
+                mHandler = handler;
+            }
         }
         public void performReceive(Intent intent, int resultCode, String data,
                 Bundle extras, boolean serialized, boolean sticky, int sendingUser) {
