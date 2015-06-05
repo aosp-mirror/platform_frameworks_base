@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -412,6 +411,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private boolean mWaitingForKeyguardExit;
     private boolean mDozing;
+    private boolean mDozingRequested;
     private boolean mScrimSrcModeEnabled;
 
     private Interpolator mLinearInterpolator = new LinearInterpolator();
@@ -3478,9 +3478,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updateDozingState() {
-        if (mState != StatusBarState.KEYGUARD && !mNotificationPanel.isDozing()) {
-            return;
-        }
         boolean animate = !mDozing && mDozeScrimController.isPulsing();
         mNotificationPanel.setDozing(mDozing, animate);
         mStackScroller.setDark(mDozing, animate, mScreenOnTouchLocation);
@@ -3597,6 +3594,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mState = state;
         mGroupManager.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
+        updateDozing();
     }
 
     @Override
@@ -3912,6 +3910,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    private void updateDozing() {
+        mDozing = mDozingRequested && mState == StatusBarState.KEYGUARD;
+        updateDozingState();
+    }
+
     private final class ShadeUpdates {
         private final ArraySet<String> mVisibleNotifications = new ArraySet<String>();
         private final ArraySet<String> mNewVisibleNotifications = new ArraySet<String>();
@@ -4017,10 +4020,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         private void handleStartDozing(@NonNull Runnable ready) {
-            if (!mDozing) {
-                mDozing = true;
+            if (!mDozingRequested) {
+                mDozingRequested = true;
                 DozeLog.traceDozing(mContext, mDozing);
-                updateDozingState();
+                updateDozing();
             }
             ready.run();
         }
@@ -4030,10 +4033,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         private void handleStopDozing() {
-            if (mDozing) {
-                mDozing = false;
+            if (mDozingRequested) {
+                mDozingRequested = false;
                 DozeLog.traceDozing(mContext, mDozing);
-                updateDozingState();
+                updateDozing();
             }
         }
 

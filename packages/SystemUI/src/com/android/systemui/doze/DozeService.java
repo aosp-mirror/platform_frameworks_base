@@ -235,7 +235,7 @@ public class DozeService extends DreamService {
                 public void onProximityResult(int result) {
                     final boolean isNear = result == RESULT_NEAR;
                     final long end = SystemClock.uptimeMillis();
-                    DozeLog.traceProximityResult(isNear, end - start, reason);
+                    DozeLog.traceProximityResult(mContext, isNear, end - start, reason);
                     if (nonBlocking) {
                         // we already continued
                         return;
