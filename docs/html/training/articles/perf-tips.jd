@@ -427,7 +427,7 @@ Traceview.</p>
 <ul>
   <li><a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with
     Traceview and dmtracedump</a></li>
-  <li><a href="{@docRoot}tools/debugging/systrace.html">Analysing Display and Performance
+  <li><a href="{@docRoot}tools/debugging/systrace.html">Analyzing UI Performance
     with Systrace</a></li>
 </ul>
 
