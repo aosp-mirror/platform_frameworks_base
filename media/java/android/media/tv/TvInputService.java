@@ -27,7 +27,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
-import android.media.tv.TvInputService.HardwareSession;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -341,9 +340,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Notifies the channel of the session is retuned by TV input.
+         * Informs the application that the current channel is re-tuned for some reason and the
+         * session now displays the content from a new channel. This is used to handle special cases
+         * such as when the current channel becomes unavailable, it is necessary to send the user to
+         * a certain channel or the user changes channel in some other way (e.g. by using a
+         * dedicated remote).
          *
-         * @param channelUri The URI of a channel.
+         * @param channelUri The URI of the new channel.
          */
         public void notifyChannelRetuned(final Uri channelUri) {
             executeOrPostRunnable(new Runnable() {
