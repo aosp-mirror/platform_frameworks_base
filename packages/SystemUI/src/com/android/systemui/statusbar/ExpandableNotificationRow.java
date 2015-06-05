@@ -903,11 +903,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mShowingPublic ? mPublicLayout : mPrivateLayout;
     }
 
+    @Override
+    public void setShowingLegacyBackground(boolean showing) {
+        super.setShowingLegacyBackground(showing);
+        mPrivateLayout.setShowingLegacyBackground(showing);
+        mPublicLayout.setShowingLegacyBackground(showing);
+    }
+
     public void setExpansionLogger(ExpansionLogger logger, String key) {
         mLogger = logger;
         mLoggingKey = key;
     }
-
 
     private void logExpansionEvent(boolean userAction, boolean wasExpanded) {
         final boolean nowExpanded = isExpanded();
