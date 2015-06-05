@@ -516,8 +516,8 @@ public class ScaleGestureDetector {
     }
 
     /**
-     * Return whether the stylus scale gesture, in which the user uses a stylus
-     * and presses the button, should preform scaling. {@see #setButtonScaleEnabled(boolean)}.
+     * Return whether the stylus scale gesture, in which the user uses a stylus and presses the
+     * button, should perform scaling. {@see #setStylusScaleEnabled(boolean)}
      */
     public boolean isStylusScaleEnabled() {
         return mStylusScaleEnabled;
