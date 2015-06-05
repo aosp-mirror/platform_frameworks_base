@@ -60,6 +60,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private final android.hardware.camera2.impl.CameraDeviceImpl mDeviceImpl;
     /** Internal handler; used for all incoming events to preserve total order */
     private final Handler mDeviceHandler;
+    private final boolean mIsConstrainedHighSpeedSession;
 
     /** Drain Sequence IDs which have been queued but not yet finished with aborted/completed */
     private final TaskDrainer<Integer> mSequenceDrainer;
@@ -88,13 +89,14 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     CameraCaptureSessionImpl(int id, Surface input, List<Surface> outputs,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
-            Handler deviceStateHandler, boolean configureSuccess) {
+            Handler deviceStateHandler, boolean configureSuccess, boolean isConstrainedHighSpeed) {
         if (outputs == null || outputs.isEmpty()) {
             throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
         } else if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
 
+        mIsConstrainedHighSpeedSession = isConstrainedHighSpeed;
         mId = id;
         mIdString = String.format("Session %d: ", mId);
 
@@ -134,6 +136,30 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         }
     }
 
+
+    private boolean isConstrainedHighSpeedRequestList(List<CaptureRequest> requestList) {
+        checkCollectionNotEmpty(requestList, "High speed request list");
+        for (CaptureRequest request : requestList) {
+            if (!request.isPartOfCRequestList()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * If the session is constrained high speed session, it only accept constrained high speed
+     * request list.
+     */
+    private void checkConstrainedHighSpeedRequestSanity(List<CaptureRequest> requestList) {
+        if (mIsConstrainedHighSpeedSession) {
+            if (!isConstrainedHighSpeedRequestList(requestList)) {
+                throw new IllegalArgumentException("It is only allowed to submit a constrained "
+                        + "high speed request list to a constrianed high speed session!!!");
+            }
+        }
+    }
+
     @Override
     public CameraDevice getDevice() {
         return mDeviceImpl;
@@ -154,6 +180,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                     "requests");
         } else if (request.isReprocess() && request.getReprocessableSessionId() != mId) {
             throw new IllegalArgumentException("capture request was created for another session");
+        }
+        if (mIsConstrainedHighSpeedSession) {
+            throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                    + " this method");
         }
 
         checkNotClosed();
@@ -177,6 +207,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         } else if (requests.isEmpty()) {
             throw new IllegalArgumentException("Requests must have at least one element");
         }
+
+        checkConstrainedHighSpeedRequestSanity(requests);
 
         for (CaptureRequest request : requests) {
             if (request.isReprocess()) {
@@ -212,7 +244,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         } else if (request.isReprocess()) {
             throw new IllegalArgumentException("repeating reprocess requests are not supported");
         }
-
+        if (mIsConstrainedHighSpeedSession) {
+            throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                    + " this method");
+        }
 
         checkNotClosed();
 
@@ -235,6 +270,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         } else if (requests.isEmpty()) {
             throw new IllegalArgumentException("requests must have at least one element");
         }
+
+        checkConstrainedHighSpeedRequestSanity(requests);
 
         for (CaptureRequest r : requests) {
             if (r.isReprocess()) {
@@ -704,7 +741,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                     // everything is idle.
                     try {
                         // begin transition to unconfigured
-                        mDeviceImpl.configureStreamsChecked(null, null);
+                        mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
+                                /*isConstrainedHighSpeed*/false);
                     } catch (CameraAccessException e) {
                         // OK: do not throw checked exceptions.
                         Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);

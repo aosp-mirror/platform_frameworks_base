@@ -465,7 +465,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public int endConfigure() {
+    public int endConfigure(boolean isConstrainedHighSpeed) {
         if (DEBUG) {
             Log.d(TAG, "endConfigure called.");
         }
