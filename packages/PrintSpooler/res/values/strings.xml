@@ -41,7 +41,7 @@
     <string name="label_color">Color</string>
 
     <!-- Label of the duplex mode widget. [CHAR LIMIT=20] -->
-    <string name="label_duplex">Duplex</string>
+    <string name="label_duplex">Two-sided</string>
 
     <!-- Label of the orientation widget. [CHAR LIMIT=20] -->
     <string name="label_orientation">Orientation</string>
