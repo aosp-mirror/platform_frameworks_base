@@ -6395,18 +6395,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 PackageManager packageManager = mContext.getPackageManager();
                 switch (grantState) {
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED: {
-                        packageManager.grantRuntimePermission(packageName, permission, user);
                         packageManager.updatePermissionFlags(permission, packageName,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
+                        packageManager.grantRuntimePermission(packageName, permission, user);
                     } break;
 
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED: {
-                        packageManager.revokeRuntimePermission(packageName,
-                                permission, user);
                         packageManager.updatePermissionFlags(permission, packageName,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
+                        packageManager.revokeRuntimePermission(packageName,
+                                permission, user);
                     } break;
 
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT: {
@@ -6428,14 +6428,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String permission) throws RemoteException {
         PackageManager packageManager = mContext.getPackageManager();
 
-        // Do this before clearing the caller's identity
-        int granted = packageManager.checkPermission(permission, packageName);
-
         UserHandle user = Binder.getCallingUserHandle();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = Binder.clearCallingIdentity();
             try {
+                int granted = AppGlobals.getPackageManager().checkPermission(permission,
+                        packageName, user.getIdentifier());
                 int permFlags = packageManager.getPermissionFlags(permission, packageName, user);
                 if ((permFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED)
                         != PackageManager.FLAG_PERMISSION_POLICY_FIXED) {
