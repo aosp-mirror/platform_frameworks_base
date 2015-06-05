@@ -238,8 +238,6 @@ public final class TvInputManager {
 
     private final ITvInputClient mClient;
 
-    private final ITvInputManagerCallback mManagerCallback;
-
     private final int mUserId;
 
     /**
@@ -879,7 +877,7 @@ public final class TvInputManager {
                 }
             }
         };
-        mManagerCallback = new ITvInputManagerCallback.Stub() {
+        ITvInputManagerCallback managerCallback = new ITvInputManagerCallback.Stub() {
             @Override
             public void onInputStateChanged(String inputId, int state) {
                 synchronized (mLock) {
@@ -921,7 +919,7 @@ public final class TvInputManager {
         };
         try {
             if (mService != null) {
-                mService.registerCallback(mManagerCallback, mUserId);
+                mService.registerCallback(managerCallback, mUserId);
                 List<TvInputInfo> infos = mService.getTvInputList(mUserId);
                 synchronized (mLock) {
                     for (TvInputInfo info : infos) {
