@@ -626,7 +626,7 @@ public final class TvInputInfo implements Parcelable {
         public static Set<String> getHiddenTvInputIds(Context context, int userId) {
             String hiddenIdsString = Settings.Secure.getStringForUser(
                     context.getContentResolver(), Settings.Secure.TV_INPUT_HIDDEN_INPUTS, userId);
-            Set<String> set = new HashSet<String>();
+            Set<String> set = new HashSet<>();
             if (TextUtils.isEmpty(hiddenIdsString)) {
                 return set;
             }
@@ -648,7 +648,7 @@ public final class TvInputInfo implements Parcelable {
         public static Map<String, String> getCustomLabels(Context context, int userId) {
             String labelsString = Settings.Secure.getStringForUser(
                     context.getContentResolver(), Settings.Secure.TV_INPUT_CUSTOM_LABELS, userId);
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<>();
             if (TextUtils.isEmpty(labelsString)) {
                 return map;
             }
