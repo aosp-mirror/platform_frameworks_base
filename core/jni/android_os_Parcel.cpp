@@ -211,7 +211,7 @@ static void android_os_Parcel_writeBlob(JNIEnv* env, jclass clazz, jlong nativeP
     }
 
     android::Parcel::WritableBlob blob;
-    android::status_t err2 = parcel->writeBlob(length, &blob);
+    android::status_t err2 = parcel->writeBlob(length, false, &blob);
     if (err2 != NO_ERROR) {
         signalExceptionForError(env, clazz, err2);
         return;
