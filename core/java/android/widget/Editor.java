@@ -125,6 +125,15 @@ public class Editor {
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
+    // Ordering constants used to place the Action Mode items in their menu.
+    private static final int MENU_ITEM_ORDER_CUT = 1;
+    private static final int MENU_ITEM_ORDER_COPY = 2;
+    private static final int MENU_ITEM_ORDER_PASTE = 3;
+    private static final int MENU_ITEM_ORDER_SHARE = 4;
+    private static final int MENU_ITEM_ORDER_SELECT_ALL = 5;
+    private static final int MENU_ITEM_ORDER_REPLACE = 6;
+    private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 10;
+
     // Each Editor manages its own undo stack.
     private final UndoManager mUndoManager = new UndoManager();
     private UndoOwner mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
@@ -3160,34 +3169,33 @@ public class Editor {
 
         private void populateMenuWithItems(Menu menu) {
             if (mTextView.canCut()) {
-                menu.add(0, TextView.ID_CUT, 0, com.android.internal.R.string.cut).
+                menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
+                        com.android.internal.R.string.cut).
                     setAlphabeticShortcut('x').
                     setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canCopy()) {
-                menu.add(0, TextView.ID_COPY, 0, com.android.internal.R.string.copy).
+                menu.add(Menu.NONE, TextView.ID_COPY, MENU_ITEM_ORDER_COPY,
+                        com.android.internal.R.string.copy).
                     setAlphabeticShortcut('c').
                     setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canPaste()) {
-                menu.add(0, TextView.ID_PASTE, 0, com.android.internal.R.string.paste).
-                        setAlphabeticShortcut('v').
-                        setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE,
+                        com.android.internal.R.string.paste).
+                    setAlphabeticShortcut('v').
+                    setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canShare()) {
-                menu.add(0, TextView.ID_SHARE, 0, com.android.internal.R.string.share).
-                        setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
+                        com.android.internal.R.string.share).
+                    setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
 
-            if (mTextView.canSelectAllText()) {
-                menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                        setAlphabeticShortcut('a').
-                        setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            }
-
+            updateSelectAllItem(menu);
             updateReplaceItem(menu);
         }
 
@@ -3196,8 +3204,11 @@ public class Editor {
                 PackageManager packageManager = mTextView.getContext().getPackageManager();
                 List<ResolveInfo> supportedActivities =
                         packageManager.queryIntentActivities(createProcessTextIntent(), 0);
-                for (ResolveInfo info : supportedActivities) {
-                    menu.add(info.loadLabel(packageManager))
+                for (int i = 0; i < supportedActivities.size(); ++i) {
+                    ResolveInfo info = supportedActivities.get(i);
+                    menu.add(Menu.NONE, Menu.NONE,
+                            MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
+                            info.loadLabel(packageManager))
                         .setIntent(createProcessTextIntentForResolveInfo(info))
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
                 }
@@ -3218,6 +3229,7 @@ public class Editor {
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            updateSelectAllItem(menu);
             updateReplaceItem(menu);
 
             Callback customCallback = getCustomCallback();
@@ -3227,12 +3239,25 @@ public class Editor {
             return true;
         }
 
+        private void updateSelectAllItem(Menu menu) {
+            boolean canSelectAll = mTextView.canSelectAllText();
+            boolean selectAllItemExists = menu.findItem(TextView.ID_SELECT_ALL) != null;
+            if (canSelectAll && !selectAllItemExists) {
+                menu.add(Menu.NONE, TextView.ID_SELECT_ALL, MENU_ITEM_ORDER_SELECT_ALL,
+                        com.android.internal.R.string.selectAll)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            } else if (!canSelectAll && selectAllItemExists) {
+                menu.removeItem(TextView.ID_SELECT_ALL);
+            }
+        }
+
         private void updateReplaceItem(Menu menu) {
             boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions();
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
-                menu.add(0, TextView.ID_REPLACE, 0, com.android.internal.R.string.replace).
-                    setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                menu.add(Menu.NONE, TextView.ID_REPLACE, MENU_ITEM_ORDER_REPLACE,
+                        com.android.internal.R.string.replace)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             } else if (!canReplace && replaceItemExists) {
                 menu.removeItem(TextView.ID_REPLACE);
             }
