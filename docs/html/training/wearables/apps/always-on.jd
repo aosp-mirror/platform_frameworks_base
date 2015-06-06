@@ -30,6 +30,11 @@ list as they shop at the market. Making an app constantly visible has an impact 
 so you should carefully consider that impact when adding this feature to your app.
 </p>
 
+<div class="video-wrapper-left">
+<iframe src="https://www.youtube.com/embed/7m6Z9d0fDaM" frameborder="0"
+allowfullscreen></iframe>
+</div>
+
 <p>Android Wear devices running Android version 5.1 or higher allow apps to remain in the
 foreground while saving battery power. Android Wear apps can control what’s displayed on the
 wearable device screen while the device is in a low-power ambient mode. Wear apps that run in both
