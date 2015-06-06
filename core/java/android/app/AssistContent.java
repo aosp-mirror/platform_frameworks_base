@@ -152,6 +152,7 @@ public class AssistContent {
         if (in.readInt() != 0) {
             mUri = Uri.CREATOR.createFromParcel(in);
         }
+        mIsAppProvidedIntent = in.readInt() == 1;
     }
 
     /** @hide */
@@ -174,5 +175,6 @@ public class AssistContent {
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(mIsAppProvidedIntent ? 1 : 0);
     }
 }
