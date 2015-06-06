@@ -55,6 +55,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -170,6 +171,7 @@ public final class LoadedApk {
             if (runtimeIsa.equals(secondaryIsa)) {
                 final ApplicationInfo modified = new ApplicationInfo(info);
                 modified.nativeLibraryDir = modified.secondaryNativeLibraryDir;
+                modified.primaryCpuAbi = modified.secondaryCpuAbi;
                 return modified;
             }
         }
@@ -276,8 +278,9 @@ public final class LoadedApk {
                     }
                 }
 
-                final ArrayList<String> zipPaths = new ArrayList<>();
-                final ArrayList<String> libPaths = new ArrayList<>();
+                final List<String> zipPaths = new ArrayList<>();
+                final List<String> apkPaths = new ArrayList<>();
+                final List<String> libPaths = new ArrayList<>();
 
                 if (mRegisterPackage) {
                     try {
@@ -333,6 +336,8 @@ public final class LoadedApk {
                     }
                 }
 
+                apkPaths.addAll(zipPaths);
+
                 if (mSharedLibraries != null) {
                     for (String lib : mSharedLibraries) {
                         if (!zipPaths.contains(lib)) {
@@ -350,6 +355,14 @@ public final class LoadedApk {
                 }
 
                 final String zip = TextUtils.join(File.pathSeparator, zipPaths);
+
+                // Add path to libraries in apk for current abi
+                if (mApplicationInfo.primaryCpuAbi != null) {
+                    for (String apk : apkPaths) {
+                      libPaths.add(apk + "!/lib/" + mApplicationInfo.primaryCpuAbi);
+                    }
+                }
+
                 final String lib = TextUtils.join(File.pathSeparator, libPaths);
 
                 /*
