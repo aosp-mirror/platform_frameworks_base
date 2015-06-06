@@ -152,9 +152,16 @@ public class PowerProfile {
     public static final String POWER_VIDEO = "dsp.video";
 
     /**
-     * Power consumption when camera flashlight is on.
+     * Average power consumption when camera flashlight is on.
      */
     public static final String POWER_FLASHLIGHT = "camera.flashlight";
+
+    /**
+     * Average power consumption when the camera is on over all standard use cases.
+     *
+     * TODO: Add more fine-grained camera power metrics.
+     */
+    public static final String POWER_CAMERA = "camera.avg";
 
     public static final String POWER_CPU_SPEEDS = "cpu.speeds";
 

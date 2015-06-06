@@ -37,6 +37,8 @@
   <item name="wifi.scan">0.1</item>  <!-- WIFI network scanning, ~100mA -->
   <item name="dsp.audio">0.1</item> <!-- ~10mA -->
   <item name="dsp.video">0.1</item> <!-- ~50mA -->
+  <item name="camera.flashlight">0.1</item> <!-- Avg. power for camera flash, ~160mA -->
+  <item name="camera.avg">0.1</item> <!-- Avg. power use of camera in standard usecases, ~550mA -->
   <item name="radio.active">0.1</item> <!-- ~200mA -->
   <item name="radio.scanning">0.1</item> <!-- cellular radio scanning for signal, ~10mA -->
   <item name="gps.on">0.1</item> <!-- ~50mA -->
