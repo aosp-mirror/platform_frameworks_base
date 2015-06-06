@@ -311,6 +311,11 @@ public class VectorDrawable extends Drawable {
     }
 
     @Override
+    public ColorFilter getColorFilter() {
+        return mColorFilter;
+    }
+
+    @Override
     public void setTintList(ColorStateList tint) {
         final VectorDrawableState state = mVectorState;
         if (state.mTint != tint) {
