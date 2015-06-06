@@ -2584,9 +2584,9 @@ public final class ActivityThread {
                     intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                             | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
                     intent.removeUnsafeExtras();
-                    content.setIntent(intent);
+                    content.setDefaultIntent(intent);
                 } else {
-                    content.setIntent(new Intent());
+                    content.setDefaultIntent(new Intent());
                 }
                 r.activity.onProvideAssistContent(content);
             }
