@@ -829,7 +829,8 @@ public class RttManager {
             Log.e(TAG, "Request " + index + ": two side RTT is not supported");
             return false;
         }  else if(params.bssid == null || params.bssid.isEmpty()) {
-            Log.e(TAG,"No BSSID is input");
+            Log.e(TAG,"No BSSID in params");
+            return false;
         } else if ( params.numberBurst != 0 ) {
             Log.e(TAG, "Request " + index + ": Illegal number of burst: " + params.numberBurst);
             return false;
