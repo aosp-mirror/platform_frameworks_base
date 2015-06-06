@@ -43,24 +43,10 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>Android Studio v1.2.2</a> <em>(June 2015)</em>
-  </p>
-  <div class="toggle-content-toggleme">
-    <p>Fixes and enhancements:</p>
-    <ul>
-      <li>Fixed build issues that were blocking builds from completing. </li>
-    </ul>
-  </div>
-</div>
-
-
-<div class="toggle-content closed">
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.1</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
-    <p>Fixes and enhancements:</p>
+    <p>Various fixes and enhancements:</p>
     <ul>
       <li>Fixed minor performance and feature issues. </li>
     </ul>
@@ -76,7 +62,7 @@ Android Studio, as denoted by revision number. </p>
   </p>
 
   <div class="toggle-content-toggleme">
-    <p>Fixes and enhancements:</p>
+    <p>Various fixes and enhancements:</p>
     <ul>
       <li>Updated the Android runtime window to include the
         <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a> tool
