@@ -56,6 +56,7 @@ enum {
 enum {
     EVENT_CALLBACK = 1,
     EVENT_SET_CALLBACK = 2,
+    EVENT_FRAME_RENDERED = 3,
 };
 
 static struct CryptoErrorCodes {
@@ -224,6 +225,18 @@ void JMediaCodec::deleteJavaObjects(JNIEnv *env) {
     mByteBufferAsReadOnlyBufferMethodID = NULL;
     mByteBufferPositionMethodID = NULL;
     mByteBufferLimitMethodID = NULL;
+}
+
+status_t JMediaCodec::enableOnFrameRenderedListener(jboolean enable) {
+    if (enable) {
+        if (mOnFrameRenderedNotification == NULL) {
+            mOnFrameRenderedNotification = new AMessage(kWhatFrameRendered, this);
+        }
+    } else {
+        mOnFrameRenderedNotification.clear();
+    }
+
+    return mCodec->setOnFrameRenderedNotification(mOnFrameRenderedNotification);
 }
 
 status_t JMediaCodec::setCallback(jobject cb) {
@@ -728,11 +741,37 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
     env->DeleteLocalRef(obj);
 }
 
+void JMediaCodec::handleFrameRenderedNotification(const sp<AMessage> &msg) {
+    int32_t arg1 = 0, arg2 = 0;
+    jobject obj = NULL;
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+    sp<AMessage> data;
+    CHECK(msg->findMessage("data", &data));
+
+    status_t err = ConvertMessageToMap(env, data, &obj);
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    env->CallVoidMethod(
+            mObject, gFields.postEventFromNativeID,
+            EVENT_FRAME_RENDERED, arg1, arg2, obj);
+
+    env->DeleteLocalRef(obj);
+}
+
 void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
         case kWhatCallbackNotify:
         {
             handleCallback(msg);
+            break;
+        }
+        case kWhatFrameRendered:
+        {
+            handleFrameRenderedNotification(msg);
             break;
         }
         default:
@@ -846,6 +885,22 @@ static jint throwExceptionAsNecessary(
             throwCodecException(env, err, actionCode, msg);
             return 0;
     }
+}
+
+static void android_media_MediaCodec_native_enableOnFrameRenderedListener(
+        JNIEnv *env,
+        jobject thiz,
+        jboolean enabled) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    status_t err = codec->enableOnFrameRenderedListener(enabled);
+
+    throwExceptionAsNecessary(env, err);
 }
 
 static void android_media_MediaCodec_native_setCallback(
@@ -1743,6 +1798,9 @@ static JNINativeMethod gMethods[] = {
 
     { "native_setInputSurface", "(Landroid/view/Surface;)V",
       (void *)android_media_MediaCodec_setInputSurface },
+
+    { "native_enableOnFrameRenderedListener", "(Z)V",
+      (void *)android_media_MediaCodec_native_enableOnFrameRenderedListener },
 
     { "native_setCallback",
       "(Landroid/media/MediaCodec$Callback;)V",
