@@ -387,7 +387,9 @@ public class SubscriptionManager {
     public SubscriptionInfo getActiveSubscriptionInfo(int subId) {
         if (VDBG) logd("[getActiveSubscriptionInfo]+ subId=" + subId);
         if (!isValidSubscriptionId(subId)) {
-            logd("[getActiveSubscriptionInfo]- invalid subId");
+            if (DBG) {
+                logd("[getActiveSubscriptionInfo]- invalid subId");
+            }
             return null;
         }
 
@@ -751,7 +753,9 @@ public class SubscriptionManager {
      */
     public static int getSlotId(int subId) {
         if (!isValidSubscriptionId(subId)) {
-            logd("[getSlotId]- fail");
+            if (DBG) {
+                logd("[getSlotId]- fail");
+            }
         }
 
         int result = INVALID_SIM_SLOT_INDEX;
@@ -793,7 +797,9 @@ public class SubscriptionManager {
     /** @hide */
     public static int getPhoneId(int subId) {
         if (!isValidSubscriptionId(subId)) {
-            logd("[getPhoneId]- fail");
+            if (DBG) {
+                logd("[getPhoneId]- fail");
+            }
             return INVALID_PHONE_INDEX;
         }
 
