@@ -18,8 +18,6 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.app.ActivityThread;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -64,14 +62,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.android.internal.widget.ResolverDrawerLayout;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -100,10 +95,7 @@ public class ResolverActivity extends Activity {
     private boolean mResolvingHome = false;
     private int mProfileSwitchMessageId = -1;
     private final ArrayList<Intent> mIntents = new ArrayList<>();
-
-    private UsageStatsManager mUsm;
-    private Map<String, UsageStats> mStats;
-    private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
+    private ResolverComparator mResolverComparator;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -222,10 +214,6 @@ public class ResolverActivity extends Activity {
         }
 
         mPm = getPackageManager();
-        mUsm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-
-        final long sinceTime = System.currentTimeMillis() - USAGE_STATS_PERIOD;
-        mStats = mUsm.queryAndAggregateUsageStats(sinceTime, System.currentTimeMillis());
 
         mPackageMonitor.register(this, getMainLooper(), false);
         mRegistered = true;
@@ -235,6 +223,10 @@ public class ResolverActivity extends Activity {
 
         // Add our initial intent as the first item, regardless of what else has already been added.
         mIntents.add(0, new Intent(intent));
+
+        final String referrerPackage = getReferrerPackageName();
+
+        mResolverComparator = new ResolverComparator(this, getTargetIntent(), referrerPackage);
 
         configureContentView(mIntents, initialIntents, rList, alwaysUseOption);
 
@@ -265,7 +257,6 @@ public class ResolverActivity extends Activity {
             // Try to initialize the title icon if we have a view for it and a title to match
             final ImageView titleIcon = (ImageView) findViewById(R.id.title_icon);
             if (titleIcon != null) {
-                final String referrerPackage = getReferrerPackageName();
                 ApplicationInfo ai = null;
                 try {
                     if (!TextUtils.isEmpty(referrerPackage)) {
@@ -1175,8 +1166,8 @@ public class ResolverActivity extends Activity {
                     }
                 }
                 if (N > 1) {
-                    Collections.sort(currentResolveList,
-                            new ResolverComparator(ResolverActivity.this, getTargetIntent()));
+                    mResolverComparator.compute(currentResolveList);
+                    Collections.sort(currentResolveList, mResolverComparator);
                 }
                 // First put the initial items at the top.
                 if (mInitialIntents != null) {
@@ -1651,63 +1642,4 @@ public class ResolverActivity extends Activity {
                 && match <= IntentFilter.MATCH_CATEGORY_PATH;
     }
 
-    class ResolverComparator implements Comparator<ResolvedComponentInfo> {
-        private final Collator mCollator;
-        private final boolean mHttp;
-
-        public ResolverComparator(Context context, Intent intent) {
-            mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
-            String scheme = intent.getScheme();
-            mHttp = "http".equals(scheme) || "https".equals(scheme);
-        }
-
-        @Override
-        public int compare(ResolvedComponentInfo lhsp, ResolvedComponentInfo rhsp) {
-            final ResolveInfo lhs = lhsp.getResolveInfoAt(0);
-            final ResolveInfo rhs = rhsp.getResolveInfoAt(0);
-
-            // We want to put the one targeted to another user at the end of the dialog.
-            if (lhs.targetUserId != UserHandle.USER_CURRENT) {
-                return 1;
-            }
-
-            if (mHttp) {
-                // Special case: we want filters that match URI paths/schemes to be
-                // ordered before others.  This is for the case when opening URIs,
-                // to make native apps go above browsers.
-                final boolean lhsSpecific = isSpecificUriMatch(lhs.match);
-                final boolean rhsSpecific = isSpecificUriMatch(rhs.match);
-                if (lhsSpecific != rhsSpecific) {
-                    return lhsSpecific ? -1 : 1;
-                }
-            }
-
-            if (mStats != null) {
-                final long timeDiff =
-                        getPackageTimeSpent(rhs.activityInfo.packageName) -
-                        getPackageTimeSpent(lhs.activityInfo.packageName);
-
-                if (timeDiff != 0) {
-                    return timeDiff > 0 ? 1 : -1;
-                }
-            }
-
-            CharSequence  sa = lhs.loadLabel(mPm);
-            if (sa == null) sa = lhs.activityInfo.name;
-            CharSequence  sb = rhs.loadLabel(mPm);
-            if (sb == null) sb = rhs.activityInfo.name;
-
-            return mCollator.compare(sa.toString(), sb.toString());
-        }
-
-        private long getPackageTimeSpent(String packageName) {
-            if (mStats != null) {
-                final UsageStats stats = mStats.get(packageName);
-                if (stats != null) {
-                    return stats.getTotalTimeInForeground();
-                }
-            }
-            return 0;
-        }
-    }
 }
