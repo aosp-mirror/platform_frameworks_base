@@ -155,7 +155,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         if (mIsConstrainedHighSpeedSession) {
             if (!isConstrainedHighSpeedRequestList(requestList)) {
                 throw new IllegalArgumentException("It is only allowed to submit a constrained "
-                        + "high speed request list to a constrianed high speed session!!!");
+                        + "high speed request list to a constrained high speed session!!!");
             }
         }
     }
@@ -761,8 +761,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
     @Override
     public boolean isConstrainedHighSpeed() {
-        // TODO: to be implemented
-        return false;
+        return mIsConstrainedHighSpeedSession;
     }
 
 }
