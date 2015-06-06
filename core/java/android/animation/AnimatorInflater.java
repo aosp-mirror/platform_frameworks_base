@@ -441,8 +441,12 @@ public class AnimatorInflater {
 
         long startDelay = arrayAnimator.getInt(R.styleable.Animator_startOffset, 0);
 
-        int valueType = arrayAnimator.getInt(R.styleable.Animator_valueType, VALUE_TYPE_FLOAT);
+        int valueType = arrayAnimator.getInt(R.styleable.Animator_valueType, VALUE_TYPE_UNDEFINED);
 
+        if (valueType == VALUE_TYPE_UNDEFINED) {
+            valueType = inferValueTypeFromValues(arrayAnimator, R.styleable.Animator_valueFrom,
+                    R.styleable.Animator_valueTo);
+        }
         PropertyValuesHolder pvh = getPVH(arrayAnimator, valueType,
                 R.styleable.Animator_valueFrom, R.styleable.Animator_valueTo, "");
         if (pvh != null) {
@@ -520,8 +524,14 @@ public class AnimatorInflater {
         ObjectAnimator oa = (ObjectAnimator) anim;
         String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
 
-        // Note that if there is a pathData defined in the Object Animator,
-        // valueFrom / valueTo will be ignored.
+        // Path can be involved in an ObjectAnimator in the following 3 ways:
+        // 1) Path morphing: the property to be animated is pathData, and valueFrom and valueTo
+        //    are both of pathType. valueType = pathType needs to be explicitly defined.
+        // 2) A property in X or Y dimension can be animated along a path: the property needs to be
+        //    defined in propertyXName or propertyYName attribute, the path will be defined in the
+        //    pathData attribute. valueFrom and valueTo will not be necessary for this animation.
+        // 3) PathInterpolator can also define a path (in pathData) for its interpolation curve.
+        // Here we are dealing with case 2:
         if (pathData != null) {
             String propertyXName =
                     arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyXName);
@@ -802,6 +812,25 @@ public class AnimatorInflater {
             valueType = VALUE_TYPE_FLOAT;
         }
         a.recycle();
+        return valueType;
+    }
+
+    private static int inferValueTypeFromValues(TypedArray styledAttributes, int valueFromId,
+            int valueToId) {
+        TypedValue tvFrom = styledAttributes.peekValue(valueFromId);
+        boolean hasFrom = (tvFrom != null);
+        int fromType = hasFrom ? tvFrom.type : 0;
+        TypedValue tvTo = styledAttributes.peekValue(valueToId);
+        boolean hasTo = (tvTo != null);
+        int toType = hasTo ? tvTo.type : 0;
+
+        int valueType;
+        // Check whether it's color type. If not, fall back to default type (i.e. float type)
+        if ((hasFrom && isColorType(fromType)) || (hasTo && isColorType(toType))) {
+            valueType = VALUE_TYPE_COLOR;
+        } else {
+            valueType = VALUE_TYPE_FLOAT;
+        }
         return valueType;
     }
 
