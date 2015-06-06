@@ -32891,6 +32891,8 @@ package android.telephony {
     method public void reloadCarrierConfigForSubId(int);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    final java.lang.String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS = "bool_allow_emergency_video_calls";
+    field public static final java.lang.String BOOL_ALLOW_VIDEO_PAUSE = "bool_allow_video_pause";
     field public static final java.lang.String KEY_ADDITIONAL_CALL_SETTING_BOOL = "additional_call_setting_bool";
     field public static final java.lang.String KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL = "allow_emergency_numbers_in_call_log_bool";
     field public static final java.lang.String KEY_ALLOW_LOCAL_DTMF_TONES_BOOL = "allow_local_dtmf_tones_bool";
