@@ -271,6 +271,30 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_UA_PROF_URL_STRING = "uaProfUrl";
     public static final String KEY_MMS_USER_AGENT_STRING = "userAgent";
 
+    /**
+     * Flag indicating whether to allow carrier video calls to emergency numbers.
+     * When {@code true}, video calls to emergency numbers will be allowed.  When {@code false},
+     * video calls to emergency numbers will be initiated as audio-only calls instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS =
+            "bool_allow_emergency_video_calls";
+
+    /**
+     * Flag indicating whether the carrier supports video pause signaling.  When {@code true}, the
+     * carrier supports use of the {@link android.telecom.VideoProfile#STATE_PAUSED} video state
+     * to pause transmission of video when the In-Call app is sent to the background.
+     * When {@code false}, video pause signaling is not supported.  {@code True} by default unless
+     * a carrier configuration overrides the default.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String BOOL_ALLOW_VIDEO_PAUSE =
+            "bool_allow_video_pause";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -309,6 +333,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_VVM_PORT_NUMBER_INT, 0);
         sDefaults.putString(KEY_VVM_TYPE_STRING, "");
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
+        sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_VIDEO_CALLS, false);
+        sDefaults.putBoolean(BOOL_ALLOW_VIDEO_PAUSE, true);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
