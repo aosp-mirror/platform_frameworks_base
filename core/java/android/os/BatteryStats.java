@@ -1940,6 +1940,15 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract long getFlashlightOnCount(int which);
 
+    /**
+     * Returns the time in microseconds that the camera has been on while the device was
+     * running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getCameraOnTime(long elapsedRealtimeUs, int which);
+
+
     public static final int NETWORK_MOBILE_RX_DATA = 0;
     public static final int NETWORK_MOBILE_TX_DATA = 1;
     public static final int NETWORK_WIFI_RX_DATA = 2;
@@ -2735,6 +2744,9 @@ public abstract class BatteryStats implements Parcelable {
                     case OVERCOUNTED:
                         label = "over";
                         break;
+                    case CAMERA:
+                        label = "camera";
+                        break;
                     default:
                         label = "???";
                 }
@@ -3521,6 +3533,10 @@ public abstract class BatteryStats implements Parcelable {
                         break;
                     case OVERCOUNTED:
                         pw.print(prefix); pw.print("    Over-counted: "); printmAh(pw, bs.totalPowerMah);
+                        pw.println();
+                        break;
+                    case CAMERA:
+                        pw.print(prefix); pw.print("    Camera: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                 }
