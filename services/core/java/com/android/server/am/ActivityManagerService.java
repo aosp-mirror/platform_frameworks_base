@@ -355,6 +355,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     // giving up on them and unfreezing the screen.
     static final int USER_SWITCH_TIMEOUT = 2*1000;
 
+    // This is the amount of time an app needs to be running a foreground service before
+    // we will consider it to be doing interaction for usage stats.
+    static final int SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
+
     // Maximum number of users we allow to be running at a time.
     static final int MAX_RUNNING_USERS = 3;
 
@@ -17781,13 +17785,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     // give them the best state after that.
                                     if ((cr.flags&Context.BIND_FOREGROUND_SERVICE) != 0) {
                                         clientProcState =
-                                                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                                                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                                     } else if (mWakefulness
                                                     == PowerManagerInternal.WAKEFULNESS_AWAKE &&
                                             (cr.flags&Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)
                                                     != 0) {
                                         clientProcState =
-                                                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                                                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                                     } else {
                                         clientProcState =
                                                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
@@ -17901,7 +17905,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // into the top state, since they are not on top.  Instead
                         // give them the best state after that.
                         clientProcState =
-                                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                     }
                 }
                 if (procState > clientProcState) {
@@ -17941,7 +17945,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 case ActivityManager.PROCESS_STATE_SERVICE:
                     // These all are longer-term states, so pull them up to the top
                     // of the background states, but not all the way to the top state.
-                    procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                    procState = ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                     break;
                 default:
                     // Otherwise, top is a better choice, so take it.
@@ -18511,7 +18515,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             // Inform UsageStats of important process state change
             // Must be called before updating setProcState
-            maybeUpdateUsageStats(app);
+            maybeUpdateUsageStatsLocked(app);
 
             app.setProcState = app.curProcState;
             if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
@@ -18600,7 +18604,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         uidRec.pendingChange.processState = uidRec.setProcState;
     }
 
-    private void maybeUpdateUsageStats(ProcessRecord app) {
+    private void maybeUpdateUsageStatsLocked(ProcessRecord app) {
         if (DEBUG_USAGE_STATS) {
             Slog.d(TAG, "Checking proc [" + Arrays.toString(app.getPackageList())
                     + "] state changes: old = " + app.setProcState + ", new = "
@@ -18609,9 +18613,32 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mUsageStatsService == null) {
             return;
         }
-        if (app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-                && (app.setProcState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-                        || app.setProcState < 0)) {
+        boolean isInteraction;
+        if (!mSleeping) {
+            isInteraction = app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            app.fgInteractionTime = 0;
+        } else {
+            // If the display is off, we are going to be more restrictive about what we consider
+            // to be an app interaction.  Being the top activity doesn't count, nor do generally
+            // foreground services.
+            if (app.curProcState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+                isInteraction = true;
+                app.fgInteractionTime = 0;
+            } else if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+                final long now = SystemClock.elapsedRealtime();
+                if (app.fgInteractionTime == 0) {
+                    app.fgInteractionTime = now;
+                    isInteraction = false;
+                } else {
+                    isInteraction = now > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
+                }
+            } else {
+                isInteraction = app.curProcState
+                        <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                app.fgInteractionTime = 0;
+            }
+        }
+        if (isInteraction && !app.reportedInteraction) {
             String[] packages = app.getPackageList();
             if (packages != null) {
                 for (int i = 0; i < packages.length; i++) {
@@ -18620,6 +18647,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+        app.reportedInteraction = isInteraction;
     }
 
     private final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {

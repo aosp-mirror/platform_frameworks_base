@@ -112,6 +112,8 @@ final class ProcessRecord {
     boolean killedByAm;         // True when proc has been killed by activity manager, not for RAM
     boolean killed;             // True once we know the process has been killed
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
+    boolean reportedInteraction;// Whether we have told usage stats about it being an interaction
+    long fgInteractionTime;     // When we became foreground for interaction purposes
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
@@ -290,6 +292,15 @@ final class ProcessRecord {
             pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
                     pw.print(" foregroundServices="); pw.print(foregroundServices);
                     pw.print(" forcingToForeground="); pw.println(forcingToForeground);
+        }
+        if (reportedInteraction || fgInteractionTime != 0) {
+            pw.print(prefix); pw.print("reportedInteraction=");
+            pw.print(reportedInteraction);
+            if (fgInteractionTime != 0) {
+                pw.print(" fgInteractionTime=");
+                TimeUtils.formatDuration(fgInteractionTime, SystemClock.elapsedRealtime(), pw);
+            }
+            pw.println();
         }
         if (persistent || removed) {
             pw.print(prefix); pw.print("persistent="); pw.print(persistent);
