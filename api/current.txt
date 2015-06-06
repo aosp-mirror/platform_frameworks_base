@@ -5500,7 +5500,8 @@ package android.app {
   }
 
   public static class VoiceInteractor.AbortVoiceRequest extends android.app.VoiceInteractor.Request {
-    ctor public VoiceInteractor.AbortVoiceRequest(java.lang.CharSequence, android.os.Bundle);
+    ctor public VoiceInteractor.AbortVoiceRequest(android.app.VoiceInteractor.Prompt, android.os.Bundle);
+    ctor public deprecated VoiceInteractor.AbortVoiceRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onAbortResult(android.os.Bundle);
   }
 
@@ -5510,17 +5511,20 @@ package android.app {
   }
 
   public static class VoiceInteractor.CompleteVoiceRequest extends android.app.VoiceInteractor.Request {
-    ctor public VoiceInteractor.CompleteVoiceRequest(java.lang.CharSequence, android.os.Bundle);
+    ctor public VoiceInteractor.CompleteVoiceRequest(android.app.VoiceInteractor.Prompt, android.os.Bundle);
+    ctor public deprecated VoiceInteractor.CompleteVoiceRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onCompleteResult(android.os.Bundle);
   }
 
   public static class VoiceInteractor.ConfirmationRequest extends android.app.VoiceInteractor.Request {
-    ctor public VoiceInteractor.ConfirmationRequest(java.lang.CharSequence, android.os.Bundle);
+    ctor public VoiceInteractor.ConfirmationRequest(android.app.VoiceInteractor.Prompt, android.os.Bundle);
+    ctor public deprecated VoiceInteractor.ConfirmationRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onConfirmationResult(boolean, android.os.Bundle);
   }
 
   public static class VoiceInteractor.PickOptionRequest extends android.app.VoiceInteractor.Request {
-    ctor public VoiceInteractor.PickOptionRequest(java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+    ctor public VoiceInteractor.PickOptionRequest(android.app.VoiceInteractor.Prompt, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+    ctor public deprecated VoiceInteractor.PickOptionRequest(java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
     method public void onPickOptionResult(boolean, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
   }
 
@@ -5537,6 +5541,17 @@ package android.app {
     method public void setExtras(android.os.Bundle);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.VoiceInteractor.PickOptionRequest.Option> CREATOR;
+  }
+
+  public static class VoiceInteractor.Prompt implements android.os.Parcelable {
+    ctor public VoiceInteractor.Prompt(java.lang.CharSequence[], java.lang.CharSequence);
+    ctor public VoiceInteractor.Prompt(java.lang.CharSequence);
+    method public int countVoicePrompts();
+    method public int describeContents();
+    method public java.lang.CharSequence getVisualPrompt();
+    method public java.lang.CharSequence getVoicePromptAt(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.VoiceInteractor.Prompt> CREATOR;
   }
 
   public static abstract class VoiceInteractor.Request {
@@ -28990,7 +29005,8 @@ package android.service.voice {
   }
 
   public static final class VoiceInteractionSession.AbortVoiceRequest extends android.service.voice.VoiceInteractionSession.Request {
-    method public java.lang.CharSequence getMessage();
+    method public deprecated java.lang.CharSequence getMessage();
+    method public android.app.VoiceInteractor.Prompt getVoicePrompt();
     method public void sendAbortResult(android.os.Bundle);
   }
 
@@ -29001,12 +29017,14 @@ package android.service.voice {
   }
 
   public static final class VoiceInteractionSession.CompleteVoiceRequest extends android.service.voice.VoiceInteractionSession.Request {
-    method public java.lang.CharSequence getMessage();
+    method public deprecated java.lang.CharSequence getMessage();
+    method public android.app.VoiceInteractor.Prompt getVoicePrompt();
     method public void sendCompleteResult(android.os.Bundle);
   }
 
   public static final class VoiceInteractionSession.ConfirmationRequest extends android.service.voice.VoiceInteractionSession.Request {
-    method public java.lang.CharSequence getPrompt();
+    method public deprecated java.lang.CharSequence getPrompt();
+    method public android.app.VoiceInteractor.Prompt getVoicePrompt();
     method public void sendConfirmationResult(boolean, android.os.Bundle);
   }
 
@@ -29022,7 +29040,8 @@ package android.service.voice {
 
   public static final class VoiceInteractionSession.PickOptionRequest extends android.service.voice.VoiceInteractionSession.Request {
     method public android.app.VoiceInteractor.PickOptionRequest.Option[] getOptions();
-    method public java.lang.CharSequence getPrompt();
+    method public deprecated java.lang.CharSequence getPrompt();
+    method public android.app.VoiceInteractor.Prompt getVoicePrompt();
     method public void sendIntermediatePickOptionResult(android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
     method public void sendPickOptionResult(android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
   }

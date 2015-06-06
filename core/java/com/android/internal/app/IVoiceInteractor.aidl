@@ -27,14 +27,14 @@ import com.android.internal.app.IVoiceInteractorRequest;
  */
 interface IVoiceInteractor {
     IVoiceInteractorRequest startConfirmation(String callingPackage,
-            IVoiceInteractorCallback callback, CharSequence prompt, in Bundle extras);
+            IVoiceInteractorCallback callback, in VoiceInteractor.Prompt prompt, in Bundle extras);
     IVoiceInteractorRequest startPickOption(String callingPackage,
-            IVoiceInteractorCallback callback, CharSequence prompt,
+            IVoiceInteractorCallback callback, in VoiceInteractor.Prompt prompt,
             in VoiceInteractor.PickOptionRequest.Option[] options, in Bundle extras);
     IVoiceInteractorRequest startCompleteVoice(String callingPackage,
-            IVoiceInteractorCallback callback, CharSequence message, in Bundle extras);
+            IVoiceInteractorCallback callback, in VoiceInteractor.Prompt prompt, in Bundle extras);
     IVoiceInteractorRequest startAbortVoice(String callingPackage,
-            IVoiceInteractorCallback callback, CharSequence message, in Bundle extras);
+            IVoiceInteractorCallback callback, in VoiceInteractor.Prompt prompt, in Bundle extras);
     IVoiceInteractorRequest startCommand(String callingPackage,
             IVoiceInteractorCallback callback, String command, in Bundle extras);
     boolean[] supportsCommands(String callingPackage, in String[] commands);
