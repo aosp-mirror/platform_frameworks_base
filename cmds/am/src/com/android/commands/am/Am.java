@@ -31,6 +31,7 @@ import android.app.UiAutomationConnection;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -144,6 +145,8 @@ public class Am extends BaseCommand {
                 "       am get-config\n" +
                 "       am set-inactive [--user <USER_ID>] <PACKAGE> true|false\n" +
                 "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
+                "       am send-trim-memory [--user <USER_ID>] <PROCESS>\n" +
+                "               [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -271,9 +274,9 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stack info: display the information about activity stack <STACK_ID>.\n" +
                 "\n" +
-                "am task lock: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
+                "am task lock: bring <TASK_ID> to the front and don't allow other tasks to run.\n" +
                 "\n" +
-                "am task lock stop: end the current task lock\n" +
+                "am task lock stop: end the current task lock.\n" +
                 "\n" +
                 "am task resizeable: change if <TASK_ID> is resizeable (true) or not (false).\n" +
                 "\n" +
@@ -282,12 +285,13 @@ public class Am extends BaseCommand {
                 "   has the specified bounds.\n" +
                 "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
-                "  of the device\n" +
+                "  of the device.\n" +
                 "\n" +
-                "am set-inactive: sets the inactive state of an app\n" +
+                "am set-inactive: sets the inactive state of an app.\n" +
                 "\n" +
-                "am get-inactive: returns the inactive state of an app\n" +
+                "am get-inactive: returns the inactive state of an app.\n" +
                 "\n" +
+                " am send-trim-memory: Send a memory trim event to a <PROCESS>.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -399,6 +403,8 @@ public class Am extends BaseCommand {
             runSetInactive();
         } else if (op.equals("get-inactive")) {
             runGetInactive();
+        } else if (op.equals("send-trim-memory")) {
+            runSendTrimMemory();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -2068,6 +2074,57 @@ public class Am extends BaseCommand {
                 Context.USAGE_STATS_SERVICE));
         boolean isIdle = usm.isAppInactive(packageName, userId);
         System.out.println("Idle=" + isIdle);
+    }
+
+    private void runSendTrimMemory() throws Exception {
+        int userId = UserHandle.USER_CURRENT;
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+                if (userId == UserHandle.USER_ALL) {
+                    System.err.println("Error: Can't use user 'all'");
+                    return;
+                }
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+
+        String proc = nextArgRequired();
+        String levelArg = nextArgRequired();
+        int level;
+        switch (levelArg) {
+            case "HIDDEN":
+                level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+                break;
+            case "RUNNING_MODERATE":
+                level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
+                break;
+            case "BACKGROUND":
+                level = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                break;
+            case "RUNNING_LOW":
+                level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+                break;
+            case "MODERATE":
+                level = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+                break;
+            case "RUNNING_CRITICAL":
+                level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+                break;
+            case "COMPLETE":
+                level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+                break;
+            default:
+                System.err.println("Error: Unknown level option: " + levelArg);
+                return;
+        }
+        if (!mAm.setProcessMemoryTrimLevel(proc, userId, level)) {
+            System.err.println("Error: Failure to set the level - probably Unknown Process: " +
+                               proc);
+        }
     }
 
     /**

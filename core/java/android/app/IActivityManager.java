@@ -242,14 +242,14 @@ public interface IActivityManager extends IInterface {
 
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting)
             throws RemoteException;
-    
+
     public void getMemoryInfo(ActivityManager.MemoryInfo outInfo) throws RemoteException;
-    
+
     public void killBackgroundProcesses(final String packageName, int userId)
             throws RemoteException;
     public void killAllBackgroundProcesses() throws RemoteException;
     public void forceStopPackage(final String packageName, int userId) throws RemoteException;
-    
+
     // Note: probably don't want to allow applications access to these.
     public void setLockScreenShown(boolean shown) throws RemoteException;
 
@@ -263,7 +263,7 @@ public interface IActivityManager extends IInterface {
         throws RemoteException;
 
     public void enterSafeMode() throws RemoteException;
-    
+
     public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg, String tag)
             throws RemoteException;
     public void noteAlarmStart(IIntentSender sender, int sourceUid, String tag)
@@ -318,9 +318,9 @@ public interface IActivityManager extends IInterface {
 
     public void killApplicationWithAppId(String pkg, int appid, String reason)
             throws RemoteException;
-    
+
     public void closeSystemDialogs(String reason) throws RemoteException;
-    
+
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException;
 
@@ -506,6 +506,9 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
 
     public int getPackageProcessState(String packageName) throws RemoteException;
+
+    public boolean setProcessMemoryTrimLevel(String process, int uid, int level)
+            throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -792,6 +795,7 @@ public interface IActivityManager extends IInterface {
     // Available
     int GET_ACTIVITY_DISPLAY_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
+    int SET_PROCESS_MEMORY_TRIM_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+186;
 
 
     // Start of L transactions
