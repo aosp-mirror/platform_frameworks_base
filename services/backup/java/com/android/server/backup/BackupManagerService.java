@@ -4411,6 +4411,8 @@ public class BackupManagerService {
      * to perform one app backup per scheduled job execution, and to reschedule the job
      * with zero latency as long as conditions remain right and we still have work to do.
      *
+     * <p>This is the "start a full backup operation" entry point called by the scheduled job.
+     *
      * @return Whether ongoing work will continue.  The return value here will be passed
      *         along as the return value to the scheduled job's onStartJob() callback.
      */
@@ -4427,6 +4429,14 @@ public class BackupManagerService {
                 Slog.i(TAG, "beginFullBackup but e=" + mEnabled
                         + " p=" + mProvisioned + "; ignoring");
             }
+            return false;
+        }
+
+        // Don't run the backup if we're in battery saver mode, but reschedule
+        // to try again in the not-so-distant future.
+        if (mPowerManager.isPowerSaveMode()) {
+            if (DEBUG) Slog.i(TAG, "Deferring scheduled full backups in battery saver mode");
+            FullBackupJob.schedule(mContext, KeyValueBackupJob.BATCH_INTERVAL);
             return false;
         }
 
@@ -8515,18 +8525,23 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
-        if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
-        synchronized (mQueueLock) {
-            // Fire the intent that kicks off the whole shebang...
-            try {
-                mRunBackupIntent.send();
-            } catch (PendingIntent.CanceledException e) {
-                // should never happen
-                Slog.e(TAG, "run-backup intent cancelled!");
-            }
+        if (mPowerManager.isPowerSaveMode()) {
+            if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
+            KeyValueBackupJob.schedule(mContext);   // try again in several hours
+        } else {
+            if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
+            synchronized (mQueueLock) {
+                // Fire the intent that kicks off the whole shebang...
+                try {
+                    mRunBackupIntent.send();
+                } catch (PendingIntent.CanceledException e) {
+                    // should never happen
+                    Slog.e(TAG, "run-backup intent cancelled!");
+                }
 
-            // ...and cancel any pending scheduled job, because we've just superseded it
-            KeyValueBackupJob.cancel(mContext);
+                // ...and cancel any pending scheduled job, because we've just superseded it
+                KeyValueBackupJob.cancel(mContext);
+            }
         }
     }
 
