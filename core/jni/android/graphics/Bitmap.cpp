@@ -27,6 +27,8 @@
 #include <sys/mman.h>
 #include <cutils/ashmem.h>
 
+#define DEBUG_PARCEL 0
+
 namespace android {
 
 class WrappedPixelRef : public SkPixelRef {
@@ -959,75 +961,82 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
     }
 
-    int fd = p->readFileDescriptor();
-    int dupFd = dup(fd);
-    if (dupFd < 0) {
+    // Read the bitmap blob.
+    size_t size = bitmap->getSize();
+    android::Parcel::ReadableBlob blob;
+    android::status_t status = p->readBlob(size, &blob);
+    if (status) {
         SkSafeUnref(ctable);
-        doThrowRE(env, "Could not dup parcel fd.");
+        doThrowRE(env, "Could not read bitmap blob.");
         return NULL;
     }
 
-    bool readOnlyMapping = !isMutable;
-    Bitmap* nativeBitmap = GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
-        ctable, dupFd, readOnlyMapping);
-    SkSafeUnref(ctable);
-    if (!nativeBitmap) {
-        close(dupFd);
-        doThrowRE(env, "Could not allocate ashmem pixel ref.");
-        return NULL;
+    // Map the bitmap in place from the ashmem region if possible otherwise copy.
+    Bitmap* nativeBitmap;
+    if (blob.fd() >= 0 && (blob.isMutable() || !isMutable)) {
+#if DEBUG_PARCEL
+        ALOGD("Bitmap.createFromParcel: mapped contents of %s bitmap from %s blob "
+                "(fds %s)",
+                isMutable ? "mutable" : "immutable",
+                blob.isMutable() ? "mutable" : "immutable",
+                p->allowFds() ? "allowed" : "forbidden");
+#endif
+        // Dup the file descriptor so we can keep a reference to it after the Parcel
+        // is disposed.
+        int dupFd = dup(blob.fd());
+        if (dupFd < 0) {
+            blob.release();
+            SkSafeUnref(ctable);
+            doThrowRE(env, "Could not allocate dup blob fd.");
+            return NULL;
+        }
+
+        // Map the pixels in place and take ownership of the ashmem region.
+        nativeBitmap = GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
+                ctable, dupFd, const_cast<void*>(blob.data()), !isMutable);
+        SkSafeUnref(ctable);
+        if (!nativeBitmap) {
+            close(dupFd);
+            blob.release();
+            doThrowRE(env, "Could not allocate ashmem pixel ref.");
+            return NULL;
+        }
+
+        // Clear the blob handle, don't release it.
+        blob.clear();
+    } else {
+#if DEBUG_PARCEL
+        if (blob.fd() >= 0) {
+            ALOGD("Bitmap.createFromParcel: copied contents of mutable bitmap "
+                    "from immutable blob (fds %s)",
+                    p->allowFds() ? "allowed" : "forbidden");
+        } else {
+            ALOGD("Bitmap.createFromParcel: copied contents from %s blob "
+                    "(fds %s)",
+                    blob.isMutable() ? "mutable" : "immutable",
+                    p->allowFds() ? "allowed" : "forbidden");
+        }
+#endif
+
+        // Copy the pixels into a new buffer.
+        nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);
+        SkSafeUnref(ctable);
+        if (!nativeBitmap) {
+            blob.release();
+            doThrowRE(env, "Could not allocate java pixel ref.");
+            return NULL;
+        }
+        bitmap->lockPixels();
+        memcpy(bitmap->getPixels(), blob.data(), size);
+        bitmap->unlockPixels();
+
+        // Release the blob handle.
+        blob.release();
     }
-    bitmap->pixelRef()->setImmutable();
 
     return GraphicsJNI::createBitmap(env, nativeBitmap,
             getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
 }
-
-class Ashmem {
-public:
-    Ashmem(size_t sz, bool removeWritePerm) : mSize(sz) {
-        int fd = -1;
-        void *addr = nullptr;
-
-        // Create new ashmem region with read/write priv
-        fd = ashmem_create_region("bitmap", sz);
-        if (fd < 0) {
-            goto error;
-        }
-        addr = mmap(nullptr, sz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-        if (addr == MAP_FAILED) {
-            goto error;
-        }
-        // If requested, remove the ability to make additional writeable to
-        // this memory.
-        if (removeWritePerm) {
-            if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
-                goto error;
-            }
-        }
-        mFd = fd;
-        mPtr = addr;
-        return;
-error:
-        if (fd >= 0) {
-            close(fd);
-        }
-        if (addr) {
-            munmap(addr, sz);
-        }
-    }
-    ~Ashmem() {
-        if (mPtr) {
-            close(mFd);
-            munmap(mPtr, mSize);
-        }
-    }
-    void *getPtr() const { return mPtr; }
-    int getFd() const { return mFd; }
-private:
-    int mFd = -1;
-    int mSize;
-    void* mPtr = nullptr;
-};
 
 static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
                                      jlong bitmapHandle,
@@ -1064,26 +1073,51 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         }
     }
 
-    bool ashmemSrc = androidBitmap->getAshmemFd() >= 0;
-    if (ashmemSrc && !isMutable) {
-        p->writeDupFileDescriptor(androidBitmap->getAshmemFd());
-    } else {
-        Ashmem dstAshmem(bitmap.getSize(), !isMutable);
-        if (!dstAshmem.getPtr()) {
-            doThrowRE(env, "Could not allocate ashmem for new bitmap.");
+    // Transfer the underlying ashmem region if we have one and it's immutable.
+    android::status_t status;
+    int fd = androidBitmap->getAshmemFd();
+    if (fd >= 0 && !isMutable && p->allowFds()) {
+#if DEBUG_PARCEL
+        ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
+                "immutable blob (fds %s)",
+                p->allowFds() ? "allowed" : "forbidden");
+#endif
+
+        status = p->writeDupImmutableBlobFileDescriptor(fd);
+        if (status) {
+            doThrowRE(env, "Could not write bitmap blob file descriptor.");
             return JNI_FALSE;
         }
-
-        bitmap.lockPixels();
-        const void* pSrc = bitmap.getPixels();
-        if (pSrc == NULL) {
-            memset(dstAshmem.getPtr(), 0, bitmap.getSize());
-        } else {
-            memcpy(dstAshmem.getPtr(), pSrc, bitmap.getSize());
-        }
-        bitmap.unlockPixels();
-        p->writeDupFileDescriptor(dstAshmem.getFd());
+        return JNI_TRUE;
     }
+
+    // Copy the bitmap to a new blob.
+    bool mutableCopy = isMutable;
+#if DEBUG_PARCEL
+    ALOGD("Bitmap.writeToParcel: copying %s bitmap into new %s blob (fds %s)",
+            isMutable ? "mutable" : "immutable",
+            mutableCopy ? "mutable" : "immutable",
+            p->allowFds() ? "allowed" : "forbidden");
+#endif
+
+    size_t size = bitmap.getSize();
+    android::Parcel::WritableBlob blob;
+    status = p->writeBlob(size, mutableCopy, &blob);
+    if (status) {
+        doThrowRE(env, "Could not copy bitmap to parcel blob.");
+        return JNI_FALSE;
+    }
+
+    bitmap.lockPixels();
+    const void* pSrc =  bitmap.getPixels();
+    if (pSrc == NULL) {
+        memset(blob.data(), 0, size);
+    } else {
+        memcpy(blob.data(), pSrc, size);
+    }
+    bitmap.unlockPixels();
+
+    blob.release();
     return JNI_TRUE;
 }
 
