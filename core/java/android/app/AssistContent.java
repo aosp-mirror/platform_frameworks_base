@@ -31,6 +31,7 @@ import android.os.Parcelable;
  */
 @Deprecated
 public class AssistContent {
+    private boolean mIsAppProvidedIntent = false;
     private Intent mIntent;
     private ClipData mClipData;
     private Uri mUri;
@@ -55,12 +56,14 @@ public class AssistContent {
     }
 
     /**
-     * Sets the Intent associated with the content, describing the current top-level context of
-     * the activity.  If this contains a reference to a piece of data related to the activity,
-     * be sure to set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} so the accessibility
-     * service can access it.
+     * @hide
+     * Called by {@link android.app.ActivityThread} to set the default Intent based on
+     * {@link android.app.Activity#getIntent Activity.getIntent}.
+     *
+     * <p>Automatically populates {@link #mUri} if that Intent is an {@link Intent#ACTION_VIEW}
+     * of a web (http or https scheme) URI.</p>
      */
-    public void setIntent(Intent intent) {
+    public void setDefaultIntent(Intent intent) {
         mIntent = intent;
         setWebUri(null);
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
@@ -72,11 +75,33 @@ public class AssistContent {
     }
 
     /**
-     * Return the current {@link #setIntent}, which you can modify in-place.
+     * Sets the Intent associated with the content, describing the current top-level context of
+     * the activity.  If this contains a reference to a piece of data related to the activity,
+     * be sure to set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} so the accessibility
+     * service can access it.
+     */
+    public void setIntent(Intent intent) {
+        mIsAppProvidedIntent = true;
+        mIntent = intent;
+    }
+
+    /**
+     * Returns the current {@link #setIntent} if one is set, else the default Intent obtained from
+     * {@link android.app.Activity#getIntent Activity.getIntent}. Can be modified in-place.
      * @hide
      */
     public Intent getIntent() {
         return mIntent;
+    }
+
+    /**
+     * Returns whether or not the current Intent was explicitly provided in
+     * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}. If not,
+     * the Intent was automatically set based on
+     * {@link android.app.Activity#getIntent Activity.getIntent}.
+     */
+    public boolean isAppProvidedIntent() {
+        return mIsAppProvidedIntent;
     }
 
     /**
@@ -103,9 +128,6 @@ public class AssistContent {
      * off the device into other environments to acesss the same data as is currently
      * being shown in the app; if the app does not have such a representation, it should
      * leave the null and only report the local intent and clip data.
-     *
-     * <p>This will be automatically populated for you from {@link #setIntent} if that Intent
-     * is an {@link Intent#ACTION_VIEW} of a web (http or https scheme) URI.</p>
      */
     public void setWebUri(Uri uri) {
         mUri = uri;
