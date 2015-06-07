@@ -151,19 +151,6 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
                     dispatcher.startTracking(event, this);
                 } else if (event.isLongPress() && dispatcher.isTracking(event)) {
                     dispatcher.performedLongPress(event);
-                    if (isUserSetupComplete()) {
-                        mView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                        sendCloseSystemWindows();
-                        // Broadcast an intent that the Camera button was longpressed
-                        Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
-                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                        intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                        mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF,
-                                null, null, null, 0, null, null);
-                    } else {
-                        Log.i(TAG, "Not dispatching CAMERA long press because user "
-                                + "setup is in progress.");
-                    }
                 }
                 return true;
             }
