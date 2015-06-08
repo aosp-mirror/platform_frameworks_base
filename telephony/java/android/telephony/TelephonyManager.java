@@ -2082,6 +2082,35 @@ public class TelephonyManager {
     }
 
     /**
+     * Informs the system of an intentional upcoming carrier network change by
+     * a carrier app. This call is optional and is only used to allow the
+     * system to provide alternative UI while telephony is performing an action
+     * that may result in intentional, temporary network lack of connectivity.
+     * <p>
+     * Based on the active parameter passed in, this method will either show or
+     * hide the alternative UI. There is no timeout associated with showing
+     * this UX, so a carrier app must be sure to call with active set to false
+     * sometime after calling with it set to true.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges.
+     *   @see #hasCarrierPrivileges
+     *
+     * @param active Whether the carrier network change is or shortly will be
+     *               active. Set this value to true to begin showing
+     *               alternative UI and false to stop.
+     */
+    public void notifyCarrierNetworkChange(boolean active) {
+        try {
+            if (sRegistry != null)
+                sRegistry.notifyCarrierNetworkChange(active);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+    }
+
+    /**
      * Returns the alphabetic identifier associated with the line 1 number.
      * Return null if it is unavailable.
      * <p>
