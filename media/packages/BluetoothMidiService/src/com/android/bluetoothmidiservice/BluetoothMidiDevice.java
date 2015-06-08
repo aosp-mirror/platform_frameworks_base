@@ -24,10 +24,11 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
-import android.media.midi.MidiReceiver;
-import android.media.midi.MidiManager;
-import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDeviceInfo;
+import android.media.midi.MidiDeviceServer;
+import android.media.midi.MidiDeviceStatus;
+import android.media.midi.MidiManager;
+import android.media.midi.MidiReceiver;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -80,6 +81,18 @@ public final class BluetoothMidiDevice {
 
     private final BluetoothPacketDecoder mPacketDecoder
             = new BluetoothPacketDecoder(MAX_PACKET_SIZE);
+
+    private final MidiDeviceServer.Callback mDeviceServerCallback
+            = new MidiDeviceServer.Callback() {
+        @Override
+        public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
+        }
+
+        @Override
+        public void onClose() {
+            close();
+        }
+    };
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -213,7 +226,7 @@ public final class BluetoothMidiDevice {
         inputPortReceivers[0] = mEventScheduler.getReceiver();
 
         mDeviceServer = mMidiManager.createDeviceServer(inputPortReceivers, 1,
-                null, null, properties, MidiDeviceInfo.TYPE_BLUETOOTH, null);
+                null, null, properties, MidiDeviceInfo.TYPE_BLUETOOTH, mDeviceServerCallback);
 
         mOutputReceiver = mDeviceServer.getOutputPortReceivers()[0];
 
@@ -248,11 +261,12 @@ public final class BluetoothMidiDevice {
 
     private void close() {
         synchronized (mBluetoothDevice) {
-        mEventScheduler.close();
+            mEventScheduler.close();
+            mService.deviceClosed(mBluetoothDevice);
+
             if (mDeviceServer != null) {
                 IoUtils.closeQuietly(mDeviceServer);
                 mDeviceServer = null;
-                mService.deviceClosed(mBluetoothDevice);
             }
             if (mBluetoothGatt != null) {
                 mBluetoothGatt.close();

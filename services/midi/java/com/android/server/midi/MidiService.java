@@ -16,8 +16,11 @@
 
 package com.android.server.midi;
 
+import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -25,11 +28,13 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.XmlResourceParser;
 import android.media.midi.IMidiDeviceListener;
+import android.media.midi.IMidiDeviceOpenCallback;
 import android.media.midi.IMidiDeviceServer;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceService;
 import android.media.midi.MidiDeviceStatus;
+import android.media.midi.MidiManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -78,6 +83,10 @@ public class MidiService extends IMidiManager.Stub {
     private final HashMap<MidiDeviceInfo, Device> mDevicesByInfo
             = new HashMap<MidiDeviceInfo, Device>();
 
+    // list of all Bluetooth devices, keyed by BluetoothDevice
+     private final HashMap<BluetoothDevice, Device> mBluetoothDevices
+            = new HashMap<BluetoothDevice, Device>();
+
     // list of all devices, keyed by IMidiDeviceServer
     private final HashMap<IBinder, Device> mDevicesByServer = new HashMap<IBinder, Device>();
 
@@ -85,6 +94,9 @@ public class MidiService extends IMidiManager.Stub {
     private int mNextDeviceId = 1;
 
     private final PackageManager mPackageManager;
+
+    // UID of BluetoothMidiService
+    private final int mBluetoothServiceUid;
 
     // PackageMonitor for listening to package changes
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -115,6 +127,9 @@ public class MidiService extends IMidiManager.Stub {
         // List of all receivers for this client
         private final ArrayList<IMidiDeviceListener> mListeners
                 = new ArrayList<IMidiDeviceListener>();
+        // List of all device connections for this client
+        private final HashMap<IBinder, DeviceConnection> mDeviceConnections
+                = new HashMap<IBinder, DeviceConnection>();
 
         public Client(IBinder token) {
             mToken = token;
@@ -132,8 +147,33 @@ public class MidiService extends IMidiManager.Stub {
 
         public void removeListener(IMidiDeviceListener listener) {
             mListeners.remove(listener);
-            if (mListeners.size() == 0) {
-                removeClient(mToken);
+            if (mListeners.size() == 0 && mDeviceConnections.size() == 0) {
+                close();
+            }
+        }
+
+        public void addDeviceConnection(Device device, IMidiDeviceOpenCallback callback) {
+            DeviceConnection connection = new DeviceConnection(device, this, callback);
+            mDeviceConnections.put(connection.getToken(), connection);
+            device.addDeviceConnection(connection);
+        }
+
+        // called from MidiService.closeDevice()
+        public void removeDeviceConnection(IBinder token) {
+            DeviceConnection connection = mDeviceConnections.remove(token);
+            if (connection != null) {
+                connection.getDevice().removeDeviceConnection(connection);
+            }
+            if (mListeners.size() == 0 && mDeviceConnections.size() == 0) {
+                close();
+            }
+        }
+
+        // called from Device.close()
+        public void removeDeviceConnection(DeviceConnection connection) {
+            mDeviceConnections.remove(connection.getToken());
+            if (mListeners.size() == 0 && mDeviceConnections.size() == 0) {
+                close();
             }
         }
 
@@ -178,8 +218,21 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
+        private void close() {
+            synchronized (mClients) {
+                mClients.remove(mToken);
+                mToken.unlinkToDeath(this, 0);
+            }
+
+            for (DeviceConnection connection : mDeviceConnections.values()) {
+                connection.getDevice().removeDeviceConnection(connection);
+            }
+        }
+
+        @Override
         public void binderDied() {
-            removeClient(mToken);
+            Log.d(TAG, "Client died: " + this);
+            close();
         }
 
         @Override
@@ -190,6 +243,12 @@ public class MidiService extends IMidiManager.Stub {
             sb.append(mPid);
             sb.append(" listener count: ");
             sb.append(mListeners.size());
+            sb.append(" Device Connections:");
+            for (DeviceConnection connection : mDeviceConnections.values()) {
+                sb.append(" <device ");
+                sb.append(connection.getDevice().getDeviceInfo().getId());
+                sb.append(">");
+            }
             return sb.toString();
         }
     }
@@ -211,57 +270,96 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
-    private void removeClient(IBinder token) {
-        mClients.remove(token);
-    }
-
     private final class Device implements IBinder.DeathRecipient {
-        private final IMidiDeviceServer mServer;
-        private final MidiDeviceInfo mDeviceInfo;
+        private IMidiDeviceServer mServer;
+        private MidiDeviceInfo mDeviceInfo;
+        private final BluetoothDevice mBluetoothDevice;
         private MidiDeviceStatus mDeviceStatus;
-        private IBinder mDeviceStatusToken;
+
         // ServiceInfo for the device's MidiDeviceServer implementation (virtual devices only)
         private final ServiceInfo mServiceInfo;
         // UID of device implementation
         private final int mUid;
 
+        // ServiceConnection for implementing Service (virtual devices only)
+        // mServiceConnection is non-null when connected or attempting to connect to the service
+        private ServiceConnection mServiceConnection;
+
+        // List of all device connections for this device
+        private final ArrayList<DeviceConnection> mDeviceConnections
+                = new ArrayList<DeviceConnection>();
+
         public Device(IMidiDeviceServer server, MidiDeviceInfo deviceInfo,
                 ServiceInfo serviceInfo, int uid) {
-            mServer = server;
             mDeviceInfo = deviceInfo;
             mServiceInfo = serviceInfo;
             mUid = uid;
+            mBluetoothDevice = (BluetoothDevice)deviceInfo.getProperties().getParcelable(
+                    MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE);;
+            setDeviceServer(server);
+        }
+
+        public Device(BluetoothDevice bluetoothDevice) {
+            mBluetoothDevice = bluetoothDevice;
+            mServiceInfo = null;
+            mUid = mBluetoothServiceUid;
+        }
+
+        private void setDeviceServer(IMidiDeviceServer server) {
+            if (server != null) {
+                if (mServer != null) {
+                    Log.e(TAG, "mServer already set in setDeviceServer");
+                    return;
+                }
+                IBinder binder = server.asBinder();
+                try {
+                    if (mDeviceInfo == null) {
+                        mDeviceInfo = server.getDeviceInfo();
+                    }
+                    binder.linkToDeath(this, 0);
+                    mServer = server;
+                } catch (RemoteException e) {
+                    mServer = null;
+                    return;
+                }
+                mDevicesByServer.put(binder, this);
+            } else if (mServer != null) {
+                server = mServer;
+                mServer = null;
+
+                IBinder binder = server.asBinder();
+                mDevicesByServer.remove(binder);
+
+                try {
+                    server.closeDevice();
+                    binder.unlinkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    // nothing to do here
+                }
+            }
+
+            if (mDeviceConnections != null) {
+                for (DeviceConnection connection : mDeviceConnections) {
+                    connection.notifyClient(server);
+                }
+            }
         }
 
         public MidiDeviceInfo getDeviceInfo() {
             return mDeviceInfo;
         }
 
+        // only used for bluetooth devices, which are created before we have a MidiDeviceInfo
+        public void setDeviceInfo(MidiDeviceInfo deviceInfo) {
+            mDeviceInfo = deviceInfo;
+        }
+
         public MidiDeviceStatus getDeviceStatus() {
             return mDeviceStatus;
         }
 
-        public void setDeviceStatus(IBinder token, MidiDeviceStatus status) {
+        public void setDeviceStatus(MidiDeviceStatus status) {
             mDeviceStatus = status;
-
-            if (mDeviceStatusToken == null && token != null) {
-                // register a death recipient so we can clear the status when the device dies
-                try {
-                    token.linkToDeath(new IBinder.DeathRecipient() {
-                        @Override
-                        public void binderDied() {
-                            // reset to default status and clear the token
-                            mDeviceStatus = new MidiDeviceStatus(mDeviceInfo);
-                            mDeviceStatusToken = null;
-                            notifyDeviceStatusChanged(Device.this, mDeviceStatus);
-                        }
-                    }, 0);
-                    mDeviceStatusToken = token;
-                } catch (RemoteException e) {
-                    // reset to default status
-                    mDeviceStatus = new MidiDeviceStatus(mDeviceInfo);
-                }
-            }
         }
 
         public IMidiDeviceServer getDeviceServer() {
@@ -284,11 +382,102 @@ public class MidiService extends IMidiManager.Stub {
             return (!mDeviceInfo.isPrivate() || mUid == uid);
         }
 
-        public void binderDied() {
-            synchronized (mDevicesByInfo) {
-                if (mDevicesByInfo.remove(mDeviceInfo) != null) {
-                    removeDeviceLocked(this);
+        public void addDeviceConnection(DeviceConnection connection) {
+            synchronized (mDeviceConnections) {
+                if (mServer != null) {
+                    mDeviceConnections.add(connection);
+                    connection.notifyClient(mServer);
+                } else if (mServiceConnection == null &&
+                    (mServiceInfo != null || mBluetoothDevice != null)) {
+                    mDeviceConnections.add(connection);
+
+                    mServiceConnection = new ServiceConnection() {
+                        @Override
+                        public void onServiceConnected(ComponentName name, IBinder service) {
+                            IMidiDeviceServer server = IMidiDeviceServer.Stub.asInterface(service);
+                            setDeviceServer(server);
+                        }
+
+                        @Override
+                        public void onServiceDisconnected(ComponentName name) {
+                            setDeviceServer(null);
+                            mServiceConnection = null;
+                        }
+                    };
+
+                    Intent intent;
+                    if (mBluetoothDevice != null) {
+                        intent = new Intent(MidiManager.BLUETOOTH_MIDI_SERVICE_INTENT);
+                        intent.setComponent(new ComponentName(
+                                MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE,
+                                MidiManager.BLUETOOTH_MIDI_SERVICE_CLASS));
+                        intent.putExtra("device", mBluetoothDevice);
+                    } else {
+                        intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
+                        intent.setComponent(
+                                new ComponentName(mServiceInfo.packageName, mServiceInfo.name));
+                    }
+
+                    if (!mContext.bindService(intent, mServiceConnection,
+                            Context.BIND_AUTO_CREATE)) {
+                        Log.e(TAG, "Unable to bind service: " + intent);
+                        setDeviceServer(null);
+                        mServiceConnection = null;
+                    }
+                } else {
+                    Log.e(TAG, "No way to connect to device in addDeviceConnection");
+                    connection.notifyClient(null);
                 }
+            }
+        }
+
+        public void removeDeviceConnection(DeviceConnection connection) {
+            synchronized (mDeviceConnections) {
+                mDeviceConnections.remove(connection);
+
+                if (mDeviceConnections.size() == 0 && mServiceConnection != null) {
+                    mContext.unbindService(mServiceConnection);
+                    mServiceConnection = null;
+                    if (mBluetoothDevice != null) {
+                        // Bluetooth devices are ephemeral - remove when no clients exist
+                        synchronized (mDevicesByInfo) {
+                            closeLocked();
+                        }
+                    } else {
+                        setDeviceServer(null);
+                    }
+                }
+            }
+        }
+
+        // synchronize on mDevicesByInfo
+        public void closeLocked() {
+            synchronized (mDeviceConnections) {
+                for (DeviceConnection connection : mDeviceConnections) {
+                    connection.getClient().removeDeviceConnection(connection);
+                }
+                mDeviceConnections.clear();
+            }
+            setDeviceServer(null);
+
+            // closed virtual devices should not be removed from mDevicesByInfo
+            // since they can be restarted on demand
+            if (mServiceInfo == null) {
+                removeDeviceLocked(this);
+            } else {
+                mDeviceStatus = new MidiDeviceStatus(mDeviceInfo);
+            }
+
+            if (mBluetoothDevice != null) {
+                mBluetoothDevices.remove(mBluetoothDevice);
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            Log.d(TAG, "Device died: " + this);
+            synchronized (mDevicesByInfo) {
+                closeLocked();
             }
         }
 
@@ -300,7 +489,53 @@ public class MidiService extends IMidiManager.Stub {
             sb.append(mDeviceStatus);
             sb.append(" UID: ");
             sb.append(mUid);
+            sb.append(" DeviceConnection count: ");
+            sb.append(mDeviceConnections.size());
+            sb.append(" mServiceConnection: ");
+            sb.append(mServiceConnection);
             return sb.toString();
+        }
+    }
+
+    // Represents a connection between a client and a device
+    private final class DeviceConnection {
+        private final IBinder mToken = new Binder();
+        private final Device mDevice;
+        private final Client mClient;
+        private IMidiDeviceOpenCallback mCallback;
+
+        public DeviceConnection(Device device, Client client, IMidiDeviceOpenCallback callback) {
+            mDevice = device;
+            mClient = client;
+            mCallback = callback;
+        }
+
+        public Device getDevice() {
+            return mDevice;
+        }
+
+        public Client getClient() {
+            return mClient;
+        }
+
+        public IBinder getToken() {
+            return mToken;
+        }
+
+        public void notifyClient(IMidiDeviceServer deviceServer) {
+            if (mCallback != null) {
+                try {
+                    mCallback.onDeviceOpened(deviceServer, (deviceServer == null ? null : mToken));
+                } catch (RemoteException e) {
+                    // Client binderDied() method will do necessary cleanup, so nothing to do here
+                }
+                mCallback = null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "DeviceConnection Device ID: " + mDevice.getDeviceInfo().getId();
         }
     }
 
@@ -320,6 +555,18 @@ public class MidiService extends IMidiManager.Stub {
                     addPackageDeviceServer(serviceInfo);
                 }
             }
+        }
+
+        PackageInfo info;
+        try {
+            info = mPackageManager.getPackageInfo(MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            info = null;
+        }
+        if (info != null && info.applicationInfo != null) {
+            mBluetoothServiceUid = info.applicationInfo.uid;
+        } else {
+            mBluetoothServiceUid = -1;
         }
    }
 
@@ -355,18 +602,61 @@ public class MidiService extends IMidiManager.Stub {
     }
 
     @Override
-    public IMidiDeviceServer openDevice(IBinder token, MidiDeviceInfo deviceInfo) {
-        Device device = mDevicesByInfo.get(deviceInfo);
-        if (device == null) {
-            Log.e(TAG, "device not found in openDevice: " + deviceInfo);
-            return null;
+    public void openDevice(IBinder token, MidiDeviceInfo deviceInfo,
+            IMidiDeviceOpenCallback callback) {
+        Client client = getClient(token);
+        if (client == null) return;
+
+        Device device;
+        synchronized (mDevicesByInfo) {
+            device = mDevicesByInfo.get(deviceInfo);
+            if (device == null) {
+                throw new IllegalArgumentException("device does not exist: " + deviceInfo);
+            }
+            if (!device.isUidAllowed(Binder.getCallingUid())) {
+                throw new SecurityException("Attempt to open private device with wrong UID");
+            }
         }
 
-        if (!device.isUidAllowed(Binder.getCallingUid())) {
-            throw new SecurityException("Attempt to open private device with wrong UID");
+        // clear calling identity so bindService does not fail
+        long identity = Binder.clearCallingIdentity();
+        try {
+            client.addDeviceConnection(device, callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void openBluetoothDevice(IBinder token, BluetoothDevice bluetoothDevice,
+            IMidiDeviceOpenCallback callback) {
+        Client client = getClient(token);
+        if (client == null) return;
+
+        // Bluetooth devices are created on demand
+        Device device;
+        synchronized (mDevicesByInfo) {
+            device = mBluetoothDevices.get(bluetoothDevice);
+            if (device == null) {
+                device = new Device(bluetoothDevice);
+                mBluetoothDevices.put(bluetoothDevice, device);
+            }
         }
 
-        return device.getDeviceServer();
+        // clear calling identity so bindService does not fail
+        long identity = Binder.clearCallingIdentity();
+        try {
+            client.addDeviceConnection(device, callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void closeDevice(IBinder clientToken, IBinder deviceToken) {
+        Client client = getClient(clientToken);
+        if (client == null) return;
+        client.removeDeviceConnection(deviceToken);
     }
 
     @Override
@@ -376,6 +666,8 @@ public class MidiService extends IMidiManager.Stub {
         int uid = Binder.getCallingUid();
         if (type == MidiDeviceInfo.TYPE_USB && uid != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create USB devices");
+        } else if (type == MidiDeviceInfo.TYPE_BLUETOOTH && uid != mBluetoothServiceUid) {
+            throw new SecurityException("only MidiBluetoothService can create Bluetooth devices");
         }
 
         synchronized (mDevicesByInfo) {
@@ -389,8 +681,7 @@ public class MidiService extends IMidiManager.Stub {
         synchronized (mDevicesByInfo) {
             Device device = mDevicesByServer.get(server.asBinder());
             if (device != null) {
-                mDevicesByInfo.remove(device.getDeviceInfo());
-                removeDeviceLocked(device);
+                device.closeLocked();
             }
         }
     }
@@ -420,19 +711,16 @@ public class MidiService extends IMidiManager.Stub {
     }
 
     @Override
-    public void setDeviceStatus(IBinder token, MidiDeviceStatus status) {
-        MidiDeviceInfo deviceInfo = status.getDeviceInfo();
-        Device device = mDevicesByInfo.get(deviceInfo);
-        if (device == null) {
-            // Just return quietly here if device no longer exists
-            return;
+    public void setDeviceStatus(IMidiDeviceServer server, MidiDeviceStatus status) {
+        Device device = mDevicesByServer.get(server.asBinder());
+        if (device != null) {
+            if (Binder.getCallingUid() != device.getUid()) {
+                throw new SecurityException("setDeviceStatus() caller UID " + Binder.getCallingUid()
+                        + " does not match device's UID " + device.getUid());
+            }
+            device.setDeviceStatus(status);
+            notifyDeviceStatusChanged(device, status);
         }
-        if (Binder.getCallingUid() != device.getUid()) {
-            throw new SecurityException("setDeviceStatus() caller UID " + Binder.getCallingUid()
-                    + " does not match device's UID " + device.getUid());
-        }
-        device.setDeviceStatus(token, status);
-        notifyDeviceStatusChanged(device, status);
     }
 
     private void notifyDeviceStatusChanged(Device device, MidiDeviceStatus status) {
@@ -452,18 +740,24 @@ public class MidiService extends IMidiManager.Stub {
         int id = mNextDeviceId++;
         MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,
                 inputPortNames, outputPortNames, properties, isPrivate);
-        Device device = new Device(server, deviceInfo, serviceInfo, uid);
 
-        if (server != null) {
-            IBinder binder = server.asBinder();
-            try {
-                binder.linkToDeath(device, 0);
-            } catch (RemoteException e) {
-                return null;
+        Device device = null;
+        BluetoothDevice bluetoothDevice = null;
+        if (type == MidiDeviceInfo.TYPE_BLUETOOTH) {
+            bluetoothDevice = (BluetoothDevice)properties.getParcelable(
+                    MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE);
+            device = mBluetoothDevices.get(bluetoothDevice);
+            if (device != null) {
+                device.setDeviceInfo(deviceInfo);
             }
-            mDevicesByServer.put(binder, device);
+        }
+        if (device == null) {
+            device = new Device(server, deviceInfo, serviceInfo, uid);
         }
         mDevicesByInfo.put(deviceInfo, device);
+        if (bluetoothDevice != null) {
+            mBluetoothDevices.put(bluetoothDevice, device);
+        }
 
         synchronized (mClients) {
             for (Client c : mClients.values()) {
@@ -478,8 +772,9 @@ public class MidiService extends IMidiManager.Stub {
     private void removeDeviceLocked(Device device) {
         IMidiDeviceServer server = device.getDeviceServer();
         if (server != null) {
-            mDevicesByServer.remove(server);
+            mDevicesByServer.remove(server.asBinder());
         }
+        mDevicesByInfo.remove(device.getDeviceInfo());
 
         synchronized (mClients) {
             for (Client c : mClients.values()) {
@@ -515,6 +810,15 @@ public class MidiService extends IMidiManager.Stub {
             parser = serviceInfo.loadXmlMetaData(mPackageManager,
                     MidiDeviceService.SERVICE_INTERFACE);
             if (parser == null) return;
+
+            // ignore virtual device servers that do not require the correct permission
+            if (!android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE.equals(
+                    serviceInfo.permission)) {
+                Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
+                        + ": it does not require the permission "
+                        + android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE);
+                return;
+            }
 
             Bundle properties = null;
             int numInputPorts = 0;

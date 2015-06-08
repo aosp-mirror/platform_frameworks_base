@@ -241,7 +241,8 @@ messages.</p>
 
 
 <p>An app can provide a MIDI Service that can be used by other apps. For example,
-an app can provide a custom synthesizer that other apps can send messages to. </p>
+an app can provide a custom synthesizer that other apps can send messages to.
+The service must be guarded with permission &quot;android.permission.BIND_MIDI_DEVICE_SERVICE&quot;.</p>
 
 <h2 id=manifest_files>Manifest Files</h2>
 
@@ -250,7 +251,8 @@ an app can provide a custom synthesizer that other apps can send messages to. </
 AndroidManifest.xml file.</p>
 
 <pre class=prettyprint>
-&lt;service android:name="<strong>MySynthDeviceService</strong>">
+&lt;service android:name="<strong>MySynthDeviceService</strong>"
+  android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
   &lt;intent-filter>
     &lt;action android:name="android.media.midi.MidiDeviceService" />
   &lt;/intent-filter>
