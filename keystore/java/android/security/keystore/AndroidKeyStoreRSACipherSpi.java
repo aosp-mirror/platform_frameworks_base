@@ -60,6 +60,13 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         }
 
         @Override
+        protected boolean isEncryptingUsingPrivateKeyPermitted() {
+            // RSA encryption with no padding using private key is is a way to implement raw RSA
+            // signatures. We have to support this.
+            return true;
+        }
+
+        @Override
         protected void initAlgorithmSpecificParameters() throws InvalidKeyException {}
 
         @Override
@@ -152,8 +159,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                             paddedInput.length - bufferedInput.length,
                             bufferedInput.length);
                 } else {
-                    // No need to pad input
-                    paddedInput = bufferedInput;
+                    // RI throws BadPaddingException in this scenario. INVALID_ARGUMENT below will
+                    // be translated into BadPaddingException.
+                    throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_ARGUMENT,
+                            "Message size (" + bufferedInput.length + " bytes) must be smaller than"
+                            + " modulus (" + mModulusSizeBytes + " bytes)");
                 }
                 return mDelegate.doFinal(paddedInput, 0, paddedInput.length);
             }
@@ -412,14 +422,46 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         }
 
         if (keystoreKey instanceof PrivateKey) {
-            if ((opmode != Cipher.DECRYPT_MODE) && (opmode != Cipher.UNWRAP_MODE)) {
-                throw new InvalidKeyException("Private key cannot be used with opmode: " + opmode
-                        + ". Only DECRYPT_MODE and UNWRAP_MODE supported");
+            // Private key
+            switch (opmode) {
+                case Cipher.DECRYPT_MODE:
+                case Cipher.UNWRAP_MODE:
+                    // Permitted
+                    break;
+                case Cipher.ENCRYPT_MODE:
+                    if (!isEncryptingUsingPrivateKeyPermitted()) {
+                        throw new InvalidKeyException(
+                                "RSA private keys cannot be used with Cipher.ENCRYPT_MODE"
+                                + ". Only RSA public keys supported for this mode");
+                    }
+                    // JCA doesn't provide a way to generate raw RSA signatures (with arbitrary
+                    // padding). Thus, encrypting with private key is used instead.
+                    setKeymasterPurposeOverride(KeymasterDefs.KM_PURPOSE_SIGN);
+                    break;
+                case Cipher.WRAP_MODE:
+                    throw new InvalidKeyException(
+                            "RSA private keys cannot be used with Cipher.WRAP_MODE"
+                            + ". Only RSA public keys supported for this mode");
+                    // break;
+                default:
+                    throw new InvalidKeyException(
+                            "RSA private keys cannot be used with opmode: " + opmode);
             }
         } else {
-            if ((opmode != Cipher.ENCRYPT_MODE) && (opmode != Cipher.WRAP_MODE)) {
-                throw new InvalidKeyException("Public key cannot be used with opmode: " + opmode
-                        + ". Only ENCRYPT_MODE and WRAP_MODE supported");
+            // Public key
+            switch (opmode) {
+                case Cipher.ENCRYPT_MODE:
+                case Cipher.WRAP_MODE:
+                    // Permitted
+                    return;
+                case Cipher.DECRYPT_MODE:
+                case Cipher.UNWRAP_MODE:
+                    throw new InvalidKeyException("RSA public keys cannot be used with opmode: "
+                            + opmode + ". Only RSA private keys supported for this opmode.");
+                    // break;
+                default:
+                    throw new InvalidKeyException(
+                            "RSA public keys cannot be used with opmode: " + opmode);
             }
         }
 
@@ -438,6 +480,10 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         setKey(keystoreKey);
     }
 
+    protected boolean isEncryptingUsingPrivateKeyPermitted() {
+        return false;
+    }
+
     @Override
     protected final void resetAll() {
         mModulusSizeBytes = -1;
@@ -454,6 +500,13 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             @NonNull KeymasterArguments keymasterArgs) {
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
+        int purposeOverride = getKeymasterPurposeOverride();
+        if ((purposeOverride != -1)
+                && ((purposeOverride == KeymasterDefs.KM_PURPOSE_SIGN)
+                || (purposeOverride == KeymasterDefs.KM_PURPOSE_VERIFY))) {
+            // Keymaster sign/verify requires digest to be specified. For raw sign/verify it's NONE.
+            keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
+        }
     }
 
     @Override
