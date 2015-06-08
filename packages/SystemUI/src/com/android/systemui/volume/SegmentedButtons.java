@@ -68,10 +68,11 @@ public class SegmentedButtons extends LinearLayout {
         fireOnSelected();
     }
 
-    public void addButton(int labelResId, Object value) {
+    public void addButton(int labelResId, int contentDescriptionResId, Object value) {
         final Button b = (Button) mInflater.inflate(R.layout.segmented_button, this, false);
         b.setTag(LABEL_RES_KEY, labelResId);
         b.setText(labelResId);
+        b.setContentDescription(getResources().getString(contentDescriptionResId));
         final LayoutParams lp = (LayoutParams) b.getLayoutParams();
         if (getChildCount() == 0) {
             lp.leftMargin = lp.rightMargin = 0; // first button has no margin
