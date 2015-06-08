@@ -449,15 +449,11 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jclass clazz,
         jniThrowNullPointerException(env, NULL);
         return NULL;
     }
-    const jchar* str = env->GetStringCritical(name, 0);
-    if (str == NULL) {
-        // Whatever, whatever.
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+    ScopedUtfChars name8(env, name);
+    if (name8.c_str() == NULL) {
         return NULL;
     }
-    String8 name8(reinterpret_cast<const char16_t*>(str),
-                  env->GetStringLength(name));
-    env->ReleaseStringCritical(name, str);
+
     int flags=0;
     switch (mode&0x30000000) {
         case 0:
@@ -480,7 +476,7 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jclass clazz,
     if (mode&0x00000001) realMode |= S_IROTH;
     if (mode&0x00000002) realMode |= S_IWOTH;
 
-    int fd = open(name8.string(), flags, realMode);
+    int fd = open(name8.c_str(), flags, realMode);
     if (fd < 0) {
         jniThrowException(env, "java/io/FileNotFoundException", strerror(errno));
         return NULL;
