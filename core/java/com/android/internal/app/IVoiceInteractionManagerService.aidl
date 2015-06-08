@@ -97,6 +97,11 @@ interface IVoiceInteractionManagerService {
     void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback);
 
     /**
+     * Hides the session from the active service, if it is showing.
+     */
+    void hideCurrentSession();
+
+    /**
      * Notifies the active service that a launch was requested from the Keyguard. This will only
      * be called if {@link #activeServiceSupportsLaunchFromKeyguard()} returns true.
      */

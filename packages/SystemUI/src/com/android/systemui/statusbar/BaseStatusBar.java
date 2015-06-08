@@ -92,6 +92,7 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.NavigationBarView;
@@ -239,6 +240,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected EmptyShadeView mEmptyShadeView;
 
     private NotificationClicker mNotificationClicker = new NotificationClicker();
+
+    protected AssistManager mAssistManager;
 
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
@@ -1626,6 +1629,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                                     // TODO: Dismiss Keyguard.
                                 }
                                 if (intent.isActivity()) {
+                                    mAssistManager.hideAssist();
                                     overrideActivityPendingAppTransition(keyguardShowing
                                             && !afterKeyguardGone);
                                 }
