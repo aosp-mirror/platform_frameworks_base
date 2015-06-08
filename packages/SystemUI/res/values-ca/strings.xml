@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dóna sempre permís des d\'aquest equip"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració USB"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"S\'està desant captura de pantalla..."</string>
@@ -246,7 +248,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositius)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivat"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"No hi ha dispositius emparellats disponibles."</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"No hi ha dispositius vinculats  disponibles."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Gira automàticament"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotació bloquejada"</string>
@@ -267,7 +269,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Desconnectat"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No hi ha cap xarxa"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desconnectada"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"No hi ha cap xarxa desada disponible."</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emet"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"En emissió"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositiu sense nom"</string>
@@ -307,8 +310,8 @@
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"No s\'està carregant"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"És possible que la xarxa\nestigui controlada"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Fes lliscar el dit cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Fes lliscar el dit cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Llisca cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels que produeixin les alarmes, els recordatoris, els esdeveniments i les trucades de les persones que especifiquis."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
     <string name="zen_silence_introduction" msgid="575422795504098868">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos les alarmes, la música, els vídeos i els jocs. Tot i això, encara podràs fer trucades."</string>
@@ -402,16 +405,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra el percentatge de la bateria inserit"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra el percentatge del nivell de bateria dins de la icona de la barra d\'estat quan no s\'estigui carregant"</string>
     <string name="quick_settings" msgid="10042998191725428">"Configuració ràpida"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Barra d\'estat"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Perfil professional"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Mode d\'avió"</string>
     <string name="add_tile" msgid="2995389510240786221">"Afegeix un mosaic"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Mosaic d\'emissió"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Si no desactives aquesta opció abans, <xliff:g id="WHEN">%1$s</xliff:g> no sentiràs la pròxima alarma"</string>

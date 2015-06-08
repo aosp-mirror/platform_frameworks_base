@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB အမှားရှာဖွေပြင်ဆင်ခြင်း ခွင့်ပြုပါမည်လား?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ဒီကွန်ပျူတာရဲ့ RSA key fingerprint ကတော့:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g> ဖြစ်ပါသည်"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ဒီကွန်ပျူတာမှ အမြဲခွင့်ပြုရန်"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB အမှားပြင်ဆင်ခြင်း ခွင့်မပြုပါ"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"ဤစက်ပစ္စည်းသို့ လက်ရှိဝင်ရောက်ထားသည့် အသုံးပြုသူသည် USB အမှားပြင်ဆင်ခြင်း ဖွင့်၍မရပါ။ ဤအင်္ဂါရပ်ကို အသုံးပြုရန်၊ အဓိကအသုံးပြုသူ “<xliff:g id="NAME">%s</xliff:g>” သို့ပြောင်းပါ။"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ဖန်သားပြင်ပြည့် ချဲ့ခြင်း"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ဖန်သားပြင်အပြည့်ဆန့်ခြင်း"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ဖန်သားပြင်ဓါတ်ပုံသိမ်းစဉ်.."</string>
@@ -265,7 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ချိတ်ဆက်မထားပါ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ကွန်ရက်မရှိပါ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ဝိုင်ဖိုင်ပိတ်ရန်"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"သိမ်းဆည်းထား ကွန်ရက်များ မရှိ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ဝိုင်ဖိုင်ကွန်ရက် မရနိုင်ပါ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"အမည်မတပ် ကိရိယာ"</string>
