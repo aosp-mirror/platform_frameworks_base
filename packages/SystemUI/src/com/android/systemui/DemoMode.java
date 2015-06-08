@@ -24,6 +24,8 @@ public interface DemoMode {
 
     public static final String ACTION_DEMO = "com.android.systemui.demo";
 
+    public static final String EXTRA_COMMAND = "command";
+
     public static final String COMMAND_ENTER = "enter";
     public static final String COMMAND_EXIT = "exit";
     public static final String COMMAND_CLOCK = "clock";
