@@ -80,12 +80,12 @@ public class AppTimeTracker {
     public void deliverResult(Context context) {
         stop();
         Bundle extras = new Bundle();
-        extras.putLong(ActivityOptions.EXTRA_USAGE_REPORT_TIME, mTotalTime);
+        extras.putLong(ActivityOptions.EXTRA_USAGE_TIME_REPORT, mTotalTime);
         Bundle pkgs = new Bundle();
         for (int i=mPackageTimes.size()-1; i>=0; i--) {
             pkgs.putLong(mPackageTimes.keyAt(i), mPackageTimes.valueAt(i).value);
         }
-        extras.putBundle(ActivityOptions.EXTRA_USAGE_REPORT_PACKAGES, pkgs);
+        extras.putBundle(ActivityOptions.EXTRA_USAGE_TIME_REPORT_PACKAGES, pkgs);
         Intent fillinIntent = new Intent();
         fillinIntent.putExtras(extras);
         try {

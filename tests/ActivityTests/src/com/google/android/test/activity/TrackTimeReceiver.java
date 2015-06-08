@@ -27,7 +27,7 @@ public class TrackTimeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle data = intent.getExtras();
-        data.getLong(ActivityOptions.EXTRA_USAGE_REPORT_TIME);
+        data.getLong(ActivityOptions.EXTRA_USAGE_TIME_REPORT);
         Log.i("ActivityTest", "Received time: " + data);
     }
 }
