@@ -2734,7 +2734,7 @@ public class TelephonyManager {
      * The list can include one or more of {@link android.telephony.CellInfoGsm CellInfoGsm},
      * {@link android.telephony.CellInfoCdma CellInfoCdma},
      * {@link android.telephony.CellInfoLte CellInfoLte} and
-     * {@link android.telephony.CellInfoWcdma CellInfoCdma} in any combination.
+     * {@link android.telephony.CellInfoWcdma CellInfoWcdma} in any combination.
      * Specifically on devices with multiple radios it is typical to see instances of
      * one or more of any these in the list. In addition 0, 1 or more CellInfo
      * objects may return isRegistered() true.
