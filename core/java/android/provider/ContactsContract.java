@@ -4086,9 +4086,8 @@ public final class ContactsContract {
         public static final String CARRIER_PRESENCE = "carrier_presence";
 
         /**
-         * Bitmask flags for CARRIER_PRESENCE column. Each value represents
-         * a bit (or a set of bits) which may be set independently of each
-         * other.
+         * Indicates that the entry is Video Telephony (VT) capable on the
+         * current carrier. An allowed bitmask of {@link #CARRIER_PRESENCE}.
          */
         public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
     }
