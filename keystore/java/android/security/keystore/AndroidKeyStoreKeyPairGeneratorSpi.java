@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.security.Credentials;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore;
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeymasterDefs;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 import com.android.org.conscrypt.NativeConstants;
@@ -33,6 +35,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyPairGeneratorSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
@@ -153,7 +156,18 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 throw new RuntimeException("Can't get key", e);
             }
 
-            final byte[] pubKeyBytes = mKeyStore.getPubkey(privateKeyAlias);
+            ExportResult exportResult =
+                    mKeyStore.exportKey(
+                            privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null);
+            if (exportResult == null) {
+                throw new KeyStoreConnectException();
+            } else if (exportResult.resultCode != KeyStore.NO_ERROR) {
+                throw new ProviderException(
+                        "Failed to obtain public key in X.509 format",
+                        KeyStore.getKeyStoreException(exportResult.resultCode));
+            }
+            final byte[] pubKeyBytes = exportResult.exportData;
+
 
             final PublicKey pubKey;
             try {

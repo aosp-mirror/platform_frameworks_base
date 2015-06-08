@@ -24,6 +24,8 @@ import com.android.org.conscrypt.OpenSSLEngine;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.security.KeyStoreParameter;
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeymasterDefs;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
@@ -742,7 +744,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         assertTrue(mAndroidKeyStore.onUserPasswordChanged("1111"));
         assertTrue(mAndroidKeyStore.isUnlocked());
 
-        assertEquals(0, mAndroidKeyStore.saw("").length);
+        assertEquals(0, mAndroidKeyStore.list("").length);
     }
 
     private void assertAliases(final String[] expectedAliases) throws KeyStoreException {
@@ -1932,7 +1934,10 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
             throw new RuntimeException("Can't get key", e);
         }
 
-        final byte[] pubKeyBytes = keyStore.getPubkey(privateKeyAlias);
+        ExportResult exportResult =
+                keyStore.exportKey(privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null);
+        assertEquals(KeyStore.NO_ERROR, exportResult.resultCode);
+        final byte[] pubKeyBytes = exportResult.exportData;
 
         final PublicKey pubKey;
         try {
