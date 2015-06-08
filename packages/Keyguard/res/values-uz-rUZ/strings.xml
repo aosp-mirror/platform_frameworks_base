@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chizmali parolni chizing"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM karta PIN kodini kiriting"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM kartaning PIN kodini kiriting"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"“<xliff:g id="CARRIER">%1$s</xliff:g>” SIM kartasi uchun PIN kodni kiriting"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN kodni tering"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Parol kiriting"</string>
@@ -73,7 +73,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kod kamida 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodlar bir xil emas"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Chizmali parolni ochishga juda ko‘p urinildi"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Siz PIN-kodni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Siz parolni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>

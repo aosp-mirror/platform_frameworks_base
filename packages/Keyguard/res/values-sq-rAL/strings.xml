@@ -107,6 +107,6 @@
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kodi u pranua!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nuk ka shërbim."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Butoni i metodës së ndërrimit të hyrjeve."</string>
-    <string name="airplane_mode" msgid="3122107900897202805">"Modaliteti \"në aeroplan\""</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"Modaliteti i aeroplanit"</string>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nuk njihet"</string>
 </resources>

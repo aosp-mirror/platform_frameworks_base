@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Nhập mật khẩu để mở khóa"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Nhập mã PIN để mở khóa"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Mã PIN không chính xác."</string>
-    <string name="keyguard_charged" msgid="3272223906073492454">"Pin đầy"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Đã sạc đầy"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Đang sạc"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Kết nối bộ sạc của bạn."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Nhấn vào Menu để mở khóa."</string>
@@ -75,9 +75,9 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Hãy nhập lại mã PUK chính xác. Nhiều lần lặp lại sẽ vô hiệu hóa vĩnh viễn thẻ SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Mã PIN không khớp"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Quá nhiều lần nhập hình"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, máy tính bảng này sẽ được đặt lại, tức là tất cả dữ liệu của máy tính bảng sẽ bị xóa."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, điện thoại này sẽ được đặt lại, tức là tất cả dữ liệu của điện thoại sẽ bị xóa."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER">%d</xliff:g> lần. Máy tính bảng này sẽ được đặt lại, tức là tất cả dữ liệu của máy tính bảng sẽ bị xóa."</string>
