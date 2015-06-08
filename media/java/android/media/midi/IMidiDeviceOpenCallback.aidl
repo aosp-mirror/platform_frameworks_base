@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,10 @@
 
 package android.media.midi;
 
-import android.media.midi.MidiDeviceInfo;
-import android.os.ParcelFileDescriptor;
+import android.media.midi.IMidiDeviceServer;
 
 /** @hide */
-interface IMidiDeviceServer
+oneway interface IMidiDeviceOpenCallback
 {
-    ParcelFileDescriptor openInputPort(IBinder token, int portNumber);
-    ParcelFileDescriptor openOutputPort(IBinder token, int portNumber);
-    void closePort(IBinder token);
-    void closeDevice();
-
-    // connects the input port pfd to the specified output port
-    void connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
-
-    MidiDeviceInfo getDeviceInfo();
+    void onDeviceOpened(in IMidiDeviceServer server, IBinder token);
 }
