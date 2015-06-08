@@ -89,6 +89,7 @@ public class ZenModePanel extends LinearLayout {
     private final IconPulser mIconPulser;
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
     private final Uri mForeverId;
+    private final SpTexts mSpTexts;
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
@@ -96,7 +97,7 @@ public class ZenModePanel extends LinearLayout {
     private View mZenIntroduction;
     private TextView mZenIntroductionMessage;
     private View mZenIntroductionConfirm;
-    private View mZenIntroductionCustomize;
+    private TextView mZenIntroductionCustomize;
     private LinearLayout mZenConditions;
     private TextView mZenAlarmWarning;
 
@@ -125,6 +126,7 @@ public class ZenModePanel extends LinearLayout {
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
         mIconPulser = new IconPulser(mContext);
         mForeverId = Condition.newId(mContext).appendPath("forever").build();
+        mSpTexts = new SpTexts(mContext);
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
 
@@ -163,6 +165,7 @@ public class ZenModePanel extends LinearLayout {
 
         mZenIntroduction = findViewById(R.id.zen_introduction);
         mZenIntroductionMessage = (TextView) findViewById(R.id.zen_introduction_message);
+        mSpTexts.add(mZenIntroductionMessage);
         mZenIntroductionConfirm = findViewById(R.id.zen_introduction_confirm);
         mZenIntroductionConfirm.setOnClickListener(new OnClickListener() {
             @Override
@@ -170,7 +173,7 @@ public class ZenModePanel extends LinearLayout {
                 confirmZenIntroduction();
             }
         });
-        mZenIntroductionCustomize = findViewById(R.id.zen_introduction_customize);
+        mZenIntroductionCustomize = (TextView) findViewById(R.id.zen_introduction_customize);
         mZenIntroductionCustomize.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -180,6 +183,7 @@ public class ZenModePanel extends LinearLayout {
                 }
             }
         });
+        mSpTexts.add(mZenIntroductionCustomize);
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
         mZenAlarmWarning = (TextView) findViewById(R.id.zen_alarm_warning);
@@ -661,9 +665,11 @@ public class ZenModePanel extends LinearLayout {
         }
         if (tag.line1 == null) {
             tag.line1 = (TextView) row.findViewById(android.R.id.text1);
+            mSpTexts.add(tag.line1);
         }
         if (tag.line2 == null) {
             tag.line2 = (TextView) row.findViewById(android.R.id.text2);
+            mSpTexts.add(tag.line2);
         }
         final String line1 = !TextUtils.isEmpty(condition.line1) ? condition.line1
                 : condition.summary;
