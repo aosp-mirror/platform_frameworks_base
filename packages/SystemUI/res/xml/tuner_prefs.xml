@@ -72,4 +72,8 @@
         android:summary="@string/show_battery_percentage_summary"
         android:persistent="false" />
 
+    <Preference
+        android:key="demo_mode"
+        android:title="@string/demo_mode" />
+
 </PreferenceScreen>
