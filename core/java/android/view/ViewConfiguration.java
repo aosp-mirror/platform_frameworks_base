@@ -213,9 +213,9 @@ public class ViewConfiguration {
     private static final int OVERFLING_DISTANCE = 6;
 
     /**
-     * Default time to snooze an action mode for.
+     * Default duration to hide an action mode for.
      */
-    private static final int ACTION_MODE_SNOOZE_TIME_DEFAULT = 2000;
+    private static final long ACTION_MODE_HIDE_DURATION_DEFAULT = 2000;
 
     /**
      * Configuration values for overriding {@link #hasPermanentMenuKey()} behavior.
@@ -737,10 +737,10 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return the default duration in milliseconds for {@link ActionMode#snooze(int)}.
+     * @return the default duration in milliseconds for {@link ActionMode#hide(long)}.
      */
-    public static int getDefaultActionModeSnoozeTime() {
-        return ACTION_MODE_SNOOZE_TIME_DEFAULT;
+    public static long getDefaultActionModeHideDuration() {
+        return ACTION_MODE_HIDE_DURATION_DEFAULT;
     }
 
     /**
