@@ -96,6 +96,7 @@ public class MediaProjectionPermissionActivity extends Activity
                 .create();
 
         mDialog.create();
+        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
         ((CheckBox) mDialog.findViewById(R.id.remember)).setOnCheckedChangeListener(this);
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
