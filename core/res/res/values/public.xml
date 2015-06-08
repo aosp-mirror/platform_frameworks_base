@@ -2679,8 +2679,9 @@
   <public type="attr" name="rightIndents" />
 
   <public type="attr" name="showForAllUsers" />
-  <!-- NFC CardEmulation: dynamically load service resources -->
-  <public type="attr" name="dynamicResources" />
+
+  <attr name="__reserved1" format="boolean" />
+  <public type="attr" name="__reserved1" />
 
   <attr name="__reserved0" format="boolean" />
   <public type="attr" name="__reserved0" />
