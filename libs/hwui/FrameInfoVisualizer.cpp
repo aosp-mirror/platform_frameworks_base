@@ -28,7 +28,6 @@
 #define PROFILE_DRAW_DP_PER_MS 7
 
 // Must be NUM_ELEMENTS in size
-static const SkColor CURRENT_FRAME_COLOR = 0xcf5faa4d;
 static const SkColor THRESHOLD_COLOR = 0xff5faa4d;
 static const SkColor BAR_FAST_ALPHA = 0x8F000000;
 static const SkColor BAR_JANKY_ALPHA = 0xDF000000;
