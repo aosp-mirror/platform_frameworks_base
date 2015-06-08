@@ -445,7 +445,7 @@ public abstract class Visibility extends Transition {
                     mForcedEndVisibility != -1;
             if (!isForcedVisibility) {
                 originalVisibility = viewToKeep.getVisibility();
-                viewToKeep.setVisibility(View.VISIBLE);
+                viewToKeep.setTransitionVisibility(View.VISIBLE);
             }
             Animator animator = onDisappear(sceneRoot, viewToKeep, startValues, endValues);
             if (animator != null) {
@@ -454,7 +454,7 @@ public abstract class Visibility extends Transition {
                 animator.addListener(disappearListener);
                 addListener(disappearListener);
             } else if (!isForcedVisibility) {
-                viewToKeep.setVisibility(originalVisibility);
+                viewToKeep.setTransitionVisibility(originalVisibility);
             }
             return animator;
         }
@@ -516,14 +516,14 @@ public abstract class Visibility extends Transition {
         @Override
         public void onAnimationPause(Animator animation) {
             if (!mCanceled && !mIsForcedVisibility) {
-                mView.setVisibility(mFinalVisibility);
+                mView.setTransitionVisibility(mFinalVisibility);
             }
         }
 
         @Override
         public void onAnimationResume(Animator animation) {
             if (!mCanceled && !mIsForcedVisibility) {
-                mView.setVisibility(View.VISIBLE);
+                mView.setTransitionVisibility(View.VISIBLE);
             }
         }
 
@@ -557,7 +557,7 @@ public abstract class Visibility extends Transition {
                 if (mIsForcedVisibility) {
                     mView.setTransitionAlpha(0);
                 } else {
-                    mView.setVisibility(mFinalVisibility);
+                    mView.setTransitionVisibility(mFinalVisibility);
                 }
             }
         }
