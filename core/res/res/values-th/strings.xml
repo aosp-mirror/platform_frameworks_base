@@ -48,7 +48,7 @@
     <string name="mmiFdnError" msgid="5224398216385316471">"การดำเนินการถูกจำกัดไว้ที่การจำกัดหมายเลขโทรออกเท่านั้น"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"เปิดใช้งานบริการแล้ว"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"เปิดการใช้งานบริการสำหรับ:"</string>
-    <string name="serviceDisabled" msgid="1937553226592516411">"ปิดใช้งานบริการไว้"</string>
+    <string name="serviceDisabled" msgid="1937553226592516411">"ปิดใช้บริการไว้"</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"การลงทะเบียนสำเร็จแล้ว"</string>
     <string name="serviceErased" msgid="1288584695297200972">"ลบเรียบร้อยแล้ว"</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"รหัสผ่านไม่ถูกต้อง"</string>
@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"เข้าถึงบัญชีที่ใช้งานได้"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"อ่านฟีดข้อมูลที่สมัครไว้"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"อนุญาตให้แอปพลิเคชันดูรายละเอียดเกี่ยวกับฟีดที่ซิงค์ไว้ในปัจจุบัน"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"ส่งข้อความ SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"ส่งและดูข้อความ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"อนุญาตให้แอปพลิเคชันส่งข้อความ SMS ซึ่งอาจทำให้มีการเรียกเก็บเงินที่ไม่คาดคิด แอปพลิเคชันที่เป็นอันตรายอาจทำให้คุณเสียค่าใช้จ่ายด้วยการส่งข้อความโดยไม่รอการยืนยันจากคุณ"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"อ่านข้อความของคุณ (SMS หรือ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"อนุญาตให้แอปพลิเคชันอ่านข้อความ SMS ที่จัดเก็บไว้ในแท็บเล็ตหรือซิมการ์ด ซึ่งจะทำให้แอปพลิเคชันสามารถอ่านข้อความ SMS ทั้งหมดได้ไม่ว่าจะเป็นเนื้อหาใดหรือมีการรักษาข้อมูลที่เป็นความลับแบบใด"</string>
@@ -1506,6 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"จนกว่าคุณจะปิดฟังก์ชันนี้"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"จนกว่าคุณจะปิดห้ามรบกวน"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ยุบ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ห้ามรบกวน"</string>

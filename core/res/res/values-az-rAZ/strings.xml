@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Əlçatımlı hesablara daxil olun."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abunə olunmuş xəbərləri oxuyur"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tətbiqə hazırda sinxron lentlər haqqında ətraflı məlumat almaq üçün imkan verir."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS mesajlarını göndərir"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"göndərmək və SMS mesajları"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tətbiqə SMS mesajı göndərmə icazəsi verir. Bu gözlənilməyən ödənişlərə səbəb ola bilər. Zərərli tətbiqlər sizin təsdiqiniz olmadan mesaj göndərməklə sizə ödənişə səbəb ola bilərlər."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"tekst mesajlarınızı oxuyur (SMS və ya MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tətbiqə planşetinizdə və ya SIM kartınızda saxlanan SMS mesajları oxumağa imkan verir. Bu bütün SMS mesajların, onların məzmunundan və konfidensiallığından asılı olmadan oxunması imkanı deməkdir."</string>
@@ -1506,6 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Saat <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> qədər"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Bunu söndürənə kimi"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Narahat etməyin\" seçiminini deaktiv edənə kimi"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Dağıt"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Narahat etməyin"</string>

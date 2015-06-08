@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"అందుబాటులో ఉన్న ఖాతాలను ప్రాప్యత చేయండి."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ప్రస్తుతం సమకాలీకరించిన ఫీడ్‌ల గురించి వివరాలను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS సందేశాలను పంపడం"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS సందేశాలు పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఊహించని ఛార్జీలు విధించబడవచ్చు. హానికరమైన అనువర్తనాలు మీ నిర్ధారణ లేకుండానే సందేశాలను పంపడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"మీ వచన సందేశాలు (SMS లేదా MMS) చదవడం"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"మీ టాబ్లెట్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"మీరు దీన్ని ఆఫ్ చేసే వరకు"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"అంతరాయం కలిగించవద్దు"</string>

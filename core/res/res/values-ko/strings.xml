@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"사용 가능한 계정에 액세스합니다."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"가입된 피드 읽기"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"앱이 현재 동기화된 피드에 대한 세부정보를 가져올 수 있도록 허용합니다."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송해 요금이 부과될 수 있습니다."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"내 문자 메시지 읽기(SMS 또는 MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"앱이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이렇게 하면 앱이 콘텐츠 또는 비밀유지와 관계 없이 모든 SMS 메시지를 읽을 수 있습니다."</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"알림 일시중지 기능을 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"알림 일시중지"</string>

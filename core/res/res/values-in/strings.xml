@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Akses akun yang tersedia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca umpan langganan"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Mengizinkan apl mendapatkan detail tentang umpan yang saat ini sedang disinkronkan."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"kirim pesan SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"mengirim dan melihat pesan SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Memungkinkan aplikasi mengirim pesan SMS. Izin ini dapat mengakibatkan biaya tak terduga. Aplikasi berbahaya dapat membebankan biaya kepada Anda dengan mengirim pesan tanpa konfirmasi dari Anda."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"membaca pesan teks (SMS atau MMS) Anda"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Memungkinkan aplikasi membaca pesan SMS yang tersimpan di tablet atau kartu SIM Anda. Izin ini memungkinkan aplikasi membaca semua pesan SMS, terlepas dari konten atau kerahasiaan."</string>
@@ -1506,6 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hingga Anda menonaktifkan ini"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hingga Anda menonaktifkan status Jangan Ganggu"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Ciutkan"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Jangan ganggu"</string>

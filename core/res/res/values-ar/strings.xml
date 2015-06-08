@@ -277,7 +277,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"الوصول إلى الحسابات المتاحة."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"قراءة الخلاصات المشتركة"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"للسماح للتطبيق بالحصول على تفاصيل حول الخلاصات المتزامنة في الوقت الحالي."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"‏إرسال رسائل قصيرة SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏للسماح للتطبيق بإرسال رسائل قصيرة SMS. وقد يؤدي هذا إلى تحمل رسوم غير متوقعة. وقد تكلفك التطبيقات الضارة أموالاً من خلال إرسال رسائل بدون موافقة منك."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏قراءة الرسائل النصية (الرسائل القصيرة SMS أو رسائل الوسائط المتعددة)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"‏للسماح للتطبيق بقراءة الرسائل القصيرة SMS المخزنة على الجهاز اللوحي أو على شريحة SIM. ويتيح هذا للتطبيق قراءة جميع الرسائل القصيرة SMS، بغض النظر عن المحتوى أو مدى السرية."</string>
@@ -1574,6 +1574,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"لحين تعطيل هذا الإعداد"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"حتى يتم تعطيل \"الرجاء عدم الإزعاج\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"تصغير"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"الرجاء عدم الإزعاج"</string>

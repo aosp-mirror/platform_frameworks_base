@@ -275,7 +275,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Pasiekite galimas paskyras."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"skaityti prenumeruojamus tiekimus"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Leidžiama programai gauti išsamios informacijos apie šiuo metu sinchronizuojamus sklaidos kanalus."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"siųsti SMS pranešimus"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Leidžiama programai siųsti SMS pranešimus. Dėl to gali atsirasti nenumatytų apmokestinimų. Kenkėjiškos programos gali siųsti mokamus pranešimus be jūsų patvirtinimo."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"skaityti teksto pranešimus (SMS arba MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Leidžiama programai skaityti planšetiniame kompiuteryje ar SIM kortelėje saugomus SMS pranešimus. Taip programai leidžiama skaityti visus SMS pranešimus, neatsižvelgiant į turinį ar konfidencialumą."</string>
@@ -1076,7 +1077,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Bus prarasti visi kortelėje esantys duomenys."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatuoti"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Palieskite, kad neleistumėte USB derinimo."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Neleisti USB derinimo."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatūros keitimas"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Pasirinkti klaviatūras"</string>
     <string name="show_ime" msgid="9157568568695230830">"Rodyti įvesties metodą"</string>
@@ -1540,6 +1541,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kol išjungsite"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Kol neišjungsite režimo „Netrukdyti“"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sutraukti"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Netrukdyti"</string>

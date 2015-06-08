@@ -123,7 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"ರೋಮಿಂಗ್ ಬ್ಯಾನರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ರೋಮಿಂಗ್ ಬ್ಯಾನರ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ಸೇವೆ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi ಕರೆ ಮಾಡುವಿಕೆ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
@@ -133,7 +133,7 @@
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ಆಫ್"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ಸೆಲ್ಯುಲಾರ್‌ಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ವೈ-ಫೈ ಮಾತ್ರ"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi ಮಾತ್ರ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> ಸೆಕೆಂಡುಗಳ ನಂತರ <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -247,8 +247,8 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಸಂವಹನ ನಡೆಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯವನ್ನು ಪರೀಕ್ಷಿಸಿ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶಿಸುವ ಮೂಲಕ ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡಿ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ಸ್ಪರ್ಶಿಸಲಾದ ಐಟಂಗಳನ್ನು ಗಟ್ಟಿಯಾಗಿ ಹೇಳಲಾಗುತ್ತದೆ ಮತ್ತು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಪರದೆಯನ್ನು ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಮಾಡಬಹುದಾಗಿದೆ."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ವರ್ಧಿತ ವೆಬ್ ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ಅಪ್ಲಿಕೇಶನ್ ವಿಷಯವನ್ನು ಇನ್ನಷ್ಟು ಪ್ರವೇಶಿಸುವಂತೆ ಮಾಡಲು ಸ್ಕ್ರಿಪ್ಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಬಹುದಾಗಿದೆ."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ವರ್ಧಿತ ವೆಬ್ ಪ್ರವೇಶಿಸುವಿಕೆ ಆನ್ ಆಗುವಿಕೆ"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ಅಪ್ಲಿಕೇಶನ್ ವಿಷಯ ಇನ್ನಷ್ಟು ಲಭ್ಯವಾಗುವಂತೆ ಮಾಡಲು ಸ್ಕ್ರಿಪ್ಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಬಹುದಾಗಿದೆ."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ನೀವು ಟೈಪ್ ಮಾಡುವ ಪಠ್ಯವನ್ನು ಗಮನಿಸುತ್ತದೆ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್‌ಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇಲ್ಲವೇ ಮಾರ್ಪಡಿಸಿ"</string>
@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ಲಭ್ಯವಿರುವ ಖಾತೆಗಳನ್ನು ಪ್ರವೇಶಿಸಿ."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ಚಂದಾದಾರ ಫೀಡ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ಪ್ರಸ್ತುತವಾಗಿ ಸಿಂಕ್‌ ಮಾಡಲಾದ ಫೀಡ್‌ಗಳ ಕುರಿತು ವಿವರಗಳನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಅನಿರೀಕ್ಷಿತ ವೆಚ್ಚಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ದೃಢೀಕರಣವಿಲ್ಲದೆಯೇ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸುವ ಮೂಲಕ ನಿಮ್ಮ ಹಣವನ್ನು ವ್ಯಯಿಸಬಹುದು."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ನಿಮ್ಮ ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಓದಿ (SMS ಅಥವಾ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅಥವಾ ಸಿಮ್‌ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ವಿಷಯ ಅಥವಾ ಗೌಪ್ಯತೆಯನ್ನು ಲೆಕ್ಕಿಸದೆಯೇ, ಎಲ್ಲಾ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -670,7 +670,7 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"ಪರದೆ ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ ಇಲ್ಲವೇ ತುರ್ತು ಕರೆಯನ್ನು ಮಾಡಿ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನಮೂನೆ ಚಿತ್ರಿಸಿ"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ಯಾಟರ್ನ್ ಚಿತ್ರಿಸಿ"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"ತುರ್ತು"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"ಕರೆಗೆ ಹಿಂತಿರುಗು"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ಸರಿಯಾಗಿದೆ!"</string>
@@ -724,10 +724,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ಅನ್‌ಲಾಕ್"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"ಧ್ವನಿ ಆನ್ ಮಾಡಿ"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"ಧ್ವನಿ ಆಫ್ ಮಾಡಿ"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"ನಮೂನೆ ಪ್ರಾರಂಭವಾಗಿದೆ"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"ನಮೂನೆ ತೆರವುಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"ಪ್ಯಾಟರ್ನ್ ಪ್ರಾರಂಭವಾಗಿದೆ"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"ಪ್ಯಾಟರ್ನ್ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"ಸೆಲ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"ನಮೂನೆ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"ಪ್ಯಾಟರ್ನ್ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s.%3$d ರಲ್ಲಿ %2$d ವಿಜೆಟ್."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ವಿಜೆಟ್ ಸೇರಿಸು."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"ಖಾಲಿ"</string>
@@ -743,11 +743,11 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ವಿಜೆಟ್ ಅಳಿಸಲಾಗಿದೆ."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ಅನ್‌ಲಾಕ್ ಪ್ರದೇಶವನ್ನು ವಿಸ್ತರಿಸು."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ಸ್ಲೈಡ್ ಅನ್‌ಲಾಕ್."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ನಮೂನೆ ಅನ್‌ಲಾಕ್."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ಪ್ಯಾಟರ್ನ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ಮುಖದ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ಪಿನ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ಪಾಸ್‌ವರ್ಡ್ ಅನ್‌ಲಾಕ್."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ನಮೂನೆ ಪ್ರದೇಶ."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ಪ್ಯಾಟರ್ನ್ ಪ್ರದೇಶ."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ಸ್ಲೈಡ್ ಪ್ರದೇಶ."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -969,14 +969,14 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ರಿಂಗ್‌ಟೋನ್‌ಗಳು"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ಅಜ್ಞಾತ ರಿಂಗ್‌ಟೋನ್"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
-      <item quantity="other">ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="one">Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="other">Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
-      <item quantity="other">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="one">ಮುಕ್ತ Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="other">ಮುಕ್ತ Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ವೈ-ಫೈ ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
@@ -1465,9 +1465,9 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ಅಪ್ಲಿಕೇಶನ್ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ: ಈ ಸಾಧನದಲ್ಲಿ ಅನ್‌ಪಿನ್‌ ಮಾಡುವುದನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ಸ್ಕ್ರೀನ್‌ ಅನ್‌ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಿನ್‌ ಕೇಳಿ"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಅನ್‌ಲಾಕ್ ನಮೂನೆಯನ್ನು ಕೇಳಿ"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಿನ್‌ ಕೇಳು"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಕೇಳಿ"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳು"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಸ್ಥಾಪಿಸಲಾಗಿದೆ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ನವೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>
@@ -1506,6 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ನೀವಿದನ್ನು ಆಫ್‌ ಮಾಡುವವರೆಗೆ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೂ ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>

@@ -245,14 +245,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществление телефонных звонков и управление ими"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Датчики"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"доступ к данным с датчиков и носимых устройств"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Читать содержимое окна."</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Распознавать содержимое окна, в котором вы находитесь."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки."</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Озвучивать нажимаемые элементы и разрешать управление устройством с помощью жестов."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Включать дополнительные возможности для работы в Интернете."</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"При необходимости устанавливать скрипты, чтобы получить больше специальных возможностей."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Следить за тем, что вы печатаете."</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Фильтровать личные данные, например номера кредитных карт и пароли."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Произносить названия элементов и включать навигацию с помощью жестов."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Включать спец. возможности для Интернета"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могут быть установлены дополнительные скрипты."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Обрабатывать набираемый текст"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"В том числе личные данные, например номера кредитных карт и пароли."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Отключение/изменение строки состояния"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"Строка состояния"</string>
@@ -275,7 +275,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ к имеющимся аккаунтам."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Просмотр фидов пользователя"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Приложение сможет получать сведения о синхронизируемых в настоящее время фидах."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"Отправка SMS-сообщений"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Приложение сможет отправлять SMS. Учтите, что вредоносные программы смогут отправлять сообщения без уведомления, что может привести к непредвиденным расходам."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"Просмотр SMS и MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Приложение сможет просматривать SMS-сообщения, сохраненные на устройстве или SIM-карте, независимо от содержания или настроек конфиденциальности."</string>
@@ -522,10 +523,10 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать планшет или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать телевизор или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать телефон или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Изменить блокировку экрана"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Изменить блокировку экрана."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировать экран"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролировать способ и время блокировки экрана."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Изменение блокировки экрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Изменять блокировку экрана."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировка экрана"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Управлять способом и временем блокировки экрана."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Удалить все данные"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сброс настроек и удаление всех данных на телевизоре без предупреждения."</string>
@@ -1259,7 +1260,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Превышен лимит мобильного трафика"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Превышен лимит трафика Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Лимит превышен на <xliff:g id="SIZE">%s</xliff:g>."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фоновый режим ограничен"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фон. режим ограничен"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Снять ограничение..."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертификат безопасности"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Этот сертификат действителен."</string>
@@ -1483,7 +1484,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Включена блокировка в приложении. Ее отключение запрещено правилами организации."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Блокировка включена"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Блокировка выключена"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-код для отключения"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Установлено администратором"</string>
@@ -1540,6 +1541,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Пока вы не отключите режим \"Не беспокоить\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Свернуть"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не беспокоить"</string>

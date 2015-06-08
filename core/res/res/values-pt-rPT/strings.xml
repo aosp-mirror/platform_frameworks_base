@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Aceda às contas disponíveis."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds subscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite à aplicação obter detalhes acerca dos feeds atualmente sincronizados."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensagens SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite que a aplicação envie mensagens SMS. Isto pode resultar em custos inesperados. As aplicações maliciosas podem fazer com que incorra em custos, enviando mensagens sem a sua confirmação."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler as mensagens de texto (SMS ou MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite que a aplicação leia mensagens SMS guardadas no tablet ou no cartão SIM. Permite que a aplicação leia todas as mensagens SMS, independentemente do conteúdo ou da confidencialidade das mesmas."</string>
@@ -1062,7 +1063,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Todos os dados do seu cartão serão perdidos."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desativar a depuração USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desat. a depuração USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Escolher teclados"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostrar método de entrada"</string>
@@ -1075,7 +1076,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"A preparar o <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"A verificar a presença de erros"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Novo <xliff:g id="NAME">%s</xliff:g> detetado"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos e conteúdos multimédia"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Transf. fotos, conteúdos multimédia."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> danificado"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> está danificado. Experimente reformatá-lo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> foi removido inesperadamente"</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Até que o utilizador desative"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Até desativar Não incomodar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Reduzir"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Não incomodar"</string>

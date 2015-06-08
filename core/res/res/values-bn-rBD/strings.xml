@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"উপলব্ধ অ্যাকাউন্টগুলি অ্যাক্সেস করে৷"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসাবে নেওয়া ফিডগুলি পড়ে"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS বার্তাগুলি পাঠায়"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে SMS বার্তাগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"আপনার দ্বারা এটি বন্ধ করা পর্যন্ত"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"যতক্ষণ না পর্যন্ত আপনি বিরক্ত করবেন না বন্ধ করছেন"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"বিরক্ত করবেন না"</string>

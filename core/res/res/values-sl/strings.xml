@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"Št. dni: <xliff:g id="DAYS">%1$d</xliff:g>"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
@@ -275,7 +275,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Dostop do razpoložljivih računov."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"branje naročenih virov"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Aplikaciji omogoča dobivanje podrobnosti o trenutno sinhroniziranih virih."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"pošiljanje sporočil SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Aplikaciji omogoča pošiljanje SMS-ov. Zaradi tega lahko pride do nepričakovanih stroškov. Zlonamerne aplikacije lahko pošiljajo sporočila brez vaše potrditve, kar vas lahko drago stane."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"branje sporočil (SMS ali MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Aplikaciji omogoča branje SMS-ov, shranjenih v tabličnem računalniku ali na kartici SIM. S tem lahko aplikacija bere vse SMS-e, ne glede na njihovo vsebino ali zaupnost."</string>
@@ -545,7 +546,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Izklop funkcij zaklep. zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Preprečitev uporabe nekaterih funkcij zaklepanja zaslona."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Začetna stran"</item>
+    <item msgid="8901098336658710359">"Dom"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
     <item msgid="7897544654242874543">"Služba"</item>
     <item msgid="1103601433382158155">"Službeni faks"</item>
@@ -561,7 +562,7 @@
     <item msgid="2374913952870110618">"Po meri"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Začetna stran"</item>
+    <item msgid="6880257626740047286">"Dom"</item>
     <item msgid="5629153956045109251">"Služba"</item>
     <item msgid="4966604264500343469">"Drugo"</item>
     <item msgid="4932682847595299369">"Po meri"</item>
@@ -588,7 +589,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Po meri"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Začetna stran"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Dom"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilni"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Služba"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Službeni faks"</string>
@@ -599,7 +600,7 @@
     <string name="phoneTypeCar" msgid="8738360689616716982">"Avto"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Podjetje (glavno)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Glavna"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Glavni"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Drugi faks"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telefaks"</string>
@@ -618,7 +619,7 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Drugo"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilni"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Po meri"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Začetna stran"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Dom"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Služba"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Drugo"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Po meri"</string>
@@ -1540,6 +1541,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokler tega ne izklopite"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokler ne izklopite načina »ne moti«"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Strni"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne moti"</string>

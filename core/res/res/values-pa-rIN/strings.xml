@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ਉਪਲਬਧ ਖਾਤਿਆਂ ਤੱਕ ਪਹੁੰਚ।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ਸਬਸਕ੍ਰਾਈਬ ਕੀਤੇ ਫੀਡਸ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ਐਪ ਨੂੰ ਵਰਤਮਾਨ ਵਿੱਚ ਸਿੰਕ ਕੀਤੇ ਫੀਡਸ ਬਾਰੇ ਵੇਰਵੇ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS ਸੁਨੇਹੇ ਭੇਜੋ"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ਐਪ ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖ਼ਰਚੇ ਪੈ ਸਕਦੇ ਹਨ। ਖ਼ਰਾਬ ਐਪਸ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਕੇ ਤੁਹਾਨੂੰ ਖ਼ਰਚੇ ਪਾ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ਤੁਹਾਡੇ ਟੈਕਸਟ ਸੁਨੇਹੇ (SMS ਜਾਂ MMS) ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਟੈਬਲੇਟ ਜਾਂ SIM ਕਾਰਡ ਤੇ ਸਟੋਰ ਕੀਤੇ SMS ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਸਾਰੇ SMS ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਮੱਗਰੀ ਜਾਂ ਗੁਪਤਤਾ ਤੇ ਧਿਆਨ ਦਿੱਤੇ ਬਿਨਾਂ।"</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ਤੱਕ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇਸਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ ਹੋ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ ਹੋ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ਨਸ਼ਟ ਕਰੋ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
