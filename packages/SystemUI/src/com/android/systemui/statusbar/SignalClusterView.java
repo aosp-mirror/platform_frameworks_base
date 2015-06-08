@@ -18,14 +18,12 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,6 +38,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ import java.util.List;
 public class SignalClusterView
         extends LinearLayout
         implements NetworkControllerImpl.SignalCallback,
-        SecurityController.SecurityControllerCallback {
+        SecurityController.SecurityControllerCallback, Tunable {
 
     static final String TAG = "SignalClusterView";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -105,14 +105,22 @@ public class SignalClusterView
 
     public SignalClusterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        readBlacklist();
     }
 
-    private void readBlacklist() {
-        mBlockAirplane = StatusBarIconController.isBlocked(getContext(), SLOT_AIRPLANE);
-        mBlockMobile = StatusBarIconController.isBlocked(getContext(), SLOT_MOBILE);
-        mBlockWifi = StatusBarIconController.isBlocked(getContext(), SLOT_WIFI);
-        mBlockEthernet = StatusBarIconController.isBlocked(getContext(), SLOT_ETHERNET);
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+            return;
+        }
+        ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
+        mBlockAirplane = blockList.contains(SLOT_AIRPLANE);
+        mBlockMobile = blockList.contains(SLOT_MOBILE);
+        mBlockWifi = blockList.contains(SLOT_WIFI);
+        mBlockEthernet = blockList.contains(SLOT_ETHERNET);
+
+        // Re-register to get new callbacks.
+        mNC.removeSignalCallback(SignalClusterView.this);
+        mNC.addSignalCallback(SignalClusterView.this);
     }
 
     public void setNetworkController(NetworkControllerImpl nc) {
@@ -160,12 +168,10 @@ public class SignalClusterView
         for (PhoneState state : mPhoneStates) {
             mMobileSignalGroup.addView(state.mMobileGroup);
         }
+        TunerService.get(mContext).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
 
         apply();
         applyIconTint();
-        getContext().getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(StatusBarIconController.ICON_BLACKLIST), false,
-                mBlacklistObserver);
     }
 
     @Override
@@ -178,7 +184,7 @@ public class SignalClusterView
         mAirplane       = null;
         mMobileSignalGroup.removeAllViews();
         mMobileSignalGroup = null;
-        getContext().getContentResolver().unregisterContentObserver(mBlacklistObserver);
+        TunerService.get(mContext).removeTunable(this);
 
         super.onDetachedFromWindow();
     }
@@ -528,14 +534,5 @@ public class SignalClusterView
             setTint(mMobileType, tint);
         }
     }
-
-    private final ContentObserver mBlacklistObserver = new ContentObserver(new Handler()) {
-        public void onChange(boolean selfChange) {
-            readBlacklist();
-            // Re-register to get new callbacks.
-            mNC.removeSignalCallback(SignalClusterView.this);
-            mNC.addSignalCallback(SignalClusterView.this);
-        };
-    };
 }
 

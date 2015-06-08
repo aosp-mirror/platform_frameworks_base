@@ -15,6 +15,7 @@
  */
 package com.android.systemui.tuner;
 
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.preference.SwitchPreference;
@@ -23,28 +24,38 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.Set;
 
-public class StatusBarSwitch extends SwitchPreference {
+public class StatusBarSwitch extends SwitchPreference implements Tunable {
+
+    private Set<String> mBlacklist;
 
     public StatusBarSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setChecked(!StatusBarIconController.isBlocked(getContext(), getKey()));
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+            return;
+        }
+        mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
+        setChecked(!mBlacklist.contains(getKey()));
     }
 
     @Override
     protected boolean persistBoolean(boolean value) {
-        Set<String> blacklist = StatusBarIconController.getIconBlacklist(getContext());
         if (!value) {
             // If not enabled add to blacklist.
-            if (!blacklist.contains(getKey())) {
-                blacklist.add(getKey());
-                setList(blacklist);
+            if (!mBlacklist.contains(getKey())) {
+                mBlacklist.add(getKey());
+                setList(mBlacklist);
             }
         } else {
-            if (blacklist != null && blacklist.remove(getKey())) {
-                setList(blacklist);
+            if (mBlacklist.remove(getKey())) {
+                setList(mBlacklist);
             }
         }
         return true;
@@ -52,7 +63,7 @@ public class StatusBarSwitch extends SwitchPreference {
 
     private void setList(Set<String> blacklist) {
         ContentResolver contentResolver = getContext().getContentResolver();
-        Settings.Secure.putString(contentResolver, StatusBarIconController.ICON_BLACKLIST,
-                TextUtils.join(",", blacklist));
+        Settings.Secure.putStringForUser(contentResolver, StatusBarIconController.ICON_BLACKLIST,
+                TextUtils.join(",", blacklist), ActivityManager.getCurrentUser());
     }
 }
