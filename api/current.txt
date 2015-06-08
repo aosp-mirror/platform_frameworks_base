@@ -30670,7 +30670,7 @@ package android.telephony {
   public class CarrierConfigManager {
     method public android.os.PersistableBundle getConfig();
     method public android.os.PersistableBundle getConfigForSubId(int);
-    method public void reloadCarrierConfigForSubId(int);
+    method public void notifyConfigChangedForSubId(int);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final java.lang.String KEY_ADDITIONAL_CALL_SETTING_BOOL = "additional_call_setting_bool";
     field public static final java.lang.String KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL = "allow_emergency_numbers_in_call_log_bool";
