@@ -62,8 +62,6 @@ static void wakeup_callback(void)
 static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
         jobjectArray outReasons)
 {
-    bool first_time = false;
-
     if (outIrqs == NULL || outReasons == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", "null argument");
         return -1;
@@ -83,19 +81,17 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
         }
         ALOGV("Registering callback...");
         set_wakeup_callback(&wakeup_callback);
-        // First time through, we will just drain the current wakeup reasons.
-        first_time = true;
-    } else {
-        // On following calls, we need to wait for wakeup.
-        ALOGV("Waiting for wakeup...");
-        int ret = sem_wait(&wakeup_sem);
-        if (ret < 0) {
-            char buf[80];
-            strerror_r(errno, buf, sizeof(buf));
-            ALOGE("Error waiting on semaphore: %s\n", buf);
-            // Return 0 here to let it continue looping but not return results.
-            return 0;
-        }
+    }
+
+    // Wait for wakeup.
+    ALOGV("Waiting for wakeup...");
+    int ret = sem_wait(&wakeup_sem);
+    if (ret < 0) {
+        char buf[80];
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error waiting on semaphore: %s\n", buf);
+        // Return 0 here to let it continue looping but not return results.
+        return 0;
     }
 
     FILE *fp = fopen(LAST_RESUME_REASON, "r");
@@ -169,9 +165,6 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
     }
 
     ALOGV("Got %d reasons", i);
-    if (first_time) {
-        i = 0;
-    }
     if (i > 0) {
         irqs[0] = firstirq;
         *mergedreasonpos = 0;
@@ -185,7 +178,7 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
         return -1;
     }
 
-    return first_time ? 0 : i;
+    return i;
 }
 
 static JNINativeMethod method_table[] = {
