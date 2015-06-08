@@ -1043,6 +1043,15 @@
     <!-- Name of status bar -->
     <string name="status_bar">Status bar</string>
 
+    <!-- Name of demo mode (mode with preset icons for screenshots) -->
+    <string name="demo_mode">Demo mode</string>
+
+    <!-- Enable demo mode -->
+    <string name="enable_demo_mode">Enable demo mode</string>
+
+    <!-- Show demo mode icons -->
+    <string name="show_demo_mode">Show demo mode</string>
+
     <!-- Name of the ethernet status bar icon. -->
     <string name="status_bar_ethernet">Ethernet</string>
 

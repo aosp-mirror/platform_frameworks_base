@@ -38,6 +38,7 @@ import com.android.systemui.tuner.TunerService.Tunable;
 public class TunerFragment extends PreferenceFragment {
 
     private static final String KEY_QS_TUNER = "qs_tuner";
+    private static final String KEY_DEMO_MODE = "demo_mode";
     private static final String KEY_BATTERY_PCT = "battery_pct";
 
     private final SettingObserver mSettingObserver = new SettingObserver();
@@ -58,7 +59,17 @@ public class TunerFragment extends PreferenceFragment {
                 ft.replace(android.R.id.content, new QsTuner(), "QsTuner");
                 ft.addToBackStack(null);
                 ft.commit();
-                return false;
+                return true;
+            }
+        });
+        findPreference(KEY_DEMO_MODE).setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(android.R.id.content, new DemoModeFragment(), "DemoMode");
+                ft.addToBackStack(null);
+                ft.commit();
+                return true;
             }
         });
         mBatteryPct = (SwitchPreference) findPreference(KEY_BATTERY_PCT);
