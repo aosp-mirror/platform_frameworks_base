@@ -2336,6 +2336,12 @@
     <permission android:name="android.permission.ACCESS_NOTIFICATIONS"
         android:protectionLevel="signature|system" />
 
+    <!-- Marker permission for applications that wish to access notification policy. -->
+    <permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"
+        android:description="@string/permdesc_access_notification_policy"
+        android:label="@string/permlab_access_notification_policy"
+        android:protectionLevel="normal" />
+
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
