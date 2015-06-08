@@ -57,6 +57,16 @@ public class ExifInterface {
     public static final String TAG_APERTURE = "FNumber";
     /** Type is String. */
     public static final String TAG_ISO = "ISOSpeedRatings";
+    /** Type is String. */
+    public static final String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
+    /** Type is int. */
+    public static final String TAG_SUBSEC_TIME = "SubSecTime";
+    /** Type is int. */
+    public static final String TAG_SUBSEC_TIME_ORIG = "SubSecTimeOriginal";
+    /** Type is int. */
+    public static final String TAG_SUBSEC_TIME_DIG = "SubSecTimeDigitized";
+
+
 
     /**
      * @hide

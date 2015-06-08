@@ -15254,6 +15254,7 @@ package android.media {
     field public static final int ORIENTATION_UNDEFINED = 0; // 0x0
     field public static final java.lang.String TAG_APERTURE = "FNumber";
     field public static final java.lang.String TAG_DATETIME = "DateTime";
+    field public static final java.lang.String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
     field public static final java.lang.String TAG_EXPOSURE_TIME = "ExposureTime";
     field public static final java.lang.String TAG_FLASH = "Flash";
     field public static final java.lang.String TAG_FOCAL_LENGTH = "FocalLength";
@@ -15272,6 +15273,9 @@ package android.media {
     field public static final java.lang.String TAG_MAKE = "Make";
     field public static final java.lang.String TAG_MODEL = "Model";
     field public static final java.lang.String TAG_ORIENTATION = "Orientation";
+    field public static final java.lang.String TAG_SUBSEC_TIME = "SubSecTime";
+    field public static final java.lang.String TAG_SUBSEC_TIME_DIG = "SubSecTimeDigitized";
+    field public static final java.lang.String TAG_SUBSEC_TIME_ORIG = "SubSecTimeOriginal";
     field public static final java.lang.String TAG_WHITE_BALANCE = "WhiteBalance";
     field public static final int WHITEBALANCE_AUTO = 0; // 0x0
     field public static final int WHITEBALANCE_MANUAL = 1; // 0x1
