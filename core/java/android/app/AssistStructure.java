@@ -235,7 +235,7 @@ public class AssistStructure {
         static final int FLAGS_CHECKED = 0x00000200;
         static final int FLAGS_CLICKABLE = 0x00004000;
         static final int FLAGS_LONG_CLICKABLE = 0x00200000;
-        static final int FLAGS_STYLUS_BUTTON_PRESSABLE = 0x00400000;
+        static final int FLAGS_CONTEXT_CLICKABLE = 0x00400000;
 
         int mFlags;
 
@@ -413,8 +413,8 @@ public class AssistStructure {
             return (mFlags&ViewNode.FLAGS_LONG_CLICKABLE) != 0;
         }
 
-        public boolean isStylusButtonPressable() {
-            return (mFlags&ViewNode.FLAGS_STYLUS_BUTTON_PRESSABLE) != 0;
+        public boolean isContextClickable() {
+            return (mFlags&ViewNode.FLAGS_CONTEXT_CLICKABLE) != 0;
         }
 
         public String getClassName() {
@@ -529,9 +529,9 @@ public class AssistStructure {
         }
 
         @Override
-        public void setStylusButtonPressable(boolean state) {
-            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_STYLUS_BUTTON_PRESSABLE)
-                    | (state ? ViewNode.FLAGS_STYLUS_BUTTON_PRESSABLE : 0);
+        public void setContextClickable(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_CONTEXT_CLICKABLE)
+                    | (state ? ViewNode.FLAGS_CONTEXT_CLICKABLE : 0);
         }
 
         @Override

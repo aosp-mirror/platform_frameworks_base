@@ -75,10 +75,10 @@ public abstract class ViewStructure {
     public abstract void setLongClickable(boolean state);
 
     /**
-     * Set the stylus button pressable state of this view, as per
-     * {@link View#isStylusButtonPressable View.isStylusButtonPressable()}.
+     * Set the context clickable state of this view, as per
+     * {@link View#isContextClickable View.isContextClickable()}.
      */
-    public abstract void setStylusButtonPressable(boolean state);
+    public abstract void setContextClickable(boolean state);
 
     /**
      * Set the focusable state of this view, as per {@link View#isFocusable View.isFocusable()}.

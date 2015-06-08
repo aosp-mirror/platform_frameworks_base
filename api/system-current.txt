@@ -508,6 +508,7 @@ package android {
     field public static final int contentInsetLeft = 16843861; // 0x1010455
     field public static final int contentInsetRight = 16843862; // 0x1010456
     field public static final int contentInsetStart = 16843859; // 0x1010453
+    field public static final int contextClickable = 16844021; // 0x10104f5
     field public static final int controlX1 = 16843772; // 0x10103fc
     field public static final int controlX2 = 16843774; // 0x10103fe
     field public static final int controlY1 = 16843773; // 0x10103fd
@@ -1256,7 +1257,6 @@ package android {
     field public static final int strokeLineJoin = 16843788; // 0x101040c
     field public static final int strokeMiterLimit = 16843789; // 0x101040d
     field public static final int strokeWidth = 16843783; // 0x1010407
-    field public static final int stylusButtonPressable = 16844021; // 0x10104f5
     field public static final int submitBackground = 16843912; // 0x1010488
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextAppearance = 16843823; // 0x101042f
@@ -1769,13 +1769,13 @@ package android {
 
   public static final class R.id {
     ctor public R.id();
+    field public static final int accessibilityActionContextClick = 16908348; // 0x102003c
     field public static final int accessibilityActionScrollDown = 16908345; // 0x1020039
     field public static final int accessibilityActionScrollLeft = 16908344; // 0x1020038
     field public static final int accessibilityActionScrollRight = 16908346; // 0x102003a
     field public static final int accessibilityActionScrollToPosition = 16908342; // 0x1020036
     field public static final int accessibilityActionScrollUp = 16908343; // 0x1020037
     field public static final int accessibilityActionShowOnScreen = 16908341; // 0x1020035
-    field public static final int accessibilityActionStylusButtonPress = 16908348; // 0x102003c
     field public static final int addToDictionary = 16908330; // 0x102002a
     field public static final int background = 16908288; // 0x1020000
     field public static final int button1 = 16908313; // 0x1020019
@@ -4139,12 +4139,12 @@ package android.app {
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isClickable();
+    method public boolean isContextClickable();
     method public boolean isEnabled();
     method public boolean isFocusable();
     method public boolean isFocused();
     method public boolean isLongClickable();
     method public boolean isSelected();
-    method public boolean isStylusButtonPressable();
     field public static final int TEXT_COLOR_UNDEFINED = 1; // 0x1
     field public static final int TEXT_STYLE_BOLD = 1; // 0x1
     field public static final int TEXT_STYLE_ITALIC = 2; // 0x2
@@ -37114,11 +37114,11 @@ package android.view {
 
   public class HapticFeedbackConstants {
     field public static final int CLOCK_TICK = 4; // 0x4
+    field public static final int CONTEXT_CLICK = 6; // 0x6
     field public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
     field public static final int FLAG_IGNORE_VIEW_SETTING = 1; // 0x1
     field public static final int KEYBOARD_TAP = 3; // 0x3
     field public static final int LONG_PRESS = 0; // 0x0
-    field public static final int STYLUS_BUTTON_PRESS = 6; // 0x6
     field public static final int VIRTUAL_KEY = 1; // 0x1
   }
 
@@ -38427,6 +38427,7 @@ package android.view {
     method public boolean isActivated();
     method public boolean isAttachedToWindow();
     method public boolean isClickable();
+    method public boolean isContextClickable();
     method public boolean isDirty();
     method public boolean isDrawingCacheEnabled();
     method public boolean isDuplicateParentStateEnabled();
@@ -38459,7 +38460,6 @@ package android.view {
     method public boolean isSelected();
     method public boolean isShown();
     method public boolean isSoundEffectsEnabled();
-    method public boolean isStylusButtonPressable();
     method public boolean isTextAlignmentResolved();
     method public boolean isTextDirectionResolved();
     method public boolean isVerticalFadingEdgeEnabled();
@@ -38524,10 +38524,10 @@ package android.view {
     method protected boolean overScrollBy(int, int, int, int, int, int, int, int, boolean);
     method public boolean performAccessibilityAction(int, android.os.Bundle);
     method public boolean performClick();
+    method public boolean performContextClick();
     method public boolean performHapticFeedback(int);
     method public boolean performHapticFeedback(int, int);
     method public boolean performLongClick();
-    method public boolean performStylusButtonPress();
     method public void playSoundEffect(int);
     method public boolean post(java.lang.Runnable);
     method public boolean postDelayed(java.lang.Runnable, long);
@@ -38581,6 +38581,7 @@ package android.view {
     method public void setClipBounds(android.graphics.Rect);
     method public void setClipToOutline(boolean);
     method public void setContentDescription(java.lang.CharSequence);
+    method public void setContextClickable(boolean);
     method public void setDrawingCacheBackgroundColor(int);
     method public void setDrawingCacheEnabled(boolean);
     method public void setDrawingCacheQuality(int);
@@ -38622,6 +38623,7 @@ package android.view {
     method public void setNextFocusUpId(int);
     method public void setOnApplyWindowInsetsListener(android.view.View.OnApplyWindowInsetsListener);
     method public void setOnClickListener(android.view.View.OnClickListener);
+    method public void setOnContextClickListener(android.view.View.OnContextClickListener);
     method public void setOnCreateContextMenuListener(android.view.View.OnCreateContextMenuListener);
     method public void setOnDragListener(android.view.View.OnDragListener);
     method public void setOnFocusChangeListener(android.view.View.OnFocusChangeListener);
@@ -38630,7 +38632,6 @@ package android.view {
     method public void setOnKeyListener(android.view.View.OnKeyListener);
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnScrollChangeListener(android.view.View.OnScrollChangeListener);
-    method public void setOnStylusButtonPressListener(android.view.View.OnStylusButtonPressListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
     method public void setOutlineProvider(android.view.ViewOutlineProvider);
@@ -38661,7 +38662,6 @@ package android.view {
     method public void setSelected(boolean);
     method public void setSoundEffectsEnabled(boolean);
     method public void setStateListAnimator(android.animation.StateListAnimator);
-    method public void setStylusButtonPressable(boolean);
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
     method public void setTag(int, java.lang.Object);
@@ -38879,6 +38879,10 @@ package android.view {
     method public abstract void onClick(android.view.View);
   }
 
+  public static abstract interface View.OnContextClickListener {
+    method public abstract boolean onContextClick(android.view.View);
+  }
+
   public static abstract interface View.OnCreateContextMenuListener {
     method public abstract void onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo);
   }
@@ -38913,10 +38917,6 @@ package android.view {
 
   public static abstract interface View.OnScrollChangeListener {
     method public abstract void onScrollChange(android.view.View, int, int, int, int);
-  }
-
-  public static abstract interface View.OnStylusButtonPressListener {
-    method public abstract boolean onStylusButtonPress(android.view.View);
   }
 
   public static abstract interface View.OnSystemUiVisibilityChangeListener {
@@ -39330,6 +39330,7 @@ package android.view {
     method public abstract void setClassName(java.lang.String);
     method public abstract void setClickable(boolean);
     method public abstract void setContentDescription(java.lang.CharSequence);
+    method public abstract void setContextClickable(boolean);
     method public abstract void setDimens(int, int, int, int, int, int);
     method public abstract void setEnabled(boolean);
     method public abstract void setFocusable(boolean);
@@ -39338,7 +39339,6 @@ package android.view {
     method public abstract void setId(int, java.lang.String, java.lang.String, java.lang.String);
     method public abstract void setLongClickable(boolean);
     method public abstract void setSelected(boolean);
-    method public abstract void setStylusButtonPressable(boolean);
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
     method public abstract void setTextStyle(float, int, int, int);
@@ -39847,13 +39847,13 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_ACCESSIBILITY_FOCUSED = 32768; // 0x8000
     field public static final int TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED = 65536; // 0x10000
     field public static final int TYPE_VIEW_CLICKED = 1; // 0x1
+    field public static final int TYPE_VIEW_CONTEXT_CLICKED = 8388608; // 0x800000
     field public static final int TYPE_VIEW_FOCUSED = 8; // 0x8
     field public static final int TYPE_VIEW_HOVER_ENTER = 128; // 0x80
     field public static final int TYPE_VIEW_HOVER_EXIT = 256; // 0x100
     field public static final int TYPE_VIEW_LONG_CLICKED = 2; // 0x2
     field public static final int TYPE_VIEW_SCROLLED = 4096; // 0x1000
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
-    field public static final int TYPE_VIEW_STYLUS_BUTTON_PRESSED = 8388608; // 0x800000
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
     field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
     field public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 131072; // 0x20000
@@ -39934,6 +39934,7 @@ package android.view.accessibility {
     method public boolean isChecked();
     method public boolean isClickable();
     method public boolean isContentInvalid();
+    method public boolean isContextClickable();
     method public boolean isDismissable();
     method public boolean isEditable();
     method public boolean isEnabled();
@@ -39944,7 +39945,6 @@ package android.view.accessibility {
     method public boolean isPassword();
     method public boolean isScrollable();
     method public boolean isSelected();
-    method public boolean isStylusButtonPressable();
     method public boolean isVisibleToUser();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
@@ -39970,6 +39970,7 @@ package android.view.accessibility {
     method public void setCollectionItemInfo(android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo);
     method public void setContentDescription(java.lang.CharSequence);
     method public void setContentInvalid(boolean);
+    method public void setContextClickable(boolean);
     method public void setDismissable(boolean);
     method public void setEditable(boolean);
     method public void setEnabled(boolean);
@@ -39995,7 +39996,6 @@ package android.view.accessibility {
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
     method public void setSource(android.view.View, int);
-    method public void setStylusButtonPressable(boolean);
     method public void setText(java.lang.CharSequence);
     method public void setTextSelection(int, int);
     method public void setTraversalAfter(android.view.View);
@@ -40055,6 +40055,7 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CLEAR_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CLICK;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_COLLAPSE;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CONTEXT_CLICK;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_COPY;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CUT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DISMISS;
@@ -40077,7 +40078,6 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_ON_SCREEN;
-    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_STYLUS_BUTTON_PRESS;
   }
 
   public static final class AccessibilityNodeInfo.CollectionInfo {
