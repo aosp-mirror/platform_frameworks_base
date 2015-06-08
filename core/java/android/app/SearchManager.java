@@ -985,12 +985,12 @@ public class SearchManager
      * Launch an assist action for the current top activity.
      * @hide
      */
-    public boolean launchAssistAction(String hint, int userHandle) {
+    public boolean launchAssistAction(String hint, int userHandle, Bundle args) {
         try {
             if (mService == null) {
                 return false;
             }
-            return mService.launchAssistAction(hint, userHandle);
+            return mService.launchAssistAction(hint, userHandle, args);
         } catch (RemoteException re) {
             Log.e(TAG, "launchAssistAction() failed: " + re);
             return false;

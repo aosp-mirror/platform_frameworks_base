@@ -1274,6 +1274,13 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ASSIST_INPUT_HINT_KEYBOARD";
 
     /**
+     * An optional field on {@link #ACTION_ASSIST} containing the InputDevice id
+     * that was used to invoke the assist.
+     */
+    public static final String EXTRA_ASSIST_INPUT_DEVICE_ID =
+            "android.intent.extra.ASSIST_INPUT_DEVICE_ID";
+
+    /**
      * Activity Action: List all available applications
      * <p>Input: Nothing.
      * <p>Output: nothing.
