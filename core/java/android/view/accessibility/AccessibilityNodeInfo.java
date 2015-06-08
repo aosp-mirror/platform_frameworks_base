@@ -566,7 +566,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
 
-    private static final int BOOLEAN_PROPERTY_STYLUS_BUTTON_PRESSABLE = 0x00020000;
+    private static final int BOOLEAN_PROPERTY_CONTEXT_CLICKABLE = 0x00020000;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -1991,27 +1991,27 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets whether this node is stylus button pressable.
+     * Gets whether this node is context clickable.
      *
-     * @return True if the node is stylus button pressable.
+     * @return True if the node is context clickable.
      */
-    public boolean isStylusButtonPressable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_STYLUS_BUTTON_PRESSABLE);
+    public boolean isContextClickable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_CONTEXT_CLICKABLE);
     }
 
     /**
-     * Sets whether this node is stylus button pressable.
+     * Sets whether this node is context clickable.
      * <p>
      * <strong>Note:</strong> Cannot be called from an
      * {@link android.accessibilityservice.AccessibilityService}. This class is made immutable
      * before being delivered to an AccessibilityService.
      * </p>
      *
-     * @param stylusButtonPressable True if the node is stylus button pressable.
+     * @param contextClickable True if the node is context clickable.
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setStylusButtonPressable(boolean stylusButtonPressable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_STYLUS_BUTTON_PRESSABLE, stylusButtonPressable);
+    public void setContextClickable(boolean contextClickable) {
+        setBooleanProperty(BOOLEAN_PROPERTY_CONTEXT_CLICKABLE, contextClickable);
     }
 
     /**
@@ -3202,7 +3202,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; selected: ").append(isSelected());
         builder.append("; clickable: ").append(isClickable());
         builder.append("; longClickable: ").append(isLongClickable());
-        builder.append("; stylusButtonPressable: ").append(isStylusButtonPressable());
+        builder.append("; contextClickable: ").append(isContextClickable());
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
         builder.append("; scrollable: ").append(isScrollable());
@@ -3610,10 +3610,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionScrollRight, null);
 
         /**
-         * Action that stylus button presses the node.
+         * Action that context clicks the node.
          */
-        public static final AccessibilityAction ACTION_STYLUS_BUTTON_PRESS =
-                new AccessibilityAction(R.id.accessibilityActionStylusButtonPress, null);
+        public static final AccessibilityAction ACTION_CONTEXT_CLICK =
+                new AccessibilityAction(R.id.accessibilityActionContextClick, null);
 
         /**
          * Action that sets progress between {@link  RangeInfo#getMin() RangeInfo.getMin()} and
@@ -3658,8 +3658,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             sStandardActions.add(ACTION_SCROLL_LEFT);
             sStandardActions.add(ACTION_SCROLL_DOWN);
             sStandardActions.add(ACTION_SCROLL_RIGHT);
-            sStandardActions.add(ACTION_STYLUS_BUTTON_PRESS);
             sStandardActions.add(ACTION_SET_PROGRESS);
+            sStandardActions.add(ACTION_CONTEXT_CLICK);
         }
 
         private final int mActionId;

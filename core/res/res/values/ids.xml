@@ -114,9 +114,9 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_RIGHT}. -->
   <item type="id" name="accessibilityActionScrollRight" />
 
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_STYLUS_BUTTON_PRESS}. -->
-  <item type="id" name="accessibilityActionStylusButtonPress" />
-
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SET_PROGRESS}. -->
   <item type="id" name="accessibilityActionSetProgress" />
+  
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_CONTEXT_CLICK}. -->
+  <item type="id" name="accessibilityActionContextClick" />
 </resources>
