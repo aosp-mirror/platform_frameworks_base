@@ -40,13 +40,14 @@ public class SystemUIApplication extends Application {
      * The classes of the stuff to start.
      */
     private final Class<?>[] SERVICES = new Class[] {
+            com.android.systemui.tuner.TunerService.class,
             com.android.systemui.keyguard.KeyguardViewMediator.class,
             com.android.systemui.recents.Recents.class,
             com.android.systemui.volume.VolumeUI.class,
             com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.usb.StorageNotification.class,
             com.android.systemui.power.PowerUI.class,
-            com.android.systemui.media.RingtonePlayer.class
+            com.android.systemui.media.RingtonePlayer.class,
     };
 
     /**
