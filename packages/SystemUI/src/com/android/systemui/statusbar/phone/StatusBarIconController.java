@@ -20,12 +20,10 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.database.ContentObserver;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.View;
@@ -44,6 +42,8 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ import java.util.ArrayList;
  * limited to: notification icons, signal cluster, additional status icons, and clock in the status
  * bar.
  */
-public class StatusBarIconController {
+public class StatusBarIconController implements Tunable {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
 
@@ -95,7 +95,7 @@ public class StatusBarIconController {
     private long mTransitionDeferringStartTime;
     private long mTransitionDeferringDuration;
 
-    private final ArraySet<String> mIconBlacklist;
+    private final ArraySet<String> mIconBlacklist = new ArraySet<>();
 
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
         @Override
@@ -126,13 +126,32 @@ public class StatusBarIconController {
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
-        mIconBlacklist = getIconBlacklist(context);
         updateResources();
 
-        context.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(StatusBarIconController.ICON_BLACKLIST), false,
-                mBlacklistObserver);
+        TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
     }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (!ICON_BLACKLIST.equals(key)) {
+            return;
+        }
+        mIconBlacklist.clear();
+        mIconBlacklist.addAll(getIconBlacklist(newValue));
+        ArrayList<StatusBarIconView> views = new ArrayList<StatusBarIconView>();
+        // Get all the current views.
+        for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
+            views.add((StatusBarIconView) mStatusIcons.getChildAt(i));
+        }
+        // Remove all the icons.
+        for (int i = views.size() - 1; i >= 0; i--) {
+            removeSystemIcon(views.get(i).getSlot(), i, i);
+        }
+        // Add them all back
+        for (int i = 0; i < views.size(); i++) {
+            addSystemIcon(views.get(i).getSlot(), i, i, views.get(i).getStatusBarIcon());
+        }
+    };
 
     public void updateResources() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
@@ -429,29 +448,7 @@ public class StatusBarIconController {
         mTransitionPending = false;
     }
 
-    private final ContentObserver mBlacklistObserver = new ContentObserver(new Handler()) {
-        public void onChange(boolean selfChange) {
-            mIconBlacklist.clear();
-            mIconBlacklist.addAll(getIconBlacklist(mContext));
-            ArrayList<StatusBarIconView> views = new ArrayList<StatusBarIconView>();
-            // Get all the current views.
-            for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
-                views.add((StatusBarIconView) mStatusIcons.getChildAt(i));
-            }
-            // Remove all the icons.
-            for (int i = views.size() - 1; i >= 0; i--) {
-                removeSystemIcon(views.get(i).getSlot(), i, i);
-            }
-            // Add them all back
-            for (int i = 0; i < views.size(); i++) {
-                addSystemIcon(views.get(i).getSlot(), i, i, views.get(i).getStatusBarIcon());
-            }
-        }
-    };
-
-    public static ArraySet<String> getIconBlacklist(Context context) {
-        String blackListStr = Settings.Secure.getString(context.getContentResolver(),
-                ICON_BLACKLIST);
+    public static ArraySet<String> getIconBlacklist(String blackListStr) {
         ArraySet<String> ret = new ArraySet<String>();
         if (blackListStr != null) {
             String[] blacklist = blackListStr.split(",");
@@ -462,9 +459,5 @@ public class StatusBarIconController {
             }
         }
         return ret;
-    }
-
-    public static boolean isBlocked(Context context, String slot) {
-        return getIconBlacklist(context).contains(slot);
     }
 }
