@@ -89,6 +89,11 @@ public final class Display {
     public static final int DEFAULT_DISPLAY = 0;
 
     /**
+     * Invalid display id.
+     */
+    public static final int INVALID_DISPLAY = -1;
+
+    /**
      * Display flag: Indicates that the display supports compositing content
      * that is stored in protected graphics buffers.
      * <p>
