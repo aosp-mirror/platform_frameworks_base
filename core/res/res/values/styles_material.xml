@@ -87,6 +87,10 @@ please see styles_device_defaults.xml.
         <item name="negativeButtonText">@string/no</item>
     </style>
 
+    <style name="Preference.Material.DialogPreference.SeekBarPreference">
+        <item name="dialogLayout">@layout/preference_dialog_seekbar_material</item>
+    </style>
+
     <style name="Preference.Material.DialogPreference.EditTextPreference">
         <item name="dialogLayout">@layout/preference_dialog_edittext_material</item>
     </style>

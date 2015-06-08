@@ -1335,7 +1335,6 @@
   <java-symbol type="layout" name="preference_widget_seekbar" />
   <java-symbol type="layout" name="progress_dialog" />
   <java-symbol type="layout" name="resolve_list_item" />
-  <java-symbol type="layout" name="seekbar_dialog" />
   <java-symbol type="layout" name="select_dialog_singlechoice_holo" />
   <java-symbol type="layout" name="ssl_certificate" />
   <java-symbol type="layout" name="tab_content" />
@@ -2286,4 +2285,5 @@
   <java-symbol type="string" name="config_radio_access_family" />
   <java-symbol type="string" name="notification_inbox_ellipsis" />
   <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
+  <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
 </resources>

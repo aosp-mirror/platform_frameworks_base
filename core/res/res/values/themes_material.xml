@@ -295,6 +295,7 @@ please see themes_device_defaults.xml.
         <item name="seekBarPreferenceStyle">@style/Preference.Material.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.Material.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.Material.DialogPreference</item>
+        <item name="seekBarDialogPreferenceStyle">@style/Preference.Material.DialogPreference.SeekBarPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.Material.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Material.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_material</item>
@@ -651,6 +652,7 @@ please see themes_device_defaults.xml.
         <item name="seekBarPreferenceStyle">@style/Preference.Material.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.Material.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.Material.DialogPreference</item>
+        <item name="seekBarDialogPreferenceStyle">@style/Preference.Material.DialogPreference.SeekBarPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.Material.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Material.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_material</item>
