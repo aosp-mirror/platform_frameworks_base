@@ -80,11 +80,6 @@ public:
      * cannot be found in the cache, a new texture is generated.
      */
     Texture* get(const SkBitmap* bitmap);
-    /**
-     * Returns the texture associated with the specified bitmap. The generated
-     * texture is not kept in the cache. The caller must destroy the texture.
-     */
-    Texture* getTransient(const SkBitmap* bitmap);
 
     /**
      * Removes the texture associated with the specified pixelRef. This is meant
