@@ -57,7 +57,7 @@
     <string name="empty" msgid="7858882803708117596">"Nu există elemente"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Fișierul nu poate fi deschis"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unele documente nu au putut fi șterse"</string>
-    <string name="share_via" msgid="8966594246261344259">"Distribuiți prin"</string>
+    <string name="share_via" msgid="8966594246261344259">"Trimiteți prin"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Se copiază fișierele"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Timp rămas: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
