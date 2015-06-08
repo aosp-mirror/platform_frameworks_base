@@ -23,6 +23,7 @@ import android.telephony.CellInfo;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.RadioAccessFamily;
+import android.telephony.ModemActivityInfo;
 import java.util.List;
 
 
@@ -959,4 +960,10 @@ interface ITelephony {
      * if no locale could be derived.
      */
     String getLocaleFromDefaultSim();
+
+    /**
+     * Return the modem activity info.
+     *@hide
+     */
+    ModemActivityInfo getModemActivityInfo();
 }
