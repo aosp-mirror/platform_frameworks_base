@@ -36,6 +36,7 @@ public class SegmentedButtons extends LinearLayout {
 
     private final Context mContext;
     private final LayoutInflater mInflater;
+    private final SpTexts mSpTexts;
 
     private Callback mCallback;
     private Object mSelectedValue;
@@ -45,6 +46,7 @@ public class SegmentedButtons extends LinearLayout {
         mContext = context;
         mInflater = LayoutInflater.from(mContext);
         setOrientation(HORIZONTAL);
+        mSpTexts = new SpTexts(mContext);
     }
 
     public void setCallback(Callback callback) {
@@ -87,6 +89,7 @@ public class SegmentedButtons extends LinearLayout {
                 fireInteraction();
             }
         });
+        mSpTexts.add(b);
     }
 
     public void updateLocale() {
