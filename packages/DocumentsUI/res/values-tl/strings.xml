@@ -20,9 +20,9 @@
     <string name="title_open" msgid="4353228937663917801">"Buksan mula sa"</string>
     <string name="title_save" msgid="2433679664882857999">"I-save sa"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Gumawa ng folder"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"View ng grid"</string>
-    <string name="menu_list" msgid="7279285939892417279">"View ng listahan"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Pag-uri-uriin ayon sa"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"View na grid"</string>
+    <string name="menu_list" msgid="7279285939892417279">"View na listahan"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Uriin ayon sa"</string>
     <string name="menu_search" msgid="3816712084502856974">"Maghanap"</string>
     <string name="menu_settings" msgid="6008033148948428823">"Mga Setting"</string>
     <string name="menu_open" msgid="432922957274920903">"Buksan"</string>

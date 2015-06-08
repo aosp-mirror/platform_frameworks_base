@@ -35,7 +35,7 @@
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostra la targeta SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Amaga emmagatz. intern"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Amaga la targeta SD"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostra la mida de fitxer"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostra la mida del fitxer"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Amaga la mida del fitxer"</string>
     <string name="button_select" msgid="527196987259139214">"Selecciona"</string>
     <string name="button_copy" msgid="8706475544635021302">"Copia"</string>
