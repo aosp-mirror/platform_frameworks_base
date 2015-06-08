@@ -438,8 +438,8 @@ public interface IActivityManager extends IInterface {
     public void reportAssistContextExtras(IBinder token, Bundle extras,
             AssistStructure structure, AssistContent content) throws RemoteException;
 
-    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle)
-            throws RemoteException;
+    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
+            Bundle args) throws RemoteException;
 
     public void killUid(int uid, String reason) throws RemoteException;
 

@@ -1204,7 +1204,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         launchHomeFromHotKey();
     }
 
-    private void handleLongPressOnHome() {
+    private void handleLongPressOnHome(int deviceId) {
         if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
             mHomeConsumed = true;
             performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
@@ -1212,7 +1212,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
                 toggleRecentApps();
             } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_ASSIST) {
-                launchAssistAction();
+                launchAssistAction(null, deviceId);
             }
         }
     }
@@ -2637,7 +2637,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
-                    handleLongPressOnHome();
+                    handleLongPressOnHome(event.getDeviceId());
                 }
             }
             return -1;
@@ -2717,7 +2717,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAssistKeyLongPressed = false;
                 } else {
                     if (!keyguardOn) {
-                        launchAssistAction();
+                        launchAssistAction(null, event.getDeviceId());
                     }
                 }
             }
@@ -2779,7 +2779,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down) {
                 mPendingMetaAction = true;
             } else if (mPendingMetaAction) {
-                launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD);
+                launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId());
             }
             return -1;
         }
@@ -3000,26 +3000,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void launchAssistAction() {
-        launchAssistAction(null);
+        launchAssistAction(null, Integer.MIN_VALUE);
     }
 
     private void launchAssistAction(String hint) {
+        launchAssistAction(hint, Integer.MIN_VALUE);
+    }
+
+    private void launchAssistAction(String hint, int deviceId) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
-        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
-        if (intent != null) {
-            if (hint != null) {
-                intent.putExtra(hint, true);
-            }
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            try {
-                startActivityAsUser(intent, UserHandle.CURRENT);
-            } catch (ActivityNotFoundException e) {
-                Slog.w(TAG, "No activity to handle assist action.", e);
-            }
+        Bundle args = null;
+        if (deviceId > Integer.MIN_VALUE) {
+            args = new Bundle();
+            args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
         }
+        ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .launchAssistAction(hint, UserHandle.myUserId(), args);
     }
 
     private void startActivityAsUser(Intent intent, UserHandle handle) {

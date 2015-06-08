@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -264,7 +265,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     @Override
-    public boolean launchAssistAction(String hint, int userHandle) {
+    public boolean launchAssistAction(String hint, int userHandle, Bundle args) {
         ComponentName comp = getAssistIntent(userHandle);
         if (comp == null) {
             return false;
@@ -275,7 +276,7 @@ public class SearchManagerService extends ISearchManager.Stub {
             intent.setComponent(comp);
             IActivityManager am = ActivityManagerNative.getDefault();
             return am.launchAssistIntent(intent, ActivityManager.ASSIST_CONTEXT_BASIC, hint,
-                    userHandle);
+                    userHandle, args);
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
