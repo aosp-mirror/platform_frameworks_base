@@ -25,7 +25,7 @@ public class SearchEvent {
 
     private InputDevice mInputDevice;
 
-    /** @hide */
+    /** Create a new search event. */
     public SearchEvent(InputDevice inputDevice) {
         mInputDevice = inputDevice;
     }

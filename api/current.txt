@@ -34879,7 +34879,7 @@ package android.view {
     method public int getVendorId();
     method public android.os.Vibrator getVibrator();
     method public boolean[] hasKeys(int...);
-    method public boolean hasMic();
+    method public boolean hasMicrophone();
     method public boolean isVirtual();
     method public boolean supportsSource(int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -35770,6 +35770,7 @@ package android.view {
   }
 
   public class SearchEvent {
+    ctor public SearchEvent(android.view.InputDevice);
     method public android.view.InputDevice getInputDevice();
   }
 
