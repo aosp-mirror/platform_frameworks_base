@@ -82,6 +82,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Бул компүтерден дайыма уруксат берилсин"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB мүчүлүштүктөрүн оңдоого уруксат жок"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Учурда түзмөккө кирген колдонуучу USB мүчүлүштүктөрүн оңдоону күйгүзө албайт. Бул өзгөчөлүктү урунуу үчүн, каттоо эсебин алгачкы колдонуучуга которуңуз“<xliff:g id="NAME">%s</xliff:g>”."</string>
     <!-- no translation found for compat_mode_on (6623839244840638213) -->
     <skip />
     <!-- no translation found for compat_mode_off (4434467572461327898) -->
@@ -290,7 +292,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Байланыш жок"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Желе жок"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi өчүк"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Сакталган тармактар жок"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Тышкы экранга чыгаруу"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Тышкы экранга чыгарылууда"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Аты жок түзмөк"</string>
@@ -422,23 +425,18 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Түпнусканы калыбына келтирүү үчүн тийип коюңуз."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Сиз Жумуш профилиндесиз"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI tuner"</string>
-    <string name="show_battery_percentage" msgid="5444136600512968798">"Камтылган батарей пайызы көрсөтүлсүн"</string>
-    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Кубаттандырылбаганда батареянын деңгээли статус такта сүрөтчөсүнүн ичинде көрсөтүлүп турсун"</string>
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Батарянын кубатнын деңгээли пайыз менен көрсөтлсүн"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Түзмөк кубаттанбай турганда, батареянын деңгээли статус тилкесинде көрүнүп турат"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ыкчам жөндөөлөр"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Абал тилкеси"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Ойготкуч"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Жумуш профили"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Учак режими"</string>
     <string name="add_tile" msgid="2995389510240786221">"Тайл кошуу"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Тайлды жайылтуу"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Сиз муну өчүрмөйүн <xliff:g id="WHEN">%1$s</xliff:g> болуучу эмки эскертмени укпайсыз"</string>
-    <string name="zen_alarm_warning" msgid="444533119582244293">"сиз <xliff:g id="WHEN">%1$s</xliff:g> болуучу эмки эскертмени укпайсыз"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Бул нерсе өчүрүлмөйүнчө <xliff:g id="WHEN">%1$s</xliff:g> боло турган кийинки эскертмени укпайсыз"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g> боло турган кийинки эскертмени укпайсыз"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> болгондо"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> болгондо"</string>
 </resources>

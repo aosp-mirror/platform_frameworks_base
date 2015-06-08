@@ -64,6 +64,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vai atļaut USB atkļūdošanu?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datora RSA atslēgas ciparfails: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vienmēr atļaut no šī datora"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB atkļūdošana nav atļauta"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Lietotājs, kurš pašlaik ir pierakstījies šajā ierīcē, nevar iespējot USB atkļūdošanu. Lai izmantotu šo funkciju, pārslēdzieties uz galveno lietotāju “<xliff:g id="NAME">%s</xliff:g>”."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Tālumm., lai aizp. ekr."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stiepiet, lai aizp. ekr."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Saglabā ekrānuzņēmumu…"</string>
@@ -266,7 +268,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nav izveidots savienojums"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nav tīkla"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ir izslēgts"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Nav pieejams neviens saglabātais tīkls."</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Apraide"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Notiek apraide…"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nenosaukta ierīce"</string>
@@ -401,16 +404,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rādīt akumulatora uzlādes līmeni procentos"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Rādīt akumulatora uzlādes līmeni procentos statusa joslas ikonā, kad netiek veikta uzlāde"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ātrie iestatījumi"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Statusa josla"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Tīkls Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Signāls"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Darba profils"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Lidojuma režīms"</string>
     <string name="add_tile" msgid="2995389510240786221">"Pievienot elementu"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Apraides elements"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots, ja līdz tam laikam neizslēgsiet šo iestatījumu."</string>

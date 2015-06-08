@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಈ ಸಾಧನಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, “<xliff:g id="NAME">%s</xliff:g>” ಅವರನ್ನು ಪ್ರಾಥಮಿಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -265,7 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ಆಫ್"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"ಯಾವುದೇ ಉಳಿಸಲಾದ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ಯಾವುದೇ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ಬಿತ್ತರಿಸುವಿಕೆ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ಹೆಸರಿಸದಿರುವ ಸಾಧನ"</string>

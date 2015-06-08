@@ -65,6 +65,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Zezwalać na debugowanie USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Odcisk cyfrowy klucza RSA komputera to:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Zawsze zezwalaj z tego komputera"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debugowanie USB jest niedozwolone"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Użytkownik obecnie zalogowany na tym urządzeniu nie może włączyć debugowania USB. Aby użyć tej funkcji, przełącz się na użytkownika głównego: „<xliff:g id="NAME">%s</xliff:g>”."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Powiększ, aby wypełnić ekran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rozciągnij, aby wypełnić ekran"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Zapisywanie zrzutu ekranu..."</string>
@@ -267,7 +269,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Brak połączenia"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Brak sieci"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi wyłączone"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Brak dostępnych zapisanych sieci"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Przesyłanie"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Przesyłam"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Urządzenie bez nazwy"</string>

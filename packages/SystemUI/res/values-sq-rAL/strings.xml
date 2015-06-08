@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Të lejohet korrigjimi i USB-së?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Shenja e gishtit të tastit \"RSA\" së kompjuterit është:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Lejo gjithmonë nga ky kompjuter"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Korrigjimi i USB-së nuk lejohet"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin e USB-së. Për ta përdorur këtë funksion, kalo te përdoruesi parësor “<xliff:g id="NAME">%s</xliff:g>”."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zmadho për të mbushur ekranin"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Shtrije për të mbushur ekranin"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Po ruan pamjen e ekranit..."</string>
@@ -149,7 +151,7 @@
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nuk ka kartë SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Po lidhet me \"bluetooth\"."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"modaliteti \"në aeroplan\""</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"modaliteti i aeroplanit"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Rrjeti i operatorit celular po ndryshohet."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria ka edhe <xliff:g id="NUMBER">%d</xliff:g> për qind."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Cilësimet e sistemit."</string>
@@ -180,10 +182,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi është i aktivizuar."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Celulari <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Bateria: <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Modaliteti \"në aeroplan\" është i çaktivizuar."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Modaliteti \"në aeroplan\" është i aktivizuar."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Modaliteti \"në aeroplan\" është i çaktivizuar."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Modaliteti \"në aeroplan\" është i aktivizuar."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Modaliteti i aeroplanit është i çaktivizuar."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Modaliteti i aeroplanit është i aktivizuar."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Modaliteti i aeroplanit është i çaktivizuar."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Modaliteti i aeroplanit është i aktivizuar."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Mos shqetëso\" është i aktivizuar, vetëm me prioritet."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\"Mos shqetëso\" është aktiv, heshtje e plotë."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Mos shqetëso\" është i aktivizuar, vetëm alarmet."</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nuk është i lidhur"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nuk ka rrjet"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi është i çaktivizuar"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Nuk ofrohet asnjë rrjet i ruajtur"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmeto"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Po transmeton"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Pajisje e paemërtuar"</string>
@@ -400,16 +403,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Shfaq përqindjen e baterisë së integruar"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Shfaq përqindjen e nivelit të baterisë brenda ikonës së shiritit të statusit kur nuk është duke u ngarkuar."</string>
     <string name="quick_settings" msgid="10042998191725428">"Cilësimet e shpejta"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Shiriti i statusit"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Eternet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarmi"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Profili i punës"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Modaliteti i aeroplanit"</string>
     <string name="add_tile" msgid="2995389510240786221">"Shto një pllakëz"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Pllakëza e transmetimit"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Nuk do ta dëgjosh alarmin e radhës në <xliff:g id="WHEN">%1$s</xliff:g> nëse nuk e çaktivizon këtë përpara asaj ore."</string>
