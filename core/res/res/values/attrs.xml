@@ -3225,8 +3225,6 @@
         <!-- A drawable that can be rendered in Android's system UI for representing
              the service. -->
         <attr name="apduServiceBanner" format="reference"/>
-        <!-- Allows the app to update the description and service banner at run-time -->
-        <attr name="dynamicResources" format="boolean"/>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity"/>
@@ -3243,8 +3241,6 @@
         <!-- A drawable that can be rendered in Android's system UI for representing
              the service. -->
         <attr name="apduServiceBanner"/>
-        <!-- Allows the app to update the description and service banner at run-time -->
-        <attr name="dynamicResources"/>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity"/>

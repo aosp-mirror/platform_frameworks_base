@@ -232,7 +232,6 @@
 
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
 
-    <protected-broadcast android:name="android.nfc.cardemulation.action.REQUEST_SERVICE_RESOURCES" />
     <protected-broadcast android:name="android.intent.action.CLEAR_DNS_CACHE" />
     <protected-broadcast android:name="android.intent.action.PROXY_CHANGE" />
 
