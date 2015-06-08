@@ -3764,8 +3764,8 @@ package android.app {
     method public void requestUsageTimeReport(android.app.PendingIntent);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
-    field public static final java.lang.String EXTRA_USAGE_REPORT_PACKAGES = "android.package";
-    field public static final java.lang.String EXTRA_USAGE_REPORT_TIME = "android.time";
+    field public static final java.lang.String EXTRA_USAGE_TIME_REPORT = "android.usage_time";
+    field public static final java.lang.String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
   }
 
   public class AlarmManager {
