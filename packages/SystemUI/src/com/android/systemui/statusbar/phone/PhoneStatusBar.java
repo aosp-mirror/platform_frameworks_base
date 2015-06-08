@@ -3166,9 +3166,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
         final SignalClusterView signalClusterQs =
                 (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
-        mNetworkController.addSignalCallback(signalCluster);
-        mNetworkController.addSignalCallback(signalClusterKeyguard);
-        mNetworkController.addSignalCallback(signalClusterQs);
+        mNetworkController.removeSignalCallback(signalCluster);
+        mNetworkController.removeSignalCallback(signalClusterKeyguard);
+        mNetworkController.removeSignalCallback(signalClusterQs);
+        if (mQSPanel != null && mQSPanel.getHost() != null) {
+            mQSPanel.getHost().destroy();
+        }
     }
 
     private boolean mDemoModeAllowed;
