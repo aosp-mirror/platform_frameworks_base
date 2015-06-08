@@ -83,11 +83,12 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
  * display list. This function should remain in sync with the replay() function.
  */
 void RenderNode::output(uint32_t level) {
-    ALOGD("%*sStart display list (%p, %s%s%s%s%s)", (level - 1) * 2, "", this,
+    ALOGD("%*sStart display list (%p, %s%s%s%s%s%s)", (level - 1) * 2, "", this,
             getName(),
             (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : ""),
             (properties().hasShadow() ? ", casting shadow" : ""),
             (isRenderable() ? "" : ", empty"),
+            (properties().getProjectBackwards() ? ", projected" : ""),
             (mLayer != nullptr ? ", on HW Layer" : ""));
     ALOGD("%*s%s %d", level * 2, "", "Save",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
@@ -520,10 +521,10 @@ void RenderNode::computeOrderingImpl(
             Vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
             const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
-                // if receiving projections, collect projecting descendent
+                // if receiving projections, collect projecting descendant
 
-                // Note that if a direct descendent is projecting backwards, we pass it's
-                // grandparent projection collection, since it shouldn't project onto it's
+                // Note that if a direct descendant is projecting backwards, we pass its
+                // grandparent projection collection, since it shouldn't project onto its
                 // parent, where it will already be drawing.
                 projectionOutline = properties().getOutline().getPath();
                 projectionChildren = &mProjectedNodes;
@@ -802,7 +803,8 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
 template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     if (mDisplayListData->isEmpty()) {
-        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, getName());
+        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", handler.level() * 2, "",
+                this, getName());
         return;
     }
 
@@ -814,7 +816,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     if (useViewProperties) {
         const Outline& outline = properties().getOutline();
         if (properties().getAlpha() <= 0 || (outline.getShouldClip() && outline.isEmpty())) {
-            DISPLAY_LIST_LOGD("%*sRejected display list (%p, %s)", level * 2, "", this, getName());
+            DISPLAY_LIST_LOGD("%*sRejected display list (%p, %s)", handler.level() * 2, "",
+                    this, getName());
             return;
         }
     }
@@ -833,7 +836,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
-    DISPLAY_LIST_LOGD("%*sSave %d %d", (level + 1) * 2, "",
+    DISPLAY_LIST_LOGD("%*sSave %d %d", (handler.level() + 1) * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
     if (useViewProperties) {
@@ -880,11 +883,11 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         }
     }
 
-    DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
+    DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (handler.level() + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
-    DISPLAY_LIST_LOGD("%*sDone (%p, %s)", level * 2, "", this, getName());
+    DISPLAY_LIST_LOGD("%*sDone (%p, %s)", handler.level() * 2, "", this, getName());
     handler.endMark();
 }
 
