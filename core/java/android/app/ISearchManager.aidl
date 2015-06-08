@@ -31,5 +31,5 @@ interface ISearchManager {
    ComponentName getGlobalSearchActivity();
    ComponentName getWebSearchActivity();
    ComponentName getAssistIntent(int userHandle);
-   boolean launchAssistAction(String hint, int userHandle);
+   boolean launchAssistAction(String hint, int userHandle, in Bundle args);
 }
