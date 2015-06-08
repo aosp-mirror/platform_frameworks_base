@@ -215,16 +215,6 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
     return texture;
 }
 
-Texture* TextureCache::getTransient(const SkBitmap* bitmap) {
-    Texture* texture = new Texture(Caches::getInstance());
-    texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
-    texture->cleanup = true;
-
-    generateTexture(bitmap, texture, false);
-
-    return texture;
-}
-
 void TextureCache::releaseTexture(uint32_t pixelRefStableID) {
     Mutex::Autolock _l(mLock);
     mGarbage.push(pixelRefStableID);
