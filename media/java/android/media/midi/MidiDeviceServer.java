@@ -65,7 +65,6 @@ public final class MidiDeviceServer implements Closeable {
 
 
     // for reporting device status
-    private final IBinder mDeviceStatusToken = new Binder();
     private final boolean[] mInputPortOpen;
     private final int[] mOutputPortOpenCount;
 
@@ -81,6 +80,11 @@ public final class MidiDeviceServer implements Closeable {
          * @param status the {@link MidiDeviceStatus} for the device
          */
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status);
+
+        /**
+         * Called to notify when the device is closed
+         */
+        public void onClose();
     }
 
     abstract private class PortClient implements IBinder.DeathRecipient {
@@ -242,6 +246,14 @@ public final class MidiDeviceServer implements Closeable {
         }
 
         @Override
+        public void closeDevice() {
+            if (mCallback != null) {
+                mCallback.onClose();
+            }
+            IoUtils.closeQuietly(MidiDeviceServer.this);
+        }
+
+        @Override
         public void connectPorts(IBinder token, ParcelFileDescriptor pfd,
                 int outputPortNumber) {
             MidiInputPort inputPort = new MidiInputPort(pfd, outputPortNumber);
@@ -305,7 +317,7 @@ public final class MidiDeviceServer implements Closeable {
             mCallback.onDeviceStatusChanged(this, status);
         }
         try {
-            mMidiManager.setDeviceStatus(mDeviceStatusToken, status);
+            mMidiManager.setDeviceStatus(mServer, status);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in updateDeviceStatus");
         } finally {

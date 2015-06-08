@@ -59,6 +59,11 @@ abstract public class MidiDeviceService extends Service {
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
             MidiDeviceService.this.onDeviceStatusChanged(status);
         }
+
+        @Override
+        public void onClose() {
+            MidiDeviceService.this.onClose();
+        }
     };
 
     @Override
@@ -123,6 +128,12 @@ abstract public class MidiDeviceService extends Service {
      * @param status the number of the port that was opened
      */
     public void onDeviceStatusChanged(MidiDeviceStatus status) {
+    }
+
+    /**
+     * Called to notify when our device has been closed by all its clients
+     */
+    public void onClose() {
     }
 
     @Override
