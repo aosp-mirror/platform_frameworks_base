@@ -36974,6 +36974,7 @@ package android.view {
     field public static final int FLAG_ROUND = 16; // 0x10
     field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
+    field public static final int INVALID_DISPLAY = -1; // 0xffffffff
     field public static final int STATE_DOZE = 3; // 0x3
     field public static final int STATE_DOZE_SUSPEND = 4; // 0x4
     field public static final int STATE_OFF = 1; // 0x1
