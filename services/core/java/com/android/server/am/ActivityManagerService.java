@@ -10217,6 +10217,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     void finishRunningVoiceLocked() {
         if (mRunningVoice != null) {
             mRunningVoice = null;
+            mVoiceWakeLock.release();
             updateSleepIfNeededLocked();
         }
     }
