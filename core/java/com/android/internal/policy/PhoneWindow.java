@@ -75,6 +75,7 @@ import com.android.internal.widget.SwipeDismissLayout;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
@@ -4319,8 +4320,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (!result && (getContext().getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
             // On TVs, if the app doesn't implement search, we want to launch assist.
+            Bundle args = new Bundle();
+            args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, event.getDeviceId());
             return ((SearchManager)getContext().getSystemService(Context.SEARCH_SERVICE))
-                    .launchAssistAction(null, UserHandle.myUserId());
+                    .launchAssistAction(null, UserHandle.myUserId(), args);
         }
         return result;
     }
