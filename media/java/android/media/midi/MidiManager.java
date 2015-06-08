@@ -17,11 +17,6 @@
 package android.media.midi;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Bundle;
@@ -52,16 +47,17 @@ public final class MidiManager {
 
     /**
      * BluetoothMidiService package name
+     * @hide
      */
-    private static final String BLUETOOTH_MIDI_SERVICE_PACKAGE = "com.android.bluetoothmidiservice";
+    public static final String BLUETOOTH_MIDI_SERVICE_PACKAGE = "com.android.bluetoothmidiservice";
 
     /**
      * BluetoothMidiService class name
+     * @hide
      */
-    private static final String BLUETOOTH_MIDI_SERVICE_CLASS =
+    public static final String BLUETOOTH_MIDI_SERVICE_CLASS =
                 "com.android.bluetoothmidiservice.BluetoothMidiService";
 
-    private final Context mContext;
     private final IMidiManager mService;
     private final IBinder mToken = new Binder();
 
@@ -166,8 +162,7 @@ public final class MidiManager {
     /**
      * @hide
      */
-    public MidiManager(Context context, IMidiManager service) {
-        mContext = context;
+    public MidiManager(IMidiManager service) {
         mService = service;
     }
 
@@ -237,7 +232,7 @@ public final class MidiManager {
      * Opens a MIDI device for reading and writing.
      *
      * @param deviceInfo a {@link android.media.midi.MidiDeviceInfo} to open
-     * @param listener a {@link MidiManager.OnDeviceOpenedListener} to be called 
+     * @param listener a {@link MidiManager.OnDeviceOpenedListener} to be called
      *                 to receive the result
      * @param handler the {@link android.os.Handler Handler} that will be used for delivering
      *                the result. If handler is null, then the thread used for the
@@ -245,52 +240,28 @@ public final class MidiManager {
      */
     public void openDevice(MidiDeviceInfo deviceInfo, OnDeviceOpenedListener listener,
             Handler handler) {
-        MidiDevice device = null;
-        try {
-            IMidiDeviceServer server = mService.openDevice(mToken, deviceInfo);
-            if (server == null) {
-                ServiceInfo serviceInfo = (ServiceInfo)deviceInfo.getProperties().getParcelable(
-                        MidiDeviceInfo.PROPERTY_SERVICE_INFO);
-                if (serviceInfo == null) {
-                    Log.e(TAG, "no ServiceInfo for " + deviceInfo);
-                } else {
-                    Intent intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
-                    intent.setComponent(new ComponentName(serviceInfo.packageName,
-                            serviceInfo.name));
-                    final MidiDeviceInfo deviceInfoF = deviceInfo;
-                    final OnDeviceOpenedListener listenerF = listener;
-                    final Handler handlerF = handler;
-                    if (mContext.bindService(intent,
-                        new ServiceConnection() {
-                            @Override
-                            public void onServiceConnected(ComponentName name, IBinder binder) {
-                                IMidiDeviceServer server =
-                                        IMidiDeviceServer.Stub.asInterface(binder);
-                                MidiDevice device = new MidiDevice(deviceInfoF, server, mContext,
-                                        this);
-                                sendOpenDeviceResponse(device, listenerF, handlerF);
-                            }
+        final MidiDeviceInfo deviceInfoF = deviceInfo;
+        final OnDeviceOpenedListener listenerF = listener;
+        final Handler handlerF = handler;
 
-                            @Override
-                            public void onServiceDisconnected(ComponentName name) {
-                                // FIXME - anything to do here?
-                            }
-                        },
-                        Context.BIND_AUTO_CREATE))
-                    {
-                        // return immediately to avoid calling sendOpenDeviceResponse below
-                        return;
-                    } else {
-                        Log.e(TAG, "Unable to bind service: " + intent);
-                    }
+        IMidiDeviceOpenCallback callback = new IMidiDeviceOpenCallback.Stub() {
+            @Override
+            public void onDeviceOpened(IMidiDeviceServer server, IBinder deviceToken) {
+                MidiDevice device;
+                if (server != null) {
+                    device = new MidiDevice(deviceInfoF, server, mService, mToken, deviceToken);
+                } else {
+                    device = null;
                 }
-            } else {
-                device = new MidiDevice(deviceInfo, server);
+                sendOpenDeviceResponse(device, listenerF, handlerF);
             }
+        };
+
+        try {
+            mService.openDevice(mToken, deviceInfo, callback);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openDevice");
         }
-        sendOpenDeviceResponse(device, listener, handler);
     }
 
     /**
@@ -303,38 +274,33 @@ public final class MidiManager {
      *                the result. If handler is null, then the thread used for the
      *                listener is unspecified.
      */
-    public void openBluetoothDevice(final BluetoothDevice bluetoothDevice,
-            final OnDeviceOpenedListener listener, final Handler handler) {
-        Intent intent = new Intent(BLUETOOTH_MIDI_SERVICE_INTENT);
-        intent.setComponent(new ComponentName(BLUETOOTH_MIDI_SERVICE_PACKAGE,
-                BLUETOOTH_MIDI_SERVICE_CLASS));
-        intent.putExtra("device", bluetoothDevice);
-        if (!mContext.bindService(intent,
-            new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder binder) {
-                    IMidiDeviceServer server =
-                            IMidiDeviceServer.Stub.asInterface(binder);
+    public void openBluetoothDevice(BluetoothDevice bluetoothDevice,
+            OnDeviceOpenedListener listener, Handler handler) {
+        final OnDeviceOpenedListener listenerF = listener;
+        final Handler handlerF = handler;
+
+        IMidiDeviceOpenCallback callback = new IMidiDeviceOpenCallback.Stub() {
+            @Override
+            public void onDeviceOpened(IMidiDeviceServer server, IBinder deviceToken) {
+                MidiDevice device = null;
+                if (server != null) {
                     try {
                         // fetch MidiDeviceInfo from the server
                         MidiDeviceInfo deviceInfo = server.getDeviceInfo();
-                        MidiDevice device = new MidiDevice(deviceInfo, server, mContext, this);
-                        sendOpenDeviceResponse(device, listener, handler);
+                        device = new MidiDevice(deviceInfo, server, mService, mToken, deviceToken);
+                        sendOpenDeviceResponse(device, listenerF, handlerF);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "remote exception in onServiceConnected");
-                        sendOpenDeviceResponse(null, listener, handler);
+                        Log.e(TAG, "remote exception in getDeviceInfo()");
                     }
                 }
+                sendOpenDeviceResponse(device, listenerF, handlerF);
+            }
+        };
 
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    // FIXME - anything to do here?
-                }
-            },
-            Context.BIND_AUTO_CREATE))
-        {
-            Log.e(TAG, "Unable to bind service: " + intent);
-            sendOpenDeviceResponse(null, listener, handler);
+        try {
+            mService.openBluetoothDevice(mToken, bluetoothDevice, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in openDevice");
         }
     }
 

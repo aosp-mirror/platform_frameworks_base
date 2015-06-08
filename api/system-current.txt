@@ -40,6 +40,7 @@ package android {
     field public static final java.lang.String BIND_INCALL_SERVICE = "android.permission.BIND_INCALL_SERVICE";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
+    field public static final java.lang.String BIND_MIDI_DEVICE_SERVICE = "android.permission.BIND_MIDI_DEVICE_SERVICE";
     field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
@@ -18672,6 +18673,7 @@ package android.media.midi {
     method public final android.media.midi.MidiDeviceInfo getDeviceInfo();
     method public final android.media.midi.MidiReceiver[] getOutputPortReceivers();
     method public android.os.IBinder onBind(android.content.Intent);
+    method public void onClose();
     method public void onDeviceStatusChanged(android.media.midi.MidiDeviceStatus);
     method public abstract android.media.midi.MidiReceiver[] onGetInputPortReceivers();
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.midi.MidiDeviceService";

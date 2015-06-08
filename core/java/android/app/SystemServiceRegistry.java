@@ -691,7 +691,7 @@ final class SystemServiceRegistry {
             @Override
             public MidiManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.MIDI_SERVICE);
-                return new MidiManager(ctx, IMidiManager.Stub.asInterface(b));
+                return new MidiManager(IMidiManager.Stub.asInterface(b));
             }});
 
         registerService(Context.RADIO_SERVICE, RadioManager.class,
