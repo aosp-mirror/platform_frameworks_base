@@ -17,7 +17,6 @@
 
 package android.app;
 
-import android.app.INotificationManagerCallback;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -87,7 +86,6 @@ interface INotificationManager
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
-    oneway void requestNotificationPolicyAccess(String pkg, in INotificationManagerCallback callback);
     boolean isNotificationPolicyAccessGranted(String pkg);
     NotificationManager.Policy getNotificationPolicy(String pkg);
     void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
