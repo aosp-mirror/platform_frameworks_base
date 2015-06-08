@@ -73,7 +73,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
 
         mInteractor = getVoiceInteractor();
         mCurrentRequest = new VoiceInteractor.ConfirmationRequest(
-                "This is a confirmation", null) {
+                new VoiceInteractor.Prompt("This is a confirmation"), null) {
             @Override
             public void onCancel() {
                 Log.i(TAG, "Canceled!");
@@ -98,7 +98,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     public void onClick(View v) {
         if (v == mAbortButton) {
             VoiceInteractor.AbortVoiceRequest req = new VoiceInteractor.AbortVoiceRequest(
-                    "Dammit, we suck :(", null) {
+                    new VoiceInteractor.Prompt("Dammit, we suck :("), null) {
                 @Override
                 public void onCancel() {
                     Log.i(TAG, "Canceled!");
@@ -115,7 +115,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
             mInteractor.submitRequest(req);
         } else if (v == mCompleteButton) {
             VoiceInteractor.CompleteVoiceRequest req = new VoiceInteractor.CompleteVoiceRequest(
-                    "Woohoo, completed!", null) {
+                    new VoiceInteractor.Prompt("Woohoo, completed!"), null) {
                 @Override
                 public void onCancel() {
                     Log.i(TAG, "Canceled!");
@@ -139,7 +139,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
             options[3] = new VoiceInteractor.PickOptionRequest.Option("Four");
             options[4] = new VoiceInteractor.PickOptionRequest.Option("Five");
             VoiceInteractor.PickOptionRequest req = new VoiceInteractor.PickOptionRequest(
-                    "Need to pick something", options, null) {
+                    new VoiceInteractor.Prompt("Need to pick something"), options, null) {
                 @Override
                 public void onCancel() {
                     Log.i(TAG, "Canceled!");
