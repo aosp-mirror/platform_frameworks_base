@@ -192,17 +192,6 @@ public final class DisplayManagerGlobal {
         return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
-    /**
-     * Gets information about a logical display without applying any compatibility metrics.
-     *
-     * @param displayId The logical display id.
-     * @param configuration the configuration.
-     * @return The display object, or null if there is no display with the given id.
-     */
-    public Display getRealDisplay(int displayId, Configuration configuration) {
-        return getCompatibleDisplay(displayId, new DisplayAdjustments(configuration));
-    }
-
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
