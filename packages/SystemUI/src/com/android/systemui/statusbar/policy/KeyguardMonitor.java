@@ -16,21 +16,59 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
+import android.content.Context;
+
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.settings.CurrentUserTracker;
+
 import java.util.ArrayList;
 
-public final class KeyguardMonitor {
+public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
 
+    private final Context mContext;
+    private final CurrentUserTracker mUserTracker;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    private int mCurrentUser;
     private boolean mShowing;
     private boolean mSecure;
+    private boolean mTrusted;
+
+    private boolean mListening;
+
+    public KeyguardMonitor(Context context) {
+        mContext = context;
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mUserTracker = new CurrentUserTracker(mContext) {
+            @Override
+            public void onUserSwitched(int newUserId) {
+                mCurrentUser = newUserId;
+                updateTrustedState();
+            }
+        };
+    }
 
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
+        if (mCallbacks.size() != 0 && !mListening) {
+            mListening = true;
+            mCurrentUser = ActivityManager.getCurrentUser();
+            updateTrustedState();
+            mKeyguardUpdateMonitor.registerCallback(this);
+            mUserTracker.startTracking();
+        }
     }
 
     public void removeCallback(Callback callback) {
-        mCallbacks.remove(callback);
+        if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
+            mListening = false;
+            mKeyguardUpdateMonitor.removeCallback(this);
+            mUserTracker.stopTracking();
+        }
     }
 
     public boolean isShowing() {
@@ -41,10 +79,28 @@ public final class KeyguardMonitor {
         return mSecure;
     }
 
+    public boolean isTrusted() {
+        return mTrusted;
+    }
+
     public void notifyKeyguardState(boolean showing, boolean secure) {
         if (mShowing == showing && mSecure == secure) return;
         mShowing = showing;
         mSecure = secure;
+        notifyKeyguardChanged();
+    }
+
+    @Override
+    public void onTrustChanged(int userId) {
+        updateTrustedState();
+        notifyKeyguardChanged();
+    }
+
+    private void updateTrustedState() {
+        mTrusted = mKeyguardUpdateMonitor.getUserHasTrust(mCurrentUser);
+    }
+
+    private void notifyKeyguardChanged() {
         for (Callback callback : mCallbacks) {
             callback.onKeyguardChanged();
         }
