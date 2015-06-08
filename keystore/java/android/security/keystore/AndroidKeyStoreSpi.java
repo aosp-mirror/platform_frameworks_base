@@ -685,7 +685,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     }
 
     private Set<String> getUniqueAliases() {
-        final String[] rawAliases = mKeyStore.saw("");
+        final String[] rawAliases = mKeyStore.list("");
         if (rawAliases == null) {
             return new HashSet<String>();
         }
@@ -778,7 +778,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
          * equivalent to the USER_CERTIFICATE prefix for the Android keystore
          * convention.
          */
-        final String[] certAliases = mKeyStore.saw(Credentials.USER_CERTIFICATE);
+        final String[] certAliases = mKeyStore.list(Credentials.USER_CERTIFICATE);
         if (certAliases != null) {
             for (String alias : certAliases) {
                 final byte[] certBytes = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
@@ -799,7 +799,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
          * Look at all the TrustedCertificateEntry types. Skip all the
          * PrivateKeyEntry we looked at above.
          */
-        final String[] caAliases = mKeyStore.saw(Credentials.CA_CERTIFICATE);
+        final String[] caAliases = mKeyStore.list(Credentials.CA_CERTIFICATE);
         if (certAliases != null) {
             for (String alias : caAliases) {
                 if (nonCaEntries.contains(alias)) {

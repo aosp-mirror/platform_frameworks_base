@@ -276,8 +276,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
     }
 
-    public void testSaw() throws Exception {
-        String[] emptyResult = mKeyStore.saw(TEST_KEYNAME);
+    public void testList() throws Exception {
+        String[] emptyResult = mKeyStore.list(TEST_KEYNAME);
         assertNotNull(emptyResult);
         assertEquals(0, emptyResult.length);
 
@@ -285,26 +285,26 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results = mKeyStore.saw(TEST_KEYNAME);
+        String[] results = mKeyStore.list(TEST_KEYNAME);
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results)));
     }
 
-    public void testSaw_ungrantedUid_Bluetooth() throws Exception {
-        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
+    public void testList_ungrantedUid_Bluetooth() throws Exception {
+        String[] results1 = mKeyStore.list(TEST_KEYNAME, Process.BLUETOOTH_UID);
         assertEquals(0, results1.length);
 
         mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
+        String[] results2 = mKeyStore.list(TEST_KEYNAME, Process.BLUETOOTH_UID);
         assertEquals(0, results2.length);
     }
 
-    public void testSaw_grantedUid_Wifi() throws Exception {
-        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.WIFI_UID);
+    public void testList_grantedUid_Wifi() throws Exception {
+        String[] results1 = mKeyStore.list(TEST_KEYNAME, Process.WIFI_UID);
         assertNotNull(results1);
         assertEquals(0, results1.length);
 
@@ -312,14 +312,14 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, Process.WIFI_UID, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, Process.WIFI_UID, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.WIFI_UID);
+        String[] results2 = mKeyStore.list(TEST_KEYNAME, Process.WIFI_UID);
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results2)));
     }
 
-    public void testSaw_grantedUid_Vpn() throws Exception {
-        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.VPN_UID);
+    public void testList_grantedUid_Vpn() throws Exception {
+        String[] results1 = mKeyStore.list(TEST_KEYNAME, Process.VPN_UID);
         assertNotNull(results1);
         assertEquals(0, results1.length);
 
@@ -327,7 +327,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, Process.VPN_UID, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, Process.VPN_UID, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.VPN_UID);
+        String[] results2 = mKeyStore.list(TEST_KEYNAME, Process.VPN_UID);
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results2)));
