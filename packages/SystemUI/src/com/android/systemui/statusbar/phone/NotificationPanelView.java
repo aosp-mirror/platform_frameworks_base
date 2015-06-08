@@ -998,6 +998,9 @@ public class NotificationPanelView extends PanelView implements
                 mAfforanceHelper.updatePreviews();
             }
         }
+        if (keyguardShowing) {
+            updateDozingVisibilities(false /* animate */);
+        }
         resetVerticalPanelPosition();
         updateQsState();
     }
@@ -2109,6 +2112,10 @@ public class NotificationPanelView extends PanelView implements
     public void setDozing(boolean dozing, boolean animate) {
         if (dozing == mDozing) return;
         mDozing = dozing;
+        updateDozingVisibilities(animate);
+    }
+
+    private void updateDozingVisibilities(boolean animate) {
         if (mDozing) {
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
             mKeyguardBottomArea.setVisibility(View.INVISIBLE);
