@@ -56,7 +56,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Διαγραφή"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Ξεχάσατε το μοτίβο"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Εσφαλμένο μοτίβο"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Λάθος μοτίβο"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Εσφαλμένος κωδικός πρόσβασης"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Εσφαλμένος κωδικός PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
