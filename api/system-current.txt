@@ -37034,9 +37034,13 @@ package android.view {
     method public boolean isLongpressEnabled();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onTouchEvent(android.view.MotionEvent);
+    method public void setContextClickListener(android.view.GestureDetector.OnContextClickListener);
     method public void setIsLongpressEnabled(boolean);
     method public void setOnDoubleTapListener(android.view.GestureDetector.OnDoubleTapListener);
-    method public void setOnStylusButtonPressListener(android.view.GestureDetector.OnStylusButtonPressListener);
+  }
+
+  public static abstract interface GestureDetector.OnContextClickListener {
+    method public abstract boolean onContextClick(android.view.MotionEvent);
   }
 
   public static abstract interface GestureDetector.OnDoubleTapListener {
@@ -37054,12 +37058,9 @@ package android.view {
     method public abstract boolean onSingleTapUp(android.view.MotionEvent);
   }
 
-  public static abstract interface GestureDetector.OnStylusButtonPressListener {
-    method public abstract boolean onStylusButtonPress(android.view.MotionEvent);
-  }
-
-  public static class GestureDetector.SimpleOnGestureListener implements android.view.GestureDetector.OnDoubleTapListener android.view.GestureDetector.OnGestureListener android.view.GestureDetector.OnStylusButtonPressListener {
+  public static class GestureDetector.SimpleOnGestureListener implements android.view.GestureDetector.OnContextClickListener android.view.GestureDetector.OnDoubleTapListener android.view.GestureDetector.OnGestureListener {
     ctor public GestureDetector.SimpleOnGestureListener();
+    method public boolean onContextClick(android.view.MotionEvent);
     method public boolean onDoubleTap(android.view.MotionEvent);
     method public boolean onDoubleTapEvent(android.view.MotionEvent);
     method public boolean onDown(android.view.MotionEvent);
@@ -37069,7 +37070,6 @@ package android.view {
     method public void onShowPress(android.view.MotionEvent);
     method public boolean onSingleTapConfirmed(android.view.MotionEvent);
     method public boolean onSingleTapUp(android.view.MotionEvent);
-    method public boolean onStylusButtonPress(android.view.MotionEvent);
   }
 
   public class Gravity {
