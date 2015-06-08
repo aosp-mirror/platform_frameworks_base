@@ -679,11 +679,11 @@ final class ActivityStack {
                 "Launch completed; removing icicle of " + r.icicle);
     }
 
-    private void startLaunchTraces() {
+    private void startLaunchTraces(String packageName) {
         if (mFullyDrawnStartTime != 0)  {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
         }
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching", 0);
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: " + packageName, 0);
         Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
     }
 
@@ -698,11 +698,11 @@ final class ActivityStack {
         if (r.displayStartTime == 0) {
             r.fullyDrawnStartTime = r.displayStartTime = SystemClock.uptimeMillis();
             if (mLaunchStartTime == 0) {
-                startLaunchTraces();
+                startLaunchTraces(r.packageName);
                 mLaunchStartTime = mFullyDrawnStartTime = r.displayStartTime;
             }
         } else if (mLaunchStartTime == 0) {
-            startLaunchTraces();
+            startLaunchTraces(r.packageName);
             mLaunchStartTime = mFullyDrawnStartTime = SystemClock.uptimeMillis();
         }
     }
