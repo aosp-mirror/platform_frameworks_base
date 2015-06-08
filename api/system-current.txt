@@ -32885,7 +32885,7 @@ package android.telephony {
     method public android.os.PersistableBundle getConfig();
     method public android.os.PersistableBundle getConfigForSubId(int);
     method public static android.os.PersistableBundle getDefaultConfig();
-    method public void reloadCarrierConfigForSubId(int);
+    method public void notifyConfigChangedForSubId(int);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final java.lang.String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS = "bool_allow_emergency_video_calls";

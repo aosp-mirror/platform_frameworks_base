@@ -406,8 +406,9 @@ public class CarrierConfigManager {
     /**
      * Calling this method triggers telephony services to fetch the current carrier configuration.
      * <p>
-     * Normally this does not need to be called because the platform reloads config on its own. Call
-     * this method if your app wants to update config at an arbitrary moment.
+     * Normally this does not need to be called because the platform reloads config on its own.
+     * This should be called by a carrier service app if it wants to update config at an arbitrary
+     * moment.
      * </p>
      * <p>
      * This method returns before the reload has completed, and
@@ -415,9 +416,9 @@ public class CarrierConfigManager {
      * arbitrary thread.
      * </p>
      */
-    public void reloadCarrierConfigForSubId(int subId) {
+    public void notifyConfigChangedForSubId(int subId) {
         try {
-            getICarrierConfigLoader().reloadCarrierConfigForSubId(subId);
+            getICarrierConfigLoader().notifyConfigChangedForSubId(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Error reloading config for subId=" + subId + ": " + ex.toString());
         } catch (NullPointerException ex) {
