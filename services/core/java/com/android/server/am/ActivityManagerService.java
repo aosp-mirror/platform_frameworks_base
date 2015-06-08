@@ -3615,19 +3615,21 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean setProcessMemoryTrimLevel(String process, int userId, int level) {
-        ProcessRecord app = getProcessRecordLocked(process, userId, true);
-        if (app == null) {
-            return false;
-        }
-        if (app.trimMemoryLevel < level && app.thread != null &&
-                (level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
-                        app.trimMemoryLevel >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)) {
-            try {
-                app.thread.scheduleTrimMemory(level);
-                app.trimMemoryLevel = level;
-                return true;
-            } catch (RemoteException e) {
-                // Fallthrough to failure case.
+        synchronized (this) {
+            final ProcessRecord app = getProcessRecordLocked(process, userId, true);
+            if (app == null) {
+                return false;
+            }
+            if (app.trimMemoryLevel < level && app.thread != null &&
+                    (level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
+                            app.trimMemoryLevel >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)) {
+                try {
+                    app.thread.scheduleTrimMemory(level);
+                    app.trimMemoryLevel = level;
+                    return true;
+                } catch (RemoteException e) {
+                    // Fallthrough to failure case.
+                }
             }
         }
         return false;
