@@ -102,6 +102,51 @@ StringPiece16::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece16
     return endIter;
 }
 
+bool isJavaClassName(const StringPiece16& str) {
+    size_t pieces = 0;
+    for (const StringPiece16& piece : tokenize(str, u'.')) {
+        pieces++;
+        if (piece.empty()) {
+            return false;
+        }
+
+        // Can't have starting or trailing $ character.
+        if (piece.data()[0] == u'$' || piece.data()[piece.size() - 1] == u'$') {
+            return false;
+        }
+
+        if (findNonAlphaNumericAndNotInSet(piece, u"$_") != piece.end()) {
+            return false;
+        }
+    }
+    return pieces >= 2;
+}
+
+Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
+                                                 const StringPiece16& className) {
+    if (className.empty()) {
+        return {};
+    }
+
+    if (util::isJavaClassName(className)) {
+        return className.toString();
+    }
+
+    if (package.empty()) {
+        return {};
+    }
+
+    std::u16string result(package.data(), package.size());
+    if (className.data()[0] != u'.') {
+        result += u'.';
+    }
+    result.append(className.data(), className.size());
+    if (!isJavaClassName(result)) {
+        return {};
+    }
+    return result;
+}
+
 static Maybe<char16_t> parseUnicodeCodepoint(const char16_t** start, const char16_t* end) {
     char16_t code = 0;
     for (size_t i = 0; i < 4 && *start != end; i++, (*start)++) {
