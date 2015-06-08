@@ -25,7 +25,7 @@ interface ICarrierConfigLoader {
 
     PersistableBundle getConfigForSubId(int subId);
 
-    void reloadCarrierConfigForSubId(int subId);
+    void notifyConfigChangedForSubId(int subId);
 
     void updateConfigForPhoneId(int phoneId, String simState);
 }
