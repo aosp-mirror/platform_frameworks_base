@@ -19,6 +19,7 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Path;
@@ -700,7 +701,7 @@ public abstract class Transition implements Cloneable {
                 continue;
             }
             // Only bother trying to animate with values that differ between start/end
-            boolean isChanged = start == null || end == null || areValuesChanged(start, end);
+            boolean isChanged = start == null || end == null || isTransitionRequired(start, end);
             if (isChanged) {
                 if (DBG) {
                     View view = (end != null) ? end.view : start.view;
@@ -1747,7 +1748,7 @@ public abstract class Transition implements Cloneable {
                         endValues = mEndValues.viewValues.get(oldView);
                     }
                     boolean cancel = (startValues != null || endValues != null) &&
-                            oldInfo.transition.areValuesChanged(oldValues, endValues);
+                            oldInfo.transition.isTransitionRequired(oldValues, endValues);
                     if (cancel) {
                         if (anim.isRunning() || anim.isStarted()) {
                             if (DBG) {
@@ -1770,32 +1771,36 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Returns whether transition values have changed between the start scene and the end scene
-     * (thus determining whether animation is required). The default implementation compares the
+     * Returns whether or not the transition should create an Animator, based on the values
+     * captured during {@link #captureStartValues(TransitionValues)} and
+     * {@link #captureEndValues(TransitionValues)}. The default implementation compares the
      * property values returned from {@link #getTransitionProperties()}, or all property values if
      * {@code getTransitionProperties()} returns null. Subclasses may override this method to
-     * provide logic more specific to their transition implementation.
+     * provide logic more specific to the transition implementation.
      *
-     * @param oldValues the first set of values, may be {@code null}
-     * @param newValues the second set of values, may be {@code null}
+     * @param startValues the values from captureStartValues, This may be {@code null} if the
+     *                    View did not exist in the start state.
+     * @param endValues the values from captureEndValues. This may be {@code null} if the View
+     *                  did not exist in the end state.
      */
-    protected boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
+    public boolean isTransitionRequired(@Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         boolean valuesChanged = false;
-        // if oldValues null, then transition didn't care to stash values,
+        // if startValues null, then transition didn't care to stash values,
         // and won't get canceled
-        if (oldValues != null && newValues != null) {
+        if (startValues != null && endValues != null) {
             String[] properties = getTransitionProperties();
             if (properties != null) {
                 int count = properties.length;
                 for (int i = 0; i < count; i++) {
-                    if (isValueChanged(oldValues, newValues, properties[i])) {
+                    if (isValueChanged(startValues, endValues, properties[i])) {
                         valuesChanged = true;
                         break;
                     }
                 }
             } else {
-                for (String key : oldValues.values.keySet()) {
-                    if (isValueChanged(oldValues, newValues, key)) {
+                for (String key : startValues.values.keySet()) {
+                    if (isValueChanged(startValues, endValues, key)) {
                         valuesChanged = true;
                         break;
                     }
