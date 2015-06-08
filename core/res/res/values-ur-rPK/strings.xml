@@ -205,7 +205,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"پاور آف"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"بگ کی اطلاع"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"بگ کی اطلاع لیں"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"ایک ای میل پیغام کے بطور بھیجنے کیلئے، یہ آپ کے موجودہ آلہ کی حالت کے بارے میں معلومات جمع کرے گا۔ بگ کی اطلاع شروع کرنے سے لے کر بھیجنے کیلئے تیار ہونے تک اس میں تھوڑا وقت لگے گا؛ براہ کرم صبر کریں۔"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"ایک ای میل پیغام کے بطور بھیجنے کیلئے، یہ آپ کے موجودہ آلہ کی حالت کے بارے میں معلومات جمع کرے گا۔ بگ کی اطلاع شروع کرنے سے لے کر بھیجنے کیلئے تیار ہونے تک اس میں تھوڑا وقت لگے گا؛ براہ کرم تحمل سے کام لیں۔"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"خاموش وضع"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"آواز آف ہے"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"آواز آن ہے"</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"دستیاب اکاؤنٹس تک رسائی حاصل کریں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"سبسکرائب کردہ فیڈز پڑھیں"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے فیڈز کے بارے میں تفصیلات حاصل کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"‏SMS پیغامات بھیجیں"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏ایپ کو SMS پیغامات بھیجنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز لگ سکتے ہیں۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر پیغامات بھیج کر آپ کی رقم خرچ کروا سکتی ہیں۔"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏اپنے متنی پیغامات (SMS یا MMS) کو پڑھیں"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"‏ایپ کو آپ کے ٹیبلٹ یا SIM کارڈ میں اسٹور کردہ SMS پیغامات کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو مواد اور رازداری سے قطع نظر سبھی SMS پیغامات پڑھنے کی اجازت دیتا ہے۔"</string>
@@ -523,7 +524,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"اسکرین لاک تبدیل کریں"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"اسکرین لاک تبدیل کریں۔"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"اسکرین مقفل کریں"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"اسکرین کب اور کس طرح مقفل ہوتا ہے اس کو کنٹرول کریں۔"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"اسکرین کب اور کس طرح مقفل ہوتی ہے اس کو کنٹرول کریں۔"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"سبھی ڈیٹا صاف کریں"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"فیکٹری ڈیٹا کی دوبارہ ترتیب انجام دے کر وارننگ کے بغیر ٹیبلٹ کا ڈیٹا مٹائیں۔"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"‏ایک فیکٹری ڈیٹا ری سیٹ انجام دے کر انتباہ کے بغیر TV کا ڈیٹا مٹائیں۔"</string>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"جب تک آپ اسے آف نہ کر دیں"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"جب تک آپ ڈسڑب نہ کریں کو آف نہیں کر دیتے"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ڈسٹرب نہ کریں"</string>

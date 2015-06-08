@@ -23,7 +23,7 @@
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"kilobajt"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"gigabajt"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"terabajt"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"petabajt"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -209,9 +209,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modaliteti \"në heshtje\""</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zëri është çaktivizuar"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zëri është i aktivizuar"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"modaliteti \"në aeroplan\""</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modaliteti \"në aeroplan\" është i aktivizuar."</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modaliteti \"në aeroplan\" është i çaktivizuar."</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"modaliteti i aeroplanit"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modaliteti i aeroplanit është i AKTIVIZUAR"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modaliteti i aeroplanit është i ÇAKTIVIZUAR"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Cilësimet"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Ndihma"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ndihma zanore"</string>
@@ -243,13 +243,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"kryej dhe menaxho telefonata"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorët"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"qasu te të dhënat nga sensorët dhe pajisjet që vishen"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"nxjerrë përmbajtjen e dritares"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po bashkëvepron."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizo \"Eksploro me prekje\""</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nxjerrë përmbajtjen e dritares"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po ndërvepron."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Artikujt e prekur do të lexohen me zë të lartë dhe ekrani mund të eksplorohet duke përdorur gjeste."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivizo qasjen e zgjeruar në ueb"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivizojë qasjen e përmirësuar në ueb"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skriptet mund të instalohen për ta bërë përmbajtjen e aplikacionit më të qasshme."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"vëzhgojë tekstin që shkruan"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Vëzhgojë tekstin që shkruan"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Përfshi të dhënat personale si numrat e kartave të kreditit si dhe fjalëkalimet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Qasje në llogaritë e vlefshme."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lexo informacione të abonuara"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lejon aplikacionin të marrë detaje rreth çdo gjëje që sinkronizohet në pajisje."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"dërgo mesazhe SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lejon aplikacionin të dërgojë mesazhe SMS. Kjo mund të rezultojë me tarifa të papritura. Aplikacionet keqdashëse mund të të kushtojnë të holla duke dërguar mesazhe pa konfirmimin tënd."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lexo mesazhet e tua në tekst (SMS ose MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lejon aplikacionin të lexojë mesazhet SMS të ruajtura në tablet ose kartën SIM. Kjo i mundëson aplikacionit të lexojë të gjitha mesazhet SMS, pavarësisht përmbajtjes apo privatësisë."</string>
@@ -520,14 +521,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe tabletin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe televizorin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ndrysho kyçjen e ekranit"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ndrysho kyçjen e ekranit."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Kyç ekranin"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollo si dhe kur të kyçet ekrani."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Fshiji të gjitha të dhënat"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ndryshimin e kyçjes"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ndryshon kyçjen e ekranit."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Kyçje të ekranit"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollon si dhe kur të kyçet ekrani."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Fshirjen e të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Fshi të dhënat e televizorit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Fshi të dhënat e telefonit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Fshin të dhënat e telefonit pa paralajmërim, duke kryer rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Spatro të dhënat e përdoruesit"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Spastroji të dhënat e këtij përdoruesi në këtë tablet pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Spastroji të dhënat e këtij përdoruesi në këtë televizor pa paralajmërim."</string>
@@ -950,7 +951,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories së procesit me <xliff:g id="SIZE">%2$s</xliff:g>. Mundësohet stivimi e skedarëve fiktivë në mënyrë që t\'i ndani me zhvilluesit e tyre. Bëni kujdes pasi stiva e skedarëve fiktivë mund të përmbajë ndonjë informacion tëndin personal ku aplikacioni ka qasje."</string>
     <string name="sendText" msgid="5209874571959469142">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumi i ziles"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Volumi i klipeve \"media\""</string>
+    <string name="volume_music" msgid="5421651157138628171">"volumi i klipit \"media\""</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Luajtje përmes \"bluetooth-it\""</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Zilja \"në heshjte\" u caktua"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volumi i telefonatës"</string>
@@ -961,7 +962,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volumi i \"bluetooth-it\""</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volumi i ziles"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumi i telefonatës"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumi i klipeve \"media\""</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"volumi i klipit \"media\""</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumi i njoftimeve"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zile e paracaktuar."</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Zilja e paracaktuar (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1107,7 +1108,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"Shko"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Kërko"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Dërgo"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Tjetër"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Përpara"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"U krye!"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"I mëparshëm"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Ekzekuto"</string>
@@ -1146,7 +1147,7 @@
     <string name="tethered_notification_title" msgid="3146694234398202601">"Lidhja e çiftimit ose ajo e qasjes në zona publike interneti është aktive"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Prek për të konfiguruar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Prapa"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"Tjetër"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Përpara"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Kapërce"</string>
     <string name="no_matches" msgid="8129421908915840737">"Asnjë përputhje"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Gjej brenda faqes"</string>
@@ -1258,7 +1259,7 @@
     <string name="serial_number" msgid="758814067660862493">"Numri serik:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Shenjat e gishtave:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Shenja e gishtit SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Shenjë gishti SHA-1:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Shenja e gishtit SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Shikoji të gjitha"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Zgjidh aktivitetin"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Shpërnda publikisht me"</string>
@@ -1465,7 +1466,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Kërko PIN-in para se t\'i heqësh gozhdimin"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Kërko PIN-in para se ta zhgozhdosh."</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"U instalua nga administratori yt"</string>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Deri sa ta çaktivizosh këtë"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Deri sa të çaktivizosh gjendjen \"Mos shqetëso\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Shpalos"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Mos shqetëso"</string>

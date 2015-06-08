@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> kun"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> kun <xliff:g id="HOURS">%2$d</xliff:g> soat"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> kun <xliff:g id="HOURS">%2$d</xliff:g> soat"</string>
@@ -196,7 +196,7 @@
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"O‘chirmoqchimisiz?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Xavfsiz rejimda ishga tushirish uchun o‘chirib-yoqish"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Xavfsiz rejimda ishga tushirish uchun o‘chirib-yoqishni xohlaysizmi? Bu barcha siz o‘rnatgan uchinchi tomon ilovalarini o‘chirib turadi. Yana qayta ishga tushirsangiz, ular tiklanadi."</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"So‘nggi"</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Yaqinda"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"So‘nggi foydalanilgan ilovalar yo‘q."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Planshet sozlamalari"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"TV tanlamalari"</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Mavjud hisoblarga kirish."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"obunalarni o‘qish"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ilova hozirgi vaqtda sinxronlanayotgan elementlar to‘g‘risidagi ma’lumotlarni olishi mumkin."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS xabarlarni jo‘natish"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ilovaga SMS xabarlarini jo‘natish uchun ruxsat beradi. Bu kutilmagan xarajatlarga sabab bo‘lishi mumkin. Zararli ilovalar sizdan so‘roqsiz xabarlar jo‘natish orqali pulingizni sarflashi mumkin."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"matn xabarlaringizni o‘qish (SMS yoki MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ilovaga planshetingiz yoki SIM kartangizga zaxiralangan SMS xabarlarini o‘qish uchun ruxsat beradi. Bu huquq ilovaga tarkibi va maxfiyligidan qat’iy nazar har qanday SMS xabarlarni o‘qish imkonini beradi."</string>
@@ -950,18 +951,18 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> jarayoni o‘zi uchun ajratilgan <xliff:g id="SIZE">%2$s</xliff:g> xotira chegarasidan o‘tib ketdi. Ilova dasturchisi bilan ulashishingiz uchun hip-damp ma’lumotlari yig‘ilib qoldi. Ehtiyot bo\'ling: ushbu hip-dampda ilova uchun foydalanishga ruxsat berilgan shaxsiy ma’lumotlaringiz bo‘lishi mumkin."</string>
     <string name="sendText" msgid="5209874571959469142">"Matn uchun amalni tanlash"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Qo‘ng‘iroq tovushi"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Media tovushi"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Multimedia ovozi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth orqali ijro etilmoqda"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="3941680041282788711">"Kiruvchi qo‘ng‘iroq balandligi"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Kiruvchi bluetooth tovushi"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Signal balandligi"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Signal ovozi"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Eslatma tovushi"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Tovush"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth tovushi"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Rington balandligi"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Qo‘ng‘iroq tovushi balandligi"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Media tovushi balandligi"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia ovozi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standart rington"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standart rington (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1133,8 +1134,8 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN <xliff:g id="APP">%s</xliff:g> tomonidan faollashtirilgan"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Tarmoqni boshqarish uchun bosing."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"<xliff:g id="SESSION">%s</xliff:g>ga ulandi. Tarmoqni boshqarish uchun bosing."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Doimiy VPN ulanmoqda…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Doimiy VPN ulandi"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Ulanmoqda…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Ulandi"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Xato"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"Sozlash uchun bosing"</string>
     <string name="upload_file" msgid="2897957172366730416">"Faylni tanlash"</string>
@@ -1300,7 +1301,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chizmali parolni chizing"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM karta PIN kodini kiriting"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM kartaning PIN kodini kiriting"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN kodni tering"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Parol kiriting"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM karta hozir o‘chirilgan. Davom etish uchun PUK kodni kiriting. To‘liqroq ma’lumot olish uchun tarmoq operatori bilan bog‘laning."</string>
@@ -1311,7 +1312,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kod 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodlar bir xil emas"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Chizmali parolni ochishga juda ko‘p urinildi"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Foydalanuvchi nomi (e-pochta)"</string>
@@ -1441,7 +1442,7 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Yangi PIN kod"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Yangi PIN kodni tasdiqlash"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Cheklovlarni o‘zgartirish uchun PIN kod yaratish"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN kodlar bir xil emas. Qayta urinib ko‘ring."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-kod mos kelmadi. Qayta urinib ko‘ring."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN kod juda qisqa. Kamida 4 raqamli bo‘lishi kerak."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring</item>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ushbu vaqtgacha: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Men o‘chirmaguncha"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"“Bezovta qilinmasin” rejimi o‘chirilmaguncha"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Bezovta qilinmasin"</string>

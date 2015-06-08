@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ලබාගත හැකි ගිණුම් වලට ප්‍රවේශ වීම."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"දායක වූ සංග්‍රහ කියවීම"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"වර්තමාන සමමුහුර්ත සංග්‍රහ ගැන විස්තර ලැබීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS පණිවිඩ යැවීම"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS පණිවිඩ යැවීමට යෙදුමට අවසර දෙන්න. මෙමඟින් බලාපොරොත්තු නොවූ ප්‍රතිඵල අත් විය හැක. අනිෂ්ට යෙදුම් ඔබගේ තහවුරුවකින් තොරව පණිවිඩ යැවීම මඟින් ඔබගේ මුදල් වැය කල හැක."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ඔබගේ පෙළ පණිවුඩ කියවන්න (SMS හෝ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ඔබගේ ටැබ්ලටයේ හෝ SIM පතේ ආචයනය කර ඇති SMS පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. අන්තර්ගතය හෝ විශවාසදයි බවින් තොරවම සියලු SMS පණිවිඩ කියවීමට මෙමගින් යෙදුමට අවසර දෙයි."</string>
@@ -1508,8 +1508,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ඔබ මෙය අක්‍රිය කරන තුරු"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"හකුළන්න"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"බාධා නොකරන්න"</string>

@@ -243,14 +243,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorer"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"få tilgang til data fra sensorer og enheter du har på deg"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hent innholdet i vinduet"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspiser innholdet i et vindu du samhandler med."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Slå på for Berøringsutforsking"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente innhold i vinduer"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Den kontrollerer innholdet i vinduer du samhandler med."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"slå på berøringsutforsking"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Berørte elementer leses høyt, og skjermen kan utforskes ved hjelp av bevegelser."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Slå på forbedret nettilgjengelighet"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"slå på forbedret nettilgjengelighet"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skript kan installeres for å gjøre appinnhold mer tilgjengelig."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observer teksten du skriver inn"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inkluderer personlige data, slik som kredittkortnumre og passord."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere teksten du skriver inn"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette kan inkludere personlige data, blant annet kredittkortnumre og passord."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Tilgang til tilgjengelige Google-kontoer."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lese abonnement på nyhetskilder"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lar appen hente inn detaljer om strømmer som er synkroniserte for øyeblikket."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"sende SMS-meldinger"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lar appen sende tekstmeldinger. Dette kan resultere i uventede kostnader. Merk at skadelige apper kan påføre deg kostnader ved å sende meldinger uten bekreftelse fra deg."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lese tekstmeldinger (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lar appen lese tekstmeldinger lagret på nettbrettet eller SIM-kortet ditt. Dette lar appen lese alle tekstmeldingene dine, uavhengig av innhold og konfidensialitet."</string>
@@ -400,7 +401,7 @@
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"endre nettverkskonnektivitet"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Lar appen endre innstillingene for nettverkstilknytning."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"endre tilknytningsoppsett"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Lar appen endre innstillingene for nettverkstilknytning via tethering."</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Lar appen endre innstillingene for delt nettforbindelse."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"se Wi-Fi-tilkoblinger"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Lar appen se informasjon om Wi-Fi-nettverk, f.eks. hvorvidt Wi-Fi er aktivert og navn på tilkoblede Wi-Fi-enheter."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"koble til og fra Wi-Fi"</string>
@@ -521,9 +522,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser TV-en eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endrer skjermlåsen."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontroller hvordan og når skjermen låses."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollér hvordan og når skjermen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slett alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tilbakestill nettbrettets data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Slett TV-ens data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
@@ -1075,7 +1076,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Forbereder <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sjekker for feil"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> ble oppdaget"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"For overføring av bilder og media"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"For overføring av bilder og medier"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Skadet <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> er skadet – prøv formatering"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ble uventet fjernet"</string>
@@ -1143,7 +1144,7 @@
     <string name="submit" msgid="1602335572089911941">"Send inn"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Bilmodus er aktivert"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Trykk for å avslutte bilmodus."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Tilknytning eller trådløs sone er aktiv"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Internettdeling eller trådløs sone er aktiv"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Trykk for å konfigurere."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Tilbake"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Neste"</string>
@@ -1471,7 +1472,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installert av administratoren"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet av administratoren"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"For å bidra til å forbedre batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"For å forlenge batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minutter (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I 1 minutt (til <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Inntil du slår av funksjonen"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Inntil du slår av Ikke forstyrr"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"«Ikke forstyrr»"</string>

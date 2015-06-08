@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"கிடைக்கும் கணக்குகளை அணுக முடியும்."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"குழுசேர்ந்த ஊட்டங்களைப் படித்தல்"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS குறுந்தகவல்களை அனுப்புதல்"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத கட்டணங்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"உங்கள் உரைச் செய்திகளை (SMS அல்லது MMS) படித்தல்"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"உங்கள் டேப்லெட் அல்லது சிம் கார்டில் சேமிக்கப்பட்ட SMS குறுஞ்செய்திகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. SMS குறுஞ்செய்திகளின் உள்ளடக்கம் அல்லது ரகசியத்தன்மை ஆகியவற்றைப் பொருட்படுத்தாமல் அச்செய்திகளைப் படிக்க பயன்பாட்டை இது அனுமதிக்கிறது."</string>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"இதை முடக்கும்வரை"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"தொந்தரவு செய்ய வேண்டாம் என்பதை முடக்கும் வரை"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"தொந்தரவு செய்ய வேண்டாம்"</string>

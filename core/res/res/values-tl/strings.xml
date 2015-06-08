@@ -243,7 +243,7 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumatawag sa telepono at namamahala sa mga tawag sa telepono"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Mga Sensor"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ina-access ang data mula sa mga sensor at nasusuot na device"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kunin ang nilalaman ng window"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kunin ang content ng window"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Siyasatin ang nilalaman ng isang window kung saan ka nakikipag-ugnayan."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"I-on ang Explore by Touch"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Bibigkasin ang mga pinindot na item at maaaring galugarin ang screen gamit ang mga galaw."</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"I-access ang mga available na account."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"magbasa ng mga na-subscribe na feed"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Pinapayagan ang app na kumuha ng mga detalye tungkol sa kasalukuyang naka-sync na mga feed."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"basahin ang iyong mga text message (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong tablet o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
@@ -1062,7 +1063,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Mawawala ang lahat ng data sa iyong card."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Pindutin upang huwag paganahin ang pag-debug ng USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Pindutin upang i-disable ang pagde-debug ng USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Baguhin ang keyboard"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Piliin ang mga keyboard"</string>
     <string name="show_ime" msgid="9157568568695230830">"Ipakita ang pamamaraan ng pag-input"</string>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hanggang sa i-off mo ito"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hanggang sa i-off mo ang Huwag Istorbohin"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"I-collapse"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Huwag istorbohin"</string>

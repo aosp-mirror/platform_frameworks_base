@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Sense títol&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Sense número de telèfon)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Desconegut"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correu de veu"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Bústia de veu"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de connexió o codi MMI no vàlid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"L\'operació està restringida a números de marcatge fixos."</string>
@@ -67,8 +67,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Identificació de trucada entrant"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Identificació de trucada de sortida"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"ID de l\'emissor (trucada entrant)"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"ID de l\'emissor (trucada de sortida)"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identificador de la línia connectada"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restricció de l\'identificador de la línia connectada"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Desviació de trucades"</string>
@@ -82,12 +82,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Rebuig de trucades molestes no desitjades"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Lliurament de número que truca"</string>
     <string name="DndMmi" msgid="1265478932418334331">"No molesteu"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"El valor predeterminat de la identificació de trucada és restringida. Propera trucada: restringida"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"El valor predeterminat de la identificació de trucada és restringida. Propera trucada: no restringida"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"El valor predeterminat de la identificació de trucada és no restringida. Propera trucada: restringida"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"El valor predeterminat de la identificació de trucada és no restringida. Propera trucada: no restringida"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"El valor predeterminat de l\'identificador de l\'emissor és restringit. Següent trucada: restringit"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"El valor predeterminat de l\'identificador de l\'emissor és restringit. Següent trucada: no restringit"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"El valor predeterminat de l\'identificador de l\'emissor és no restringit. Següent trucada: restringit"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"El valor predeterminat de l\'identificador de l\'emissor és no restringit. Següent trucada: no restringit"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"No s\'ha proveït el servei."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"No pots canviar la configuració de la identificació de trucada."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"No pots canviar la configuració de l\'identificador de l\'emissor."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Accés restringit canviat"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"El servei de dades està bloquejat."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"El servei d\'emergència està bloquejat."</string>
@@ -246,9 +246,9 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contingut de la finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contingut d\'una finestra amb què estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar Exploració tàctil"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Els elements que toquis es diran en veu alta i la pantalla es podrà explorar mitjançant gestos."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Els elements que toquis es diran en veu alta i podràs explorar la pantalla mitjançant gestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar l\'accessibilitat web millorada"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"És possible que s\'instal·lin scripts per fer que el contingut de l\'aplicació sigui més accessible."</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"És possible que s\'instal·lin scripts perquè el contingut de les aplicacions sigui més accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el text que escrius"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedeix als comptes disponibles."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"llegir els feeds als quals esteu subscrit"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet que l\'aplicació obtingui detalls sobre els feeds sincronitzats actualment."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"enviar missatges SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet que l\'aplicació enviï missatges SMS. Aquesta acció pot provocar càrrecs inesperats. Les aplicacions malicioses poden enviar missatges sense la teva confirmació, cosa que et pot fer gastar diners."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lectura dels missatges de text (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats a la tauleta o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
@@ -410,18 +411,18 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces de multidifusió, no només al televisor. Fa servir més energia que el mode que no és de multidifusió."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces multidifusió, no només al teu telèfon. Fa servir més energia que el mode que no és multidifusió."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accés a la configuració de Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que detecti i emparelli dispositius remots."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Permet que l\'aplicació configuri el televisor Bluetooth local, cerqui dispositius remots i s\'hi emparelli."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que detecti i emparelli dispositius remots."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que detecti dispositius remots i s\'hi vinculi."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Permet que l\'aplicació configuri el televisor Bluetooth local, cerqui dispositius remots i s\'hi vinculi."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que detecti dispositius remots i s\'hi vinculi."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"connecta i desconnecta de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permet que l\'aplicació determini si WiMAX està activat i que vegi la informació sobre totes les xarxes WiMAX que estan connectades."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permet que l\'aplicació connecti i desconnecti la tauleta de les xarxes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Permet que l\'aplicació connecti el televisor a xarxes WiMAX, o bé que el desconnecti."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permet que l\'aplicació connecti i desconnecti el telèfon de les xarxes WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"emparella amb dispositius Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"vincula amb dispositius Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet que l\'aplicació visualitzi la configuració de Bluetooth de la tauleta i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permet que l\'aplicació consulti la configuració de Bluetooth del televisor i estableixi i accepti connexions amb dispositius emparellats."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permet que l\'aplicació consulti la configuració de Bluetooth del televisor i estableixi i accepti connexions amb dispositius vinculats ."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració de Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicació de camp proper (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Near Field Communication (NFC)."</string>
@@ -521,13 +522,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el televisor o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el telèfon o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Canviar el bloqueig de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Permet canviar el bloqueig de pantalla."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueig de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canviar el bloqueig de pantalla"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquejar la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Esborra les dades de la tauleta sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Esborra les dades del televisor sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Esborra les dades del telèfon sense avisar, restablint les dades de fàbrica."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Esborra les dades de la tauleta sense avisar, i restableix les dades de fàbrica."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Esborra les dades del televisor sense avisar, i restableix les dades de fàbrica."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Esborra les dades del telèfon sense avisar, i restableix les dades de fàbrica."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Esborrar les dades de l\'usuari"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Esborra les dades de l\'usuari desades a la tauleta sense avisar-ne."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Esborra les dades de l\'usuari desades al televisor sense avisar-ne."</string>
@@ -547,7 +548,7 @@
     <item msgid="869923650527136615">"Mòbil"</item>
     <item msgid="7897544654242874543">"Feina"</item>
     <item msgid="1103601433382158155">"Fax de la feina"</item>
-    <item msgid="1735177144948329370">"Fax particular"</item>
+    <item msgid="1735177144948329370">"Fax de casa"</item>
     <item msgid="603878674477207394">"Cercapersones"</item>
     <item msgid="1650824275177931637">"Altres"</item>
     <item msgid="9192514806975898961">"Personalitzat"</item>
@@ -590,7 +591,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mòbil"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Feina"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax de la feina"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax particular"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax de casa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Cercapersones"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altres"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Torna la trucada"</string>
@@ -607,7 +608,7 @@
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Personalitza"</string>
-    <string name="eventTypeBirthday" msgid="2813379844211390740">"Aniversari"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Natalici"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversari"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Altres"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalitzat"</string>
@@ -640,13 +641,13 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Assistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Germà"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Fill"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Parella de fet"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Parella"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Pare"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amic"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Gerent"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Mare"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Pare/mare"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Company"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Recomanat per"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Familiar"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Germana"</string>
@@ -1063,7 +1064,7 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Canviar el teclat"</string>
+    <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Tria els teclats"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostra mètode d\'entrada."</string>
     <string name="hardware" msgid="7517821086888990278">"Maquinari"</string>
@@ -1189,7 +1190,7 @@
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Incrementa"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Redueix"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Mantén premut <xliff:g id="VALUE">%s</xliff:g>."</string>
-    <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Fes lliscar el dit cap amunt per incrementar i cap avall per disminuir."</string>
+    <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Llisca cap amunt per augmentar i cap avall per disminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Fes augmentar el minut"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Fes disminuir el minut"</string>
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Fes augmentar l\'hora"</string>
@@ -1244,7 +1245,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"S\'ha superat el límit de dades Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> per sobre del límit especif."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dades en segon pla restringides"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca per eliminar la restricció."</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca per suprimir la restricció."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de seguretat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Aquest certificat és vàlid."</string>
     <string name="issued_to" msgid="454239480274921032">"Emès per a:"</string>
@@ -1254,7 +1255,7 @@
     <string name="issued_by" msgid="2647584988057481566">"Emès per:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Validesa:"</string>
     <string name="issued_on" msgid="5895017404361397232">"Emès el:"</string>
-    <string name="expires_on" msgid="3676242949915959821">"Caduca el:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Data de caducitat:"</string>
     <string name="serial_number" msgid="758814067660862493">"Número de sèrie:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Empremtes"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Empremta SHA-256:"</string>
@@ -1449,7 +1450,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Visualització en pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Per sortir, fes lliscar el dit cap avall des de la part superior."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Per sortir, llisca cap avall des de la part superior."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"D\'acord"</string>
     <string name="done_label" msgid="2093726099505892398">"Fet"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Control circular de les hores"</string>
@@ -1465,13 +1466,13 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"S\'ha fixat l\'aplicació. En aquest dispositiu no es permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demana el codi PIN abans d\'anul·lar la fixació"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per anul·lar la fixació"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya abans d\'anul·lar la fixació"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demana el codi PIN per anul·lar"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per anul·lar"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per anul·lar"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"L\'administrador ho ha instal·lat"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"L\'administrador l\'ha actualitzat"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"L\'administrador ho ha suprimit"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Per allargar la durada de la bateria, l\'estalvi de bateria redueix el rendiment del dispositiu i limita l\'ús de la vibració, dels serveis d\'ubicació i de la majoria de les dades en segon pla. És possible que el correu electrònic, la missatgeria i altres aplicacions que depenen de la sincronització no s\'actualitzin fins que els obris.\n\nL\'estalvi de bateria es desactiva de manera automàtica quan el dispositiu es posa a carregar."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durant 1 minut (fins a les <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Fins que no ho desactivis"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Fins que desactivis el mode No molesteu"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Replega"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"No molesteu"</string>

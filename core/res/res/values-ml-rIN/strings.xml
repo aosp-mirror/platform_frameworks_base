@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ലഭ്യമായ അക്കൗണ്ടുകൾ ആക്‌സസ്സ് ചെയ്യുക."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"സബ്‌സ്ക്രൈബ് ചെയ്‌ത ഫീഡുകൾ വായിക്കുക"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"നിലവിൽ സമന്വയിപ്പിച്ച ഫീഡുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ നേടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുക"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിത നിരക്കുകൾക്കിടയാക്കാം. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ സന്ദേശങ്ങൾ അയയ്‌ക്കുന്നത് പണച്ചെലവിനിടയാക്കാം."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"നിങ്ങളുടെ വാചക സന്ദേശങ്ങൾ വായിക്കുക (SMS അല്ലെങ്കിൽ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"നിങ്ങളുടെ ടാബ്‌ലെറ്റിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ പരിഗണിക്കാതെ എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -671,7 +672,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"അൺലോക്ക് ചെയ്യുന്നതിനായി മെനു അമർത്തുക അല്ലെങ്കിൽ അടിയന്തര കോൾ വിളിക്കുക."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"അൺലോക്ക് ചെയ്യാൻ പാറ്റേൺ വരയ്‌ക്കുക"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"അടിയന്തിരാവശ്യം"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"എമർജൻസി"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"കോളിലേക്ക് മടങ്ങുക"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ശരി!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"വീണ്ടും ശ്രമിക്കുക"</string>
@@ -1086,7 +1087,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"നീക്കംചെയ്യരുത്"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"സജ്ജമാക്കുക"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"നിരസിക്കുക"</string>
-    <string name="ext_media_browse_action" msgid="8322172381028546087">"പര്യവേക്ഷണം ചെയ്യുക"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"അടുത്തറിയുക"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> കാണുന്നില്ല"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"ഈ ഉപകരണം വീണ്ടും നൽകുക"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> നീക്കുന്നു"</string>
@@ -1465,7 +1466,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"അപ്ലിക്കേഷൻ പിൻ ചെയ്‌തു: ഈ ഉപകരണത്തിൽ അൺപിൻ ചെയ്യാനാവില്ല."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"സ്ക്രീൻ അൺപിൻ ചെയ്തു"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പിൻ ആവശ്യപ്പെടുക"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിന്നിനുമുമ്പ് പിൻ ആവശ്യപ്പെടൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇൻസ്റ്റാളുചെയ്‌തു"</string>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"നിങ്ങൾ ഇത് ഓ‌ഫാക്കും വരെ"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\'ശല്ല്യപ്പെടുത്തരുത്\' ഓഫാക്കുന്നതുവരെ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ചുരുക്കുക"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ശല്യപ്പെടുത്തരുത്"</string>
