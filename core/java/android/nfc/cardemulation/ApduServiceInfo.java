@@ -92,11 +92,6 @@ public final class ApduServiceInfo implements Parcelable {
     final int mUid;
 
     /**
-     * Whether this service has dynamic resources
-     */
-    final boolean mHasDynamicResources;
-
-    /**
      * Settings Activity for this service
      */
     final String mSettingsActivityName;
@@ -106,7 +101,7 @@ public final class ApduServiceInfo implements Parcelable {
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
             ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
-            boolean requiresUnlock, int bannerResource, int uid, boolean hasDynamicResources,
+            boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName) {
         this.mService = info;
         this.mDescription = description;
@@ -122,7 +117,6 @@ public final class ApduServiceInfo implements Parcelable {
         }
         this.mBannerResourceId = bannerResource;
         this.mUid = uid;
-        this.mHasDynamicResources = hasDynamicResources;
         this.mSettingsActivityName = settingsActivityName;
     }
 
@@ -172,8 +166,6 @@ public final class ApduServiceInfo implements Parcelable {
                         false);
                 mBannerResourceId = sa.getResourceId(
                         com.android.internal.R.styleable.HostApduService_apduServiceBanner, -1);
-                mHasDynamicResources = sa.getBoolean(
-                        com.android.internal.R.styleable.HostApduService_dynamicResources, false);
                 mSettingsActivityName = sa.getString(
                         com.android.internal.R.styleable.HostApduService_settingsActivity);
                 sa.recycle();
@@ -186,8 +178,6 @@ public final class ApduServiceInfo implements Parcelable {
                 mRequiresDeviceUnlock = false;
                 mBannerResourceId = sa.getResourceId(
                         com.android.internal.R.styleable.OffHostApduService_apduServiceBanner, -1);
-                mHasDynamicResources = sa.getBoolean(
-                        com.android.internal.R.styleable.OffHostApduService_dynamicResources, false);
                 mSettingsActivityName = sa.getString(
                         com.android.internal.R.styleable.HostApduService_settingsActivity);
                 sa.recycle();
@@ -410,9 +400,6 @@ public final class ApduServiceInfo implements Parcelable {
             return null;
         }
     }
-    public boolean hasDynamicResources() {
-        return mHasDynamicResources;
-    }
 
     public String getSettingsActivityName() { return mSettingsActivityName; }
 
@@ -468,7 +455,6 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeInt(mRequiresDeviceUnlock ? 1 : 0);
         dest.writeInt(mBannerResourceId);
         dest.writeInt(mUid);
-        dest.writeInt(mHasDynamicResources ? 1 : 0);
         dest.writeString(mSettingsActivityName);
     };
 
@@ -492,10 +478,9 @@ public final class ApduServiceInfo implements Parcelable {
             boolean requiresUnlock = source.readInt() != 0;
             int bannerResource = source.readInt();
             int uid = source.readInt();
-            boolean dynamicResources = source.readInt() != 0;
             String settingsActivityName = source.readString();
             return new ApduServiceInfo(info, onHost, description, staticAidGroups,
-                    dynamicAidGroups, requiresUnlock, bannerResource, uid, dynamicResources,
+                    dynamicAidGroups, requiresUnlock, bannerResource, uid,
                     settingsActivityName);
         }
 
