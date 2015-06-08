@@ -208,7 +208,7 @@ public class WindowAnimator {
         // Only hide windows if the keyguard is active and not animating away.
         boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()
                 && mForceHiding != KEYGUARD_ANIMATING_OUT;
-        return keyguardOn && hideWhenLocked;
+        return keyguardOn && hideWhenLocked && (win.getDisplayId() == Display.DEFAULT_DISPLAY);
     }
 
     private void updateWindowsLocked(final int displayId) {
