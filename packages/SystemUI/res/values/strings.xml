@@ -1009,7 +1009,7 @@
     <string name="volumeui_notification_text">Touch to restore the original.</string>
 
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
-    <string name="managed_profile_foreground_toast">You are in the work profile</string>
+    <string name="managed_profile_foreground_toast">You\'re using your work profile</string>
 
     <string-array name="volume_stream_titles" translatable="false">
         <item>Voice calls</item> <!-- STREAM_VOICE_CALL -->
