@@ -118,5 +118,9 @@ endif
 
 # Defaults for ATRACE_TAG and LOG_TAG for libhwui
 LOCAL_CFLAGS += -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\"
+LOCAL_CFLAGS += -Wall -Wno-unused-parameter -Wunreachable-code
 
-LOCAL_CFLAGS += -Wall -Werror -Wno-unused-parameter -Wunreachable-code
+# b/21698669
+ifneq ($(USE_CLANG_PLATFORM_BUILD),true)
+    LOCAL_CFLAGS += -Werror
+endif
