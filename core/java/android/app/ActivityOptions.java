@@ -41,16 +41,16 @@ public class ActivityOptions {
 
     /**
      * A long in the extras delivered by {@link #requestUsageTimeReport} that contains
-     * the total time (in ms) the user spent in the app.
+     * the total time (in ms) the user spent in the app flow.
      */
-    public static final String EXTRA_USAGE_REPORT_TIME = "android.time";
+    public static final String EXTRA_USAGE_TIME_REPORT = "android.usage_time";
 
     /**
      * A Bundle in the extras delivered by {@link #requestUsageTimeReport} that contains
      * detailed information about the time spent in each package associated with the app;
      * each key is a package name, whose value is a long containing the time (in ms).
      */
-    public static final String EXTRA_USAGE_REPORT_PACKAGES = "android.package";
+    public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
 
     /**
      * The package name that created the options.
@@ -915,7 +915,7 @@ public class ActivityOptions {
     /**
      * Ask the the system track that time the user spends in the app being launched, and
      * report it back once done.  The report will be sent to the given receiver, with
-     * the extras {@link #EXTRA_USAGE_REPORT_TIME} and {@link #EXTRA_USAGE_REPORT_PACKAGES}
+     * the extras {@link #EXTRA_USAGE_TIME_REPORT} and {@link #EXTRA_USAGE_TIME_REPORT_PACKAGES}
      * filled in.
      *
      * <p>The time interval tracked is from launching this activity until the user leaves
