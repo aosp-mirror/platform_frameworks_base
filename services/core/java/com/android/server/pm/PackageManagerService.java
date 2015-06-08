@@ -4991,7 +4991,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 scanPackageLI(file, parseFlags | PackageParser.PARSE_MUST_BE_APK,
                         scanFlags, currentTime, null);
             } catch (PackageManagerException e) {
-                Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage(), e);
+                Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
 
                 // Delete invalid userdata apps
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
