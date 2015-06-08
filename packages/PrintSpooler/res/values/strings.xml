@@ -40,7 +40,7 @@
     <!-- Label of the color mode widget. [CHAR LIMIT=20] -->
     <string name="label_color">Color</string>
 
-    <!-- Label of the duplex mode widget. [CHAR LIMIT=20] -->
+    <!-- Label of the printer mode to print on both sides of paper. [CHAR LIMIT=20] -->
     <string name="label_duplex">Two-sided</string>
 
     <!-- Label of the orientation widget. [CHAR LIMIT=20] -->
