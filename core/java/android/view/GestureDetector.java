@@ -32,7 +32,7 @@ import android.os.Message;
  *  <li>In the {@link View#onTouchEvent(MotionEvent)} method ensure you call
  *          {@link #onTouchEvent(MotionEvent)}. The methods defined in your callback
  *          will be executed when the events occur.
- *  <li>If listening for {@link OnStylusButtonPressListener#onStylusButtonPress(MotionEvent)}
+ *  <li>If listening for {@link OnContextClickListener#onContextClick(MotionEvent)}
  *          you must call {@link #onGenericMotionEvent(MotionEvent)}
  *          in {@link View#onGenericMotionEvent(MotionEvent)}.
  * </ul>
@@ -152,31 +152,28 @@ public class GestureDetector {
     }
 
     /**
-     * The listener that is used to notify when a stylus button press occurs. When listening for a
-     * stylus button press ensure that you call {@link #onGenericMotionEvent(MotionEvent)} in
+     * The listener that is used to notify when a context click occurs. When listening for a
+     * context click ensure that you call {@link #onGenericMotionEvent(MotionEvent)} in
      * {@link View#onGenericMotionEvent(MotionEvent)}.
      */
-    public interface OnStylusButtonPressListener {
+    public interface OnContextClickListener {
         /**
-         * Notified when a stylus button press occurs. This is when the stylus
-         * is touching the screen and the {@value MotionEvent#BUTTON_STYLUS_PRIMARY}
-         * is pressed.
+         * Notified when a context click occurs.
          *
-         * @param e The motion event that occurred during the stylus button
-         *            press.
+         * @param e The motion event that occurred during the context click.
          * @return true if the event is consumed, else false
          */
-        boolean onStylusButtonPress(MotionEvent e);
+        boolean onContextClick(MotionEvent e);
     }
 
     /**
      * A convenience class to extend when you only want to listen for a subset
      * of all the gestures. This implements all methods in the
-     * {@link OnGestureListener}, {@link OnDoubleTapListener}, and {@link OnStylusButtonPressListener}
+     * {@link OnGestureListener}, {@link OnDoubleTapListener}, and {@link OnContextClickListener}
      * but does nothing and return {@code false} for all applicable methods.
      */
     public static class SimpleOnGestureListener implements OnGestureListener, OnDoubleTapListener,
-            OnStylusButtonPressListener {
+            OnContextClickListener {
 
         public boolean onSingleTapUp(MotionEvent e) {
             return false;
@@ -214,7 +211,7 @@ public class GestureDetector {
             return false;
         }
 
-        public boolean onStylusButtonPress(MotionEvent e) {
+        public boolean onContextClick(MotionEvent e) {
             return false;
         }
     }
@@ -238,12 +235,12 @@ public class GestureDetector {
     private final Handler mHandler;
     private final OnGestureListener mListener;
     private OnDoubleTapListener mDoubleTapListener;
-    private OnStylusButtonPressListener mStylusButtonListener;
+    private OnContextClickListener mContextClickListener;
 
     private boolean mStillDown;
     private boolean mDeferConfirmSingleTap;
     private boolean mInLongPress;
-    private boolean mInStylusButtonPress;
+    private boolean mInContextClick;
     private boolean mAlwaysInTapRegion;
     private boolean mAlwaysInBiggerTapRegion;
     private boolean mIgnoreNextUpEvent;
@@ -388,8 +385,8 @@ public class GestureDetector {
         if (listener instanceof OnDoubleTapListener) {
             setOnDoubleTapListener((OnDoubleTapListener) listener);
         }
-        if (listener instanceof OnStylusButtonPressListener) {
-            setOnStylusButtonPressListener((OnStylusButtonPressListener) listener);
+        if (listener instanceof OnContextClickListener) {
+            setContextClickListener((OnContextClickListener) listener);
         }
         init(context);
     }
@@ -453,16 +450,13 @@ public class GestureDetector {
     }
 
     /**
-     * Sets the listener which will be called for stylus button related
-     * gestures.
+     * Sets the listener which will be called for context clicks.
      *
-     * @param onStylusButtonPressListener the listener invoked for all the
-     *            callbacks, or null to stop listening for stylus button
-     *            gestures.
+     * @param onContextClickListener the listener invoked for all the callbacks, or null to stop
+     *            listening for context clicks.
      */
-    public void setOnStylusButtonPressListener(
-            OnStylusButtonPressListener onStylusButtonPressListener) {
-        mStylusButtonListener = onStylusButtonPressListener;
+    public void setContextClickListener(OnContextClickListener onContextClickListener) {
+        mContextClickListener = onContextClickListener;
     }
 
     /**
@@ -597,7 +591,7 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_MOVE:
-            if (mInLongPress || mInStylusButtonPress) {
+            if (mInLongPress || mInContextClick) {
                 break;
             }
             final float scrollX = mLastFocusX - focusX;
@@ -698,12 +692,14 @@ public class GestureDetector {
             mInputEventConsistencyVerifier.onGenericMotionEvent(ev, 0);
         }
 
+        final int actionButton = ev.getActionButton();
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_BUTTON_PRESS:
-                if (mStylusButtonListener != null && !mInStylusButtonPress && !mInLongPress
-                        && ev.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
-                    if (mStylusButtonListener.onStylusButtonPress(ev)) {
-                        mInStylusButtonPress = true;
+                if (mContextClickListener != null && !mInContextClick && !mInLongPress
+                        && (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                        || actionButton == MotionEvent.BUTTON_SECONDARY)) {
+                    if (mContextClickListener.onContextClick(ev)) {
+                        mInContextClick = true;
                         mHandler.removeMessages(LONG_PRESS);
                         mHandler.removeMessages(TAP);
                         return true;
@@ -712,9 +708,9 @@ public class GestureDetector {
                 break;
 
             case MotionEvent.ACTION_BUTTON_RELEASE:
-                if (mInStylusButtonPress
-                        && ev.getActionButton() == MotionEvent.BUTTON_STYLUS_PRIMARY) {
-                    mInStylusButtonPress = false;
+                if (mInContextClick && (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                        || actionButton == MotionEvent.BUTTON_SECONDARY)) {
+                    mInContextClick = false;
                     mIgnoreNextUpEvent = true;
                 }
                 break;
@@ -734,7 +730,7 @@ public class GestureDetector {
         mAlwaysInBiggerTapRegion = false;
         mDeferConfirmSingleTap = false;
         mInLongPress = false;
-        mInStylusButtonPress = false;
+        mInContextClick = false;
         mIgnoreNextUpEvent = false;
     }
 
@@ -747,7 +743,7 @@ public class GestureDetector {
         mAlwaysInBiggerTapRegion = false;
         mDeferConfirmSingleTap = false;
         mInLongPress = false;
-        mInStylusButtonPress = false;
+        mInContextClick = false;
         mIgnoreNextUpEvent = false;
     }
 
