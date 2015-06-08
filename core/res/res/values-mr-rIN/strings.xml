@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्ध खात्यांवर प्रवेश करा."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता घेतलेली फीड वाचा"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"सध्या संकालित केलेल्या फीडविषयी तपशील मिळविण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS संदेश पाठवा"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS संदेश पाठविण्यासाठी अॅप ला अनुमती देते. हे अनपेक्षित शुल्कामुळे होऊ शकते. दुर्भावनापूर्ण अॅप्स नी आपल्या पुष्टिकरणाशिवाय संदेश पाठवल्यामुळे आपले पैसे खर्च होऊ शकतात."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"आपले मजकूर संदेश वाचा (SMS किंवा MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"आपल्या टॅब्लेटवर किंवा सिम कार्डवर संचयित केलेले SMS संदेश वाचण्यासाठी अॅप ला अनुमती देते. हे सामग्री किंवा गोपनीयतेकडे दुर्लक्ष करून, सर्व SMS संदेश वाचण्यासाठी अॅप ला अनुमती देते."</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"आपण हे बंद करेपर्यंत"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"आपण बंद करेपर्यंत व्यत्यय आणू नका"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"व्यत्यय आणू नका"</string>

@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ရရိှနိုင်သောအကောင့်များကို အသုံးပြုရန်"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"အမည်သွင်းထားသောဖိဖ့်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"appအား လောလောဆယ် စင့်က် လုပ်ပြီးသား ထည့်သွင်းမှုများ ဆိုင်ရာ အသေးစိတ်များကို ရယူခွင့်ပြုသည်။"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"စာတိုပို့စနစ်(SMS)ဖြင့် စာများ ပို့သည်"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"အပလီကေးရှင်းအား စာတိုပို့ခွင့် ပြုပါ။ မမျှော်လင့်သော ကုန်ကျမှု ဖြစ်နိုင်ပါသည်။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ သင် မသိပဲ စာပို့ခြင်းများ ပြုလုပ်ခြင်းကြောင့် ပိုက်ဆံ အပို ကုန်စေနိုင်သည်"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"သင့်ရဲ့ စာပေးပို့ခြင်းများ ဖတ်ခြင်း (စာတို နှင့် ရုပ်သံစာ)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"အပလီကေးရှင်းအား တက်ဘလက် သို့မဟုတ် ဆင်းမ်ကဒ်မှာ သိမ်းဆည်းထားသော စာတိုများ ဖတ်ရှုခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် အကြာင်းအရာ သို့မဟုတ် ယုံကြည်စိတ်ချရမှုကို ဂရုမပြုပဲ စာတိုအားလုံးကို ဖတ်နိုင်ပါလိမ်မည်။"</string>
@@ -1506,6 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"သင်က ဒါကို ပိတ်မပစ်သည့် အထိ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"မနှောင့်ယှက်ရန် ကိုသင်ပိတ်သည်အထိ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ခေါက်ရန်"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"မနှောက်ယှက်ပါနှင့်"</string>

@@ -387,7 +387,7 @@
     <!-- no translation found for permlab_subscribedFeedsRead (4756609637053353318) -->
     <skip />
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Колдонмого учурда шайкештештирилген каналдардын чоо-жайларын алуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_sendSms (5600830612147671529) -->
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
     <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Колдонмого SMS билдирүүлөрүн жөнөтүү уруксатын берет. Бул сиз күтпөгөн чыгымдарга алып келиши мүмкүн. Зыяндуу колдонмолор сиздин ырастооңузсуз билдирүүлөрдү жөнөтүп, көп чыгымдарга себепкер болушу мүмкүн."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"билдирүүлөрүңүздү (SMS же MMS) окуу"</string>
@@ -1923,6 +1923,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Бул өчүрүлгөнгө чейин"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Тынчымды алба режими өчүрүлгөнгө чейин"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Тынчымды алба"</string>

@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Մուտքի հնարավորություն առկա հաշիվներ:"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"կարդալ բաժանորդագրված հոսքերը"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Թույլ է տալիս հավելվածին մանրամասներ ստանալ ընթացիկ համաժամեցված հոսքերի մասին:"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"ուղարկել SMS հաղորդագրություններ"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Թույլ է տալիս հավելվածին ուղարկել SMS հաղորդագրություններ: Այն կարող է անսպասելի ծախսերի պատճառ դառնալ: Վնասարար հավելվածները կարող են ձեր հաշվից գումար ծախսել` ուղարկելով հաղորդագրություններ`  առանց ձեր հաստատման:"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"կարդալ ձեր տեքստային հաղորդագրությունները (SMS կամ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Թույլ է տալիս հավելվածին կարդալ ձեր գրասալիկում կամ SIM քարտում պահված SMS հաղորդագրությունները: Սա թույլ է տալիս հավելվածին կարդալ բոլոր SMS հաղորդագրությունները` անկախ բովանդակությունից կամ գաղտնիությունից:"</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Մինչև <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Քանի դեռ չեք անջատել"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Մինչև չանջատեք «Չանհանգստացնել» գործառույթը"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Թաքցնել"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Չանհանգստացնել"</string>

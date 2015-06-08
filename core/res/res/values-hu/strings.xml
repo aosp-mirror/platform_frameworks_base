@@ -247,10 +247,10 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"A használt ablak tartalmának vizsgálata."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Felfedezés érintéssel bekapcsolása"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"A megérintett elemeket a rendszer hangosan kimondja, a képernyő pedig felfedezhető kézmozdulatok használatával."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Webelérhetőség fokozásának bekapcsolása"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Lehet telepíteni szkripteket, hogy az alkalmazástartalmak jobban elérhetők legyenek."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Internetes kisegítő lehetőségek bővítése"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Szkripteket lehet telepíteni, hogy könnyebb legyen hozzáférni az alkalmazások tartalmához."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"A gépelt szöveg figyelése"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Tartalmazza a személyes adatokat, például a hitelkártyaszámokat és jelszavakat."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Beleértve a személyes adatokat, például a hitelkártyaszámokat és jelszavakat."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"állapotsor kikapcsolása vagy módosítása"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lehetővé teszi az alkalmazás számára az állapotsor kikapcsolását, illetve rendszerikonok hozzáadását és eltávolítását."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"állapotsor"</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Hozzáférés az elérhető fiókokhoz."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"feliratkozott hírcsatornák olvasása"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lehetővé teszi az alkalmazás számára, hogy részleteket kapjon a jelenleg szinkronizált hírcsatornákról."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-ek küldése"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lehetővé teszi az alkalmazás számára, hogy SMS-eket küldjön. Ennek eredményeként váratlan terhelésekkel találkozhat. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül küldhetnek üzeneteket, így költségek merülhetnek fel."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"szöveges üzenetek (SMS vagy MMS) olvasása"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a táblagépen vagy SIM kártyán tárolt SMS-ekhez. Így az alkalmazás hozzáférhet az összes SMS-hez, azok tartalmától és titkos jellegétől függetlenül."</string>
@@ -829,7 +830,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Múlt hónapban"</string>
     <string name="older" msgid="5211975022815554840">"Régebbi"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"e napon: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"év: <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"nap"</string>
@@ -1086,7 +1087,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ne távolítsa el"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Beállítás"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Kiadás"</string>
-    <string name="ext_media_browse_action" msgid="8322172381028546087">"Felfedezés"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Tallózás"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"A(z) <xliff:g id="NAME">%s</xliff:g> nem található"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"Helyezze be újra az eszközt"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> áthelyezése"</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Amíg ki nem kapcsolja ezt"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Amíg ki nem kapcsolja a „Ne zavarjanak” lehetőséget"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Összecsukás"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne zavarjanak"</string>

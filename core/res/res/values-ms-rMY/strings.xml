@@ -205,7 +205,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Matikan kuasa"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan pepijat"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan pepijat"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Proses ini akan mengambil sedikit masa bermula dari laporan pepijat sehingga siap untuk dihantar; jadi diharap bersabar."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Harap bersabar, mungkin perlu sedikit masa untuk memulakan laporan sehingga siap untuk dihantar."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mod senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Bunyi DIMATIKAN"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Bunyi DIHIDUPKAN"</string>
@@ -250,7 +250,7 @@
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Hidupkan kebolehcapaian web dipertingkat"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skrip boleh dipasang untuk menjadikan kandungan apl lebih mudah diakses."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Perhatikan teks yang anda taip"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Berserta data peribadi seperti nombor kad kredit dan kata laluan."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Termasuk data peribadi seperti nombor kad kredit dan kata laluan."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"bar status"</string>
@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Akses akaun yang tersedia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca suapan langganan"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Membenarkan apl mendapatkan butiran mengenai suapan tersegerak semasa."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"hantar mesej SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Membenarkan apl menghantar mesej SMS. Ini boleh menyebabkan caj di luar jangkaan. Apl hasad boleh membuat anda kerugian wang dengan menghantar mesej tanpa pengesahan anda."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"baca mesej teks anda (SMS atau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Membenarkan apl membaca mesej SMS yang tersimpan pada tablet atau kad SIM anda. Ini membenarkan apl membaca semua mesej SMS, tanpa mengira kandungan atau kerahsiaan."</string>
@@ -640,7 +641,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pembantu"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Abang/Adik"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Anak"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Rakan Kongsi Domestik"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Pasangan Hidup"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Bapa"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Rakan"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Pengurus"</string>
@@ -699,8 +700,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Kad SIM dikunci."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Membuka kunci kad SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nSila cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah tersilap taip menaip kata laluan anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah tersilap taip PIN anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Anda telah tersilap lukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta untuk membuka kunci TV anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam masa <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Sila cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
@@ -1320,8 +1321,8 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau kata laluan tidak sah."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau kata laluan anda?\nLawati"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Menyemak akaun…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Anda telah cuba membuka kunci TV secara tidak betul sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, TV akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
@@ -1471,7 +1472,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Dipasang oleh pentadbir anda"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dipadamkan oleh pentadbir anda"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan menghadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan mengehadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d minit (sehingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Selama satu minit (sehingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Sehingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Sehingga anda matikan"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hingga anda mematikan Jangan Ganggu"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Runtuhkan"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Jangan ganggu"</string>

@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Zugriff auf verfügbare Konten"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Abonnierte Feeds lesen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ermöglicht der App, Details zu den zurzeit synchronisierten Feeds abzurufen"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS senden"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ermöglicht der App, SMS zu senden. Dies kann zu unerwarteten Kosten führen. Schädliche Apps können Kosten verursachen, indem sie Nachrichten ohne Ihre Bestätigung senden."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"SMS oder MMS lesen"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ermöglicht der App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu lesen. Die App kann alle SMS lesen, unabhängig von Inhalt und Vertraulichkeit."</string>
@@ -965,7 +966,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Benachrichtigungslautstärke"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standard-Klingelton"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standard-Klingelton (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Keine"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Ohne"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Klingeltöne"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Unbekannter Klingelton"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Bis zur Deaktivierung"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Bis zur Deaktivierung von \"Nicht stören\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nicht stören"</string>

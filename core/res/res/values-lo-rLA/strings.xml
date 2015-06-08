@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ເຂົ້າເຖິງບັນຊີທີ່ໃຊ້ໄດ້."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ອ່ານຂໍ້ມູນຟີດທີ່ສະໝັກໄວ້"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ອະນຸຍາດໃຫ້ແອັບຯ ດຶງລາຍລະອຽດກ່ຽວກັບຂໍ້ມູນທີ່ກຳລັງຊິ້ງຢູ່."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"ສົ່ງຂໍ້ຄວາມ SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"ສົ່ງ ແລະ​ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຂໍ້ຄວາມ SMS ໄດ້. ນີ້ອາດເຮັດໃຫ້ທ່ານເກີດການຄິດຄ່າບໍລິການທີ່ບໍ່ຄາດຄິດໄດ້. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດເຮັດໃຫ້ທ່ານເສຍເງິນຍ້ອນການສົ່ງຂໍ້ຄວາມໂດຍທີ່ທ່ານບໍ່ຮູ້ໂຕໄດ້."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ອ່ານຂໍ້ຄວາມຂອງທ່ານ (SMS ຫຼື MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານ SMS ທີ່ບັນທຶກໄວ້ໃນແທັບເລັດ ຫຼື SIM card ຂອງທ່ານ. ຄຸນສົມບັດນີ້ຈະເຮັດໃຫ້ແອັບຯສາມາດອ່ານຂໍ້ຄວາມ SMS ທັງໝົດໄດ້ ບໍ່ເນື້ອຫາຂອງມັນຈະແມ່ນຫຍັງກໍຕາມ."</string>
@@ -1506,6 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"ຈົນ​ກ່​ວາ​ທ່ານ​ປິດ​ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ຫ້າມ​ລົບ​ກວນ"</string>

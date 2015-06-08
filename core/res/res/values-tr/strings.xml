@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kullanılabilir hesaplara erişin."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abone olunan yayınları okuma"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Uygulamaya, o anda senkronize olan özet akışları ile ilgili bilgi alma izni verir."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS iletileri gönder"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Uygulamaya SMS iletisi gönderme izni verir. Bu durum beklenmeyen ödemelere neden olabilir. Kötü amaçlı uygulamalar onayınız olmadan iletiler göndererek sizi zarara uğratabilir."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"kısa mesajlarımı (SMS veya MMS) oku"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Uygulamaya tabletinizde veya SIM kartta saklanan SMS iletilerini okuma izni verir. Bu izin, uygulamanın tüm SMS iletilerini içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
@@ -409,7 +410,7 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Uygulamaya, çoklu yayın adreslerini kullanarak yalnızca tablete değil Kablosuz ağ üzerindeki tüm cihazlara gönderilen paketleri alma izni verir. Çoklu olmayan yayın moduna göre daha fazla güç tüketir."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Uygulamaya, sadece TV\'nize değil çoklu yayın adresleri kullanarak bir Kablosuz ağdaki tüm cihazlara gönderilmiş olan paketleri alma izni verir. Çoklu olmayan yayın modundan daha fazla güç kullanır."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Uygulamaya, çoklu yayın adreslerini kullanarak yalnızca telefona değil Kablosuz ağ üzerindeki tüm cihazlara gönderilen paketleri alma izni verir. Çoklu olmayan yayın moduna göre daha fazla güç tüketir."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ayarlara eriş"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ayarlarına erişme"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Uygulamaya, yerel Bluetooth TV\'yi yapılandırma, uzak cihazları bulma ve bu cihazlarla eşleme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Uygulamaya, yerel Bluetooth telefonunu yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
@@ -420,9 +421,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Uygulamaya TV\'yi WiMAX ağlarına bağlama ve TV\'nin WiMAX ağları ile bağlantısını kesme izni verir."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Uygulamaya, telefonu WiMAX ağlarına bağlanma veya bağlantıyı kesme izni verir."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth cihazlarla eşle"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Uygulamaya, tabletteki Bluetooth yapılandırmasını görüntüleme, eşleştirilmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Uygulamaya TV\'nizde Bluetooth yapılandırmasını görüntüleme ve eşleştirilmiş cihazlarla bağlantı yapma ve bağlantı yapılmasını kabul etme izni verir."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Uygulamaya, telefondaki Bluetooth yapılandırmasını görüntüleme, eşleştirilmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Uygulamaya, tabletteki Bluetooth yapılandırmasını görüntüleme, eşlenmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Uygulamaya TV\'nizde Bluetooth yapılandırmasını görüntüleme ve eşlenmiş cihazlarla bağlantı yapma ve bağlantı yapılmasını kabul etme izni verir."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Uygulamaya, telefondaki Bluetooth yapılandırmasını görüntüleme, eşlenmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Yakın Alan İletişimini denetle"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Uygulamaya, Near Field Communication (NFC) etiketleri, kartlar ve okuyucular ile iletişim kurma izni verir."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran kilidimi devre dışı bırak"</string>
@@ -829,7 +830,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Son ay"</string>
     <string name="older" msgid="5211975022815554840">"Daha eski"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> tarihinde"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> yılında"</string>
     <string name="day" msgid="8144195776058119424">"gün"</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Rahatsız Etmeyin ayarını kapatana kadar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Daralt"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Rahatsız etmeyin"</string>

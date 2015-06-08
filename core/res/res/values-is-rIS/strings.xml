@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Aðgangur að tiltækum reikningum."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lesa strauma í áskrift"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Leyfir forriti að fá upplýsingar um straumana sem samstilltir eru á hverjum tíma."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"senda SMS-skilaboð"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Leyfir forriti að senda SMS-skilaboð. Þetta getur valdið óvæntri gjaldtöku. Spilliforrit geta kostað þig peninga með því að senda skilaboð án staðfestingar frá þér."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lesa textaskilaboð (SMS eða MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Leyfir forriti að lesa SMS-skilaboð sem vistuð eru í spjaldtölvunni eða á SIM-kortinu. Þetta gerir forritinu kleift að lesa öll SMS-skilaboð burtséð frá innihaldi eða trúnaðarstigi."</string>
@@ -1506,6 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Þar til þú slekkur á þessu"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Þar til þú slekkur á „Ónáðið ekki“"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minnka"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ónáðið ekki"</string>
