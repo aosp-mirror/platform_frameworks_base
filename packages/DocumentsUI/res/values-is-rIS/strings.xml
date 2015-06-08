@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ekki er hægt að eyða einhverjum skjölum"</string>
     <string name="share_via" msgid="8966594246261344259">"Deila í gegnum"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Afritar skrár"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Skrár færðar"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> eftir"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Afritar <xliff:g id="COUNT_1">%1$d</xliff:g> skrá.</item>
@@ -75,21 +74,22 @@
       <item quantity="other">Færir <xliff:g id="COUNT_1">%1$d</xliff:g> skrár.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Undirbúningur fyrir afritun…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Flutningur undirbúinn…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Ekki var hægt að afrita <xliff:g id="COUNT_1">%1$d</xliff:g> skrá</item>
       <item quantity="other">Ekki var hægt að afrita <xliff:g id="COUNT_1">%1$d</xliff:g> skrár</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="one">Ekki tókst að færa <xliff:g id="COUNT_1">%1$d</xliff:g> skrá</item>
+      <item quantity="other">Ekki tókst að færa <xliff:g id="COUNT_1">%1$d</xliff:g> skrár</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Snertu til að skoða nánari upplýsingar"</string>
     <string name="retry" msgid="7564024179122207376">"Reyna aftur"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Þessar skrár voru ekki afritaðar: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Þessar skrár voru ekki færðar: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> skrá afrituð á klippiborð.</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> skrár afritaðar á klippiborð.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Ekki er hægt að líma valdar skrár hér."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Ekki er hægt að vista valdar skrár á þessum stað."</string>
 </resources>

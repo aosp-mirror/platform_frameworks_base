@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Non se poden eliminar algúns documentos"</string>
     <string name="share_via" msgid="8966594246261344259">"Compartir a través de"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Copiando ficheiros"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Mover ficheiros"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Tempo restante: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">Copiando <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros.</item>
@@ -75,21 +74,22 @@
       <item quantity="one">Movendo <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Preparando para copiar…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Preparándose para mover..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Non se puideron copiar <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros</item>
       <item quantity="one">Non se puido copiar <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="other">Non se puideron mover <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros</item>
+      <item quantity="one">Non se puido mover <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Toca para ver detalles"</string>
     <string name="retry" msgid="7564024179122207376">"Tentar de novo"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Non se copiaron estes ficheiros: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Non se moveron estes ficheiros: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Copiáronse <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros no portapapeis.</item>
       <item quantity="one">Copiouse <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro no portapapeis.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Non se poden pegar os ficheiros seleccionados nesta localización."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Non se poden pegar os ficheiros seleccionados nesta localización."</string>
 </resources>

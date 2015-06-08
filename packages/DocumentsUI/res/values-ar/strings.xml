@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"تعذر حذف بعض المستندات"</string>
     <string name="share_via" msgid="8966594246261344259">"مشاركة عبر"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"جارٍ نسخ الملفات"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"نقل الملفات"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"المدة المتبقية: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="zero">جارٍ نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات.</item>
@@ -83,8 +82,7 @@
       <item quantity="one">جارٍ نقل <xliff:g id="COUNT_0">%1$d</xliff:g> ملف واحد.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"جارٍ التحضير للنسخ ..."</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"جارٍ التحضير للنقل…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="zero">لم يتعذر نسخ أية ملفات (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
       <item quantity="two">تعذر نسخ ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
@@ -93,12 +91,18 @@
       <item quantity="other"> تعذر نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات</item>
       <item quantity="one"> تعذر نسخ <xliff:g id="COUNT_0">%1$d</xliff:g> ملف</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="zero">ليست هناك ملفات يتعذر نقلها (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="two">تعذر نقل ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few">تعذر نقل <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات</item>
+      <item quantity="many">تعذر نقل <xliff:g id="COUNT_1">%1$d</xliff:g> ملفًا</item>
+      <item quantity="other">تعذر نقل <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات</item>
+      <item quantity="one">تعذر نقل ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"المس لعرض التفاصيل"</string>
     <string name="retry" msgid="7564024179122207376">"إعادة المحاولة"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"لم يتم نسخ هذه الملفات: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"لم يتم نقل الملفات التالية: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="zero">لم يتم نسخ أي ملف (<xliff:g id="COUNT_1">%1$d</xliff:g>) إلى الحافظة.</item>
       <item quantity="two">تم نسخ ملفين اثنين (<xliff:g id="COUNT_1">%1$d</xliff:g>) إلى الحافظة.</item>
@@ -107,5 +111,5 @@
       <item quantity="other">تم نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات إلى الحافظة.</item>
       <item quantity="one">تم نسخ ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>) إلى الحافظة.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"لا يمكن لصق الملفات المحددة في هذا الموقع."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"يتعذر لصق الملفات المحددة في هذا الموقع."</string>
 </resources>

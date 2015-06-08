@@ -39,7 +39,7 @@
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostra la targeta SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Amaga emmagatz. intern"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Amaga la targeta SD"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostra la mida de fitxer"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostra la mida del fitxer"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Amaga la mida del fitxer"</string>
     <string name="button_copy" msgid="8706475544635021302">"Copia"</string>
     <string name="button_move" msgid="2202666023104202232">"Desplaça"</string>
@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"No es poden suprimir alguns documents."</string>
     <string name="share_via" msgid="8966594246261344259">"Comparteix mitjançant"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"S\'estan copiant fitxers"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"S\'estan movent fitxers"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Temps restant: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">S\'estan copiant <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers.</item>
@@ -75,21 +74,22 @@
       <item quantity="one">S\'està movent <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"S\'està preparant una còpia…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"S\'està preparant per moure\'ls..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">No s\'han pogut copiar <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
       <item quantity="one">No s\'ha pogut copiar <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="other">No s\'han pogut moure <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
+      <item quantity="one">No s\'ha pogut moure <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Toca per veure els detalls"</string>
     <string name="retry" msgid="7564024179122207376">"Torna-ho a provar"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aquests fitxers no s\'han copiat: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Aquests fitxers no s\'han mogut: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">S\'han copiat <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers al porta-retalls.</item>
       <item quantity="one">S\'ha copiat <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer al porta-retalls.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"No s\'han pogut enganxar els fitxers seleccionats en aquesta ubicació."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"No s\'han pogut enganxar els fitxers seleccionats en aquesta ubicació."</string>
 </resources>

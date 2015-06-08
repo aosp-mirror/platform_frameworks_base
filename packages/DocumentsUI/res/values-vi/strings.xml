@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Không thể xóa một số tài liệu"</string>
     <string name="share_via" msgid="8966594246261344259">"Chia sẻ qua"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Đang sao chép tệp"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Đang di chuyển tệp"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Còn <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">Đang sao chép <xliff:g id="COUNT_1">%1$d</xliff:g> tệp.</item>
@@ -75,21 +74,22 @@
       <item quantity="one">Đang di chuyển <xliff:g id="COUNT_0">%1$d</xliff:g> tệp.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Đang chuẩn bị sao chép…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Đang chuẩn bị di chuyển…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Không thể sao chép <xliff:g id="COUNT_1">%1$d</xliff:g> tệp</item>
       <item quantity="one">Không thể sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="other">Không thể di chuyển <xliff:g id="COUNT_1">%1$d</xliff:g> tệp</item>
+      <item quantity="one">Không thể di chuyển <xliff:g id="COUNT_0">%1$d</xliff:g> tệp</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Chạm để xem chi tiết"</string>
     <string name="retry" msgid="7564024179122207376">"Thử lại"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Những tệp này chưa được sao chép: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Những tệp này chưa được di chuyển: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Đã sao chép <xliff:g id="COUNT_1">%1$d</xliff:g> tệp vào khay nhớ tạm.</item>
       <item quantity="one">Đã sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp vào khay nhớ tạm.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Không thể dán tệp được chọn ở vị trí này."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Không thể dán các tệp đã chọn vào vị trí này."</string>
 </resources>

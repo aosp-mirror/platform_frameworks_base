@@ -20,9 +20,9 @@
     <string name="title_open" msgid="4353228937663917801">"Buksan mula sa"</string>
     <string name="title_save" msgid="2433679664882857999">"I-save sa"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Gumawa ng folder"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"View ng grid"</string>
-    <string name="menu_list" msgid="7279285939892417279">"View ng listahan"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Pag-uri-uriin ayon sa"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"View na grid"</string>
+    <string name="menu_list" msgid="7279285939892417279">"View na listahan"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Uriin ayon sa"</string>
     <string name="menu_search" msgid="3816712084502856974">"Maghanap"</string>
     <string name="menu_settings" msgid="6008033148948428823">"Mga Setting"</string>
     <string name="menu_open" msgid="432922957274920903">"Buksan"</string>
@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Hindi matanggal ang ilang dokumento"</string>
     <string name="share_via" msgid="8966594246261344259">"Ibahagi sa pamamagitan ng"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kinokopya ang mga file"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Inililipat ang mga file"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> na lang ang natitira"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Kumokopya ng <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
@@ -75,21 +74,22 @@
       <item quantity="other">Inililipat ang <xliff:g id="COUNT_1">%1$d</xliff:g> na file.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Naghahanda para sa pagkopya…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Naghahanda para sa paglilipat…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Hindi makopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="other">Hindi makopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> na file</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="one">Hindi nailipat ang <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
+      <item quantity="other">Hindi nailipat ang <xliff:g id="COUNT_1">%1$d</xliff:g> na file</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Pindutin upang tingnan ang mga detalye"</string>
     <string name="retry" msgid="7564024179122207376">"Subukang muli"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hindi nakopya ang mga file na ito: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Hindi nailipat ang mga file na ito: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Nakopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> file sa clipboard.</item>
       <item quantity="other">Nakopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> na file sa clipboard.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Hindi mai-paste ang mga piniling file sa lokasyong ito."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Hindi mai-paste sa lokasyong ito ang mga piniling file."</string>
 </resources>
