@@ -32885,7 +32885,7 @@ package android.telephony {
     method public android.os.PersistableBundle getConfig();
     method public android.os.PersistableBundle getConfigForSubId(int);
     method public static android.os.PersistableBundle getDefaultConfig();
-    method public void reloadCarrierConfigForSubId(int);
+    method public void notifyConfigChangedForSubId(int);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final java.lang.String KEY_ADDITIONAL_CALL_SETTING_BOOL = "additional_call_setting_bool";

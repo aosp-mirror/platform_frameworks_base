@@ -59,16 +59,16 @@ public abstract class CarrierService extends Service {
      * <ol>
      * <li>The carrier app package is updated, or</li>
      * <li>The carrier app requests a reload with
-     * {@link android.telephony.CarrierConfigManager#reloadCarrierConfigForSubId
-     * reloadCarrierConfigForSubId}.</li>
+     * {@link android.telephony.CarrierConfigManager#notifyConfigChangedForSubId
+     * notifyConfigChangedForSubId}.</li>
      * </ol>
      * This method can be called after a SIM card loads, which may be before or after boot.
      * </p>
      * <p>
      * This method should not block for a long time. If expensive operations (e.g. network access)
      * are required, this method can schedule the work and return null. Then, use
-     * {@link android.telephony.CarrierConfigManager#reloadCarrierConfigForSubId
-     * reloadCarrierConfigForSubId} to trigger a reload when the config is ready.
+     * {@link android.telephony.CarrierConfigManager#notifyConfigChangedForSubId
+     * notifyConfigChangedForSubId} to trigger a reload when the config is ready.
      * </p>
      * <p>
      * Implementations should use the keys defined in {@link android.telephony.CarrierConfigManager
