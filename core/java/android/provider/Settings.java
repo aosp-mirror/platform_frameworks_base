@@ -811,14 +811,17 @@ public final class Settings {
     /**
      * Activity Action: Show Do Not Disturb access settings.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * Users can grant and deny access to Do Not Disturb configuration from here.
+     * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
+     * details.
      * <p>
      * Input: Nothing.
      * <p>
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_ZEN_ACCESS_SETTINGS = "android.settings.ZEN_ACCESS_SETTINGS";
+    public static final String ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
+            = "android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS";
 
     /**
      * @hide
@@ -5425,12 +5428,21 @@ public final class Settings {
         public static final String ASSIST_STRUCTURE_ENABLED = "assist_structure_enabled";
 
         /**
-         * Names of the packages that the current user has explicitly allowed to
+         * Names of the service components that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
          *
          * @hide
          */
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+
+        /**
+         * Names of the packages that the current user has explicitly allowed to
+         * manage notification policy configuration, separated by ':'.
+         *
+         * @hide
+         */
+        public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
+                "enabled_notification_policy_access_packages";
 
         /**
          * @hide
