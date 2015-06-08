@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"មិន​អាច​លុប​ឯកសារ​មួយ​ចំនួន"</string>
     <string name="share_via" msgid="8966594246261344259">"ចែករំលែក​តាម"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"កំពុងថតចម្លងឯកសារ"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"ផ្លាស់ទីឯកសារ"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"នៅសល់ <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">កំពុងថតចម្លងឯកសារចំនួន <xliff:g id="COUNT_1">%1$d</xliff:g> ។</item>
@@ -75,21 +74,22 @@
       <item quantity="one">កំពុងផ្លាស់ទីឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g>។</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"កំពុងរៀបចំចម្លង…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"កំពុងរៀបចំផ្លាស់ទី…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">មិនអាចចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">មិនអាចចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="other">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"ប៉ះ ដើម្បីមើលព័ត៌មានលម្អិត"</string>
     <string name="retry" msgid="7564024179122207376">"ព្យាយាមម្ដងទៀត"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ឯកសារទាំងនេះមិនបានចម្លងទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"ឯកសារទាំងនេះមិនអាចផ្លាស់ទីបានទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">បានចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> ទៅតម្បៀតខ្ទាស់។</item>
       <item quantity="one">បានចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> ទៅតម្បៀតខ្ទាស់។</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"មិនអាចបិទភ្ជាប់ឯកសារដែលបានជ្រើសទៅក្នុងទីតាំងនេះបានទេ។"</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"មិនអាចបិទភ្ជាប់ឯកសារដែលបានជ្រើសនៅក្នុងទីតាំងនេះបានទេ។"</string>
 </resources>

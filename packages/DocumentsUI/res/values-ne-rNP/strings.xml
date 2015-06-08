@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"केही कागजातहरू मेट्न असमर्थ छ"</string>
     <string name="share_via" msgid="8966594246261344259">"माध्यमबाट साझेदारी गर्नुहोस्"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फाइलहरू प्रतिलिपि गर्दै:"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"फाइलहरू सार्दै"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g>बाँकी"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g>फाइलहरू प्रतिलिप गर्दै।</item>
@@ -75,21 +74,22 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> फाइलहरु सार्दै।</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"प्रतिलिपिको लागि तयारी गर्दै ..."</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"सार्नको लागि तयारी गर्दै ..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू प्रतिलिपि गर्न सकेन</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल प्रतिलिपि गर्न सकेन</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू सार्न सकिएन</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल सार्न सकिएन</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"विवरणहरू हेर्न छुनुहोस्"</string>
     <string name="retry" msgid="7564024179122207376">"पुनःप्रयास गर्नुहोस्"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"यी फाइलहरू प्रतिलिपि गरिएको थिएनः <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"यी फाइलहरू सारिएनन्: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> क्लिपबोर्डमा <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू प्रतिलिपि बनाइए।</item>
       <item quantity="one"> क्लिपबोर्डमा <xliff:g id="COUNT_0">%1$d</xliff:g> फाइलहरूका प्रतिलिपि बनाइए।</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"यस स्थान मा चयन गरिएका फाइलहरू टाँस्न सकिएन।"</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"यो स्थानमा चयन गरिएका फाइलहरू टाँस्न सकिँदैन।"</string>
 </resources>

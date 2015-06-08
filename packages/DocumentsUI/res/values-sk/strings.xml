@@ -36,14 +36,14 @@
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopírovať"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Prilepiť"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Zobraziť interné úložisko"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Zobraziť kartu SD"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Zobraziť SD kartu"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Skryť interné úložisko"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skryť kartu SD"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skryť SD kartu"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Zobraziť veľkosť súboru"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Skryť veľkosť súboru"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopírovať"</string>
     <string name="button_move" msgid="2202666023104202232">"Presunúť"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Vybraté: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Vybrané: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Podľa názvu"</string>
     <string name="sort_date" msgid="586080032956151448">"Podľa dátumu zmeny"</string>
     <string name="sort_size" msgid="3350681319735474741">"Podľa veľkosti"</string>
@@ -61,10 +61,9 @@
     <string name="empty" msgid="7858882803708117596">"Žiadne položky"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Súbor sa nepodarilo otvoriť"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Niektoré dokumenty sa nepodarilo odstrániť"</string>
-    <string name="share_via" msgid="8966594246261344259">"Zdieľať pomocou"</string>
+    <string name="share_via" msgid="8966594246261344259">"Zdieľať"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírovanie súborov"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Presúvajú sa súbory"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Zostáva: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="few">Kopírujú sa <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>
@@ -79,25 +78,28 @@
       <item quantity="one">Presúva sa <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravuje sa na kopírovanie..."</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Prebieha príprava na presunutie…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
       <item quantity="many">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
       <item quantity="other">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
       <item quantity="one">Zlyhalo kopírovanie <xliff:g id="COUNT_0">%1$d</xliff:g> súboru</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> súbory nie je možné presunúť</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> súboru nie je možné presunúť</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> súborov nie je možné presunúť</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> súbor nie je možné presunúť</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Klepnutím zobrazíte podrobné informácie"</string>
     <string name="retry" msgid="7564024179122207376">"Skúsiť znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Tieto súbory neboli presunuté: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="few">Do schránky boli skopírované <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>
       <item quantity="many">Do schránky bolo skopírovaného <xliff:g id="COUNT_1">%1$d</xliff:g> súboru.</item>
       <item quantity="other">Do schránky bolo skopírovaných <xliff:g id="COUNT_1">%1$d</xliff:g> súborov.</item>
       <item quantity="one">Do schránky bol skopírovaný <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Do tohto umiestnenia nie je možné prilepiť vybraté súbory"</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Do tohto umiestnenia nie je možné prilepiť vybrané súbory"</string>
 </resources>

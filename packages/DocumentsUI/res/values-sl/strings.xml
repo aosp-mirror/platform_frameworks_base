@@ -43,7 +43,7 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Skrij velikost datoteke"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiraj"</string>
     <string name="button_move" msgid="2202666023104202232">"Premik"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Št. izbranih: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"Izbranih: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Po imenu"</string>
     <string name="sort_date" msgid="586080032956151448">"Po datumu spremembe"</string>
     <string name="sort_size" msgid="3350681319735474741">"Po velikosti"</string>
@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nekaterih dokumentov ni mogoče izbrisati"</string>
     <string name="share_via" msgid="8966594246261344259">"Deli z drugimi prek"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiranje datotek"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Premikanje datotek"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Še <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Kopiranje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
@@ -79,25 +78,28 @@
       <item quantity="other">Premikanje <xliff:g id="COUNT_1">%1$d</xliff:g> datotek.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravljanje na kopiranje …"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Priprava na premikanje …"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče kopirati</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče premakniti</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Dotaknite se za ogled podrobnosti"</string>
     <string name="retry" msgid="7564024179122207376">"Poskusi znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Te datoteke niso bile kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Te datoteke niso bile premaknjene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">V odložišče je bila kopirana <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka.</item>
       <item quantity="two">V odložišče sta bili kopirani <xliff:g id="COUNT_1">%1$d</xliff:g> datoteki.</item>
       <item quantity="few">V odložišče so bile kopirane <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
       <item quantity="other">V odložišče je bilo kopiranih <xliff:g id="COUNT_1">%1$d</xliff:g> datotek.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Izbranih datotek ni mogoče prilepiti sem."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Izbranih datotek ni mogoče prilepiti sem."</string>
 </resources>

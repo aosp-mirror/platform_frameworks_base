@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Některé dokumenty nelze smazat"</string>
     <string name="share_via" msgid="8966594246261344259">"Sdílet pomocí"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírování souborů"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Přesouvání souborů"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Zbývající čas: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="few">Kopírování <xliff:g id="COUNT_1">%1$d</xliff:g> souborů</item>
@@ -79,25 +78,28 @@
       <item quantity="one">Přesouvá se <xliff:g id="COUNT_0">%1$d</xliff:g> soubor.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Příprava na kopírování…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Příprava na přesunutí…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory</item>
       <item quantity="many">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru</item>
       <item quantity="other">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů</item>
       <item quantity="one">Nepodařilo se zkopírovat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> soubory nelze přesunout</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> souboru nelze přesunout</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> souborů nelze přesunout</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> soubor nelze přesunout</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Podrobnosti zobrazíte klepnutím"</string>
     <string name="retry" msgid="7564024179122207376">"Opakovat"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tyto soubory nebyly zkopírovány: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Následující soubory nebyly přesunuty: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> soubory byly zkopírovány do schránky.</item>
       <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> souboru bylo zkopírováno do schránky.</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> souborů bylo zkopírováno do schránky.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> soubor byl zkopírován do schránky.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Vybrané soubory nelze vložit do tohoto umístění."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Vybrané soubory nelze vložit do tohoto umístění."</string>
 </resources>

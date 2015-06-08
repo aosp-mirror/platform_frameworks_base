@@ -63,8 +63,7 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"ບໍ່ສາມາດລຶບບາງເອກະສານໄດ້"</string>
     <string name="share_via" msgid="8966594246261344259">"ແບ່ງປັນຜ່ານ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ​ໄຟ​ລ໌"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"ກຳ​ລັງ​ຍ້າຍ​ໄຟ​ລ໌"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ຍັງ​ເຫຼືອ​ຢູ່"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌.</item>
@@ -75,21 +74,22 @@
       <item quantity="one">ກຳ​ລັງ​ຍ້າຍ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"ກຳ​ລັງ​ກຽມ​ອັດ​ສຳ​ເນົາ…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"ກຳ​ລັງ​ກະ​ກຽມ​ຍ້າຍ…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">ບໍ່​ສາ​ມາດ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌​ໄດ້</item>
       <item quantity="one">ບໍ່​ສາ​ມາດ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌​ໄດ້</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="other">ບໍ່​ສາ​ມາດ​ຍ້າຍ​ໄດ້ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌</item>
+      <item quantity="one">ບໍ່​ສາ​ມາດ​ຍ້າຍ​ໄດ້ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"ສຳ​ພັດເພື່ອເບິ່ງລາຍລະອຽດ"</string>
     <string name="retry" msgid="7564024179122207376">"ລອງໃໝ່"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ໄຟ​ລ໌​ເຫຼົ່າ​ນີ້​ບໍ່​ຖື​ກ​ອັດ​ສຳ​ເນົາ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"ໄຟ​ລ໌​ເຫຼົ່າ​ນີ້​ບໍ່​ຖືກ​ຍ້າຍ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌​ໃສ່​ຄ​ລິບບອດ​ແລ້ວ.</item>
       <item quantity="one">ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌​ໃສ່​ຄ​ລິບບອດ​ແລ້ວ.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"ບໍ່​ສາ​ມາດ​ແປະ​ໄຟ​ລ໌​ເລືອກ​ໄວ້​ຢູ່​ໃນ​ທີ່​ຕັ້ງ​ນີ້​ໄດ້."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ບໍ່​ສາ​ມາດ​ແປະ​ໄຟ​ລ໌​ເລືອກ​ໄວ້​ຢູ່​ໃນ​ທີ່​ຕັ້ງ​ນີ້​ໄດ້."</string>
 </resources>

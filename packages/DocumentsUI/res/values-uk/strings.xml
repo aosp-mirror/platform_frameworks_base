@@ -58,13 +58,12 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Ярлики"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Пристрої"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Інші програми"</string>
-    <string name="empty" msgid="7858882803708117596">"Немає елементів"</string>
+    <string name="empty" msgid="7858882803708117596">"Нічого немає"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Не вдалося відкрити файл"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Не вдалося видалити деякі документи"</string>
     <string name="share_via" msgid="8966594246261344259">"Надіслати через"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Копіювання файлів"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Переміщення файлів"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Залишилося <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Копіювання <xliff:g id="COUNT_1">%1$d</xliff:g> файлу.</item>
@@ -79,25 +78,28 @@
       <item quantity="other">Переміщення <xliff:g id="COUNT_1">%1$d</xliff:g> файла.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Підготовка до копіювання…"</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Підготовка до переміщення…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Не вдалося скопіювати <xliff:g id="COUNT_1">%1$d</xliff:g> файл</item>
       <item quantity="few">Не вдалося скопіювати <xliff:g id="COUNT_1">%1$d</xliff:g> файли</item>
       <item quantity="many">Не вдалося скопіювати <xliff:g id="COUNT_1">%1$d</xliff:g> файлів</item>
       <item quantity="other">Не вдалося скопіювати <xliff:g id="COUNT_1">%1$d</xliff:g> файлу</item>
     </plurals>
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+      <item quantity="one">Не вдалося перемістити <xliff:g id="COUNT_1">%1$d</xliff:g> файл</item>
+      <item quantity="few">Не вдалося перемістити <xliff:g id="COUNT_1">%1$d</xliff:g> файли</item>
+      <item quantity="many">Не вдалося перемістити <xliff:g id="COUNT_1">%1$d</xliff:g> файлів</item>
+      <item quantity="other">Не вдалося перемістити <xliff:g id="COUNT_1">%1$d</xliff:g> файлу</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Торкніться, щоб дізнатися більше"</string>
     <string name="retry" msgid="7564024179122207376">"Повторити"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ці файли не скопійовано: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
-    <skip />
+    <string name="move_failure_alert_content" msgid="7151140279020481180">"Не переміщено ці файли: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">У буфер обміну скопійовано <xliff:g id="COUNT_1">%1$d</xliff:g> файл.</item>
       <item quantity="few">У буфер обміну скопійовано <xliff:g id="COUNT_1">%1$d</xliff:g> файли.</item>
       <item quantity="many">У буфер обміну скопійовано <xliff:g id="COUNT_1">%1$d</xliff:g> файлів.</item>
       <item quantity="other">У буфер обміну скопійовано <xliff:g id="COUNT_1">%1$d</xliff:g> файла.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Не вдається вставити вибрані файли в цю папку."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Не вдається вставити вибрані файли в цю папку."</string>
 </resources>
