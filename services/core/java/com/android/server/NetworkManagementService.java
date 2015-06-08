@@ -231,14 +231,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
         mFgHandler = new Handler(FgThread.get().getLooper());
 
-        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
-            mConnector = null;
-            mThread = null;
-            mDaemonHandler = null;
-            mPhoneStateListener = null;
-            return;
-        }
-
         // Don't need this wake lock, since we now have a time stamp for when
         // the network actually went inactive.  (It might be nice to still do this,
         // but I don't want to do it through the power manager because that pollutes the
