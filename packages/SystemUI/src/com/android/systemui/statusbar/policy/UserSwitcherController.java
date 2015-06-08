@@ -411,7 +411,8 @@ public class UserSwitcherController {
         @Override
         public int getCount() {
             boolean secureKeyguardShowing = mController.mKeyguardMonitor.isShowing()
-                    && mController.mKeyguardMonitor.isSecure();
+                    && mController.mKeyguardMonitor.isSecure()
+                    && !mController.mKeyguardMonitor.isTrusted();
             if (!secureKeyguardShowing) {
                 return mController.mUsers.size();
             }
