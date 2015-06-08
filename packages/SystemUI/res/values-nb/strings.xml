@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Slå på batterisparing"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Innstillinger"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Trådløse nettverk"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Roter skjerm automatisk"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Rotér skjermen automatisk"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"DEMPET"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Varsler"</string>
@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vil du tillate USB-feilsøking?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datamaskinens nøkkelfingeravtrykk for RSA er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillat alltid fra denne datamaskinen"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-feilsøking er ikke tillatt"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til hovedbrukeren «<xliff:g id="NAME">%s</xliff:g>»."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom for å fylle skjermen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strekk for å fylle skjerm"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Lagrer skjermdumpen …"</string>
@@ -148,7 +150,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Uten SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-deling."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-internettdeling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flymodus."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Bytting av operatørnettverk."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ikke tilkoblet"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ingen nettverk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi er av"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Ingen lagrede nettverk er tilgjengelige"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Enhet uten navn"</string>
@@ -279,7 +282,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Ferdig"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Tilkoblet"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Kobler til …"</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tilknytning"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Internettdeling"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Wi-Fi-sone"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Varsler"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lommelykt"</string>
@@ -314,9 +317,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende varsler nedenfor"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Trykk på nytt for å åpne"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Sveip oppover for å låse opp"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Sveip fra ikonet for å åpne telefonen"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Sveip ikonet for å åpne telefon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Sveip fra ikonet for å åpne talehjelp"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Sveip fra ikonet for å åpne kameraet"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Sveip ikonet for å åpne kamera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stillhet"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bare prioritet"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Bare alarmer"</string>
@@ -397,19 +400,14 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du er i Work-profilen"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
-    <string name="show_battery_percentage" msgid="5444136600512968798">"Vis kapasitet for det innebygde batteriet"</string>
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis batterinivåprosenten inni statusfeltikonet når du ikke lader"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtiginnstillinger"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Statusrad"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Work-profil"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Flymodus"</string>
     <string name="add_tile" msgid="2995389510240786221">"Legg til felt"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Publiser feltet"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g> med mindre du slår dette av i forkant"</string>

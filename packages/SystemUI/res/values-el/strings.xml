@@ -41,7 +41,7 @@
     <string name="battery_low_why" msgid="4553600287639198111">"Ρυθμίσεις"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Να ενεργοποιηθεί η εξοικονόμηση μπαταρίας;"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Ενεργοποίηση"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Ενεργοποίηση της εξοικονόμησης μπαταρίας"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Ενερ. της εξοικ/σης μπαταρίας"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ρυθμίσεις"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Αυτόματη περιστροφή οθόνης"</string>
@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Να επιτρέπεται ο εντοπισμός σφαλμάτων USB;"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Το μοναδικό χαρακτηριστικό του κλειδιού RSA είναι:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Να επιτρέπεται πάντα από αυτόν τον υπολογιστή"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Δεν επιτρέπεται ο εντοπισμός σφαλμάτων USB"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή σε αυτήν τη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων USB. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ζουμ σε πλήρη οθόνη"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Προβoλή σε πλήρη οθ."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Αποθήκ. στιγμιότυπου οθόνης..."</string>
@@ -267,7 +269,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Μη συνδεδεμένο"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Κανένα δίκτυο"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ανενεργό"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Δεν υπάρχουν διαθέσιμα αποθηκευμένα δίκτυα"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Μετάδοση"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Μετάδοση"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Ανώνυμη συσκευή"</string>
@@ -316,9 +319,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Λιγότερο επείγουσες ειδοποιήσεις παρακάτω"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Αγγίξτε ξανά για άνοιγμα"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Σύρετε για να ξεκλειδώσετε"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Σύρετε από το εικονίδιο για τηλέφωνο"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Σύρετε από το εικονίδιο για φωνητική υποβοήθηση"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Σύρετε από το εικονίδιο για κάμερα"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Σύρετε προς τα έξω για τηλέφωνο"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Σύρετε προς τα έξω για voice assist"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Σύρετε προς τα έξω για κάμερα"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Πλήρης σίγαση"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Μόνο προτεραιότητας"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Μόνο ειδοποιήσεις"</string>
@@ -348,7 +351,7 @@
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Μειώνει την απόδοση και τα δεδομένα παρασκηνίου"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Απενεργοποίηση εξοικονόμησης μπαταρίας"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Απενερ. εξοικ/σης μπαταρίας"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Κρυφό περιεχόμενο"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Θα ξεκινήσει η καταγραφή του περιεχομένου που εμφανίζεται στην οθόνη σας από την εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Να μην εμφανιστεί ξανά"</string>
@@ -402,16 +405,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Εμφάνιση ποσοστού ενσωματωμένης μπαταρίας"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Εμφάνιση ποσοστού επιπέδου μπαταρίας μέσα στο εικονίδιο της γραμμής κατάστασης όταν δεν γίνεται φόρτιση"</string>
     <string name="quick_settings" msgid="10042998191725428">"Γρήγορες ρυθμίσεις"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Γραμμή κατάστασης"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Ξυπνητήρι"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Προφίλ εργασίας"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Λειτουργία πτήσης"</string>
     <string name="add_tile" msgid="2995389510240786221">"Προσθήκη πλακιδίου"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Μετάδοση πλακιδίου"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Δεν θα ακούσετε το επόμενο ξυπνητήρι σας <xliff:g id="WHEN">%1$s</xliff:g> εκτός κι αν το απενεργοποιήσετε νωρίτερα"</string>

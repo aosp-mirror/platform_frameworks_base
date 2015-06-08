@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"컴퓨터 RSA 키 지문:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"이 컴퓨터에서 항상 허용"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB 디버깅이 허용되지 않음"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용할 수 없습니다. 이 기능을 사용하려면 기본 사용자 \'<xliff:g id="NAME">%s</xliff:g>\'님으로 전환하세요."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"캡쳐화면 저장 중..."</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"연결되어 있지 않음"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"네트워크가 연결되지 않음"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 꺼짐"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"저장된 네트워크가 없습니다."</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"전송"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"전송 중"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"이름이 없는 기기"</string>
@@ -400,16 +403,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"내장형 배터리 잔량 비율 표시"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
     <string name="quick_settings" msgid="10042998191725428">"빠른 설정"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"상태 표시줄"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"이더넷"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"알람"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"직장 프로필"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"비행기 모드"</string>
     <string name="add_tile" msgid="2995389510240786221">"타일 추가"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"브로드캐스트 타일"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"그때까지 알림 일시중지 상태를 유지하면 <xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>

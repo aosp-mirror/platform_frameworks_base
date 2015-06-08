@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Altijd toestaan vanaf deze computer"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als u deze functie wilt gebruiken, schakelt u naar de primaire gebruiker \'<xliff:g id="NAME">%s</xliff:g>\'."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot opslaan..."</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Niet verbonden"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Geen netwerk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wifi uit"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Geen opgeslagen netwerken beschikbaar"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Casten"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casten"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Naamloos apparaat"</string>
@@ -314,9 +317,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minder urgente meldingen onderaan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Raak opnieuw aan om te openen"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Veeg omhoog om te ontgrendelen"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Vegen vanaf pictogram voor telefoon"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Vegen voor telefoon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Vegen vanaf pictogram voor spraakassistent"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Vegen vanaf pictogram voor camera"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Vegen voor camera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Totale stilte"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Alleen prioriteit"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alleen alarmen"</string>
@@ -400,16 +403,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Percentage ingebouwde accu weergeven"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Accupercentage weergeven in het pictogram op de statusbalk wanneer er niet wordt opgeladen"</string>
     <string name="quick_settings" msgid="10042998191725428">"Snelle instellingen"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Statusbalk"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Werkprofiel"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Vliegtuigmodus"</string>
     <string name="add_tile" msgid="2995389510240786221">"Tegel toevoegen"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Tegel \'Uitzenden\'"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"U hoort uw volgende alarm niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij u dit voor die tijd uitschakelt"</string>

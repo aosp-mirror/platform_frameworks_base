@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Allow USB debugging?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"The computer\'s RSA key fingerprint is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Always allow from this computer"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB debugging not allowed"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user “<xliff:g id="NAME">%s</xliff:g>”."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom to fill screen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stretch to fill screen"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Saving screenshot…"</string>
@@ -265,7 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Not Connected"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No Network"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Off"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"No saved networks available"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"No Wi-Fi networks available"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unnamed device"</string>
@@ -400,16 +402,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Show embedded battery percentage"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Show battery level percentage inside the status bar icon when not charging"</string>
     <string name="quick_settings" msgid="10042998191725428">"Quick Settings"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Status bar"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Work profile"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Aeroplane mode"</string>
     <string name="add_tile" msgid="2995389510240786221">"Add tile"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Broadcast Tile"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g> unless you turn this off before then"</string>
