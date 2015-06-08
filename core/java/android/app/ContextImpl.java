@@ -1597,7 +1597,7 @@ class ContextImpl extends Context {
             final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
                     new UserHandle(UserHandle.getUserId(application.uid)), restricted,
-                    mDisplay, null);
+                    mDisplay, null, Display.INVALID_DISPLAY);
             if (c.mResources != null) {
                 return c;
             }
@@ -1620,14 +1620,14 @@ class ContextImpl extends Context {
         final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
         if (packageName.equals("system") || packageName.equals("android")) {
             return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                    user, restricted, mDisplay, null);
+                    user, restricted, mDisplay, null, Display.INVALID_DISPLAY);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    user, restricted, mDisplay, null);
+                    user, restricted, mDisplay, null, Display.INVALID_DISPLAY);
             if (c.mResources != null) {
                 return c;
             }
@@ -1645,7 +1645,7 @@ class ContextImpl extends Context {
         }
 
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mRestricted, mDisplay, overrideConfiguration);
+                mUser, mRestricted, mDisplay, overrideConfiguration, Display.INVALID_DISPLAY);
     }
 
     @Override
@@ -1655,15 +1655,15 @@ class ContextImpl extends Context {
         }
 
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mRestricted, display, null);
+                mUser, mRestricted, display, null, Display.INVALID_DISPLAY);
     }
 
     Display getDisplay() {
         if (mDisplay != null) {
             return mDisplay;
         }
-        DisplayManager dm = getSystemService(DisplayManager.class);
-        return dm.getDisplay(Display.DEFAULT_DISPLAY);
+        return ResourcesManager.getInstance().getAdjustedDisplay(
+                Display.DEFAULT_DISPLAY, mDisplayAdjustments);
     }
 
     private int getDisplayId() {
@@ -1708,7 +1708,7 @@ class ContextImpl extends Context {
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
         ContextImpl context = new ContextImpl(null, mainThread,
-                packageInfo, null, null, false, null, null);
+                packageInfo, null, null, false, null, null, Display.INVALID_DISPLAY);
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetricsLocked());
         return context;
@@ -1717,21 +1717,19 @@ class ContextImpl extends Context {
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
         return new ContextImpl(null, mainThread,
-                packageInfo, null, null, false, null, null);
+                packageInfo, null, null, false, null, null, Display.INVALID_DISPLAY);
     }
 
     static ContextImpl createActivityContext(ActivityThread mainThread,
             LoadedApk packageInfo, int displayId, Configuration overrideConfiguration) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        final Display display = ResourcesManager.getInstance().getAdjustedDisplay(
-                displayId, overrideConfiguration);
-        return new ContextImpl(null, mainThread, packageInfo, null, null, false, display,
-                overrideConfiguration);
+        return new ContextImpl(null, mainThread, packageInfo, null, null, false,
+                null, overrideConfiguration, displayId);
     }
 
     private ContextImpl(ContextImpl container, ActivityThread mainThread,
             LoadedApk packageInfo, IBinder activityToken, UserHandle user, boolean restricted,
-            Display display, Configuration overrideConfiguration) {
+            Display display, Configuration overrideConfiguration, int createDisplayWithId) {
         mOuterContext = this;
 
         mMainThread = mainThread;
@@ -1745,9 +1743,10 @@ class ContextImpl extends Context {
 
         mPackageInfo = packageInfo;
         mResourcesManager = ResourcesManager.getInstance();
-        mDisplay = display;
 
-        final int displayId = getDisplayId();
+        final int displayId = (createDisplayWithId != Display.INVALID_DISPLAY)
+                ? createDisplayWithId : getDisplayId();
+
         CompatibilityInfo compatInfo = null;
         if (container != null) {
             compatInfo = container.getDisplayAdjustments(displayId).getCompatibilityInfo();
@@ -1759,6 +1758,9 @@ class ContextImpl extends Context {
         }
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
         mDisplayAdjustments.setConfiguration(overrideConfiguration);
+
+        mDisplay = (createDisplayWithId == Display.INVALID_DISPLAY) ? display
+                : ResourcesManager.getInstance().getAdjustedDisplay(displayId, mDisplayAdjustments);
 
         Resources resources = packageInfo.getResources(mainThread);
         if (resources != null) {
