@@ -252,7 +252,7 @@
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za účelem usnadnění přístupu k obsahu aplikací mohou být nainstalovány skripty."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovat zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledování zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový řádek"</string>
@@ -275,7 +275,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Přístup k dostupným účtům."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čtení zdrojů přihlášených k odběru"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čtení textových zpráv (SMS nebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na SIM kartě.Toto oprávnění umožňuje aplikaci číst zprávy SMS bez ohledu na jejich obsah nebo důvěrnost."</string>
@@ -1078,7 +1079,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Vyberte klávesnice"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrat klávesnici"</string>
     <string name="show_ime" msgid="9157568568695230830">"Zobrazit metodu zadávání"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Výběr rozložení klávesnice"</string>
@@ -1138,7 +1139,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Tuto aplikaci používáte v pracovním profilu"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metoda zadávání dat"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronizace"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Usnadnění"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Přístupnost"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Změnit tapetu"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Aplikace poslouchající oznámení"</string>
@@ -1259,7 +1260,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Dosažen limit mobilních dat"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Datový limit Wi-Fi byl překročen"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> nad stanoveným limitem."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Přenos dat na pozadí je omezen"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data na pozadí jsou omezena"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Klepnutím omezení odstraníte."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečení"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Tento certifikát je platný."</string>
@@ -1540,8 +1541,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokud tuto funkci nevypnete"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nerušit"</string>

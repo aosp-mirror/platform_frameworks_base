@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kry toegang tot beskikbare rekeninge."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lees ingetekende nuus"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Laat die program toe om details oor die tans gesinkroniseerde strome te kry."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"stuur SMS-boodskappe"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"stuur en bekyk SMS-boodskappe"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Laat die program toe om SMS-boodskappe te stuur. Dit kan tot onverwagse heffings lei. Kwaadwillige programme kan jou geld kos deur boodskappe sonder jou bevestiging te stuur."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lees jou teksboodskappe (SMS of MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Laat die program toe om SMS-boodskappe wat op jou tablet of SIM-kaart gestoor is, te lees. Dit laat die program toe om alle SMS-boodskappe te lees, ongeag van die inhoud of vertroulikheid daarvan."</string>
@@ -1506,8 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Totdat jy dit afskakel"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat jy Moenie steur nie afskakel"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Vou in"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Moenie steur nie"</string>

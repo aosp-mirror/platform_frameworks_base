@@ -246,13 +246,13 @@
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzory"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"prístup k údajom zo senzorov a nositeľných zariadení"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítať obsah okna"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preskúmať obsah okna s ktorým interagujete."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Môžete preskúmať obsah okna, s ktorým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnúť funkciu Preskúmanie dotykom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Po dotyku na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnúť vylepšenú dostupnosť na webe"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Môže nainštalovať skripty na sprístupnenie obsahu aplikácie."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovať vami zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obsahuje osobné údaje ako sú čísla kreditných kariet a heslá."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovať zadávaný text"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový riadok"</string>
@@ -275,7 +275,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Prístup k dostupným účtom."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikácii získať podrobnosti o aktuálne synchronizovaných informačných kanáloch."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"odosielať správy SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"posielať a zobrazovať správy SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikácii odosielať správy SMS. Môže to mať za následok účtovanie neočakávaných poplatkov. Škodlivé aplikácie vám môžu spôsobiť výdavky odosielaním správ bez vášho potvrdenia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čítať textové správy (SMS alebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikácii čítať správy SMS uložené v tablete alebo na SIM karte. Toto povolenie umožňuje aplikácii čítať správy SMS bez ohľadu na ich obsah alebo dôvernosť."</string>
@@ -1138,7 +1138,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Túto aplikáciu používate vo svojom pracovnom profile"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metóda vstupu"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronizovať"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Zjednodušenie"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Dostupnosť"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Zmeniť tapetu"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Aplikácia na počúvanie upozornení"</string>
@@ -1259,8 +1259,8 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Presiahli ste limit mobil. dát"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Dát. limit Wi-Fi bol prekročený"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> nad stanovenou hranicou."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Údaje na pozadí sú obmedzené"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Dotykom odstránite obmedzenie."</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dátové prenosy obmedzené"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Klepnutím obmedzenie odstránite."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečenia"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certifikát je platný."</string>
     <string name="issued_to" msgid="454239480274921032">"Vydané pre:"</string>
@@ -1489,7 +1489,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Inštalovaný správcom"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aktualizované správcom"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Odstránený správcom"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrovanie, služby určovania polohy a väčšinu údajov na pozadí, aby tak pomohol predĺžiť výdrž batérie. E-mailová aplikácia, aplikácia na odosielanie správ SMS a MMS a ďalšie aplikácie, ktoré sú založené na synchronizácii, sa pravdepodobne aktualizujú až po ich otvorení.\n\nŠetrič batérie sa automaticky vypne, keď zariadenie začnete nabíjať."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"S cieľom predĺžiť výdrž batérie zníži šetrič batérie výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1540,8 +1540,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokým túto funkciu nevypnete"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokým nevypnete stav Nerušiť"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zbaliť"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nerušiť"</string>

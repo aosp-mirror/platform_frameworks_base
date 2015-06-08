@@ -275,7 +275,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"גישה לכל החשבונות הזמינים."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"קרא עדכוני מנויים"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"מאפשר לאפליקציה לקבל פרטים על ההזנות הנוכחיות שמסונכרנות."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"‏שלוח הודעות SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"‏שליחה והצגה של הודעות SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏מאפשר לאפליקציה לשלוח הודעות SMS. הדבר עשוי לגרום לחיובים בלתי צפויים. אפליקציות זדוניות עלולות לגרום לעלויות על ידי שליחת הודעות ללא אישורך."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏קריאת הודעות הטקסט שלך (SMS או MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"‏מאפשר לאפליקציה לקרוא הודעות SMS המאוחסנות בטאבלט או בכרטיס ה-SIM. דבר זה מתיר לאפליקציה לקרוא את כל הודעות ה-SMS, ללא התחשבות בתוכן או בסודיות."</string>
@@ -1540,8 +1540,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"עד שתכבה"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"עד שתכבה את \'נא לא להפריע\'"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"כווץ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"נא לא להפריע"</string>

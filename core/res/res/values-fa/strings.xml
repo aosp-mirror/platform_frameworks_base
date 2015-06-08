@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"به حساب‌های موجود دسترسی داشته باشید."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"خواندن فیدهای مشترک"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"‏به برنامه اجازه می‎دهد تا جزئیات مربوط به فیدهای همگام شده کنونی را دریافت کند."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"ارسال پیامک ها"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"ارسال و نمایش پیام‌های پیامک"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"به برنامه اجازه می‌دهد پیامک‌ها را ارسال کند. این باعث ایجاد هزینه‌های پیش‌بینی نشده می‌شود. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏خواندن پیام‌های نوشتاری شما (پیامک یا MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در رایانهٔ لوحی یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
@@ -302,9 +302,9 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"اصلاح تنظیمات سیستم"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‎های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"اجرا شدن در هنگام راه‌اندازی"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"‏به برنامه اجازه می‎دهد تا به محض اتمام راه‎اندازی سیستم خودبخود شروع به کار کند. این کار ممکن است باعث شود مدت زمان بیشتری صرف شدوع به کار رایانهٔ لوحی شود و به برنامه اجازه می‎دهد تا با اجرای همیشگی رایانهٔ لوحی را کند کند."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"به برنامه اجازه می‌دهد تا به محض اینکه سیستم راه‌اندازی را تمام کرد، شروع به کار کند. شاید باعث شود که تلویزیون دیرتر شروع به کار کند و به برنامه اجازه می‌دهد تا با اجرای همیشگی، باعث کند شدن کلی رایانه لوحی شود."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"‏به برنامه اجازه می‎دهد تا به محض اینکه سیستم راه‎اندازی شد خودبخود شروع به کار کند. این کار باعث می‎شود مدت زمان بیشتری صرف شود تا تلفن شروع به کار کند و به برنامه اجازه می‎دهد تا کل تلفن کند شود چون همیشه در حال اجرا شدن است."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ارسال پخش چسبنده"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"‏به برنامه اجازه می‎دهد تا پخش‌های ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. استفاده بیش از حد این ویژگی ممکن است باعث مصرف بیش از حد حافظه و در نتیجه کندی یا ناپایداری رایانهٔ لوحی شود."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"به برنامه اجازه می‌دهد تا پخش برنامه‌های دلچسبی را ارسال کند که پس از اتمام پخش باقی می‌ماند. استفاده بیش از حد شاید باعث شود تلویزیون با استفاده بیش از اندازه از حافظه کند یا بی‌ثبات عمل کند."</string>
@@ -803,7 +803,7 @@
     <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"الآن نه"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"هرگز"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"شما اجازه بازکردن این صفحه را ندارید."</string>
     <string name="text_copied" msgid="4985729524670131385">"متن در کلیپ بورد کپی شد."</string>
     <string name="more_item_label" msgid="4650918923083320495">"بیشتر"</string>
@@ -1061,8 +1061,8 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏همه فایل‌های ذخیره شده در حافظهٔ USB پاک خواهد شد. این عمل را نمی‎توان برگرداند!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"‏تمام اطلاعات روی کارت شما از بین می‎رود."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"قالب"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اتصال رفع عیب USB"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏برای غیرفعال کردن اشکال زدایی USB لمس کنید."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏غیرفعال‌کردن اشکال‌زدایی‌USB: با لمس آن."</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغییر صفحه‌کلید"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"انتخاب صفحه‌کلیدها"</string>
     <string name="show_ime" msgid="9157568568695230830">"نمایش روش ورودی"</string>
@@ -1506,8 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"تا وقتی آن را خاموش کنید"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> /‏ <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"کوچک کردن"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"مزاحم نشوید"</string>

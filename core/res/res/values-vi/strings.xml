@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Truy cập các tài khoản khả dụng."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"đọc nguồn cấp dữ liệu đã đăng ký"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Cho phép ứng dụng lấy thông tin chi tiết về nguồn cấp dữ liệu hiện được đồng bộ hóa."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"gửi tin nhắn SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"gửi và xem tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Cho phép ứng dụng gửi tin nhắn SMS. Việc này có thể dẫn đến các khoản phí không mong muốn. Các ứng dụng độc hai có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"đọc tin nhắn văn bản của bạn (SMS hoặc MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên máy tính bảng hoặc thẻ SIM của bạn. Việc này cho phép ứng dụng đọc tất cả tin nhắn SMS, bất kể nội dung hay tính bí mật là gì."</string>
@@ -698,12 +698,12 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Vui lòng xem Hướng dẫn người dùng hoặc liên hệ với Bộ phận chăm sóc khách hàng."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Thẻ SIM đã bị khóa."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Đang mở khóa thẻ SIM…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. \n\nVui lòng thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa. \n\nVui lòng thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Bạn đã nhập sai mã PIN <xliff:g id="NUMBER_0">%d</xliff:g> lần. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng thông tin đăng nhập Google của mình.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Bạn đã vẽ sai hình mở khóa <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, bạn sẽ được yêu cầu mở khóa TV bằng cách đăng nhập vào Google.\n\n Hãy thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng thông tin đăng nhập Google của bạn.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng thông tin đăng nhập Google của bạn.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Bạn đã mở khóa máy tính bảng không đúng cách <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, máy tính bảng sẽ được đặt lại về mặc định ban đầu và tất cả dữ liệu người dùng sẽ bị mất."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Bạn đã mở khóa TV sai <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, TV sẽ được đặt lại về cài đặt mặc định ban đầu và toàn bộ dữ liệu người dùng sẽ bị mất."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Bạn đã mở khóa điện thoại không đúng cách <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, điện thoại sẽ được đặt lại về mặc định ban đầu và tất cả dữ liệu người dùng sẽ bị mất."</string>
@@ -1124,7 +1124,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Bạn đang sử dụng ứng dụng này trong hồ sơ công việc của mình"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Phương thức nhập"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Đồng bộ hóa"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Khả năng truy cập"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Trợ năng"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hình nền"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Thay đổi hình nền"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Trình xử lý thông báo"</string>
@@ -1320,9 +1320,9 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Tên người dùng hoặc mật khẩu không hợp lệ."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Bạn quên tên người dùng hoặc mật khẩu?\nHãy truy cập "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Đang kiểm tra tài khoản…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần mở khóa máy tính bảng không đúng cách. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, máy tính bảng sẽ được đặt lại về mặc định ban đầu và tất cả dữ liệu người dùng sẽ bị mất."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Bạn đã mở khóa TV sai <xliff:g id="NUMBER_0">%d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, TV sẽ được đặt lại về cài đặt mặc định ban đầu và toàn bộ dữ liệu người dùng sẽ bị mất."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần mở khóa điện thoại không đúng cách. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần mở khóa không thành công nữa, điện thoại sẽ được đặt lại về mặc định ban đầu và tất cả dữ liệu người dùng sẽ bị mất."</string>
@@ -1506,8 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Cho đến <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Cho đến khi bạn tắt tính năng này"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Cho đến khi bạn tắt Đừng làm phiền"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Thu gọn"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Không làm phiền"</string>

@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ចូល​ដំណើរការ​គណនី​ដែល​មាន។"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"អាន​អត្ថបទ​ព័ត៌មាន​បាន​ជាវ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​លម្អិត​អំពី​អត្ថបទ​ព័ត៌មាន​​បាន​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្ន។"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"ផ្ញើ​សារ SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ឲ្យ​កម្មវិធី​ផ្ញើ​សារ​ SMS ។ វា​អាច​គិត​ថ្លៃ​សេវាកម្ម​ដែល​មិន​រំពឹង​ទុក។ កម្មវិធី​ព្យាបាទ​អាច​គិត​ថ្លៃ​សេវាកម្ម​ពី​អ្នក​ ដោយ​ផ្ញើ​សារ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"អាន​សារ​អត្ថបទ​របស់​អ្នក (SMS ឬ MMS​)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ឲ្យ​កម្មវិធី​​អាន​សារ SMS ដែល​មាន​ក្នុង​កុំព្យូទ័រ​បន្ទះ ឬ​ស៊ីម​កាត។ វា​ឲ្យ​កម្មវិធី​អាន​សារ SMS ទាក់ទង​នឹង​មាតិកា ឬ​ព័ត៌មាន​សម្ងាត់។"</string>
@@ -1508,8 +1509,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"រហូត​ដល់ពេល​​អ្នក​បិទ​វា"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"រហូតទាល់តែអ្នកបិទ កុំរំខាន"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"បង្រួម"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"កុំរំខាន"</string>

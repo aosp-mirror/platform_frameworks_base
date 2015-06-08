@@ -273,7 +273,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accéder aux comptes disponibles"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lire les flux auxquels vous êtes abonné"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet à l\'application d\'obtenir des informations sur les flux en cours de synchronisation."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"Envoi de messages SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet à l\'application d\'envoyer des messages SMS. Cette autorisation peut entraîner des frais inattendus. Les applications malveillantes peuvent générer des frais en envoyant des messages sans votre consentement."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"voir les messages texte (SMS ou MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permet à l\'application de lire les SMS stockés sur votre tablette ou sur la carte SIM. Cette autorisation lui permet de lire tous les SMS, indépendamment de leur contenu ou de leur caractère confidentiel."</string>
@@ -965,7 +966,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Sonnerie par défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Aucun"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Aucune"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sonneries"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Sonnerie inconnue"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1062,7 +1063,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Toutes les données stockées sur votre carte seront perdues."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Appuyez pour désactiver le débogage USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Appuyez pour désact. débogage USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Changer de clavier"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Sélectionner des claviers"</string>
     <string name="show_ime" msgid="9157568568695230830">"Afficher mode de saisie"</string>
@@ -1075,7 +1076,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Préparation mémoire \"<xliff:g id="NAME">%s</xliff:g>\" en cours"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Recherche d\'erreurs"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Une nouvelle mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" a été détectée."</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pour transférer des photos et d\'autres fichiers"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pour transférer photos et fichiers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Mémoire stockage \"<xliff:g id="NAME">%s</xliff:g>\" endommagée"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"La mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" est endommagée. Veuillez essayer de la reformater."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Retrait inattendu de mémoire \"<xliff:g id="NAME">%s</xliff:g>\""</string>
@@ -1506,8 +1507,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Jusqu\'à la désactivation"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Jusqu\'à ce que vous désactiviez la fonctionnalité \"Ne pas déranger\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Réduire"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne pas déranger"</string>

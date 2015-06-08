@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"讀取訂閱的資訊提供"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允許應用程式取得目前已同步的資訊提供的詳細資料。"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"傳送 SMS 短訊"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"傳送和查看 SMS 短訊"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允許應用程式傳送短訊，但可能產生未預期的費用。惡意應用程式可能會未經您確認擅自傳送短訊，增加您的支出。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"讀取您的短訊 (SMS 或 MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允許應用程式讀取平板電腦或 SIM 卡上儲存的短訊。這項權限允許應用程式不論內容及機密程度，均可讀取所有短訊。"</string>
@@ -1506,8 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直至您關閉這項設定"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"直至您關閉「請勿騷擾」功能"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"請勿干擾"</string>

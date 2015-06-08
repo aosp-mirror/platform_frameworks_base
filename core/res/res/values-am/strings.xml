@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">" ለተገኙት መለያዎች ድረስ"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"የምዝገባ መግቦች አንበብ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ስለ አሁኑ ጊዜ አስምር ምላሾች ዝርዝሮች ለማግኘት ለመተግበሪያው ይፈቅዳሉ።"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"የSMS መልዕክቶች ላክ"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"መተግበሪያው የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲልክ ይፈቅድለታል። ይህ ያልተጠበቁ ወጪዎችን ሊያስከትል ይችላል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ መልዕክቶችን በመላክ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"የጽሑፍ መልዕክቶችዎን ያንብቡ (ኤስ.ኤም.ኤስ. ወይም ኤም.ኤም.ኤስ.)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"መገለጫው በጡባዊ ተኮዎ ወይም በSIM ካርድዎ የተከማቹ የኤስኤምኤስ. መልዕክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስኤምኤስ መልዕክቶች እንዲያነብ ይፈቅድለታል።"</string>
@@ -1506,8 +1506,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ድረስ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ይህን እስኪያጠፉት ድረስ"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"አትረብሽን እስኪያጠፉ ድረስ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ሰብስብ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"አትረብሽ"</string>

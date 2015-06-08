@@ -273,7 +273,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्ध खाताहरू पहुँच गर्नुहोस्।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्य बनाइका फिडहरू पढ्नुहोस्"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"अनुप्रयोगलाई अहिलेको समीकरण गरिएका सूचकहरू बारे विवरणहरू लिने अनुमति दिन्छ।"</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS सन्देशहरू पठाउनुहोस्"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"अनुप्रयोगलाई SMS सन्देशहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब अनुप्रयोगहरूले तपाईंको पुष्टि बिना सन्देशहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"तपाईंका पाठ सन्देशहरू (SMS वा MMS) पढ्नुहोस्"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"तपाईँको ट्याब्लेट वा SIM कार्डमा भण्डारण भएका SMS सन्देशहरूलाई पढ्न अनुप्रयोगलाई अनुमति दिन्छ। यसले अनुप्रयोगलाई विषयवस्तु वा गोपनीयतालाई वेवास्ता गर्दै सबै SMS सन्देशहरू पढ्ने अनुमति दिन्छ।"</string>
@@ -1512,8 +1512,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> सम्म"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"तपाईँले यसलाई बन्द नगरेसम्म"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"तपाईँले बन्द नगरे सम्म बाधा नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त पार्नुहोस्"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"अवरोध नपुर्याउँनुहोस्"</string>

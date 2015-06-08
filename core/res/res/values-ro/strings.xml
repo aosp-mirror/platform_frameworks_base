@@ -274,7 +274,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accesează conturile disponibile."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"citire feeduri abonat"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite aplicației să obţină detalii despre feedurile sincronizate în prezent."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"trimitere mesaje SMS"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite aplicației să trimită mesaje SMS, ceea ce ar putea determina apariţia unor taxe neaşteptate. Aplicaţiile rău intenţionate pot acumula costuri prin trimiterea mesajelor fără confirmarea dvs."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"citeşte mesajele text (SMS sau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite aplicației să citească mesajele SMS stocate pe tabletă sau pe cardul SIM. În acest fel, aplicația poate citi toate mesajele SMS, indiferent de conţinutul sau de gradul de confidenţialitate al acestora."</string>
@@ -521,7 +522,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Modificați blocarea ecranului"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Schimbarea setărilor de blocare a ecranului"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Modificați blocarea ecranului."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Blocaţi ecranul"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Stabiliţi modul și timpul în care se blochează ecranul."</string>
@@ -1523,8 +1524,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Până la dezactivare"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Până când dezactivați „Nu deranja”"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Restrângeți"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nu deranja"</string>

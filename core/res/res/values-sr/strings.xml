@@ -244,13 +244,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упућивање телефонских позива и управљање њима"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сензори"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"приступ подацима са сензора и носивих уређаја"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преузимање садржаја прозора"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преузима садржај прозора"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Проверава садржај прозора са којим остварујете интеракцију."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључивање Истраживања додиром"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Ставке које додирнете ће бити изговорене, а можете да се крећете по екрану покретима."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Укључивање побољшане приступачности веба"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могу да се инсталирају скрипте да би садржај апликација био приступачнији."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Праћење текста који уносите"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Прати текст који уносите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Обухвата личне податке као што су бројеви кредитних картица и лозинке."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"онемогућавање или измена статусне траке"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дозвољава апликацији да онемогући статусну траку или да додаје и уклања системске иконе."</string>
@@ -274,7 +274,8 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Приступ доступним налозима."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читање пријављених фидова"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозвољава апликацији да преузима детаље о тренутно синхронизованим фидовима."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
+    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
+    <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Дозвољава апликацији да шаље SMS поруке. Ово може да доведе до неочекиваних трошкова. Злонамерне апликације могу да шаљу поруке без ваше потврде, што може да изазове трошкове."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"читање текстуалних порука (SMS или MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Дозвољава апликацији да чита SMS поруке ускладиштене на таблету или SIM картици. Ово омогућава апликацији да чита све SMS поруке, без обзира на садржај или поверљивост."</string>
@@ -638,7 +639,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"Друго"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Прилагођено"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Прилагођено"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"Помоћни"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Помоћник"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Брат"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Дете"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Невенчани партнер"</string>
@@ -706,10 +707,10 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Неисправно сте нацртали шаблон за откључавање <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја од вас ће бити затражено да откључате ТВ помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Неправилно сте покушали да откључате таблет <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Покушали сте да откључате ТВ неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја ТВ ће бити ресетован на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја ТВ ће бити ресетован на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Неисправно сте покушали да откључате таблет <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Покушали сте да откључате ТВ неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. ТВ ће сада бити ресетован на подразумевана фабричка подешавања."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. ТВ ће сада бити ресетован на подразумевана фабричка подешавања."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Покушајте поново за <xliff:g id="NUMBER">%d</xliff:g> секунде(и)."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Заборавили сте шаблон?"</string>
@@ -831,7 +832,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Прошлог месеца"</string>
     <string name="older" msgid="5211975022815554840">"Старије"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"дана <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"у <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"у <xliff:g id="YEAR">%s</xliff:g>."</string>
     <string name="day" msgid="8144195776058119424">"дан"</string>
@@ -970,7 +971,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Јачина звука обавештења"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Подразумевани звук звона"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Подразумевани звук звона (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Без"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Без звука"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Звукови звона"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Непознати звук звона"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1150,7 +1151,7 @@
     <string name="submit" msgid="1602335572089911941">"Пошаљи"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим рада у аутомобилу је омогућен"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Додирните да бисте изашли из режима рада у аутомобилу."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са интернетом преко мобилног уређаја или врућа тачка"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са интернетом преко мобилног уређаја или хотспот"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Додирните да бисте подесили."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Next"</string>
@@ -1328,18 +1329,18 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Заборавили сте корисничко име или лозинку?\nПосетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Провера налога…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Покушали сте да откључате ТВ неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја ТВ ће бити ресетован на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Покушали сте да откључате ТВ неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. ТВ ће сада бити ресетован на подразумевана фабричка подешавања."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте нетачни PIN <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте нетачну лозинку <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја ТВ ће бити ресетован на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. ТВ ће сада бити ресетован на подразумевана фабричка подешавања."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Неисправно сте нацртали шаблон за откључавање <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате ТВ помоћу налога е-поште.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Желите да појачате звук изнад препорученог нивоа?\n\nСлушање гласне музике дуже време може да вам оштети слух."</string>
@@ -1523,8 +1524,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Док не искључите"</string>
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Док не искључите режим Не узнемиравај"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Скупи"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не узнемиравај"</string>
