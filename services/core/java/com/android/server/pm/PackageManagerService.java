@@ -6166,9 +6166,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             } else {
                 if (!checkUpgradeKeySetLP(pkgSetting, pkg)) {
-                    throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
-                            + pkg.packageName + " upgrade keys do not match the "
-                            + "previously installed version");
+                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                        throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                "Package " + pkg.packageName + " upgrade keys do not match the "
+                                + "previously installed version");
+                    } else {
+                        pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                        String msg = "System package " + pkg.packageName
+                            + " signature changed; retaining data.";
+                        reportSettingsProblem(Log.WARN, msg);
+                    }
                 } else {
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
