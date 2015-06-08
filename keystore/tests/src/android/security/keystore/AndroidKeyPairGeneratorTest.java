@@ -18,6 +18,9 @@ package android.security.keystore;
 
 import android.security.Credentials;
 import android.security.KeyPairGeneratorSpec;
+import android.security.KeyStore;
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeymasterDefs;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
@@ -78,7 +81,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         assertTrue(mAndroidKeyStore.onUserPasswordChanged("1111"));
         assertTrue(mAndroidKeyStore.isUnlocked());
 
-        String[] aliases = mAndroidKeyStore.saw("");
+        String[] aliases = mAndroidKeyStore.list("");
         assertNotNull(aliases);
         assertEquals(0, aliases.length);
     }
@@ -359,7 +362,10 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         final byte[] caCerts = mAndroidKeyStore.get(Credentials.CA_CERTIFICATE + alias);
         assertNull("A list of CA certificates should not exist for the generated entry", caCerts);
 
-        final byte[] pubKeyBytes = mAndroidKeyStore.getPubkey(Credentials.USER_PRIVATE_KEY + alias);
+        ExportResult exportResult = mAndroidKeyStore.exportKey(
+                Credentials.USER_PRIVATE_KEY + alias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null);
+        assertEquals(KeyStore.NO_ERROR, exportResult.resultCode);
+        final byte[] pubKeyBytes = exportResult.exportData;
         assertNotNull("The keystore should return the public key for the generated key",
                 pubKeyBytes);
     }
