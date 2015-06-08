@@ -56,7 +56,7 @@ public final class InputDevice implements Parcelable {
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
     private final boolean mHasVibrator;
-    private final boolean mHasMic;
+    private final boolean mHasMicrophone;
     private final boolean mHasButtonUnderPad;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
@@ -358,7 +358,7 @@ public final class InputDevice implements Parcelable {
     // Called by native code.
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMic,
+            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
             boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
@@ -372,7 +372,7 @@ public final class InputDevice implements Parcelable {
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
         mHasVibrator = hasVibrator;
-        mHasMic = hasMic;
+        mHasMicrophone = hasMicrophone;
         mHasButtonUnderPad = hasButtonUnderPad;
         mIdentifier = new InputDeviceIdentifier(descriptor, vendorId, productId);
     }
@@ -390,7 +390,7 @@ public final class InputDevice implements Parcelable {
         mKeyboardType = in.readInt();
         mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
         mHasVibrator = in.readInt() != 0;
-        mHasMic = in.readInt() != 0;
+        mHasMicrophone = in.readInt() != 0;
         mHasButtonUnderPad = in.readInt() != 0;
         mIdentifier = new InputDeviceIdentifier(mDescriptor, mVendorId, mProductId);
 
@@ -723,8 +723,8 @@ public final class InputDevice implements Parcelable {
      * Reports whether the device has a built-in microphone.
      * @return Whether the device has a built-in microphone.
      */
-    public boolean hasMic() {
-        return mHasMic;
+    public boolean hasMicrophone() {
+        return mHasMicrophone;
     }
 
     /**
@@ -861,7 +861,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mKeyboardType);
         mKeyCharacterMap.writeToParcel(out, flags);
         out.writeInt(mHasVibrator ? 1 : 0);
-        out.writeInt(mHasMic ? 1 : 0);
+        out.writeInt(mHasMicrophone ? 1 : 0);
         out.writeInt(mHasButtonUnderPad ? 1 : 0);
 
         final int numRanges = mMotionRanges.size();
@@ -907,7 +907,7 @@ public final class InputDevice implements Parcelable {
 
         description.append("  Has Vibrator: ").append(mHasVibrator).append("\n");
 
-        description.append("  Has mic: ").append(mHasMic).append("\n");
+        description.append("  Has mic: ").append(mHasMicrophone).append("\n");
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");
