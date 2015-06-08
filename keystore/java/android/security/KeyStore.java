@@ -231,14 +231,6 @@ public class KeyStore {
         return list(prefix, UID_SELF);
     }
 
-    public String[] saw(String prefix, int uid) {
-        return list(prefix, uid);
-    }
-
-    public String[] saw(String prefix) {
-        return saw(prefix, UID_SELF);
-    }
-
     public boolean reset() {
         try {
             return mBinder.reset() == NO_ERROR;
@@ -326,23 +318,6 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
-    }
-
-    public byte[] getPubkey(String key) {
-        try {
-            return mBinder.get_pubkey(key);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return null;
-        }
-    }
-
-    public boolean delKey(String key, int uid) {
-        return delete(key, uid);
-    }
-
-    public boolean delKey(String key) {
-        return delKey(key, UID_SELF);
     }
 
     public byte[] sign(String key, byte[] data) {
