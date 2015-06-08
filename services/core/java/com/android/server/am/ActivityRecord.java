@@ -982,7 +982,7 @@ final class ActivityRecord {
         final long totalTime = stack.mLaunchStartTime != 0
                 ? (curTime - stack.mLaunchStartTime) : thisTime;
         if (SHOW_ACTIVITY_START_TIME) {
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching", 0);
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: " + packageName, 0);
             EventLog.writeEvent(EventLogTags.AM_ACTIVITY_LAUNCH_TIME,
                     userId, System.identityHashCode(this), shortComponentName,
                     thisTime, totalTime);
