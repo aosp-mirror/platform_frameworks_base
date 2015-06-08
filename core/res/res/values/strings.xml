@@ -537,10 +537,10 @@
     <!-- Label for the Android system components when they are shown to the user. -->
     <string name="android_system_label">Android System</string>
 
-    <!-- Label for the user owner in the intent forwarding app. -->
-    <string name="user_owner_label">Personal apps</string>
+    <!-- Label for the user owner in the intent forwarding app. [CHAR LIMIT=15] -->
+    <string name="user_owner_label">Personal</string>
 
-    <!-- Label for a corporate profile in the intent forwarding app. -->
+    <!-- Label for a corporate profile in the intent forwarding app. [CHAR LIMIT=15] -->
     <string name="managed_profile_label">Work</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
