@@ -451,6 +451,7 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/SignalStrength.aidl \
 	frameworks/base/telephony/java/android/telephony/IccOpenLogicalChannelResponse.aidl \
 	frameworks/base/telephony/java/android/telephony/NeighboringCellInfo.aidl \
+	frameworks/base/telephony/java/android/telephony/ModemActivityInfo.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/location/java/android/location/Address.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \

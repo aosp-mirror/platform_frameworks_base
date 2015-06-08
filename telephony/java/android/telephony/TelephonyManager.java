@@ -4617,7 +4617,22 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
         }
+        return null;
+    }
 
+    /**
+     * Returns the modem activity info.
+     * @hide
+     */
+    public ModemActivityInfo getModemActivityInfo() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getModemActivityInfo();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getModemActivityInfo", e);
+        }
         return null;
     }
 }
