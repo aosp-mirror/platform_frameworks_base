@@ -248,7 +248,7 @@ public class Editor {
         @Override
         public void run() {
             if (mTextActionMode != null) {
-                mTextActionMode.snooze(ActionMode.SNOOZE_TIME_DEFAULT);
+                mTextActionMode.hide(ActionMode.DEFAULT_HIDE_DURATION);
             }
         }
     };
@@ -257,7 +257,7 @@ public class Editor {
         @Override
         public void run() {
             if (mTextActionMode != null) {
-                mTextActionMode.snooze(0);  // snooze off.
+                mTextActionMode.hide(0);  // hide off.
             }
         }
     };
