@@ -19,7 +19,7 @@
     <string name="backup_confirm_title" msgid="827563724209303345">"גיבוי מלא"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"שחזור מלא"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"הוגשה בקשה לגיבוי מלא של כל הנתונים במחשב שולחני מחובר. האם אתה רוצה לאפשר פעולה זו? \n\nאם לא ביקשת את הגיבוי בעצמך, אל תאפשר לפעולה להמשיך."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"גבה את הנתונים שלי"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"גיבוי הנתונים שלי"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"אל תגבה"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"הוגשה בקשה לשחזור מלא של כל הנתונים ממחשב שולחני מחובר. האם אתה רוצה לאפשר פעולה זו? \n \n אם לא ביקשת את השחזור בעצמך, אל תאפשר לפעולה להמשיך. פעולה זו תחליף את כל הנתונים שנמצאים כעת במכשיר!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"שחזר את הנתונים שלי"</string>
