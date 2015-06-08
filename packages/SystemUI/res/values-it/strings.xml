@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Consentire debug USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Fingerprint della chiave RSA del computer: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Consenti sempre da questo computer"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debug USB non consentito"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"L\'utente che ha eseguito l\'accesso a questo dispositivo non può attivare il debug USB. Per utilizzare questa funzione, passa all\'utente principale \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per riempire schermo"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estendi per riemp. schermo"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvataggio screenshot..."</string>
@@ -267,7 +269,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Non connesso"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nessuna rete"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi disattivato"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Nessuna rete salvata disponibile"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Trasmetti"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"In trasmissione"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo senza nome"</string>
@@ -402,16 +405,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra percentuale batteria incorporata"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra la percentuale di carica della batteria nell\'icona della barra di stato quando non è in carica"</string>
     <string name="quick_settings" msgid="10042998191725428">"Impostazioni rapide"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Barra di stato"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Sveglia"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Profilo di lavoro"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Modalità aereo"</string>
     <string name="add_tile" msgid="2995389510240786221">"Aggiungi riquadro"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Riquadro di trasmissione"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Non sentirai la tua prossima sveglia <xliff:g id="WHEN">%1$s</xliff:g> se non disattivi questa impostazione prima della sveglia"</string>

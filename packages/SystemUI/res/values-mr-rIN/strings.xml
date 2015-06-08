@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबग करण्यास अनुमती द्यायची?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"संगणकाची RSA की फिंगरप्रिंट ही आहे:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"या संगणकावरून नेहमी अनुमती द्या"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डीबग करण्‍यास अनुमती नाही"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"सध्‍या या डिव्‍हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे चालू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, “<xliff:g id="NAME">%s</xliff:g>” प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रीन भरण्यासाठी झूम करा"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रीन भरण्यासाठी ताणा"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट जतन करत आहे…"</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"कनेक्ट केले नाही"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"नेटवर्क नाही"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाय-फाय बंद"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"कोणतीही जतन केलेली नेटवर्क उपलब्ध नाहीत"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"कास्‍ट करा"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"कास्ट करत आहे"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"निनावी डिव्हाइस"</string>
@@ -400,16 +403,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
     <string name="quick_settings" msgid="10042998191725428">"दृत सेटिंग्ज"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"स्टेटस बार"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"इथरनेट"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"अलार्म"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"कार्य प्रोफाईल"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"विमान मोड"</string>
     <string name="add_tile" msgid="2995389510240786221">"टाइल जोडा"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"प्रसारण टाइल"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"आपण त्यापूर्वी हे बंद केल्याशिय आपला पुढील <xliff:g id="WHEN">%1$s</xliff:g> होणारा अलार्म ऐकणार नाही"</string>

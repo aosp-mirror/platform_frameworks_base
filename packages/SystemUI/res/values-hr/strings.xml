@@ -61,9 +61,11 @@
     <string name="label_view" msgid="6304565553218192990">"Prikaži"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Koristi se prema zadanim postavkama za ovaj USB uređaj"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Koristi se prema zadanim postavkama za ovaj USB pribor"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Omogućiti rješavanje programske pogreške na USB-u?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Omogućiti uklanjanje pogrešaka putem USB-a?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Otisak prsta RSA ključa računala je: \n <xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Uvijek dopusti s ovog računala"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zumiraj i ispuni zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rastegni i ispuni zaslon"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Spremanje snimke zaslona..."</string>
@@ -266,7 +268,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nije povezano"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nema mreže"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi isključen"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Spremljene mreže nisu dostupne"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emitiranje"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Emitiranje"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Uređaj bez naziva"</string>
@@ -315,9 +318,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manje hitne obavijesti pri dnu"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Dodirnite ponovo da biste otvorili"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Prijeđite prstom prema gore za otključavanje"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Prijeđite prstom od ikone da biste otvorili telefon"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Prijeđite prstom od ikone da biste otvorili glasovnu pomoć"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Prijeđite prstom od ikone da biste otvorili fotoaparat"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Prijeđite prstom od ikone za telefon"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Prijeđite prstom od ikone za glasovnu pomoć"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Prijeđite prstom od ikone za fotoaparat"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Potpuna tišina"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetno"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Samo alarmi"</string>
@@ -401,16 +404,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži ugrađeni postotak baterije"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prikazivanje postotka razine baterije na ikoni trake statusa kada se ne puni"</string>
     <string name="quick_settings" msgid="10042998191725428">"Brze postavke"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Traka statusa"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Radni profil"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Način rada u zrakoplovu"</string>
     <string name="add_tile" msgid="2995389510240786221">"Dodavanje pločice"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Emitiranje pločice"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Nećete čuti sljedeći alarm <xliff:g id="WHEN">%1$s</xliff:g> ako to ne isključite prije njega"</string>

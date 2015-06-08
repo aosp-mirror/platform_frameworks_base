@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಈ ಸಾಧನಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, “<xliff:g id="NAME">%s</xliff:g>” ಅವರನ್ನು ಪ್ರಾಥಮಿಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -265,7 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ಆಫ್"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"ಯಾವುದೇ ಉಳಿಸಲಾದ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ಯಾವುದೇ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ಬಿತ್ತರಿಸುವಿಕೆ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ಹೆಸರಿಸದಿರುವ ಸಾಧನ"</string>
@@ -349,7 +351,7 @@
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ಬ್ಯಾಟರಿ ಉಳಿತಾಯವನ್ನು ಆಫ್ ಮಾಡಿ"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"ವಿಷಯಗಳನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"ನಿಮ್ಮ ಪರದೆಯ ಮೇಲೆ ಪ್ರದರ್ಶಿಸಲಾಗುವ ಎಲ್ಲವನ್ನೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಯು ಸೆರೆಹಿಡಿಯಲು ಪ್ರಾರಂಭಿಸುತ್ತದೆ."</string>
-    <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರಿ"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
@@ -400,16 +402,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"ಎಂಬೆಡ್ ಮಾಡಲಾದ ಬ್ಯಾಟರಿ ಶೇಕಡಾ ತೋರಿಸಿ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ಚಾರ್ಜ್ ಮಾಡದಿರುವಾಗ ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಒಳಗೆ ಬ್ಯಾಟರಿ ಮಟ್ಟದ ಶೇಕಡಾವನ್ನು ತೋರಿಸಿ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"ಸ್ಥಿತಿ ಪಟ್ಟಿ"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"ಇಥರ್ನೆಟ್"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"ಅಲಾರಮ್"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
     <string name="add_tile" msgid="2995389510240786221">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"ಟೈಲ್ ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿ"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"ನೀವು ಈ ಅಲಾರಮ್ ಆಫ್ ಮಾಡುವವರೆಗೆ ನಿಮ್ಮ ಮುಂದಿನ <xliff:g id="WHEN">%1$s</xliff:g> ಅಲಾರಮ್ ಅನ್ನು ನೀವು ಆಲಿಸುವುದಿಲ್ಲ"</string>

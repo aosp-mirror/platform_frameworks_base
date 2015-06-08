@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB arazketa onartu?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren hatz-marka hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Onartu beti ordenagailu honetatik"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Gailu honetan saioa hasita duen erabiltzaileak ezin du USB bidezko arazketa aktibatu. Eginbide hori erabiltzeko, aldatu “<xliff:g id="NAME">%s</xliff:g>” erabiltzaile nagusira."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Handiagotu pantaila betetzeko"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Luzatu pantaila betetzeko"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Pantaila-argazkia gordetzen…"</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Konektatu gabe"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ez dago sarerik"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Ez dago gordetako sarerik erabilgarri"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Igorpena"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
@@ -400,19 +403,14 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Erakutsi txertatutako bateriaren ehunekoa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Erakutsi bateria-mailaren ehunekoa egoera-barraren ikonoan, kargatzen ari ez denean"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ezarpen bizkorrak"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Egoera-barra"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Work profila"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Hegaldi modua"</string>
     <string name="add_tile" msgid="2995389510240786221">"Gehitu lauza"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Igorpen-lauza"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>) aukera hau hori baino lehen desaktibatzen ez baduzu"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>) aukera hau lehenago desaktibatzen ez baduzu"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="3980063409350522735">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>

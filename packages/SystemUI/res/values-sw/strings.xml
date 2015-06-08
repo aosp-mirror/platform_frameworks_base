@@ -63,6 +63,8 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Ruhusu utatuaji wa USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Alama ya kidole ya kitufe cha RSA ya kompyuta ni:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Ruhusu kutoka kwenye kompyuta hii kila wakati"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Utatuzi wa USB hauruhusiwi"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Mtumiaji aliyeingia katika akaunti kwenye kifaa hiki kwa sasa hawezi kuwasha utatuzi wa USB. Ili utumie kipengele hiki, badili kwenda mtumiaji msingi  \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Kuza ili kujaza skrini"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Tanua ili kujaza skrini"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Inahifadhi picha ya skrini..."</string>
@@ -265,7 +267,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Haijaunganishwa"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Hakuna Mtandao"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Imezimwa"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Hakuna mitandao iliyohifadhiwa inayopatikana"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Tuma"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Inatuma"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Kifaa hakina jina"</string>
@@ -400,16 +403,11 @@
     <string name="show_battery_percentage" msgid="5444136600512968798">"Onyesha asilimia ya betri iliyopachikwa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Onyesha asilimia ya kiwango cha betri ndani ya aikoni ya sehemu ya arifa inapokuwa haichaji"</string>
     <string name="quick_settings" msgid="10042998191725428">"Mipangilio ya Haraka"</string>
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
+    <string name="status_bar" msgid="4877645476959324760">"Sehemu ya kuonyesha hali"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethaneti"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Kengele"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Wasifu wa kazini"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Hali ya ndegeni"</string>
     <string name="add_tile" msgid="2995389510240786221">"Ongeza kigae"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Kigae cha Tangazo"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Hutasikia kengele yako inayofuata ya saa <xliff:g id="WHEN">%1$s</xliff:g> usipozima hii kabla ya wakati huo"</string>
