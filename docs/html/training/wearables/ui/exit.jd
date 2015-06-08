@@ -24,9 +24,9 @@ content and then swipe again from left to right to exit the app.</p>
 <p>For more immersive experiences, like an app that can scroll a map in any direction, you can
 disable the swipe to exit gesture in your app. However, if you disable it, you must implement
 the long-press-to-dismiss UI pattern to let users exit your app using the
-<code>DismissOverlayView</code> class from the Wearable UI Library.
-You must also inform your users the first time they run your app that they can exit using
-a long press.</p>
+<a href="{@docRoot}reference/android/support/wearable/view/DismissOverlayView.html"><code>DismissOverlayView</code></a>
+class from the Wearable UI Library. You must also inform your users the first time they run your app
+that they can exit using a long press.</p>
 
 <p>For design guidelines about exiting Android Wear activities, see
 <a href="{@docRoot}design/wear/structure.html#Custom">Breaking out of the card</a>.</p>
@@ -51,9 +51,14 @@ exit your app, as described in the next section.</p>
 
 <h2 id="long-press">Implement the Long Press to Dismiss Pattern</h2>
 
-<p>To use the <code>DissmissOverlayView</code> class in your activity, add this element to
-your layout definition such that it covers the whole screen and is placed above all other views.
-For example:</p>
+<p>To use the
+<a href="{@docRoot}reference/android/support/wearable/view/DismissOverlayView.html"><code>DismissOverlayView</code></a>
+class in your activity, add this element to your layout definition such that it covers the whole
+screen and is placed above all other views.</p>
+
+<p>The following example shows how to add the
+<a href="{@docRoot}reference/android/support/wearable/view/DismissOverlayView.html"><code>&lt;DismissOverlayView&gt;</code></a>
+element:</p>
 
 <pre>
 &lt;FrameLayout
@@ -70,10 +75,12 @@ For example:</p>
 &lt;FrameLayout>
 </pre>
 
-<p>In your activity, obtain the <code>DismissOverlayView</code> element and set some introductory
-text. This text is shown to users the first time they run your app to inform them that they
-can exit the app using a long press gesture. Then use a <code>GestureDetector</code> to detect
-a long press:</p>
+<p>In your activity, obtain the
+<a href="{@docRoot}reference/android/support/wearable/view/DismissOverlayView.html"><code>&lt;DismissOverlayView&gt;</code></a>
+element and set some introductory text. This text is shown to users the first time they run your app
+to inform them that they can exit the app using a long press gesture. Then use a
+<a href="{@docRoot}reference/android/view/GestureDetector.html"><code>GestureDetector</code></a>
+to detect a long press:</p>
 
 <pre>
 public class WearActivity extends Activity {
@@ -106,5 +113,7 @@ public class WearActivity extends Activity {
 }
 </pre>
 
-<p>When the system detects a long press gesture, <code>DismissOverlayView</code> shows an
-<strong>Exit</strong> button, which terminates your activity if the user presses it.</p>
+<p>When the system detects a long press gesture, the
+<a href="{@docRoot}reference/android/support/wearable/view/DismissOverlayView.html"><code>&lt;DismissOverlayView&gt;</code></a>
+element shows an <strong>Exit</strong> button, which terminates your activity if the user presses
+it.</p>

@@ -94,14 +94,18 @@ API reference documentation</a> for the Wearable UI Library classes.</p>
 
 <h2 id="different-layouts">Specify Different Layouts for Square and Round Screens</h2>
 
-<p>The <code>WatchViewStub</code> class included in the Wearable UI Library lets you specify
-different layout definitions for square and round screens. This class detects the screen shape
-at runtime and inflates the corresponding layout.</p>
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>
+class included in the Wearable UI Library lets you specify different layout definitions for square
+and round screens. This class detects the screen shape at runtime and inflates the corresponding
+layout.</p>
 
 <p>To use this class for handling different screen shapes in your app:</p>
 
 <ol>
-<li>Add <code>WatchViewStub</code> as the main element of your activity's layout.</li>
+<li>Add
+<a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>
+as the main element of your activity's layout.</li>
 <li>Specify a layout definition file for square screens with the <code>rectLayout</code>
     attribute.</li>
 <li>Specify a layout definition file for round screens with the <code>roundLayout</code>
@@ -142,7 +146,8 @@ The system inflates the correct layout at runtime depending on the screen shape.
 <h3>Accessing layout views</h3>
 
 <p>The layouts that you specify for square or round screens are not inflated until
-<code>WatchViewStub</code> detects the shape of the screen, so your app cannot access their views
+<a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>
+detects the shape of the screen, so your app cannot access their views
 immediately. To access these views, set a listener in your activity to be notified when
 the shape-specific layout has been inflated:</p>
 
@@ -171,14 +176,18 @@ protected void onCreate(Bundle savedInstanceState) {
 <p class="img-caption"><strong>Figure 2.</strong> Window insets on a round screen.</p>
 </div>
 
-<p>The <code>BoxInsetLayout</code> class included in the Wearable UI Library extends
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>BoxInsetLayout</code></a>
+class included in the Wearable UI Library extends
 {@link android.widget.FrameLayout} and lets you define a single layout that works for both square
 and round screens. This class applies the required window insets depending on the screen shape
 and lets you easily align views on the center or near the edges of the screen.</p>
 
-<p>The gray square in figure 2 shows the area where <code>BoxInsetLayout</code> can automatically
-place its child views on round screens after applying the required window insets. To be displayed
-inside this area, children views specify the <code>layout_box</code> atribute with these values:
+<p>The gray square in figure 2 shows the area where
+<a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>BoxInsetLayout</code></a>
+can automatically place its child views on round screens after applying the required window insets.
+To be displayed inside this area, children views specify the <code>layout_box</code> atribute with
+these values:
 </p>
 
 <ul>
@@ -196,8 +205,9 @@ ignored.</p>
 <p class="img-caption"><strong>Figure 3.</strong> A layout definition that works on both
 square and round screens.</p>
 
-<p>The layout shown in figure 3 uses <code>BoxInsetLayout</code> and works on square and
-round screens:</p>
+<p>The layout shown in figure 3 uses the
+<a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>&lt;BoxInsetLayout&gt;</code></a>
+element and works on square and round screens:</p>
 
 <pre>
 &lt;<strong>android.support.wearable.view.BoxInsetLayout</strong>
@@ -243,19 +253,21 @@ round screens:</p>
 <ul>
 <li>
   <p><code>android:padding="15dp"</code></p>
-  <p>This line assigns padding to the <code>BoxInsetLayout</code> element. Because the window
-  insets on round devices are larger than 15dp, this padding only applies to square screens.</p>
+  <p>This line assigns padding to the
+  <a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>&lt;BoxInsetLayout&gt;</code></a>
+  element. Because the window insets on round devices are larger than 15dp, this padding only
+  applies to square screens.</p>
 </li>
 <li>
   <p><code>android:padding="5dp"</code></p>
-  <p>This line assigns padding to the inner <code>FrameLayout</code> element. This padding applies
-  to both square and round screens. The total padding between the buttons and the window insets
-  is 20 dp on square screens (15+5) and 5 dp on round screens.</p>
+  <p>This line assigns padding to the inner {@link android.widget.FrameLayout} element. This padding
+  applies to both square and round screens. The total padding between the buttons and the window
+  insets is 20 dp on square screens (15+5) and 5 dp on round screens.</p>
 </li>
 <li>
   <p><code>app:layout_box="all"</code></p>
-  <p>This line ensures that the <code>FrameLayout</code> element and its children are boxed inside
-  the area defined by the window insets on round screens. This line has no effect on square
-  screens.</p>
+  <p>This line ensures that the {@link android.widget.FrameLayout} element and its children are
+  boxed inside the area defined by the window insets on round screens. This line has no effect on
+  square screens.</p>
 </li>
 </ul>

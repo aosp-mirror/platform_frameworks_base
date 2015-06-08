@@ -21,16 +21,23 @@ page.title=Creating Cards
 This lesson shows you how to create cards in your Android Wear apps.</p>
 
 <p>The Wearable UI Library provides implementations of cards specifically designed for wearable
-devices. This library contains the <code>CardFrame</code> class, which wraps views inside
-a card-styled frame with a white background, rounded corners, and a light-drop shadow.
-<code>CardFrame</code> can only contain one direct child, usually a layout manager, to which
+devices. This library contains the
+<a href="{@docRoot}reference/android/support/wearable/view/CardFrame.html"><code>CardFrame</code></a>
+class, which wraps views inside a card-styled frame with a white background, rounded corners, and a
+light-drop shadow. A
+<a href="{@docRoot}reference/android/support/wearable/view/CardFrame.html"><code>CardFrame</code></a>
+instance can only contain one direct child, usually a layout manager, to which
 you can add other views to customize the content inside the card.</p>
 
 <p>You can add cards to your app in two ways:</p>
 
 <ul>
-  <li>Use or extend the <code>CardFragment</code> class.</li>
-  <li>Add a card inside a <code>CardScrollView</code> in your layout.</li>
+  <li>Use or extend the
+  <a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+  class.</li>
+  <li>Add a card inside a
+  <a href="{@docRoot}reference/android/support/wearable/view/CardScrollView.html"><code>CardScrollView</code></a>
+  instance in your layout.</li>
 </ul>
 
 <p class="note"><strong>Note:</strong> This lesson shows you how to add cards to Android Wear
@@ -41,22 +48,31 @@ Features to Notifications</a>.</p>
 
 <h2 id="card-fragment">Create a Card Fragment</h2>
 
-<p>The <code>CardFragment</code> class provides a default card layout with a title, a
-description, and an icon. Use this approach to add cards to your app if the default card layout
-shown in figure 1 meets your needs.</p>
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+class provides a default card layout with a title, a description, and an icon. Use this approach to
+add cards to your app if the default card layout shown in figure 1 meets your needs.</p>
 
 <img src="{@docRoot}wear/images/05_uilib.png" width="500" height="245" alt=""/>
-<p class="img-caption"><strong>Figure 1.</strong> The default <code>CardFragment</code> layout.</p>
+<p class="img-caption"><strong>Figure 1.</strong> The default
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+layout.</p>
 
-<p>To add a <code>CardFragment</code> to your app:</p>
+<p>To add a
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+instance to your app:</p>
 
 <ol>
 <li>In your layout, assign an ID to the element that contains the card</li>
-<li>Create a <code>CardFragment</code> instance in your activity</li>
-<li>Use the fragment manager to add the <code>CardFragment</code> instance to its container</li>
+<li>Create a
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+instance in your activity</li>
+<li>Use the fragment manager to add the
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+instance to its container</li>
 </ol>
 
-<p>The following sample code shows the code for the screen display shown in Figure 1:</p>
+<p>The following sample code shows the code for the screen display shown in figure 1:</p>
 
 <pre>
 &lt;android.support.wearable.view.BoxInsetLayout
@@ -76,7 +92,9 @@ android:layout_width="match_parent">
 &lt;/android.support.wearable.view.BoxInsetLayout>
 </pre>
 
-<p>The following code adds the <code>CardFragment</code> instance to the activity in Figure 1:</p>
+<p>The following code adds the
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+instance to the activity in figure 1:</p>
 
 <pre>
 protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +111,11 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
-<p>To create a card with a custom layout using <code>CardFragment</code>, extend this class
-and override its <code>onCreateContentView</code> method.</p>
+<p>To create a card with a custom layout using the
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+class, extend the class and override its
+<a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html#onCreateContentView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)"><code>onCreateContentView</code></a>
+method.</p>
 
 
 <h2 id="card-layout">Add a CardFrame to Your Layout</h2>
@@ -103,8 +124,9 @@ and override its <code>onCreateContentView</code> method.</p>
 approach when you want to define a custom layout for the card inside a layout definition file.</p>
 
 <img src="{@docRoot}wear/images/04_uilib.png" width="500" height="248" alt=""/>
-<p class="img-caption"><strong>Figure 2.</strong> Adding a <code>CardFrame</code> to your
-layout.</p>
+<p class="img-caption"><strong>Figure 2.</strong> Adding a
+<a href="{@docRoot}reference/android/support/wearable/view/CardFrame.html"><code>CardFrame</code></a>
+to your layout.</p>
 
 <p>The following layout code sample demonstrates a vertical linear layout with two elements. You
 can create more complex layouts to fit the needs of your app.</p>
@@ -152,7 +174,9 @@ android:layout_width="match_parent">
 &lt;/android.support.wearable.view.BoxInsetLayout>
 </pre>
 
-<p>The <code>CardScrollView</code> element in the example layout above lets you assign gravity to
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/view/CardScrollView.html><code>&lt;CardScrollView&gt;</code></a>
+element in the example layout above lets you assign gravity to
 the card when its content is smaller than the container. This example aligns the card to the
 bottom of the screen:</p>
 
@@ -168,8 +192,13 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
-<p><code>CardScrollView</code> detects the shape of the screen and displays the card differently
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/view/CardScrollView.html"><code>&lt;CardScrollView&gt;</code></a>
+element detects the shape of the screen and displays the card differently
 on round and square devices, using wider side margins on round screens. However,
-placing the <code>CardScrollView</code> element inside a <code>BoxInsetLayout</code> and using the
-<code>layout_box="bottom"</code> attribute is useful to align the card to the bottom of round
-screens without cropping its content.</p>
+placing the
+<a href="{@docRoot}reference/android/supprot/wearable/view/CardScrollView.html"><code>&lt;CardScrollView&gt;</code></a>
+element inside a
+<a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>&lt;BoxInsetLayout&gt;</code></a>
+and using the <code>layout_box="bottom"</code> attribute is useful to align the card to the bottom
+of round screens without cropping its content.</p>

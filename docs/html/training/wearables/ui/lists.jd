@@ -12,6 +12,11 @@ page.title=Creating Lists
   <li><a href="#adapter">Create an Adapter to Populate the List</a></li>
   <li><a href="#adapter-listener">Associate the Adapter and Set a Click Listener</a></li>
 </ol>
+<h2>Related Samples</h2>
+<ul>
+  <li><a href="{@docRoot}samples/Notifications/index.html">
+    Notifications</a></li>
+</ul>
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
@@ -23,35 +28,36 @@ page.title=Creating Lists
 <p>Lists let users select an item from a set of choices easily on wearable devices. This lesson
 shows you how to create lists in your Android Wear apps.</p>
 
-<p>The Wearable UI Library includes the <code>WearableListView</code> class, which is a list
-implementation optimized for wearable devices..</p>
-
-<p class="note"><strong>Note:</strong> The <em>Notifications</em> sample in the Android SDK
-demonstrates how to use <code>WearableListView</code> in your apps. This sample is located in
-the <code>android-sdk/samples/android-20/wearable/Notifications</code> directory.</p>
+<p>The Wearable UI Library includes the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView</code></a>
+class, which is a list implementation optimized for wearable devices.</p>
 
 <p>To create a list in your Android Wear apps:</p>
 
 <ol>
-<li>Add a <code>WearableListView</code> element to your activity's layout definition.</li>
+<li>Add a
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView</code></a>
+element to your activity's layout definition.</li>
 <li>Create a custom layout implementation for your list items.</li>
 <li>Use this implementation to create a layout definition file for your list items.</li>
-<div style="float:right;margin-left:25px;width:220px;margin-top:-25px">
-<img src="{@docRoot}wear/images/06_uilib.png" width="200" height="200" alt=""/>
-<p class="img-caption" style="text-align:center;margin-left:-10px"><strong>Figure 3:</strong>
-A list view on Android Wear.</p>
-</div>
 <li>Create an adapter to populate the list.</li>
-<li>Assign the adapter to the <code>WearableListView</code> element.</li>
+<li>Assign the adapter to the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView</code></a>
+element.</li>
 </ol>
+
+<img src="{@docRoot}wear/images/06_uilib.png" width="200" height="200" alt=""/>
+<p class="img-caption"><strong>Figure 1.</strong>
+A list view on Android Wear.</p>
 
 <p>These steps are described in detail in the following sections.</p>
 
 
 <h2 id="add-list">Add a List View</h2>
 
-<p>The following layout adds a list view to an activity using a <code>BoxInsetLayout</code>, so
-the list is displayed properly on both round and square devices:</p>
+<p>The following layout adds a list view to an activity using a
+<a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>&lt;BoxInsetLayout&gt;</code></a>
+element, so the list is displayed properly on both round and square devices:</p>
 
 <pre>
 &lt;android.support.wearable.view.BoxInsetLayout
@@ -80,12 +86,14 @@ the list is displayed properly on both round and square devices:</p>
 <h2 id="layout-impl">Create a Layout Implementation for List Items</h2>
 
 <p>In many cases, each list item consists of an icon and a description. The
-<em>Notifications</em> sample from the Android SDK implements a custom layout that extends
+<a href="{@docRoot}samples/Notifications/index.html">Notifications</a> sample implements a custom
+layout that extends
 {@link android.widget.LinearLayout} to incorporate these two elements inside each list item.
 This layout also implements the methods in the
-<code>WearableListView.OnCenterProximityListener</code> interface
-to change the color of the item's icon and fade the text in response to events from
-<code>WearableListView</code> as the user scrolls through the list.</p>
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.OnCenterProximityListener.html"<code>WearableListView.OnCenterProximityListener</code></a>
+interface to change the color of the item's icon and fade the text in response to events from the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView</code></a>
+element as the user scrolls through the list.</p>
 
 <pre>
 public class WearableListItemLayout extends LinearLayout
@@ -141,9 +149,13 @@ public class WearableListItemLayout extends LinearLayout
 </pre>
 
 <p>You can also create animator objects to enlarge the icon of the center item in the list. You can
-use the <code>onCenterPosition()</code> and <code>onNonCenterPosition()</code> callback methods
-in the <code>WearableListView.OnCenterProximityListener</code> interface to manage your
-animators. For more information about animators, see
+use the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.OnCenterProximityListener.html#onCenterPosition(boolean)"><code>onCenterPosition()</code></a>
+and
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.OnCenterProximityListener.html#onNonCenterPosition(boolean)"><code>onNonCenterPosition()</code></a>
+callback methods in the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView.OnCenterProximityListener</code></a>
+interface to manage your animators. For more information about animators, see
 <a href="{@docRoot}guide/topics/graphics/prop-animation.html#object-animator">Animating with
 ObjectAnimator</a>.</p>
 
@@ -185,7 +197,9 @@ and a text view whose IDs match those in the layout implementation class:</p>
 
 <h2 id="adapter">Create an Adapter to Populate the List</h2>
 
-<p>The adapter populates the <code>WearableListView</code> with content. The following simple
+<p>The adapter populates the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView.OnCenterProximityListener</code></a>
+element with content. The following simple
 adapter populates the list with elements based on an array of strings:</p>
 
 <pre>
@@ -247,9 +261,10 @@ private static final class Adapter extends WearableListView.Adapter {
 
 <h2 id="adapter-listener">Associate the Adapter and Set a Click Listener</h2>
 
-<p>In your activity, obtain a reference to the <code>WearableListView</code> element from
-your layout, assign an instance of the adapter to populate the list, and set a click listener
-to complete an action when the user selects a particular list item.</p>
+<p>In your activity, obtain a reference to the
+<a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView.OnCenterProximityListener</code></a>
+element from your layout, assign an instance of the adapter to populate the list, and set a click
+listener to complete an action when the user selects a particular list item.</p>
 
 <pre>
 public class WearActivity extends Activity
