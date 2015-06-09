@@ -70,14 +70,14 @@ public class WifiPowerCalculator extends PowerCalculator {
                 statsType);
         app.wifiRunningTimeMs = idleTimeMs + rxTimeMs + txTimeMs;
 
-        double powerDrain = stats.getWifiControllerActivity(BatteryStats.CONTROLLER_POWER_DRAIN,
+        double powerDrainMah = stats.getWifiControllerActivity(BatteryStats.CONTROLLER_POWER_DRAIN,
                 statsType) / (double)(1000*60*60);
-        if (powerDrain == 0) {
+        if (powerDrainMah == 0) {
             // Some controllers do not report power drain, so we can calculate it here.
-            powerDrain = ((idleTimeMs * mIdleCurrentMa) + (txTimeMs * mTxCurrentMa)
+            powerDrainMah = ((idleTimeMs * mIdleCurrentMa) + (txTimeMs * mTxCurrentMa)
                     + (rxTimeMs * mRxCurrentMa)) / (1000*60*60);
         }
-        app.wifiPowerMah = Math.max(0, powerDrain - mTotalAppPowerDrain);
+        app.wifiPowerMah = Math.max(0, powerDrainMah - mTotalAppPowerDrain);
 
         if (DEBUG) {
             Log.d(TAG, "left over WiFi power: " + BatteryStatsHelper.makemAh(app.wifiPowerMah));
