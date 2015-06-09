@@ -5549,6 +5549,15 @@ public final class Settings {
         public static final String DOUBLE_TAP_TO_WAKE = "double_tap_to_wake";
 
         /**
+         * The current assistant component. It could be a voice interaction service,
+         * or an activity that handles ACTION_ASSIST, or empty which means using the default
+         * handling.
+         *
+         * @hide
+         */
+        public static final String ASSISTANT = "assistant";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
