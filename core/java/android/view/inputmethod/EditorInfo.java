@@ -298,6 +298,19 @@ public class EditorInfo implements InputType, Parcelable {
 
     /**
      * Name of the package that owns this editor.
+     *
+     * <p><strong>IME authors:</strong> In API level 22
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} and prior, do not trust this package
+     * name. The system had not verified the consistency between the package name here and
+     * application's uid. Consider to use {@link InputBinding#getUid()}, which is trustworthy.
+     * Starting from Android MNC, the system verifies the consistency between this package name
+     * and application uid before {@link EditorInfo} is passed to the input method as long as the
+     * application sets a non-empty package name.</p>
+     *
+     * <p><strong>Editor authors:</strong> Starting from Android MNC, the application is no longer
+     * able to establish input connections if the package name provided here is inconsistent with
+     * application's uid. Note that the system does accept an empty string for an arbitrary
+     * application uid.</p>
      */
     public String packageName;
 
