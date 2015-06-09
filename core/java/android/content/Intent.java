@@ -1226,7 +1226,8 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Input: {@link #EXTRA_ASSIST_PACKAGE}, {@link #EXTRA_ASSIST_CONTEXT}, can provide
      * additional optional contextual information about where the user was when they
-     * requested the assist.
+     * requested the assist; {@link #EXTRA_REFERRER} may be set with additional referrer
+     * information.
      * Output: nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)

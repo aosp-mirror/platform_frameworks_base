@@ -58,9 +58,11 @@ import java.util.ArrayList;
  * request, rather than holding on to the activity instance yourself, either explicitly
  * or implicitly through a non-static inner class.
  */
-public class VoiceInteractor {
+public final class VoiceInteractor {
     static final String TAG = "VoiceInteractor";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
+
+    static final Request[] NO_REQUESTS = new Request[0];
 
     final IVoiceInteractor mInteractor;
 
@@ -189,7 +191,7 @@ public class VoiceInteractor {
         }
     };
 
-    final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
+    final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<>();
 
     static final int MSG_CONFIRMATION_RESULT = 1;
     static final int MSG_PICK_OPTION_RESULT = 2;
@@ -206,10 +208,22 @@ public class VoiceInteractor {
         IVoiceInteractorRequest mRequestInterface;
         Context mContext;
         Activity mActivity;
+        String mName;
 
         Request() {
         }
 
+        /**
+         * Return the name this request was submitted through
+         * {@link #submitRequest(android.app.VoiceInteractor.Request, String)}.
+         */
+        public String getName() {
+            return mName;
+        }
+
+        /**
+         * Cancel this active request.
+         */
         public void cancel() {
             try {
                 mRequestInterface.cancel();
@@ -218,20 +232,39 @@ public class VoiceInteractor {
             }
         }
 
+        /**
+         * Return the current {@link Context} this request is associated with.  May change
+         * if the activity hosting it goes through a configuration change.
+         */
         public Context getContext() {
             return mContext;
         }
 
+        /**
+         * Return the current {@link Activity} this request is associated with.  Will change
+         * if the activity is restarted such as through a configuration change.
+         */
         public Activity getActivity() {
             return mActivity;
         }
 
+        /**
+         * Report from voice interaction service: this operation has been canceled, typically
+         * as a completion of a previous call to {@link #cancel}.
+         */
         public void onCancel() {
         }
 
+        /**
+         * The request is now attached to an activity, or being re-attached to a new activity
+         * after a configuration change.
+         */
         public void onAttached(Activity activity) {
         }
 
+        /**
+         * The request is being detached from an activity.
+         */
         public void onDetached() {
         }
 
@@ -239,6 +272,7 @@ public class VoiceInteractor {
             mRequestInterface = null;
             mContext = null;
             mActivity = null;
+            mName = null;
         }
 
         abstract IVoiceInteractorRequest submit(IVoiceInteractor interactor,
@@ -761,12 +795,31 @@ public class VoiceInteractor {
     }
 
     public boolean submitRequest(Request request) {
+        return submitRequest(request, null);
+    }
+
+    /**
+     * Submit a new {@link Request} to the voice interaction service.  The request must be
+     * one of the available subclasses -- {@link ConfirmationRequest}, {@link PickOptionRequest},
+     * {@link CompleteVoiceRequest}, {@link AbortVoiceRequest}, or {@link CommandRequest}.
+     *
+     * @param request The desired request to submit.
+     * @param name An optional name for this request, or null. This can be used later with
+     * {@link #getActiveRequests} and {@link #getActiveRequest} to find the request.
+     *
+     * @return Returns true of the request was successfully submitted, else false.
+     */
+    public boolean submitRequest(Request request, String name) {
         try {
+            if (request.mRequestInterface != null) {
+                throw new IllegalStateException("Given " + request + " is already active");
+            }
             IVoiceInteractorRequest ireq = request.submit(mInteractor,
                     mContext.getOpPackageName(), mCallback);
             request.mRequestInterface = ireq;
             request.mContext = mContext;
             request.mActivity = mActivity;
+            request.mName = name;
             synchronized (mActiveRequests) {
                 mActiveRequests.put(ireq.asBinder(), request);
             }
@@ -775,6 +828,43 @@ public class VoiceInteractor {
             Log.w(TAG, "Remove voice interactor service died", e);
             return false;
         }
+    }
+
+    /**
+     * Return all currently active requests.
+     */
+    public Request[] getActiveRequests() {
+        synchronized (mActiveRequests) {
+            final int N = mActiveRequests.size();
+            if (N <= 0) {
+                return NO_REQUESTS;
+            }
+            Request[] requests = new Request[N];
+            for (int i=0; i<N; i++) {
+                requests[i] = mActiveRequests.valueAt(i);
+            }
+            return requests;
+        }
+    }
+
+    /**
+     * Return any currently active request that was submitted with the given name.
+     *
+     * @param name The name used to submit the request, as per
+     * {@link #submitRequest(android.app.VoiceInteractor.Request, String)}.
+     * @return Returns the active request with that name, or null if there was none.
+     */
+    public Request getActiveRequest(String name) {
+        synchronized (mActiveRequests) {
+            final int N = mActiveRequests.size();
+            for (int i=0; i<N; i++) {
+                Request req = mActiveRequests.valueAt(i);
+                if (name == req.getName() || (name != null && name.equals(req.getName()))) {
+                    return req;
+                }
+            }
+        }
+        return null;
     }
 
     /**
