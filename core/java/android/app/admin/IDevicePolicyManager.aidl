@@ -128,7 +128,7 @@ interface IDevicePolicyManager {
     boolean hasUserSetupCompleted();
 
     boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
-    void uninstallCaCert(in ComponentName admin, in String alias);
+    void uninstallCaCerts(in ComponentName admin, in String[] aliases);
     void enforceCanManageCaCerts(in ComponentName admin);
 
     boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer, String alias);
