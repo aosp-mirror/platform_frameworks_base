@@ -2534,15 +2534,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case UPDATE_PREFERRED_SETUP_ACTIVITY_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            ComponentName preferredActivity = ComponentName.readFromParcel(data);
-            int userId = data.readInt();
-            updatePreferredSetupActivity(preferredActivity, userId);
-            reply.writeNoException();
-            return true;
-        }
-
         case GET_PACKAGE_PROCESS_STATE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
@@ -5862,20 +5853,6 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
         mRemote.transact(UPDATE_DEVICE_OWNER_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-
-    @Override
-    public void updatePreferredSetupActivity(ComponentName preferredActivity, int userId)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        ComponentName.writeToParcel(preferredActivity, data);
-        data.writeInt(userId);
-        mRemote.transact(UPDATE_PREFERRED_SETUP_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
