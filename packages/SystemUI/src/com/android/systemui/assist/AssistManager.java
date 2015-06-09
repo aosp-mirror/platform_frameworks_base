@@ -124,6 +124,14 @@ public class AssistManager {
         startAssist();
     }
 
+    public void hideAssist() {
+        try {
+            mVoiceInteractionManagerService.hideCurrentSession();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call hideCurrentSession", e);
+        }
+    }
+
     private WindowManager.LayoutParams getLayoutParams() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

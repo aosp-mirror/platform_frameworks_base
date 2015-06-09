@@ -49,6 +49,7 @@ import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
 import android.speech.RecognitionService;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -475,11 +476,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "hideSessionFromSession without running voice interaction service");
                     return false;
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.hideSessionLocked(callingPid, callingUid);
+                    return mImpl.hideSessionLocked();
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -737,6 +736,28 @@ public class VoiceInteractionManagerService extends SystemService {
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
                                     | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,
                             showCallback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void hideCurrentSession() throws RemoteException {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                if (mImpl == null) {
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    if (mImpl.mActiveSession != null && mImpl.mActiveSession.mSession != null) {
+                        try {
+                            mImpl.mActiveSession.mSession.closeSystemDialogs();
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Failed to call closeSystemDialogs", e);
+                        }
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
