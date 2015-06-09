@@ -5792,7 +5792,6 @@ package android.app.admin {
     method public void setPermissionPolicy(android.content.ComponentName, int);
     method public boolean setPermittedAccessibilityServices(android.content.ComponentName, java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(android.content.ComponentName, java.util.List<java.lang.String>);
-    method public void setPreferredSetupActivity(android.content.ComponentName, android.content.ComponentName);
     method public void setProfileEnabled(android.content.ComponentName);
     method public void setProfileName(android.content.ComponentName, java.lang.String);
     method public void setRecommendedGlobalProxy(android.content.ComponentName, android.net.ProxyInfo);

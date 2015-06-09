@@ -183,7 +183,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
-    private static final String ATTR_PREFERRED_SETUP_ACTIVITY = "setup-activity";
     private static final String ATTR_PERMISSION_POLICY = "permission-policy";
 
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
@@ -334,8 +333,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String mDelegatedCertInstallerPackage;
 
         boolean doNotAskCredentialsOnBoot = false;
-
-        ComponentName mPreferredSetupActivity;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -1436,12 +1433,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_DELEGATED_CERT_INSTALLER,
                         policy.mDelegatedCertInstallerPackage);
             }
-            if (policy.mPreferredSetupActivity != null) {
-                out.attribute(null, ATTR_PREFERRED_SETUP_ACTIVITY,
-                        policy.mPreferredSetupActivity.flattenToString());
-            } else {
-                out.attribute(null, ATTR_PREFERRED_SETUP_ACTIVITY, "");
-            }
 
             final int N = policy.mAdminList.size();
             for (int i=0; i<N; i++) {
@@ -1566,12 +1557,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             policy.mDelegatedCertInstallerPackage = parser.getAttributeValue(null,
                     ATTR_DELEGATED_CERT_INSTALLER);
-            String preferredSetupActivity =
-                    parser.getAttributeValue(null, ATTR_PREFERRED_SETUP_ACTIVITY);
-            if (preferredSetupActivity != null) {
-                policy.mPreferredSetupActivity =
-                        ComponentName.unflattenFromString(preferredSetupActivity);
-            }
 
             type = parser.next();
             int outerDepth = parser.getDepth();
@@ -1695,7 +1680,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
-        updatePreferredSetupActivityLocked(userHandle);
     }
 
     private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
@@ -4734,43 +4718,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setPreferredSetupActivity(ComponentName who, ComponentName activity) {
-        if (!mHasFeature) {
-            return;
-        }
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        synchronized (this) {
-            ActiveAdmin activeAdmin =
-                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isDeviceInitializer(activeAdmin.info.getPackageName())) {
-                throw new SecurityException(
-                        "This method can only be called by device initializers");
-            }
-            int userHandle = UserHandle.getCallingUserId();
-            DevicePolicyData userData = getUserData(userHandle);
-            userData.mPreferredSetupActivity = activity;
-            saveSettingsLocked(userHandle);
-            updatePreferredSetupActivityLocked(userHandle);
-        }
-    }
-
-    private void updatePreferredSetupActivityLocked(int userHandle) {
-        if (!mHasFeature) {
-            return;
-        }
-        IActivityManager am = ActivityManagerNative.getDefault();
-        long ident = Binder.clearCallingIdentity();
-        try {
-            am.updatePreferredSetupActivity(
-                    getUserData(userHandle).mPreferredSetupActivity, userHandle);
-        } catch (RemoteException e) {
-            // Not gonna happen.
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
     public void setApplicationRestrictions(ComponentName who, String packageName, Bundle settings) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
@@ -6138,9 +6085,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (!policy.mUserSetupComplete) {
                     policy.mUserSetupComplete = true;
                     synchronized (this) {
-                        // Clear the preferred setup activity.
-                        policy.mPreferredSetupActivity = null;
-                        updatePreferredSetupActivityLocked(userHandle);
                         // The DeviceInitializer was whitelisted but now should be removed.
                         removeDeviceInitializerFromLockTaskPackages(userHandle);
                         saveSettingsLocked(userHandle);
