@@ -16064,23 +16064,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         } else if (cache != null) {
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-            Paint cachePaint;
-            int restoreAlpha = 0;
-
             if (layerType == LAYER_TYPE_NONE) {
-                cachePaint = parent.mCachePaint;
+                // no layer paint, use temporary paint to draw bitmap
+                Paint cachePaint = parent.mCachePaint;
                 if (cachePaint == null) {
                     cachePaint = new Paint();
                     cachePaint.setDither(false);
                     parent.mCachePaint = cachePaint;
                 }
+                cachePaint.setAlpha((int) (alpha * 255));
+                canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
             } else {
-                cachePaint = mLayerPaint;
-                restoreAlpha = mLayerPaint.getAlpha();
+                // use layer paint to draw the bitmap, merging the two alphas, but also restore
+                int layerPaintAlpha = mLayerPaint.getAlpha();
+                mLayerPaint.setAlpha((int) (alpha * layerPaintAlpha));
+                canvas.drawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
+                mLayerPaint.setAlpha(layerPaintAlpha);
             }
-            cachePaint.setAlpha((int) (alpha * 255));
-            canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
-            cachePaint.setAlpha(restoreAlpha);
         }
 
         if (restoreTo >= 0) {
