@@ -2614,12 +2614,20 @@
   <public type="attr" name="end" />
   <public type="attr" name="windowLightStatusBar" />
   <public type="attr" name="numbersInnerTextColor" />
-  <public type="attr" name="iconTint" />
-  <public type="attr" name="iconTintMode" />
-  <public type="attr" name="overflowTint" />
-  <public type="attr" name="overflowTintMode" />
-  <public type="attr" name="navigationTint" />
-  <public type="attr" name="navigationTintMode" />
+
+  <attr name="__reserved2" format="boolean" />
+  <public type="attr" name="__reserved2" />
+  <attr name="__reserved3" format="boolean" />
+  <public type="attr" name="__reserved3" />
+  <attr name="__reserved4" format="boolean" />
+  <public type="attr" name="__reserved4" />
+  <attr name="__reserved5" format="boolean" />
+  <public type="attr" name="__reserved5" />
+  <attr name="__reserved6" format="boolean" />
+  <public type="attr" name="__reserved6" />
+  <attr name="__reserved7" format="boolean" />
+  <public type="attr" name="__reserved7" />
+
   <public type="attr" name="fullBackupContent" />
 
   <public type="style" name="Widget.Material.Button.Colored" />

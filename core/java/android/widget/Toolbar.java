@@ -25,9 +25,8 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.app.ActionBar;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.PorterDuff;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -109,9 +108,6 @@ public class Toolbar extends ViewGroup {
     private TextView mSubtitleTextView;
     private ImageButton mNavButtonView;
     private ImageView mLogoView;
-
-    private TintInfo mOverflowTintInfo;
-    private TintInfo mNavTintInfo;
 
     private Drawable mCollapseIcon;
     private CharSequence mCollapseDescription;
@@ -274,21 +270,6 @@ public class Toolbar extends ViewGroup {
                 R.styleable.Toolbar_navigationContentDescription);
         if (!TextUtils.isEmpty(navDesc)) {
             setNavigationContentDescription(navDesc);
-        }
-
-        if (a.hasValue(R.styleable.Toolbar_overflowTint)) {
-            setOverflowTintList(a.getColorStateList(R.styleable.Toolbar_overflowTint));
-        }
-        if (a.hasValue(R.styleable.Toolbar_overflowTintMode)) {
-            setOverflowTintMode(Drawable.parseTintMode(
-                    a.getInt(R.styleable.Toolbar_overflowTintMode, -1), null));
-        }
-        if (a.hasValue(R.styleable.Toolbar_navigationTint)) {
-            setNavigationTintList(a.getColorStateList(R.styleable.Toolbar_navigationTint));
-        }
-        if (a.hasValue(R.styleable.Toolbar_navigationTintMode)) {
-            setNavigationTintMode(Drawable.parseTintMode(
-                    a.getInt(R.styleable.Toolbar_navigationTintMode, -1), null));
         }
         a.recycle();
     }
@@ -830,91 +811,6 @@ public class Toolbar extends ViewGroup {
     }
 
     /**
-     * Applies a tint to the icon drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
-     * <p>
-     * Subsequent calls to {@link #setNavigationIcon(Drawable)} will automatically mutate
-     * the drawable and apply the specified tint and tint mode.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#Toolbar_navigationTint
-     */
-    public void setNavigationTintList(ColorStateList tint) {
-        if (mNavTintInfo == null) {
-            mNavTintInfo = new TintInfo();
-        }
-        mNavTintInfo.mTintList = tint;
-        mNavTintInfo.mHasTintList = true;
-
-        applyNavigationTint();
-    }
-
-    /**
-     * Specifies the blending mode used to apply the tint specified by {@link
-     * #setNavigationTintList(ColorStateList)} to the navigation drawable.
-     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
-     *
-     * @param tintMode the blending mode used to apply the tint, may be {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#Toolbar_navigationTintMode
-     */
-    public void setNavigationTintMode(PorterDuff.Mode tintMode) {
-        if (mNavTintInfo == null) {
-            mNavTintInfo = new TintInfo();
-        }
-        mNavTintInfo.mTintMode = tintMode;
-        mNavTintInfo.mHasTintMode = true;
-
-        applyNavigationTint();
-    }
-
-    /**
-     * Applies a tint to the overflow drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#Toolbar_overflowTint
-     */
-    public void setOverflowTintList(ColorStateList tint) {
-        if (mMenuView != null) {
-            // If the menu view is available, directly set the tint
-            mMenuView.setOverflowTintList(tint);
-        } else {
-            // Otherwise we will record the value
-            if (mOverflowTintInfo == null) {
-                mOverflowTintInfo = new TintInfo();
-            }
-            mOverflowTintInfo.mTintList = tint;
-            mOverflowTintInfo.mHasTintList = true;
-        }
-    }
-
-    /**
-     * Specifies the blending mode used to apply the tint specified by {@link
-     * #setOverflowTintList(ColorStateList)} to the overflow drawable.
-     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
-     *
-     * @param tintMode the blending mode used to apply the tint, may be {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#Toolbar_overflowTintMode
-     */
-    public void setOverflowTintMode(PorterDuff.Mode tintMode) {
-        if (mMenuView != null) {
-            // If the menu view is available, directly set the tint mode
-            mMenuView.setOverflowTintMode(tintMode);
-        } else {
-            // Otherwise we will record the value
-            if (mOverflowTintInfo == null) {
-                mOverflowTintInfo = new TintInfo();
-            }
-            mOverflowTintInfo.mTintMode = tintMode;
-            mOverflowTintInfo.mHasTintMode = true;
-        }
-    }
-
-    /**
      * Return the Menu shown in the toolbar.
      *
      * <p>Applications that wish to populate the toolbar's menu can do so from here. To use
@@ -925,6 +821,27 @@ public class Toolbar extends ViewGroup {
     public Menu getMenu() {
         ensureMenu();
         return mMenuView.getMenu();
+    }
+
+    /**
+     * Set the icon to use for the overflow button.
+     *
+     * @param icon Drawable to set, may be null to clear the icon
+     */
+    public void setOverflowIcon(@Nullable Drawable icon) {
+        ensureMenu();
+        mMenuView.setOverflowIcon(icon);
+    }
+
+    /**
+     * Return the current drawable used as the overflow icon.
+     *
+     * @return The overflow icon drawable
+     */
+    @Nullable
+    public Drawable getOverflowIcon() {
+        ensureMenu();
+        return mMenuView.getOverflowIcon();
     }
 
     private void ensureMenu() {
@@ -950,17 +867,6 @@ public class Toolbar extends ViewGroup {
             lp.gravity = Gravity.END | (mButtonGravity & Gravity.VERTICAL_GRAVITY_MASK);
             mMenuView.setLayoutParams(lp);
             addSystemView(mMenuView);
-
-            if (mOverflowTintInfo != null) {
-                // If we have tint info for the overflow, set it on the menu view now
-                if (mOverflowTintInfo.mHasTintList) {
-                    mMenuView.setOverflowTintList(mOverflowTintInfo.mTintList);
-                }
-                if (mOverflowTintInfo.mHasTintMode) {
-                    mMenuView.setOverflowTintMode(mOverflowTintInfo.mTintMode);
-                }
-                mOverflowTintInfo = null;
-            }
         }
     }
 
@@ -1114,7 +1020,6 @@ public class Toolbar extends ViewGroup {
             final LayoutParams lp = generateDefaultLayoutParams();
             lp.gravity = Gravity.START | (mButtonGravity & Gravity.VERTICAL_GRAVITY_MASK);
             mNavButtonView.setLayoutParams(lp);
-            applyNavigationTint();
         }
     }
 
@@ -1133,7 +1038,6 @@ public class Toolbar extends ViewGroup {
                     collapseActionView();
                 }
             });
-            applyNavigationTint();
         }
     }
 
@@ -1885,30 +1789,6 @@ public class Toolbar extends ViewGroup {
         return mPopupContext;
     }
 
-    private void applyNavigationTint() {
-        final TintInfo tintInfo = mNavTintInfo;
-        if (tintInfo != null && (tintInfo.mHasTintList || tintInfo.mHasTintMode)) {
-            if (mNavButtonView != null) {
-                if (tintInfo.mHasTintList) {
-                    mNavButtonView.setImageTintList(tintInfo.mTintList);
-                }
-                if (tintInfo.mHasTintMode) {
-                    mNavButtonView.setImageTintMode(tintInfo.mTintMode);
-                }
-            }
-
-            if (mCollapseButtonView != null) {
-                // We will use the same tint for the collapse button
-                if (tintInfo.mHasTintList) {
-                    mCollapseButtonView.setImageTintList(tintInfo.mTintList);
-                }
-                if (tintInfo.mHasTintMode) {
-                    mCollapseButtonView.setImageTintMode(tintInfo.mTintMode);
-                }
-            }
-        }
-    }
-
     /**
      * Interface responsible for receiving menu item click events if the items themselves
      * do not have individual item click listeners.
@@ -2135,12 +2015,5 @@ public class Toolbar extends ViewGroup {
         @Override
         public void onRestoreInstanceState(Parcelable state) {
         }
-    }
-
-    private static class TintInfo {
-        ColorStateList mTintList;
-        PorterDuff.Mode mTintMode;
-        boolean mHasTintMode;
-        boolean mHasTintList;
     }
 }
