@@ -31,11 +31,18 @@ import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.ProviderException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
@@ -43,7 +50,10 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.ShortBufferException;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Base class for {@link CipherSpi} implementations of Android KeyStore backed ciphers.
@@ -140,11 +150,18 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     }
 
     private void init(int opmode, Key key, SecureRandom random) throws InvalidKeyException {
-        if ((opmode != Cipher.ENCRYPT_MODE) && (opmode != Cipher.DECRYPT_MODE)) {
-            throw new UnsupportedOperationException(
-                    "Only ENCRYPT and DECRYPT modes supported. Mode: " + opmode);
+        switch (opmode) {
+            case Cipher.ENCRYPT_MODE:
+            case Cipher.WRAP_MODE:
+                mEncrypting = true;
+                break;
+            case Cipher.DECRYPT_MODE:
+            case Cipher.UNWRAP_MODE:
+                mEncrypting = false;
+                break;
+            default:
+                throw new InvalidParameterException("Unsupported opmode: " + opmode);
         }
-        mEncrypting = opmode == Cipher.ENCRYPT_MODE;
         initKey(opmode, key);
         if (mKey == null) {
             throw new ProviderException("initKey did not initialize the key");
@@ -395,13 +412,139 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     @Override
     protected final byte[] engineWrap(Key key)
             throws IllegalBlockSizeException, InvalidKeyException {
-        return super.engineWrap(key);
+        if (mKey == null) {
+            throw new IllegalStateException("Not initilized");
+        }
+
+        if (!isEncrypting()) {
+            throw new IllegalStateException(
+                    "Cipher must be initialized in Cipher.WRAP_MODE to wrap keys");
+        }
+
+        if (key == null) {
+            throw new NullPointerException("key == null");
+        }
+        byte[] encoded = null;
+        if (key instanceof SecretKey) {
+            if ("RAW".equalsIgnoreCase(key.getFormat())) {
+                encoded = key.getEncoded();
+            }
+            if (encoded == null) {
+                try {
+                    SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(key.getAlgorithm());
+                    SecretKeySpec spec =
+                            (SecretKeySpec) keyFactory.getKeySpec(
+                                    (SecretKey) key, SecretKeySpec.class);
+                    encoded = spec.getEncoded();
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    throw new InvalidKeyException(
+                            "Failed to wrap key because it does not export its key material",
+                            e);
+                }
+            }
+        } else if (key instanceof PrivateKey) {
+            if ("PKCS8".equalsIgnoreCase(key.getFormat())) {
+                encoded = key.getEncoded();
+            }
+            if (encoded == null) {
+                try {
+                    KeyFactory keyFactory = KeyFactory.getInstance(key.getAlgorithm());
+                    PKCS8EncodedKeySpec spec =
+                            keyFactory.getKeySpec(key, PKCS8EncodedKeySpec.class);
+                    encoded = spec.getEncoded();
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    throw new InvalidKeyException(
+                            "Failed to wrap key because it does not export its key material",
+                            e);
+                }
+            }
+        } else if (key instanceof PublicKey) {
+            if ("X.509".equalsIgnoreCase(key.getFormat())) {
+                encoded = key.getEncoded();
+            }
+            if (encoded == null) {
+                try {
+                    KeyFactory keyFactory = KeyFactory.getInstance(key.getAlgorithm());
+                    X509EncodedKeySpec spec =
+                            keyFactory.getKeySpec(key, X509EncodedKeySpec.class);
+                    encoded = spec.getEncoded();
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    throw new InvalidKeyException(
+                            "Failed to wrap key because it does not export its key material",
+                            e);
+                }
+            }
+        } else {
+            throw new InvalidKeyException("Unsupported key type: " + key.getClass().getName());
+        }
+
+        if (encoded == null) {
+            throw new InvalidKeyException(
+                    "Failed to wrap key because it does not export its key material");
+        }
+
+        try {
+            return engineDoFinal(encoded, 0, encoded.length);
+        } catch (BadPaddingException e) {
+            throw (IllegalBlockSizeException) new IllegalBlockSizeException().initCause(e);
+        }
     }
 
     @Override
     protected final Key engineUnwrap(byte[] wrappedKey, String wrappedKeyAlgorithm,
             int wrappedKeyType) throws InvalidKeyException, NoSuchAlgorithmException {
-        return super.engineUnwrap(wrappedKey, wrappedKeyAlgorithm, wrappedKeyType);
+        if (mKey == null) {
+            throw new IllegalStateException("Not initilized");
+        }
+
+        if (isEncrypting()) {
+            throw new IllegalStateException(
+                    "Cipher must be initialized in Cipher.WRAP_MODE to wrap keys");
+        }
+
+        if (wrappedKey == null) {
+            throw new NullPointerException("wrappedKey == null");
+        }
+
+        byte[] encoded;
+        try {
+            encoded = engineDoFinal(wrappedKey, 0, wrappedKey.length);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            throw new InvalidKeyException("Failed to unwrap key", e);
+        }
+
+        switch (wrappedKeyType) {
+            case Cipher.SECRET_KEY:
+            {
+                return new SecretKeySpec(encoded, wrappedKeyAlgorithm);
+                // break;
+            }
+            case Cipher.PRIVATE_KEY:
+            {
+                KeyFactory keyFactory = KeyFactory.getInstance(wrappedKeyAlgorithm);
+                try {
+                    return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+                } catch (InvalidKeySpecException e) {
+                    throw new InvalidKeyException(
+                            "Failed to create private key from its PKCS#8 encoded form", e);
+                }
+                // break;
+            }
+            case Cipher.PUBLIC_KEY:
+            {
+                KeyFactory keyFactory = KeyFactory.getInstance(wrappedKeyAlgorithm);
+                try {
+                    return keyFactory.generatePublic(new X509EncodedKeySpec(encoded));
+                } catch (InvalidKeySpecException e) {
+                    throw new InvalidKeyException(
+                            "Failed to create public key from its X.509 encoded form", e);
+                }
+                // break;
+            }
+            default:
+                throw new InvalidParameterException(
+                        "Unsupported wrappedKeyType: " + wrappedKeyType);
+        }
     }
 
     @Override
