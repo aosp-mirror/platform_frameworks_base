@@ -36,6 +36,7 @@ import android.util.SparseArray;
 
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
+import com.android.systemui.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -61,7 +62,7 @@ public class SecurityControllerImpl implements SecurityController {
     private final ArrayList<SecurityControllerCallback> mCallbacks
             = new ArrayList<SecurityControllerCallback>();
 
-    private SparseArray<Boolean> mCurrentVpnUsers = new SparseArray<>();
+    private SparseArray<VpnConfig> mCurrentVpns = new SparseArray<>();
     private int mCurrentUserId;
 
     public SecurityControllerImpl(Context context) {
@@ -82,7 +83,16 @@ public class SecurityControllerImpl implements SecurityController {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("SecurityController state:");
-        pw.print("  mCurrentVpnUsers=" + mCurrentVpnUsers);
+        pw.print("  mCurrentVpns={");
+        for (int i = 0 ; i < mCurrentVpns.size(); i++) {
+            if (i > 0) {
+                pw.print(", ");
+            }
+            pw.print(mCurrentVpns.keyAt(i));
+            pw.print('=');
+            pw.print(mCurrentVpns.valueAt(i).user);
+        }
+        pw.println("}");
     }
 
     @Override
@@ -97,11 +107,7 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public boolean hasProfileOwner() {
-        boolean result = false;
-        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
-            result |= (mDevicePolicyManager.getProfileOwnerAsUser(profile.id) != null);
-        }
-        return result;
+        return mDevicePolicyManager.getProfileOwnerAsUser(mCurrentUserId) != null;
     }
 
     @Override
@@ -116,8 +122,37 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    public String getPrimaryVpnName() {
+        VpnConfig cfg = mCurrentVpns.get(mCurrentUserId);
+        if (cfg != null) {
+            return getNameForVpnConfig(cfg, new UserHandle(mCurrentUserId));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getProfileVpnName() {
+        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
+            if (profile.id == mCurrentUserId) {
+                continue;
+            }
+            VpnConfig cfg = mCurrentVpns.get(profile.id);
+            if (cfg != null) {
+                return getNameForVpnConfig(cfg, profile.getUserHandle());
+            }
+        }
+        return null;
+    }
+
+    @Override
     public boolean isVpnEnabled() {
-        return mCurrentVpnUsers.get(mCurrentUserId) != null;
+        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
+            if (mCurrentVpns.get(profile.id) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -140,6 +175,22 @@ public class SecurityControllerImpl implements SecurityController {
         fireCallbacks();
     }
 
+    private String getNameForVpnConfig(VpnConfig cfg, UserHandle user) {
+        if (cfg.legacy) {
+            return mContext.getString(R.string.legacy_vpn_name);
+        }
+        // The package name for an active VPN is stored in the 'user' field of its VpnConfig
+        final String vpnPackage = cfg.user;
+        try {
+            Context userContext = mContext.createPackageContextAsUser(mContext.getPackageName(),
+                    0 /* flags */, user);
+            return VpnConfig.getVpnLabel(userContext, vpnPackage).toString();
+        } catch (NameNotFoundException nnfe) {
+            Log.e(TAG, "Package " + vpnPackage + " is not present", nnfe);
+            return null;
+        }
+    }
+
     private void fireCallbacks() {
         for (SecurityControllerCallback callback : mCallbacks) {
             callback.onStateChanged();
@@ -148,21 +199,20 @@ public class SecurityControllerImpl implements SecurityController {
 
     private void updateState() {
         // Find all users with an active VPN
-        SparseArray<Boolean> vpnUsers = new SparseArray<>();
+        SparseArray<VpnConfig> vpns = new SparseArray<>();
         try {
-            for (VpnInfo vpn : mConnectivityManagerService.getAllVpnInfo()) {
-                UserInfo user = mUserManager.getUserInfo(UserHandle.getUserId(vpn.ownerUid));
-                int groupId = (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID ?
-                        user.profileGroupId : user.id);
-
-                vpnUsers.put(groupId, Boolean.TRUE);
+            for (UserInfo user : mUserManager.getUsers()) {
+                VpnConfig cfg = mConnectivityManagerService.getVpnConfig(user.id);
+                if (cfg != null) {
+                    vpns.put(user.id, cfg);
+                }
             }
         } catch (RemoteException rme) {
             // Roll back to previous state
             Log.e(TAG, "Unable to list active VPNs", rme);
             return;
         }
-        mCurrentVpnUsers = vpnUsers;
+        mCurrentVpns = vpns;
     }
 
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
@@ -182,5 +232,4 @@ public class SecurityControllerImpl implements SecurityController {
             fireCallbacks();
         };
     };
-
 }
