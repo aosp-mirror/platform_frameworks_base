@@ -162,7 +162,8 @@ public class PhoneStatusBarPolicy {
         mCast.addCallback(mCastCallback);
 
         // hotspot
-        mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0, null);
+        mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0,
+                mContext.getString(R.string.accessibility_status_bar_hotspot));
         mService.setIconVisibility(SLOT_HOTSPOT, mHotspot.isHotspotEnabled());
         mHotspot.addCallback(mHotspotCallback);
 
