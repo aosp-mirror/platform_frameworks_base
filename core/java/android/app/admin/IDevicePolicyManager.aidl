@@ -218,8 +218,6 @@ interface IDevicePolicyManager {
     String getDeviceInitializer();
     ComponentName getDeviceInitializerComponent();
 
-    void setPreferredSetupActivity(in ComponentName admin, in ComponentName activity);
-
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
     void sendDeviceInitializerStatus(int statusCode, String description);
