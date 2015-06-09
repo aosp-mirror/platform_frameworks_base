@@ -436,7 +436,7 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
 
     public void reportAssistContextExtras(IBinder token, Bundle extras,
-            AssistStructure structure, AssistContent content) throws RemoteException;
+            AssistStructure structure, AssistContent content, Uri referrer) throws RemoteException;
 
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) throws RemoteException;

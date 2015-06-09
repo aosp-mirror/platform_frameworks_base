@@ -23,6 +23,7 @@ import android.app.AssistStructure;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
@@ -79,6 +80,9 @@ public class MainInteractionSession extends VoiceInteractionSession
         super.onShow(args, showFlags);
         mState = STATE_IDLE;
         mStartIntent = args.getParcelable("intent");
+        if (mStartIntent == null) {
+            mStartIntent = new Intent(getContext(), TestInteractionActivity.class);
+        }
         if (mAssistVisualizer != null) {
             mAssistVisualizer.clearAssistData();
         }
@@ -119,6 +123,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     public void onHandleAssist(Bundle assistBundle) {
+        boolean hasStructure = false;
         if (assistBundle != null) {
             Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
             if (assistContext != null) {
@@ -126,6 +131,7 @@ public class MainInteractionSession extends VoiceInteractionSession
                 if (mAssistStructure != null) {
                     if (mAssistVisualizer != null) {
                         mAssistVisualizer.setAssistStructure(mAssistStructure);
+                        hasStructure = true;
                     }
                 }
                 AssistContent content = AssistContent.getAssistContent(assistContext);
@@ -133,10 +139,13 @@ public class MainInteractionSession extends VoiceInteractionSession
                     Log.i(TAG, "Assist intent: " + content.getIntent());
                     Log.i(TAG, "Assist clipdata: " + content.getClipData());
                 }
-                return;
+            }
+            Uri referrer = assistBundle.getParcelable(Intent.EXTRA_REFERRER);
+            if (referrer != null) {
+                Log.i(TAG, "Referrer: " + referrer);
             }
         }
-        if (mAssistVisualizer != null) {
+        if (!hasStructure && mAssistVisualizer != null) {
             mAssistVisualizer.clearAssistData();
         }
     }
