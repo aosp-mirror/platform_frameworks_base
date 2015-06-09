@@ -2740,7 +2740,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 try {
                     mode = getCallback().onWindowStartingActionMode(wrappedCallback, type);
                 } catch (AbstractMethodError ame) {
-                    // Older apps might not implement this callback method.
+                    // Older apps might not implement the typed version of this method.
+                    if (type == ActionMode.TYPE_PRIMARY) {
+                        try {
+                            mode = getCallback().onWindowStartingActionMode(wrappedCallback);
+                        } catch (AbstractMethodError ame2) {
+                            // Older apps might not implement this callback method at all.
+                        }
+                    }
                 }
             }
             if (mode != null) {
