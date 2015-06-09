@@ -33424,6 +33424,7 @@ package android.telephony {
     method public void call(java.lang.String, java.lang.String);
     method public boolean canChangeDtmfToneLength();
     method public int checkCarrierPrivilegesForPackage(java.lang.String);
+    method public int checkCarrierPrivilegesForPackageAnyPhone(java.lang.String);
     method public void dial(java.lang.String);
     method public boolean disableDataConnectivity();
     method public boolean enableDataConnectivity();
