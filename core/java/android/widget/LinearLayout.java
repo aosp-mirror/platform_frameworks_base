@@ -185,6 +185,8 @@ public class LinearLayout extends ViewGroup {
     private int mShowDividers;
     private int mDividerPadding;
 
+    private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
+
     public LinearLayout(Context context) {
         this(context, null);
     }
@@ -1563,6 +1565,17 @@ public class LinearLayout extends ViewGroup {
                 childTop += childHeight + lp.bottomMargin + getNextLocationOffset(child);
 
                 i += getChildrenSkipCount(child, i);
+            }
+        }
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        if (layoutDirection != mLayoutDirection) {
+            mLayoutDirection = layoutDirection;
+            if (mOrientation == HORIZONTAL) {
+                requestLayout();
             }
         }
     }
