@@ -19,7 +19,6 @@ package android.security;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
-import com.android.org.conscrypt.NativeConstants;
 
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
@@ -38,7 +37,6 @@ import android.security.keymaster.OperationResult;
 import android.security.keystore.KeyExpiredException;
 import android.security.keystore.KeyNotYetValidException;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
-import android.security.keystore.KeyProperties;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
@@ -134,16 +132,6 @@ public class KeyStore {
             mToken = new Binder();
         }
         return mToken;
-    }
-
-    public static int getKeyTypeForAlgorithm(@KeyProperties.KeyAlgorithmEnum String keyType) {
-        if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyType)) {
-            return NativeConstants.EVP_PKEY_RSA;
-        } else if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyType)) {
-            return NativeConstants.EVP_PKEY_EC;
-        } else {
-            return -1;
-        }
     }
 
     public State state(int userId) {

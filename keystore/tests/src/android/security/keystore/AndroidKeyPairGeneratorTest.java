@@ -26,17 +26,21 @@ import android.test.AndroidTestCase;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
@@ -158,6 +162,26 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     }
 
     public void testKeyPairGenerator_GenerateKeyPair_EC_Unencrypted_Success() throws Exception {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", "AndroidKeyStore");
+        generator.initialize(new KeyGenParameterSpec.Builder(
+                TEST_ALIAS_1,
+                KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+                .setCertificateSubject(TEST_DN_1)
+                .setCertificateSerialNumber(TEST_SERIAL_1)
+                .setCertificateNotBefore(NOW)
+                .setCertificateNotAfter(NOW_PLUS_10_YEARS)
+                .setDigests(KeyProperties.DIGEST_SHA256)
+                .build());
+
+        final KeyPair pair = generator.generateKeyPair();
+        assertNotNull("The KeyPair returned should not be null", pair);
+
+        assertKeyPairCorrect(pair, TEST_ALIAS_1, "EC", 256, null, TEST_DN_1, TEST_SERIAL_1, NOW,
+                NOW_PLUS_10_YEARS);
+    }
+
+    public void testKeyPairGenerator_Legacy_GenerateKeyPair_EC_Unencrypted_Success()
+            throws Exception {
         mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                 .setAlias(TEST_ALIAS_1)
                 .setKeyType("EC")
@@ -328,19 +352,40 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         assertNotNull("The PrivateKey for the KeyPair should be not null", privKey);
         assertEquals(keyType, privKey.getAlgorithm());
 
+        if ("EC".equalsIgnoreCase(keyType)) {
+            assertTrue("EC private key must be instanceof ECKey: " + privKey.getClass().getName(),
+                    privKey instanceof ECKey);
+            assertEquals("Private and public key must have the same EC parameters",
+                    ((ECKey) pubKey).getParams(), ((ECKey) privKey).getParams());
+        } else if ("RSA".equalsIgnoreCase(keyType)) {
+            assertTrue("RSA private key must be instance of RSAKey: "
+                    + privKey.getClass().getName(),
+                    privKey instanceof RSAKey);
+            assertEquals("Private and public key must have the same RSA modulus",
+                    ((RSAKey) pubKey).getModulus(), ((RSAKey) privKey).getModulus());
+        }
+
         final byte[] userCertBytes = mAndroidKeyStore.get(Credentials.USER_CERTIFICATE + alias);
         assertNotNull("The user certificate should exist for the generated entry", userCertBytes);
 
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        final Certificate userCert = cf
-                .generateCertificate(new ByteArrayInputStream(userCertBytes));
+        final Certificate userCert =
+                cf.generateCertificate(new ByteArrayInputStream(userCertBytes));
 
         assertTrue("Certificate should be in X.509 format", userCert instanceof X509Certificate);
 
         final X509Certificate x509userCert = (X509Certificate) userCert;
 
+        assertEquals(
+                "Public key used to sign certificate should have the same algorithm as in KeyPair",
+                pubKey.getAlgorithm(), x509userCert.getPublicKey().getAlgorithm());
+
         assertEquals("PublicKey used to sign certificate should match one returned in KeyPair",
-                pubKey, x509userCert.getPublicKey());
+                pubKey,
+                AndroidKeyStoreProvider.getAndroidKeyStorePublicKey(
+                        Credentials.USER_PRIVATE_KEY + alias,
+                        x509userCert.getPublicKey().getAlgorithm(),
+                        x509userCert.getPublicKey().getEncoded()));
 
         assertEquals("The Subject DN should be the one passed into the params", dn,
                 x509userCert.getSubjectDN());
@@ -357,7 +402,10 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         assertDateEquals("The notAfter date should be the one passed into the params", end,
                 x509userCert.getNotAfter());
 
+        // Assert that the cert's signature verifies using the public key from generated KeyPair
         x509userCert.verify(pubKey);
+        // Assert that the cert's signature verifies using the public key from the cert itself.
+        x509userCert.verify(x509userCert.getPublicKey());
 
         final byte[] caCerts = mAndroidKeyStore.get(Credentials.CA_CERTIFICATE + alias);
         assertNull("A list of CA certificates should not exist for the generated entry", caCerts);
@@ -368,6 +416,8 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         final byte[] pubKeyBytes = exportResult.exportData;
         assertNotNull("The keystore should return the public key for the generated key",
                 pubKeyBytes);
+        assertTrue("Public key X.509 format should be as expected",
+                Arrays.equals(pubKey.getEncoded(), pubKeyBytes));
     }
 
     private static void assertDateEquals(String message, Date date1, Date date2) throws Exception {
