@@ -21,6 +21,15 @@ import android.util.Log;
 public class BluetoothPowerCalculator extends PowerCalculator {
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
     private static final String TAG = "BluetoothPowerCalculator";
+    private final double mIdleMa;
+    private final double mRxMa;
+    private final double mTxMa;
+
+    public BluetoothPowerCalculator(PowerProfile profile) {
+        mIdleMa = profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE);
+        mRxMa = profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX);
+        mTxMa = profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_TX);
+    }
 
     @Override
     public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
@@ -37,10 +46,15 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                 BatteryStats.CONTROLLER_TX_TIME, statsType);
         final long rxTimeMs = stats.getBluetoothControllerActivity(
                 BatteryStats.CONTROLLER_RX_TIME, statsType);
-        final long powerMaMs = stats.getBluetoothControllerActivity(
-                BatteryStats.CONTROLLER_POWER_DRAIN, statsType);
-        final double powerMah = powerMaMs / (double)(1000*60*60);
         final long totalTimeMs = idleTimeMs + txTimeMs + rxTimeMs;
+        double powerMah = stats.getBluetoothControllerActivity(
+                BatteryStats.CONTROLLER_POWER_DRAIN, statsType) / (double)(1000*60*60);
+
+        if (powerMah == 0) {
+            // Some devices do not report the power, so calculate it.
+            powerMah = ((idleTimeMs * mIdleMa) + (rxTimeMs * mRxMa) + (txTimeMs * mTxMa))
+                    / (1000*60*60);
+        }
 
         if (DEBUG && powerMah != 0) {
             Log.d(TAG, "Bluetooth active: time=" + (totalTimeMs)
