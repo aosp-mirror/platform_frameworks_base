@@ -170,6 +170,7 @@ public class BluetoothTestUtils extends Assert {
                 assertNotSame(-1, varient);
                 switch (varient) {
                     case BluetoothDevice.PAIRING_VARIANT_PIN:
+                    case BluetoothDevice.PAIRING_VARIANT_PIN_16_DIGITS:
                         mDevice.setPin(mPin);
                         break;
                     case BluetoothDevice.PAIRING_VARIANT_PASSKEY:

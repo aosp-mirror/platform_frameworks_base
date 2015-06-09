@@ -1467,7 +1467,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public BluetoothServerSocket listenUsingRfcommOn(int channel) throws IOException {
-        return listenUsingRfcommOn(channel, false);
+        return listenUsingRfcommOn(channel, false, false);
     }
 
     /**
@@ -1482,14 +1482,17 @@ public final class BluetoothAdapter {
      * {@link SOCKET_CHANNEL_AUTO_STATIC_NO_SDP} as channel number.
      * @param channel RFCOMM channel to listen on
      * @param mitm    enforce man-in-the-middle protection for authentication.
+     * @param min16DigitPin enforce a pin key length og minimum 16 digit for sec mode 2 connections.
      * @return a listening RFCOMM BluetoothServerSocket
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions, or channel in use.
      * @hide
      */
-    public BluetoothServerSocket listenUsingRfcommOn(int channel, boolean mitm) throws IOException {
+    public BluetoothServerSocket listenUsingRfcommOn(int channel, boolean mitm,
+            boolean min16DigitPin)
+            throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_RFCOMM, true, true, channel, mitm);
+                BluetoothSocket.TYPE_RFCOMM, true, true, channel, mitm, min16DigitPin);
         int errno = socket.mSocket.bindListen();
         if (channel == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
             socket.setChannel(socket.mSocket.getPort());
@@ -1694,14 +1697,16 @@ public final class BluetoothAdapter {
      * {@link SOCKET_CHANNEL_AUTO_STATIC_NO_SDP} as port number.
      * @param port    the PSM to listen on
      * @param mitm    enforce man-in-the-middle protection for authentication.
+     * @param min16DigitPin enforce a pin key length og minimum 16 digit for sec mode 2 connections.
      * @return An L2CAP BluetoothServerSocket
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient permissions.
      * @hide
      */
-    public BluetoothServerSocket listenUsingL2capOn(int port, boolean mitm) throws IOException {
+    public BluetoothServerSocket listenUsingL2capOn(int port, boolean mitm, boolean min16DigitPin)
+            throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_L2CAP, true, true, port, mitm);
+                BluetoothSocket.TYPE_L2CAP, true, true, port, mitm, min16DigitPin);
         int errno = socket.mSocket.bindListen();
         if(port == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
             socket.setChannel(socket.mSocket.getPort());
@@ -1727,7 +1732,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public BluetoothServerSocket listenUsingL2capOn(int port) throws IOException {
-        return listenUsingL2capOn(port, false);
+        return listenUsingL2capOn(port, false, false);
     }
 
     /**
