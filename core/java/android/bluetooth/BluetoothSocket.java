@@ -107,6 +107,7 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ static final int SEC_FLAG_AUTH = 1 << 1;
     /*package*/ static final int BTSOCK_FLAG_NO_SDP  = 1 << 2;
     /*package*/ static final int SEC_FLAG_AUTH_MITM  = 1 << 3;
+    /*package*/ static final int SEC_FLAG_AUTH_16_DIGIT  = 1 << 4;
 
     private final int mType;  /* one of TYPE_RFCOMM etc */
     private BluetoothDevice mDevice;    /* remote device */
@@ -118,6 +119,7 @@ public final class BluetoothSocket implements Closeable {
     private final ParcelUuid mUuid;
     private boolean mExcludeSdp = false; /* when true no SPP SDP record will be created */
     private boolean mAuthMitm = false;   /* when true Man-in-the-middle protection will be enabled*/
+    private boolean mMin16DigitPin = false; /* Minimum 16 digit pin for sec mode 2 connections */
     private ParcelFileDescriptor mPfd;
     private LocalSocket mSocket;
     private InputStream mSocketIS;
@@ -160,7 +162,7 @@ public final class BluetoothSocket implements Closeable {
      */
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
             BluetoothDevice device, int port, ParcelUuid uuid) throws IOException {
-        this(type, fd, auth, encrypt, device, port, uuid, false);
+        this(type, fd, auth, encrypt, device, port, uuid, false, false);
     }
 
     /**
@@ -173,11 +175,13 @@ public final class BluetoothSocket implements Closeable {
      * @param port    remote port
      * @param uuid    SDP uuid
      * @param mitm    enforce man-in-the-middle protection.
+     * @param min16DigitPin enforce a minimum length of 16 digits for a sec mode 2 connection
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient privileges
      */
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
-            BluetoothDevice device, int port, ParcelUuid uuid, boolean mitm) throws IOException {
+            BluetoothDevice device, int port, ParcelUuid uuid, boolean mitm, boolean min16DigitPin)
+                    throws IOException {
         if (VDBG) Log.d(TAG, "Creating new BluetoothSocket of type: " + type);
         if (type == BluetoothSocket.TYPE_RFCOMM && uuid == null && fd == -1
                 && port != BluetoothAdapter.SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
@@ -191,6 +195,7 @@ public final class BluetoothSocket implements Closeable {
         mType = type;
         mAuth = auth;
         mAuthMitm = mitm;
+        mMin16DigitPin = min16DigitPin;
         mEncrypt = encrypt;
         mDevice = device;
         mPort = port;
@@ -223,6 +228,7 @@ public final class BluetoothSocket implements Closeable {
         mServiceName = s.mServiceName;
         mExcludeSdp = s.mExcludeSdp;
         mAuthMitm = s.mAuthMitm;
+        mMin16DigitPin = s.mMin16DigitPin;
     }
     private BluetoothSocket acceptSocket(String RemoteAddr) throws IOException {
         BluetoothSocket as = new BluetoothSocket(this);
@@ -254,7 +260,7 @@ public final class BluetoothSocket implements Closeable {
      */
     private BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
             int port) throws IOException {
-        this(type, fd, auth, encrypt, new BluetoothDevice(address), port, null, false);
+        this(type, fd, auth, encrypt, new BluetoothDevice(address), port, null, false, false);
     }
 
     /** @hide */
@@ -276,6 +282,8 @@ public final class BluetoothSocket implements Closeable {
             flags |= BTSOCK_FLAG_NO_SDP;
         if(mAuthMitm)
             flags |= SEC_FLAG_AUTH_MITM;
+        if(mMin16DigitPin)
+            flags |= SEC_FLAG_AUTH_16_DIGIT;
         return flags;
     }
 
