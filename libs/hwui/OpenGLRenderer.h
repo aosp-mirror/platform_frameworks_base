@@ -524,22 +524,6 @@ protected:
     inline float getLayerAlpha(const Layer* layer) const;
 
     /**
-     * Safely retrieves the ColorFilter from the given Paint. If the paint is
-     * null then null is returned.
-     */
-    static inline SkColorFilter* getColorFilter(const SkPaint* paint) {
-        return paint ? paint->getColorFilter() : nullptr;
-    }
-
-    /**
-     * Safely retrieves the Shader from the given Paint. If the paint is
-     * null then null is returned.
-     */
-    static inline const SkShader* getShader(const SkPaint* paint) {
-        return paint ? paint->getShader() : nullptr;
-    }
-
-    /**
      * Set to true to suppress error checks at the end of a frame.
      */
     virtual bool suppressErrorChecks() const {
