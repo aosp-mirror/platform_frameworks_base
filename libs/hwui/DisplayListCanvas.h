@@ -263,6 +263,7 @@ private:
     size_t addDrawOp(DrawOp* op);
     size_t addRenderNodeOp(DrawRenderNodeOp* op);
 
+    void refBitmapsInShader(const SkShader* shader);
 
     template<class T>
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
@@ -311,6 +312,7 @@ private:
 
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
+            refBitmapsInShader(cachedPaint->getShader());
         }
 
         return cachedPaint;
