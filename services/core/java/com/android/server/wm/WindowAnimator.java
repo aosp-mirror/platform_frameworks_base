@@ -343,8 +343,7 @@ public class WindowAnimator {
                         boolean applyExistingExitAnimation = mPostKeyguardExitAnimation != null
                                 && !winAnimator.mKeyguardGoingAwayAnimation
                                 && win.hasDrawnLw()
-                                && win.mAttachedWindow == null
-                                && mForceHiding != KEYGUARD_NOT_SHOWN;
+                                && win.mAttachedWindow == null;
 
                         // If the window is already showing and we don't need to apply an existing
                         // Keyguard exit animation, skip.
