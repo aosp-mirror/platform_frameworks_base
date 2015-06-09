@@ -1093,6 +1093,7 @@
   <java-symbol type="string" name="work_profile_deleted" />
   <java-symbol type="string" name="work_profile_deleted_description" />
   <java-symbol type="string" name="work_profile_deleted_details" />
+  <java-symbol type="string" name="work_profile_deleted_description_dpm_wipe" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
