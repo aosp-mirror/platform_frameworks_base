@@ -352,6 +352,7 @@ void DisplayListCanvas::drawRoundRect(
     mDisplayListData->ref(rx);
     mDisplayListData->ref(ry);
     mDisplayListData->ref(paint);
+    refBitmapsInShader(paint->value.getShader());
     addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
             &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
 }
@@ -366,6 +367,7 @@ void DisplayListCanvas::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPri
     mDisplayListData->ref(y);
     mDisplayListData->ref(radius);
     mDisplayListData->ref(paint);
+    refBitmapsInShader(paint->value.getShader());
     addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
             &radius->value, &paint->value));
 }
@@ -563,6 +565,25 @@ size_t DisplayListCanvas::addRenderNodeOp(DrawRenderNodeOp* op) {
         mDisplayListData->projectionReceiveIndex = opIndex;
     }
     return opIndex;
+}
+
+void DisplayListCanvas::refBitmapsInShader(const SkShader* shader) {
+    if (!shader) return;
+
+    // If this paint has an SkShader that has an SkBitmap add
+    // it to the bitmap pile
+    SkBitmap bitmap;
+    SkShader::TileMode xy[2];
+    if (shader->asABitmap(&bitmap, nullptr, xy) == SkShader::kDefault_BitmapType) {
+        refBitmap(bitmap);
+        return;
+    }
+    SkShader::ComposeRec rec;
+    if (shader->asACompose(&rec)) {
+        refBitmapsInShader(rec.fShaderA);
+        refBitmapsInShader(rec.fShaderB);
+        return;
+    }
 }
 
 }; // namespace uirenderer
