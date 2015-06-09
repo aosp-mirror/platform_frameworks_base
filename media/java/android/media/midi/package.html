@@ -10,27 +10,28 @@
 <p>The Android MIDI package allows users to:</p>
 
 <ul>
-  <li> Connect a MIDI keyboard to Android to play a synthesizer or drive music apps.
-  <li> Connect alternative MIDI controllers to Android.
-  <li> Drive external MIDI synths from Android.
-  <li> Drive external peripherals, lights, show control, etc from Android.
-  <li> Generate music dynamically from games or music creation apps.
-  <li> Generate MIDI messages in one app and send them to a second app.
-  <li> Use an Android device running in <em>peripheral mode</em> as a multitouch controller connected to a laptop.
+  <li> Connect a MIDI keyboard to Android to play a synthesizer or drive music apps.</li>
+  <li> Connect alternative MIDI controllers to Android.</li>
+  <li> Drive external MIDI synths from Android.</li>
+  <li> Drive external peripherals, lights, show control, etc from Android.</li>
+  <li> Generate music dynamically from games or music creation apps.</li>
+  <li> Generate MIDI messages in one app and send them to a second app.</li>
+  <li> Use an Android device running in <em>peripheral mode</em> as a multitouch controller
+  connected to a laptop.</li>
 </ul>
 
 <h2 id=the_api_features_include>The API features include:</h2>
 
-
 <ul>
   <li> Enumeration of currently available devices. Information includes name, vendor,
-capabilities, etc.
-  <li> Provide notification when MIDI devices are plugged in or unplugged.
-  <li> Support efficient transmission of single or multiple short 1-3 byte MIDI
-messages.
-  <li> Support transmission of arbitrary length data for SysEx, etc.
-  <li> Timestamps to avoid jitter.
-  <li> Support direction connection or &ldquo;patching&rdquo; of devices for lower latency.
+capabilities, etc.</li>
+  <li> Provide notification when MIDI devices are plugged in or unplugged.</li>
+  <li> Support efficient transmission of single or multiple short 1-3 byte MIDI messages.</li>
+  <li> Support transmission of arbitrary length data for SysEx, etc.</li>
+  <li> Timestamps to avoid jitter.</li>
+  <li> Support creation of <em>virtual MIDI devices</em> that can be connected to other devices.
+  An example might be a synthesizer app that can be controlled by a composing app.</li>
+  <li> Support direction connection or &ldquo;patching&rdquo; of devices for lower latency.</li>
 </ul>
 
 <h2 id=transports_supported>Transports Supported</h2>
@@ -65,6 +66,14 @@ the MidiService.</p>
 
 <h1 id=writing_a_midi_application>Writing a MIDI Application</h1>
 
+<h2 id=manifest_feature>Declare Feature in Manifest</h2>
+
+<p>An app that requires the MIDI API should declare that in the AndroidManifest.xml file.
+Then the app will not appear in the Play Store for old devices that do not support the MIDI API.</p>
+
+<pre class=prettyprint>
+&lt;uses-feature android:name="android.software.midi" android:required="true"/>
+</pre>
 
 <h2 id=the_midimanager>The MidiManager</h2>
 
@@ -132,11 +141,15 @@ String manufacturer = properties
 <p>Other properties include PROPERTY_PRODUCT, PROPERTY_NAME,
 PROPERTY_SERIAL_NUMBER</p>
 
-<p>You can get the names of the ports from a PortInfo object.</p>
+<p>You can get the names and types of the ports from a PortInfo object.
+The type will be either TYPE_INPUT or TYPE_OUTPUT.</p>
 
 <pre class=prettyprint>
-PortInfo portInfo = info.getInputPortInfo(i);
-String portName = portInfo.getName();
+MidiDeviceInfo.PortInfo[] portInfos = info.getPorts();
+String portName = portInfos[0].getName();
+if (portInfos[0].getType() == MidiDeviceInfo.PortInfo.TYPE_INPUT) {
+    ...
+}
 </pre>
 
 
@@ -196,8 +209,9 @@ consistent with the other audio and input timers.</p>
 <p>Here we send a message with a timestamp 2 seconds in the future.</p>
 
 <pre class=prettyprint>
+final long NANOS_PER_SECOND = 1000000000L;
 long now = System.nanoTime();
-long future = now + (2 * 1000000000);
+long future = now + (2 * NANOS_PER_SECOND);
 inputPort.send(buffer, offset, numBytes, future);
 </pre>
 
@@ -263,7 +277,8 @@ AndroidManifest.xml file.</p>
 
 
 <p>The details of the resource in this example is stored in
-&ldquo;res/xml/synth_device_info.xml&rdquo;.</p>
+&ldquo;res/xml/synth_device_info.xml&rdquo;. The port names that you
+declare in this file will be available from PortInfo.getName().</p>
 
 <pre class=prettyprint>
 &lt;devices>
@@ -288,6 +303,8 @@ import android.media.midi.MidiReceiver;
 public class MidiSynthDeviceService extends MidiDeviceService {
     private static final String TAG = "MidiSynthDeviceService";
     private MySynthEngine mSynthEngine = new MySynthEngine();
+    private boolean synthStarted = false;
+
     &#64;Override
     public void onCreate() {
         super.onCreate();
@@ -311,10 +328,12 @@ public class MidiSynthDeviceService extends MidiDeviceService {
      */
     &#64;Override
     public void onDeviceStatusChanged(MidiDeviceStatus status) {
-        if (status.isInputPortOpen(0)) {
+        if (status.isInputPortOpen(0) && !synthStarted) {
             mSynthEngine.start();
-        } else {
+            synthStarted = true;
+        } else if (!status.isInputPortOpen(0) && synthStarted){
             mSynthEngine.stop();
+            synthStarted = false;
         }
     }
 }
