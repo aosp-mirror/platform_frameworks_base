@@ -1745,7 +1745,8 @@ class ContextImpl extends Context {
         mResourcesManager = ResourcesManager.getInstance();
 
         final int displayId = (createDisplayWithId != Display.INVALID_DISPLAY)
-                ? createDisplayWithId : getDisplayId();
+                ? createDisplayWithId
+                : (display != null) ? display.getDisplayId() : Display.DEFAULT_DISPLAY;
 
         CompatibilityInfo compatInfo = null;
         if (container != null) {
