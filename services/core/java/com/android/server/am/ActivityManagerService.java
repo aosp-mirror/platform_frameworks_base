@@ -32,6 +32,7 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -4204,9 +4205,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (rootR == null) {
                 Slog.w(TAG, "Finishing task with all activities already finished");
             }
-            // Do not allow task to finish if last task in lockTask mode. Launchable apps can
-            // finish themselves.
-            if (tr.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE && rootR == r &&
+            // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps can
+            // finish.
+            if (tr.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV && rootR == r &&
                     mStackSupervisor.isLastLockedTask(tr)) {
                 Slog.i(TAG, "Not finishing task in lock task mode");
                 mStackSupervisor.showLockTaskToast();
@@ -4368,9 +4369,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return false;
                 }
 
-                // Do not allow the last non-launchable task to finish in Lock Task mode.
+                // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps
+                // can finish.
                 final TaskRecord task = r.task;
-                if (task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE &&
+                if (task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV &&
                         mStackSupervisor.isLastLockedTask(task) && task.getRootActivity() == r) {
                     mStackSupervisor.showLockTaskToast();
                     return false;
