@@ -179,11 +179,15 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 mKeymasterPurposes = KeyProperties.Purpose.allToKeymaster(spec.getPurposes());
                 mKeymasterPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
                         spec.getEncryptionPaddings());
+                if (spec.getSignaturePaddings().length > 0) {
+                    throw new InvalidAlgorithmParameterException(
+                            "Signature paddings not supported for symmetric key algorithms");
+                }
                 mKeymasterBlockModes = KeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
                 if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
                         && (spec.isRandomizedEncryptionRequired())) {
                     for (int keymasterBlockMode : mKeymasterBlockModes) {
-                        if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(
+                        if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatibleWithSymmetricCrypto(
                                 keymasterBlockMode)) {
                             throw new InvalidAlgorithmParameterException(
                                     "Randomized encryption (IND-CPA) required but may be violated"
