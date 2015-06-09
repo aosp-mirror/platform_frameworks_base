@@ -24817,6 +24817,8 @@ package android.os {
   public static class Debug.MemoryInfo implements android.os.Parcelable {
     ctor public Debug.MemoryInfo();
     method public int describeContents();
+    method public java.lang.String getMemoryStat(java.lang.String);
+    method public java.util.Map<java.lang.String, java.lang.String> getMemoryStats();
     method public int getTotalPrivateClean();
     method public int getTotalPrivateDirty();
     method public int getTotalPss();
