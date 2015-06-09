@@ -18,6 +18,7 @@
 
 #include <cutils/log.h>
 #include <SkPatchUtils.h>
+#include <SkPixelRef.h>
 
 namespace android {
 namespace uirenderer {
@@ -96,12 +97,31 @@ void SkiaCanvasProxy::onDrawPath(const SkPath& path, const SkPaint& paint) {
 
 void SkiaCanvasProxy::onDrawBitmap(const SkBitmap& bitmap, SkScalar left, SkScalar top,
         const SkPaint* paint) {
-    mCanvas->drawBitmap(bitmap, left, top, paint);
+    SkPixelRef* pxRef = bitmap.pixelRef();
+
+    // HWUI doesn't support extractSubset(), so convert any subsetted bitmap into
+    // a drawBitmapRect(); pass through an un-subsetted bitmap.
+    if (pxRef && bitmap.dimensions() != pxRef->info().dimensions()) {
+        SkBitmap fullBitmap;
+        fullBitmap.setInfo(pxRef->info());
+        fullBitmap.setPixelRef(pxRef, 0, 0);
+        SkIPoint origin = bitmap.pixelRefOrigin();
+        mCanvas->drawBitmap(fullBitmap, origin.fX, origin.fY,
+                            origin.fX + bitmap.dimensions().width(),
+                            origin.fY + bitmap.dimensions().height(),
+                            left, top,
+                            left + bitmap.dimensions().width(),
+                            top + bitmap.dimensions().height(),
+                            paint);
+    } else {
+        mCanvas->drawBitmap(bitmap, left, top, paint);
+    }
 }
 
 void SkiaCanvasProxy::onDrawBitmapRect(const SkBitmap& bitmap, const SkRect* srcPtr,
         const SkRect& dst, const SkPaint* paint, DrawBitmapRectFlags) {
     SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(bitmap.width(), bitmap.height());
+    // TODO: if bitmap is a subset, do we need to add pixelRefOrigin to src?
     mCanvas->drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                         dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
 }
@@ -114,6 +134,7 @@ void SkiaCanvasProxy::onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& ce
 
 void SkiaCanvasProxy::onDrawSprite(const SkBitmap& bitmap, int left, int top,
         const SkPaint* paint) {
+    // TODO: if bitmap is a subset, do we need to add pixelRefOrigin to src?
     mCanvas->save(SkCanvas::kMatrixClip_SaveFlag);
     mCanvas->setMatrix(SkMatrix::I());
     mCanvas->drawBitmap(bitmap, left, top, paint);
