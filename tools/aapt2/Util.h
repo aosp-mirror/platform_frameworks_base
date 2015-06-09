@@ -78,6 +78,23 @@ StringPiece16::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece16
         const StringPiece16& allowedChars);
 
 /**
+ * Tests that the string is a valid Java class name.
+ */
+bool isJavaClassName(const StringPiece16& str);
+
+/**
+ * Converts the class name to a fully qualified class name from the given `package`. Ex:
+ *
+ * asdf         --> package.asdf
+ * .asdf        --> package.asdf
+ * .a.b         --> package.a.b
+ * asdf.adsf    --> asdf.adsf
+ */
+Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
+                                                 const StringPiece16& className);
+
+
+/**
  * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
  * This will be present in C++14 and can be removed then.
  */
