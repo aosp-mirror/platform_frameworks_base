@@ -22,6 +22,8 @@ public interface SecurityController {
     String getDeviceOwnerName();
     String getProfileOwnerName();
     boolean isVpnEnabled();
+    String getPrimaryVpnName();
+    String getProfileVpnName();
     void onUserSwitched(int newUserId);
 
     void addCallback(SecurityControllerCallback callback);
