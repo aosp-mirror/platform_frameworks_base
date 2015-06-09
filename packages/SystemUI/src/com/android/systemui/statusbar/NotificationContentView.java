@@ -67,6 +67,8 @@ public class NotificationContentView extends FrameLayout {
     private final Paint mFadePaint = new Paint();
     private boolean mAnimate;
     private boolean mIsHeadsUp;
+    private boolean mShowingLegacyBackground;
+
     private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -421,7 +423,7 @@ public class NotificationContentView extends FrameLayout {
     public void setDark(boolean dark, boolean fade, long delay) {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
-        mContractedWrapper.setDark(dark, fade, delay);
+        mContractedWrapper.setDark(dark && !mShowingLegacyBackground, fade, delay);
     }
 
     public void setHeadsUp(boolean headsUp) {
@@ -435,5 +437,9 @@ public class NotificationContentView extends FrameLayout {
         // This is not really true, but good enough when fading from the contracted to the expanded
         // layout, and saves us some layers.
         return false;
+    }
+
+    public void setShowingLegacyBackground(boolean showing) {
+        mShowingLegacyBackground = showing;
     }
 }
