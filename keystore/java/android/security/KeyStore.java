@@ -181,11 +181,15 @@ public class KeyStore {
     }
 
     public boolean put(String key, byte[] value, int uid, int flags) {
+        return insert(key, value, uid, flags) == NO_ERROR;
+    }
+
+    public int insert(String key, byte[] value, int uid, int flags) {
         try {
-            return mBinder.insert(key, value, uid, flags) == NO_ERROR;
+            return mBinder.insert(key, value, uid, flags);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
+            return SYSTEM_ERROR;
         }
     }
 
