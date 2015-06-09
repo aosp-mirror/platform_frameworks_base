@@ -70,12 +70,16 @@ public interface WebViewProvider {
     public void init(Map<String, Object> javaScriptInterfaces,
             boolean privateBrowsing);
 
+    // Deprecated - should never be called
     public void setHorizontalScrollbarOverlay(boolean overlay);
 
+    // Deprecated - should never be called
     public void setVerticalScrollbarOverlay(boolean overlay);
 
+    // Deprecated - should never be called
     public boolean overlayHorizontalScrollbar();
 
+    // Deprecated - should never be called
     public boolean overlayVerticalScrollbar();
 
     public int getVisibleTitleHeight();
