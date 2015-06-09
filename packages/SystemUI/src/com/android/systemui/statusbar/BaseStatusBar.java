@@ -1648,7 +1648,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             true /* force */, true /* delayed */);
                     visibilityChanged(false);
 
-                    return intent != null && intent.isActivity();
+                    return true;
                 }
             }, afterKeyguardGone);
         }
