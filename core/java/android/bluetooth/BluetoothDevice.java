@@ -531,6 +531,13 @@ public final class BluetoothDevice implements Parcelable {
     public static final int PAIRING_VARIANT_OOB_CONSENT = 6;
 
     /**
+     * The user will be prompted to enter a 16 digit pin or
+     * an app will enter a 16 digit pin for user.
+     * @hide
+     */
+    public static final int PAIRING_VARIANT_PIN_16_DIGITS = 7;
+
+    /**
      * Used as an extra field in {@link #ACTION_UUID} intents,
      * Contains the {@link android.os.ParcelUuid}s of the remote device which
      * is a parcelable version of {@link UUID}.
@@ -1315,8 +1322,8 @@ public final class BluetoothDevice implements Parcelable {
             Log.e(TAG, "", e);
         }
         return false;
-    }    
-    
+    }
+
     /**
      * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
      * outgoing connection to this remote device on given channel.
