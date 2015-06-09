@@ -2572,9 +2572,11 @@ public final class ActivityThread {
         AssistStructure structure = null;
         AssistContent content = new AssistContent();
         ActivityClientRecord r = mActivities.get(cmd.activityToken);
+        Uri referrer = null;
         if (r != null) {
             r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
             r.activity.onProvideAssistData(data);
+            referrer = r.activity.onProvideReferrer();
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL) {
                 structure = new AssistStructure(r.activity);
                 Intent activityIntent = r.activity.getIntent();
@@ -2597,7 +2599,7 @@ public final class ActivityThread {
         }
         IActivityManager mgr = ActivityManagerNative.getDefault();
         try {
-            mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content);
+            mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
         } catch (RemoteException e) {
         }
     }

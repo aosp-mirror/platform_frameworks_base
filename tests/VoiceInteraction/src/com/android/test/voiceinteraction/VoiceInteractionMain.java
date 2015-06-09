@@ -18,6 +18,7 @@ package com.android.test.voiceinteraction;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
@@ -39,6 +40,11 @@ public class VoiceInteractionMain extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public Uri onProvideReferrer() {
+        return Uri.parse("http://www.example.com/VoiceInteractionMain");
     }
 
     View.OnClickListener mStartListener = new View.OnClickListener() {
