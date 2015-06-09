@@ -93,4 +93,44 @@ TEST(UtilTest, TokenizeInput) {
     ASSERT_EQ(tokenizer.end(), iter);
 }
 
+TEST(UtilTest, IsJavaClassName) {
+    EXPECT_TRUE(util::isJavaClassName(u"android.test.Class"));
+    EXPECT_TRUE(util::isJavaClassName(u"android.test.Class$Inner"));
+    EXPECT_TRUE(util::isJavaClassName(u"android_test.test.Class"));
+    EXPECT_TRUE(util::isJavaClassName(u"_android_.test._Class_"));
+    EXPECT_FALSE(util::isJavaClassName(u"android.test.$Inner"));
+    EXPECT_FALSE(util::isJavaClassName(u"android.test.Inner$"));
+    EXPECT_FALSE(util::isJavaClassName(u".test.Class"));
+    EXPECT_FALSE(util::isJavaClassName(u"android"));
+}
+
+TEST(UtilTest, FullyQualifiedClassName) {
+    Maybe<std::u16string> res = util::getFullyQualifiedClassName(u"android", u"asdf");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res.value(), u"android.asdf");
+
+    res = util::getFullyQualifiedClassName(u"android", u".asdf");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res.value(), u"android.asdf");
+
+    res = util::getFullyQualifiedClassName(u"android", u".a.b");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res.value(), u"android.a.b");
+
+    res = util::getFullyQualifiedClassName(u"android", u"a.b");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res.value(), u"a.b");
+
+    res = util::getFullyQualifiedClassName(u"", u"a.b");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res.value(), u"a.b");
+
+    res = util::getFullyQualifiedClassName(u"", u"");
+    ASSERT_FALSE(res);
+
+    res = util::getFullyQualifiedClassName(u"android", u"./Apple");
+    ASSERT_FALSE(res);
+}
+
+
 } // namespace aapt
