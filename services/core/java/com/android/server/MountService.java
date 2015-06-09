@@ -1435,7 +1435,7 @@ class MountService extends IMountService.Stub
 
         final VolumeInfo vol = findVolumeById(volId);
         try {
-            mConnector.execute("volume", "format", vol.id);
+            mConnector.execute("volume", "format", vol.id, "auto");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
