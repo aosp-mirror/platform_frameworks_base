@@ -339,7 +339,7 @@ public class ImsCallProfile implements Parcelable {
                 videostate = VideoProfile.STATE_AUDIO_ONLY;
                 break;
         }
-        if (callProfile.isVideoPaused() && videostate != VideoProfile.STATE_AUDIO_ONLY) {
+        if (callProfile.isVideoPaused() && !VideoProfile.isAudioOnly(videostate)) {
             videostate |= VideoProfile.STATE_PAUSED;
         } else {
             videostate &= ~VideoProfile.STATE_PAUSED;
