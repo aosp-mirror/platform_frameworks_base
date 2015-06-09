@@ -144,7 +144,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mActiveSession.showLocked(args, flags, showCallback);
     }
 
-    public boolean hideSessionLocked(int callingPid, int callingUid) {
+    public boolean hideSessionLocked() {
         if (mActiveSession != null) {
             return mActiveSession.hideLocked();
         }
