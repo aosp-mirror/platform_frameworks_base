@@ -82,11 +82,9 @@ public class DozeLog {
         sNotificationPulseStats.append();
     }
 
-    public static void traceDozing(Context context, boolean dozing) {
-        if (!ENABLED) return;
-        sPulsing = false;
+    private static void init(Context context) {
         synchronized (DozeLog.class) {
-            if (dozing && sMessages == null) {
+            if (sMessages == null) {
                 sTimes = new long[SIZE];
                 sMessages = new String[SIZE];
                 sSince = System.currentTimeMillis();
@@ -105,6 +103,12 @@ public class DozeLog {
                 KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
             }
         }
+    }
+
+    public static void traceDozing(Context context, boolean dozing) {
+        if (!ENABLED) return;
+        sPulsing = false;
+        init(context);
         log("dozing " + dozing);
     }
 
@@ -146,10 +150,12 @@ public class DozeLog {
         }
     }
 
-    public static void traceProximityResult(boolean near, long millis, int pulseReason) {
+    public static void traceProximityResult(Context context, boolean near, long millis,
+            int pulseReason) {
         if (!ENABLED) return;
         log("proximityResult reason=" + pulseReasonToString(pulseReason) + " near=" + near
                 + " millis=" + millis);
+        init(context);
         sProxStats[pulseReason][near ? 0 : 1].append();
     }
 
