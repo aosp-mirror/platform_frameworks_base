@@ -368,7 +368,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        final Record r;
+        Record r;
 
         synchronized (mRecords) {
             // register
