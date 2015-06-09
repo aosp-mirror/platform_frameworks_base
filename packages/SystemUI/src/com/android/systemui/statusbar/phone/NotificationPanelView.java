@@ -36,6 +36,7 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -204,6 +205,10 @@ public class NotificationPanelView extends PanelView implements
             notifyBarPanelExpansionChanged();
         }
     };
+
+    /** Interpolator to be used for animations that respond directly to a touch */
+    private final Interpolator mTouchResponseInterpolator =
+            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -939,7 +944,7 @@ public class NotificationPanelView extends PanelView implements
                         mQsExpansionFromOverscroll = false;
                         updateQsState();
                     }
-                });
+                }, false /* isClick */);
     }
 
     private void onQsExpansionStarted() {
@@ -1390,10 +1395,11 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void flingSettings(float vel, boolean expand) {
-        flingSettings(vel, expand, null);
+        flingSettings(vel, expand, null, false /* isClick */);
     }
 
-    private void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable) {
+    private void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable,
+            boolean isClick) {
         float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
         if (target == mQsExpansionHeight) {
             mScrollYOverride = -1;
@@ -1408,7 +1414,12 @@ public class NotificationPanelView extends PanelView implements
         }
         mScrollView.setBlockFlinging(true);
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
-        mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
+        if (isClick) {
+            animator.setInterpolator(mTouchResponseInterpolator);
+            animator.setDuration(368);
+        } else {
+            mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
+        }
         if (belowFalsingThreshold) {
             animator.setDuration(350);
         }
@@ -1870,12 +1881,12 @@ public class NotificationPanelView extends PanelView implements
         if (v == mHeader) {
             onQsExpansionStarted();
             if (mQsExpanded) {
-                flingSettings(0 /* vel */, false /* expand */);
+                flingSettings(0 /* vel */, false /* expand */, null, true /* isClick */);
             } else if (mQsExpansionEnabled) {
                 EventLogTags.writeSysuiLockscreenGesture(
                         EventLogConstants.SYSUI_TAP_TO_OPEN_QS,
                         0, 0);
-                flingSettings(0 /* vel */, true /* expand */);
+                flingSettings(0 /* vel */, true /* expand */, null, true /* isClick */);
             }
         }
     }
