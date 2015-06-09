@@ -96,6 +96,7 @@ public class StackStateAnimator {
     private ExpandableNotificationRow mChildExpandingView;
     private int mHeadsUpAppearHeightBottom;
     private boolean mShadeExpanded;
+    private ArrayList<View> mChildrenToClearFromOverlay = new ArrayList<>();
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -794,6 +795,10 @@ public class StackStateAnimator {
 
     private void onAnimationFinished() {
         mHostLayout.onChildAnimationFinished();
+        for (View v : mChildrenToClearFromOverlay) {
+            mHostLayout.getOverlay().remove(v);
+        }
+        mChildrenToClearFromOverlay.clear();
     }
 
     /**
@@ -880,8 +885,20 @@ public class StackStateAnimator {
                 finalState.applyState(changingView, mTmpState);
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR) {
-                // This item is added, initialize it's properties.
                 mHeadsUpDisappearChildren.add(changingView);
+                if (mHostLayout.indexOfChild(changingView) == -1) {
+                    // This notification was actually removed, so we need to add it to the overlay
+                    mHostLayout.getOverlay().add(changingView);
+                    ViewState viewState = new ViewState();
+                    viewState.initFrom(changingView);
+                    viewState.yTranslation = -changingView.getActualHeight();
+                    // We temporarily enable Y animations, the real filter will be combined
+                    // afterwards anyway
+                    mAnimationFilter.animateY = true;
+                    startViewAnimations(changingView, viewState, 0,
+                            ANIMATION_DURATION_HEADS_UP_DISAPPEAR);
+                    mChildrenToClearFromOverlay.add(changingView);
+                }
             }
             mNewEvents.add(event);
         }
