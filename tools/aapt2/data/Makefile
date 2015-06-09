@@ -15,6 +15,7 @@ LOCAL_RESOURCE_DIR := res
 LOCAL_LIBS := lib/out/package.apk
 LOCAL_OUT := out
 LOCAL_GEN := out/gen
+LOCAL_PROGUARD := out/proguard.rule
 
 ##
 # AAPT2 custom rules.
@@ -57,7 +58,7 @@ $(foreach d,$(PRIVATE_RESOURCE_TYPES),$(eval $(call make-collect-rule,$d)))
 
 # Link: out/package-unaligned.apk <- out/values-v4.apk out/drawable-v4.apk
 $(PRIVATE_APK_UNALIGNED): $(PRIVATE_INTERMEDIATE_TABLES) $(PRIVATE_INCLUDES) $(LOCAL_LIBS) AndroidManifest.xml
-	$(AAPT) link --manifest AndroidManifest.xml $(addprefix -I ,$(PRIVATE_INCLUDES)) --java $(LOCAL_GEN) -o $@ $(PRIVATE_INTERMEDIATE_TABLES) $(LOCAL_LIBS)
+	$(AAPT) link --manifest AndroidManifest.xml $(addprefix -I ,$(PRIVATE_INCLUDES)) --java $(LOCAL_GEN) -o $@ $(PRIVATE_INTERMEDIATE_TABLES) $(LOCAL_LIBS) --proguard $(LOCAL_PROGUARD) -v
 
 # R.java: gen/com/android/app/R.java <- out/resources.arsc
 # No action since R.java is generated when out/resources.arsc is.

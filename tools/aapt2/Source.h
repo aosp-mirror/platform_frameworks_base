@@ -19,6 +19,7 @@
 
 #include <ostream>
 #include <string>
+#include <tuple>
 
 namespace aapt {
 
@@ -78,6 +79,10 @@ inline ::std::ostream& operator<<(::std::ostream& out, const SourceLine& source)
 
 inline ::std::ostream& operator<<(::std::ostream& out, const SourceLineColumn& source) {
     return out << source.path << ":" << source.line << ":" << source.column;
+}
+
+inline bool operator<(const SourceLine& lhs, const SourceLine& rhs) {
+    return std::tie(lhs.path, lhs.line) < std::tie(rhs.path, rhs.line);
 }
 
 } // namespace aapt
