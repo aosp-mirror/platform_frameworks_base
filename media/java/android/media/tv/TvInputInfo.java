@@ -549,8 +549,9 @@ public final class TvInputInfo implements Parcelable {
     private static final String generateInputIdForHdmiDevice(
             ComponentName name, HdmiDeviceInfo deviceInfo) {
         // Example of the format : "/HDMI%04X%02X"
-        String format = String.format("%s%s%%0%sX%%0%sX", DELIMITER_INFO_IN_ID, PREFIX_HDMI_DEVICE,
-                LENGTH_HDMI_PHYSICAL_ADDRESS, LENGTH_HDMI_DEVICE_ID);
+        String format = DELIMITER_INFO_IN_ID + PREFIX_HDMI_DEVICE
+                + "%0" + LENGTH_HDMI_PHYSICAL_ADDRESS + "X"
+                + "%0" + LENGTH_HDMI_DEVICE_ID + "X";
         return name.flattenToShortString() + String.format(format,
                 deviceInfo.getPhysicalAddress(), deviceInfo.getId());
     }
@@ -564,8 +565,8 @@ public final class TvInputInfo implements Parcelable {
      */
     private static final String generateInputIdForHardware(
             ComponentName name, TvInputHardwareInfo hardwareInfo) {
-        return name.flattenToShortString() + String.format("%s%s%d",
-                DELIMITER_INFO_IN_ID, PREFIX_HARDWARE_DEVICE, hardwareInfo.getDeviceId());
+        return name.flattenToShortString() + DELIMITER_INFO_IN_ID + PREFIX_HARDWARE_DEVICE
+                + hardwareInfo.getDeviceId();
     }
 
     public static final Parcelable.Creator<TvInputInfo> CREATOR =
