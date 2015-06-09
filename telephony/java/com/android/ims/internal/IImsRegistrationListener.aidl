@@ -72,4 +72,10 @@ interface IImsRegistrationListener {
      */
     void registrationFeatureCapabilityChanged(int serviceClass,
             out int[] enabledFeatures, out int[] disabledFeatures);
+
+    /**
+     * Updates the application with the waiting voice message count.
+     * @param count The number of waiting voice messages.
+     */
+    void voiceMessageCountUpdate(int count);
 }

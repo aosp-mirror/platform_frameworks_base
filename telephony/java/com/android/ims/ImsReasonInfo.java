@@ -99,6 +99,9 @@ public class ImsReasonInfo implements Parcelable {
     // MT : No action from user after alerting the call
     public static final int CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE = 203;
 
+    //Call failures for FDN
+    public static final int CODE_FDN_BLOCKED = 241;
+
     /**
      * STATUSCODE (SIP response code) (IMS -> Telephony)
      */
@@ -225,6 +228,12 @@ public class ImsReasonInfo implements Parcelable {
      * code is received as part of the handover message.
      */
     public static final int CODE_CALL_DROP_IWLAN_TO_LTE_UNAVAILABLE = 1100;
+
+    /**
+     * MT call has ended due to a release from the network
+     * because the call was answered elsewhere
+     */
+    public static final int CODE_ANSWERED_ELSEWHERE = 1014;
 
     /**
      * Network string error messages.
