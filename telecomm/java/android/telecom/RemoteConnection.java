@@ -22,6 +22,7 @@ import com.android.internal.telecom.IVideoProvider;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -207,29 +208,111 @@ public final class RemoteConnection {
         public void onExtrasChanged(RemoteConnection connection, @Nullable Bundle extras) {}
     }
 
+    /**
+     * {@link RemoteConnection.VideoProvider} associated with a {@link RemoteConnection}.  Used to
+     * receive video related events and control the video associated with a
+     * {@link RemoteConnection}.
+     *
+     * @see Connection.VideoProvider
+     */
     public static class VideoProvider {
 
+        /**
+         * Callback class used by the {@link RemoteConnection.VideoProvider} to relay events from
+         * the {@link Connection.VideoProvider}.
+         */
         public abstract static class Callback {
+            /**
+             * Reports a session modification request received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param videoProfile The requested video call profile.
+             * @see InCallService.VideoCall.Callback#onSessionModifyRequestReceived(VideoProfile)
+             * @see Connection.VideoProvider#receiveSessionModifyRequest(VideoProfile)
+             */
             public void onSessionModifyRequestReceived(
                     VideoProvider videoProvider,
                     VideoProfile videoProfile) {}
 
+            /**
+             * Reports a session modification response received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param status Status of the session modify request.
+             * @param requestedProfile The original request which was sent to the peer device.
+             * @param responseProfile The actual profile changes made by the peer device.
+             * @see InCallService.VideoCall.Callback#onSessionModifyResponseReceived(int,
+             *      VideoProfile, VideoProfile)
+             * @see Connection.VideoProvider#receiveSessionModifyResponse(int, VideoProfile,
+             *      VideoProfile)
+             */
             public void onSessionModifyResponseReceived(
                     VideoProvider videoProvider,
                     int status,
                     VideoProfile requestedProfile,
                     VideoProfile responseProfile) {}
 
+            /**
+             * Reports a call session event received from the {@link Connection.VideoProvider}
+             * associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param event The event.
+             * @see InCallService.VideoCall.Callback#onCallSessionEvent(int)
+             * @see Connection.VideoProvider#handleCallSessionEvent(int)
+             */
             public void onCallSessionEvent(VideoProvider videoProvider, int event) {}
 
-            public void onPeerDimensionsChanged(VideoProvider videoProvider, int width, int height) {}
+            /**
+             * Reports a change in the peer video dimensions received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param width  The updated peer video width.
+             * @param height The updated peer video height.
+             * @see InCallService.VideoCall.Callback#onPeerDimensionsChanged(int, int)
+             * @see Connection.VideoProvider#changePeerDimensions(int, int)
+             */
+            public void onPeerDimensionsChanged(VideoProvider videoProvider, int width,
+                    int height) {}
 
+            /**
+             * Reports a change in the data usage (in bytes) received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param dataUsage The updated data usage (in bytes).
+             * @see InCallService.VideoCall.Callback#onCallDataUsageChanged(long)
+             * @see Connection.VideoProvider#setCallDataUsage(long)
+             */
             public void onCallDataUsageChanged(VideoProvider videoProvider, long dataUsage) {}
 
+            /**
+             * Reports a change in the capabilities of the current camera, received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param cameraCapabilities The changed camera capabilities.
+             * @see InCallService.VideoCall.Callback#onCameraCapabilitiesChanged(
+             *      VideoProfile.CameraCapabilities)
+             * @see Connection.VideoProvider#changeCameraCapabilities(
+             *      VideoProfile.CameraCapabilities)
+             */
             public void onCameraCapabilitiesChanged(
                     VideoProvider videoProvider,
                     VideoProfile.CameraCapabilities cameraCapabilities) {}
 
+            /**
+             * Reports a change in the video quality received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param videoQuality  The updated peer video quality.
+             * @see InCallService.VideoCall.Callback#onVideoQualityChanged(int)
+             * @see Connection.VideoProvider#changeVideoQuality(int)
+             */
             public void onVideoQualityChanged(VideoProvider videoProvider, int videoQuality) {}
         }
 
@@ -316,14 +399,32 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Registers a callback to receive commands and state changes for video calls.
+         *
+         * @param l The video call callback.
+         */
         public void registerCallback(Callback l) {
             mCallbacks.add(l);
         }
 
+        /**
+         * Clears the video call callback set via {@link #registerCallback}.
+         *
+         * @param l The video call callback to clear.
+         */
         public void unregisterCallback(Callback l) {
             mCallbacks.remove(l);
         }
 
+        /**
+         * Sets the camera to be used for the outgoing video for the
+         * {@link RemoteConnection.VideoProvider}.
+         *
+         * @param cameraId The id of the camera (use ids as reported by
+         * {@link CameraManager#getCameraIdList()}).
+         * @see Connection.VideoProvider#onSetCamera(String)
+         */
         public void setCamera(String cameraId) {
             try {
                 mVideoProviderBinder.setCamera(cameraId);
@@ -331,6 +432,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the surface to be used for displaying a preview of what the user's camera is
+         * currently capturing for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param surface The {@link Surface}.
+         * @see Connection.VideoProvider#onSetPreviewSurface(Surface)
+         */
         public void setPreviewSurface(Surface surface) {
             try {
                 mVideoProviderBinder.setPreviewSurface(surface);
@@ -338,6 +446,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the surface to be used for displaying the video received from the remote device for
+         * the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param surface The {@link Surface}.
+         * @see Connection.VideoProvider#onSetDisplaySurface(Surface)
+         */
         public void setDisplaySurface(Surface surface) {
             try {
                 mVideoProviderBinder.setDisplaySurface(surface);
@@ -345,6 +460,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the device orientation, in degrees, for the {@link RemoteConnection.VideoProvider}.
+         * Assumes that a standard portrait orientation of the device is 0 degrees.
+         *
+         * @param rotation The device orientation, in degrees.
+         * @see Connection.VideoProvider#onSetDeviceOrientation(int)
+         */
         public void setDeviceOrientation(int rotation) {
             try {
                 mVideoProviderBinder.setDeviceOrientation(rotation);
@@ -352,6 +474,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets camera zoom ratio for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param value The camera zoom ratio.
+         * @see Connection.VideoProvider#onSetZoom(float)
+         */
         public void setZoom(float value) {
             try {
                 mVideoProviderBinder.setZoom(value);
@@ -359,6 +487,14 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Issues a request to modify the properties of the current video session for the
+         * {@link RemoteConnection.VideoProvider}.
+         *
+         * @param fromProfile The video profile prior to the request.
+         * @param toProfile The video profile with the requested changes made.
+         * @see Connection.VideoProvider#onSendSessionModifyRequest(VideoProfile, VideoProfile)
+         */
         public void sendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
             try {
                 mVideoProviderBinder.sendSessionModifyRequest(fromProfile, toProfile);
@@ -366,6 +502,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Provides a response to a request to change the current call video session
+         * properties for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param responseProfile The response call video properties.
+         * @see Connection.VideoProvider#onSendSessionModifyResponse(VideoProfile)
+         */
         public void sendSessionModifyResponse(VideoProfile responseProfile) {
             try {
                 mVideoProviderBinder.sendSessionModifyResponse(responseProfile);
@@ -373,6 +516,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Issues a request to retrieve the capabilities of the current camera for the
+         * {@link RemoteConnection.VideoProvider}.
+         *
+         * @see Connection.VideoProvider#onRequestCameraCapabilities()
+         */
         public void requestCameraCapabilities() {
             try {
                 mVideoProviderBinder.requestCameraCapabilities();
@@ -380,6 +529,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Issues a request to retrieve the data usage (in bytes) of the video portion of the
+         * {@link RemoteConnection} for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @see Connection.VideoProvider#onRequestConnectionDataUsage()
+         */
         public void requestCallDataUsage() {
             try {
                 mVideoProviderBinder.requestCallDataUsage();
@@ -387,6 +542,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the {@link Uri} of an image to be displayed to the peer device when the video signal
+         * is paused, for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @see Connection.VideoProvider#onSetPauseImage(Uri)
+         */
         public void setPauseImage(Uri uri) {
             try {
                 mVideoProviderBinder.setPauseImage(uri);
