@@ -561,15 +561,18 @@
         <!-- Image elements -->
         <!-- ============== -->
         <eat-comment />
-
+i
         <!-- Background that can be used behind parts of a UI that provide
              details on data the user is selecting.  For example, this is
              the background element of PreferenceActivity's embedded
              preference fragment. -->
         <attr name="detailsElementBackground" format="reference" />
 
-        <!-- Drawable that should be used to indicate that an app is waiting for a fingerprint scan. -->
-        <attr name="fingerprintDrawable" format="reference" />
+        <!-- Icon that should be used to indicate that an app is waiting for a fingerprint scan.
+             This should be used whenever an app is requesting the user to place a finger on the
+             fingerprint sensor. It can be combined with other drawables such as colored circles, so
+             the appearance matches the branding of the app requesting the fingerprint scan.-->
+        <attr name="fingerprintAuthDrawable" format="reference" />
 
         <!-- ============ -->
         <!-- Panel styles -->
