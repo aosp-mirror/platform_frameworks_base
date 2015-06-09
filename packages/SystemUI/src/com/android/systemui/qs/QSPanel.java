@@ -111,6 +111,8 @@ public class QSPanel extends ViewGroup {
         mDetailDoneButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                announceForAccessibility(
+                        mContext.getString(R.string.accessibility_desc_quick_settings));
                 closeDetail();
             }
         });
@@ -392,6 +394,9 @@ public class QSPanel extends ViewGroup {
             mDetail.bringToFront();
             mDetailContent.addView(r.detailView);
             MetricsLogger.visible(mContext, detailAdapter.getMetricsCategory());
+            announceForAccessibility(mContext.getString(
+                    R.string.accessibility_quick_settings_detail,
+                    mContext.getString(detailAdapter.getTitle())));
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
             if (r instanceof TileRecord) {
