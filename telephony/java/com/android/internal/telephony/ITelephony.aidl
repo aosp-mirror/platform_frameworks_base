@@ -740,9 +740,14 @@ interface ITelephony {
     int getCarrierPrivilegeStatus();
 
     /**
-     * Similar to above, but check for pkg whose name is pkgname.
+     * Similar to above, but check for the package whose name is pkgName.
      */
-    int checkCarrierPrivilegesForPackage(String pkgname);
+    int checkCarrierPrivilegesForPackage(String pkgName);
+
+    /**
+     * Similar to above, but check across all phones.
+     */
+    int checkCarrierPrivilegesForPackageAnyPhone(String pkgName);
 
     /**
      * Returns list of the package names of the carrier apps that should handle the input intent
