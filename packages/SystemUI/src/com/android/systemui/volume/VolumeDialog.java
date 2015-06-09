@@ -386,18 +386,8 @@ public class VolumeDialog {
                         }
                     }
                 } else {
-                    if (mAutomute && !row.ss.muteSupported) {
-                        final boolean vmute = row.ss.level == 0;
-                        mController.setStreamVolume(stream, vmute ? row.lastAudibleLevel : 0);
-                    } else {
-                        final boolean mute = !row.ss.muted;
-                        mController.setStreamMute(stream, mute);
-                        if (mAutomute) {
-                            if (!mute && row.ss.level == 0) {
-                                mController.setStreamVolume(stream, 1);
-                            }
-                        }
-                    }
+                    final boolean vmute = row.ss.level == 0;
+                    mController.setStreamVolume(stream, vmute ? row.lastAudibleLevel : 0);
                 }
                 row.userAttempt = 0;  // reset the grace period, slider should update immediately
             }
@@ -589,6 +579,9 @@ public class VolumeDialog {
         if (ss.level > 0) {
             row.lastAudibleLevel = ss.level;
         }
+        if (ss.level == row.requestedLevel) {
+            row.requestedLevel = -1;
+        }
         final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
         final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
         final boolean isAlarmStream = row.stream == AudioManager.STREAM_ALARM;
@@ -664,7 +657,10 @@ public class VolumeDialog {
         row.icon.setContentDescription(ss.name);
 
         // update slider
-        updateVolumeRowSliderH(row, zenMuted);
+        final boolean enableSlider = !zenMuted;
+        final int vlevel = row.ss.muted && (isRingVibrate || !isRingStream && !zenMuted) ? 0
+                : row.ss.level;
+        updateVolumeRowSliderH(row, enableSlider, vlevel);
     }
 
     private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
@@ -676,8 +672,8 @@ public class VolumeDialog {
         row.slider.setThumbTintList(tint);
     }
 
-    private void updateVolumeRowSliderH(VolumeRow row, boolean zenMuted) {
-        row.slider.setEnabled(!zenMuted);
+    private void updateVolumeRowSliderH(VolumeRow row, boolean enable, int vlevel) {
+        row.slider.setEnabled(enable);
         updateVolumeRowSliderTintH(row, row.stream == mActiveStream);
         if (row.tracking) {
             return;  // don't update if user is sliding
@@ -694,7 +690,6 @@ public class VolumeDialog {
                     row.userAttempt + USER_ATTEMPT_GRACE_PERIOD);
             return;  // don't update if visible and in grace period
         }
-        final int vlevel = row.ss.muted ? 0 : row.ss.level;
         if (vlevel == level) {
             if (mShowing && rowVisible) {
                 return;  // don't clamp if visible
@@ -1018,7 +1013,7 @@ public class VolumeDialog {
         private StreamState ss;
         private long userAttempt;  // last user-driven slider change
         private boolean tracking;  // tracking slider touch
-        private int requestedLevel;
+        private int requestedLevel = -1;  // pending user-requested level via progress changed
         private int iconRes;
         private int iconMuteRes;
         private boolean important;
