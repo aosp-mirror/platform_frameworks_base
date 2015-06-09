@@ -354,9 +354,9 @@ public final class BatteryStatsHelper {
 
         if (mBluetoothPowerCalculator == null) {
             if (checkHasBluetoothPowerReporting(mStats, mPowerProfile)) {
-                mBluetoothPowerCalculator = new BluetoothPowerCalculator();
+                mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
             } else {
-                mBluetoothPowerCalculator = new BluetoothPowerCalculator();
+                mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
             }
         }
         mBluetoothPowerCalculator.reset();
