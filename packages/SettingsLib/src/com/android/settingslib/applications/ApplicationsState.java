@@ -513,6 +513,12 @@ public class ApplicationsState {
         }
     }
 
+    public static String normalize(String str) {
+        String tmp = Normalizer.normalize(str, Form.NFD);
+        return REMOVE_DIACRITICALS_PATTERN.matcher(tmp)
+                .replaceAll("").toLowerCase();
+    }
+
     public class Session {
         final Callbacks mCallbacks;
         boolean mResumed;
@@ -1146,12 +1152,6 @@ public class ApplicationsState {
             // Do badging ourself so that it comes from the user of the app not the current user.
             return pm.getUserBadgedIcon(pm.loadUnbadgedItemIcon(info, info),
                     new UserHandle(UserHandle.getUserId(info.uid)));
-        }
-
-        public static String normalize(String str) {
-            String tmp = Normalizer.normalize(str, Form.NFD);
-            return REMOVE_DIACRITICALS_PATTERN.matcher(tmp)
-                    .replaceAll("").toLowerCase();
         }
 
         public String getVersion(Context context) {
