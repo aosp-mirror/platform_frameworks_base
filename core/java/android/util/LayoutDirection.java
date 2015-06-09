@@ -27,6 +27,12 @@ public final class LayoutDirection {
     private LayoutDirection() {}
 
     /**
+     * An undefined layout direction.
+     * @hide
+     */
+    public static final int UNDEFINED = -1;
+
+    /**
      * Horizontal layout direction is from Left to Right.
      */
     public static final int LTR = 0;
