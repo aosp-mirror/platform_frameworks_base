@@ -468,12 +468,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     String mDeviceOwnerName;
 
-    /**
-     * Preferred activities to start on boot/user switch, as set by DevicePolicyManager. Indexed
-     * by userId.
-     */
-    SparseArray<ComponentName> mPreferredSetupActivities = new SparseArray<>();
-
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
         public final Bundle extras;
@@ -3435,20 +3429,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Factory test.
                 ai = AppGlobals.getPackageManager().getActivityInfo(comp, flags, userId);
             } else {
-                ComponentName preferredComponent = mPreferredSetupActivities.get(userId);
-                if (preferredComponent != null) {
-                    ai = AppGlobals.getPackageManager().getActivityInfo(
-                            preferredComponent, flags, userId);
-                }
-                if (ai == null) {
-                    ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
-                            intent,
-                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                flags, userId);
+                ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
+                        intent,
+                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        flags, userId);
 
-                    if (info != null) {
-                        ai = info.activityInfo;
-                    }
+                if (info != null) {
+                    ai = info.activityInfo;
                 }
             }
         } catch (RemoteException e) {
@@ -8915,22 +8902,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized(this) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
-        }
-    }
-
-    @Override
-    public void updatePreferredSetupActivity(ComponentName preferredActivity, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                    "updatePreferredSetupActivity called from non-system process");
-        }
-        synchronized (this) {
-            if (preferredActivity == null) {
-                mPreferredSetupActivities.delete(userId);
-            } else {
-                mPreferredSetupActivities.put(userId, preferredActivity);
-            }
         }
     }
 

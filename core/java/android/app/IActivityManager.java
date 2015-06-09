@@ -502,8 +502,6 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void updateLockTaskPackages(int userId, String[] packages) throws RemoteException;
     public void updateDeviceOwner(String packageName) throws RemoteException;
-    public void updatePreferredSetupActivity(ComponentName preferredActivity, int userId)
-            throws RemoteException;
 
     public int getPackageProcessState(String packageName) throws RemoteException;
 
@@ -850,8 +848,7 @@ public interface IActivityManager extends IInterface {
     int GET_PACKAGE_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+293;
     int SHOW_LOCK_TASK_ESCAPE_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+294;
     int UPDATE_DEVICE_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+295;
-    int UPDATE_PREFERRED_SETUP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+296;
-    int KEYGUARD_GOING_AWAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+297;
-    int REGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+298;
-    int UNREGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+299;
+    int KEYGUARD_GOING_AWAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+296;
+    int REGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+297;
+    int UNREGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+298;
 }
