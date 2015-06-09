@@ -1087,4 +1087,7 @@
     <!-- Alarm template for far alarms [CHAR LIMIT=25] -->
     <string name="alarm_template_far">on <xliff:g id="when" example="Fri 7:00 AM">%1$s</xliff:g></string>
 
+    <!-- Accessibility label for Quick Settings detail screens [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_detail">Quick Settings, <xliff:g id="title" example="Wi-Fi">%s</xliff:g>.</string>
+
 </resources>
