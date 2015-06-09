@@ -112,6 +112,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
+import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
@@ -1749,6 +1750,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return ret;
     }
 
+    private boolean shouldPerformDiagnostics(String[] args) {
+        for (String arg : args) {
+            if (arg.equals("--diag")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -1758,6 +1768,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println("Permission Denial: can't dump ConnectivityService " +
                     "from from pid=" + Binder.getCallingPid() + ", uid=" +
                     Binder.getCallingUid());
+            return;
+        }
+
+        final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
+        if (shouldPerformDiagnostics(args)) {
+            final long DIAG_TIME_MS = 5000;
+            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                // Start gathering diagnostic information.
+                netDiags.add(new NetworkDiagnostics(
+                        nai.network,
+                        new LinkProperties(nai.linkProperties),
+                        DIAG_TIME_MS));
+            }
+
+            for (NetworkDiagnostics netDiag : netDiags) {
+                pw.println();
+                netDiag.waitForMeasurements();
+                netDiag.dump(pw);
+            }
+
             return;
         }
 
