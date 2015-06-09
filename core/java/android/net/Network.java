@@ -19,6 +19,8 @@ package android.net;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -64,7 +66,7 @@ public class Network implements Parcelable {
     // maybeInitHttpClient() must be called prior to reading either variable.
     private volatile ConnectionPool mConnectionPool = null;
     private volatile com.android.okhttp.internal.Network mNetwork = null;
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
     // like the OkHttp code. Also like the OkHttp code, we will throw parse
@@ -300,14 +302,10 @@ public class Network implements Parcelable {
      * connected.
      */
     public void bindSocket(DatagramSocket socket) throws IOException {
-        // Apparently, the kernel doesn't update a connected UDP socket's routing upon mark changes.
-        if (socket.isConnected()) {
-            throw new SocketException("Socket is connected");
-        }
         // Query a property of the underlying socket to ensure that the socket's file descriptor
         // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        bindSocketFd(socket.getFileDescriptor$());
+        bindSocket(socket.getFileDescriptor$());
     }
 
     /**
@@ -316,18 +314,38 @@ public class Network implements Parcelable {
      * {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be connected.
      */
     public void bindSocket(Socket socket) throws IOException {
-        // Apparently, the kernel doesn't update a connected TCP socket's routing upon mark changes.
-        if (socket.isConnected()) {
-            throw new SocketException("Socket is connected");
-        }
         // Query a property of the underlying socket to ensure that the socket's file descriptor
         // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        bindSocketFd(socket.getFileDescriptor$());
+        bindSocket(socket.getFileDescriptor$());
     }
 
-    private void bindSocketFd(FileDescriptor fd) throws IOException {
-        int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
+    /**
+     * Binds the specified {@link FileDescriptor} to this {@code Network}. All data traffic on the
+     * socket represented by this file descriptor will be sent on this {@code Network},
+     * irrespective of any process-wide network binding set by
+     * {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be connected.
+     */
+    public void bindSocket(FileDescriptor fd) throws IOException {
+        try {
+            final SocketAddress peer = Os.getpeername(fd);
+            final InetAddress inetPeer = ((InetSocketAddress) peer).getAddress();
+            if (!inetPeer.isAnyLocalAddress()) {
+                // Apparently, the kernel doesn't update a connected UDP socket's
+                // routing upon mark changes.
+                throw new SocketException("Socket is connected");
+            }
+        } catch (ErrnoException e) {
+            // getpeername() failed.
+            if (e.errno != OsConstants.ENOTCONN) {
+                throw e.rethrowAsSocketException();
+            }
+        } catch (ClassCastException e) {
+            // Wasn't an InetSocketAddress.
+            throw new SocketException("Only AF_INET/AF_INET6 sockets supported");
+        }
+
+        final int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
         if (err != 0) {
             // bindSocketToNetwork returns negative errno.
             throw new ErrnoException("Binding socket to network " + netId, -err)
