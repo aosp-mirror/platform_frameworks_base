@@ -9,14 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -56,6 +57,8 @@ public class AssistManager {
     private final PhoneStatusBar mBar;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
 
+    private ComponentName mAssistComponent;
+
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
 
@@ -78,12 +81,24 @@ public class AssistManager {
         }
     };
 
+    private final ContentObserver mAssistSettingsObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateAssistInfo();
+        }
+    };
+
     public AssistManager(PhoneStatusBar bar, Context context) {
         mContext = context;
         mBar = bar;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mVoiceInteractionManagerService = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ASSISTANT), false,
+                mAssistSettingsObserver);
+        mAssistSettingsObserver.onChange(false);
     }
 
     public void onConfigurationChanged() {
@@ -108,16 +123,17 @@ public class AssistManager {
     }
 
     public void onGestureInvoked(boolean vibrate) {
-        boolean isVoiceInteractorActive = getVoiceInteractorSupportsAssistGesture();
-        if (!isVoiceInteractorActive && !isAssistantIntentAvailable()) {
+        if (mAssistComponent == null) {
             return;
         }
+
         if (vibrate) {
             vibrate();
         }
-        if (!isVoiceInteractorActive || !isVoiceSessionRunning()) {
+        final boolean isService = isAssistantService();
+        if (isService || !isVoiceSessionRunning()) {
             showOrb();
-            mView.postDelayed(mHideRunnable, isVoiceInteractorActive
+            mView.postDelayed(mHideRunnable, isService
                     ? TIMEOUT_SERVICE
                     : TIMEOUT_ACTIVITY);
         }
@@ -157,10 +173,12 @@ public class AssistManager {
     }
 
     private void startAssist() {
-        if (getVoiceInteractorSupportsAssistGesture()) {
-            startVoiceInteractor();
-        } else {
-            startAssistActivity();
+        if (mAssistComponent != null) {
+            if (isAssistantService()) {
+                startVoiceInteractor();
+            } else {
+                startAssistActivity();
+            }
         }
     }
 
@@ -177,6 +195,9 @@ public class AssistManager {
                 .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
         if (intent == null) {
             return;
+        }
+        if (mAssistComponent != null) {
+            intent.setComponent(mAssistComponent);
         }
 
         try {
@@ -255,19 +276,9 @@ public class AssistManager {
     }
 
     private void maybeSwapSearchIcon() {
-        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
-        ComponentName component = null;
-        boolean isService = false;
-        if (getVoiceInteractorSupportsAssistGesture()) {
-            component = getVoiceInteractorComponentName();
-            isService = true;
-        } else if (intent != null) {
-            component = intent.getComponent();
-        }
-        if (component != null) {
-            replaceDrawable(mView.getOrb().getLogo(), component, ASSIST_ICON_METADATA_NAME,
-                    isService);
+        if (mAssistComponent != null) {
+            replaceDrawable(mView.getOrb().getLogo(), mAssistComponent, ASSIST_ICON_METADATA_NAME,
+                    isAssistantService());
         } else {
             mView.getOrb().getLogo().setImageDrawable(null);
         }
@@ -308,8 +319,32 @@ public class AssistManager {
         mView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
-    public boolean isAssistantIntentAvailable() {
-        return ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
+    private boolean isAssistantService() {
+        return mAssistComponent == null ?
+                false : mAssistComponent.equals(getVoiceInteractorComponentName());
+    }
+
+    private void updateAssistInfo() {
+        final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
+        if (setting != null) {
+            mAssistComponent = ComponentName.unflattenFromString(setting);
+            return;
+        }
+
+        // Fallback to keep backward compatible behavior when there is no user setting.
+        if (getVoiceInteractorSupportsAssistGesture()) {
+            mAssistComponent = getVoiceInteractorComponentName();
+            return;
+        }
+
+        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
+        if (intent != null) {
+            mAssistComponent = intent.getComponent();
+            return;
+        }
+
+        mAssistComponent = null;
     }
 }
