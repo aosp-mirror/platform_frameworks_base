@@ -29,11 +29,13 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.security.keystore.KeyInfo;
 import android.security.keystore.KeyProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -442,7 +444,20 @@ public final class KeyChain {
      * imported or generated. This can be used to tell if there is special
      * hardware support that can be used to bind keys to the device in a way
      * that makes it non-exportable.
+     *
+     * @deprecated Whether the key is bound to the secure hardware is known only
+     * once the key has been imported. To find out, use:
+     * <pre>{@code
+     * PrivateKey key = ...; // private key from KeyChain
+     *
+     * KeyFactory keyFactory =
+     *     KeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
+     * KeyInfo keyInfo = keyFactory.getKeySpec(key, KeyInfo.class);
+     * if (keyInfo.isInsideSecureHardware()) &#123;
+     *     // The key is bound to the secure hardware of this Android
+     * &#125;}</pre>
      */
+    @Deprecated
     public static boolean isBoundKeyAlgorithm(
             @NonNull @KeyProperties.KeyAlgorithmEnum String algorithm) {
         if (!isKeyAlgorithmSupported(algorithm)) {

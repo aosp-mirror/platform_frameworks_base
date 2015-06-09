@@ -383,7 +383,7 @@ public class KeyStore {
         }
     }
 
-    // TODO remove this when it's removed from Settings
+    // TODO: remove this when it's removed from Settings
     public boolean isHardwareBacked() {
         return isHardwareBacked("RSA");
     }
