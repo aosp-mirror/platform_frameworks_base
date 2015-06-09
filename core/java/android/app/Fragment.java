@@ -1200,9 +1200,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mHost == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        Intent intent =
-                mHost.getContext().getPackageManager().buildRequestPermissionsIntent(permissions);
-        mHost.onStartActivityFromFragment(this, intent, requestCode, null);
+        mHost.onRequestPermissionsFromFragment(this, permissions,requestCode);
     }
 
     /**

@@ -4565,6 +4565,7 @@ package android.app {
     method public boolean onHasView();
     method public boolean onHasWindowAnimations();
     method public void onInvalidateOptionsMenu();
+    method public void onRequestPermissionsFromFragment(android.app.Fragment, java.lang.String[], int);
     method public boolean onShouldSaveFragmentState(android.app.Fragment);
     method public void onStartActivityFromFragment(android.app.Fragment, android.content.Intent, int, android.os.Bundle);
     method public boolean onUseFragmentManagerInflaterFactory();
