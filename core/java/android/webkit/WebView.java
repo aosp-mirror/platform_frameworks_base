@@ -611,41 +611,45 @@ public class WebView extends AbsoluteLayout
     /**
      * Specifies whether the horizontal scrollbar has overlay style.
      *
+     * @deprecated This method has no effect.
      * @param overlay true if horizontal scrollbar should have overlay style
      */
+    @Deprecated
     public void setHorizontalScrollbarOverlay(boolean overlay) {
-        checkThread();
-        mProvider.setHorizontalScrollbarOverlay(overlay);
     }
 
     /**
      * Specifies whether the vertical scrollbar has overlay style.
      *
+     * @deprecated This method has no effect.
      * @param overlay true if vertical scrollbar should have overlay style
      */
+    @Deprecated
     public void setVerticalScrollbarOverlay(boolean overlay) {
-        checkThread();
-        mProvider.setVerticalScrollbarOverlay(overlay);
     }
 
     /**
      * Gets whether horizontal scrollbar has overlay style.
      *
-     * @return true if horizontal scrollbar has overlay style
+     * @deprecated This method is now obsolete.
+     * @return true
      */
+    @Deprecated
     public boolean overlayHorizontalScrollbar() {
-        checkThread();
-        return mProvider.overlayHorizontalScrollbar();
+        // The old implementation defaulted to true, so return true for consistency
+        return true;
     }
 
     /**
      * Gets whether vertical scrollbar has overlay style.
      *
-     * @return true if vertical scrollbar has overlay style
+     * @deprecated This method is now obsolete.
+     * @return false
      */
+    @Deprecated
     public boolean overlayVerticalScrollbar() {
-        checkThread();
-        return mProvider.overlayVerticalScrollbar();
+        // The old implementation defaulted to false, so return false for consistency
+        return false;
     }
 
     /**
