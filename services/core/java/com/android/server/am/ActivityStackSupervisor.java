@@ -1944,15 +1944,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                     r, top.task);
                             top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                         } else {
-                            // A special case: we need to
-                            // start the activity because it is not currently
-                            // running, and the caller has asked to clear the
-                            // current task to have this activity at the top.
+                            // A special case: we need to start the activity because it is not
+                            // currently running, and the caller has asked to clear the current
+                            // task to have this activity at the top.
                             addingToTask = true;
-                            // Now pretend like this activity is being started
-                            // by the top of its task, so it is put in the
-                            // right place.
+                            // Now pretend like this activity is being started by the top of its
+                            // task, so it is put in the right place.
                             sourceRecord = intentActivity;
+                            TaskRecord task = sourceRecord.task;
+                            if (task != null && task.stack == null) {
+                                // Target stack got cleared when we all activities were removed
+                                // above. Go ahead and reset it.
+                                targetStack = computeStackFocus(sourceRecord, false /* newTask */);
+                                targetStack.addTask(
+                                        task, !launchTaskBehind /* toTop */, false /* moving */);
+                            }
+
                         }
                     } else if (r.realActivity.equals(intentActivity.task.realActivity)) {
                         // In this case the top activity on the task is the
