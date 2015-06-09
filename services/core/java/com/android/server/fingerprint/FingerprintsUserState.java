@@ -57,7 +57,7 @@ class FingerprintsUserState {
     private final File mFile;
 
     @GuardedBy("this")
-    private final ArrayList<Fingerprint> mFingerprints = new ArrayList<>();
+    private final ArrayList<Fingerprint> mFingerprints = new ArrayList<Fingerprint>();
     private final Context mCtx;
 
     public FingerprintsUserState(Context ctx, int userId) {
@@ -127,7 +127,7 @@ class FingerprintsUserState {
     }
 
     private ArrayList<Fingerprint> getCopy(ArrayList<Fingerprint> array) {
-        ArrayList<Fingerprint> result = new ArrayList<>(array.size());
+        ArrayList<Fingerprint> result = new ArrayList<Fingerprint>(array.size());
         for (int i = 0; i < array.size(); i++) {
             Fingerprint fp = array.get(i);
             result.add(new Fingerprint(fp.getName(), fp.getGroupId(), fp.getFingerId(),
