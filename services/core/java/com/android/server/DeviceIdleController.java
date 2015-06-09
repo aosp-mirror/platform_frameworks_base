@@ -85,16 +85,21 @@ import java.util.Arrays;
 /**
  * Keeps track of device idleness and drives low power mode based on that.
  */
-public class DeviceIdleController extends SystemService {
+public class DeviceIdleController extends SystemService
+        implements AnyMotionDetector.DeviceIdleCallback {
     private static final String TAG = "DeviceIdleController";
 
     private static final boolean DEBUG = false;
+
     private static final boolean COMPRESS_TIME = false;
 
     public static final String SERVICE_NAME = "deviceidle";
 
     private static final String ACTION_STEP_IDLE_STATE =
             "com.android.server.device_idle.STEP_IDLE_STATE";
+
+    private static final String ACTION_ENTER_INACTIVE_STATE =
+        "com.android.server.device_idle.ENTER_INACTIVE_STATE";
 
     // TODO: These need to be moved to system settings.
 
@@ -104,26 +109,40 @@ public class DeviceIdleController extends SystemService {
      * immediately after going inactive just because we don't want to be continually running
      * the significant motion sensor whenever the screen is off.
      */
+
     private static final long DEFAULT_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 30*60*1000L
             : 3 * 60 * 1000L;
+
+    /**
+     * If we don't receive a callback from AnyMotion in this amount of time, we will change from
+     * STATE_SENSING to STATE_INACTIVE, and any AnyMotion callbacks while not in STATE_SENSING will
+     * be ignored.
+     */
+    private static final long DEFAULT_SENSING_TIMEOUT = !DEBUG ? 5 * 60 * 1000L : 60 * 1000L;
+
     /**
      * This is the time, after seeing motion, that we wait after becoming inactive from
      * that until we start looking for motion again.
      */
     private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 10*60*1000L
             : 60 * 1000L;
+
     /**
      * This is the time, after the inactive timeout elapses, that we will wait looking
      * for significant motion until we truly consider the device to be idle.
      */
+
     private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 30*60*1000L
             : 3 * 60 * 1000L;
+
     /**
      * This is the initial time, after being idle, that we will allow ourself to be back
      * in the IDLE_PENDING state allowing the system to run normally until we return to idle.
      */
+
     private static final long DEFAULT_IDLE_PENDING_TIMEOUT = !COMPRESS_TIME ? 5*60*1000L
             : 30 * 1000L;
+
     /**
      * Maximum pending idle timeout (time spent running) we will be allowed to use.
      */
@@ -138,8 +157,10 @@ public class DeviceIdleController extends SystemService {
      * This is the initial time that we want to sit in the idle state before waking up
      * again to return to pending idle and allowing normal work to run.
      */
+
     private static final long DEFAULT_IDLE_TIMEOUT = !COMPRESS_TIME ? 60*60*1000L
             : 6 * 60 * 1000L;
+
     /**
      * Maximum idle duration we will be allowed to use.
      */
@@ -168,9 +189,11 @@ public class DeviceIdleController extends SystemService {
     private DisplayManager mDisplayManager;
     private SensorManager mSensorManager;
     private Sensor mSigMotionSensor;
+    private PendingIntent mSensingAlarmIntent;
     private PendingIntent mAlarmIntent;
     private Intent mIdleIntent;
     private Display mCurDisplay;
+    private AnyMotionDetector mAnyMotionDetector;
     private boolean mIdleDisabled;
     private boolean mScreenOn;
     private boolean mCharging;
@@ -182,15 +205,18 @@ public class DeviceIdleController extends SystemService {
     private static final int STATE_INACTIVE = 1;
     /** Device is past the initial inactive period, and waiting for the next idle period. */
     private static final int STATE_IDLE_PENDING = 2;
+    /** Device is currently sensing motion. */
+    private static final int STATE_SENSING = 3;
     /** Device is in the idle state, trying to stay asleep as much as possible. */
-    private static final int STATE_IDLE = 3;
+    private static final int STATE_IDLE = 4;
     /** Device is in the idle state, but temporarily out of idle to do regular maintenance. */
-    private static final int STATE_IDLE_MAINTENANCE = 4;
+    private static final int STATE_IDLE_MAINTENANCE = 5;
     private static String stateToString(int state) {
         switch (state) {
             case STATE_ACTIVE: return "ACTIVE";
             case STATE_INACTIVE: return "INACTIVE";
             case STATE_IDLE_PENDING: return "IDLE_PENDING";
+            case STATE_SENSING: return "SENSING";
             case STATE_IDLE: return "IDLE";
             case STATE_IDLE_MAINTENANCE: return "IDLE_MAINTENANCE";
             default: return Integer.toString(state);
@@ -247,6 +273,10 @@ public class DeviceIdleController extends SystemService {
                 synchronized (DeviceIdleController.this) {
                     stepIdleStateLocked();
                 }
+            } else if (ACTION_ENTER_INACTIVE_STATE.equals(intent.getAction())) {
+                synchronized (DeviceIdleController.this) {
+                    enterInactiveStateLocked();
+                }
             }
         }
     };
@@ -276,6 +306,24 @@ public class DeviceIdleController extends SystemService {
         }
     };
 
+    @Override
+    public void onAnyMotionResult(int result) {
+        if (DEBUG) Slog.d(TAG, "onAnyMotionResult(" + result + ")");
+        if (mState == STATE_SENSING) {
+            if (result == AnyMotionDetector.RESULT_STATIONARY) {
+                if (DEBUG) Slog.d(TAG, "RESULT_STATIONARY received.");
+                synchronized (this) {
+                    stepIdleStateLocked();
+                }
+            } else if (result == AnyMotionDetector.RESULT_MOVED) {
+                if (DEBUG) Slog.d(TAG, "RESULT_MOVED received.");
+                synchronized (this) {
+                    enterInactiveStateLocked();
+                }
+            }
+        }
+    }
+
     static final int MSG_WRITE_CONFIG = 1;
     static final int MSG_REPORT_IDLE_ON = 2;
     static final int MSG_REPORT_IDLE_OFF = 3;
@@ -288,6 +336,7 @@ public class DeviceIdleController extends SystemService {
         }
 
         @Override public void handleMessage(Message msg) {
+            if (DEBUG) Slog.d(TAG, "handleMessage(" + msg.what + ")");
             switch (msg.what) {
                 case MSG_WRITE_CONFIG: {
                     handleWriteConfigFile();
@@ -452,11 +501,20 @@ public class DeviceIdleController extends SystemService {
                         Context.DISPLAY_SERVICE);
                 mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
                 mSigMotionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+                mAnyMotionDetector = new AnyMotionDetector(
+                        mAlarmManager,
+                        (PowerManager) getContext().getSystemService(Context.POWER_SERVICE),
+                        mHandler, mSensorManager, this);
 
                 Intent intent = new Intent(ACTION_STEP_IDLE_STATE)
                         .setPackage("android")
                         .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 mAlarmIntent = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
+
+                Intent intentSensing = new Intent(ACTION_STEP_IDLE_STATE)
+                        .setPackage("android")
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                mSensingAlarmIntent = PendingIntent.getBroadcast(getContext(), 0, intentSensing, 0);
 
                 mIdleIntent = new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
                 mIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -613,6 +671,7 @@ public class DeviceIdleController extends SystemService {
         // because if there is anything shown we are going to be updating it at some
         // frequency so can't be allowed to go into deep sleeps.
         boolean screenOn = mCurDisplay.getState() != Display.STATE_OFF;;
+        if (DEBUG) Slog.d(TAG, "updateDisplayLocked: screenOn=" + screenOn);
         if (!screenOn && mScreenOn) {
             mScreenOn = false;
             becomeInactiveIfAppropriateLocked();
@@ -623,6 +682,7 @@ public class DeviceIdleController extends SystemService {
     }
 
     void updateChargingLocked(boolean charging) {
+        if (DEBUG) Slog.i(TAG, "updateChargingLocked: charging=" + charging);
         if (!charging && mCharging) {
             mCharging = false;
             becomeInactiveIfAppropriateLocked();
@@ -639,6 +699,7 @@ public class DeviceIdleController extends SystemService {
     }
 
     void becomeActiveLocked(String reason) {
+        if (DEBUG) Slog.i(TAG, "becomeActiveLocked, reason = " + reason);
         if (mState != STATE_ACTIVE) {
             EventLogTags.writeDeviceIdle(STATE_ACTIVE, reason);
             scheduleReportActiveLocked(false);
@@ -652,10 +713,12 @@ public class DeviceIdleController extends SystemService {
     }
 
     void becomeInactiveIfAppropriateLocked() {
+        if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
         if (!mScreenOn && !mCharging && !mIdleDisabled && mState == STATE_ACTIVE) {
             // Screen has turned off; we are now going to become inactive and start
             // waiting to see if we will ultimately go idle.
             mState = STATE_INACTIVE;
+            if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
             mNextIdlePendingDelay = 0;
             mNextIdleDelay = 0;
             scheduleAlarmLocked(mInactiveTimeout, false);
@@ -663,7 +726,17 @@ public class DeviceIdleController extends SystemService {
         }
     }
 
+    /**
+     * This is called when we've failed to receive a callback from AnyMotionDetector
+     * within the DEFAULT_SENSING_TIMEOUT, to return to STATE_INACTIVE.
+     */
+    void enterInactiveStateLocked() {
+        mInactiveTimeout = DEFAULT_INACTIVE_TIMEOUT;
+        becomeInactiveIfAppropriateLocked();
+    }
+
     void stepIdleStateLocked() {
+        if (DEBUG) Slog.d(TAG, "stepIdleStateLocked: mState=" + mState);
         EventLogTags.writeDeviceIdleStep();
 
         final long now = SystemClock.elapsedRealtime();
@@ -685,26 +758,34 @@ public class DeviceIdleController extends SystemService {
                 mNextIdlePendingDelay = DEFAULT_IDLE_PENDING_TIMEOUT;
                 mNextIdleDelay = DEFAULT_IDLE_TIMEOUT;
                 mState = STATE_IDLE_PENDING;
+                if (DEBUG) Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_IDLE_PENDING.");
                 EventLogTags.writeDeviceIdle(mState, "step");
                 break;
             case STATE_IDLE_PENDING:
+                mState = STATE_SENSING;
+                if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
+                scheduleSensingAlarmLocked(DEFAULT_SENSING_TIMEOUT);
+                mAnyMotionDetector.checkForAnyMotion();
+                break;
+            case STATE_SENSING:
+                cancelSensingAlarmLocked();
             case STATE_IDLE_MAINTENANCE:
-                // We have been waiting to become idle, and now it is time!  This is the
-                // only case where we want to use a wakeup alarm, because we do want to
-                // drag the device out of its sleep state in this case to do the next
-                // scheduled work.
                 scheduleAlarmLocked(mNextIdleDelay, true);
-                mNextIdleDelay = (long)(mNextIdleDelay*DEFAULT_IDLE_FACTOR);
+                if (DEBUG) Slog.d(TAG, "Moved to STATE_IDLE. Next alarm in " + mNextIdleDelay +
+                        " ms.");
+                mNextIdleDelay = (long)(mNextIdleDelay * DEFAULT_IDLE_FACTOR);
+                if (DEBUG) Slog.d(TAG, "Setting mNextIdleDelay = " + mNextIdleDelay);
                 if (mNextIdleDelay > DEFAULT_MAX_IDLE_TIMEOUT) {
                     mNextIdleDelay = DEFAULT_MAX_IDLE_TIMEOUT;
                 }
                 mState = STATE_IDLE;
-                EventLogTags.writeDeviceIdle(mState, "step");
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
             case STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
                 scheduleAlarmLocked(mNextIdlePendingDelay, false);
+                if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE to STATE_IDLE_MAINTENANCE. " +
+                        "Next alarm in " + mNextIdlePendingDelay + " ms.");
                 mNextIdlePendingDelay = (long)(mNextIdlePendingDelay*DEFAULT_IDLE_PENDING_FACTOR);
                 if (mNextIdlePendingDelay > DEFAULT_MAX_IDLE_PENDING_TIMEOUT) {
                     mNextIdlePendingDelay = DEFAULT_MAX_IDLE_PENDING_TIMEOUT;
@@ -717,6 +798,7 @@ public class DeviceIdleController extends SystemService {
     }
 
     void significantMotionLocked() {
+        if (DEBUG) Slog.d(TAG, "significantMotionLocked()");
         // When the sensor goes off, its trigger is automatically removed.
         mSigMotionActive = false;
         // The device is not yet active, so we want to go back to the pending idle
@@ -732,6 +814,7 @@ public class DeviceIdleController extends SystemService {
     }
 
     void startMonitoringSignificantMotion() {
+        if (DEBUG) Slog.d(TAG, "startMonitoringSignificantMotion()");
         if (mSigMotionSensor != null && !mSigMotionActive) {
             mSensorManager.requestTriggerSensor(mSigMotionListener, mSigMotionSensor);
             mSigMotionActive = true;
@@ -739,6 +822,7 @@ public class DeviceIdleController extends SystemService {
     }
 
     void stopMonitoringSignificantMotion() {
+        if (DEBUG) Slog.d(TAG, "stopMonitoringSignificantMotion()");
         if (mSigMotionActive) {
             mSensorManager.cancelTriggerSensor(mSigMotionListener, mSigMotionSensor);
             mSigMotionActive = false;
@@ -752,7 +836,13 @@ public class DeviceIdleController extends SystemService {
         }
     }
 
+    void cancelSensingAlarmLocked() {
+        if (DEBUG) Slog.d(TAG, "cancelSensingAlarmLocked()");
+        mAlarmManager.cancel(mSensingAlarmIntent);
+    }
+
     void scheduleAlarmLocked(long delay, boolean idleUntil) {
+        if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
         if (mSigMotionSensor == null) {
             // If there is no significant motion sensor on this device, then we won't schedule
             // alarms, because we can't determine if the device is not moving.  This effectively
@@ -768,6 +858,13 @@ public class DeviceIdleController extends SystemService {
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     mNextAlarmTime, mAlarmIntent);
         }
+    }
+
+    void scheduleSensingAlarmLocked(long delay) {
+      if (DEBUG) Slog.d(TAG, "scheduleSensingAlarmLocked(" + delay + ")");
+      mNextAlarmTime = SystemClock.elapsedRealtime() + delay;
+      mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+          mNextAlarmTime, mSensingAlarmIntent);
     }
 
     private void updateWhitelistAppIdsLocked() {
