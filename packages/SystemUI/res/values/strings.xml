@@ -1090,4 +1090,7 @@
     <!-- Accessibility label for Quick Settings detail screens [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_detail">Quick Settings, <xliff:g id="title" example="Wi-Fi">%s</xliff:g>.</string>
 
+    <!-- Accessibility label for hotspot icon [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_hotspot">Hotspot</string>
+
 </resources>
