@@ -396,6 +396,11 @@ public class FingerprintManager {
      * @param flags optional flags; should be 0
      * @param callback an object to receive authentication events
      * @param handler an optional handler to handle callback events
+     *
+     * @throws IllegalArgumentException if the crypto operation is not supported or is not backed
+     *         by <a href="{@docRoot}training/articles/keystore.html">Android Keystore
+     *         facility</a>.
+     * @throws IllegalStateException if the crypto primitive is not initialized.
      */
     @RequiresPermission(USE_FINGERPRINT)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
