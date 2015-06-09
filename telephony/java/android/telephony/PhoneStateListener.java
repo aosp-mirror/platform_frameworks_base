@@ -120,8 +120,7 @@ public class PhoneStateListener {
     /**
      * Listen for changes to the device call state.
      * {@more}
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     * READ_PHONE_STATE}
+     *
      * @see #onCallStateChanged
      */
     public static final int LISTEN_CALL_STATE                               = 0x00000020;
@@ -137,8 +136,6 @@ public class PhoneStateListener {
      * Listen for changes to the direction of data traffic on the data
      * connection (cellular).
      * {@more}
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     * READ_PHONE_STATE}
      * Example: The status bar uses this to display the appropriate
      * data-traffic icon.
      *
@@ -388,6 +385,10 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when device call state changes.
+     * @param state call state
+     * @param incomingNumber incoming call phone number. If application does not have
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission, an empty
+     * string will be passed as an argument.
      *
      * @see TelephonyManager#CALL_STATE_IDLE
      * @see TelephonyManager#CALL_STATE_RINGING
