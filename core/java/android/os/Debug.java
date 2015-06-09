@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
@@ -387,6 +388,132 @@ public final class Debug
                 case OTHER_DALVIK_INDIRECT_REFERENCE_TABLE: return ".IndirectRef";
                 default: return "????";
             }
+        }
+
+      /**
+       * Returns the value of a particular memory statistic or {@code null} if no
+       * such memory statistic exists.
+       *
+       * <p>The following table lists the memory statistics that are supported.
+       * Note that memory statistics may be added or removed in a future API level.</p>
+       *
+       * <table>
+       *     <thead>
+       *         <tr>
+       *             <th>Memory statistic name</th>
+       *             <th>Meaning</th>
+       *             <th>Example</th>
+       *             <th>Supported (API Levels)</th>
+       *         </tr>
+       *     </thead>
+       *     <tbody>
+       *         <tr>
+       *             <td>summary.java-heap</td>
+       *             <td>The private Java Heap usage in kB. This corresponds to the Java Heap field
+       *                 in the App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.native-heap</td>
+       *             <td>The private Native Heap usage in kB. This corresponds to the Native Heap
+       *                 field in the App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.code</td>
+       *             <td>The memory usage for static code and resources in kB. This corresponds to
+       *                 the Code field in the App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.stack</td>
+       *             <td>The stack usage in kB. This corresponds to the Stack field in the
+       *                 App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.graphics</td>
+       *             <td>The graphics usage in kB. This corresponds to the Graphics field in the
+       *                 App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.private-other</td>
+       *             <td>Other private memory usage in kB. This corresponds to the Private Other
+       *                 field output in the App Summary section by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.system</td>
+       *             <td>Shared and system memory usage in kB. This corresponds to the System
+       *                 field output in the App Summary section by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.total-pss</td>
+       *             <td>Total PPS memory usage in kB.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.total-swap</td>
+       *             <td>Total swap usage in kB.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *     </tbody>
+       * </table>
+       */
+        public String getMemoryStat(String statName) {
+            switch(statName) {
+                case "summary.java-heap":
+                    return Integer.toString(getSummaryJavaHeap());
+                case "summary.native-heap":
+                    return Integer.toString(getSummaryNativeHeap());
+                case "summary.code":
+                    return Integer.toString(getSummaryCode());
+                case "summary.stack":
+                    return Integer.toString(getSummaryStack());
+                case "summary.graphics":
+                    return Integer.toString(getSummaryGraphics());
+                case "summary.private-other":
+                    return Integer.toString(getSummaryPrivateOther());
+                case "summary.system":
+                    return Integer.toString(getSummarySystem());
+                case "summary.total-pss":
+                    return Integer.toString(getSummaryTotalPss());
+                case "summary.total-swap":
+                    return Integer.toString(getSummaryTotalSwap());
+                default:
+                    return null;
+            }
+        }
+
+        /**
+         * Returns a map of the names/values of the memory statistics
+         * that {@link #getMemoryStat(String)} supports.
+         *
+         * @return a map of the names/values of the supported memory statistics.
+         */
+        public Map<String, String> getMemoryStats() {
+            Map<String, String> stats = new HashMap<String, String>();
+            stats.put("summary.java-heap", Integer.toString(getSummaryJavaHeap()));
+            stats.put("summary.native-heap", Integer.toString(getSummaryNativeHeap()));
+            stats.put("summary.code", Integer.toString(getSummaryCode()));
+            stats.put("summary.stack", Integer.toString(getSummaryStack()));
+            stats.put("summary.graphics", Integer.toString(getSummaryGraphics()));
+            stats.put("summary.private-other", Integer.toString(getSummaryPrivateOther()));
+            stats.put("summary.system", Integer.toString(getSummarySystem()));
+            stats.put("summary.total-pss", Integer.toString(getSummaryTotalPss()));
+            stats.put("summary.total-swap", Integer.toString(getSummaryTotalSwap()));
+            return stats;
         }
 
         /**
