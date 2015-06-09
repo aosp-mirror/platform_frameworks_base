@@ -1323,21 +1323,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
-            IInputContext inputContext, EditorInfo attribute, int controlFlags) {
+            IInputContext inputContext, @NonNull EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
         }
 
-        if (attribute != null) {
-            // We accept an empty package name as a valid data.
-            if (!TextUtils.isEmpty(attribute.packageName) &&
-                    !InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
-                            attribute.packageName)) {
-                Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
-                        + " uid=" + cs.uid + " package=" + attribute.packageName);
-                return mNoBinding;
-            }
+        if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
+                attribute.packageName)) {
+            Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
+                    + " uid=" + cs.uid + " package=" + attribute.packageName);
+            return mNoBinding;
         }
 
         if (mCurClient != cs) {
