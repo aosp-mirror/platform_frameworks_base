@@ -453,7 +453,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                 case Cipher.ENCRYPT_MODE:
                 case Cipher.WRAP_MODE:
                     // Permitted
-                    return;
+                    break;
                 case Cipher.DECRYPT_MODE:
                 case Cipher.UNWRAP_MODE:
                     throw new InvalidKeyException("RSA public keys cannot be used with opmode: "
