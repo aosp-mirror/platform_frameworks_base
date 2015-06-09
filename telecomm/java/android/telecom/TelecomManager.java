@@ -162,8 +162,8 @@ public class TelecomManager {
      * The extra used by a {@link ConnectionService} to provide the handle of the caller that
      * has initiated a new incoming call.
      */
-    public static final String EXTRA_INCOMING_CALL_HANDLE =
-            "android.telecom.extra.INCOMING_CALL_HANDLE";
+    public static final String EXTRA_INCOMING_CALL_ADDRESS =
+            "android.telecom.extra.INCOMING_CALL_ADDRESS";
 
     /**
      * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
