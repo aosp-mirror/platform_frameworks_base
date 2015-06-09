@@ -32,6 +32,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -1497,7 +1498,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         }
                         GLSurfaceView view = mGLSurfaceViewWeakRef.get();
                         if (view != null) {
-                            view.mRenderer.onSurfaceCreated(gl, mEglHelper.mEglConfig);
+                            try {
+                                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "onSurfaceCreated");
+                                view.mRenderer.onSurfaceCreated(gl, mEglHelper.mEglConfig);
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                            }
                         }
                         createEglContext = false;
                     }
@@ -1508,7 +1514,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         }
                         GLSurfaceView view = mGLSurfaceViewWeakRef.get();
                         if (view != null) {
-                            view.mRenderer.onSurfaceChanged(gl, w, h);
+                            try {
+                                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "onSurfaceChanged");
+                                view.mRenderer.onSurfaceChanged(gl, w, h);
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                            }
                         }
                         sizeChanged = false;
                     }
@@ -1519,7 +1530,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     {
                         GLSurfaceView view = mGLSurfaceViewWeakRef.get();
                         if (view != null) {
-                            view.mRenderer.onDrawFrame(gl);
+                            try {
+                                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "onDrawFrame");
+                                view.mRenderer.onDrawFrame(gl);
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                            }
                         }
                     }
                     int swapError = mEglHelper.swap();
