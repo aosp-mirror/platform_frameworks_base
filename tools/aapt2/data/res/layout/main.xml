@@ -5,11 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <fragment class="android.test.sample.App$Inner" />
+
     <variable name="user" type="com.android.User" />
 
     <View xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/me"
         android:layout_width="1dp"
+        android:onClick="doClick"
         android:text="@{user.name}"
         android:layout_height="match_parent"
         app:layout_width="@support:bool/allow"

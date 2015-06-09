@@ -40,6 +40,7 @@ sources := \
 	ManifestParser.cpp \
 	ManifestValidator.cpp \
 	Png.cpp \
+	ProguardRules.cpp \
 	ResChunkPullParser.cpp \
 	Resource.cpp \
 	ResourceParser.cpp \
