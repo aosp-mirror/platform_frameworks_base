@@ -278,6 +278,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_VERIFY = false;
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
+    private static final boolean DEBUG_DOMAIN_VERIFICATION = false;
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -620,7 +621,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             UserHandle user = new UserHandle(userId);
             mContext.sendBroadcastAsUser(verificationIntent, user);
-            Slog.d(TAG, "Sending IntenFilter verification broadcast");
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "Sending IntenFilter verification broadcast");
         }
 
         public void receiveVerificationResponse(int verificationId) {
@@ -634,8 +636,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageParser.ActivityIntentInfo filter = filters.get(n);
                 filter.setVerified(verified);
 
-                Slog.d(TAG, "IntentFilter " + filter.toString() + " verified with result:"
-                        + verified + " and hosts:" + ivs.getHostsString());
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "IntentFilter " + filter.toString()
+                        + " verified with result:" + verified + " and hosts:"
+                        + ivs.getHostsString());
             }
 
             mIntentFilterVerificationStates.remove(verificationId);
@@ -651,8 +654,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + verificationId + " packageName:" + packageName);
                 return;
             }
-            Slog.d(TAG, "Updating IntentFilterVerificationInfo for verificationId:"
-                    + verificationId);
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "Updating IntentFilterVerificationInfo for verificationId:" + verificationId);
 
             synchronized (mPackages) {
                 if (verified) {
@@ -707,7 +710,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ActivityIntentInfo filter, String packageName) {
             if (!(filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
                     filter.hasDataScheme(IntentFilter.SCHEME_HTTPS))) {
-                Slog.d(TAG, "IntentFilter does not contain HTTP nor HTTPS data scheme");
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                        "IntentFilter does not contain HTTP nor HTTPS data scheme");
                 return false;
             }
             IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
@@ -736,16 +740,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static boolean hasValidDomains(ActivityIntentInfo filter) {
-        return hasValidDomains(filter, true);
-    }
-
-    private static boolean hasValidDomains(ActivityIntentInfo filter, boolean logging) {
         boolean hasHTTPorHTTPS = filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
                 filter.hasDataScheme(IntentFilter.SCHEME_HTTPS);
         if (!hasHTTPorHTTPS) {
-            if (logging) {
-                Slog.d(TAG, "IntentFilter does not contain any HTTP or HTTPS data scheme");
-            }
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "IntentFilter does not contain any HTTP or HTTPS data scheme");
             return false;
         }
         return true;
@@ -1515,7 +1514,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     final int userId = state.getUserId();
 
-                    Slog.d(TAG, "Processing IntentFilter verification with token:"
+                    if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                            "Processing IntentFilter verification with token:"
                             + verificationId + " and userId:" + userId);
 
                     final IntentFilterVerificationResponse response =
@@ -1523,20 +1523,22 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     state.setVerifierResponse(response.callerUid, response.code);
 
-                    Slog.d(TAG, "IntentFilter verification with token:" + verificationId
+                    if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                            "IntentFilter verification with token:" + verificationId
                             + " and userId:" + userId
                             + " is settings verifier response with response code:"
                             + response.code);
 
                     if (response.code == PackageManager.INTENT_FILTER_VERIFICATION_FAILURE) {
-                        Slog.d(TAG, "Domains failing verification: "
+                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Domains failing verification: "
                                 + response.getFailedDomainsString());
                     }
 
                     if (state.isVerificationComplete()) {
                         mIntentFilterVerifier.receiveVerificationResponse(verificationId);
                     } else {
-                        Slog.d(TAG, "IntentFilter verification with token:" + verificationId
+                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                                "IntentFilter verification with token:" + verificationId
                                 + " was not said to be complete");
                     }
 
@@ -2160,7 +2162,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.mFingerprint = Build.FINGERPRINT;
             }
 
-            primeDomainVerificationsLPw(false);
+            primeDomainVerificationsLPw();
             checkDefaultBrowser();
 
             // All the changes are done during package scanning.
@@ -2268,37 +2270,34 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (priority < info.priority) {
                 priority = info.priority;
                 verifierComponentName = new ComponentName(packageName, info.activityInfo.name);
-                Slog.d(TAG, "Selecting IntentFilterVerifier: " + verifierComponentName +
-                        " with priority: " + info.priority);
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Selecting IntentFilterVerifier: "
+                        + verifierComponentName + " with priority: " + info.priority);
             }
         }
 
         return verifierComponentName;
     }
 
-    private void primeDomainVerificationsLPw(boolean logging) {
-        Slog.d(TAG, "Start priming domain verifications");
+    private void primeDomainVerificationsLPw() {
+        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Start priming domain verifications");
         boolean updated = false;
         ArraySet<String> allHostsSet = new ArraySet<>();
         for (PackageParser.Package pkg : mPackages.values()) {
             final String packageName = pkg.packageName;
             if (!hasDomainURLs(pkg)) {
-                if (logging) {
-                    Slog.d(TAG, "No priming domain verifications for " +
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "No priming domain verifications for " +
                             "package with no domain URLs: " + packageName);
-                }
                 continue;
             }
             if (!pkg.isSystemApp()) {
-                if (logging) {
-                    Slog.d(TAG, "No priming domain verifications for a non system package : " +
-                            packageName);
-                }
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                        "No priming domain verifications for a non system package : " +
+                                packageName);
                 continue;
             }
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
-                    if (hasValidDomains(filter, false)) {
+                    if (hasValidDomains(filter)) {
                         allHostsSet.addAll(filter.getHostsList());
                     }
                 }
@@ -2310,25 +2309,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             IntentFilterVerificationInfo ivi =
                     mSettings.createIntentFilterVerificationIfNeededLPw(packageName, allHostsList);
             if (ivi != null) {
-                // We will always log this
-                Slog.d(TAG, "Priming domain verifications for package: " + packageName +
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                        "Priming domain verifications for package: " + packageName +
                         " with hosts:" + ivi.getDomainsString());
                 ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
                 updated = true;
             }
             else {
-                if (logging) {
-                    Slog.d(TAG, "No priming domain verifications for package: " + packageName);
-                }
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                        "No priming domain verifications for package: " + packageName);
             }
             allHostsSet.clear();
         }
         if (updated) {
-            if (logging) {
-                Slog.d(TAG, "Will need to write primed domain verifications");
-            }
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "Will need to write primed domain verifications");
         }
-        Slog.d(TAG, "End priming domain verifications");
+        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "End priming domain verifications");
     }
 
     private void checkDefaultBrowser() {
@@ -10344,7 +10341,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (origin.staged) {
-                Slog.d(TAG, origin.file + " already staged; skipping copy");
+                if (DEBUG_INSTALL) Slog.d(TAG, origin.file + " already staged; skipping copy");
                 codeFile = origin.file;
                 resourceFile = origin.file;
                 return PackageManager.INSTALL_SUCCEEDED;
@@ -10417,16 +10414,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             final File beforeCodeFile = codeFile;
             final File afterCodeFile = getNextCodePath(targetDir, pkg.packageName);
 
-            Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
+            if (DEBUG_INSTALL) Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
             try {
                 Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
             } catch (ErrnoException e) {
-                Slog.d(TAG, "Failed to rename", e);
+                Slog.w(TAG, "Failed to rename", e);
                 return false;
             }
 
             if (!SELinux.restoreconRecursive(afterCodeFile)) {
-                Slog.d(TAG, "Failed to restorecon");
+                Slog.w(TAG, "Failed to restorecon");
                 return false;
             }
 
@@ -10589,7 +10586,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (origin.staged) {
-                Slog.d(TAG, origin.cid + " already staged; skipping copy");
+                if (DEBUG_INSTALL) Slog.d(TAG, origin.cid + " already staged; skipping copy");
                 cid = origin.cid;
                 setMountPath(PackageHelper.getSdDir(cid));
                 return PackageManager.INSTALL_SUCCEEDED;
@@ -10849,8 +10846,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) {
-            Slog.d(TAG, "Moving " + move.packageName + " from " + move.fromUuid + " to "
-                    + move.toUuid);
+            if (DEBUG_INSTALL) Slog.d(TAG, "Moving " + move.packageName + " from "
+                    + move.fromUuid + " to " + move.toUuid);
             synchronized (mInstaller) {
                 if (mInstaller.moveCompleteApp(move.fromUuid, move.toUuid, move.packageName,
                         move.dataAppName, move.appId, move.seinfo) != 0) {
@@ -10860,7 +10857,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             codeFile = new File(Environment.getDataAppDirectory(move.toUuid), move.dataAppName);
             resourceFile = codeFile;
-            Slog.d(TAG, "codeFile after move is " + codeFile);
+            if (DEBUG_INSTALL) Slog.d(TAG, "codeFile after move is " + codeFile);
 
             return PackageManager.INSTALL_SUCCEEDED;
         }
@@ -11695,7 +11692,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void startIntentFilterVerifications(int userId, PackageParser.Package pkg) {
         if (mIntentFilterVerifierComponent == null) {
-            Slog.d(TAG, "No IntentFilter verification will not be done as "
+            Slog.w(TAG, "No IntentFilter verification will not be done as "
                     + "there is no IntentFilterVerifier available!");
             return;
         }
@@ -11717,17 +11714,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package pkg) {
         int size = pkg.activities.size();
         if (size == 0) {
-            Slog.d(TAG, "No activity, so no need to verify any IntentFilter!");
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "No activity, so no need to verify any IntentFilter!");
             return;
         }
 
         final boolean hasDomainURLs = hasDomainURLs(pkg);
         if (!hasDomainURLs) {
-            Slog.d(TAG, "No domain URLs, so no need to verify any IntentFilter!");
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "No domain URLs, so no need to verify any IntentFilter!");
             return;
         }
 
-        Slog.d(TAG, "Checking for userId:" + userId + " if any IntentFilter from the " + size
+        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Checking for userId:" + userId
+                + " if any IntentFilter from the " + size
                 + " Activities needs verification ...");
 
         final int verificationId = mIntentFilterVerificationToken++;
@@ -11740,12 +11740,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 for (ActivityIntentInfo filter : a.intents) {
                     boolean needsFilterVerification = filter.needsVerification();
                     if (needsFilterVerification && needsNetworkVerificationLPr(filter)) {
-                        Slog.d(TAG, "Verification needed for IntentFilter:" + filter.toString());
+                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                                "Verification needed for IntentFilter:" + filter.toString());
                         mIntentFilterVerifier.addOneIntentFilterVerification(
                                 verifierUid, userId, verificationId, filter, packageName);
                         count++;
                     } else if (!needsFilterVerification) {
-                        Slog.d(TAG, "No verification needed for IntentFilter:" + filter.toString());
+                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                                "No verification needed for IntentFilter:" + filter.toString());
                         if (hasValidDomains(filter)) {
                             ArrayList<String> hosts = filter.getHostsList();
                             if (hosts.size() > 0) {
@@ -11757,8 +11759,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             }
                         }
                     } else {
-                        Slog.d(TAG, "Verification already done for IntentFilter:"
-                                + filter.toString());
+                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                                "Verification already done for IntentFilter:" + filter.toString());
                     }
                 }
             }
@@ -11766,10 +11768,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (count > 0) {
             mIntentFilterVerifier.startVerifications(userId);
-            Slog.d(TAG, "Started " + count + " IntentFilter verification"
-                    + (count > 1 ? "s" : "") +  " for userId:" + userId + "!");
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Started " + count
+                    + " IntentFilter verification" + (count > 1 ? "s" : "")
+                    +  " for userId:" + userId + "!");
         } else {
-            Slog.d(TAG, "No need to start any IntentFilter verification!");
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    "No need to start any IntentFilter verification!");
             if (allHosts.size() > 0 && mSettings.createIntentFilterVerificationIfNeededLPw(
                     packageName, allHosts) != null) {
                 scheduleWriteSettingsLocked();
@@ -14558,7 +14562,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         }
 
-        Slog.d(TAG, "Loaded packages " + loaded);
+        if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
         sendResourcesChangedBroadcast(true, false, loaded, null);
     }
 
@@ -14584,7 +14588,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         }
 
-        Slog.d(TAG, "Unloaded packages " + unloaded);
+        if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
         sendResourcesChangedBroadcast(false, false, unloaded, null);
     }
 
@@ -14605,7 +14609,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             movePackageInternal(packageName, volumeUuid, moveId);
         } catch (PackageManagerException e) {
-            Slog.d(TAG, "Failed to move " + packageName, e);
+            Slog.w(TAG, "Failed to move " + packageName, e);
             mMoveCallbacks.notifyStatusChanged(moveId,
                     PackageManager.MOVE_FAILED_INTERNAL_ERROR);
         }
@@ -14714,7 +14718,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        Slog.d(TAG, "Measured code size " + stats.codeSize + ", data size " + stats.dataSize);
+        if (DEBUG_INSTALL) Slog.d(TAG, "Measured code size " + stats.codeSize + ", data size "
+                + stats.dataSize);
 
         final long startFreeBytes = measurePath.getFreeSpace();
         final long sizeBytes;
@@ -14742,7 +14747,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             @Override
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) throws RemoteException {
-                Slog.d(TAG, "Install result for move: "
+                if (DEBUG_INSTALL) Slog.d(TAG, "Install result for move: "
                         + PackageManager.installStatusToString(returnCode, msg));
 
                 installedLatch.countDown();
@@ -14891,7 +14896,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (VolumeInfo vol : vols) {
                 if (vol.getType() == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
                     final String volumeUuid = vol.getFsUuid();
-                    Slog.d(TAG, "Removing user data on volume " + volumeUuid);
+                    if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
                     mInstaller.removeUserDataDirs(volumeUuid, userHandle);
                 }
             }
