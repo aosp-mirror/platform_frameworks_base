@@ -18,31 +18,29 @@ package android.hardware.fingerprint;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManagerNative;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.hardware.fingerprint.FingerprintManager.EnrollmentCallback;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.util.Log;
 import android.util.Slog;
 
 import java.security.Signature;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
+
+import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.Manifest.permission.MANAGE_FINGERPRINT;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
@@ -57,9 +55,10 @@ public class FingerprintManager {
     private static final boolean DEBUG = true;
     private static final int MSG_ENROLL_RESULT = 100;
     private static final int MSG_ACQUIRED = 101;
-    private static final int MSG_AUTHENTICATED = 102;
-    private static final int MSG_ERROR = 103;
-    private static final int MSG_REMOVED = 104;
+    private static final int MSG_AUTHENTICATION_SUCCEEDED = 102;
+    private static final int MSG_AUTHENTICATION_FAILED = 103;
+    private static final int MSG_ERROR = 104;
+    private static final int MSG_REMOVED = 105;
 
     //
     // Error messages from fingerprint hardware during initilization, enrollment, authentication or
@@ -112,6 +111,7 @@ public class FingerprintManager {
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
+     * @hide
      */
     public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
@@ -162,6 +162,7 @@ public class FingerprintManager {
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
+     * @hide
      */
     public static final int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000;
 
@@ -173,6 +174,7 @@ public class FingerprintManager {
     private RemovalCallback mRemovalCallback;
     private CryptoObject mCryptoObject;
     private Fingerprint mRemovalFingerprint;
+    private Handler mHandler;
 
     private class OnEnrollCancelListener implements OnCancelListener {
         @Override
@@ -198,72 +200,71 @@ public class FingerprintManager {
      * A wrapper class for the crypto objects supported by FingerprintManager. Currently the
      * framework supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
      */
-    public static class CryptoObject {
+    public static final class CryptoObject {
 
         public CryptoObject(@NonNull Signature signature) {
-            mSignature = signature;
-            mCipher = null;
-            mMac = null;
+            mCrypto = signature;
         }
 
         public CryptoObject(@NonNull Cipher cipher) {
-            mCipher = cipher;
-            mSignature = null;
-            mMac = null;
+            mCrypto = cipher;
         }
 
         public CryptoObject(@NonNull Mac mac) {
-            mMac = mac;
-            mCipher = null;
-            mSignature = null;
+            mCrypto = mac;
         }
 
         /**
          * Get {@link Signature} object.
          * @return {@link Signature} object or null if this doesn't contain one.
          */
-        public Signature getSignature() { return mSignature; }
+        public Signature getSignature() {
+            return mCrypto instanceof Signature ? (Signature) mCrypto : null;
+        }
 
         /**
          * Get {@link Cipher} object.
          * @return {@link Cipher} object or null if this doesn't contain one.
          */
-        public Cipher getCipher() { return mCipher; }
+        public Cipher getCipher() {
+            return mCrypto instanceof Cipher ? (Cipher) mCrypto : null;
+        }
 
         /**
          * Get {@link Mac} object.
          * @return {@link Mac} object or null if this doesn't contain one.
          */
-        public Mac getMac() { return mMac; }
+        public Mac getMac() {
+            return mCrypto instanceof Mac ? (Mac) mCrypto : null;
+        }
 
         /**
          * @hide
          * @return the opId associated with this object or 0 if none
          */
         public long getOpId() {
-            if (mSignature != null) {
-                return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mSignature);
-            } else if (mCipher != null) {
-                return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mCipher);
-            } else if (mMac != null) {
-                return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mMac);
-            }
-            return 0;
+            return mCrypto != null ?
+                    AndroidKeyStoreProvider.getKeyStoreOperationHandle(mCrypto) : 0;
         }
 
-        private final Signature mSignature;
-        private final Cipher mCipher;
-        private final Mac mMac;
+        private final Object mCrypto;
     };
 
     /**
      * Container for callback data from {@link FingerprintManager#authenticate(CryptoObject,
-     *     CancellationSignal, AuthenticationCallback, int)}.
+     *     CancellationSignal, int, AuthenticationCallback, Handler)}.
      */
     public static final class AuthenticationResult {
         private Fingerprint mFingerprint;
         private CryptoObject mCryptoObject;
 
+        /**
+         * Authentication result
+         *
+         * @param crypto the crypto object
+         * @param fingerprint the recognized fingerprint data, if allowed.
+         * @hide
+         */
         public AuthenticationResult(CryptoObject crypto, Fingerprint fingerprint) {
             mCryptoObject = crypto;
             mFingerprint = fingerprint;
@@ -272,7 +273,7 @@ public class FingerprintManager {
         /**
          * Obtain the crypto object associated with this transaction
          * @return crypto object provided to {@link FingerprintManager#authenticate(CryptoObject,
-         *     CancellationSignal, AuthenticationCallback, int)}.
+         *     CancellationSignal, int, AuthenticationCallback, Handler)}.
          */
         public CryptoObject getCryptoObject() { return mCryptoObject; }
 
@@ -287,28 +288,28 @@ public class FingerprintManager {
 
     /**
      * Callback structure provided to {@link FingerprintManager#authenticate(CryptoObject,
-     * CancellationSignal, AuthenticationCallback, int)}. Users of {@link
+     * CancellationSignal, int, AuthenticationCallback, Handler)}. Users of {@link
      * FingerprintManager#authenticate(CryptoObject, CancellationSignal,
-     * AuthenticationCallback, int) } must provide an implementation of this for listening to
+     * int, AuthenticationCallback, Handler) } must provide an implementation of this for listening to
      * fingerprint events.
      */
     public static abstract class AuthenticationCallback {
         /**
          * Called when an unrecoverable error has been encountered and the operation is complete.
          * No further callbacks will be made on this object.
-         * @param errMsgId An integer identifying the error message
+         * @param errorCode An integer identifying the error message
          * @param errString A human-readable error string that can be shown in UI
          */
-        public void onAuthenticationError(int errMsgId, CharSequence errString) { }
+        public void onAuthenticationError(int errorCode, CharSequence errString) { }
 
         /**
          * Called when a recoverable error has been encountered during authentication. The help
          * string is provided to give the user guidance for what went wrong, such as
          * "Sensor dirty, please clean it."
-         * @param helpMsgId An integer identifying the error message
+         * @param helpCode An integer identifying the error message
          * @param helpString A human-readable string that can be shown in UI
          */
-        public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) { }
+        public void onAuthenticationHelp(int helpCode, CharSequence helpString) { }
 
         /**
          * Called when a fingerprint is recognized.
@@ -326,7 +327,7 @@ public class FingerprintManager {
      * Callback structure provided to {@link FingerprintManager#enroll(long, EnrollmentCallback,
      * CancellationSignal, int). Users of {@link #FingerprintManager()}
      * must provide an implementation of this to {@link FingerprintManager#enroll(long,
-     * CancellationSignal, EnrollmentCallback, int) for listening to fingerprint events.
+     * CancellationSignal, int, EnrollmentCallback) for listening to fingerprint events.
      *
      * @hide
      */
@@ -392,31 +393,35 @@ public class FingerprintManager {
      *
      * @param crypto object associated with the call or null if none required.
      * @param cancel an object that can be used to cancel authentication
-     * @param callback an object to receive authentication events
      * @param flags optional flags; should be 0
+     * @param callback an object to receive authentication events
+     * @param handler an optional handler to handle callback events
      */
+    @RequiresPermission(USE_FINGERPRINT)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            @NonNull AuthenticationCallback callback, int flags) {
-        authenticate(crypto, cancel, callback, flags, UserHandle.myUserId());
+            int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
+        authenticate(crypto, cancel, flags, callback, handler, UserHandle.myUserId());
     }
 
     /**
-     * Request authentication of a crypto object. This call warms up the fingerprint hardware
-     * and starts scanning for a fingerprint. It terminates when
-     * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
-     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult) is called, at
-     * which point the object is no longer valid. The operation can be canceled by using the
-     * provided cancel object.
-     *
-     * @param crypto object associated with the call or null if none required.
-     * @param cancel an object that can be used to cancel authentication
-     * @param callback an object to receive authentication events
-     * @param flags optional flags; should be 0
-     * @param userId the userId the fingerprint belongs to
+     * Use the provided handler thread for events.
+     * @param handler
+     */
+    private void useHandler(Handler handler) {
+        if (handler != null) {
+            mHandler = new MyHandler(handler.getLooper());
+        } else if (mHandler.getLooper() != mContext.getMainLooper()){
+            mHandler = new MyHandler(mContext.getMainLooper());
+        }
+    }
+
+    /**
+     * Per-user version
      * @hide
      */
+    @RequiresPermission(USE_FINGERPRINT)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            @NonNull AuthenticationCallback callback, int flags, int userId) {
+            int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -431,6 +436,7 @@ public class FingerprintManager {
         }
 
         if (mService != null) try {
+            useHandler(handler);
             mAuthenticationCallback = callback;
             mCryptoObject = crypto;
             long sessionId = crypto != null ? crypto.getOpId() : 0;
@@ -458,12 +464,13 @@ public class FingerprintManager {
      * @param token a unique token provided by a recent creation or verification of device
      * credentials (e.g. pin, pattern or password).
      * @param cancel an object that can be used to cancel enrollment
-     * @param callback an object to receive enrollment events
      * @param flags optional flags
+     * @param callback an object to receive enrollment events
      * @hide
      */
-    public void enroll(byte [] token, CancellationSignal cancel, EnrollmentCallback callback,
-            int flags) {
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void enroll(byte [] token, CancellationSignal cancel, int flags,
+            EnrollmentCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -496,6 +503,7 @@ public class FingerprintManager {
      * existing device credentials (e.g. pin/pattern/password).
      * @hide
      */
+    @RequiresPermission(MANAGE_FINGERPRINT)
     public long preEnroll() {
         long result = 0;
         if (mService != null) try {
@@ -514,6 +522,7 @@ public class FingerprintManager {
      *
      * @hide
      */
+    @RequiresPermission(MANAGE_FINGERPRINT)
     public void remove(Fingerprint fp, RemovalCallback callback) {
         if (mService != null) try {
             mRemovalCallback = callback;
@@ -535,6 +544,7 @@ public class FingerprintManager {
      *
      * @hide
      */
+    @RequiresPermission(MANAGE_FINGERPRINT)
     public void rename(int fpId, String newName) {
         // Renames the given fpId
         if (mService != null) {
@@ -554,6 +564,7 @@ public class FingerprintManager {
      *
      * @hide
      */
+    @RequiresPermission(USE_FINGERPRINT)
     public List<Fingerprint> getEnrolledFingerprints(int userId) {
         if (mService != null) try {
             return mService.getEnrolledFingerprints(userId, mContext.getOpPackageName());
@@ -569,6 +580,7 @@ public class FingerprintManager {
      *
      * @hide
      */
+    @RequiresPermission(USE_FINGERPRINT)
     public List<Fingerprint> getEnrolledFingerprints() {
         return getEnrolledFingerprints(UserHandle.myUserId());
     }
@@ -578,6 +590,7 @@ public class FingerprintManager {
      *
      * @return true if at least one fingerprint is enrolled, false otherwise
      */
+    @RequiresPermission(USE_FINGERPRINT)
     public boolean hasEnrolledFingerprints() {
         if (mService != null) try {
             return mService.hasEnrolledFingerprints(UserHandle.myUserId(),
@@ -593,6 +606,7 @@ public class FingerprintManager {
      *
      * @return true if hardware is present and functional, false otherwise.
      */
+    @RequiresPermission(USE_FINGERPRINT)
     public boolean isHardwareDetected() {
         if (mService != null) {
             try {
@@ -626,11 +640,13 @@ public class FingerprintManager {
         return 0;
     }
 
-    private Handler mHandler;
-
     private class MyHandler extends Handler {
         private MyHandler(Context context) {
             super(context.getMainLooper());
+        }
+
+        private MyHandler(Looper looper) {
+            super(looper);
         }
 
         public void handleMessage(android.os.Message msg) {
@@ -641,8 +657,11 @@ public class FingerprintManager {
                 case MSG_ACQUIRED:
                     sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */);
                     break;
-                case MSG_AUTHENTICATED:
-                    sendAuthenticatedResult((Fingerprint) msg.obj);
+                case MSG_AUTHENTICATION_SUCCEEDED:
+                    sendAuthenticatedSucceeded((Fingerprint) msg.obj);
+                    break;
+                case MSG_AUTHENTICATION_FAILED:
+                    sendAuthenticatedFailed();
                     break;
                 case MSG_ERROR:
                     sendErrorResult((Long) msg.obj /* deviceId */, msg.arg1 /* errMsgId */);
@@ -684,15 +703,16 @@ public class FingerprintManager {
             }
         }
 
-        private void sendAuthenticatedResult(Fingerprint fp) {
+        private void sendAuthenticatedSucceeded(Fingerprint fp) {
             if (mAuthenticationCallback != null) {
-                if (fp.getFingerId() == 0) {
-                    // Fingerprint template valid but doesn't match one in database
-                    mAuthenticationCallback.onAuthenticationFailed();
-                } else {
-                    final AuthenticationResult result = new AuthenticationResult(mCryptoObject, fp);
-                    mAuthenticationCallback.onAuthenticationSucceeded(result);
-                }
+                final AuthenticationResult result = new AuthenticationResult(mCryptoObject, fp);
+                mAuthenticationCallback.onAuthenticationSucceeded(result);
+            }
+        }
+
+        private void sendAuthenticatedFailed() {
+            if (mAuthenticationCallback != null) {
+               mAuthenticationCallback.onAuthenticationFailed();
             }
         }
 
@@ -809,24 +829,33 @@ public class FingerprintManager {
 
     private IFingerprintServiceReceiver mServiceReceiver = new IFingerprintServiceReceiver.Stub() {
 
+        @Override // binder call
         public void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
             mHandler.obtainMessage(MSG_ENROLL_RESULT, remaining, 0,
                     new Fingerprint(null, groupId, fingerId, deviceId)).sendToTarget();
         }
 
+        @Override // binder call
         public void onAcquired(long deviceId, int acquireInfo) {
             mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, 0, deviceId).sendToTarget();
         }
 
-        public void onAuthenticated(long deviceId, int fingerId, int groupId) {
-            mHandler.obtainMessage(MSG_AUTHENTICATED,
-                    new Fingerprint(null, groupId, fingerId, deviceId)).sendToTarget();
+        @Override // binder call
+        public void onAuthenticationSucceeded(long deviceId, Fingerprint fp) {
+            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, fp).sendToTarget();
         }
 
+        @Override // binder call
+        public void onAuthenticationFailed(long deviceId) {
+            mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();;
+        }
+
+        @Override // binder call
         public void onError(long deviceId, int error) {
             mHandler.obtainMessage(MSG_ERROR, error, 0, deviceId).sendToTarget();
         }
 
+        @Override // binder call
         public void onRemoved(long deviceId, int fingerId, int groupId) {
             mHandler.obtainMessage(MSG_REMOVED, fingerId, groupId, deviceId).sendToTarget();
         }

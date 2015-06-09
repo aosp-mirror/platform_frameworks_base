@@ -13944,16 +13944,8 @@ package android.hardware.display {
 
 package android.hardware.fingerprint {
 
-  public final class Fingerprint implements android.os.Parcelable {
-    ctor public Fingerprint(java.lang.CharSequence, int, int, long);
-    method public int describeContents();
-    method public java.lang.CharSequence getName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.fingerprint.Fingerprint> CREATOR;
-  }
-
   public class FingerprintManager {
-    method public void authenticate(android.hardware.fingerprint.FingerprintManager.CryptoObject, android.os.CancellationSignal, android.hardware.fingerprint.FingerprintManager.AuthenticationCallback, int);
+    method public void authenticate(android.hardware.fingerprint.FingerprintManager.CryptoObject, android.os.CancellationSignal, int, android.hardware.fingerprint.FingerprintManager.AuthenticationCallback, android.os.Handler);
     method public boolean hasEnrolledFingerprints();
     method public boolean isHardwareDetected();
     field public static final int FINGERPRINT_ACQUIRED_GOOD = 0; // 0x0
@@ -13962,14 +13954,12 @@ package android.hardware.fingerprint {
     field public static final int FINGERPRINT_ACQUIRED_PARTIAL = 1; // 0x1
     field public static final int FINGERPRINT_ACQUIRED_TOO_FAST = 5; // 0x5
     field public static final int FINGERPRINT_ACQUIRED_TOO_SLOW = 4; // 0x4
-    field public static final int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000; // 0x3e8
     field public static final int FINGERPRINT_ERROR_CANCELED = 5; // 0x5
     field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
     field public static final int FINGERPRINT_ERROR_LOCKOUT = 7; // 0x7
     field public static final int FINGERPRINT_ERROR_NO_SPACE = 4; // 0x4
     field public static final int FINGERPRINT_ERROR_TIMEOUT = 3; // 0x3
     field public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2; // 0x2
-    field public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000; // 0x3e8
   }
 
   public static abstract class FingerprintManager.AuthenticationCallback {
@@ -13981,11 +13971,10 @@ package android.hardware.fingerprint {
   }
 
   public static final class FingerprintManager.AuthenticationResult {
-    ctor public FingerprintManager.AuthenticationResult(android.hardware.fingerprint.FingerprintManager.CryptoObject, android.hardware.fingerprint.Fingerprint);
     method public android.hardware.fingerprint.FingerprintManager.CryptoObject getCryptoObject();
   }
 
-  public static class FingerprintManager.CryptoObject {
+  public static final class FingerprintManager.CryptoObject {
     ctor public FingerprintManager.CryptoObject(java.security.Signature);
     ctor public FingerprintManager.CryptoObject(javax.crypto.Cipher);
     ctor public FingerprintManager.CryptoObject(javax.crypto.Mac);
