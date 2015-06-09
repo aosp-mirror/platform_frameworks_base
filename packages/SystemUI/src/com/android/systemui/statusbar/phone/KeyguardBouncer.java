@@ -228,4 +228,9 @@ public class KeyguardBouncer {
         ensureView();
         return mKeyguardView.interceptMediaKey(event);
     }
+
+    public void notifyKeyguardAuthenticated() {
+        ensureView();
+        mKeyguardView.finish();
+    }
 }

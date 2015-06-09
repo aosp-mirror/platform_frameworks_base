@@ -2776,7 +2776,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         Runnable cancelRunnable = new Runnable() {
             @Override
             public void run() {
-                callback.onActivityStarted(ActivityManager.START_CANCELED);
+                if (callback != null) {
+                    callback.onActivityStarted(ActivityManager.START_CANCELED);
+                }
             }
         };
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShade, afterKeyguardGone);
