@@ -336,7 +336,10 @@ public class CaptivePortalLoginActivity extends Activity {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-            Log.w(TAG, "SSL error; displaying SSL warning.");
+            Log.w(TAG, "SSL error (error: " + error.getPrimaryError() + " host: " +
+                    // Only show host to avoid leaking private info.
+                    Uri.parse(error.getUrl()).getHost() + " certificate: " +
+                    error.getCertificate() + "); displaying SSL warning.");
             final String html = String.format(SSL_ERROR_HTML, getString(R.string.ssl_error_warning),
                     getString(R.string.ssl_error_example), mBrowserBailOutToken,
                     getString(R.string.ssl_error_continue));
