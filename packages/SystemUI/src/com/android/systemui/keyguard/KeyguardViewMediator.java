@@ -455,7 +455,7 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void onFingerprintAuthenticated(int userId) {
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mViewMediatorCallback.keyguardDone(true);
+                mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated();
             } else {
                 mStatusBarKeyguardViewManager.animateCollapsePanels(
                         FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);

@@ -447,4 +447,12 @@ public class StatusBarKeyguardViewManager {
         mPhoneStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
                 false /* delayed */, speedUpFactor);
     }
+
+    /**
+     * Notifies that the user has authenticated by other means than using the bouncer, for example,
+     * fingerprint.
+     */
+    public void notifyKeyguardAuthenticated() {
+        mBouncer.notifyKeyguardAuthenticated();
+    }
 }
