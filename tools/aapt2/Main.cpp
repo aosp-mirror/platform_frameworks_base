@@ -28,6 +28,7 @@
 #include "ManifestValidator.h"
 #include "NameMangler.h"
 #include "Png.h"
+#include "ProguardRules.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "ResourceTableResolver.h"
@@ -300,6 +301,9 @@ struct AaptOptions {
     // Directory to in which to generate R.java.
     Maybe<Source> generateJavaClass;
 
+    // File in which to produce proguard rules.
+    Maybe<Source> generateProguardRules;
+
     // Whether to output verbose details about
     // compilation.
     bool verbose = false;
@@ -417,7 +421,8 @@ bool shouldGenerateVersionedResource(const std::shared_ptr<const ResourceTable>&
 
 bool linkXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
              const std::shared_ptr<IResolver>& resolver, const LinkItem& item,
-             const void* data, size_t dataLen, ZipFile* outApk, std::queue<LinkItem>* outQueue) {
+             const void* data, size_t dataLen, ZipFile* outApk, std::queue<LinkItem>* outQueue,
+             proguard::KeepSet* keepSet) {
     SourceLogger logger(item.source);
     std::unique_ptr<xml::Node> root = xml::inflate(data, dataLen, &logger);
     if (!root) {
@@ -433,6 +438,10 @@ bool linkXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& t
         // We strip attributes that do not belong in this version of the resource.
         // Non-version qualified resources have an implicit version 1 requirement.
         xmlOptions.maxSdkAttribute = item.config.sdkVersion ? item.config.sdkVersion : 1;
+    }
+
+    if (options.generateProguardRules) {
+        proguard::collectProguardRules(item.name.type, item.source, root.get(), keepSet);
     }
 
     BigBuffer outBuffer(1024);
@@ -509,7 +518,7 @@ bool copyFile(const AaptOptions& options, const CompileItem& item, ZipFile* outA
 
 bool compileManifest(const AaptOptions& options, const std::shared_ptr<IResolver>& resolver,
                      const std::map<std::shared_ptr<ResourceTable>, StaticLibraryData>& libApks,
-                     const android::ResTable& table, ZipFile* outApk) {
+                     const android::ResTable& table, ZipFile* outApk, proguard::KeepSet* keepSet) {
     if (options.verbose) {
         Logger::note(options.manifest) << "compiling AndroidManifest.xml." << std::endl;
     }
@@ -555,6 +564,11 @@ bool compileManifest(const AaptOptions& options, const std::shared_ptr<IResolver
         if (!merger.mergeLibraryManifest(libSource, libPackage, std::move(libRoot))) {
             return false;
         }
+    }
+
+    if (options.generateProguardRules) {
+        proguard::collectProguardRulesForManifest(options.manifest, merger.getMergedXml(),
+                                                  keepSet);
     }
 
     BigBuffer outBuffer(1024);
@@ -805,8 +819,10 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
         return false;
     }
 
+    proguard::KeepSet keepSet;
+
     android::ResTable binTable;
-    if (!compileManifest(options, resolver, apkFiles, binTable, &outApk)) {
+    if (!compileManifest(options, resolver, apkFiles, binTable, &outApk, &keepSet)) {
         return false;
     }
 
@@ -826,7 +842,7 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
             assert(uncompressedData);
 
             if (!linkXml(options, outTable, resolver, item, uncompressedData,
-                        entry->getUncompressedLen(), &outApk, &linkQueue)) {
+                        entry->getUncompressedLen(), &outApk, &linkQueue, &keepSet)) {
                 Logger::error(options.output) << "failed to link '" << item.originalPath << "'."
                                               << std::endl;
                 return false;
@@ -880,6 +896,26 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
                 Logger::error(outPath) << generator.getError() << "." << std::endl;
                 return false;
             }
+        }
+    }
+
+    // Generate the Proguard rules file.
+    if (options.generateProguardRules) {
+        const Source& outPath = options.generateProguardRules.value();
+
+        if (options.verbose) {
+            Logger::note(outPath) << "writing proguard rules." << std::endl;
+        }
+
+        std::ofstream fout(outPath.path);
+        if (!fout) {
+            Logger::error(outPath) << strerror(errno) << std::endl;
+            return false;
+        }
+
+        if (!proguard::writeKeepSet(&fout, keepSet)) {
+            Logger::error(outPath) << "failed to write proguard rules." << std::endl;
+            return false;
         }
     }
 
@@ -1070,6 +1106,11 @@ static AaptOptions prepareArgs(int argc, char** argv) {
             flag::optionalFlag("--java", "directory in which to generate R.java",
                     [&options](const StringPiece& arg) {
                         options.generateJavaClass = Source{ arg.toString() };
+                    });
+
+            flag::optionalFlag("--proguard", "file in which to output proguard rules",
+                    [&options](const StringPiece& arg) {
+                        options.generateProguardRules = Source{ arg.toString() };
                     });
 
             flag::optionalSwitch("--static-lib", "generate a static Android library", true,
