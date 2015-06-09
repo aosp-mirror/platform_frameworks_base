@@ -2112,7 +2112,9 @@ public class NotificationPanelView extends PanelView implements
     public void setDozing(boolean dozing, boolean animate) {
         if (dozing == mDozing) return;
         mDozing = dozing;
-        updateDozingVisibilities(animate);
+        if (mStatusBarState == StatusBarState.KEYGUARD) {
+            updateDozingVisibilities(animate);
+        }
     }
 
     private void updateDozingVisibilities(boolean animate) {
