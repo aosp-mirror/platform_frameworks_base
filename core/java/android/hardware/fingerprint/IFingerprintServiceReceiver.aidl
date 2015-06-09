@@ -15,6 +15,7 @@
  */
 package android.hardware.fingerprint;
 
+import android.hardware.fingerprint.Fingerprint;
 import android.os.Bundle;
 import android.os.UserHandle;
 
@@ -25,7 +26,8 @@ import android.os.UserHandle;
 oneway interface IFingerprintServiceReceiver {
     void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining);
     void onAcquired(long deviceId, int acquiredInfo);
-    void onAuthenticated(long deviceId, int fingerId, int groupId);
+    void onAuthenticationSucceeded(long deviceId, in Fingerprint fp);
+    void onAuthenticationFailed(long deviceId);
     void onError(long deviceId, int error);
     void onRemoved(long deviceId, int fingerId, int groupId);
 }
