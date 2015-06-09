@@ -3658,15 +3658,30 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public int checkCarrierPrivilegesForPackage(String pkgname) {
+    public int checkCarrierPrivilegesForPackage(String pkgName) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.checkCarrierPrivilegesForPackage(pkgname);
+                return telephony.checkCarrierPrivilegesForPackage(pkgName);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "checkCarrierPrivilegesForPackage RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "checkCarrierPrivilegesForPackage NPE", ex);
+        }
+        return CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /** @hide */
+    @SystemApi
+    public int checkCarrierPrivilegesForPackageAnyPhone(String pkgName) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                return telephony.checkCarrierPrivilegesForPackageAnyPhone(pkgName);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "checkCarrierPrivilegesForPackageAnyPhone RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "checkCarrierPrivilegesForPackageAnyPhone NPE", ex);
         }
         return CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
     }

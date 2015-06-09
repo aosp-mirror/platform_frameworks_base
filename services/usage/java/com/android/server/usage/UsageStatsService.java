@@ -57,6 +57,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -725,6 +726,10 @@ public class UsageStatsService extends SystemService implements
             return false;
         }
 
+        if (isCarrierApp(packageName)) {
+            return false;
+        }
+
         if (mAppWidgetManager != null
                 && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
             return false;
@@ -752,6 +757,12 @@ public class UsageStatsService extends SystemService implements
             }
         }
         return false;
+    }
+
+    private boolean isCarrierApp(String packageName) {
+        TelephonyManager telephonyManager = getContext().getSystemService(TelephonyManager.class);
+        return telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
+                    == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
     }
 
     void informListeners(String packageName, int userId, boolean isIdle) {
