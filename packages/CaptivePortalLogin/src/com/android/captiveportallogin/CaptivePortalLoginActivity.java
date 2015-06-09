@@ -342,6 +342,15 @@ public class CaptivePortalLoginActivity extends Activity {
                     getString(R.string.ssl_error_continue));
             view.loadDataWithBaseURL(INTERNAL_ASSETS, html, "text/HTML", "UTF-8", null);
         }
+
+        @Override
+        public boolean shouldOverrideUrlLoading (WebView view, String url) {
+            if (url.startsWith("tel:")) {
+                startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse(url)));
+                return true;
+            }
+            return false;
+        }
     }
 
     private class MyWebChromeClient extends WebChromeClient {
