@@ -7814,11 +7814,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
                     info.getControllerIdleTimeMillis());
 
-            final double opVoltage = mPowerProfile.getAveragePower(
-                    PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE);
-            if (opVoltage != 0) {
+            // POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
+            final double opVolt = mPowerProfile.getAveragePower(
+                    PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
+            if (opVolt != 0) {
+                // We store the power drain as mAms.
                 mWifiActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
-                        (long)(info.getControllerEnergyUsed() / opVoltage));
+                        (long)(info.getControllerEnergyUsed() / opVolt));
             }
         }
     }
@@ -7908,11 +7910,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mBluetoothActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
                     info.getControllerIdleTimeMillis());
 
-            final double opVoltage = mPowerProfile.getAveragePower(
-                    PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE);
-            if (opVoltage != 0) {
+            // POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
+            final double opVolt = mPowerProfile.getAveragePower(
+                    PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
+            if (opVolt != 0) {
+                // We store the power drain as mAms.
                 mBluetoothActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
-                        (long) (info.getControllerEnergyUsed() / opVoltage));
+                        (long) (info.getControllerEnergyUsed() / opVolt));
             }
         }
     }
