@@ -1277,7 +1277,8 @@ public class AudioRecord
                     native_enableDeviceCallback();
                 }
                 mRoutingChangeListeners.put(
-                    listener, new NativeRoutingEventHandlerDelegate(this, listener, handler));
+                    listener, new NativeRoutingEventHandlerDelegate(this, listener,
+                            handler != null ? handler : new Handler(mInitializationLooper)));
             }
         }
     }
