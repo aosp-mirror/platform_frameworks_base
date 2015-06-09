@@ -9,9 +9,9 @@ helpoutsWidget=true
 <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#UpdateSDK">Update Your SDK</a></li>
-  <li><a href="#SetupEmulator">Set Up an Android Wear Emulator</a></li>
-  <li><a href="#SetupDevice">Set Up an Android Wear Device</a></li>
+  <li><a href="#SetupEmulator">Set Up an Android Wear Emulator or Device</a></li>
   <li><a href="#CreateProject">Create a Project</a></li>
+  <li><a href="#Install">Install the Wearable App</a></li>
   <li><a href="#Libraries">Include the Correct Libraries</a></li>
 </ol>
 </div>
@@ -112,18 +112,20 @@ types of screen shapes, which is useful for testing.</p>
     <li>Tap <strong>ADB Debugging</strong> to enable adb.</li>
   </ol>
   <li>Connect the wearable to your machine through USB, so you can install apps directly to it
-  as you develop. A message appears on both the wearable and the Android Wear app prompting you to allow debugging.</li>
-  <p class="note"><strong>Note:</strong> If you can not connect your wearable to your machine via USB,
-  follow the directions on
-  <a href="{@docRoot}training/wearables/apps/bt-debugging.html">Debugging over
-  Bluetooth</a>.
+  as you develop. A message appears on both the wearable and the Android Wear app prompting you to
+  allow debugging.</li>
+
+  <p class="note"><strong>Note:</strong> If you can not connect your wearable
+  to your machine via USB, you can try
+  <a href="{@docRoot}training/wearables/apps/bt-debugging.html">connecting over Bluetooth</a>.
   </p>
+
   <li>On the Android Wear app, check <strong>Always allow from this computer</strong> and tap
   <strong>OK</strong>.</li>
 </ol>
 
-<p>The <strong>Android</strong> tool window on Android Studio shows the system log from the wearable.
-The wearable should also be listed when you run the <code>adb devices</code> command.</p>
+<p>The <i>Android</i> tool window on Android Studio shows the system log from the
+wearable. The wearable should also be listed when you run the <code>adb devices</code> command.</p>
 
 <h2 id="CreateProject">Create a Project</h2>
 
@@ -147,18 +149,23 @@ Project</a>. As you follow the wizard, enter the following information:</p>
   <li>In the first <b>Add an Activity</b> window, add a blank activity for mobile.</li>
   <li>In the second <b>Add an Activity</b> window, add a blank activity for Wear.</li>
 </ol>
-  <p>When the wizard completes, Android Studio creates a new project with two modules, <b>mobile</b> and
-  <b>wear</b>. You now have a project for both your handheld and wearable apps that you can create activities,
-  services, custom layouts, and much more in. On the handheld app, you do most of the heavy lifting,
-  such as network communications, intensive processing, or tasks that require long
-  amounts of user interaction. When these are done,
-  you usually notify the wearable of the results through notifications or by syncing and sending
-  data to the wearable.</p>
+  <p>When the wizard completes, Android Studio creates a new project with two modules, <b>mobile</b>
+  and <b>wear</b>. You now have a project for both your handheld and wearable apps for which you can
+  create activities, services, and custom layouts. The handheld app does most of
+  the heavy lifting, such as network communications, intensive processing, or tasks that require
+  long amounts of user interaction. When the app completes these operations, your app should
+  notify the wearable of the results through notifications or by syncing and sending data to
+  the wearable.</p>
 
-  <p class="note"><b>Note:</b> The <b>wear</b> module also contains a "Hello World" activity that uses a
-  <code>WatchViewStub</code> that inflates a layout based on whether the device's screen
-  is round or square. The <code>WatchViewStub</code> class is one of the UI widgets that's provided
-  by the <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">wearable support library</a>.</p>
+  <p class="note"><b>Note:</b> The <b>wear</b> module also contains a "Hello World" activity that
+  uses a
+  <a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>.
+  This class inflates a layout based on whether the device's screen is round or square. The
+  <a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>
+  class is one of the UI widgets that the
+  <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">wearable support library</a>
+  provides.
+  </p>
 </li>
 
 <h2 id="Install">Install the Wearable App</h2>
@@ -167,8 +174,8 @@ Project</a>. As you follow the wizard, enter the following information:</p>
 either <code>adb install</code> or the <b>Play</b> button on Android Studio.</p>
 
 <p>When you're ready to publish your app to users, you embed the wearable app inside of the
-handheld app. When users install the handheld app from Google Play, a connected wearable automatically
-receives the wearable app.</p>
+handheld app. When a user installs the handheld app from Google Play, a connected wearable
+automatically receives the wearable app.</p>
 
 <p class="note"><b>Note:</b> The automatic installation of wearable apps
 does not work when you are signing apps with a debug key and only works with release keys. See
@@ -184,7 +191,8 @@ wearable and prints out "Hello world!"
 
 <p>As part of the Project Wizard, the correct
 dependencies are imported for you in the appropriate module's <code>build.gradle</code> file.
-However, these dependencies are not required, so read the following descriptions to find out if you need them or not:</p>
+However, these dependencies are not required, so read the following descriptions to find out if you
+need them or not:</p>
 
 <b>Notifications</b>
 <p>The <a href="{@docRoot}tools/support-library/features.html#v4">Android

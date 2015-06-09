@@ -10,7 +10,7 @@ helpoutsWidget=true
 <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#CustomNotifications">Create custom notifications</a></li>
-  <li><a href="#UiLibrary">Create Layouts with the Wearable UI Library</li>
+  <li><a href="#UiLibrary">Create Layouts with the Wearable UI Library</a></li>
 </ol>
 
 <h2>You should also read</h2>
@@ -73,8 +73,8 @@ public void onCreate(Bundle bundle){
   For example:
 <pre>
 Intent notificationIntent = new Intent(this, NotificationActivity.class);
-PendingIntent notificationPendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT);
+PendingIntent notificationPendingIntent = PendingIntent.getActivity(
+        this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 </pre>
   </li>
   <li>Build a {@link android.app.Notification} and call
@@ -110,35 +110,88 @@ dependencies {
 
 <p>Here are some of the major classes in the Wearable UI Library:</p>
 
-<ul>
-    <li><code>BoxInsetLayout</code> - A FrameLayout that's aware of screen shape and can box its
-    children in the center square of a round screen.</li>
-    <li><code>CardFragment</code> - A fragment that presents content within an expandable,
-    vertically scrollable card.</li>
-    <li><code>CircledImageView</code> - An image view surrounded by a circle.</li>
-    <li><code>ConfirmationActivity</code> - An activity that displays confirmation animations after the user
-    completes an action.</li>
-    <li><code>CrossFadeDrawable</code> - A drawable that contains two child drawables and provides
-    methods to directly adjust the blend between the two.</li>
-    <li><code>DelayedConfirmationView</code> - A view that provides a circular countdown timer,
-    typically used to automatically confirm an operation after a short delay has elapsed.</li>
-    <li><code>DismissOverlayView</code> - A view for implementing long-press-to-dismiss.</li>
-    <li><code>DotsPageIndicator</code> - A page indicator for GridViewPager that identifies the
-    current page in relation to all available pages on the current row.</li>
-    <li><code>GridViewPager</code> - A layout manager that allows the user to both vertically and
-    horizontally through pages of data. You supply an implementation of a GridPagerAdapter to
-    generate the pages that the view shows.</li>
-    <li><code>GridPagerAdapter</code> - An adapter that supplies pages to a GridViewPager.</li>
-    <li><code>FragmentGridPagerAdapter</code> - An implementation of GridPagerAdapter that
-    represents each page as a fragment.</li>
-    </li>
-    <li><code>WatchViewStub</code> - A class that can inflate a specific layout,
-    depending on the shape of the device's screen.</li>
-    <li><code>WearableListView</code> - An alternative version of ListView that is optimized for
-    ease of use on small screen wearable devices. It displays a vertically scrollable list of items,
-    and automatically snaps to the nearest item when the user stops scrolling.
-    </li>
-</ul>
+<dl>
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/BoxInsetLayout.html"><code>BoxInsetLayout</code></a>
+  </dt>
+  <dd>A {@link android.widget.FrameLayout} object
+  that's aware of screen shape and can box its children in the center square of a round screen.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/CardFragment.html"><code>CardFragment</code></a>
+  </dt>
+  <dd>A fragment that presents content within an expandable, vertically scrollable card.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/CircledImageView.html"><code>CircledImageView</code></a>
+  </dt>
+  <dd>An image view surrounded by a circle.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html"><code>ConfirmationActivity</code></a>
+  </dt>
+  <dd>An activity that displays confirmation animations after the user completes an action.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/CrossfadeDrawable.html"><code>CrossFadeDrawable</code></a>
+  </dt>
+  <dd>A drawable that contains two child drawables and provides methods to directly adjust the blend
+  between the two.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/DelayedConfirmationView.html"><code>DelayedConfirmationView</code></a>
+  </dt>
+  <dd>A view that provides a circular countdown timer, typically used to automatically confirm an
+  operation after a short delay has elapsed.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/DismissOverlayView.html"><code>DismissOverlayView</code></a>
+  </dt>
+  <dd>A view for implementing long-press-to-dismiss.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/GridViewPager.html"><code>GridViewPager</code></a>
+  </dt>
+  <dd>A layout manager that allows the user to navigate both vertically and
+    horizontally through pages of data. You supply an implementation of a
+    <a href="{@docRoot}reference/android/support/wearable/view/GridPagerAdapter.html"><code>GridPagerAdapter</code></a>
+    instance to generate the pages that the view shows.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/GridPagerAdapter.html"><code>GridPagerAdapter</code></a>
+  </dt>
+  <dd>An adapter that supplies pages to a
+  <a href="{@docRoot}reference/android/support/wearable/view/GridViewPager.html"><code>GridViewPager</code></a>
+  object.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/FragmentGridPagerAdapter.html"><code>FragmentGridPagerAdapter</code></a>
+  </dt>
+  <dd>An implementation of a
+  <a href="{@docRoot}reference/android/support/wearable/view/GridPagerAdapter.html"><code>GridPagerAdapter</code></a>
+  instance that represents each page as a fragment.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/DotsPageIndicator.html"><code>DotsPageIndicator</code></a>
+  </dt>
+  <dd>A page indicator for a
+  <a href="{@docRoot}reference/android/support/wearable/view/GridViewPager.html"><code>GridViewPager</code></a>
+  implementation that identifies the current page in relation to all available pages on the current
+  row.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>
+  </dt>
+  <dd>A class that can inflate a specific layout, depending on the shape of the device's screen.
+  </dd>
+
+  <dt><a href="{@docRoot}reference/android/support/wearable/view/WearableListView.html"><code>WearableListView</code></a>
+  </dt>
+  <dd>An alternative version of a {@link android.widget.ListView}
+  object that is optimized for ease of use on small screen wearable devices. It displays a
+  vertically scrollable list of items, and automatically snaps to the nearest item when the user
+  stops scrolling.
+  </dd>
+</dl>
 
 <h3 id="UiLibReference">Wear UI library API reference</h3>
 
