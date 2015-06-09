@@ -838,7 +838,8 @@ public abstract class Connection extends Conferenceable {
          * <p>
          * This could be in response to a preview request via
          * {@link #onRequestConnectionDataUsage()}, or as a periodic update by the
-         * {@link VideoProvider}.
+         * {@link VideoProvider}.  Where periodic updates of data usage are provided, they should be
+         * provided at most for every 1 MB of data transferred and no more than once every 10 sec.
          * <p>
          * Received by the {@link InCallService} via
          * {@link InCallService.VideoCall.Callback#onCallDataUsageChanged(long)}.
