@@ -911,7 +911,7 @@
     <string name="monitoring_description_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information. For more information, contact your administrator.</string>
 
     <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps and websites.</string>
+    <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog VPN with device owner text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nYou\'re connected to a VPN, which can monitor your network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
@@ -923,16 +923,16 @@
     <string name="legacy_vpn_name">VPN</string>
 
     <!-- Monitoring dialog text for single app (no profile or device owner) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your network activity including emails, apps and websites.</string>
+    <string name="monitoring_description_app">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your network activity including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog text for single app (inside personal profile) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps and websites.</string>
+    <string name="monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog text for single app (inside work profile) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps and websites.\n\nFor more information, contact your administrator.</string>
+    <string name="monitoring_description_app_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
 
     <!-- Monitoring dialog text for multiple apps (in personal and work profiles) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_personal_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps and websites.\n\nYou\'re also connected to <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network activity.</string>
+    <string name="monitoring_description_app_personal_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nYou\'re also connected to <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network activity.</string>
 
     <!-- Monitoring dialog text for single app (with device owner) [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn_app_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nYou\'re connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
