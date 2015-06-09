@@ -36,6 +36,7 @@ namespace android
 {
 
 static jclass sFileDescriptorClass;
+static jfieldID sPipeFDField;
 
 static jint
 android_server_UsbMidiDevice_get_subdevice_count(JNIEnv *env, jobject /* thiz */,
@@ -66,14 +67,15 @@ android_server_UsbMidiDevice_get_subdevice_count(JNIEnv *env, jobject /* thiz */
 }
 
 static jobjectArray
-android_server_UsbMidiDevice_open(JNIEnv *env, jobject /* thiz */, jint card, jint device,
+android_server_UsbMidiDevice_open(JNIEnv *env, jobject thiz, jint card, jint device,
         jint subdevice_count)
 {
     char    path[100];
 
     snprintf(path, sizeof(path), "/dev/snd/midiC%dD%d", card, device);
 
-    jobjectArray fds = env->NewObjectArray(subdevice_count, sFileDescriptorClass, NULL);
+    // allocate one extra file descriptor for close pipe
+    jobjectArray fds = env->NewObjectArray(subdevice_count + 1, sFileDescriptorClass, NULL);
     if (!fds) {
         return NULL;
     }
@@ -91,12 +93,27 @@ android_server_UsbMidiDevice_open(JNIEnv *env, jobject /* thiz */, jint card, ji
         env->DeleteLocalRef(fileDescriptor);
     }
 
+    // create a pipe to use for unblocking our input thread
+    int pipeFD[2];
+    pipe(pipeFD);
+    jobject fileDescriptor = jniCreateFileDescriptor(env, pipeFD[0]);
+    env->SetObjectArrayElement(fds, subdevice_count, fileDescriptor);
+    env->DeleteLocalRef(fileDescriptor);
+    // store our end of the pipe in mPipeFD
+    env->SetIntField(thiz, sPipeFDField, pipeFD[1]);
+
     return fds;
 }
 
 static void
-android_server_UsbMidiDevice_close(JNIEnv *env, jobject /* thiz */, jobjectArray fds)
+android_server_UsbMidiDevice_close(JNIEnv *env, jobject thiz, jobjectArray fds)
 {
+    // write to mPipeFD to unblock input thread
+    jint pipeFD = env->GetIntField(thiz, sPipeFDField);
+    write(pipeFD, &pipeFD, sizeof(pipeFD));
+    close(pipeFD);
+    env->SetIntField(thiz, sPipeFDField, -1);
+
     int count = env->GetArrayLength(fds);
     for (int i = 0; i < count; i++) {
         jobject fd = env->GetObjectArrayElement(fds, i);
@@ -117,11 +134,16 @@ int register_android_server_UsbMidiDevice(JNIEnv *env)
         ALOGE("Can't find java/io/FileDescriptor");
         return -1;
     }
-    sFileDescriptorClass = (jclass)env->NewGlobalRef(clazz);;
+    sFileDescriptorClass = (jclass)env->NewGlobalRef(clazz);
 
     clazz = env->FindClass("com/android/server/usb/UsbMidiDevice");
     if (clazz == NULL) {
         ALOGE("Can't find com/android/server/usb/UsbMidiDevice");
+        return -1;
+    }
+    sPipeFDField = env->GetFieldID(clazz, "mPipeFD", "I");
+    if (sPipeFDField == NULL) {
+        ALOGE("Can't find UsbMidiDevice.mPipeFD");
         return -1;
     }
 
