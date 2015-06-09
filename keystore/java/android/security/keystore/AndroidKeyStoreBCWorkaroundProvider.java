@@ -245,4 +245,12 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
         put("Signature." + algorithm + " SupportedKeyClasses",
                 KEYSTORE_PRIVATE_KEY_CLASS_NAME + "|" + KEYSTORE_PUBLIC_KEY_CLASS_NAME);
     }
+
+    public static String[] getSupportedEcdsaSignatureDigests() {
+        return new String[] {"NONE", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512"};
+    }
+
+    public static String[] getSupportedRsaSignatureWithPkcs1PaddingDigests() {
+        return new String[] {"NONE", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512"};
+    }
 }

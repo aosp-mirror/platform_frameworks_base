@@ -50,7 +50,8 @@ public abstract class KeymasterUtils {
         }
     }
 
-    public static boolean isKeymasterBlockModeIndCpaCompatible(int keymasterBlockMode) {
+    public static boolean isKeymasterBlockModeIndCpaCompatibleWithSymmetricCrypto(
+            int keymasterBlockMode) {
         switch (keymasterBlockMode) {
             case KeymasterDefs.KM_MODE_ECB:
                 return false;
@@ -60,6 +61,20 @@ public abstract class KeymasterUtils {
                 return true;
             default:
                 throw new IllegalArgumentException("Unsupported block mode: " + keymasterBlockMode);
+        }
+    }
+
+    public static boolean isKeymasterPaddingSchemeIndCpaCompatibleWithAsymmetricCrypto(
+            int keymasterPadding) {
+        switch (keymasterPadding) {
+            case KeymasterDefs.KM_PAD_NONE:
+                return false;
+            case KeymasterDefs.KM_PAD_RSA_OAEP:
+            case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT:
+                return true;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported encryption padding scheme: " + keymasterPadding);
         }
     }
 

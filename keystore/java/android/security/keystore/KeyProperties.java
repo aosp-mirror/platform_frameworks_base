@@ -168,6 +168,31 @@ public abstract class KeyProperties {
     public static abstract class KeyAlgorithm {
         private KeyAlgorithm() {}
 
+        public static int toKeymasterAsymmetricKeyAlgorithm(
+                @NonNull @KeyAlgorithmEnum String algorithm) {
+            if (KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)) {
+                return KeymasterDefs.KM_ALGORITHM_EC;
+            } else if (KEY_ALGORITHM_RSA.equalsIgnoreCase(algorithm)) {
+                return KeymasterDefs.KM_ALGORITHM_RSA;
+            } else {
+                throw new IllegalArgumentException("Unsupported key algorithm: " + algorithm);
+            }
+        }
+
+        @NonNull
+        public static @KeyAlgorithmEnum String fromKeymasterAsymmetricKeyAlgorithm(
+                int keymasterAlgorithm) {
+            switch (keymasterAlgorithm) {
+                case KeymasterDefs.KM_ALGORITHM_EC:
+                    return KEY_ALGORITHM_EC;
+                case KeymasterDefs.KM_ALGORITHM_RSA:
+                    return KEY_ALGORITHM_RSA;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unsupported key algorithm: " + keymasterAlgorithm);
+            }
+        }
+
         public static int toKeymasterSecretKeyAlgorithm(
                 @NonNull @KeyAlgorithmEnum String algorithm) {
             if (KEY_ALGORITHM_AES.equalsIgnoreCase(algorithm)) {
@@ -566,6 +591,28 @@ public abstract class KeyProperties {
                     return DIGEST_SHA384;
                 case KeymasterDefs.KM_DIGEST_SHA_2_512:
                     return DIGEST_SHA512;
+                default:
+                    throw new IllegalArgumentException("Unsupported digest algorithm: " + digest);
+            }
+        }
+
+        @NonNull
+        public static @DigestEnum String fromKeymasterToSignatureAlgorithmDigest(int digest) {
+            switch (digest) {
+                case KeymasterDefs.KM_DIGEST_NONE:
+                    return "NONE";
+                case KeymasterDefs.KM_DIGEST_MD5:
+                    return "MD5";
+                case KeymasterDefs.KM_DIGEST_SHA1:
+                    return "SHA1";
+                case KeymasterDefs.KM_DIGEST_SHA_2_224:
+                    return "SHA224";
+                case KeymasterDefs.KM_DIGEST_SHA_2_256:
+                    return "SHA256";
+                case KeymasterDefs.KM_DIGEST_SHA_2_384:
+                    return "SHA384";
+                case KeymasterDefs.KM_DIGEST_SHA_2_512:
+                    return "SHA512";
                 default:
                     throw new IllegalArgumentException("Unsupported digest algorithm: " + digest);
             }
