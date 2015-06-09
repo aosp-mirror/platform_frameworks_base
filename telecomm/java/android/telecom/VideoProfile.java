@@ -49,7 +49,32 @@ public class VideoProfile implements Parcelable {
     public static final int QUALITY_DEFAULT = 4;
 
     /**
-     * Call is currently in an audio-only mode with no video transmission or receipt.
+     * Used when answering or dialing a call to indicate that the call does not have a video
+     * component.
+     * <p>
+     * Should <b>not</b> be used in comparison checks to determine if a video state represents an
+     * audio-only call.
+     * <p>
+     * The following, for example, is not the correct way to check if a call is audio-only:
+     * <pre>
+     * {@code
+     * // This is the incorrect way to check for an audio-only call.
+     * if (videoState == VideoProfile.STATE_AUDIO_ONLY) {
+     *      // Handle audio-only call.
+     * }
+     * }
+     * </pre>
+     * <p>
+     * Instead, use the {@link VideoProfile#isAudioOnly(int)} helper function to check if a
+     * video state represents an audio-only call:
+     * <pre>
+     * {@code
+     * // This is the correct way to check for an audio-only call.
+     * if (VideoProfile.isAudioOnly(videoState)) {
+     *      // Handle audio-only call.
+     * }
+     * }
+     * </pre>
      */
     public static final int STATE_AUDIO_ONLY = 0x0;
 
