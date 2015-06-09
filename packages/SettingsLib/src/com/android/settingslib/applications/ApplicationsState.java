@@ -386,7 +386,7 @@ public class ApplicationsState {
         }
     }
 
-    void removePackage(String pkgName, int userId) {
+    public void removePackage(String pkgName, int userId) {
         synchronized (mEntriesMap) {
             if (DEBUG_LOCKING) Log.v(TAG, "removePackage acquired lock");
             int idx = indexOfApplicationInfoLocked(pkgName, userId);
@@ -1107,7 +1107,7 @@ public class ApplicationsState {
             ensureLabel(context);
         }
 
-        void ensureLabel(Context context) {
+        public void ensureLabel(Context context) {
             if (this.label == null || !this.mounted) {
                 if (!this.apkFile.exists()) {
                     this.mounted = false;
@@ -1152,6 +1152,14 @@ public class ApplicationsState {
             String tmp = Normalizer.normalize(str, Form.NFD);
             return REMOVE_DIACRITICALS_PATTERN.matcher(tmp)
                     .replaceAll("").toLowerCase();
+        }
+
+        public String getVersion(Context context) {
+            try {
+                return context.getPackageManager().getPackageInfo(info.packageName, 0).versionName;
+            } catch (PackageManager.NameNotFoundException e) {
+                return "";
+            }
         }
     }
 
