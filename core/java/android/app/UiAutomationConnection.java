@@ -239,9 +239,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             public void run() {
                 InputStream in = null;
                 OutputStream out = null;
+                java.lang.Process process = null;
 
                 try {
-                    java.lang.Process process = Runtime.getRuntime().exec(command);
+                    process = Runtime.getRuntime().exec(command);
 
                     in = process.getInputStream();
                     out = new FileOutputStream(sink.getFileDescriptor());
@@ -257,7 +258,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 } catch (IOException ioe) {
                     throw new RuntimeException("Error running shell command", ioe);
                 } finally {
-                    IoUtils.closeQuietly(in);
+                    if (process != null) {
+                        process.destroy();
+                    }
                     IoUtils.closeQuietly(out);
                     IoUtils.closeQuietly(sink);
                 }
