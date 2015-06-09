@@ -365,7 +365,7 @@ public class Recents extends SystemUI
 
     void preloadRecentsInternal() {
         // Preload only the raw task list into a new load plan (which will be consumed by the
-        // RecentsActivity)
+        // RecentsActivity) only if there is a task to animate to.
         ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
         MutableBoolean topTaskHome = new MutableBoolean(true);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -374,8 +374,10 @@ public class Recents extends SystemUI
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
             loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
             TaskStack top = sInstanceLoadPlan.getAllTaskStacks().get(0);
-            preCacheThumbnailTransitionBitmapAsync(topTask, top, mDummyStackView,
-                    topTaskHome.value);
+            if (top.getTaskCount() > 0) {
+                preCacheThumbnailTransitionBitmapAsync(topTask, top, mDummyStackView,
+                        topTaskHome.value);
+            }
         }
     }
 
