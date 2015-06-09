@@ -454,6 +454,18 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+
+    public int linkFile(String relativePath, String fromBase, String toBase) {
+        StringBuilder builder = new StringBuilder("linkfile");
+        builder.append(' ');
+        builder.append(relativePath);
+        builder.append(' ');
+        builder.append(fromBase);
+        builder.append(' ');
+        builder.append(toBase);
+        return mInstaller.execute(builder.toString());
+    }
+
     /**
      * Returns true iff. {@code instructionSet} is a valid instruction set.
      */
