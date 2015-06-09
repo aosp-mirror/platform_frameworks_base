@@ -41588,8 +41588,8 @@ package android.webkit {
     method public deprecated void onGlobalFocusChanged(android.view.View, android.view.View);
     method public void onPause();
     method public void onResume();
-    method public boolean overlayHorizontalScrollbar();
-    method public boolean overlayVerticalScrollbar();
+    method public deprecated boolean overlayHorizontalScrollbar();
+    method public deprecated boolean overlayVerticalScrollbar();
     method public boolean pageDown(boolean);
     method public boolean pageUp(boolean);
     method public void pauseTimers();
@@ -41609,13 +41609,13 @@ package android.webkit {
     method public deprecated void setCertificate(android.net.http.SslCertificate);
     method public void setDownloadListener(android.webkit.DownloadListener);
     method public void setFindListener(android.webkit.WebView.FindListener);
-    method public void setHorizontalScrollbarOverlay(boolean);
+    method public deprecated void setHorizontalScrollbarOverlay(boolean);
     method public void setHttpAuthUsernamePassword(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method public void setInitialScale(int);
     method public deprecated void setMapTrackballToArrowKeys(boolean);
     method public void setNetworkAvailable(boolean);
     method public deprecated void setPictureListener(android.webkit.WebView.PictureListener);
-    method public void setVerticalScrollbarOverlay(boolean);
+    method public deprecated void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public static void setWebContentsDebuggingEnabled(boolean);
     method public void setWebViewClient(android.webkit.WebViewClient);
