@@ -213,7 +213,7 @@ public class Presentation extends Dialog {
         // dismiss the presentation immediately.  This case is expected
         // to be rare but surprising, so we'll write a log message about it.
         if (!isConfigurationStillValid()) {
-            Log.i(TAG, "Presentation is being immediately dismissed because the "
+            Log.i(TAG, "Presentation is being dismissed because the "
                     + "display metrics have changed since it was created.");
             mHandler.sendEmptyMessage(MSG_CANCEL);
         }
@@ -274,6 +274,8 @@ public class Presentation extends Dialog {
         // is invalid and the application must recreate the presentation to get
         // a new context.
         if (!isConfigurationStillValid()) {
+            Log.i(TAG, "Presentation is being dismissed because the "
+                    + "display metrics have changed since it was created.");
             cancel();
         }
     }
