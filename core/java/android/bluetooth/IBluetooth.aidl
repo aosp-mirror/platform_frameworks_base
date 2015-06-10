@@ -99,6 +99,6 @@ interface IBluetooth
     void getActivityEnergyInfoFromController();
     BluetoothActivityEnergyInfo reportActivityInfo();
 
-    // for dumpsys support
-    String dump();
+    // For dumpsys support
+    void dump(in ParcelFileDescriptor fd);
 }
