@@ -842,9 +842,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void notifyCarrierNetworkChange(boolean active) {
-        if (!checkNotifyPermissionOrCarrierPrivilege("notifyCarrierNetworkChange()")) {
-            return;
-        }
+        enforceNotifyPermissionOrCarrierPrivilege("notifyCarrierNetworkChange()");
+
         if (VDBG) {
             log("notifyCarrierNetworkChange: active=" + active);
         }
@@ -1511,15 +1510,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 android.Manifest.permission.READ_PRECISE_PHONE_STATE);
     }
 
-    private boolean checkNotifyPermissionOrCarrierPrivilege(String method) {
-        if  (checkNotifyPermission() || checkCarrierPrivilege()) {
-            return true;
+    private void enforceNotifyPermissionOrCarrierPrivilege(String method) {
+        if  (checkNotifyPermission()) {
+            return;
         }
 
-        String msg = "Modify Phone State or Carrier Privilege Permission Denial: " + method
-                + " from pid=" + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
-        if (DBG) log(msg);
-        return false;
+        enforceCarrierPrivilege();
     }
 
     private boolean checkNotifyPermission(String method) {
@@ -1537,17 +1533,20 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean checkCarrierPrivilege() {
+    private void enforceCarrierPrivilege() {
         TelephonyManager tm = TelephonyManager.getDefault();
         String[] pkgs = mContext.getPackageManager().getPackagesForUid(Binder.getCallingUid());
         for (String pkg : pkgs) {
             if (tm.checkCarrierPrivilegesForPackage(pkg) ==
                     TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                return true;
+                return;
             }
         }
 
-        return false;
+        String msg = "Carrier Privilege Permission Denial: from pid=" + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid();
+        if (DBG) log(msg);
+        throw new SecurityException(msg);
     }
 
     private void checkListenerPermission(int events) {
