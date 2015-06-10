@@ -589,6 +589,10 @@ public class UserManagerService extends IUserManager.Stub {
         if (ActivityManager.isLowRamDeviceStatic()) {
             return false;
         }
+        if (!mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_MANAGED_USERS)) {
+            return false;
+        }
         synchronized(mPackagesLock) {
             // Limit number of managed profiles that can be created
             if (numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
