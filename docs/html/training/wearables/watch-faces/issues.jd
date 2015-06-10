@@ -31,8 +31,11 @@ should adapt to and take advantage of the particular shape of the screen, as des
 <a href="{@docRoot}design/wear/watchfaces.html">design guidelines</a>.</p>
 
 <p>Android Wear lets your watch face determine the screen shape at runtime. To detect whether
-the screen is square or round, override the <code>onApplyWindowInsets()</code> method in the
-<code>CanvasWatchFaceService.Engine</code> class as follows:</p>
+the screen is square or round, override the
+<a href="{@docRoot}reference/android/service/wallpaper/WallpaperService.Engine.html#onApplyWindowInsets(android.view.WindowInsets)"><code>onApplyWindowInsets()</code></a>
+method in the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html"><code>CanvasWatchFaceService.Engine</code></a>
+class as follows:</p>
 
 <pre>
 private class Engine extends CanvasWatchFaceService.Engine {
@@ -75,7 +78,9 @@ the notification card is present.</p>
 down the watch face to fit inside the portion of the screen not covered by the peek card. Digital
 watch faces that display the time in the area of the screen not covered by peek cards do not
 usually require adjustments. To determine the free space above the peek card so you can adapt
-your watch face, use the <code>WatchFaceService.getPeekCardPosition()</code> method.</p>
+your watch face, use the
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getPeekCardPosition()"><code>WatchFaceService.Engine.getPeekCardPosition()</code></a>
+method.</p>
 
 <p>In ambient mode, peek cards have a transparent background. If your watch face contains details
 near the card in ambient mode, consider drawing a black rectangle over them to ensure that users
@@ -93,16 +98,21 @@ can read the contents of the card.</p>
 </div>
 
 <p>To ensure that the system indicators remain visible, you can configure their position on the
-screen and whether they need background protection when you create a <code>WatchFaceStyle</code>
+screen and whether they need background protection when you create a
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceStyle.html"><code>WatchFaceStyle</code></a>
 instance:</p>
 
 <ul>
-<li>To set the position of the status bar, use the <code>setStatusBarGravity()</code> method.</li>
-<li>To set the position of the hotword, use the <code>setHotwordIndicatorGravity()</code>
+<li>To set the position of the status bar, use the
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceStyle.Builder.html#setStatusBarGravity(int)"><code>setStatusBarGravity()</code></a>
+method.</li>
+<li>To set the position of the hotword, use the
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceStyle.Builder.html#setHotwordIndicatorGravity(int)"><code>setHotwordIndicatorGravity()</code></a>
 method.</li>
 <li>To protect the status bar and hotword with a semi-transparent gray background, use the
-<code>setViewProtection()</code> method. This is usually necessary if your watch face has a
-light background, since the system indicators are white.</li>
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceStyle.Builder.html#setViewProtection(int)"><code>setViewProtection()</code></a>
+method. This is usually necessary if your watch face has a light background, since the system
+indicators are white.</li>
 </ul>
 
 <p>For more information about the system indicators, see <a

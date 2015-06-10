@@ -10,6 +10,11 @@ page.title=Building a Watch Face Service
   <li><a href="#CallbackMethods">Implement the Service Callback Methods</a></li>
   <li><a href="#RegisterService">Register the Service Implementation</a></li>
 </ol>
+<h2>Related Samples</h2>
+<ul>
+<li><a href="{@docRoot}samples/WatchFace/index.html">
+WatchFace</a></li>
+</ul>
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
@@ -64,7 +69,9 @@ Project</a>.</p>
 
 <h3 id="Dependencies">Dependencies</h3>
 
-<p>The Wearable Support Library provides the necessary classes that you extend to create watch
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/watchface/package-summary.html">Wearable Support Library</a>
+provides the necessary classes that you extend to create watch
 face implementations. The Google Play services client libraries (<code>play-services</code> and
 <code>play-services-wearable</code>) are required to sync data items between the companion device
 and the wearable with the <a href="{@docRoot}training/wearables/data-layer/index.html">Wearable
@@ -116,10 +123,15 @@ or when an important event occurs (like switching to ambient mode or receiving a
 notification). The service implementation then draws the watch face on the screen using the
 updated time and any other relevant data.</p>
 
-<p>To implement a watch face, you extend the <code>CanvasWatchFaceService</code>
-and <code>CanvasWatchFaceService.Engine</code> classes, and then you override the callback methods
-in the <code>CanvasWatchFaceService.Engine</code> class. These classes are included in the
-Wearable Support Library.</p>
+<p>To implement a watch face, you extend the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.html"><code>CanvasWatchFaceService</code></a>
+and
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html"><code>CanvasWatchFaceService.Engine</code></a>
+classes, and then you override the callback methods in the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html"><code>CanvasWatchFaceService.Engine</code></a>
+class. These classes are included in the
+<a href="{@docRoot}reference/android/support/wearable/watchface/package-summary.html">Wearable Support Library</a>.
+</p>
 
 <p>The following snippet outlines the key methods you need to implement:</p>
 
@@ -173,20 +185,21 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
 }
 </pre>
 
-<p class="note"><strong>Note:</strong> The <em>WatchFace</em> sample in the Android SDK
-demonstrates how to implement analog and digital watch faces extending the
-<code>CanvasWatchFaceService</code> class. This sample is located in the
-<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory.</p>
-
-<p>The <code>CanvasWatchFaceService</code> class provides an invalidate mechanism similar to
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.html"><code>CanvasWatchFaceService</code></a>
+class provides an invalidate mechanism similar to
 the {@link android.view.View#invalidate View.invalidate()} method. You can call the
-<code>invalidate()</code> method throughout your implementation when you want the system to
-redraw the watch face. You can only use the <code>invalidate()</code> method in the main UI
-thread. To invalidate the canvas from another thread, call the <code>postInvalidate()</code>
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#invalidate()"><code>invalidate()</code></a>
+method throughout your implementation when
+you want the system to redraw the watch face. You can only use the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#invalidate()"><code>invalidate()</code></a>
+method in the main UI thread. To invalidate the canvas from another thread, call the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#postInvalidate()"><code>postInvalidate()</code></a>
 method.</p>
 
 <p>For more information about implementing the methods in the
-<code>CanvasWatchFaceService.Engine</code> class, see <a
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html"><code>CanvasWatchFaceService.Engine</code></a>
+class, see <a
 href="{@docRoot}training/wearables/watch-faces/drawing.html">Drawing Watch Faces</a>.</p>
 
 

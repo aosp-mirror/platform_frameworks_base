@@ -10,6 +10,11 @@ page.title=Providing Configuration Activities
   <li><a href="#WearableActivity">Create a Wearable Configuration Activity</a></li>
   <li><a href="#CompanionActivity">Create a Companion Configuration Activity</a></li>
 </ol>
+<h2>Related Samples</h2>
+<ul>
+<li><a href="{@docRoot}samples/WatchFace/index.html">
+WatchFace</a></li>
+</ul>
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
@@ -34,10 +39,10 @@ an activity in the wearable app, an activity on the handheld app, or both. Users
 wearable configuration activity on the wearable device, and they can start the companion
 configuration activity from the Android Wear companion app.</p>
 
-<p>The digital watch face from the <em>WatchFace</em> sample in the Android SDK demonstrates how to
+<p>The digital watch face from the
+<a href="{@docRoot}samples/WatchFace/index.html">WatchFace</a> sample demonstrates how to
 implement handheld and wearable configuration activities and how to update a watch face in
-response to configuration changes. This sample is located in the
-<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory.</p>
+response to configuration changes.</p>
 
 
 
@@ -107,7 +112,8 @@ href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer AP
 communicate the configuration change to the watch face activity.</p>
 
 <p>For more details, see the <code>DigitalWatchFaceWearableConfigActivity</code> and
-<code>DigitalWatchFaceUtil</code> classes in the <em>WatchFace</em> sample.</p>
+<code>DigitalWatchFaceUtil</code> classes in the
+<a href="{@docRoot}samples/WatchFace/index.html">WatchFace</a> sample.</p>
 
 
 
@@ -141,17 +147,20 @@ href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer AP
 communicate the configuration change to the watch face activity.</p>
 
 <p>For more details, see the <code>DigitalWatchFaceCompanionConfigActivity</code> class in the
-<em>WatchFace</em> sample.</p>
+<a href="{@docRoot}samples/WatchFace/index.html">WatchFace</a> sample.</p>
 
 
 
 <h2 id="Listener">Create a Listener Service in the Wearable App</h2>
 
 <p>To receive updated configuration parameters from the configuration activities, create a
-service that implements the <code>WearableListenerService</code> interface from the <a
-href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer API</a> in your
+service that implements the
+<a href="//developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService"><code>WearableListenerService</code></a>
+interface from the
+<a href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer API</a> in your
 wearable app. Your watch face implementation can redraw the watch face when the configuration
 parameters change.</p>
 
 <p>For more details, see the <code>DigitalWatchFaceConfigListenerService</code> and
-<code>DigitalWatchFaceService</code> classes in the <em>WatchFace</em> sample.</p>
+<code>DigitalWatchFaceService</code> classes in the
+<a href="{@docRoot}samples/WatchFace/index.html">WatchFace</a> sample.</p>
