@@ -1455,15 +1455,6 @@ final public class MediaCodec {
     @Retention(RetentionPolicy.SOURCE)
     public @interface BufferFlag {}
 
-    private static class FrameRenderedInfo {
-        public long mPresentationTimeUs;
-        public long mNanoTime;
-        public FrameRenderedInfo(long presentationTimeUs, long nanoTime) {
-            mPresentationTimeUs = presentationTimeUs;
-            mNanoTime = nanoTime;
-        }
-    }
-
     private EventHandler mEventHandler;
     private EventHandler mOnFrameRenderedHandler;
     private EventHandler mCallbackHandler;
@@ -1503,10 +1494,16 @@ final public class MediaCodec {
                 }
                 case EVENT_FRAME_RENDERED:
                     synchronized (mListenerLock) {
-                        FrameRenderedInfo info = (FrameRenderedInfo)msg.obj;
-                        if (mOnFrameRenderedListener != null) {
+                        Map<String, Object> map = (Map<String, Object>)msg.obj;
+                        for (int i = 0; ; ++i) {
+                            Object mediaTimeUs = map.get(i + "-media-time-us");
+                            Object systemNano = map.get(i + "-system-nano");
+                            if (mediaTimeUs == null || systemNano == null
+                                    || mOnFrameRenderedListener == null) {
+                                break;
+                            }
                             mOnFrameRenderedListener.onFrameRendered(
-                                    mCodec, info.mPresentationTimeUs, info.mNanoTime);
+                                    mCodec, (long)mediaTimeUs, (long)systemNano);
                         }
                         break;
                     }
@@ -2362,24 +2359,7 @@ final public class MediaCodec {
                 info = mDequeuedOutputInfos.remove(index);
             }
         }
-        // TODO
-        // until codec and libgui supports callback, assume frame is rendered within 50 ms
-        postRenderedCallback(render, info, 50 /* delayMs */);
         releaseOutputBuffer(index, render, false /* updatePTS */, 0 /* dummy */);
-    }
-
-    private void postRenderedCallback(boolean render, @Nullable BufferInfo info, long delayMs) {
-        if (render && info != null) {
-            synchronized (mListenerLock) {
-                 if (mOnFrameRenderedListener != null) {
-                     FrameRenderedInfo obj = new FrameRenderedInfo(
-                            info.presentationTimeUs, System.nanoTime() + delayMs * 1000000);
-                     Message msg = mOnFrameRenderedHandler.obtainMessage(
-                            EVENT_FRAME_RENDERED, obj);
-                     mOnFrameRenderedHandler.sendMessageDelayed(msg, delayMs);
-                 }
-            }
-        }
     }
 
     /**
@@ -2440,12 +2420,6 @@ final public class MediaCodec {
                 info = mDequeuedOutputInfos.remove(index);
             }
         }
-        // TODO
-        // until codec and libgui supports callback, assume frame is rendered at the
-        // render time or 16 ms from now, whichever is later.
-        postRenderedCallback(
-                true /* render */, info,
-                Math.max(renderTimestampNs - System.nanoTime(), 16666666) / 1000000);
         releaseOutputBuffer(
                 index, true /* render */, true /* updatePTS */, renderTimestampNs);
     }
@@ -3049,8 +3023,11 @@ final public class MediaCodec {
             } else if (mOnFrameRenderedHandler != null) {
                 mOnFrameRenderedHandler.removeMessages(EVENT_FRAME_RENDERED);
             }
+            native_enableOnFrameRenderedListener(listener != null);
         }
     }
+
+    private native void native_enableOnFrameRenderedListener(boolean enable);
 
     private EventHandler getEventHandlerOn(
             @Nullable Handler handler, @NonNull EventHandler lastHandler) {
