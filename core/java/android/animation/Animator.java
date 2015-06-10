@@ -211,11 +211,15 @@ public abstract class Animator implements Cloneable {
     public abstract boolean isRunning();
 
     /**
-     * Returns whether this Animator has been started and not yet ended. This state is a superset
-     * of the state of {@link #isRunning()}, because an Animator with a nonzero
-     * {@link #getStartDelay() startDelay} will return true for {@link #isStarted()} during the
-     * delay phase, whereas {@link #isRunning()} will return true only after the delay phase
-     * is complete.
+     * Returns whether this Animator has been started and not yet ended. For reusable
+     * Animators (which most Animators are, apart from the one-shot animator produced by
+     * {@link android.view.ViewAnimationUtils#createCircularReveal(
+     * android.view.View, int, int, float, float) createCircularReveal()}),
+     * this state is a superset of {@link #isRunning()}, because an Animator with a
+     * nonzero {@link #getStartDelay() startDelay} will return true for {@link #isStarted()} during
+     * the delay phase, whereas {@link #isRunning()} will return true only after the delay phase
+     * is complete. Non-reusable animators will always return true after they have been
+     * started, because they cannot return to a non-started state.
      *
      * @return Whether the Animator has been started and not yet ended.
      */
