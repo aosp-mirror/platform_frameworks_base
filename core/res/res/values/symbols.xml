@@ -706,6 +706,7 @@
   <java-symbol type="string" name="package_updated_device_owner" />
   <java-symbol type="string" name="package_deleted_device_owner" />
   <java-symbol type="string" name="lockscreen_access_pattern_cell_added" />
+  <java-symbol type="string" name="lockscreen_access_pattern_cell_added_verbose" />
   <java-symbol type="string" name="lockscreen_access_pattern_cleared" />
   <java-symbol type="string" name="lockscreen_access_pattern_detected" />
   <java-symbol type="string" name="lockscreen_access_pattern_start" />
