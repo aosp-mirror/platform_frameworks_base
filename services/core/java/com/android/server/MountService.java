@@ -77,7 +77,6 @@ import android.util.Xml;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
-import libcore.util.HexEncoding;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2079,23 +2078,6 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private static String toHex(String password) {
-        if (password == null) {
-            return "";
-        }
-        byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
-        return new String(HexEncoding.encode(bytes));
-    }
-
-    private static String fromHex(String hexPassword) throws IllegalArgumentException {
-        if (hexPassword == null) {
-            return null;
-        }
-
-        final byte[] bytes = HexEncoding.decode(hexPassword.toCharArray(), false);
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
     @Override
     public int decryptStorage(String password) {
         if (TextUtils.isEmpty(password)) {
@@ -2113,7 +2095,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mCryptConnector.execute("cryptfs", "checkpw", new SensitiveArg(toHex(password)));
+            event = mCryptConnector.execute("cryptfs", "checkpw", new SensitiveArg(password));
 
             final int code = Integer.parseInt(event.getMessage());
             if (code == 0) {
@@ -2153,7 +2135,7 @@ class MountService extends IMountService.Stub
 
         try {
             mCryptConnector.execute("cryptfs", "enablecrypto", "inplace", CRYPTO_TYPES[type],
-                               new SensitiveArg(toHex(password)));
+                               new SensitiveArg(password));
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
@@ -2178,7 +2160,7 @@ class MountService extends IMountService.Stub
 
         try {
             NativeDaemonEvent event = mCryptConnector.execute("cryptfs", "changepw", CRYPTO_TYPES[type],
-                        new SensitiveArg(toHex(password)));
+                        new SensitiveArg(password));
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
@@ -2211,7 +2193,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mCryptConnector.execute("cryptfs", "verifypw", new SensitiveArg(toHex(password)));
+            event = mCryptConnector.execute("cryptfs", "verifypw", new SensitiveArg(password));
             Slog.i(TAG, "cryptfs verifypw => " + event.getMessage());
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
@@ -2301,7 +2283,7 @@ class MountService extends IMountService.Stub
                 // -1 equals no password
                 return null;
             }
-            return fromHex(event.getMessage());
+            return event.getMessage();
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         } catch (IllegalArgumentException e) {
