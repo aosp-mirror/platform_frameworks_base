@@ -262,6 +262,8 @@ public class Editor {
         }
     };
 
+    boolean mIsInsertionActionModeStartPending = false;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -990,7 +992,7 @@ public class Editor {
     }
 
     public boolean performLongClick(boolean handled) {
-        // Long press in empty space moves cursor and starts the selection action mode.
+        // Long press in empty space moves cursor and starts the insertion action mode.
         if (!handled && !isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
                 mInsertionControllerEnabled) {
             final int offset = mTextView.getOffsetForPosition(mLastDownPositionX,
@@ -998,7 +1000,7 @@ public class Editor {
             stopTextActionMode();
             Selection.setSelection((Spannable) mTextView.getText(), offset);
             getInsertionController().show();
-            startInsertionActionMode();
+            mIsInsertionActionModeStartPending = true;
             handled = true;
         }
 
@@ -1710,14 +1712,14 @@ public class Editor {
     }
 
     /**
-     * @return true if the selection mode was actually started.
+     * Start an Insertion action mode.
      */
-    private boolean startInsertionActionMode() {
+    void startInsertionActionMode() {
         if (mInsertionActionModeRunnable != null) {
             mTextView.removeCallbacks(mInsertionActionModeRunnable);
         }
         if (extractedTextModeWillBeStarted()) {
-            return false;
+            return;
         }
         stopTextActionMode();
 
@@ -1725,7 +1727,9 @@ public class Editor {
                 new TextActionModeCallback(false /* hasSelection */);
         mTextActionMode = mTextView.startActionMode(
                 actionModeCallback, ActionMode.TYPE_FLOATING);
-        return mTextActionMode != null;
+        if (mTextActionMode != null && getInsertionController() != null) {
+            getInsertionController().show();
+        }
     }
 
     /**
@@ -1796,7 +1800,7 @@ public class Editor {
 
     private boolean startSelectionActionModeInternal() {
         if (mTextActionMode != null) {
-            // Selection action mode is already started
+            // Text action mode is already started
             mTextActionMode.invalidate();
             return false;
         }
@@ -3873,7 +3877,7 @@ public class Editor {
         private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
 
-        // Used to detect taps on the insertion handle, which will affect the selection action mode
+        // Used to detect taps on the insertion handle, which will affect the insertion action mode
         private float mDownPositionX, mDownPositionY;
         private Runnable mHider;
 
@@ -3898,17 +3902,20 @@ public class Editor {
             // timeout has passed.
             if (!mDoubleTap && !isCursorInsideEasyCorrectionSpan()
                     && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
-                if (mInsertionActionModeRunnable == null) {
-                    mInsertionActionModeRunnable = new Runnable() {
-                        public void run() {
-                            startInsertionActionMode();
-                        }
-                    };
+                if (mTextActionMode == null) {
+                    if (mInsertionActionModeRunnable == null) {
+                        mInsertionActionModeRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                startInsertionActionMode();
+                            }
+                        };
+                    }
+                    mTextView.postDelayed(
+                            mInsertionActionModeRunnable,
+                            ViewConfiguration.getDoubleTapTimeout() + 1);
                 }
 
-                mTextView.postDelayed(
-                        mInsertionActionModeRunnable,
-                        ViewConfiguration.getDoubleTapTimeout() + 1);
             }
 
             hideAfterDelay();
@@ -3975,7 +3982,7 @@ public class Editor {
                         final int touchSlop = viewConfiguration.getScaledTouchSlop();
 
                         if (distanceSquared < touchSlop * touchSlop) {
-                            // Tapping on the handle toggles the selection action mode.
+                            // Tapping on the handle toggles the insertion action mode.
                             if (mTextActionMode != null) {
                                 mTextActionMode.finish();
                             } else {
