@@ -858,6 +858,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // User info. Trigger first load.
         mHeader.setUserInfoController(mUserInfoController);
         mKeyguardStatusBar.setUserInfoController(mUserInfoController);
+        mKeyguardStatusBar.setUserSwitcherController(mUserSwitcherController);
         mUserInfoController.reloadUserInfo();
 
         mHeader.setBatteryController(mBatteryController);

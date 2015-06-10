@@ -24,7 +24,7 @@ import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -40,9 +40,13 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     private QSPanel mQsPanel;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private boolean mKeyguardMode;
+    private UserSwitcherController.BaseUserAdapter mUserListener;
+
     final UserManager mUserManager;
 
     private final int[] mTmpInt2 = new int[2];
+
+    private UserSwitcherController mUserSwitcherController;
 
     public MultiUserSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,10 +57,18 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     protected void onFinishInflate() {
         super.onFinishInflate();
         setOnClickListener(this);
+        refreshContentDescription();
     }
 
     public void setQsPanel(QSPanel qsPanel) {
         mQsPanel = qsPanel;
+        setUserSwitcherController(qsPanel.getHost().getUserSwitcherController());
+    }
+
+    public void setUserSwitcherController(UserSwitcherController userSwitcherController) {
+        mUserSwitcherController = userSwitcherController;
+        registerListener();
+        refreshContentDescription();
     }
 
     public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
@@ -65,6 +77,28 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     public void setKeyguardMode(boolean keyguardShowing) {
         mKeyguardMode = keyguardShowing;
+        registerListener();
+    }
+
+    private void registerListener() {
+        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager) && mUserListener == null) {
+
+            final UserSwitcherController controller = mUserSwitcherController;
+            if (controller != null) {
+                mUserListener = new UserSwitcherController.BaseUserAdapter(controller) {
+                    @Override
+                    public void notifyDataSetChanged() {
+                        refreshContentDescription();
+                    }
+
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        return null;
+                    }
+                };
+                refreshContentDescription();
+            }
+        }
     }
 
     @Override
@@ -74,22 +108,16 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                 if (mKeyguardUserSwitcher != null) {
                     mKeyguardUserSwitcher.show(true /* animate */);
                 }
-            } else {
-                if (mQsPanel != null) {
-                    UserSwitcherController userSwitcherController =
-                            mQsPanel.getHost().getUserSwitcherController();
-                    if (userSwitcherController != null) {
-                        View center = getChildCount() > 0 ? getChildAt(0) : this;
+            } else if (mQsPanel != null && mUserSwitcherController != null) {
+                View center = getChildCount() > 0 ? getChildAt(0) : this;
 
-                        center.getLocationInWindow(mTmpInt2);
-                        mTmpInt2[0] += center.getWidth() / 2;
-                        mTmpInt2[1] += center.getHeight() / 2;
+                center.getLocationInWindow(mTmpInt2);
+                mTmpInt2[0] += center.getWidth() / 2;
+                mTmpInt2[1] += center.getHeight() / 2;
 
-                        mQsPanel.showDetailAdapter(true,
-                                userSwitcherController.userDetailAdapter,
-                                mTmpInt2);
-                    }
-                }
+                mQsPanel.showDetailAdapter(true,
+                        mUserSwitcherController.userDetailAdapter,
+                        mTmpInt2);
             }
         } else {
             Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
@@ -100,20 +128,21 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void setClickable(boolean clickable) {
+        super.setClickable(clickable);
+        refreshContentDescription();
+    }
 
+    private void refreshContentDescription() {
+        String currentUser = null;
+        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)
+                && mUserSwitcherController != null) {
+            currentUser = mUserSwitcherController.getCurrentUserName(mContext);
+        }
+
+        String text = null;
         if (isClickable()) {
-            String text;
             if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)) {
-                String currentUser = null;
-                if (mQsPanel != null) {
-                    UserSwitcherController controller = mQsPanel.getHost()
-                            .getUserSwitcherController();
-                    if (controller != null) {
-                        currentUser = controller.getCurrentUserName(mContext);
-                    }
-                }
                 if (TextUtils.isEmpty(currentUser)) {
                     text = mContext.getString(R.string.accessibility_multi_user_switch_switcher);
                 } else {
@@ -124,11 +153,17 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
             } else {
                 text = mContext.getString(R.string.accessibility_multi_user_switch_quick_contact);
             }
-            if (!TextUtils.isEmpty(text)) {
-                event.getText().add(text);
+        } else {
+            if (!TextUtils.isEmpty(currentUser)) {
+                text = mContext.getString(
+                        R.string.accessibility_multi_user_switch_inactive,
+                        currentUser);
             }
         }
 
+        if (!TextUtils.equals(getContentDescription(), text)) {
+            setContentDescription(text);
+        }
     }
 
     @Override
