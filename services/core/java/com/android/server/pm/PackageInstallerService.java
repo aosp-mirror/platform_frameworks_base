@@ -571,6 +571,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 throw new IOException("No suitable external storage available");
             }
 
+        } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
+            // For now, installs to adopted media are treated as internal from
+            // an install flag point-of-view.
+            params.setInstallFlagsInternal();
+
         } else {
             // For now, installs to adopted media are treated as internal from
             // an install flag point-of-view.
