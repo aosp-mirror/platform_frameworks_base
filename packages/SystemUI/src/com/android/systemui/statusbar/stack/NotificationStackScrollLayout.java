@@ -2230,6 +2230,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    public void resetScrollPosition() {
+        mScroller.abortAnimation();
+        mOwnScrollY = 0;
+    }
+
     private void setIsExpanded(boolean isExpanded) {
         boolean changed = isExpanded != mIsExpanded;
         mIsExpanded = isExpanded;
