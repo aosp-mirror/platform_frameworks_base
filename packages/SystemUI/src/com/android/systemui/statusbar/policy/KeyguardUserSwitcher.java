@@ -30,7 +30,7 @@ import android.view.ViewStub;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
-import com.android.keyguard.AppearAnimationUtils;
+import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.UserDetailItemView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License
  */
 
-package com.android.keyguard;
+package com.android.settingslib.animation;
 
 import android.view.animation.Interpolator;
 
 /**
  * An interface which can create animations when starting an appear animation with
- * {@link com.android.keyguard.AppearAnimationUtils}
+ * {@link AppearAnimationUtils}
  */
 public interface AppearAnimationCreator<T> {
      void createAnimation(T animatedObject, long delay, long duration,

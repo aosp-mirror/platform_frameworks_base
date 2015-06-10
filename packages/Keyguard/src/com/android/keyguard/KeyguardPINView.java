@@ -22,6 +22,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 
+import com.android.settingslib.animation.AppearAnimationUtils;
+import com.android.settingslib.animation.DisappearAnimationUtils;
+
 /**
  * Displays a PIN pad for unlocking.
  */
@@ -115,7 +118,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 .setDuration(500)
                 .setInterpolator(mAppearAnimationUtils.getInterpolator())
                 .translationY(0);
-        mAppearAnimationUtils.startAnimation(mViews,
+        mAppearAnimationUtils.startAnimation2d(mViews,
                 new Runnable() {
                     @Override
                     public void run() {
@@ -132,7 +135,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 .setDuration(280)
                 .setInterpolator(mDisappearAnimationUtils.getInterpolator())
                 .translationY(mDisappearYTranslation);
-        mDisappearAnimationUtils.startAnimation(mViews,
+        mDisappearAnimationUtils.startAnimation2d(mViews,
                 new Runnable() {
                     @Override
                     public void run() {
