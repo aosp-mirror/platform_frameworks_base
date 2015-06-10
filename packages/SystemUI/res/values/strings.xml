@@ -772,6 +772,9 @@
     <!-- Shows when people have clicked on the camera icon [CHAR LIMIT=60] -->
     <string name="camera_hint">Swipe from icon for camera</string>
 
+    <!-- Accessibility content description for Interruption level: None. [CHAR LIMIT=NONE] -->
+    <string name="interruption_level_none_with_warning">Total silence.  This will also silence screen readers.</string>
+
     <!-- Interruption level: None. [CHAR LIMIT=40] -->
     <string name="interruption_level_none">Total silence</string>
 
