@@ -3156,7 +3156,6 @@ public class Editor {
 
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.hide();
-                mSelectionModifierCursorController.resetTouchOffsets();
             }
 
             mSelectionActionMode = null;
