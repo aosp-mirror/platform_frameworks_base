@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -707,7 +706,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
         mKeyguardIconOverflowContainer.setOnActivatedListener(this);
         mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
-        mStackScroller.addView(mKeyguardIconOverflowContainer);
+        mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
 
         SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_speed_bump, mStackScroller, false);

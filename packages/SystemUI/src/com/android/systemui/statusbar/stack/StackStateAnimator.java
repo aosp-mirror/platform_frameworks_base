@@ -284,6 +284,10 @@ public class StackStateAnimator {
         boolean scaleChanging = child.getScaleX() != viewState.scale;
         float childAlpha = child.getVisibility() == View.INVISIBLE ? 0.0f : child.getAlpha();
         boolean alphaChanging = viewState.alpha != childAlpha;
+        if (child instanceof ExpandableView) {
+            // We don't want views to change visibility when they are animating to GONE
+            alphaChanging &= !((ExpandableView) child).willBeGone();
+        }
 
         // start translationY animation
         if (yTranslationChanging) {

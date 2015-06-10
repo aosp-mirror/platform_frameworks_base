@@ -43,6 +43,7 @@ public abstract class ExpandableView extends FrameLayout {
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private int mClipTopOptimization;
     private static Rect mClipRect = new Rect();
+    private boolean mWillBeGone;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -372,6 +373,14 @@ public abstract class ExpandableView extends FrameLayout {
     public void setClipTopOptimization(int clipTopOptimization) {
         mClipTopOptimization = clipTopOptimization;
         updateClipping();
+    }
+
+    public boolean willBeGone() {
+        return mWillBeGone;
+    }
+
+    public void setWillBeGone(boolean willBeGone) {
+        mWillBeGone = willBeGone;
     }
 
     /**
