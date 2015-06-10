@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"仕事用プロファイルが削除されました"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"管理アプリがないため仕事用プロファイルが削除されました。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"端末のデータが消去されます"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理アプリの構成要素が不足しているか、アプリが破損しているため、ご利用になれません。端末のデータはこれから消去されます。管理者にサポートをご依頼ください。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"着信音オフ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"バイブレーション着信"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"着信音オン"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"更新の準備"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"更新パッケージを処理しています…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"テレビの電源をOFFにします。"</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置情報"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"位置情報にアクセスします"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ソーシャル情報"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"連絡先とソーシャルコネクションに関する情報に直接アクセスします。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"カレンダー"</string>
@@ -511,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"携帯通信会社のサービスへのバインド"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"[通知を非表示]へのアクセス"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"[通知を非表示]の設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>

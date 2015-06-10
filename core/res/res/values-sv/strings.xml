@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Jobbprofilen har raderats"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Jobbprofilen har raderats eftersom det saknas en administratörsapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringsignal av"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrerande ringsignal"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringsignal på"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Förbered för uppdatering"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Uppdateringspaketet behandlas ..."</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Tv:n stängs av."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tillgång till dina kontakter"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Plats"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"få åtkomst till din plats"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Dina sociala uppgifter"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direktåtkomst till information om dina kontakter och sociala kontakter."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få åtkomst till tillgängliga konton."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"läsa flöden som du prenumererar på"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillåter att appen får information om aktuella synkroniserade flöden."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"skicka och visa sms"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillåter att appen läser SMS som sparats på surfplattan eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en operatörs meddelandetjänst. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"binder till leverantörstjänster"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Tillåter att innehavaren binder till leverantörstjänster. Det här ska inte behövas för vanliga appar."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"åtkomst till Stör ej"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ger appen läs- och skrivbehörighet till konfigurationen för Stör ej."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>

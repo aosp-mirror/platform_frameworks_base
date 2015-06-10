@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"কাজের প্রোফাইল মুছে ফেলা হয়েছে"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"প্রশাসক অ্যাপ্লিকেশান অনুপস্থিত থাকায় কাজের প্রোফাইল মুছে ফেলা হয়েছে৷"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"কাজের প্রোফাইলের প্রশাসক অ্যাপ্লিকেশান হয় অনুপস্থিত বা ক্ষতিগ্রস্ত হয়েছে৷ এর ফলস্বরূপ আপনার কাজের প্রোফাইল এবং সম্পর্কিত ডেটা মুছে দেওয়া হয়েছে৷ সহায়তার জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"প্রশাসক অ্যাপকেশানটিতে উপাদান অনুপস্থিত বা ক্ষতিগ্রস্ত হয়েছে এবং ব্যবহার করা যাবে না৷ আপনার ডিভাইস এখন মুছে ফেলা হবে৷ সহায়তার জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="me" msgid="6545696007631404292">"আমাকে"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"রিং বাজার শব্দ বন্ধ করা আছে"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"রিং বাজার সাথে স্পন্দিত করুন"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"রিং বাজার শব্দ চালু করা আছে"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"আপডেট করার জন্য প্রস্তুত"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"আপডেট প্যাকেজটি প্রক্রিয়া করা হচ্ছে..."</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"বন্ধ হচ্ছে…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"আপনার ট্যাবলেট বন্ধ হবে৷"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"আপনার টিভি বন্ধ হবে৷"</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"পরিচিতি"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"আপনার পরিচিতিগুলিতে অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"অবস্থান"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"আপনার অবস্থান অ্যাক্সেস করুন"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"আপনার সামাজিক তথ্য"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"আপনার পরিচিতিগুলি এবং সামাজিক পরিচিতিগুলি সম্পর্কিত তথ্যে সরাসরি অ্যাক্সেস৷"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ক্যালেন্ডার"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"উপলব্ধ অ্যাকাউন্টগুলি অ্যাক্সেস করে৷"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসাবে নেওয়া ফিডগুলি পড়ে"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS বার্তাগুলি পাঠান এবং দেখুন"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে SMS বার্তাগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ধারককে, একটি ক্যারিয়ার বার্তাপ্রেরণ পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"পরিষেবা প্রদানকারীর সাথে যুক্ত হন"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"কোনো পরিষেবা প্রদানকারীর সাথে যুক্ত হতে ধারককে অনুমতি দিন। সাধারণ অ্যাপ্লিকেশানের জন্য প্র্রয়োজন হয় না।"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\'বিরক্ত করবেন না\' -তে অ্যাক্সেস"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"অ্যাপটিকে \'বিরক্ত করবেন না\' কনফিগারেশন পড়া এবং লেখার অনুমতি দেয়।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"পাসওয়ার্ড নিয়মগুলি সেট করে"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"স্ক্রীন লক করার পাসওয়ার্ডগুলিতে অনুমতিপ্রাপ্ত অক্ষর এবং দৈর্ঘ্য নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"স্ক্রীণ আনলক করার প্রচেষ্টাগুলি নিরীক্ষণ করে"</string>

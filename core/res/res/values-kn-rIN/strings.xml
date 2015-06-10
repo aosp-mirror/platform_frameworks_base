@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ತಪ್ಪಿಹೋಗಿರುವ ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದಾಗಿ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸಲಾಗಿದೆ."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್ ಕಳೆದು ಹೋಗಿದೆ ಅಥವಾ ಹಾಳಾಗಿದೆ. ಇದರ ಪರಿಣಾಮವಾಗಿ ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗಿದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್‌ನ ಅಂಶಗಳು ಕಾಣೆಯಾಗಿವೆ ಅಥವಾ ದೋಷಪೂರಿತವಾಗಿದೆ ಮತ್ತು ಬಳಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಮ್ಮ ಸಾಧನವನ್ನು ಇದೀಗ ಅಳಿಸಲಾಗುತ್ತದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="me" msgid="6545696007631404292">"ನಾನು"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ರಿಂಗರ್ ಆಫ್"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ರಿಂಗರ್ ವೈಬ್ರೇಷನ್‌"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ರಿಂಗರ್ ಆನ್"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"ನವೀಕರಣಕ್ಕಾಗಿ ತಯಾರಿ ನಡೆಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"ನವೀಕರಣ ಪ್ಯಾಕೇಜ್ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತಿದೆ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ನಿಮ್ಮ ಟಿವಿಯನ್ನು ಮುಚ್ಚಲಾಗುತ್ತದೆ."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ನಿಮ್ಮ ಸಾಮಾಜಿಕ ಮಾಹಿತಿ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಸಾಮಾಜಿಕ ಸಂಪರ್ಕಗಳ ಕುರಿತ ಮಾಹಿತಿಗೆ ನೇರ ಪ್ರವೇಶ."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
@@ -511,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ವಾಹಕ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ವಾಹಕ ಸೇವೆಗಳಿಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ವಾಹಕ ಸೇವೆಗಳನ್ನು ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ಅಡಚಣೆ ಮಾಡಬೇಡಿಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ಪರದೆ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ಪರದೆಯ-ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾನಿಟರ್ ಮಾಡಿ"</string>

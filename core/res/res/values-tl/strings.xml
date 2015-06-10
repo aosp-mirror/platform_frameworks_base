@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Na-delete na ang profile sa trabaho"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Na-delete ang profile sa trabaho dahil wala itong admin app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ang admin app ng profile sa trabaho ay nawawala o sira. Bilang resulta, na-delete na ang iyong profile sa trabaho at nauugnay na data. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ang admin app ay may mga kulang na bahagi o sira, at hindi ito magagamit. Buburahin na ngayon ang iyong device. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="me" msgid="6545696007631404292">"Ako"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"I-off ang ringer"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"I-vibrate ang ringer"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"I-on ang ringer"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Maghanda para sa pag-update"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Pinoproseso ang package ng update…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Mag-shut down ang iyong tablet."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Magsa-shut down ang iyong TV."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Mga Contact"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ina-access ang iyong mga contact"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasyon"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"i-access ang iyong lokasyon"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ang iyong social na impormasyon"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direktang access sa impormasyon tungkol sa iyong mga contact at social na koneksyon."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendaryo"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"I-access ang mga available na account."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"magbasa ng mga na-subscribe na feed"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Pinapayagan ang app na kumuha ng mga detalye tungkol sa kasalukuyang naka-sync na mga feed."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"magpadala at tumingin ng mga mensaheng SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"basahin ang iyong mga text message (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong tablet o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Binibigyang-daan ang may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo ng pagmemensahe ng carrier. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"mag-bind sa mga serbisyo ng carrier"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Pinapayagan ang may-ari na mag-bind sa mga serbisyo ng carrier. Hindi dapat kailanganin sa mga normal na app."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"i-access ang Huwag Istorbohin"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa lock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>

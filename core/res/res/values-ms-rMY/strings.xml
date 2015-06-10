@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Profil kerja dipadam"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil kerja dipadam kerana apl pentadbir hilang."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Apl admin profil kerja hilang atau pun rosak. Akibatnya, profil kerja anda dan data yang berkaitan telah dipadam. Hubungi pentadbir anda untuk mendapatkan bantuan."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Peranti anda akan dipadam"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Apl pentadbir kehilangan komponen atau rosak dan tidak boleh digunakan. Sekarang peranti anda akan dipadam. Hubungi pentadbir anda untuk mendapatkan bantuan."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Pendering dimatikan"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Pendering bergetar"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Pendering dihidupkan"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Bersedia untuk kemas kini"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Memproses pakej yang dikemas kini…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV anda akan dimatikan."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kenalan"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"akses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"akses lokasi anda"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Maklumat sosial anda"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Akses langsung ke maklumat tentang kenalan anda dan sambungan sosial."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Akses akaun yang tersedia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca suapan langganan"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Membenarkan apl mendapatkan butiran mengenai suapan tersegerak semasa."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"hantar dan lihat mesej SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Membenarkan apl menghantar mesej SMS. Ini boleh menyebabkan caj di luar jangkaan. Apl hasad boleh membuat anda kerugian wang dengan menghantar mesej tanpa pengesahan anda."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"baca mesej teks anda (SMS atau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Membenarkan apl membaca mesej SMS yang tersimpan pada tablet atau kad SIM anda. Ini membenarkan apl membaca semua mesej SMS, tanpa mengira kandungan atau kerahsiaan."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi perkhidmatan pemesejan pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"terikat kepada perkhidmatan pembawa"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Membenarkan pemegang terikat kepada perkhidmatan pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"akses Jangan ganggu"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Membenarkan apl membaca dan menulis konfigurasi Jangan Ganggu."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan  dan PIN kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>

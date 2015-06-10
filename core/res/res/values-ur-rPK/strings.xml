@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"دفتری پروفائل حذف کر دیا گیا"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"گمشدہ منتظم ایپ کی وجہ سے دفتری پروفائل حذف کر دیا گیا۔"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"دفتری پروفائل کی منتظم ایپ یا تو غائب ہے یا خراب ہے۔ اس کی وجہ سے، آپ کا دفتری پروفائل اور متعلقہ ڈیٹا حذف کر دیے گئے ہیں۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"منتظم کی ایپ میں گمشدہ اجزاء ہیں یا وہ خراب ہے اور اسے استعمال نہیں کیا جا سکتا ہے۔ آپ کے آلہ کو اب صاف کر دیا جائے گا۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"رنگر آف ہے"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"رنگر مرتعش کریں"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"رنگر آن ہے"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"اپ ڈیٹ کیلئے تیار کریں"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"اپ ڈیٹ پیکج پر کاروائی جاری ہے…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"بند ہو رہا ہے…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"آپ کا ٹیبلیٹ بند ہو جائے گا۔"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"‏آپ کا TV بند ہو جائے گا۔"</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"رابطے"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"اپنے رابطوں تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"مقام"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"اپنے مقام تک رسائی حاصل کریں"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"آپ کی سوشل معلومات"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"اپنے رابطوں اور سوشل کنکشنز کے بارے میں معلومات تک براہ راست رسائی۔"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"کیلنڈر"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"دستیاب اکاؤنٹس تک رسائی حاصل کریں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"سبسکرائب کردہ فیڈز پڑھیں"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے فیڈز کے بارے میں تفصیلات حاصل کرنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏ایپ کو SMS پیغامات بھیجنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز لگ سکتے ہیں۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر پیغامات بھیج کر آپ کی رقم خرچ کروا سکتی ہیں۔"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏اپنے متنی پیغامات (SMS یا MMS) کو پڑھیں"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"‏ایپ کو آپ کے ٹیبلٹ یا SIM کارڈ میں اسٹور کردہ SMS پیغامات کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو مواد اور رازداری سے قطع نظر سبھی SMS پیغامات پڑھنے کی اجازت دیتا ہے۔"</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"حامل کو ایک کیریئر پیغام رسانی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتی ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"کیریئر سروسز کا پابند کریں"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"حامل کو کیریئر سروسز کا پابند کرنے کی اجازت دیتا ہے۔ معمول کی ایپس کیلئے کبھی درکار نہیں ہونا چاہیے۔"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ڈسٹرب نہ کریں تک رسائی حاصل کریں"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ایپ کو ڈسٹرب نہ کریں کنفیگریشن لکھنے اور پڑھنے کے قابل کرتا ہے۔"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"پاس ورڈ کے اصول سیٹ کریں"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"‏اسکرین لاک پاس ورڈز اور PINs میں اجازت یافتہ لمبائی اور حروف کو کنٹرول کریں۔"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"اسکرین غیر مقفل کرنے کی کوششیں مانیٹر کریں"</string>

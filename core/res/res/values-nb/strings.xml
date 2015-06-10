@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dager"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> t"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> t"</string>
@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Arbeidsprofilen er slettet"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeidsprofilen er slettet på grunn av manglende admin-app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler eller er ødelagt. Dette har ført til at arbeidsprofilen og alle data knyttet til den er blitt slettet. Kontakt administratoren for å få hjelp."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Admin-appen mangler komponenter eller er ødelagt, og kan ikke brukes. Enheten din blir nå slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringelyd av"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibreringsmodus"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringelyd på"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Forbered for oppdatering"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Behandler oppdateringspakken …"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutter…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Nettbrettet slås av."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV-en slår seg av."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tilgang til kontaktene dine"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posisjon"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"få tilgang til posisjonen din"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Den sosiale informasjonen din"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte tilgang til informasjon om kontaktene og de sosiale forbindelsene dine."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenderen"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Tilgang til tilgjengelige Google-kontoer."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lese abonnement på nyhetskilder"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lar appen hente inn detaljer om strømmer som er synkroniserte for øyeblikket."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"sende og lese SMS-meldinger"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lar appen sende tekstmeldinger. Dette kan resultere i uventede kostnader. Merk at skadelige apper kan påføre deg kostnader ved å sende meldinger uten bekreftelse fra deg."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lese tekstmeldinger (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lar appen lese tekstmeldinger lagret på nettbrettet eller SIM-kortet ditt. Dette lar appen lese alle tekstmeldingene dine, uavhengig av innhold og konfidensialitet."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Tillater at innehaveren binder seg til det øverste nivået av grensesnittet til en operatørtjeneste. Dette skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"bind til operatørtjenester"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lar innehaveren binde seg til operatørtjenester. Det skal aldri være nødvendig for vanlige apper."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"tilgang til Ikke forstyrr"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lar appen lese og skrive konfigurasjon av Ikke forstyrr."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollerer tillatt lengde og tillatte tegn i passord og PIN-koder for opplåsing av skjermen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
