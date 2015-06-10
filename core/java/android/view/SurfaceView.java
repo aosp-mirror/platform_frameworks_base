@@ -523,7 +523,7 @@ public class SurfaceView extends View {
                             mVisibleInsets, mStableInsets, mOutsets, mConfiguration,
                             mNewSurface);
                     if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
-                        mReportDrawNeeded = true;
+                        reportDrawNeeded = true;
                     }
 
                     if (DEBUG) Log.i(TAG, "New surface: " + mNewSurface
