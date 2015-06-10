@@ -100,6 +100,7 @@ import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.NetworkStatsFactory;
@@ -767,7 +768,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return mNextNetworkRequestId++;
     }
 
-    private int reserveNetId() {
+    @VisibleForTesting
+    protected int reserveNetId() {
         synchronized (mNetworkForNetId) {
             for (int i = MIN_NET_ID; i <= MAX_NET_ID; i++) {
                 int netId = mNextNetId;
@@ -1664,6 +1666,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String DEFAULT_TCP_RWND_KEY = "net.tcp.default_init_rwnd";
 
     // Overridden for testing purposes to avoid writing to SystemProperties.
+    @VisibleForTesting
     protected int getDefaultTcpRwnd() {
         return SystemProperties.getInt(DEFAULT_TCP_RWND_KEY, 0);
     }
