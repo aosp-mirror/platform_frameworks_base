@@ -346,6 +346,8 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mTempDisplayStateWorkQueue) {
             try {
                 // Update the display state within the lock.
+                // Note that we do not need to schedule traversals here although it
+                // may happen as a side-effect of displays changing state.
                 synchronized (mSyncRoot) {
                     if (mGlobalDisplayState == state
                             && mGlobalDisplayBrightness == brightness) {
@@ -357,8 +359,7 @@ public final class DisplayManagerService extends SystemService {
                             + ", brightness=" + brightness + ")");
                     mGlobalDisplayState = state;
                     mGlobalDisplayBrightness = brightness;
-                    updateGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
-                    scheduleTraversalLocked(false);
+                    applyGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
                 }
 
                 // Setting the display power state can take hundreds of milliseconds
@@ -715,6 +716,7 @@ public final class DisplayManagerService extends SystemService {
             handleDisplayDeviceRemovedLocked(device);
         }
     }
+
     private void handleDisplayDeviceRemovedLocked(DisplayDevice device) {
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if (!mDisplayDevices.remove(device)) {
@@ -729,7 +731,7 @@ public final class DisplayManagerService extends SystemService {
         scheduleTraversalLocked(false);
     }
 
-    private void updateGlobalDisplayStateLocked(List<Runnable> workQueue) {
+    private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
             DisplayDevice device = mDisplayDevices.get(i);
