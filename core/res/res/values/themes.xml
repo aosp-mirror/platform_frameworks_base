@@ -331,6 +331,7 @@ please see themes_device_defaults.xml.
         <item name="seekBarPreferenceStyle">@style/Preference.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.DialogPreference</item>
+        <item name="seekBarDialogPreferenceStyle">@style/Preference.DialogPreference.SeekBarPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child</item>
