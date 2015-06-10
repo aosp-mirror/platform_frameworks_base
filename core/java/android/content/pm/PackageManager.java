@@ -401,6 +401,9 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
 
+    /** {@hide} */
+    public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
+
     /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
