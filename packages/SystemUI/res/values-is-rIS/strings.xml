@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Engin tenging"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ekkert net"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Slökkt á Wi-Fi"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Engin Wi-Fi net í boði"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Útsending"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Sendir út"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Ónefnt tæki"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Í hleðslu (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> fram að fullri hleðslu)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Skipta um notanda"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Skipta um notanda; núverandi notandi er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Sýna snið"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Bæta notanda við"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nýr notandi"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Slökkva á VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Aftengja VPN-net"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Tækinu er stjórnað af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nKerfisstjórinn þinn getur fylgst með og stjórnað stillingum, fyrirtækjaaðgangi, forritum, gögnum sem tengd eru tækinu og staðsetningarupplýsingum tækisins. Hafðu samband við kerfisstjórann til að fá frekari upplýsingar."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"Þú veittir forriti heimild til að koma á VPN-tengingu.\n\nÞetta forrit getur fylgst með virkni þinni í tækinu og á netinu, þar á meðal tölvupósti, forritum og vefsvæðum."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Tækinu er stjórnað af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nKerfisstjórinn þinn getur fylgst með og stjórnað stillingum, fyrirtækjaaðgangi, forritum, gögnum sem tengd eru tækinu og staðsetningarupplýsingum tækisins.\n\nÞú ert með tengingu við VPN-net sem getur fylgst með netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum.\n\nHafðu samband við kerfisstjórann til að fá frekari upplýsingar."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Vinnusniðinu þínu er stjórnað af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nKerfisstjórinn þinn getur fylgst með netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum.\n\nHafðu samband við kerfisstjórann til að fá frekari upplýsingar.\n\nÞú ert einnig með tengingu við VPN-net sem getur fylgst með netnotkun þinni."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"Þú ert með tengingu við <xliff:g id="APPLICATION">%1$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Þú ert með tengingu við <xliff:g id="APPLICATION">%1$s</xliff:g>, sem getur fylgst með persónulegri netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Vinnusniðinu þínu er stjórnað af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Það er tengt <xliff:g id="APPLICATION">%2$s</xliff:g>, sem getur fylgst með vinnutengdri netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum.\n\nHafðu samband við kerfisstjórann til að fá frekari upplýsingar."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Vinnusniðinu þínu er stjórnað af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Það er tengt <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, sem getur fylgst með vinnutengdri netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum.\n\nÞú ert einnig með tengingu við <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, sem getur fylgst með persónulegri netnotkun þinni."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Tækinu er stjórnað af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nKerfisstjórinn þinn getur fylgst með og stjórnað stillingum, fyrirtækjaaðgangi, forritum, gögnum sem tengd eru tækinu og staðsetningarupplýsingum tækisins.\n\nÞú ert með tengingu við <xliff:g id="APPLICATION">%2$s</xliff:g>, sem getur fylgst með netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum.\n\nHafðu samband við kerfisstjórann til að fá frekari upplýsingar."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Tækið verður læst þar til þú opnar það handvirkt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Fáðu tilkynningar hraðar"</string>
@@ -398,12 +404,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Hafna"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er hljóðstyrksvalmyndin"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Snertu til að færa í upprunalegt horf."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Þú ert í vinnusniðinu"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Fínstillingar kerfisviðmóts"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Sýna innfellda rafhlöðustöðu"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Sýna rafhlöðustöðuna í stöðustikunni þegar tækið er ekki í hleðslu"</string>
     <string name="quick_settings" msgid="10042998191725428">"Flýtistillingar"</string>
     <string name="status_bar" msgid="4877645476959324760">"Stöðustika"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Prufustilling"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Kveikja á prufustillingu"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Sýna prufustillingu"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Vekjari"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Vinnusnið"</string>
@@ -414,4 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Ekki mun heyrast í vekjaranum <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"இணைக்கப்படவில்லை"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"நெட்வொர்க் இல்லை"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"வைஃபையை முடக்கு"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"வைஃபை நெட்வொர்க்குகள் இல்லை"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"அனுப்பு"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"பெயரிடப்படாத சாதனம்"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"சார்ஜாகிறது (முழு சார்ஜிற்கு <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ஆகும்)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"பயனரை மாற்று, தற்போதைய பயனர் <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"சுயவிவரத்தைக் காட்டு"</string>
     <string name="user_add_user" msgid="5110251524486079492">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"புதியவர்"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPNஐ முடக்கு"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNஐத் துண்டி"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"சாதனத்தை நிர்வகிப்பவர்: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nஉங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், பயன்பாடுகள், சாதனத்துடன் தொடர்புடைய தரவு மற்றும் சாதனத்தின் இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும். கூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"VPN இணைப்பை அமைக்க, பயன்பாட்டிற்கு அனுமதி வழங்கியுள்ளீர்கள்.\n\nமின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட, உங்கள் சாதனத்தையும் நெட்வொர்க் செயல்பாட்டையும் இந்தப் பயன்பாட்டினால் கண்காணிக்க முடியும்."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"சாதனத்தை நிர்வகிப்பவர்: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nஉங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், பயன்பாடுகள், சாதனத்துடன் தொடர்புடைய தரவு மற்றும் சாதனத்தின் இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\nVPN இல் இணைக்கப்பட்டுள்ளதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் பாதுகாப்பான இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டை கண்காணிக்க முடியும்.\n\nகூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"உங்கள் பணி சுயவிவரத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nமின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டை நிர்வாகியால் கண்காணிக்க முடியும்.\n\nகூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்.\n\nஉங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய VPN இலும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"உங்கள் பணி சுயவிவரத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION">%1$s</xliff:g>. <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் இணைக்கப்பட்டதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் பணியிட நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nகூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"உங்கள் பணி சுயவிவரத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION">%1$s</xliff:g>. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் இணைக்கப்பட்டதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் பணியிட நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nமேலும் <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளதால், உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"சாதனத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nஉங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், பயன்பாடுகள், சாதனத்துடன் தொடர்புடைய தரவு மற்றும் சாதனத்தின் இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\n<xliff:g id="APPLICATION">%2$s</xliff:g> உடன் இணைக்கப்பட்டதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nகூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"நீங்கள் கைமுறையாகத் திறக்கும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"விரைவாக அறிவிப்புகளைப் பெறுதல்"</string>
@@ -398,12 +404,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"நிராகரி"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"ஒலியளவு செய்தி: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"அசலை மீட்டமைக்கத் தொடவும்."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"பணி சுயவிவரத்தில் இருக்கிறீர்கள்"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ட்யூனர்"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"உள்ளிணைந்த பேட்டரி சதவீதத்தைக் காட்டு"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"சார்ஜ் செய்யாத போது, நிலைப் பட்டி ஐகானின் உள்ளே பேட்டரி அளவு சதவீதத்தைக் காட்டும்"</string>
     <string name="quick_settings" msgid="10042998191725428">"உடனடி அமைப்புகள்"</string>
     <string name="status_bar" msgid="4877645476959324760">"நிலைப் பட்டி"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"டெமோ முறை"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"டெமோ முறையை இயக்கு"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"டெமோ முறையைக் காட்டு"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"ஈதர்நெட்"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"அலாரம்"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"பணி சுயவிவரம்"</string>
@@ -414,4 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"அடுத்த அலாரத்தை <xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு கேட்க மாட்டீர்கள்"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

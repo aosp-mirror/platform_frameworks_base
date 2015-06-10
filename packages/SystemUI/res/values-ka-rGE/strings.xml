@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"არ არის დაკავშირებული."</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ქსელი არ არის"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi გამორთულია"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi ქსელები მიუწვდომელია"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ტრანსლირება"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"გადაიცემა"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"უსახელო მოწყობილობა"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>-ის შეცვლა დასრულებამდე)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"მომხმარებლის გადართვა"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"მომხმარებლის გდართვა. ამჟამინდელი მომხმარებელი <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"პროფილის ჩვენება"</string>
     <string name="user_add_user" msgid="5110251524486079492">"მომხმარებლის დამატება"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ახალი მომხმარებელი"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN-ის გაუქმება"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-ის გათიშვა"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"თქვენ მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორატიული წვდომის, აპებისა და მონაცემების, მათ შორის, ქსელის აქტივობისა და თქვენი მოწყობილობის მდებარეობის ინფორმაციის მონიტორინგი და მართვა. დამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"თქვენ მიეცით ნებართვა აპს, დააყენოს VPN კავშირი.\n\nამ აპს შეუძლია თქვენი მოწყობილობის და ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებ-საიტების, მონიტორინგი."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"თქვენ მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორატიული წვდომის, აპებისა და მონაცემების, და ასევე თქვენი მოწყობილობის მდებარეობის ინფორმაციის მონიტორინგი და მართვა.\n\nთქვენ ასევე დაკავშირებული ხართ VPN-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპების და ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"თქვენს სამუშაო პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი, მათ შორის, ელფოსტის, აპებისა და ვებ-საიტების.\n\nდამატებითი ინფორმაციისთვის, დაუკავშირდით თქვენს ადმინისტრატორს.\n\nთქვენ ასევე დაკავშირებული ხართ VPN-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და ვებ-საიტების."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და ვებ-საიტების."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"თქვენს სამუშაო პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ის დაკავშირებულია <xliff:g id="APPLICATION">%2$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი სამსახურის ქსელის აქტივობის მონიტორინგი, მათ შორის, ელფოსტის, აპებისა და ვებ-საიტების.\n\nდამატებითი ინფორმაციისთვის მიმართეთ თქვენს ადმინისტრატორს."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"თქვენს სამუშაო პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ის დაკავშირებულია <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი სამსახურის ქსელის აქტივობის მონიტორინგი, მათ შორის, ელფოსტის, აპებისა და ვებ-საიტების.\n\nთქვენ ასევე დაკავშირებული ხართ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის მონიტორინგი."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"თქვენს მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nადმინისტრატორს შეუძლია თქვენი მოწყობილობასთან ასოცირებული პარამეტრების, კორპორატიული წვდომის, აპებისა და მონაცემების, და ასევე მოწყობილობის მდებარეობის ინფორმაციის მონიტორინგი და მართვა.\n\nთქვენ დაკავშირებული ხართ <xliff:g id="APPLICATION">%2$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებ-საიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"მოწყობილობის დარჩება ჩაკეტილი, სანამ ხელით არ გახსნით"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"შეტყობინებების უფრო სწრაფად მიღება"</string>
@@ -398,12 +404,19 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"უარყოფა"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ხმოვან დიალოგშია"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ორიგინალის აღდგენისათვის, შეეხეთ."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"თქვენ სამუშაო პროფილში ხართ"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ტუნერი"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ჩამაგრებული ბატარეის პროცენტის ჩვენება"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ბატარეის დონის პროცენტის ჩვენება სტატუსის ზოლის ხატულას შიგნით, როდესაც არ იტენება"</string>
     <string name="quick_settings" msgid="10042998191725428">"სწრაფი პარამეტრები"</string>
     <string name="status_bar" msgid="4877645476959324760">"სტატუსის ზოლი"</string>
+    <!-- no translation found for demo_mode (2389163018533514619) -->
+    <skip />
+    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
+    <skip />
+    <!-- no translation found for show_demo_mode (2018336697782464029) -->
+    <skip />
     <string name="status_bar_ethernet" msgid="5044290963549500128">"ეთერნეტი"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"მაღვიძარა"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"სამსახურის პროფილი"</string>
@@ -414,4 +427,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"ვერ გაიგონებთ მომდევნო მაღვიძარას <xliff:g id="WHEN">%1$s</xliff:g>-ზე"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>-ზე"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>-ზე"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>
