@@ -81,10 +81,13 @@ public class PanelBar extends FrameLayout {
     }
 
     public void setBouncerShowing(boolean showing) {
+        int important = showing ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                : IMPORTANT_FOR_ACCESSIBILITY_AUTO;
+
+        setImportantForAccessibility(important);
+
         if (mPanelHolder != null) {
-            mPanelHolder.setImportantForAccessibility(
-                    showing ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                            : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            mPanelHolder.setImportantForAccessibility(important);
         }
     }
 
