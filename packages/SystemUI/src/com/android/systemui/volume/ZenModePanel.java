@@ -151,7 +151,7 @@ public class ZenModePanel extends LinearLayout {
 
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
         mZenButtons.addButton(R.string.interruption_level_none_twoline,
-                R.string.interruption_level_none,
+                R.string.interruption_level_none_with_warning,
                 Global.ZEN_MODE_NO_INTERRUPTIONS);
         mZenButtons.addButton(R.string.interruption_level_alarms_twoline,
                 R.string.interruption_level_alarms,
