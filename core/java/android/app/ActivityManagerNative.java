@@ -2197,7 +2197,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             Bundle extras = data.readBundle();
             AssistStructure structure = AssistStructure.CREATOR.createFromParcel(data);
             AssistContent content = AssistContent.CREATOR.createFromParcel(data);
-            reportAssistContextExtras(token, extras, structure, content);
+            Uri referrer = data.readInt() != 0 ? Uri.CREATOR.createFromParcel(data) : null;
+            reportAssistContextExtras(token, extras, structure, content, referrer);
             reply.writeNoException();
             return true;
         }
@@ -5367,7 +5368,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public void reportAssistContextExtras(IBinder token, Bundle extras, AssistStructure structure,
-            AssistContent content) throws RemoteException {
+            AssistContent content, Uri referrer) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -5375,6 +5376,12 @@ class ActivityManagerProxy implements IActivityManager
         data.writeBundle(extras);
         structure.writeToParcel(data, 0);
         content.writeToParcel(data, 0);
+        if (referrer != null) {
+            data.writeInt(1);
+            referrer.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(REPORT_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

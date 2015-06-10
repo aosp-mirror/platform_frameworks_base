@@ -10728,12 +10728,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void reportAssistContextExtras(IBinder token, Bundle extras, AssistStructure structure,
-            AssistContent content) {
+            AssistContent content, Uri referrer) {
         PendingAssistExtras pae = (PendingAssistExtras)token;
         synchronized (pae) {
             pae.result = extras;
             pae.structure = structure;
             pae.content = content;
+            if (referrer != null) {
+                pae.extras.putParcelable(Intent.EXTRA_REFERRER, referrer);
+            }
             pae.haveResult = true;
             pae.notifyAll();
             if (pae.intent == null && pae.receiver == null) {

@@ -23,14 +23,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
 public class TestInteractionActivity extends Activity implements View.OnClickListener {
     static final String TAG = "TestInteractionActivity";
+
+    static final String REQUEST_ABORT = "abort";
+    static final String REQUEST_COMPLETE = "complete";
+    static final String REQUEST_PICK = "pick";
+    static final String REQUEST_CONFIRM = "confirm";
 
     VoiceInteractor mInteractor;
     VoiceInteractor.Request mCurrentRequest = null;
@@ -72,21 +75,32 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         mCancelButton.setOnClickListener(this);
 
         mInteractor = getVoiceInteractor();
-        mCurrentRequest = new VoiceInteractor.ConfirmationRequest(
-                new VoiceInteractor.Prompt("This is a confirmation"), null) {
-            @Override
-            public void onCancel() {
-                Log.i(TAG, "Canceled!");
-                getActivity().finish();
-            }
 
-            @Override
-            public void onConfirmationResult(boolean confirmed, Bundle result) {
-                Log.i(TAG, "Confirmation result: confirmed=" + confirmed + " result=" + result);
-                getActivity().finish();
-            }
-        };
-        mInteractor.submitRequest(mCurrentRequest);
+        VoiceInteractor.Request[] active = mInteractor.getActiveRequests();
+        for (int i=0; i<active.length; i++) {
+            Log.i(TAG, "Active #" + i + " / " + active[i].getName() + ": " + active[i]);
+        }
+
+        mCurrentRequest = mInteractor.getActiveRequest(REQUEST_CONFIRM);
+        if (mCurrentRequest == null) {
+            mCurrentRequest = new VoiceInteractor.ConfirmationRequest(
+                    new VoiceInteractor.Prompt("This is a confirmation"), null) {
+                @Override
+                public void onCancel() {
+                    Log.i(TAG, "Canceled!");
+                    getActivity().finish();
+                }
+
+                @Override
+                public void onConfirmationResult(boolean confirmed, Bundle result) {
+                    Log.i(TAG, "Confirmation result: confirmed=" + confirmed + " result=" + result);
+                    getActivity().finish();
+                }
+            };
+            mInteractor.submitRequest(mCurrentRequest, REQUEST_CONFIRM);
+        } else {
+            Log.i(TAG, "Restarting with active confirmation: " + mCurrentRequest);
+        }
     }
 
     @Override
@@ -112,7 +126,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                     getActivity().finish();
                 }
             };
-            mInteractor.submitRequest(req);
+            mInteractor.submitRequest(req, REQUEST_ABORT);
         } else if (v == mCompleteButton) {
             VoiceInteractor.CompleteVoiceRequest req = new VoiceInteractor.CompleteVoiceRequest(
                     new VoiceInteractor.Prompt("Woohoo, completed!"), null) {
@@ -129,7 +143,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                     getActivity().finish();
                 }
             };
-            mInteractor.submitRequest(req);
+            mInteractor.submitRequest(req, REQUEST_COMPLETE);
         } else if (v == mPickButton) {
             VoiceInteractor.PickOptionRequest.Option[] options =
                     new VoiceInteractor.PickOptionRequest.Option[5];
@@ -168,7 +182,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                     }
                 }
             };
-            mInteractor.submitRequest(req);
+            mInteractor.submitRequest(req, REQUEST_PICK);
         } else if (v == mJumpOutButton) {
             Log.i(TAG, "Jump out");
             Intent intent = new Intent(Intent.ACTION_MAIN);
