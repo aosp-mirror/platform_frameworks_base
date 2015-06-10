@@ -41,7 +41,7 @@
     <string name="button_copy" msgid="8706475544635021302">"நகலெடு"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டன"</string>
     <string name="sort_name" msgid="9183560467917256779">"பெயரின்படி"</string>
-    <string name="sort_date" msgid="586080032956151448">"தேதியின்படி திருத்தப்பட்டது"</string>
+    <string name="sort_date" msgid="586080032956151448">"திருத்தப்பட்ட தேதியின்படி"</string>
     <string name="sort_size" msgid="3350681319735474741">"அளவின்படி"</string>
     <string name="drawer_open" msgid="4545466532430226949">"வழிகளைக் காட்டு"</string>
     <string name="drawer_close" msgid="7602734368552123318">"வழிகளை மறை"</string>
