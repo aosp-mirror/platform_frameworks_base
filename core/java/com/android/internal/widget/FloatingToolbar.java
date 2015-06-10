@@ -361,7 +361,7 @@ public final class FloatingToolbar {
             mParent = Preconditions.checkNotNull(parent);
             mContentContainer = createContentContainer(parent.getContext());
             mPopupWindow = createPopupWindow(mContentContainer);
-            mDismissAnimation = createShrinkFadeOutFromBottomAnimation(
+            mDismissAnimation = createExitAnimation(
                     mContentContainer,
                     150,  // startDelay
                     new AnimatorListenerAdapter() {
@@ -371,7 +371,7 @@ public final class FloatingToolbar {
                             mContentContainer.removeAllViews();
                         }
                     });
-            mHideAnimation = createShrinkFadeOutFromBottomAnimation(
+            mHideAnimation = createExitAnimation(
                     mContentContainer,
                     0,  // startDelay
                     new AnimatorListenerAdapter() {
@@ -561,7 +561,7 @@ public final class FloatingToolbar {
          * Performs the "show" animation on the floating popup.
          */
         private void runShowAnimation() {
-            createGrowFadeInFromBottom(mContentContainer).start();
+            createEnterAnimation(mContentContainer).start();
         }
 
         /**
@@ -1369,38 +1369,35 @@ public final class FloatingToolbar {
     }
 
     /**
-     * Creates a "grow and fade in from the bottom" animation for the specified view.
+     * Creates an "appear" animation for the specified view.
      *
      * @param view  The view to animate
      */
-    private static AnimatorSet createGrowFadeInFromBottom(View view) {
-        AnimatorSet growFadeInFromBottomAnimation =  new AnimatorSet();
-        growFadeInFromBottomAnimation.playTogether(
-                ObjectAnimator.ofFloat(view, View.SCALE_X, 0.5f, 1).setDuration(125),
-                ObjectAnimator.ofFloat(view, View.SCALE_Y, 0.5f, 1).setDuration(125),
-                ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(75),
+    private static AnimatorSet createEnterAnimation(View view) {
+        AnimatorSet animation =  new AnimatorSet();
+        animation.playTogether(
+                ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(200),
                 // Make sure that view.x is always fixed throughout the duration of this animation.
                 ObjectAnimator.ofFloat(view, View.X, view.getX(), view.getX()));
-        growFadeInFromBottomAnimation.setStartDelay(50);
-        return growFadeInFromBottomAnimation;
+        animation.setStartDelay(50);
+        return animation;
     }
 
     /**
-     * Creates a "shrink and fade out from bottom" animation for the specified view.
+     * Creates a "disappear" animation for the specified view.
      *
      * @param view  The view to animate
      * @param startDelay  The start delay of the animation
      * @param listener  The animation listener
      */
-    private static AnimatorSet createShrinkFadeOutFromBottomAnimation(
+    private static AnimatorSet createExitAnimation(
             View view, int startDelay, Animator.AnimatorListener listener) {
-        AnimatorSet shrinkFadeOutFromBottomAnimation =  new AnimatorSet();
-        shrinkFadeOutFromBottomAnimation.playTogether(
-                ObjectAnimator.ofFloat(view, View.SCALE_Y, 1, 0.5f).setDuration(125),
-                ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0).setDuration(75));
-        shrinkFadeOutFromBottomAnimation.setStartDelay(startDelay);
-        shrinkFadeOutFromBottomAnimation.addListener(listener);
-        return shrinkFadeOutFromBottomAnimation;
+        AnimatorSet animation =  new AnimatorSet();
+        animation.playTogether(
+                ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0).setDuration(200));
+        animation.setStartDelay(startDelay);
+        animation.addListener(listener);
+        return animation;
     }
 
     private static int getEstimatedToolbarHeight(Context context) {
