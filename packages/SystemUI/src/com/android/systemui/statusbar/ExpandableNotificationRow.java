@@ -856,6 +856,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
+    protected View getContentView() {
+        return getShowingLayout();
+    }
+
+    @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         super.setActualHeight(height, notifyListeners);
         int contentHeight = calculateContentHeightFromActualHeight(height);
