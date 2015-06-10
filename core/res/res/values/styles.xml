@@ -1279,6 +1279,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.ActionButton.CloseMode">
+        <!-- Should match Widget.Toolbar.Button.Navigation minWidth. -->
+        <item name="minWidth">56dp</item>
     </style>
 
     <style name="Widget.ActionBar.TabView" parent="Widget">
