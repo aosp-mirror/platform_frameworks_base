@@ -80,16 +80,10 @@ public class ViewPropertyAnimator {
 
     /**
      * The interpolator of the underlying Animator object. By default, we don't set the interpolator
-     * on the Animator and just use its default interpolator. If the interpolator is ever set on
-     * this Animator, then we use the interpolator that it was set to.
+     * on the Animator and just use its default interpolator. If the interpolator is set to a
+     * non-null value on this Animator, then we use the interpolator that it was set to.
      */
     private TimeInterpolator mInterpolator;
-
-    /**
-     * A flag indicating whether the interpolator has been set on this object. If not, we don't set
-     * the interpolator on the underlying Animator, but instead just use its default interpolator.
-     */
-    private boolean mInterpolatorSet = false;
 
     /**
      * Listener for the lifecycle events of the underlying ValueAnimator object.
@@ -338,7 +332,6 @@ public class ViewPropertyAnimator {
      * @return This object, allowing calls to methods in this class to be chained.
      */
     public ViewPropertyAnimator setInterpolator(TimeInterpolator interpolator) {
-        mInterpolatorSet = true;
         mInterpolator = interpolator;
         return this;
     }
@@ -349,7 +342,7 @@ public class ViewPropertyAnimator {
      * @return The timing interpolator for this animation.
      */
     public TimeInterpolator getInterpolator() {
-        if (mInterpolatorSet) {
+        if (mInterpolator != null) {
             return mInterpolator;
         } else {
             // Just return the default from ValueAnimator, since that's what we'd get if
@@ -897,7 +890,7 @@ public class ViewPropertyAnimator {
         if (mDurationSet) {
             animator.setDuration(mDuration);
         }
-        if (mInterpolatorSet) {
+        if (mInterpolator != null) {
             animator.setInterpolator(mInterpolator);
         }
         animator.start();
