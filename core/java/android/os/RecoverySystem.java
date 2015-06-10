@@ -71,6 +71,7 @@ public class RecoverySystem {
     /** Used to communicate with recovery.  See bootable/recovery/recovery.c. */
     private static File RECOVERY_DIR = new File("/cache/recovery");
     private static File COMMAND_FILE = new File(RECOVERY_DIR, "command");
+    private static File UNCRYPT_FILE = new File(RECOVERY_DIR, "uncrypt_file");
     private static File LOG_FILE = new File(RECOVERY_DIR, "log");
     private static String LAST_PREFIX = "last_";
 
@@ -333,7 +334,20 @@ public class RecoverySystem {
     public static void installPackage(Context context, File packageFile)
         throws IOException {
         String filename = packageFile.getCanonicalPath();
+
+        FileWriter uncryptFile = new FileWriter(UNCRYPT_FILE);
+        try {
+            uncryptFile.write(filename + "\n");
+        } finally {
+            uncryptFile.close();
+        }
         Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
+
+        // If the package is on the /data partition, write the block map file
+        // into COMMAND_FILE instead.
+        if (filename.startsWith("/data/")) {
+            filename = "@/cache/recovery/block.map";
+        }
 
         final String filenameArg = "--update_package=" + filename;
         final String localeArg = "--locale=" + Locale.getDefault().toString();
