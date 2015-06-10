@@ -21,15 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -100,7 +93,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDark;
 
     private int mBgTint = 0;
-    private final int mRoundedRectCornerRadius;
 
     /**
      * Flag to indicate that the notification has been touched once and the second touch will
@@ -126,10 +118,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private NotificationBackgroundView mBackgroundDimmed;
     private ObjectAnimator mBackgroundAnimator;
     private RectF mAppearAnimationRect = new RectF();
-    private PorterDuffColorFilter mAppearAnimationFilter;
     private float mAnimationTranslationY;
     private boolean mDrawingAppearAnimation;
-    private Paint mAppearPaint = new Paint();
     private ValueAnimator mAppearAnimator;
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
@@ -151,9 +141,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mLinearInterpolator = new LinearInterpolator();
         setClipChildren(false);
         setClipToPadding(false);
-        mAppearAnimationFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
-        mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
-                R.dimen.notification_material_rounded_rect_radius);
         mLegacyColor = context.getColor(R.color.notification_legacy_background_color);
         mNormalColor = context.getColor(R.color.notification_material_background_color);
         mLowPriorityColor = context.getColor(
@@ -661,19 +648,25 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void updateAppearAnimationAlpha() {
-        int backgroundColor = getBgColor();
-        if (backgroundColor != -1) {
-            float contentAlphaProgress = mAppearAnimationFraction;
-            contentAlphaProgress = contentAlphaProgress / (1.0f - ALPHA_ANIMATION_END);
-            contentAlphaProgress = Math.min(1.0f, contentAlphaProgress);
-            contentAlphaProgress = mCurrentAlphaInterpolator.getInterpolation(contentAlphaProgress);
-            int sourceColor = Color.argb((int) (255 * (1.0f - contentAlphaProgress)),
-                    Color.red(backgroundColor), Color.green(backgroundColor),
-                    Color.blue(backgroundColor));
-            mAppearAnimationFilter.setColor(sourceColor);
-            mAppearPaint.setColorFilter(mAppearAnimationFilter);
-        }
+        float contentAlphaProgress = mAppearAnimationFraction;
+        contentAlphaProgress = contentAlphaProgress / (1.0f - ALPHA_ANIMATION_END);
+        contentAlphaProgress = Math.min(1.0f, contentAlphaProgress);
+        contentAlphaProgress = mCurrentAlphaInterpolator.getInterpolation(contentAlphaProgress);
+        setContentAlpha(contentAlphaProgress);
     }
+
+    private void setContentAlpha(float contentAlpha) {
+        int layerType = contentAlpha == 0.0f || contentAlpha == 1.0f ? LAYER_TYPE_NONE
+                : LAYER_TYPE_HARDWARE;
+        View contentView = getContentView();
+        int currentLayerType = contentView.getLayerType();
+        if (currentLayerType != layerType) {
+            contentView.setLayerType(layerType, null);
+        }
+        contentView.setAlpha(contentAlpha);
+    }
+
+    protected abstract View getContentView();
 
     private int getBgColor() {
         if (mBgTint != 0) {
@@ -708,41 +701,24 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     private void enableAppearDrawing(boolean enable) {
         if (enable != mDrawingAppearAnimation) {
-            if (enable) {
-                if (getWidth() == 0 || getActualHeight() == 0) {
-                    // TODO: This should not happen, but it can during expansion. Needs
-                    // investigation
-                    return;
-                }
-                Bitmap bitmap = Bitmap.createBitmap(getWidth(), getActualHeight(),
-                        Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                draw(canvas);
-                mAppearPaint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP,
-                        Shader.TileMode.CLAMP));
-            } else {
-                mAppearPaint.setShader(null);
-            }
             mDrawingAppearAnimation = enable;
+            if (!enable) {
+                setContentAlpha(1.0f);
+            }
             invalidate();
         }
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        if (!mDrawingAppearAnimation) {
-            super.dispatchDraw(canvas);
-        } else {
-            drawAppearRect(canvas);
+        if (mDrawingAppearAnimation) {
+            canvas.save();
+            canvas.translate(0, mAppearAnimationTranslation);
         }
-    }
-
-    private void drawAppearRect(Canvas canvas) {
-        canvas.save();
-        canvas.translate(0, mAppearAnimationTranslation);
-        canvas.drawRoundRect(mAppearAnimationRect, mRoundedRectCornerRadius,
-                mRoundedRectCornerRadius, mAppearPaint);
-        canvas.restore();
+        super.dispatchDraw(canvas);
+        if (mDrawingAppearAnimation) {
+            canvas.restore();
+        }
     }
 
     public void setOnActivatedListener(OnActivatedListener onActivatedListener) {
