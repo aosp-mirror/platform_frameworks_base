@@ -618,12 +618,11 @@ public class ListPopupWindow {
                 heightSpec = mDropDownHeight;
             }
 
-            mPopup.setWidth(widthSpec);
-            mPopup.setHeight(heightSpec);
             mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
 
             mPopup.update(getAnchorView(), mDropDownHorizontalOffset,
-                            mDropDownVerticalOffset, -1, -1);
+                            mDropDownVerticalOffset, (widthSpec < 0)? -1 : widthSpec,
+                            (heightSpec < 0)? -1 : heightSpec);
         } else {
             final int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
