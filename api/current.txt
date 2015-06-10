@@ -25940,6 +25940,7 @@ package android.provider {
   protected static abstract interface ContactsContract.RawContactsColumns {
     field public static final java.lang.String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
     field public static final java.lang.String AGGREGATION_MODE = "aggregation_mode";
+    field public static final java.lang.String BACKUP_ID = "backup_id";
     field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";

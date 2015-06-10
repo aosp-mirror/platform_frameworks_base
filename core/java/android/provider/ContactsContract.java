@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
@@ -2216,8 +2217,6 @@ public final class ContactsContract {
          * This id is provided by its own data source, and can be used to backup metadata
          * to the server.
          * This should be unique within each set of account_name/account_type/data_set
-         *
-         * @hide
          */
         public static final String BACKUP_ID = "backup_id";
 
@@ -8942,30 +8941,25 @@ public final class ContactsContract {
     /**
      * @hide
      */
+    @SystemApi
     protected interface MetadataSyncColumns {
 
         /**
          * The raw contact backup id.
          * A reference to the {@link ContactsContract.RawContacts#BACKUP_ID} that save the
          * persistent unique id for each raw contact within its source system.
-         *
-         * @hide
          */
         public static final String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
 
         /**
          * The account type to which the raw_contact of this item is associated. See
          * {@link RawContacts#ACCOUNT_TYPE}
-         *
-         * @hide
          */
         public static final String ACCOUNT_TYPE = "account_type";
 
         /**
          * The account name to which the raw_contact of this item is associated. See
          * {@link RawContacts#ACCOUNT_NAME}
-         *
-         * @hide
          */
         public static final String ACCOUNT_NAME = "account_name";
 
@@ -8974,8 +8968,6 @@ public final class ContactsContract {
          * multiple sync adapters for the same account type to distinguish between
          * each others' data.
          * {@link RawContacts#DATA_SET}
-         *
-         * @hide
          */
         public static final String DATA_SET = "data_set";
 
@@ -9037,8 +9029,6 @@ public final class ContactsContract {
          *       ]
          *     }
          * </pre>
-         *
-         * @hide
          */
         public static final String DATA = "data";
 
@@ -9048,8 +9038,6 @@ public final class ContactsContract {
          * called on a raw contact, updating MetadataSync table to set the flag of the raw contact
          * as "1", then metadata sync adapter deletes the raw contact metadata on the server.
          * <P>Type: INTEGER</P>
-         *
-         * @hide
          */
         public static final String DELETED = "deleted";
     }
@@ -9060,6 +9048,7 @@ public final class ContactsContract {
      *
      * @hide
      */
+    @SystemApi
     public static final class MetadataSync implements BaseColumns, MetadataSyncColumns {
 
         /** The authority for the contacts metadata */

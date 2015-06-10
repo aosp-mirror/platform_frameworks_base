@@ -27758,6 +27758,23 @@ package android.provider {
     field public static final java.lang.String TERTIARY_PHONE_TYPE = "tertiary_phone_type";
   }
 
+  public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String METADATA_AUTHORITY = "com.android.contacts.metadata";
+    field public static final android.net.Uri METADATA_AUTHORITY_URI;
+  }
+
+  protected static abstract interface ContactsContract.MetadataSyncColumns {
+    field public static final java.lang.String ACCOUNT_NAME = "account_name";
+    field public static final java.lang.String ACCOUNT_TYPE = "account_type";
+    field public static final java.lang.String DATA = "data";
+    field public static final java.lang.String DATA_SET = "data_set";
+    field public static final java.lang.String DELETED = "deleted";
+    field public static final java.lang.String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
+  }
+
   public static final class ContactsContract.PhoneLookup implements android.provider.BaseColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.PhoneLookupColumns {
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
@@ -27870,6 +27887,7 @@ package android.provider {
   protected static abstract interface ContactsContract.RawContactsColumns {
     field public static final java.lang.String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
     field public static final java.lang.String AGGREGATION_MODE = "aggregation_mode";
+    field public static final java.lang.String BACKUP_ID = "backup_id";
     field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
