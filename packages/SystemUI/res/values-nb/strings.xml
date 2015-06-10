@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ikke tilkoblet"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ingen nettverk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi er av"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ingen Wi-Fi-nettverk er tilgjengelige"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Enhet uten navn"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Lader (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Bytt bruker"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Bytt bruker, gjeldende bruker er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Vis profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Legg til brukere"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Ny bruker"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Koble fra VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Enheten din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data tilknyttet enheten din og enhetens posisjonsinformasjon. Hvis du vil har mer informasjon, kan du ta kontakt med administratoren."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"Du ga en app tillatelse til å konfigurere en VPN-tilkobling.\n\nDenne appen kan overvåke enheten og nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Enheten din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nAdministratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data tilknyttet enheten din og enhetens posisjonsinformasjon.\n\nDu er koblet til et VPN, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder.\n\nHvis du vil ha mer informasjon, kan du ta kontakt med administratoren."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Work-profilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratoren din kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder.\n\nFor mer informasjon, ta kontakt med administratoren.\n\nDu er også koblet til et VPN, som kan overvåke nettverksaktiviteten din."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"Enheten er koblet til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Enheten er koblet til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåke den personlige nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Work-profilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er koblet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din på jobben, inkludert e-post, apper og nettsteder.\n\nFor mer informasjon, ta kontakt med administratoren."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Work-profilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er koblet til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din på jobben, inkludert e-post, apper og nettsteder.\n\nDu er også koblet til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåke den personlige nettverksaktiviteten din."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Enheten din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data tilknyttet enheten din og enhetens posisjonsinformasjon.\n\nDu er koblet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder.\n\nFor mer informasjon, ta kontakt med administratoren."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten forblir låst til du låser den opp manuelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Motta varsler raskere"</string>
@@ -398,12 +404,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ikke tillat"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er volumdialogen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du er i Work-profilen"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis batterinivåprosenten inni statusfeltikonet når du ikke lader"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtiginnstillinger"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusrad"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Demo-modus"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Slå på demo-modus"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Vis demo-modus"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Work-profil"</string>
@@ -414,4 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

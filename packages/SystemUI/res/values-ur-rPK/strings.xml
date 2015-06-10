@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"مربوط نہیں ہے"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"کوئی نیٹ ورک نہیں ہے"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi آف ہے"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏کوئی WI-FI نیٹ ورک دستیاب نہیں"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"کاسٹ کریں"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"کاسٹنگ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"بغیر نام والا آلہ"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"چارج ہو رہا ہے (مکمل ہونے تک <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> باقی ہیں)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"صارف سوئچ کریں"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"صارف سوئچ کریں، موجودہ صارف <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"پروفائل دکھائیں"</string>
     <string name="user_add_user" msgid="5110251524486079492">"صارف کو شامل کریں"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"نیا صارف"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"‏VPN کو غیر فعال کریں"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏VPN کو غیر منسلک کریں"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"آپ کے آلہ کا نظم کیا جاتا ہے بذریعہ <xliff:g id="ORGANIZATION">%1$s</xliff:g>۔\n\nآپ کا منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کو مانیٹر اور ان کا نظم کر سکتا ہے۔ مزید معلومات کیلئے، اپنے منتظم سے رابطہ کریں۔"</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"‏آپ نے ایک ایپ کو VPN کنکشن ترتیب دینے کی اجازت دی ہے۔\n\nیہ ایپ ای میلز، ایپس اور ویب سائٹس سمیت آپ کے آلہ اور نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"‏آپ کے آلہ کا نظم کیا جاتا ہے بذریعہ <xliff:g id="ORGANIZATION">%1$s</xliff:g>۔\n\nآپ کا منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کو مانیٹر اور ان کا نظم کر سکتا ہے۔\n\nآپ ایک VPN سے منسلک ہیں، جو ای میلز، ایپس اور محفوظ ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتا ہے۔\n\nمزید معلومات کیلئے، اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"‏آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔\n\nآپ کا منتظم ای میلز، ایپس اور ویب سائٹس سیمت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتا ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔\n\nآپ ایک VPN سے بھی منسلک ہیں، جو آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتا ہے۔"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس آپ کے نجی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ یہ <xliff:g id="APPLICATION">%2$s</xliff:g> سے منسلک ہے، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ یہ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> سے منسلک ہے، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتا ہے۔\n\nآپ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> سے بھی منسلک ہیں، جو آپ کے نجی نیٹ ورک کی سرگرمی کو مانیٹر کر سکتا ہے۔"</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"آپ کا آلہ <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔\n\nآپ کا منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کو مانیٹر اور ان کا نظم کر سکتا ہے۔\n\nآپ <xliff:g id="APPLICATION">%2$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"آلہ اس وقت تک مقفل رہے گا جب تک آپ دستی طور پر اسے غیر مقفل نہ کریں"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"تیزی سے اطلاعات حاصل کریں"</string>
@@ -398,12 +404,19 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"مسترد کریں"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> والیوم ڈائلاگ ہے"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"اصل کو بحال کرنے کیلئے ٹچ کریں۔"</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"آپ دفتری پروفائل میں ہیں"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"‏سسٹم UI ٹیونر"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"سرایت کردہ بیٹری کی فیصد دکھائیں"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"جب چارج نہ ہو رہا ہو تو بیٹری کی سطح کی فیصد اسٹیٹس بار آئیکن کے اندر دکھائیں"</string>
     <string name="quick_settings" msgid="10042998191725428">"فوری ترتیبات"</string>
     <string name="status_bar" msgid="4877645476959324760">"اسٹیٹس بار"</string>
+    <!-- no translation found for demo_mode (2389163018533514619) -->
+    <skip />
+    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
+    <skip />
+    <!-- no translation found for show_demo_mode (2018336697782464029) -->
+    <skip />
     <string name="status_bar_ethernet" msgid="5044290963549500128">"ایتھرنیٹ"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"الارم"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"دفتری پروفائل"</string>
@@ -414,4 +427,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"آپ کو <xliff:g id="WHEN">%1$s</xliff:g> بجے اپنا اگلا الارم سنائی نہیں دے گا"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> بجے"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> بجے"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

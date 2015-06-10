@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Միացված չէ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ցանց չկա"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi-ը անջատված է"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Հասանելի Wi-Fi ցանցեր չկան"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Հեռարձակում"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Հեռարձակում"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Անանուն սարք"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Լիցքավորում (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> մինչև լրիվ լիցքավորումը)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Անջատել օգտվողին"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Փոխել օգտվողին. ներկայիս օգտվողն է՝ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Ցույց տալ դիտարկումը"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Ավելացնել օգտվող"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Նոր օգտվող"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Անջատել VPN-ը"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Անջատել VPN-ը"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Սարքի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ հաշիվը, հավելվածները, սարքի հետ առնչվող և սարքի տեղադրության տվյալները: Լրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"Ինչ-որ հավելվածի թույլ եք տվել հաստատել VPN կապակցում:\n\nԱյդ հավելվածը կարող է վերահսկել ձեր սարքի և ցանցի գործունեությունը, այդ թվում նաև՝ էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Սարքի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ հաշիվը, հավելվածները, սարքի հետ առնչվող և սարքի տեղադրության տվյալները:\n\nՆաև ունեք VPN կապակցում, ինչը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև՝ էլեկտրոնային նամակները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել ցանցում ունեցած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:\n\nՆաև ունեք VPN կապակցում, ինչը կարող է վերահսկել ձեր ցանցում կատարած գործողությունները:"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>: Այն կապակցված է <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>: Այն կապակցված է <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԴուք նույնպես կապակցված եք <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները:"</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Սարքի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ հաշիվը, հավելվածները, սարքի հետ առնչվող և սարքի տեղադրության տվյալները:\n\nՆաև կապակցված եք <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև՝ էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ավելի արագ ստացեք ծանուցումները"</string>
@@ -398,12 +404,19 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Մերժել"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ը ձայնի ուժգնության երկխոսության հավելված է"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Դիպչեք՝ սկզբնօրինակը վերականգնելու համար:"</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Դուք աշխատանքային պրոֆիլում եք"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Համակարգի ՕՄ-ի կարգավորիչ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Ցուցադրել ներկառուցված մարտկոցի տոկոսայնությունը"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Ցուցադրել մարտկոցի լիցքավորման տոկոսայնությունը կարգավիճակի գոտու պատկերակի վրա, երբ այն չի լիցքավորվում"</string>
     <string name="quick_settings" msgid="10042998191725428">"Արագ կարգավորումներ"</string>
     <string name="status_bar" msgid="4877645476959324760">"Կարգավիճակի գոտի"</string>
+    <!-- no translation found for demo_mode (2389163018533514619) -->
+    <skip />
+    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
+    <skip />
+    <!-- no translation found for show_demo_mode (2018336697782464029) -->
+    <skip />
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Զարթուցիչ"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Android for Work-ի պրոֆիլ"</string>
@@ -414,4 +427,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Ժամը <xliff:g id="WHEN">%1$s</xliff:g>-ի զարթուցիչը չի զանգի"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>-ին"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>-ին"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

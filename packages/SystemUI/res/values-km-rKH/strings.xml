@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ខាស"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"កំពុង​បញ្ចូល​ថ្ម (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ទើប​ពេញ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ប្ដូរ​អ្នកប្រើ ​អ្នកប្រើ​បច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"បង្ហាញ​ប្រវត្តិរូប"</string>
     <string name="user_add_user" msgid="5110251524486079492">"បន្ថែម​អ្នកប្រើ"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"អ្នកប្រើ​ថ្មី"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"បិទ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ផ្ដាច់ VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ឧបករណ៍របស់អ្នកត្រូវបានគ្រប់គ្រងដោយ៖ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចឃ្លាំមើល និងគ្រប់គ្រងការកំណត់ ការចូលដំណើរការជាក្រុម កម្មវិធី ទិន្នន័យដែលជាប់ទាក់ទងនឹងឧបករណ៍របស់អ្នក និងព័ត៌មានទីតាំងនៃឧបករណ៍របស់អ្នក។ សម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។"</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"អ្នកបានអនុញ្ញាតឲ្យកម្មវិធីរដំឡើងការភ្ជាប់ VPN ។\n\nកម្មវិធីនេះអាចឃ្លាំមើលឧបករណ៍ និងសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។"</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ឧបករណ៍របស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចឃ្លាំមើល និងគ្រប់គ្រងការកំណត់ ការចូលដំណើរការជាក្រុម កម្មវិធី ទិន្នន័យដែលជាប់ទាក់ទងនឹងឧបករណ៍របស់អ្នក និងព័ត៌មានទីតាំងនៃឧបករណ៍របស់អ្នក។\n\nអ្នកត្រូវបានភ្ជាប់ជាមួយ VPN ដែលវាអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។\n\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ប្រវត្តិការងាររបស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកមានលទ្ធភាពអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី គេហទំព័រ។\n\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។\n\nអ្នកក៏ត្រូវបានភ្ជាប់ជាមួួយ VPN ផងដែរ ដែលវាអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក។"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"អ្នកត្រូវបានតភ្ជាប់ទៅ <xliff:g id="APPLICATION">%1$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រាប់បញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។"</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"អ្នកត្រូវបានតភ្ជាប់ទៅ <xliff:g id="APPLICATION">%1$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រាប់បញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។"</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"ប្រវត្តិការងាររបស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>។ វាត្រូវបានតភ្ជាប់ទៅនឹង <xliff:g id="APPLICATION">%2$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី គេហទំព័រ។\n\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រប់របស់អ្នក។"</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"ប្រវត្តិការងាររបស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>។ វាត្រូវបានតភ្ជាប់ទៅនឹង <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី គេហទំព័រ។\n\nអ្នកក៏ត្រូវបានតភ្ជាប់ផងដែរទៅនឹង <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញផ្ទាល់ខ្លួនរបស់អ្នក។"</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ឧបករណ៍របស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចឃ្លាំមើល និងគ្រប់គ្រងការកំណត់ ការចូលប្រើជាក្រុម កម្មវិធី ទិន្នន័យដែលជាប់ទាក់ទងនឹងឧបករណ៍របស់អ្នក និងព័ត៌មានទីតាំងនៃឧបករណ៍របស់អ្នក។\n\nអ្នកត្រូវបានភ្ជាប់ជាមួយ <xliff:g id="APPLICATION">%2$s</xliff:g> ដែលវាអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។\n\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
@@ -398,12 +404,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"បដិសេធ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> គឺជាប្រអប់សម្លេង"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ប៉ះដើម្បីស្តារច្បាប់ដើម។"</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"អ្នកកំពុងនៅក្នុងប្រវត្តិរូបការងារ"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"ឧបករណ៍ចាប់ SystemUI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"បង្ហាញភាគរយថាមពលថ្មដែលបានបង្កប់"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"បង្ហាញភាគរយនៃកម្រិតថាមពលថ្មនៅក្នុងរូបតំណាងរបារស្ថានភាពនៅពេលមិនសាកថ្ម"</string>
     <string name="quick_settings" msgid="10042998191725428">"ការកំណត់រហ័ស"</string>
     <string name="status_bar" msgid="4877645476959324760">"របារស្ថានភាព"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"របៀបសាកល្បង"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"បើករបៀបសាកល្បង"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"បង្ហាញរបៀបសាកល្បង"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"អ៊ីសឺរណិត"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"ម៉ោងរោទ៍"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"ប្រវត្តិរូបការងារ"</string>
@@ -414,4 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ"</string>
     <string name="alarm_template" msgid="3980063409350522735">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>
