@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.view.Surface;
@@ -442,8 +443,7 @@ public abstract class Connection extends Conferenceable {
         private static final int MSG_SET_PAUSE_IMAGE = 11;
         private static final int MSG_REMOVE_VIDEO_CALLBACK = 12;
 
-        private final VideoProvider.VideoProviderHandler
-                mMessageHandler = new VideoProvider.VideoProviderHandler();
+        private VideoProvider.VideoProviderHandler mMessageHandler;
         private final VideoProvider.VideoProviderBinder mBinder;
 
         /**
@@ -455,6 +455,14 @@ public abstract class Connection extends Conferenceable {
          * Default handler used to consolidate binder method calls onto a single thread.
          */
         private final class VideoProviderHandler extends Handler {
+            public VideoProviderHandler() {
+                super();
+            }
+
+            public VideoProviderHandler(Looper looper) {
+                super(looper);
+            }
+
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -586,6 +594,18 @@ public abstract class Connection extends Conferenceable {
 
         public VideoProvider() {
             mBinder = new VideoProvider.VideoProviderBinder();
+            mMessageHandler = new VideoProvider.VideoProviderHandler();
+        }
+
+        /**
+         * Creates an instance of the {@link VideoProvider}, specifying the looper to use.
+         *
+         * @param looper The looper.
+         * @hide
+         */
+        public VideoProvider(Looper looper) {
+            mBinder = new VideoProvider.VideoProviderBinder();
+            mMessageHandler = new VideoProvider.VideoProviderHandler(looper);
         }
 
         /**
