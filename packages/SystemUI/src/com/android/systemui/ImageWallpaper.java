@@ -22,10 +22,8 @@ import static javax.microedition.khronos.egl.EGL10.*;
 import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.ComponentCallbacks2;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
@@ -35,6 +33,7 @@ import android.renderscript.Matrix4f;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -111,6 +110,9 @@ public class ImageWallpaper extends WallpaperService {
         float mYOffset = 0.5f;
         float mScale = 1f;
 
+        private Display mDefaultDisplay;
+        private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
+
         boolean mVisible = true;
         boolean mRedrawNeeded;
         boolean mOffsetsChanged;
@@ -172,7 +174,9 @@ public class ImageWallpaper extends WallpaperService {
 
             super.onCreate(surfaceHolder);
 
-            updateSurfaceSize(surfaceHolder);
+            mDefaultDisplay = getSystemService(WindowManager.class).getDefaultDisplay();
+
+            updateSurfaceSize(surfaceHolder, getDefaultDisplayInfo());
 
             setOffsetNotificationsEnabled(false);
         }
@@ -184,9 +188,7 @@ public class ImageWallpaper extends WallpaperService {
             mWallpaperManager.forgetLoadedWallpaper();
         }
 
-        void updateSurfaceSize(SurfaceHolder surfaceHolder) {
-            Point p = getDefaultDisplaySize();
-
+        void updateSurfaceSize(SurfaceHolder surfaceHolder, DisplayInfo displayInfo) {
             // Load background image dimensions, if we haven't saved them yet
             if (mBackgroundWidth <= 0 || mBackgroundHeight <= 0) {
                 // Need to load the image to get dimensions
@@ -194,14 +196,14 @@ public class ImageWallpaper extends WallpaperService {
                 updateWallpaperLocked();
                 if (mBackgroundWidth <= 0 || mBackgroundHeight <= 0) {
                     // Default to the display size if we can't find the dimensions
-                    mBackgroundWidth = p.x;
-                    mBackgroundHeight = p.y;
+                    mBackgroundWidth = displayInfo.logicalWidth;
+                    mBackgroundHeight = displayInfo.logicalHeight;
                 }
             }
 
             // Force the wallpaper to cover the screen in both dimensions
-            int surfaceWidth = Math.max(p.x, mBackgroundWidth);
-            int surfaceHeight = Math.max(p.y, mBackgroundHeight);
+            int surfaceWidth = Math.max(displayInfo.logicalWidth, mBackgroundWidth);
+            int surfaceHeight = Math.max(displayInfo.logicalHeight, mBackgroundHeight);
 
             // If the surface dimensions haven't changed, then just return
             final Rect frame = surfaceHolder.getSurfaceFrame();
@@ -299,26 +301,22 @@ public class ImageWallpaper extends WallpaperService {
             drawFrame();
         }
 
-        private Point getDefaultDisplaySize() {
-            Point p = new Point();
-            Context c = ImageWallpaper.this.getApplicationContext();
-            WindowManager wm = (WindowManager)c.getSystemService(Context.WINDOW_SERVICE);
-            Display d = wm.getDefaultDisplay();
-            d.getRealSize(p);
-            return p;
+        private DisplayInfo getDefaultDisplayInfo() {
+            mDefaultDisplay.getDisplayInfo(mTmpDisplayInfo);
+            return mTmpDisplayInfo;
         }
 
         void drawFrame() {
             try {
-                int newRotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).
-                        getDefaultDisplay().getRotation();
+                DisplayInfo displayInfo = getDefaultDisplayInfo();
+                int newRotation = displayInfo.rotation;
 
                 // Sometimes a wallpaper is not large enough to cover the screen in one dimension.
                 // Call updateSurfaceSize -- it will only actually do the update if the dimensions
                 // should change
                 if (newRotation != mLastRotation) {
                     // Update surface size (if necessary)
-                    updateSurfaceSize(getSurfaceHolder());
+                    updateSurfaceSize(getSurfaceHolder(), displayInfo);
                 }
                 SurfaceHolder sh = getSurfaceHolder();
                 final Rect frame = sh.getSurfaceFrame();
