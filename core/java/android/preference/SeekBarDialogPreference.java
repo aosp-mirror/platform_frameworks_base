@@ -18,29 +18,28 @@ package android.preference;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import com.android.internal.R;
+
 /**
  * @hide
  */
 public class SeekBarDialogPreference extends DialogPreference {
-    private static final String TAG = "SeekBarDialogPreference";
-
-    private Drawable mMyIcon;
+    private final Drawable mMyIcon;
 
     public SeekBarDialogPreference(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        setDialogLayoutResource(com.android.internal.R.layout.seekbar_dialog);
         createActionButtons();
 
         // Steal the XML dialogIcon attribute's value
         mMyIcon = getDialogIcon();
+
         setDialogIcon(null);
     }
 
@@ -49,7 +48,7 @@ public class SeekBarDialogPreference extends DialogPreference {
     }
 
     public SeekBarDialogPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
+        this(context, attrs, R.attr.seekBarDialogPreferenceStyle);
     }
 
     public SeekBarDialogPreference(Context context) {
@@ -58,15 +57,15 @@ public class SeekBarDialogPreference extends DialogPreference {
 
     // Allow subclasses to override the action buttons
     public void createActionButtons() {
-        setPositiveButtonText(android.R.string.ok);
-        setNegativeButtonText(android.R.string.cancel);
+        setPositiveButtonText(R.string.ok);
+        setNegativeButtonText(R.string.cancel);
     }
 
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        final ImageView iconView = (ImageView) view.findViewById(android.R.id.icon);
+        final ImageView iconView = (ImageView) view.findViewById(R.id.icon);
         if (mMyIcon != null) {
             iconView.setImageDrawable(mMyIcon);
         } else {
@@ -75,6 +74,6 @@ public class SeekBarDialogPreference extends DialogPreference {
     }
 
     protected static SeekBar getSeekBar(View dialogView) {
-        return (SeekBar) dialogView.findViewById(com.android.internal.R.id.seekbar);
+        return (SeekBar) dialogView.findViewById(R.id.seekbar);
     }
 }

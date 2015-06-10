@@ -26,14 +26,13 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.SeekBar;
 
+import com.android.internal.R;
+
 /**
  * @hide
  */
 public class VolumePreference extends SeekBarDialogPreference implements
         PreferenceManager.OnActivityStopListener, View.OnKeyListener, SeekBarVolumizer.Callback {
-
-    static final String TAG = "VolumePreference";
-
     private int mStreamType;
 
     /** May be null if the dialog isn't visible. */
@@ -44,7 +43,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
         super(context, attrs, defStyleAttr, defStyleRes);
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.VolumePreference, defStyleAttr, defStyleRes);
+                R.styleable.VolumePreference, defStyleAttr, defStyleRes);
         mStreamType = a.getInt(android.R.styleable.VolumePreference_streamType, 0);
         a.recycle();
     }
@@ -54,7 +53,11 @@ public class VolumePreference extends SeekBarDialogPreference implements
     }
 
     public VolumePreference(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
+        this(context, attrs, R.attr.seekBarDialogPreferenceStyle);
+    }
+
+    public VolumePreference(Context context) {
+        this(context, null);
     }
 
     public void setStreamType(int streamType) {
@@ -65,7 +68,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        final SeekBar seekBar = (SeekBar) view.findViewById(com.android.internal.R.id.seekbar);
+        final SeekBar seekBar = (SeekBar) view.findViewById(R.id.seekbar);
         mSeekBarVolumizer = new SeekBarVolumizer(getContext(), mStreamType, null, this);
         mSeekBarVolumizer.start();
         mSeekBarVolumizer.setSeekBar(seekBar);
@@ -128,14 +131,17 @@ public class VolumePreference extends SeekBarDialogPreference implements
        getPreferenceManager().unregisterOnActivityStopListener(this);
 
        if (mSeekBarVolumizer != null) {
-           Dialog dialog = getDialog();
+           final Dialog dialog = getDialog();
            if (dialog != null && dialog.isShowing()) {
-               View view = dialog.getWindow().getDecorView()
-                       .findViewById(com.android.internal.R.id.seekbar);
-               if (view != null) view.setOnKeyListener(null);
+               final View view = dialog.getWindow().getDecorView().findViewById(R.id.seekbar);
+               if (view != null) {
+                   view.setOnKeyListener(null);
+               }
+
                // Stopped while dialog was showing, revert changes
                mSeekBarVolumizer.revertVolume();
            }
+
            mSeekBarVolumizer.stop();
            mSeekBarVolumizer = null;
        }
