@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"කාර්යාල පැතිකඩ මකා දමන ලදි"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"පරිපාලක යෙදුමක් නොමැති වීමෙන් කාර්යාල පැතිකඩ මකා දමන ලදි."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"කාර්යාල පැතිකඩ පාලක යෙදුම නොමැති හෝ දූෂණය වී ඇත. ප්‍රතිඵලයක් ලෙස ඔබගේ කාර්යාල පැතිකඩ සහ අදාළ දත්ත මකා දමා ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කර ගන්න."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"යෙදුමේ කොටස් නොමැති හෝ දූෂණය වී ඇති නිසා, භාවිතා කළ නොහැක. ඔබගේ උපාංගය දැන් මකා දැමෙනු ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කරගන්න."</string>
     <string name="me" msgid="6545696007631404292">"මම"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"හඬ නඟනය අක්‍රියයි"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"හඬ නඟනය කම්පනය"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"හඬ නඟනය සක්‍රීයයි"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"යාවත්කාලීනය සඳහා සූදානම් වන්න"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"යාවත්කාලීන පැකේජය සකසමින්…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"වසා දමමින්…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ඔබගේ ටැබ්ලටය වැසේ."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ඔබගේ රූපවාහිනිය වසා දැමෙනු ඇත."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"සම්බන්ධතා"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ස්ථානය"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"ඔබගේ ස්ථානය ප්‍රවේශ කිරීම"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ඔබගේ සමාජයීය තොරතුරු"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ඔබගේ සම්බන්ධතා සහ සාමාජ සම්බන්ධයන් ගැන තොරතුරු වෙත ඍජු ප්‍රවේශය."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"දින දර්ශනය"</string>
@@ -511,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"වාහක සේවා වෙත බඳින්න"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"වාහක සේවා වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"බාධා නොකරන්න ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>

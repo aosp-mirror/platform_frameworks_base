@@ -56,7 +56,7 @@
     <string name="badPin" msgid="9015277645546710014">"De oude pincode die u heeft ingevoerd, is onjuist."</string>
     <string name="badPuk" msgid="5487257647081132201">"De PUK-code die u heeft ingevoerd, is onjuist."</string>
     <string name="mismatchPin" msgid="609379054496863419">"De pincodes die u heeft ingevoerd, komen niet overeen."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"Voer een PIN-code van 4 tot 8 cijfers in."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Voer een pincode van 4 tot 8 cijfers in."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Typ een PUK-code die 8 cijfers of langer is."</string>
     <string name="needPuk" msgid="919668385956251611">"Uw SIM-kaart is vergrendeld met de PUK-code. Typ de PUK-code om te ontgrendelen."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Voer de PUK2-code in om de SIM-kaart te ontgrendelen."</string>
@@ -75,7 +75,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"Wisselgesprek"</string>
     <string name="BaMmi" msgid="455193067926770581">"Oproep blokkeren"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Wachtwoordwijziging"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"PIN-wijziging"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"Pin-wijziging"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Nummer van beller beschikbaar"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Nummer van beller beperkt"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Driewegs bellen"</string>
@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Werkprofiel verwijderd"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Werkprofiel verwijderd wegens ontbrekende beheerapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"De beheerapp van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn uw werkprofiel en alle gerelateerde gegevens verwijderd. Neem voor hulp contact op met uw beheerder."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uw apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Er ontbreken onderdelen van de beheerapp of de app is beschadigd, waardoor de app niet kan worden gebruikt. Uw apparaat wordt nu gewist. Neem voor hulp contact op met uw beheerder."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Belsoftware uit"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Belsoftware op trillen"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Belsoftware aan"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Voorbereiden op updaten"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Updatepakket verwerken…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Uitschakelen..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Uw tablet wordt uitgeschakeld."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Uw tv wordt uitgeschakeld.."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacten"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"toegang krijgen tot uw contacten"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locatie"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"toegang krijgen tot uw locatie"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Uw sociale informatie"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Rechtstreeks toegang krijgen tot informatie over uw contacten en sociale connecties."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
@@ -245,7 +258,7 @@
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"toegang krijgen tot gegevens van sensoren en wearable-apparaten"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Inhoud van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De inhoud inspecteren van een venster waarmee u interactie heeft."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Verkennen via aanraking inschakelen"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Aangeraakte items worden hardop benoemd en het scherm kan worden verkend door middel van aanraking."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbeterde internettoegankelijkheid inschakelen"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Er kunnen scripts worden geïnstalleerd om app-inhoud toegankelijker te maken."</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Toegang tot de beschikbare accounts."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Geabonneerde feeds lezen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Hiermee kan de app details over de huidige gesynchroniseerde feeds achterhalen."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"sms\'jes verzenden en bekijken"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Hiermee kan de app sms-berichten verzenden. Dit kan tot onverwachte kosten leiden. Schadelijke apps kunnen u geld kosten doordat ze zonder uw bevestiging berichten kunnen verzenden."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"uw tekstberichten (SMS of MMS) lezen"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op uw tablet of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"toegang tot Niet storen"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>

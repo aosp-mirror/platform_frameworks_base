@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Служебният потребителски профил е изтрит"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Служебният потребителски профил е изтрит поради липса на администраторско приложение."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Администраторското приложение на служебния потребителски профил липсва или е повредено. В резултат на това той и свързаните с него данни са изтрити. За съдействие се свържете с администратора си."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Данните на устройството ви ще бъдат изтрити"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"В администраторското приложение липсват компоненти или то е невалидно и не може да се използва. Сега данните на устройството ви ще бъдат изтрити. Свържете се с администратора си за съдействие."</string>
     <string name="me" msgid="6545696007631404292">"Аз"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Звъненето е изключено"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибрира при звънене"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Подготвяне за актуализация"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Пакетът с актуализацията се обработва…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Телевизорът ви ще се изключи."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"достъп до контактите ви"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Местоположение"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"достъп до местоположението ви"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Социалната ви информация"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Осъществяване на директен достъп до информация за контактите и социалните ви връзки."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Достъп до наличните профили."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"четене на емисиите с абонамент"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Разрешава на приложението да получи подробности за текущо синхронизираните емисии."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"изпращане и преглед на SMS съобщения"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Разрешава на приложението да изпраща SMS съобщения. Това може да доведе до неочаквано таксуване. Злонамерените приложения могат да ви въвлекат в разходи, като изпращат съобщения без потвърждение от ваша страна."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"четене на текстовите ви съобщения (SMS или MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Разрешава на приложението да чете SMS съобщенията, съхранени на таблета или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Разрешава на притежателя да се свърже към интерфейса от най-високото ниво на услуга за съобщения от оператор. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"свързване с услуги на оператор"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Разрешава на собственика да се свързва с услуги на оператор. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"достъп до „Не безпокойте“"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Предоставя на приложението достъп за четене и запис до конфигурацията на „Не безпокойте“."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролира дължината и разрешените знаци за паролите и ПИН кодовете за заключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>

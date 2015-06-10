@@ -174,6 +174,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Pracovný profil bol odstránený"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Pracovný profil bol odstránený z dôvodu chýbajúcej správcovskej aplikácie."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Správcovská aplikácia pracovného profilu buď chýba, alebo je poškodená. Z toho dôvodu boli váš pracovný profil a s ním súvisiace údaje odstránené. Ak potrebujete pomoc, kontaktujte svojho správcu."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Vaše zariadenie bude vymazané"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"V správcovskej aplikácii chýbajú komponenty alebo je poškodená, a preto sa nedá použiť. Vaše zariadenie bude vymazané. Ak potrebujete pomoc, kontaktujte svojho správcu."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -188,8 +190,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvonenie je vypnuté"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibračné zvonenie"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvonenie je zapnuté"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Príprava na aktualizáciu"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Spracováva sa balík aktualizácií…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Prebieha vypínanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Váš tablet bude vypnutý."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televízor sa vypne."</string>
@@ -206,8 +218,8 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnúť"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlásenie o chybách"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie o chybách"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Zhromaždí informácie o aktuálnom stave zariadenia na odoslanie v e-mailovej správe. Chvíľu však potrvá, kým bude hlásenie o chybách pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie chyby"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
@@ -226,7 +238,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"prístup k vašim kontaktom"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"prístup k polohe"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Vaše sociálne informácie"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Priamy prístup k informáciám o vašich kontaktoch a sociálnych prepojeniach."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
@@ -513,6 +526,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby na odosielanie správ SMS a MMS operátora. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"naviazať sa na služby operátora"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Umožňuje držiteľovi povolenia naviazať sa na služby operátora. Bežné aplikácie by toto povolenie nemali nikdy nepotrebovať."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"prístup k nastaveniu Nerušiť"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikácii čítať a zapisovať konfiguráciu nastavenia Nerušiť."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
@@ -523,13 +538,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite televízor alebo vymažte všetky údaje tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite telefón alebo vymažte všetky údaje tohto používateľa."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Zmeniť zámku obrazovky"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Zmeňte zámku obrazovky."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Zmeniť zámku obrazovky."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknúť obrazovku"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ovládať, ako a kedy sa obrazovka uzamkne."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazanie všetkých údajov"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia výrobné nastavenia tabletu."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Vymažte údaje televízora bez upozornenia obnovením jeho výrobných nastavení."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia výrobné nastavenia telefónu."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazať všetky dáta"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení tabletu."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Bez predchádzajúceho upozornenia vymazať všetky dáta televízora obnovením jeho výrobných nastavení."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení telefónu."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Vymazať údaje používateľa"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Vymažte bez upozornenia údaje tohto používateľa na tomto televízore."</string>
@@ -820,7 +835,7 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Jasný dopyt"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Odoslať dopyt"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Hlasové vyhľadávanie"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Povoliť Preskúmanie dotykom?"</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Chcete zapnúť Preskúmanie dotykom?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Preskúmanie dotykom zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať tablet gestami."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Preskúmanie dotykom zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať telefón gestami."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"pred 1 mesiacom"</string>
@@ -1293,8 +1308,8 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systém"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
-    <string name="wireless_display_route_description" msgid="9070346425023979651">"Bezdrôtový displej"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"Preniesť"</string>
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"Bezdrôtové zobrazenie"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Prenášať"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Pripojenie k zariadeniu"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prenos obrazovky do zariadenia"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Prebieha vyhľadávanie zariadení…"</string>
@@ -1337,7 +1352,7 @@
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Zabudli ste svoje používateľské meno alebo heslo?\n Navštívte stránky "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Prebieha kontrola účtu..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávny kód PIN. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa v tablete obnovia predvolené výrobné nastavenia a všetky používateľské údaje budú stratené."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Televízor ste sa pokúsili nesprávne odomknúť <xliff:g id="NUMBER_0">%d</xliff:g>-krát. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%d</xliff:g>) sa obnovia výrobné nastavenia televízora a prídete o všetky údaje používateľa."</string>

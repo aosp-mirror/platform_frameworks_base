@@ -173,6 +173,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Darba profils izdzēsts"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Darba profils tika dzēsts, jo trūkst administratora lietotnes."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Trūkst darba profila administratora lietotnes, vai šī lietotne ir bojāta. Šī iemesla dēļ jūsu darba profils un saistītie dati tika dzēsti. Lai saņemtu palīdzību, sazinieties ar administratoru."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jūsu ierīces dati tiks dzēsti"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratora lietotnē trūkst komponentu, vai šī lietotne ir bojāta. Lietotni nevar izmantot. Ierīces dati tūlīt tiks dzēsti. Lai saņemtu palīdzību, sazinieties ar administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Man"</string>
@@ -187,8 +189,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvanītājs izslēgts"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Zvanītājs vibrācijas režīmā"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvanītājs ieslēgts"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Sagatavošanās atjauninājumam"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Notiek pakotņu atjaunināšanas apstrāde…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks beidzēts."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizors tiks izslēgts."</string>
@@ -225,7 +237,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersonas"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"piekļūt jūsu kontaktpersonu datiem"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Atrašanās vieta"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"piekļūt jūsu atrašanās vietas informācijai"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Jūsu sociālo tīklu informācija"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Tieša piekļuve informācijai par jūsu kontaktpersonām un sociālajiem savienojumiem."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendārs"</string>
@@ -274,8 +287,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Piekļūstiet pieejamajiem kontiem."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lasīt abonētās plūsmas"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ļauj lietotnei iegūt informāciju par pašlaik sinhronizētajām plūsmām."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"sūtīt un skatīt īsziņas"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ļauj lietotnei sūtīt īsziņas. Tas var radīt neparedzētas izmaksas. Ļaunprātīgas lietotnes var radīt jums izmaksas, sūtot ziņojumus bez jūsu apstiprinājuma."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lasīt ziņojumus (SMS vai MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ļauj lietotnei lasīt planšetdatorā vai SIM kartē saglabātās īsziņas. Tas ļauj lietotnei lasīt visas īsziņas, neraugoties uz to saturu vai konfidencialitāti."</string>
@@ -513,6 +525,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ļauj īpašniekam izveidot savienojumu ar mobilo sakaru operatora ziņojumapmaiņas pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"saistīšana ar mobilo sakaru operatoru pakalpojumiem"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Atļauj īpašniekam izveidot savienojumu ar mobilo sakaru operatoru pakalpojumiem. Parastām lietotnēm šīs atļauja nekad nav nepieciešama."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"piekļūt režīmam “Netraucēt”"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ļauj lietotnei lasīt un rakstīt režīma “Netraucēt” konfigurāciju."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>

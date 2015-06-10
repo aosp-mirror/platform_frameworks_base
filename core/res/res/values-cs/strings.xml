@@ -174,6 +174,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Pracovní profil byl smazán."</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Pracovní profil byl smazán, protože není k dispozici aplikace pro správu."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikace pro správu pracovního profilu chybí nebo je poškozena. Váš pracovní profil a související data proto byla smazána. Kontaktujte svého administrátora a požádejte jej o pomoc."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Zařízení bude vymazáno"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"V aplikaci pro správu chybí některé součásti nebo je poškozená, a proto ji nelze použít. Zařízení nyní bude vymazáno. Kontaktujte svého administrátora a požádejte jej o pomoc."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
@@ -188,8 +190,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Vyzvánění vypnuto"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrační vyzvánění"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Vyzvánění zapnuto"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Příprava na aktualizaci"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Zpracovávání balíčku aktualizací…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televize se vypne."</string>
@@ -207,7 +219,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnout"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlášení chyb"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvořit chybové hlášení"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
@@ -226,7 +238,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"přístup ke kontaktům"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"přístup k poloze"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informace o vašich kontaktech a sociálních sítích"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Přímý přístup k informacím o vašich kontaktech a sociálních propojeních"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendář"</string>
@@ -275,8 +288,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Přístup k dostupným účtům."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čtení zdrojů přihlášených k odběru"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"odesílání a zobrazení zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čtení textových zpráv (SMS nebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na SIM kartě.Toto oprávnění umožňuje aplikaci číst zprávy SMS bez ohledu na jejich obsah nebo důvěrnost."</string>
@@ -514,6 +526,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"navázat se na služby operátora"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Umožňuje držiteli oprávnění navázat se na služby operátora. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"přístup k režimu Nerušit"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikaci číst a zapisovat konfiguraci režimu Nerušit."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
@@ -1036,7 +1050,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karta přidána."</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Mobilní síť bude přístupná po restartu zařízení."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartovat"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavení času"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavit čas"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavení data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Hotovo"</string>
@@ -1101,7 +1115,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Neodebírat"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Nastavení"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odpojit"</string>
-    <string name="ext_media_browse_action" msgid="8322172381028546087">"Prozkoumat"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Otevřít"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> chybí"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"Znovu toto zařízení vložte"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Přesouvání aplikace <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1158,7 +1172,7 @@
     <string name="submit" msgid="1602335572089911941">"Odeslat"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Aktivován režim V autě"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Dotykem ukončíte režim V autě."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Je aktivní tethering nebo hotspot"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Sdílené připojení nebo hotspot je aktivní."</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Dotykem nastavíte."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Zpět"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Další"</string>
@@ -1484,7 +1498,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikace je připnutá: Odepnutí v tomto zařízení není povoleno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o kód PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Před uvolněním požádat o bezpečnostní gesto"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Nainstalováno administrátorem"</string>
