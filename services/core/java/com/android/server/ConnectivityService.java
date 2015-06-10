@@ -2027,20 +2027,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
+                    final int netId = msg.arg2;
                     if (msg.arg1 == 0) {
-                        setProvNotificationVisibleIntent(false, msg.arg2, 0, null, null);
+                        setProvNotificationVisibleIntent(false, netId, null, 0, null, null);
                     } else {
                         final NetworkAgentInfo nai;
                         synchronized (mNetworkForNetId) {
-                            nai = mNetworkForNetId.get(msg.arg2);
+                            nai = mNetworkForNetId.get(netId);
                         }
                         if (nai == null) {
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
                         nai.captivePortalDetected = true;
-                        setProvNotificationVisibleIntent(true, msg.arg2, nai.networkInfo.getType(),
-                                nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
+                        setProvNotificationVisibleIntent(true, netId, NotificationType.SIGN_IN,
+                                nai.networkInfo.getType(),nai.networkInfo.getExtraInfo(),
+                                (PendingIntent)msg.obj);
                     }
                     break;
                 }
@@ -2397,9 +2399,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (nai.everValidated) {
-            // The network validated while the dialog box was up. Don't make any changes. There's a
-            // TODO in the dialog code to make it go away if the network validates; once that's
-            // implemented, taking action here will be confusing.
+            // The network validated while the dialog box was up. Take no action.
             return;
         }
 
@@ -2419,16 +2419,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     NetworkAgent.CMD_SAVE_ACCEPT_UNVALIDATED, accept ? 1 : 0);
         }
 
-        // TODO: should we also disconnect from the network if accept is false?
+        if (!accept) {
+            // Tell the NetworkAgent that the network does not have Internet access (because that's
+            // what we just told the user). This will hint to Wi-Fi not to autojoin this network in
+            // the future. We do this now because NetworkMonitor might not yet have finished
+            // validating and thus we might not yet have received an EVENT_NETWORK_TESTED.
+            nai.asyncChannel.sendMessage(NetworkAgent.CMD_REPORT_NETWORK_STATUS,
+                    NetworkAgent.INVALID_NETWORK, 0, null);
+            // TODO: Tear the network down once we have determined how to tell WifiStateMachine not
+            // to reconnect to it immediately. http://b/20739299
+        }
+
     }
 
     private void scheduleUnvalidatedPrompt(NetworkAgentInfo nai) {
+        if (DBG) log("scheduleUnvalidatedPrompt " + nai.network);
         mHandler.sendMessageDelayed(
                 mHandler.obtainMessage(EVENT_PROMPT_UNVALIDATED, nai.network),
                 PROMPT_UNVALIDATED_DELAY_MS);
     }
 
     private void handlePromptUnvalidated(Network network) {
+        if (DBG) log("handlePromptUnvalidated " + network);
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
 
         // Only prompt if the network is unvalidated and was explicitly selected by the user, and if
@@ -2439,31 +2451,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        // TODO: What should we do if we've already switched to this network because we had no
-        // better option? There are two obvious alternatives.
-        //
-        // 1. Decide that there's no point prompting because this is our only usable network.
-        //    However, because we didn't prompt, if later on a validated network comes along, we'll
-        //    either a) silently switch to it - bad if the user wanted to connect to stay on this
-        //    unvalidated network - or b) prompt the user at that later time - bad because the user
-        //    might not understand why they are now being prompted.
-        //
-        // 2. Always prompt the user, even if we have no other network to use. The user could then
-        //    try to find an alternative network to join (remember, if we got here, then the user
-        //    selected this network manually). This is bad because the prompt isn't really very
-        //    useful.
-        //
-        // For now we do #1, but we can revisit that later.
-        if (isDefaultNetwork(nai)) {
-            return;
-        }
-
         Intent intent = new Intent(ConnectivityManager.ACTION_PROMPT_UNVALIDATED);
-        intent.putExtra(ConnectivityManager.EXTRA_NETWORK, network);
+        intent.setData(Uri.fromParts("netId", Integer.toString(network.netId), null));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setClassName("com.android.settings",
                 "com.android.settings.wifi.WifiNoInternetDialog");
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+        setProvNotificationVisibleIntent(true, nai.network.netId, NotificationType.NO_INTERNET,
+                nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(), pendingIntent);
     }
 
     private class InternalHandler extends Handler {
@@ -3243,7 +3240,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private static final String NOTIFICATION_ID = "CaptivePortal.Notification";
-    private volatile boolean mIsNotificationVisible = false;
+    private static enum NotificationType { SIGN_IN, NO_INTERNET; };
 
     private void setProvNotificationVisible(boolean visible, int networkType, String action) {
         if (DBG) {
@@ -3254,21 +3251,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
         // Concatenate the range of types onto the range of NetIDs.
         int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
-        setProvNotificationVisibleIntent(visible, id, networkType, null, pendingIntent);
+        setProvNotificationVisibleIntent(visible, id, NotificationType.SIGN_IN,
+                networkType, null, pendingIntent);
     }
 
     /**
-     * Show or hide network provisioning notificaitons.
+     * Show or hide network provisioning notifications.
+     *
+     * We use notifications for two purposes: to notify that a network requires sign in
+     * (NotificationType.SIGN_IN), or to notify that a network does not have Internet access
+     * (NotificationType.NO_INTERNET). We display at most one notification per ID, so on a
+     * particular network we can display the notification type that was most recently requested.
+     * So for example if a captive portal fails to reply within a few seconds of connecting, we
+     * might first display NO_INTERNET, and then when the captive portal check completes, display
+     * SIGN_IN.
      *
      * @param id an identifier that uniquely identifies this notification.  This must match
      *         between show and hide calls.  We use the NetID value but for legacy callers
      *         we concatenate the range of types with the range of NetIDs.
      */
-    private void setProvNotificationVisibleIntent(boolean visible, int id, int networkType,
-            String extraInfo, PendingIntent intent) {
+    private void setProvNotificationVisibleIntent(boolean visible, int id,
+            NotificationType notifyType, int networkType, String extraInfo, PendingIntent intent) {
         if (DBG) {
-            log("setProvNotificationVisibleIntent: E visible=" + visible + " networkType=" +
-                networkType + " extraInfo=" + extraInfo);
+            log("setProvNotificationVisibleIntent " + notifyType + " visible=" + visible
+                    + " networkType=" + getNetworkTypeName(networkType)
+                    + " extraInfo=" + extraInfo);
         }
 
         Resources r = Resources.getSystem();
@@ -3280,27 +3287,38 @@ public class ConnectivityService extends IConnectivityManager.Stub
             CharSequence details;
             int icon;
             Notification notification = new Notification();
-            switch (networkType) {
-                case ConnectivityManager.TYPE_WIFI:
-                    title = r.getString(R.string.wifi_available_sign_in, 0);
-                    details = r.getString(R.string.network_available_sign_in_detailed,
-                            extraInfo);
-                    icon = R.drawable.stat_notify_wifi_in_range;
-                    break;
-                case ConnectivityManager.TYPE_MOBILE:
-                case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                    title = r.getString(R.string.network_available_sign_in, 0);
-                    // TODO: Change this to pull from NetworkInfo once a printable
-                    // name has been added to it
-                    details = mTelephonyManager.getNetworkOperatorName();
-                    icon = R.drawable.stat_notify_rssi_in_range;
-                    break;
-                default:
-                    title = r.getString(R.string.network_available_sign_in, 0);
-                    details = r.getString(R.string.network_available_sign_in_detailed,
-                            extraInfo);
-                    icon = R.drawable.stat_notify_rssi_in_range;
-                    break;
+            if (notifyType == NotificationType.NO_INTERNET &&
+                    networkType == ConnectivityManager.TYPE_WIFI) {
+                title = r.getString(R.string.wifi_no_internet, 0);
+                details = r.getString(R.string.wifi_no_internet_detailed);
+                icon = R.drawable.stat_notify_wifi_in_range;  // TODO: Need new icon.
+            } else if (notifyType == NotificationType.SIGN_IN) {
+                switch (networkType) {
+                    case ConnectivityManager.TYPE_WIFI:
+                        title = r.getString(R.string.wifi_available_sign_in, 0);
+                        details = r.getString(R.string.network_available_sign_in_detailed,
+                                extraInfo);
+                        icon = R.drawable.stat_notify_wifi_in_range;
+                        break;
+                    case ConnectivityManager.TYPE_MOBILE:
+                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
+                        title = r.getString(R.string.network_available_sign_in, 0);
+                        // TODO: Change this to pull from NetworkInfo once a printable
+                        // name has been added to it
+                        details = mTelephonyManager.getNetworkOperatorName();
+                        icon = R.drawable.stat_notify_rssi_in_range;
+                        break;
+                    default:
+                        title = r.getString(R.string.network_available_sign_in, 0);
+                        details = r.getString(R.string.network_available_sign_in_detailed,
+                                extraInfo);
+                        icon = R.drawable.stat_notify_rssi_in_range;
+                        break;
+                }
+            } else {
+                Slog.wtf(TAG, "Unknown notification type " + notifyType + "on network type "
+                        + getNetworkTypeName(networkType));
+                return;
             }
 
             notification.when = 0;
@@ -3315,18 +3333,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 notificationManager.notify(NOTIFICATION_ID, id, notification);
             } catch (NullPointerException npe) {
-                loge("setNotificaitionVisible: visible notificationManager npe=" + npe);
+                loge("setNotificationVisible: visible notificationManager npe=" + npe);
                 npe.printStackTrace();
             }
         } else {
             try {
                 notificationManager.cancel(NOTIFICATION_ID, id);
             } catch (NullPointerException npe) {
-                loge("setNotificaitionVisible: cancel notificationManager npe=" + npe);
+                loge("setNotificationVisible: cancel notificationManager npe=" + npe);
                 npe.printStackTrace();
             }
         }
-        mIsNotificationVisible = visible;
     }
 
     /** Location to an updatable file listing carrier provisioning urls.
