@@ -577,6 +577,21 @@ public final class Settings {
             "android.settings.APPLICATION_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show screen for controlling which apps can ignore battery optimizations.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: The Intent's data URI specifies the application package name
+     * to be shown, with the "package" scheme.  That is "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS =
+            "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS";
+
+    /**
      * @hide
      * Activity Action: Show the "app ops" settings screen.
      * <p>
