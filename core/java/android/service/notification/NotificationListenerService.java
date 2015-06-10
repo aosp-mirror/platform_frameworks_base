@@ -646,7 +646,7 @@ public abstract class NotificationListenerService extends Service {
     private void createLegacyIconExtras(Notification n) {
         Icon smallIcon = n.getSmallIcon();
         Icon largeIcon = n.getLargeIcon();
-        if (smallIcon.getType() == Icon.TYPE_RESOURCE) {
+        if (smallIcon != null && smallIcon.getType() == Icon.TYPE_RESOURCE) {
             n.extras.putInt(Notification.EXTRA_SMALL_ICON, smallIcon.getResId());
             n.icon = smallIcon.getResId();
         }
