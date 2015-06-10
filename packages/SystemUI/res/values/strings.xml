@@ -844,7 +844,7 @@
     <string name="guest_notification_title">Guest user</string>
 
     <!-- Text of the notification shown to a new guest user [CHAR LIMIT=60] -->
-    <string name="guest_notification_text">Remove guest to delete apps and data</string>
+    <string name="guest_notification_text">To delete apps and data, remove guest user</string>
 
     <!-- Remove action in the notification shown to a new guest user [CHAR LIMIT=30] -->
     <string name="guest_notification_remove_action">REMOVE GUEST</string>
