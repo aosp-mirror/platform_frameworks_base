@@ -271,6 +271,18 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void setUsbDataUnlocked(boolean unlocked) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.setUsbDataUnlocked(unlocked);
+    }
+
+    @Override
+    public boolean isUsbDataUnlocked() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        return mDeviceManager.isUsbDataUnlocked();
+    }
+
+    @Override
     public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         mDeviceManager.allowUsbDebugging(alwaysAllow, publicKey);
