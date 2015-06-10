@@ -1576,13 +1576,17 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast action that requests current permission granted information.  It will respond
      * to the request by sending a broadcast with action defined by
      * {@link #EXTRA_GET_PERMISSIONS_RESPONSE_INTENT}. The response will contain
-     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT} with contents described below or a null upon
-     * failure.
+     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}, as well as
+     * {@link #EXTRA_GET_PERMISSIONS_GROUP_LIST_RESULT}, with contents described below or
+     * a null upon failure.
      *
-     * <p>If {@link #EXTRA_PACKAGE_NAME} is included then the number of permissions granted and the
-     * number of permissions requested by that package will be calculated and included as the first
+     * <p>If {@link #EXTRA_PACKAGE_NAME} is included then the number of permissions granted, the
+     * number of permissions requested and the number of granted additional permissions
+     * by that package will be calculated and included as the first
      * and second elements respectively of an int[] in the response as
-     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}.
+     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}.  The response will also deliver the list
+     * of localized permission group names that are granted in
+     * {@link #EXTRA_GET_PERMISSIONS_GROUP_LIST_RESULT}.
      *
      * <p>If {@link #EXTRA_PACKAGE_NAME} is not included then the number of apps granted any runtime
      * permissions and the total number of apps requesting runtime permissions will be the first
@@ -1602,7 +1606,14 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.GET_PERMISSIONS_COUNT_RESULT";
 
     /**
-     * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_COUNT} broadcast.
+     * List of CharSequence of localized permission group labels.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_GROUP_LIST_RESULT
+            = "android.intent.extra.GET_PERMISSIONS_GROUP_LIST_RESULT";
+
+    /**
+     * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_COUNT} broadcasts.
      * @hide
      */
     public static final String EXTRA_GET_PERMISSIONS_RESPONSE_INTENT
