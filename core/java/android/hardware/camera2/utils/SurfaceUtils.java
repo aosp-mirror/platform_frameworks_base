@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.utils;
 
+import android.graphics.ImageFormat;
 import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;
 import android.util.Size;
@@ -27,7 +28,7 @@ import android.view.Surface;
 public class SurfaceUtils {
 
     /**
-     * Check if a surface is for preview consumer.
+     * Check if a surface is for preview consumer based on consumer end point Gralloc usage flags.
      *
      * @param surface The surface to be checked.
      * @return true if the surface is for preview consumer, false otherwise.
@@ -37,7 +38,8 @@ public class SurfaceUtils {
     }
 
     /**
-     * Check if the surface is for hardware video encoder consumer.
+     * Check if the surface is for hardware video encoder consumer based on consumer end point
+     * Gralloc usage flags.
      *
      * @param surface The surface to be checked.
      * @return true if the surface is for hardware video encoder consumer, false otherwise.
