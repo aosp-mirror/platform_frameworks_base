@@ -377,6 +377,9 @@
          as a result of the current profile admin gone missing. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_details">The work profile admin app is either missing or corrupted.
          As a result, your work profile and related data have been deleted. Contact your administrator for assistance.</string>
+    <!-- Content text for a notification. The Title of the notification is "work_profile_deleted",
+        This indicates that a work profile has been deleted. [CHAR LIMIT=NONE]-->
+    <string name="work_profile_deleted_description_dpm_wipe">Your work profile is no longer available on this device.</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
