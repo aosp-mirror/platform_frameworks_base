@@ -60,6 +60,7 @@ public class CodecTest {
     private static boolean onPrepareSuccess = false;
     public static boolean onCompleteSuccess = false;
     public static boolean mPlaybackError = false;
+    public static boolean mFailedToCompleteWithNoError = true;
     public static int mMediaInfoUnknownCount = 0;
     public static int mMediaInfoVideoTrackLaggingCount = 0;
     public static int mMediaInfoBadInterleavingCount = 0;
@@ -801,6 +802,7 @@ public class CodecTest {
         mMediaInfoNotSeekableCount = 0;
         mMediaInfoMetdataUpdateCount = 0;
         mPlaybackError = false;
+        mFailedToCompleteWithNoError = true;
         String testResult;
 
         initializeMessageLooper();
@@ -843,6 +845,9 @@ public class CodecTest {
         } catch (Exception e) {
             Log.v(TAG, "playMediaSamples:" + e.getMessage());
         }
+        // Check if playback state is unknown (neither completed nor erroneous) unless
+        // it's not interrupted in the middle. If true, that is an exceptional case to investigate.
+        mFailedToCompleteWithNoError = !(onCompleteSuccess || mPlaybackError);
         return onCompleteSuccess;
     }
 }
