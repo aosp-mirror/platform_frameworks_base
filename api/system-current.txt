@@ -19194,7 +19194,9 @@ package android.media.tv {
     method public android.content.Intent createSettingsIntent();
     method public android.content.Intent createSetupIntent();
     method public static android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.hardware.hdmi.HdmiDeviceInfo, java.lang.String, java.lang.String, android.net.Uri) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.hardware.hdmi.HdmiDeviceInfo, java.lang.String, int, android.graphics.drawable.Icon) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.media.tv.TvInputHardwareInfo, java.lang.String, android.net.Uri) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.media.tv.TvInputHardwareInfo, int, android.graphics.drawable.Icon) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public int describeContents();
     method public android.hardware.hdmi.HdmiDeviceInfo getHdmiDeviceInfo();
     method public java.lang.String getId();
