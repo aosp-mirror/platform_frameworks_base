@@ -801,6 +801,9 @@
     <!-- Accessibility label for the button that opens the user switcher and announces the current user. -->
     <string name="accessibility_multi_user_switch_switcher_with_current">Switch user, current user <xliff:g id="current_user_name" example="John Doe">%s</xliff:g></string>
 
+    <!-- Accessibility label for the user icon on the lock screen. -->
+    <string name="accessibility_multi_user_switch_inactive">Current user <xliff:g id="current_user_name" example="John Doe">%s</xliff:g></string>
+
     <!-- Accessibility label for the button that opens the quick contact of the user. -->
     <string name="accessibility_multi_user_switch_quick_contact">Show profile</string>
 
