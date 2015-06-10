@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"সংযুক্ত নয়"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"কোনো নেটওয়ার্ক নেই"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi বন্ধ"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"কোনো Wi-Fi নেটওয়ার্ক উপলব্ধ নেই"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"কাস্ট করুন"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"কাস্ট করা হচ্ছে"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নামবিহীন ডিভাইস"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"চার্জ হচ্ছে (পূর্ণ হতে <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> সময় বাকি)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ব্যবহারকারী পাল্টে দিন"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ব্যবহারকারী পাল্টান, বর্তমান ব্যবহারকারী <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"প্রোফাইল দেখান"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ব্যবহারকারী জুড়ুন"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"নতুন ব্যবহারকারী"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN অক্ষম করুন"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN এর সংযোগ বিচ্ছিন্ন করুন"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\n\nআপনার প্রশাসক আপনার ডিভাইসের সাথে সম্পর্কিত সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ্লিকেশানগুলি, ডেটা এবং ডিভাইসের অবস্থান সম্পর্কিত তথ্য নিরীক্ষণ ও পরিচালনা করতে পারেন৷ আরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"আপনি VPN সংযোগ সেট আপ করার জন্য একটি অ্যাপ্লিকেশানকে অনুমতি দিন৷\n\nএই অ্যাপ্লিকেশানটি ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার ডিভাইস এবং নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে।"</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\n\nআপনার প্রশাসক আপনার ডিভাইসের সাথে সম্পর্কিত সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ্লিকেশান ডেটা এবং ডিভাইসের অবস্থান সম্পর্কিত তথ্য নিরীক্ষণ ও পরিচালনা করতে পারেন৷\n\nআপনি একটি VPN এর সাথে সংযুক্ত রয়েছেন যা ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷\n\nআপনার প্রশাসক ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে সক্ষম৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷\n\nএছাড়াও আপনি একটি VPN, এর সাথে সংযুক্ত রয়েছেন যা আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"আপনি <xliff:g id="APPLICATION">%1$s</xliff:g> এ সংযুক্ত হয়েছেন, যা ইমেল, অ্যাপ্লিকেশান এবং ওয়েবসাইটগুলি সমেত আপনার নেটওয়ার্ক কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"আপনি <xliff:g id="APPLICATION">%1$s</xliff:g> এ সংযুক্ত হয়েছেন, যা ইমেল, অ্যাপ্লিকেশান এবং ওয়েবসাইটগুলি সমেত আপনার ব্যক্তিগত নেটওয়ার্ক কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷ এটি <xliff:g id="APPLICATION">%2$s</xliff:g> এ সংযুক্ত রয়েছে যা আপনার ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার কাজের নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷ এটি <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> এ সংযুক্ত রয়েছে যা আপনার ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার কাজের নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nএছাড়াও আপনি <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> এর সাথে সংযুক্ত রয়েছেন যা আপনার ব্যক্তিগত নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\n\nআপনার প্রশাসক আপনার ডিভাইসের সাথে সম্পর্কিত সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ্লিকেশান ডেটা এবং ডিভাইসের অবস্থান সম্পর্কিত তথ্য নিরীক্ষণ ও পরিচালনা করতে পারেন৷\n\nআপনি <xliff:g id="APPLICATION">%2$s</xliff:g> এর সাথে সংযুক্ত রয়েছেন যা ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"আপনি নিজে আনলক না করা পর্যন্ত ডিভাইসটি লক হয়ে থাকবে"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"বিজ্ঞপ্তিগুলি আরো দ্রুত পান"</string>
@@ -398,12 +404,19 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"প্রত্যাখ্যান করুন"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> হল ভলিউম ডায়লগ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"আসলটি পুনঃস্থাপন করতে স্পর্শ করুন৷"</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"আপনি কাজের প্রোফাইলে রয়েছেন"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"সিস্টেম UI টিউনার"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"এম্বেড করা ব্যাটারির শতকরা হার দেখায়"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"যখন চার্জ করা হবে না তখন স্থিতি দন্ডের আইকনের ভিতরে ব্যাটারি স্তরের শতকার হার দেখায়"</string>
     <string name="quick_settings" msgid="10042998191725428">"দ্রুত সেটিংস"</string>
     <string name="status_bar" msgid="4877645476959324760">"স্থিতি দন্ড"</string>
+    <!-- no translation found for demo_mode (2389163018533514619) -->
+    <skip />
+    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
+    <skip />
+    <!-- no translation found for show_demo_mode (2018336697782464029) -->
+    <skip />
     <string name="status_bar_ethernet" msgid="5044290963549500128">"ইথারনেট"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"অ্যালার্ম"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"কাজের প্রোফাইল"</string>
@@ -414,4 +427,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"আপনি আপনার পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> -টায়"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> -তে"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

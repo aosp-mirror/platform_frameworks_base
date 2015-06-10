@@ -267,8 +267,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ej ansluten"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Inget nätverk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi av"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Det finns inga tillgängliga Wi-Fi-nätverk"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Casta"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Castar"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Namnlös enhet"</string>
@@ -329,6 +328,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laddar (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> tills batteriet är fulladdat)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Byt användare"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Byt användare. Aktuell användare: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Visa profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Ny användare"</string>
@@ -365,14 +366,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Inaktivera VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Koppla från VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Enheten hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratören kan övervaka och hantera inställningar, företagsåtkomst, appar, data som är kopplad till enheten och enhetens platsinformation. Kontakta administratören om du vill veta mer."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"Du har gett en app behörighet att upprätta en VPN-anslutning.\n\nAppen kan bevaka aktivitet på enheten och nätverket, inklusive e-post, appar och webbplatser."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Enheten hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratören kan övervaka och hantera inställningar, företagsåtkomst, appar, data som är kopplad till enheten och enhetens platsinformation.\n\nDu är ansluten till ett VPN-nätverk som kan övervaka dina nätverksaktiviteter, inklusive e-post, appar och webbplatser.\n\nKontakta administratören om du vill veta mer."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratören kan bevaka aktiviteten på nätverket, inklusive e-post, appar och webbplatser.\n\nKontakta administratören för mer information.\n\nDu är även ansluten till ett VPN-nätverk som kan bevaka aktiviteten på nätverket."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g> som kan bevaka aktivitet på nätverket, inklusive e-post, appar och webbplatser."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g> som kan bevaka din privata aktivitet på nätverket, inklusive e-post, appar och webbplatser."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den är ansluten till <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan hantera aktivitet på arbetsplatsens nätverk, inklusive e-post, appar och webbplatser.\n\nKontakta administratören för mer information."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den är ansluten till <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan hantera aktivitet på arbetsplatsens nätverk, inklusive e-post, appar och webbplatser.\n\nDu är även ansluten till <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan hantera privat aktivitet på nätverket."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Enheten hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratören kan bevaka och hantera inställningar, företagsåtkomst, appar, data som är kopplad till enheten och enhetens platsuppgifter.\n\nDu är ansluten till <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan övervaka aktivitet på nätverket, inklusive e-post. appar och webbplatser .\n\nKontakta administratören för mer information."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten förblir låst tills du låser upp den manuellt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Få aviseringar snabbare"</string>
@@ -398,12 +404,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Neka"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> används som volymkontroll"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryck här om du vill återställa den ursprungliga appen."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Du använder Work-profilen"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Inställningar för systemgränssnitt"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Visa inbäddad batteriprocent"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Visa batterinivå i procent i statusfältsikonen när enheten inte laddas"</string>
     <string name="quick_settings" msgid="10042998191725428">"Snabbinställningar"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusfält"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Demoläge"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Aktivera demoläge"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Visa demoläge"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Jobbprofil"</string>
@@ -414,4 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Nästa alarm, kl. <xliff:g id="WHEN">%1$s</xliff:g>, kommer inte att höras"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

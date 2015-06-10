@@ -268,8 +268,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nav izveidots savienojums"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nav tīkla"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ir izslēgts"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nav pieejams neviens Wi-Fi tīkls."</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Apraide"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Notiek apraide…"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nenosaukta ierīce"</string>
@@ -330,6 +329,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Notiek uzlāde (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> līdz pilnīgai uzlādei)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Mainīt lietotāju"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Pārslēgt lietotāju; pašreizējais lietotājs: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Parādīt profilu"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Lietotāja pievienošana"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Jauns lietotājs"</string>
@@ -366,14 +367,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Atspējot VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Atvienot VPN tīklu"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas ir saistīti ar šo ierīci, kā arī informāciju par jūsu ierīces atrašanās vietu. Lai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"Jūs piešķīrāt lietotnei atļauju izveidot savienojumu ar VPN tīklu.\n\nŠī lietotne var pārraudzīt jūsu ierīcē un tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas ir saistīti ar šo ierīci, kā arī informāciju par jūsu ierīces atrašanās vietu.\n\nIerīcē ir izveidots savienojums ar VPN tīklu, kurā var tikt pārraudzītas jūsu tīklā veiktās darbības, tostarp e-pasts, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru.\n\nIerīcē ir arī izveidots savienojums ar VPN tīklu, kurā var tikt pārraudzītas jūsu tīklā veiktās darbības."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"Ir izveidots savienojums ar lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Ir izveidots savienojums ar lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Tas ir saistīts ar lietojumprogrammu <xliff:g id="APPLICATION">%2$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Tas ir saistīts ar lietojumprogrammu <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nIr piesaistīta arī lietojumprogramma <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas ir saistīti ar šo ierīci, kā arī informāciju par jūsu ierīces atrašanās vietu.\n\nIr piesaistīta lietojumprogramma <xliff:g id="APPLICATION">%2$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Ierīce būs bloķēta, līdz to manuāli atbloķēsiet."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Saņemiet paziņojumus ātrāk"</string>
@@ -399,12 +405,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Neatļaut"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ir skaļuma dialoglodziņš"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Pieskarieties, lai atjaunotu sākotnējo."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Jūs esat pierakstījies darba profilā."</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sistēmas saskarnes regulators"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rādīt akumulatora uzlādes līmeni procentos"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Rādīt akumulatora uzlādes līmeni procentos statusa joslas ikonā, kad netiek veikta uzlāde"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ātrie iestatījumi"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusa josla"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Demonstrācijas režīms"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Iespējot demonstrācijas režīmu"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Rādīt demonstrācijas režīmu"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Tīkls Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Signāls"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Darba profils"</string>
@@ -415,4 +425,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots."</string>
     <string name="alarm_template" msgid="3980063409350522735">"plkst. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>

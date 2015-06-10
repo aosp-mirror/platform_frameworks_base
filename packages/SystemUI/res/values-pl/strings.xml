@@ -269,8 +269,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Brak połączenia"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Brak sieci"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi wyłączone"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Brak dostępnych sieci Wi-Fi"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Przesyłanie"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Przesyłam"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Urządzenie bez nazwy"</string>
@@ -331,6 +330,8 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Ładuje się (pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Przełącz użytkownika. Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Pokaż profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Dodaj użytkownika"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nowy użytkownik"</string>
@@ -367,14 +368,19 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Wyłącz VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Rozłącz z VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Urządzeniem zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane powiązane z tym urządzeniem i informacje o lokalizacji urządzenia oraz nimi zarządzać. Skontaktuj się z nim, by dowiedzieć się więcej."</string>
-    <string name="monitoring_description_vpn" msgid="996222259035614736">"Aplikacja otrzymała od Ciebie uprawnienia do konfigurowania połączenia VPN.\n\nMoże ona monitorować Twoją aktywność na urządzeniu i w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
+    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Urządzeniem zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane powiązane z tym urządzeniem i informacje o lokalizacji urządzenia oraz nimi zarządzać.\n\nMasz połączenie z siecią VPN, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby uzyskać więcej informacji, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z nim, by dowiedzieć się więcej.\n\nMasz też połączenie z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6947928635272782570">"Masz połączenie z aplikacją <xliff:g id="APPLICATION">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Masz połączenie z aplikacją <xliff:g id="APPLICATION">%1$s</xliff:g>, która może monitorować Twoją prywatną aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Jest on połączony z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci związaną z pracą, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Jest on połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci związaną z pracą, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją prywatną aktywność w sieci."</string>
+    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
+    <skip />
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Twoim urządzeniem zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane powiązane z urządzeniem i informacje o jego lokalizacji oraz nimi zarządzać.\n\nMasz połączenie z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Urządzenie pozostanie zablokowane, aż odblokujesz je ręcznie"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Szybszy dostęp do powiadomień"</string>
@@ -400,12 +406,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odmów"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> steruje głośnością"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dotknij, by przywrócić pierwotną."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Korzystasz z profilu do pracy"</string>
+    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Kalibrator System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Pokaż procent naładowania baterii"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Pokaż procent naładowania baterii w ikonie na pasku stanu, gdy telefon się nie ładuje"</string>
     <string name="quick_settings" msgid="10042998191725428">"Szybkie ustawienia"</string>
     <string name="status_bar" msgid="4877645476959324760">"Pasek stanu"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Tryb demonstracyjny"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Włącz tryb demonstracyjny"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Pokaż tryb demonstracyjny"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Profil do pracy"</string>
@@ -416,4 +426,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Nie usłyszysz swojego następnego alarmu <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"o <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"w: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <skip />
 </resources>
