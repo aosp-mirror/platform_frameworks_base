@@ -784,6 +784,21 @@ public class ApplicationsState {
                                 numDone++;
                                 getEntryLocked(info);
                             }
+                            if (userId != 0 && mEntriesMap.indexOfKey(0) >= 0) {
+                                // If this app is for a profile and we are on the owner, remove
+                                // the owner entry if it isn't installed.  This will prevent
+                                // duplicates of work only apps showing up as 'not installed
+                                // for this user'.
+                                // Note: This depends on us traversing the users in order, which
+                                // happens because of the way we generate the list in
+                                // doResumeIfNeededLocked.
+                                AppEntry entry = mEntriesMap.get(0).get(info.packageName);
+                                if (entry != null &&
+                                        (entry.info.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
+                                    mEntriesMap.get(0).remove(info.packageName);
+                                    mAppEntries.remove(entry);
+                                }
+                            }
                         }
                         if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_ENTRIES releasing lock");
                     }
