@@ -333,17 +333,29 @@ public class RippleDrawable extends LayerDrawable {
      */
     @Override
     public boolean isProjected() {
-        // If the maximum radius is contained entirely within the bounds, we
-        // don't need to project this ripple.
-        final int radius = mState.mMaxRadius;
-        final Rect bounds = getBounds();
-        if (radius != RADIUS_AUTO && radius <= bounds.width() / 2
-                && radius <= bounds.height() / 2) {
+        // If the layer is bounded, then we don't need to project.
+        if (isBounded()) {
             return false;
         }
 
-        // Otherwise, if the layer is bounded then we don't need to project.
-        return !isBounded();
+        // Otherwise, if the maximum radius is contained entirely within the
+        // bounds then we don't need to project. This is sort of a hack to
+        // prevent check box ripples from being projected across the edges of
+        // scroll views. It does not impact rendering performance, and it can
+        // be removed once we have better handling of projection in scrollable
+        // views.
+        final int radius = mState.mMaxRadius;
+        final Rect drawableBounds = getBounds();
+        final Rect hotspotBounds = mHotspotBounds;
+        if (radius != RADIUS_AUTO
+                && radius <= hotspotBounds.width() / 2
+                && radius <= hotspotBounds.height() / 2
+                && (drawableBounds.equals(hotspotBounds)
+                        || drawableBounds.contains(hotspotBounds))) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isBounded() {
