@@ -251,19 +251,9 @@ class WindowStateAnimator {
                 && mAppAnimator.animation == AppWindowAnimator.sDummyAnimation;
     }
 
-    /** Is this window currently set to animate or currently animating?
-     *  NOTE: The method will return true for cases where the window isn't currently animating, but
-     *  is set to animate. i.e. if the window animation is currently set to a dummy placeholder
-     *  animation. Use {@link #isWindowAnimatingNow} to know if the window is currently running a
-     *  real animation. */
+    /** Is this window currently set to animate or currently animating? */
     boolean isWindowAnimating() {
         return mAnimation != null;
-    }
-
-    /** Is the window performing a real animation and not a dummy which is only waiting for an
-     * an animation to start? */
-    boolean isWindowAnimatingNow() {
-        return isWindowAnimating() && !isDummyAnimation();
     }
 
     void cancelExitAnimationForNextAnimationLocked() {
