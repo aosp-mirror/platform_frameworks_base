@@ -80,7 +80,7 @@ public class SystemSensorManager extends SensorManager {
                 nativeClassInit();
             }
             mHasDataInjectionPermissions = context.checkSelfPermission(
-                    Manifest.permission.HARDWARE_TEST) == PackageManager.PERMISSION_GRANTED;
+                    Manifest.permission.LOCATION_HARDWARE) == PackageManager.PERMISSION_GRANTED;
         }
 
         // initialize the sensor list
@@ -233,7 +233,7 @@ public class SystemSensorManager extends SensorManager {
     protected boolean enableDataInjectionImpl(boolean enable) {
         if (!mHasDataInjectionPermissions) {
             throw new SecurityException("Permission denial. Calling enableDataInjection without "
-                    + Manifest.permission.HARDWARE_TEST);
+                    + Manifest.permission.LOCATION_HARDWARE);
         }
         synchronized (mLock) {
             int ret = nativeEnableDataInjection(mNativeInstance, enable);
@@ -256,7 +256,7 @@ public class SystemSensorManager extends SensorManager {
             long timestamp) {
         if (!mHasDataInjectionPermissions) {
             throw new SecurityException("Permission denial. Calling injectSensorData without "
-                    + Manifest.permission.HARDWARE_TEST);
+                    + Manifest.permission.LOCATION_HARDWARE);
         }
         synchronized (mLock) {
             if (!mDataInjectionMode) {
