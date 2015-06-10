@@ -3357,6 +3357,7 @@ public class PackageParser {
         info.labelRes = target.info.labelRes;
         info.nonLocalizedLabel = target.info.nonLocalizedLabel;
         info.launchMode = target.info.launchMode;
+        info.lockTaskLaunchMode = target.info.lockTaskLaunchMode;
         info.processName = target.info.processName;
         if (info.descriptionRes == 0) {
             info.descriptionRes = target.info.descriptionRes;
