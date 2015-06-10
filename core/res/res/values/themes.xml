@@ -387,6 +387,7 @@ please see themes_device_defaults.xml.
         <item name="buttonBarNegativeButtonStyle">?attr/buttonBarButtonStyle</item>
         <item name="buttonBarNeutralButtonStyle">?attr/buttonBarButtonStyle</item>
         <item name="segmentedButtonStyle">@style/SegmentedButton</item>
+        <item name="fingerprintAuthDrawable">@drawable/ic_fingerprint</item>
 
         <!-- SearchView attributes -->
         <item name="searchViewStyle">@style/Widget.Holo.SearchView</item>
