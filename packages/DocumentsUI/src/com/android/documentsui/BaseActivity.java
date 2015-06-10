@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -32,6 +33,10 @@ import libcore.io.IoUtils;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -232,9 +237,38 @@ abstract class BaseActivity extends Activity {
         invalidateOptionsMenu();
     }
 
+    final List<String> getExcludedAuthorities() {
+        List<String> authorities = new ArrayList<>();
+        if (getIntent().getBooleanExtra(DocumentsContract.EXTRA_EXCLUDE_SELF, false)) {
+            // Exclude roots provided by the calling package.
+            String packageName = getCallingPackageMaybeExtra();
+            try {
+                PackageInfo pkgInfo = getPackageManager().getPackageInfo(packageName,
+                        PackageManager.GET_PROVIDERS);
+                for (ProviderInfo provider: pkgInfo.providers) {
+                    authorities.add(provider.authority);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(mTag, "Calling package name does not resolve: " + packageName);
+            }
+        }
+        return authorities;
+    }
+
     final String getCallingPackageMaybeExtra() {
-        final String extra = getIntent().getStringExtra(DocumentsContract.EXTRA_PACKAGE_NAME);
-        return (extra != null) ? extra : getCallingPackage();
+        String callingPackage = getCallingPackage();
+        // System apps can set the calling package name using an extra.
+        try {
+            ApplicationInfo info = getPackageManager().getApplicationInfo(callingPackage, 0);
+            if (info.isSystemApp() || info.isUpdatedSystemApp()) {
+                final String extra = getIntent().getStringExtra(DocumentsContract.EXTRA_PACKAGE_NAME);
+                if (extra != null) {
+                    callingPackage = extra;
+                }
+            }
+        } finally {
+            return callingPackage;
+        }
     }
 
     public static BaseActivity get(Fragment fragment) {
@@ -287,6 +321,9 @@ abstract class BaseActivity extends Activity {
         /** Currently copying file */
         public List<DocumentInfo> selectedDocumentsForCopy = new ArrayList<DocumentInfo>();
 
+        /** Name of the package that started DocsUI */
+        public List<String> excludedAuthorities = new ArrayList<>();
+
         public static final int ACTION_OPEN = 1;
         public static final int ACTION_CREATE = 2;
         public static final int ACTION_GET_CONTENT = 3;
@@ -327,6 +364,7 @@ abstract class BaseActivity extends Activity {
             out.writeString(currentSearch);
             out.writeMap(dirState);
             out.writeList(selectedDocumentsForCopy);
+            out.writeList(excludedAuthorities);
         }
 
         public static final Creator<State> CREATOR = new Creator<State>() {
@@ -348,6 +386,7 @@ abstract class BaseActivity extends Activity {
                 state.currentSearch = in.readString();
                 in.readMap(state.dirState, null);
                 in.readList(state.selectedDocumentsForCopy, null);
+                in.readList(state.excludedAuthorities, null);
                 return state;
             }
 
