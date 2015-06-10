@@ -68,8 +68,10 @@ public class AssistContent {
         setWebUri(null);
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri uri = intent.getData();
-            if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
-                setWebUri(uri);
+            if (uri != null) {
+                if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
+                    setWebUri(uri);
+                }
             }
         }
     }
