@@ -28,12 +28,15 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.mtp.MtpStorage;
@@ -619,6 +622,26 @@ class MountService extends IMountService.Stub
 
     private final Handler mHandler;
 
+    private BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+
+            try {
+                if (Intent.ACTION_USER_ADDED.equals(action)) {
+                    final UserManager um = mContext.getSystemService(UserManager.class);
+                    final int userSerialNumber = um.getUserSerialNumber(userId);
+                    mConnector.execute("volume", "user_added", userId, userSerialNumber);
+                } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                    mConnector.execute("volume", "user_removed", userId);
+                }
+            } catch (NativeDaemonConnectorException e) {
+                Slog.w(TAG, "Failed to send user details to vold", e);
+            }
+        }
+    };
+
     @Override
     public void waitForAsecScan() {
         waitForLatch(mAsecsScanned, "mAsecsScanned");
@@ -674,8 +697,15 @@ class MountService extends IMountService.Stub
 
             try {
                 mConnector.execute("volume", "reset");
+
+                // Tell vold about all existing and started users
+                final UserManager um = mContext.getSystemService(UserManager.class);
+                final List<UserInfo> users = um.getUsers();
+                for (UserInfo user : users) {
+                    mConnector.execute("volume", "user_added", user.id, user.serialNumber);
+                }
                 for (int userId : mStartedUsers) {
-                    mConnector.execute("volume", "start_user", userId);
+                    mConnector.execute("volume", "user_started", userId);
                 }
             } catch (NativeDaemonConnectorException e) {
                 Slog.w(TAG, "Failed to reset vold", e);
@@ -690,7 +720,7 @@ class MountService extends IMountService.Stub
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
         try {
-            mConnector.execute("volume", "start_user", userId);
+            mConnector.execute("volume", "user_started", userId);
         } catch (NativeDaemonConnectorException ignored) {
         }
 
@@ -715,7 +745,7 @@ class MountService extends IMountService.Stub
         Slog.d(TAG, "onCleanupUser " + userId);
 
         try {
-            mConnector.execute("volume", "cleanup_user", userId);
+            mConnector.execute("volume", "user_stopped", userId);
         } catch (NativeDaemonConnectorException ignored) {
         }
 
@@ -1208,6 +1238,11 @@ class MountService extends IMountService.Stub
 
         Thread crypt_thread = new Thread(mCryptConnector, CRYPTD_TAG);
         crypt_thread.start();
+
+        final IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_ADDED);
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
 
         // Add ourself to the Watchdog monitors if enabled.
         if (WATCHDOG_ENABLE) {
