@@ -60,7 +60,6 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -543,14 +542,15 @@ public class UsageStatsService extends SystemService implements
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             final long beginIdleTime = service.getBeginIdleTime(event.mPackage);
-            final long lastUsedTime = service.getLastUsedTime(event.mPackage);
+            final long lastUsedTime = service.getSystemLastUsedTime(event.mPackage);
             final boolean previouslyIdle = hasPassedIdleTimeoutLocked(beginIdleTime,
                     lastUsedTime, screenOnTime, timeNow);
             service.reportEvent(event, getScreenOnTimeLocked(timeNow));
             // Inform listeners if necessary
             if ((event.mEventType == Event.MOVE_TO_FOREGROUND
                     || event.mEventType == Event.MOVE_TO_BACKGROUND
-                    || event.mEventType == Event.INTERACTION)) {
+                    || event.mEventType == Event.SYSTEM_INTERACTION
+                    || event.mEventType == Event.USER_INTERACTION)) {
                 if (previouslyIdle) {
                     // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
@@ -575,11 +575,11 @@ public class UsageStatsService extends SystemService implements
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             final long beginIdleTime = service.getBeginIdleTime(packageName);
-            final long lastUsedTime = service.getLastUsedTime(packageName);
+            final long lastUsedTime = service.getSystemLastUsedTime(packageName);
             final boolean previouslyIdle = hasPassedIdleTimeoutLocked(beginIdleTime,
                     lastUsedTime, screenOnTime, timeNow);
             service.setBeginIdleTime(packageName, deviceUsageTime);
-            service.setLastUsedTime(packageName,
+            service.setSystemLastUsedTime(packageName,
                     timeNow - (idle ? DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS : 0) - 5000);
             // Inform listeners if necessary
             if (previouslyIdle != idle) {
@@ -666,7 +666,7 @@ public class UsageStatsService extends SystemService implements
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             long beginIdleTime = service.getBeginIdleTime(packageName);
-            long lastUsedTime = service.getLastUsedTime(packageName);
+            long lastUsedTime = service.getSystemLastUsedTime(packageName);
             return hasPassedIdleTimeoutLocked(beginIdleTime, lastUsedTime, screenOnTime, timeNow);
         }
     }
