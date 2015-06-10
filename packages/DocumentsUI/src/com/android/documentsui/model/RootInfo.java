@@ -55,7 +55,6 @@ public class RootInfo implements Durable, Parcelable {
     public String mimeTypes;
 
     /** Derived fields that aren't persisted */
-    public String derivedPackageName;
     public String[] derivedMimeTypes;
     public int derivedIcon;
 
@@ -75,7 +74,6 @@ public class RootInfo implements Durable, Parcelable {
         availableBytes = -1;
         mimeTypes = null;
 
-        derivedPackageName = null;
         derivedMimeTypes = null;
         derivedIcon = 0;
     }
