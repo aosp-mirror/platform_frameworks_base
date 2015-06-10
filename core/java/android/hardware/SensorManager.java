@@ -1570,7 +1570,7 @@ public abstract class SensorManager {
      * Significant Motion, Step Counter etc.
      *
      * The tests which call this API need to have {@code
-     * android.permission.HARDWARE_TEST} permission which isn't
+     * android.permission.LOCATION_HADWARE} permission which isn't
      * available for third party applications.
      *
      * @param enable True to set the HAL in DATA_INJECTION mode.
@@ -1600,7 +1600,7 @@ public abstract class SensorManager {
      * the HAL is already in data injection mode.
      *
      * The tests which call this API need to have {@code
-     * android.permission.HARDWARE_TEST} permission which isn't
+     * android.permission.LOCATION_HARDWARE} permission which isn't
      * available for third party applications.
      *
      * @param sensor The sensor to inject.
