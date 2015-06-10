@@ -23,7 +23,7 @@
     <string name="byteShort" msgid="8340973892742019101">"b"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Kb"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Mb"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Gb"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Tb"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Pb"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Arbejdsprofilen blev slettet"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbejdsprofilen blev slettet, fordi der mangler en administrationsapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administrationsappen til arbejdsprofilen mangler eller er beskadiget. Derfor er din arbejdsprofil og dine relaterede data blevet slettet. Kontakt din administrator for at få hjælp."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheden slettes"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administrationsappen mangler komponenter eller er beskadiget og kan ikke bruges. Enheden vil nu blive slettet. Kontakt din administrator for at få hjælp."</string>
     <string name="me" msgid="6545696007631404292">"Mig"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringervibrering"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringeren er aktiveret"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Gør klar til opdatering"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Behandler opdateringspakken…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din tablet slukkes nu."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Dit tv vil lukke ned."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersoner"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"have adgang til dine kontaktpersoner"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"få adgang til din placering"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Dine sociale oplysninger"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte adgang til oplysninger om dine kontaktpersoner og sociale forbindelser."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få adgang til de tilgængelige konti."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læse feeds, jeg abonnerer på"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillader, at appen kan hente oplysninger om de feeds, der synkroniseres."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"Send og se sms-beskeder"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (sms eller mms)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din tablet eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
@@ -512,7 +524,9 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dette giver indehaveren mulighed for at knytte sig til det øverste grænsefladeniveau for et mobilselskabs beskedtjeneste. Dette bør ikke være nødvendigt i normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"knytte til tjenester fra mobilselskabet"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Tillader, at brugeren knytter sig til tjenester fra mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Adgang til Vil ikke forstyrres"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og skrive konfigurationen af Vil ikke forstyrres."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollér længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Overvåg antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås din tablet, eller slet alle data i den, hvis der er indtastet for mange forkerte adgangskoder."</string>
@@ -522,7 +536,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås tv-adgangen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Skift skærmlås"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skift skærmlås."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifte skærmlås"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
@@ -951,7 +965,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Processen <xliff:g id="PROC">%1$s</xliff:g> har overskredet sin proceshukommelsesgrænse på <xliff:g id="SIZE">%2$s</xliff:g>. En heap dump er tilgængelig og kan deles med udvikleren. Vær forsigtig: Denne heap dump kan indeholde dine personlige oplysninger, som appen har adgang til."</string>
     <string name="sendText" msgid="5209874571959469142">"Vælg en handling for teksten"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lydstyrke for opkald"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Lydstyrke for medier"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Medielydstyrke"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspilning via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Lydløs ringetone er angivet"</string>
     <string name="volume_call" msgid="3941680041282788711">"Lydstyrke for opkald"</string>
@@ -962,7 +976,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Lydstyrke for bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Lydstyrke for ringetone"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Lydstyrke for opkald"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Lydstyrke for medier"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Medielydstyrke"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Lydstyrke for meddelelser"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standardringetone"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standardringetone (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1506,7 +1520,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Indtil du slår denne indstilling fra"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Indtil du slår \"Forstyr ikke\" fra"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Indtil du slår \"Vil ikke forstyrres\" fra"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Vil ikke forstyrres"</string>

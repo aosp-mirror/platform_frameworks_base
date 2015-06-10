@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Profilo di lavoro eliminato"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profilo di lavoro eliminato per app di amministrazione mancante."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'app di amministrazione dei profili di lavoro manca o è danneggiata. Di conseguenza, il tuo profilo di lavoro e i relativi dati sono stati eliminati. Contatta l\'amministratore per ricevere assistenza."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"L\'app di amministrazione è danneggiata o mancano componenti, pertanto non è possibile utilizzarla. Il dispositivo verrà resettato. Contatta l\'amministratore per ricevere assistenza."</string>
     <string name="me" msgid="6545696007631404292">"Io"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Suoneria disattivata"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Suoneria vibrazione"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Suoneria attiva"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Preparazione per l\'aggiornamento"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Elaborazione del pacchetto di aggiornamento…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Spegnimento..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Il tablet verrà spento."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"La TV verrà spenta."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accesso ai contatti"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posizione"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"accesso alla posizione"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Le tue informazioni social"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accesso diretto alle informazioni sui tuoi contatti e sulle tue connessioni social."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedere agli account disponibili."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lettura feed sottoscritti"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Consente all\'applicazione di ottenere dettagli sui feed attualmente sincronizzati."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"invio e lettura di SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Consente all\'applicazione di inviare messaggi SMS. Ciò potrebbe comportare costi imprevisti. Applicazioni dannose potrebbero generare dei costi inviando messaggi senza la tua conferma."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lettura messaggi di testo personali (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Consente all\'applicazione di leggere i messaggi SMS memorizzati sul tablet o sulla scheda SIM. Ciò consente all\'applicazione di leggere tutti i messaggi SMS, indipendentemente dai contenuti o dal livello di riservatezza."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Consente l\'associazione di un servizio di messaggi dell\'operatore all\'interfaccia principale. Non dovrebbe mai essere necessaria per le normali applicazioni."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"Collegamento a servizi dell\'operatore"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Consente al titolare di collegarsi a servizi dell\'operatore. Non dovrebbe mai essere necessaria per le normali app."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accesso alla funzione Non disturbare"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Consente all\'app di leggere e modificare la configurazione della funzione Non disturbare."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Impostazione regole password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Controllo tentativi di sblocco dello schermo"</string>
@@ -1465,7 +1479,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'app è bloccata. Su questo dispositivo non è consentito lo sblocco."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN prima di sbloccare"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installato dall\'amministratore"</string>

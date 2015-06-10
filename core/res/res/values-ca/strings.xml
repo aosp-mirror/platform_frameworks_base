@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"S\'ha suprimit el perfil professional"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"S\'ha suprimit el perfil professional perquè no s\'ha detectat cap aplicació d\'administració."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'aplicació d\'administració del perfil professional està malmesa o no es detecta. Com a conseqüència, el perfil professional i les dades relacionades s\'han suprimit. Contacta amb l\'administrador per obtenir ajuda."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"El contingut del dispositiu s\'esborrarà"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"L\'aplicació d\'administració està malmesa o hi falten components, i no es pot fer servir. El contingut del dispositiu s\'esborrarà. Contacta amb l\'administrador per obtenir ajuda."</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Timbre desactivat"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Mode vibració"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activat"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Preparació per a l\'actualització"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"S\'està processant el paquet d\'actualització…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"S\'està apagant..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"La tauleta s\'apagarà."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"El televisor s\'apagarà."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ubicació"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"accedir a la ubicació"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informació social"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accés directe a informació sobre els teus contactes i sobre les teves connexions socials."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendari"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedeix als comptes disponibles."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"llegir els feeds als quals esteu subscrit"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet que l\'aplicació obtingui detalls sobre els feeds sincronitzats actualment."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"envia i llegeix missatges SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet que l\'aplicació enviï missatges SMS. Aquesta acció pot provocar càrrecs inesperats. Les aplicacions malicioses poden enviar missatges sense la teva confirmació, cosa que et pot fer gastar diners."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lectura dels missatges de text (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats a la tauleta o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permet que el propietari la pugui vincular a la interfície principal del servei de missatgeria d\'un operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular-la a serveis de l\'operador de telefonia mòbil"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permet que el propietari la vinculi a serveis de l\'operador de telefonia mòbil. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accedir a No molesteu"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permet que l\'aplicació llegeixi la configuració No molesteu i hi escrigui."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar els intents de desbloqueig de pantalla"</string>

@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Ichshi profil o‘chirildi"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Administrator ilovasi yo‘qligi sababli ishchi profil o‘chirib tashlandi"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ishchi profilning administrator ilovasi yo‘q yoki buzilgan. Shuning uchun, ishchi profilingiz va unga aloqador ma’lumotlar o‘chirib tashlandi. Yordam olish uchun administratoringizga murojaat qiling."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administrator ilovasining ba’zi qismlari yo‘qolgan yoki buzilgan, shuning uchun undan foydalanib bo‘lmaydi. Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi. Yordam olish uchun administratoringizga murojaat qiling."</string>
     <string name="me" msgid="6545696007631404292">"Men"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Jiringlovchi o‘chirilgan"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Jiringlab tebranish"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Jiringlovchi yoqilgan"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Yangilashga tayyorgarlik"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Yangilanish paketiga ishlov berilmoqda…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"O‘chirilmoqda…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planshetingiz o‘chiriladi."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizoringiz o‘chadi."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktlarga kirish"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Joylashuv"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"joylashuvingizni ko‘rish"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ijtimoiy ma’lumotingiz"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kontaktlaringiz va ijtimoiy aloqalaringiz haqidagi ma’lumotga to‘g‘ridan to‘g‘ri o‘tadi."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Mavjud hisoblarga kirish."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"obunalarni o‘qish"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ilova hozirgi vaqtda sinxronlanayotgan elementlar to‘g‘risidagi ma’lumotlarni olishi mumkin."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS xabarlarni yuborish va ko‘rish"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ilovaga SMS xabarlarini jo‘natish uchun ruxsat beradi. Bu kutilmagan xarajatlarga sabab bo‘lishi mumkin. Zararli ilovalar sizdan so‘roqsiz xabarlar jo‘natish orqali pulingizni sarflashi mumkin."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"matn xabarlaringizni o‘qish (SMS yoki MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ilovaga planshetingiz yoki SIM kartangizga zaxiralangan SMS xabarlarini o‘qish uchun ruxsat beradi. Bu huquq ilovaga tarkibi va maxfiyligidan qat’iy nazar har qanday SMS xabarlarni o‘qish imkonini beradi."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Egasiga aloqa operatorining xabar almashinuv xizmatining yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"aloqa operatori xizmatlariga ulanish"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Aloqa operatori xizmatlariga ulanish imkonini beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"“Bezovta qilinmasin” rejimidan foydalanish"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"“Bezovta qilinmasin” rejimi sozlamalarini ko‘rish va o‘zgartirish."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekranni qulfdan chiqarish urinishlarini nazorat qilish"</string>

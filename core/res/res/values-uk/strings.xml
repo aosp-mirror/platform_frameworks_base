@@ -174,6 +174,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Робочий профіль видалено"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Робочий профіль видалено через відсутність додатка адміністратора."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Додаток адміністратора в робочому профілі відсутній або пошкоджений. У результаті ваш робочий профіль і пов’язані з ним дані видалено. Зверніться до свого адміністратора по допомогу."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Неможливо скористатися додатком адміністратора, оскільки в ньому немає певних компонентів або його пошкоджено. З вашого пристрою буде стерто всі дані. Зверніться до свого адміністратора по допомогу."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -188,8 +190,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Дзвінок вимкнено"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Дзвінок на вібросигналі"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Дзвінок увімкнено"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Підготовка до оновлення"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Обробка пакета оновлення…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Телевізор буде вимкнено."</string>
@@ -226,7 +238,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"отримувати доступ до контактів"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Геодані"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"використовувати геодані"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Соціальна інформація"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Безпосередній доступ до інформації про ваші контакти та соціальні зв’язки."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
@@ -513,6 +526,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби надсилання повідомлень через оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"підключатися до служб оператора"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Власник може підключатися до служб оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"доступ до режиму \"Не турбувати\""</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Додаток зможе переглядати та змінювати конфігурацію режиму \"Не турбувати\"."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>
@@ -522,8 +537,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте планшет або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телевізор або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телефон або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінення пароля розблокування екрана"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змініть пароль розблокування екрана."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінити пароль розблокування екрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змінити пароль розблокування екрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокувати екран"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролювати, як і коли блокується екран."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>
@@ -770,7 +785,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Полишити цю сторінку"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Залишитися на цій сторінці"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nСправді полишити цю сторінку?"</string>
-    <string name="save_password_label" msgid="6860261758665825069">"Підтверд."</string>
+    <string name="save_password_label" msgid="6860261758665825069">"Підтвердьте"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Порада: двічі торкніться для збільшення чи зменшення."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автозап."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Налашт.автозап."</string>
@@ -1482,7 +1497,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Додаток закріплено. Його не можна відкріпити на цьому пристрої."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екран закріплено"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екран відкріплено"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запитувати PIN-код перед відкріпленням"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-код для відкріплення"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запитувати ключ розблокування перед відкріпленням"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запитувати пароль перед відкріпленням"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Установив адміністратор"</string>
