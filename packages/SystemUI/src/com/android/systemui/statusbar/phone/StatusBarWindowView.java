@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -50,6 +51,8 @@ public class StatusBarWindowView extends FrameLayout {
     private NotificationPanelView mNotificationPanel;
     private View mBrightnessMirror;
 
+    private int mRightInset = 0;
+
     PhoneStatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
 
@@ -63,14 +66,18 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     protected boolean fitSystemWindows(Rect insets) {
         if (getFitsSystemWindows()) {
-            boolean changed = insets.left != getPaddingLeft()
+            boolean paddingChanged = insets.left != getPaddingLeft()
                     || insets.top != getPaddingTop()
-                    || insets.right != getPaddingRight()
                     || insets.bottom != getPaddingBottom();
 
-            // Drop top inset, apply right and left inset and pass through bottom inset.
-            if (changed) {
-                setPadding(insets.left, 0, insets.right, 0);
+            // Super-special right inset handling, because scrims and backdrop need to ignore it.
+            if (insets.right != mRightInset) {
+                mRightInset = insets.right;
+                applyMargins();
+            }
+            // Drop top inset, apply left inset and pass through bottom inset.
+            if (paddingChanged) {
+                setPadding(insets.left, 0, 0, 0);
             }
             insets.left = 0;
             insets.top = 0;
@@ -86,6 +93,30 @@ public class StatusBarWindowView extends FrameLayout {
             insets.top = 0;
         }
         return false;
+    }
+
+    private void applyMargins() {
+        final int N = getChildCount();
+        for (int i = 0; i < N; i++) {
+            View child = getChildAt(i);
+            if (child.getLayoutParams() instanceof LayoutParams) {
+                LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                if (!lp.ignoreRightInset && lp.rightMargin != mRightInset) {
+                    lp.rightMargin = mRightInset;
+                    child.requestLayout();
+                }
+            }
+        }
+    }
+
+    @Override
+    public FrameLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected FrameLayout.LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     }
 
     @Override
@@ -242,6 +273,24 @@ public class StatusBarWindowView extends FrameLayout {
     public void cancelExpandHelper() {
         if (mStackScrollLayout != null) {
             mStackScrollLayout.cancelExpandHelper();
+        }
+    }
+
+    public class LayoutParams extends FrameLayout.LayoutParams {
+
+        public boolean ignoreRightInset;
+
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
+
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+
+            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.StatusBarWindowView_Layout);
+            ignoreRightInset = a.getBoolean(
+                    R.styleable.StatusBarWindowView_Layout_ignoreRightInset, false);
+            a.recycle();
         }
     }
 }
