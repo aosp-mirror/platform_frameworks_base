@@ -3129,7 +3129,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void uninstallCaCert(ComponentName admin, String alias) {
+    public void uninstallCaCerts(ComponentName admin, String[] aliases) {
         enforceCanManageCaCerts(admin);
 
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
@@ -3137,7 +3137,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
             try {
-                keyChainConnection.getService().deleteCaCertificate(alias);
+                for (int i = 0 ; i < aliases.length; i++) {
+                    keyChainConnection.getService().deleteCaCertificate(aliases[i]);
+                }
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "from CaCertUninstaller: ", e);
             } finally {
