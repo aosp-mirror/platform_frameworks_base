@@ -690,6 +690,8 @@ public class Activity extends ContextThemeWrapper
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
     private static final String SAVED_DIALOG_ARGS_KEY_PREFIX = "android:dialog_args_";
 
+    private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
+
     private static class ManagedDialog {
         Dialog mDialog;
         Bundle mArgs;
@@ -3751,7 +3753,7 @@ public class Activity extends ContextThemeWrapper
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
         Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
-        startActivityForResult(intent, requestCode);
+        startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
     }
 
     /**
@@ -6348,31 +6350,31 @@ public class Activity extends ContextThemeWrapper
             + ", resCode=" + resultCode + ", data=" + data);
         mFragments.noteStateNotSaved();
         if (who == null) {
-            if (isRequestPermissionResult(data)) {
+            onActivityResult(requestCode, resultCode, data);
+        } else if (who.startsWith(REQUEST_PERMISSIONS_WHO_PREFIX)) {
+            who = who.substring(REQUEST_PERMISSIONS_WHO_PREFIX.length());
+            if (TextUtils.isEmpty(who)) {
                 dispatchRequestPermissionsResult(requestCode, data);
-            } else {
-                onActivityResult(requestCode, resultCode, data);
-            }
-        } else {
-            if (who.startsWith("@android:view:")) {
-                ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
-                        getActivityToken());
-                for (ViewRootImpl viewRoot : views) {
-                    if (viewRoot.getView() != null
-                            && viewRoot.getView().dispatchActivityResult(
-                                    who, requestCode, resultCode, data)) {
-                        return;
-                    }
-                }
             } else {
                 Fragment frag = mFragments.findFragmentByWho(who);
                 if (frag != null) {
-                    if (isRequestPermissionResult(data)) {
-                        dispatchRequestPermissionsResultToFragment(requestCode, data, frag);
-                    } else {
-                        frag.onActivityResult(requestCode, resultCode, data);
-                    }
+                    dispatchRequestPermissionsResultToFragment(requestCode, data, frag);
                 }
+            }
+        } else if (who.startsWith("@android:view:")) {
+            ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
+                    getActivityToken());
+            for (ViewRootImpl viewRoot : views) {
+                if (viewRoot.getView() != null
+                        && viewRoot.getView().dispatchActivityResult(
+                                who, requestCode, resultCode, data)) {
+                    return;
+                }
+            }
+        } else {
+            Fragment frag = mFragments.findFragmentByWho(who);
+            if (frag != null) {
+                frag.onActivityResult(requestCode, resultCode, data);
             }
         }
     }
@@ -6484,11 +6486,6 @@ public class Activity extends ContextThemeWrapper
         fragement.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private static boolean isRequestPermissionResult(Intent intent) {
-        return intent != null
-                && PackageManager.ACTION_REQUEST_PERMISSIONS.equals(intent.getAction());
-    }
-
     class HostCallbacks extends FragmentHostCallback<Activity> {
         public HostCallbacks() {
             super(Activity.this /*activity*/);
@@ -6533,6 +6530,14 @@ public class Activity extends ContextThemeWrapper
         public void onStartActivityFromFragment(Fragment fragment, Intent intent, int requestCode,
                 Bundle options) {
             Activity.this.startActivityFromFragment(fragment, intent, requestCode, options);
+        }
+
+        @Override
+        public void onRequestPermissionsFromFragment(Fragment fragment, String[] permissions,
+                int requestCode) {
+            String who = REQUEST_PERMISSIONS_WHO_PREFIX + fragment.mWho;
+            Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
+            startActivityForResult(who, intent, requestCode, null);
         }
 
         @Override
