@@ -534,6 +534,7 @@ public class VolumeDialog {
                 }
             }
             Util.setVisOrInvis(row.settingsButton, false);
+            updateVolumeRowHeaderVisibleH(row);
             row.header.setAlpha(mExpanded && isActive ? 1 : 0.5f);
             updateVolumeRowSliderTintH(row, isActive);
         }
@@ -613,25 +614,22 @@ public class VolumeDialog {
         }
 
         // update header visible
-        if (row.cachedShowHeaders != mShowHeaders) {
-            row.cachedShowHeaders = mShowHeaders;
-            Util.setVisOrGone(row.header, mShowHeaders);
-        }
+        updateVolumeRowHeaderVisibleH(row);
 
         // update header text
-        final String text;
-        if (isRingZenNone) {
-            text = mContext.getString(R.string.volume_stream_muted_dnd, ss.name);
-        } else if (isRingVibrate && isRingLimited) {
-            text = mContext.getString(R.string.volume_stream_vibrate_dnd, ss.name);
-        } else if (isRingVibrate) {
-            text = mContext.getString(R.string.volume_stream_vibrate, ss.name);
-        } else if (ss.muted || mAutomute && ss.level == 0) {
-            text = mContext.getString(R.string.volume_stream_muted, ss.name);
-        } else if (isRingLimited) {
-            text = mContext.getString(R.string.volume_stream_limited_dnd, ss.name);
-        } else {
-            text = ss.name;
+        String text = ss.name;
+        if (mShowHeaders) {
+            if (isRingZenNone) {
+                text = mContext.getString(R.string.volume_stream_muted_dnd, ss.name);
+            } else if (isRingVibrate && isRingLimited) {
+                text = mContext.getString(R.string.volume_stream_vibrate_dnd, ss.name);
+            } else if (isRingVibrate) {
+                text = mContext.getString(R.string.volume_stream_vibrate, ss.name);
+            } else if (ss.muted || mAutomute && ss.level == 0) {
+                text = mContext.getString(R.string.volume_stream_muted, ss.name);
+            } else if (isRingLimited) {
+                text = mContext.getString(R.string.volume_stream_limited_dnd, ss.name);
+            }
         }
         Util.setText(row.header, text);
 
@@ -665,6 +663,15 @@ public class VolumeDialog {
 
         // update slider
         updateVolumeRowSliderH(row, zenMuted);
+    }
+
+    private void updateVolumeRowHeaderVisibleH(VolumeRow row) {
+        final boolean dynamic = row.ss != null && row.ss.dynamic;
+        final boolean showHeaders = mShowHeaders || mExpanded && dynamic;
+        if (row.cachedShowHeaders != showHeaders) {
+            row.cachedShowHeaders = showHeaders;
+            Util.setVisOrGone(row.header, showHeaders);
+        }
     }
 
     private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
