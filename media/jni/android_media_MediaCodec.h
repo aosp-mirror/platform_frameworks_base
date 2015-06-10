@@ -46,6 +46,8 @@ struct JMediaCodec : public AHandler {
     void registerSelf();
     void release();
 
+    status_t enableOnFrameRenderedListener(jboolean enable);
+
     status_t setCallback(jobject cb);
 
     status_t configure(
@@ -116,11 +118,11 @@ protected:
     virtual ~JMediaCodec();
 
     virtual void onMessageReceived(const sp<AMessage> &msg);
-    void handleCallback(const sp<AMessage> &msg);
 
 private:
     enum {
         kWhatCallbackNotify,
+        kWhatFrameRendered,
     };
 
     jclass mClass;
@@ -139,6 +141,7 @@ private:
     sp<MediaCodec> mCodec;
 
     sp<AMessage> mCallbackNotification;
+    sp<AMessage> mOnFrameRenderedNotification;
 
     status_t mInitStatus;
 
@@ -148,6 +151,8 @@ private:
 
     void cacheJavaObjects(JNIEnv *env);
     void deleteJavaObjects(JNIEnv *env);
+    void handleCallback(const sp<AMessage> &msg);
+    void handleFrameRenderedNotification(const sp<AMessage> &msg);
 
     DISALLOW_EVIL_CONSTRUCTORS(JMediaCodec);
 };
