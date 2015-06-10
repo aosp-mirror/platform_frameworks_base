@@ -275,6 +275,11 @@
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
+    <style name="TextAppearance.Volume.Header">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/volume_slider_inactive</item>
+    </style>
+
     <style name="TextAppearance.Volume.ZenSummary">
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
