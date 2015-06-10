@@ -142,6 +142,16 @@ public class UsbManager {
     public static final String USB_CONFIGURED = "configured";
 
     /**
+     * Boolean extra indicating whether confidential user data, such as photos, should be
+     * made available on the USB connection. This variable will only be set when the user
+     * has explicitly asked for this data to be unlocked.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
+     *
+     * {@hide}
+     */
+    public static final String USB_DATA_UNLOCKED = "unlocked";
+
+    /**
      * Name of the USB mass storage USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
@@ -464,4 +474,34 @@ public class UsbManager {
             Log.e(TAG, "RemoteException in setCurrentFunction", e);
         }
     }
+
+    /**
+     * Sets whether USB data (for example, MTP exposed pictures) should be made available
+     * on the USB connection. Unlocking usb data should only be done with user involvement,
+     * since exposing pictures or other data could leak sensitive user information.
+     *
+     * {@hide}
+     */
+    public void setUsbDataUnlocked(boolean unlocked) {
+        try {
+            mService.setUsbDataUnlocked(unlocked);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setUsbDataUnlocked", e);
+        }
+    }
+
+    /**
+     * Returns {@code true} iff access to sensitive USB data is currently allowed.
+     *
+     * {@hide}
+     */
+    public boolean isUsbDataUnlocked() {
+        try {
+            return mService.isUsbDataUnlocked();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in isUsbDataUnlocked", e);
+        }
+        return false;
+    }
+
 }
