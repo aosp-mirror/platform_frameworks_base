@@ -32,13 +32,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 public class ZoneGetter {
     private static final String TAG = "ZoneGetter";
@@ -50,17 +51,120 @@ public class ZoneGetter {
     public static final String KEY_GMT = "gmt";  // value: String
     public static final String KEY_OFFSET = "offset";  // value: int (Integer)
 
-    private final List<HashMap<String, Object>> mZones = new ArrayList<>();
-    private final HashSet<String> mLocalZones = new HashSet<>();
-    private final Date mNow = Calendar.getInstance().getTime();
-    private final SimpleDateFormat mZoneNameFormatter = new SimpleDateFormat("zzzz");
+    private ZoneGetter() {}
 
-    public List<HashMap<String, Object>> getZones(Context context) {
-        for (String olsonId : TimeZoneNames.forLocale(Locale.getDefault())) {
-            mLocalZones.add(olsonId);
+    public static String getTimeZoneOffsetAndName(TimeZone tz, Date now) {
+        Locale locale = Locale.getDefault();
+        String gmtString = getGmtOffsetString(locale, tz, now);
+        String zoneNameString = getZoneLongName(locale, tz, now);
+        if (zoneNameString == null) {
+            return gmtString;
         }
-        try {
-            XmlResourceParser xrp = context.getResources().getXml(R.xml.timezones);
+
+        // We don't use punctuation here to avoid having to worry about localizing that too!
+        return gmtString + " " + zoneNameString;
+    }
+
+    public static List<Map<String, Object>> getZonesList(Context context) {
+        final Locale locale = Locale.getDefault();
+        final Date now = new Date();
+
+        // The display name chosen for each zone entry depends on whether the zone is one associated
+        // with the country of the user's chosen locale. For "local" zones we prefer the "long name"
+        // (e.g. "Europe/London" -> "British Summer Time" for people in the UK). For "non-local"
+        // zones we prefer the exemplar location (e.g. "Europe/London" -> "London" for English
+        // speakers from outside the UK). This heuristic is based on the fact that people are
+        // typically familiar with their local timezones and exemplar locations don't always match
+        // modern-day expectations for people living in the country covered. Large countries like
+        // China that mostly use a single timezone (olson id: "Asia/Shanghai") may not live near
+        // "Shanghai" and prefer the long name over the exemplar location. The only time we don't
+        // follow this policy for local zones is when Android supplies multiple olson IDs to choose
+        // from and the use of a zone's long name leads to ambiguity. For example, at the time of
+        // writing Android lists 5 olson ids for Australia which collapse to 2 different zone names
+        // in winter but 4 different zone names in summer. The ambiguity leads to the users
+        // selecting the wrong olson ids.
+
+        // Get the list of olson ids to display to the user.
+        List<String> olsonIdsToDisplay = readTimezonesToDisplay(context);
+
+        // Create a lookup of local zone IDs.
+        Set<String> localZoneIds = new TreeSet<String>();
+        for (String olsonId : TimeZoneNames.forLocale(locale)) {
+            localZoneIds.add(olsonId);
+        }
+
+        // Work out whether the long names for the local entries that we would show by default would
+        // be ambiguous.
+        Set<String> localZoneNames = new TreeSet<String>();
+        boolean localLongNamesAreAmbiguous = false;
+        for (String olsonId : olsonIdsToDisplay) {
+            if (localZoneIds.contains(olsonId)) {
+                TimeZone tz = TimeZone.getTimeZone(olsonId);
+                String zoneLongName = getZoneLongName(locale, tz, now);
+                boolean longNameIsUnique = localZoneNames.add(zoneLongName);
+                if (!longNameIsUnique) {
+                    localLongNamesAreAmbiguous = true;
+                    break;
+                }
+            }
+        }
+
+        // Generate the list of zone entries to return.
+        List<Map<String, Object>> zones = new ArrayList<Map<String, Object>>();
+        for (String olsonId : olsonIdsToDisplay) {
+            final TimeZone tz = TimeZone.getTimeZone(olsonId);
+            // Exemplar location display is the default. The only time we intend to display the long
+            // name is when the olsonId is local AND long names are not ambiguous.
+            boolean isLocalZoneId = localZoneIds.contains(olsonId);
+            boolean preferLongName = isLocalZoneId && !localLongNamesAreAmbiguous;
+            String displayName = getZoneDisplayName(locale, tz, now, preferLongName);
+
+            String gmtOffsetString = getGmtOffsetString(locale, tz, now);
+            int offsetMillis = tz.getOffset(now.getTime());
+            Map<String, Object> displayEntry =
+                    createDisplayEntry(tz, gmtOffsetString, displayName, offsetMillis);
+            zones.add(displayEntry);
+        }
+        return zones;
+    }
+
+    private static Map<String, Object> createDisplayEntry(
+            TimeZone tz, String gmtOffsetString, String displayName, int offsetMillis) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(KEY_ID, tz.getID());
+        map.put(KEY_DISPLAYNAME, displayName);
+        map.put(KEY_GMT, gmtOffsetString);
+        map.put(KEY_OFFSET, offsetMillis);
+        return map;
+    }
+
+    /**
+     * Returns a name for the specific zone. If {@code preferLongName} is {@code true} then the
+     * long display name for the timezone will be used, otherwise the exemplar location will be
+     * preferred.
+     */
+    private static String getZoneDisplayName(Locale locale, TimeZone tz, Date now,
+            boolean preferLongName) {
+        String zoneNameString;
+        if (preferLongName) {
+            zoneNameString = getZoneLongName(locale, tz, now);
+        } else {
+            zoneNameString = getZoneExemplarLocation(locale, tz);
+            if (zoneNameString == null || zoneNameString.isEmpty()) {
+                // getZoneExemplarLocation can return null.
+                zoneNameString = getZoneLongName(locale, tz, now);
+            }
+        }
+        return zoneNameString;
+    }
+
+    private static String getZoneExemplarLocation(Locale locale, TimeZone tz) {
+        return TimeZoneNames.getExemplarLocation(locale.toString(), tz.getID());
+    }
+
+    private static List<String> readTimezonesToDisplay(Context context) {
+        List<String> olsonIds = new ArrayList<String>();
+        try (XmlResourceParser xrp = context.getResources().getXml(R.xml.timezones)) {
             while (xrp.next() != XmlResourceParser.START_TAG) {
                 continue;
             }
@@ -68,58 +172,34 @@ public class ZoneGetter {
             while (xrp.getEventType() != XmlResourceParser.END_TAG) {
                 while (xrp.getEventType() != XmlResourceParser.START_TAG) {
                     if (xrp.getEventType() == XmlResourceParser.END_DOCUMENT) {
-                        return mZones;
+                        return olsonIds;
                     }
                     xrp.next();
                 }
                 if (xrp.getName().equals(XMLTAG_TIMEZONE)) {
                     String olsonId = xrp.getAttributeValue(0);
-                    addTimeZone(olsonId);
+                    olsonIds.add(olsonId);
                 }
                 while (xrp.getEventType() != XmlResourceParser.END_TAG) {
                     xrp.next();
                 }
                 xrp.next();
             }
-            xrp.close();
         } catch (XmlPullParserException xppe) {
             Log.e(TAG, "Ill-formatted timezones.xml file");
         } catch (java.io.IOException ioe) {
             Log.e(TAG, "Unable to read timezones.xml file");
         }
-        return mZones;
+        return olsonIds;
     }
 
-    private void addTimeZone(String olsonId) {
-        // We always need the "GMT-07:00" string.
-        final TimeZone tz = TimeZone.getTimeZone(olsonId);
-
-        // For the display name, we treat time zones within the country differently
-        // from other countries' time zones. So in en_US you'd get "Pacific Daylight Time"
-        // but in de_DE you'd get "Los Angeles" for the same time zone.
-        String displayName;
-        if (mLocalZones.contains(olsonId)) {
-            // Within a country, we just use the local name for the time zone.
-            mZoneNameFormatter.setTimeZone(tz);
-            displayName = mZoneNameFormatter.format(mNow);
-        } else {
-            // For other countries' time zones, we use the exemplar location.
-            final String localeName = Locale.getDefault().toString();
-            displayName = TimeZoneNames.getExemplarLocation(localeName, olsonId);
-        }
-
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put(KEY_ID, olsonId);
-        map.put(KEY_DISPLAYNAME, displayName);
-        map.put(KEY_GMT, getTimeZoneText(tz, false));
-        map.put(KEY_OFFSET, tz.getOffset(mNow.getTime()));
-
-        mZones.add(map);
+    private static String getZoneLongName(Locale locale, TimeZone tz, Date now) {
+        boolean daylight = tz.inDaylightTime(now);
+        // This returns a name if it can, or will fall back to GMT+0X:00 format.
+        return tz.getDisplayName(daylight, TimeZone.LONG, locale);
     }
 
-    public static String getTimeZoneText(TimeZone tz, boolean includeName) {
-        Date now = new Date();
-
+    private static String getGmtOffsetString(Locale locale, TimeZone tz, Date now) {
         // Use SimpleDateFormat to format the GMT+00:00 string.
         SimpleDateFormat gmtFormatter = new SimpleDateFormat("ZZZZ");
         gmtFormatter.setTimeZone(tz);
@@ -127,21 +207,9 @@ public class ZoneGetter {
 
         // Ensure that the "GMT+" stays with the "00:00" even if the digits are RTL.
         BidiFormatter bidiFormatter = BidiFormatter.getInstance();
-        Locale l = Locale.getDefault();
-        boolean isRtl = TextUtils.getLayoutDirectionFromLocale(l) == View.LAYOUT_DIRECTION_RTL;
+        boolean isRtl = TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL;
         gmtString = bidiFormatter.unicodeWrap(gmtString,
                 isRtl ? TextDirectionHeuristics.RTL : TextDirectionHeuristics.LTR);
-
-        if (!includeName) {
-            return gmtString;
-        }
-
-        // Optionally append the time zone name.
-        SimpleDateFormat zoneNameFormatter = new SimpleDateFormat("zzzz");
-        zoneNameFormatter.setTimeZone(tz);
-        String zoneNameString = zoneNameFormatter.format(now);
-
-        // We don't use punctuation here to avoid having to worry about localizing that too!
-        return gmtString + " " + zoneNameString;
+        return gmtString;
     }
 }
