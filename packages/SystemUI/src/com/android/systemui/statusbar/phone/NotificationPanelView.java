@@ -482,6 +482,7 @@ public class NotificationPanelView extends PanelView implements
         mStatusBar.dismissPopups();
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
                 true /* cancelAnimators */);
+        mNotificationStackScroller.resetScrollPosition();
     }
 
     public void closeQs() {
