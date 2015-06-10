@@ -552,6 +552,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
 
         public void updateEntry() {
+            mSortedEntries.remove(HeadsUpEntry.this);
             long currentTime = mClock.currentTimeMillis();
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
             postTime = Math.max(postTime, currentTime);
@@ -561,13 +562,13 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
                 mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
             }
-            updateSortOrder(HeadsUpEntry.this);
+            mSortedEntries.add(HeadsUpEntry.this);
         }
 
         @Override
         public int compareTo(HeadsUpEntry o) {
             return postTime < o.postTime ? 1
-                    : postTime == o.postTime ? 0
+                    : postTime == o.postTime ? entry.key.compareTo(o.entry.key)
                             : -1;
         }
 
@@ -590,16 +591,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             entry = null;
             mRemoveHeadsUpRunnable = null;
         }
-    }
-
-    /**
-     * Update the sorted heads up order.
-     *
-     * @param headsUpEntry the headsUp that changed
-     */
-    private void updateSortOrder(HeadsUpEntry headsUpEntry) {
-        mSortedEntries.remove(headsUpEntry);
-        mSortedEntries.add(headsUpEntry);
     }
 
     public static class Clock {
