@@ -208,6 +208,27 @@ public interface MetricsConstants {
     public static final int APPLICATIONS_USAGE_ACCESS_DETAIL = 183;
     public static final int APPLICATIONS_HIGH_POWER_APPS = 184;
     public static final int FUELGAUGE_HIGH_POWER_DETAILS = 185;
+    public static final int ACTION_LS_UNLOCK = 186;
+    public static final int ACTION_LS_SHADE = 187;
+    public static final int ACTION_LS_HINT = 188;
+    public static final int ACTION_LS_CAMERA = 189;
+    public static final int ACTION_LS_DIALER = 190;
+    public static final int ACTION_LS_LOCK = 191;
+    public static final int ACTION_LS_NOTE = 192;
+    public static final int ACTION_LS_QS = 193;
+    public static final int ACTION_SHADE_QS_PULL = 194;
+    public static final int ACTION_SHADE_QS_TAP = 195;
+    public static final int LOCKSCREEN = 196;
+    public static final int BOUNCER = 197;
+    public static final int SCREEN = 198;
+    public static final int NOTIFICATION_ALERT = 199;
+    public static final int ACTION_EMERGENCY_CALL = 200;
+    public static final int APPLICATIONS_MANAGE_ASSIST = 201;
+    public static final int PROCESS_STATS_SUMMARY = 202;
+    public static final int ACTION_ROTATION_LOCK = 203;
+    public static final int ACTION_NOTE_CONTROLS = 204;
+    public static final int ACTION_NOTE_INFO = 205;
+    public static final int ACTION_APP_NOTE_SETTINGS = 206;
 
     //aliases
     public static final int DEVICEINFO_STORAGE = DEVICEINFO_MEMORY;
