@@ -370,7 +370,7 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->initialize(deviceId, source, action, flags, edgeFlags, metaState, buttonState, 0,
+    event->initialize(deviceId, source, action, 0, flags, edgeFlags, metaState, buttonState,
             xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
