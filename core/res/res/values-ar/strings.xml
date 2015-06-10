@@ -176,6 +176,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"تم حذف الملف الشخصي للعمل."</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"تم حذف الملف الشخصي للعمل نتيجة فقد تطبيق المشرف."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"تطبيق المشرف فاقد لمكونات أو تالف ويتعذر استخدامه. سيتم محو بيانات جهازك الآن. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="me" msgid="6545696007631404292">"أنا"</string>
@@ -190,8 +192,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"التحضير للتحديث"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"جارٍ معالجة حزم التحديث…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"سيتم إيقاف التلفزيون."</string>
@@ -228,7 +240,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"الدخول إلى موقعك"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"المعلومات الاجتماعية"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"الدخول المباشر إلى معلومات عن جهات الاتصال والاتصالات الاجتماعية."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
@@ -515,6 +528,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"يسمح لحامله بالالتزام بواجهة المستوى العالي لخدمة المراسلة التابعة لمشغل شبكة الجوَّال. ومن المفترض عدم الحاجة إليه مع التطبيقات العادية."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"الالتزام بخدمات مشغل شبكة الجوال"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"للسماح للمالك بالالتزام بخدمات مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"الوصول إلى إعداد \"الرجاء عدم الإزعاج\""</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"للسماح للتطبيق بقراءة تهيئة \"الرجاء عدم الإزعاج\" وكتابتها."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>

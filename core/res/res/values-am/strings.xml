@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"የስራ መገለጫ ተሰርዟል"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"በጎደለ የአስተዳዳሪ መተግበሪያ ምክንያት የስራ መገለጫ ተሰርዟል።"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"የስራ መገለጫ አስተዳዳሪ መተግበሪያው ወይም ይጎድላል ወይም ተበላሽቷል። በዚህ ምክንያት የስራ መገለጫዎ እና ተዛማጅ ውሂብ ተሰርዘዋል። እርዳታን ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"የእርስዎ መሣሪያ ይደመሰሳል"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"የአስተዳዳሪ መተግበሪያው ክፍሎች ይጎድሉታል ወይም ተበላሽቷል፣ እና ስራ ላይ መዋል አይችልም። የእርስዎ መሣሪያ አሁን ይደመሰሳል። እርዳታ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="me" msgid="6545696007631404292">"እኔ"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"መጥሪያ ጠፍቷል"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ነዛሪ መጥሪያ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"መጥሪያ በርቷል"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"ለዝማኔ አዘጋጅ"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"የዝማኔ ጥቅልን በማስሄድ ላይ…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"በመዝጋት ላይ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ጡባዊዎ ይዘጋል።"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"የእርስዎ ቴሌቪዥን ይዘጋል።"</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ዕውቂያዎች"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"የእርስዎ እውቂያዎች ላይ ይድረሱባቸው"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"መገኛ አካባቢ"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"የእርስዎን መገኛ አካባቢ ይድረስበት"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ማህበራዊ መረጃዎ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ወደ የእውቂያዎችህና የማህበራዊ ግንኙነቶችህ መረጃ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ቀን መቁጠሪያ"</string>
@@ -511,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ያዢው በሞባይል አገልግሎት ሰጪ የመልዕክት አላላክ አገልግሎት ላይ ከፍተኛውን ደረጃ በይነ ገጽ እንዲይዝ ይፈቅድለታል። ለመደበኛ መተግበሪያ በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ከአገልግሎት አቅራቢ አገልግሎቶች ጋር እሰር"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ያዢው የአገልግሎት አቅራቢ አገልግሎቶችን እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"አትረብሽን ድረስበት"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"መተግበሪያው የአትረብሽ ውቅረትን እንዲያነብብ እና እንዲጸፍ ይፈቅዳል።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>

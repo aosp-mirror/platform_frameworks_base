@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"نمایه کار حذف شد"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"به دلیل نداشتن برنامه سرپرست، نمایه کار حذف شده است."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"برنامه سرپرست نمایه کار وجود ندارد یا خراب است. در نتیجه، نمایه کاریتان و اطلاعات مرتبط حذف شده است. برای دریافت راهنمایی با سرپرستتان تماس بگیرید."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"برنامه سرپرست بخش‌هایی را ندارد یا خراب است، و نمی‌تواند استفاده شود. دستگاهتان اکنون پاک می‌شود. برای این که راهنمایی شوید، با سرپرستتان تماس بگیرید."</string>
     <string name="me" msgid="6545696007631404292">"من"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"زنگ خاموش"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"زنگ لرزشی"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"زنگ روشن"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"آماده‌سازی برای به‌روزرسانی"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"در حال پردازش بسته‌بندی به‌روز…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"در حال خاموش شدن…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"رایانهٔ لوحی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"تلویزیون شما خاموش خواهد شد."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"مخاطبین"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"دسترسی به مخاطبین شما"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"مکان"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"دسترسی به مکان شما"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"اطلاعات اجتماعی شما"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"مستقیم به اطلاعات مخاطبین و روابط اجتماعی دسترسی داشته باشید."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"تقویم"</string>
@@ -243,14 +256,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"برقراری و مدیریت تماس‌های تلفنی"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"حسگرها"</string>
     <string name="permgroupdesc_sensors" msgid="6376772456799240169">"دسترسی به اطلاعات به دست آمده از حسگرها و دستگاه‌های پوشیدنی"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"بازیابی محتوای پنجره"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"محتوای پنجره‌ای را که در حال تعامل با آن هستید بررسی کنید."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"محتوای پنجره را بازیابی کند"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"محتوای پنجره‌ای را که درحال تعامل با آن هستید بررسی می‌کند."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"فعال‌سازی کاوش لمسی"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"موارد لمس شده با صدای بلند خوانده می‌شوند و با استفاده از حرکات می‌توانید صفحه را کاوش کنید."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"فعال‌سازی دسترس‌پذیری پیشرفته برای وب"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ممکن است جهت افزایش دسترس‌پذیری به محتوای برنامه، اسکریپت‌هایی نصب شود."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"نوشتاری را که تایپ می‌کنید مشاهده نمایید"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را شامل می‌شود."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"نوشتاری را که تایپ می‌کنید مشاهده کند"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را لحاظ می‌کند."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"غیرفعال کردن یا تغییر نوار وضعیت"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"‏به برنامه اجازه می‎دهد تا نوار وضعیت را غیرفعال کند یا نمادهای سیستم را اضافه یا حذف کند."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"نوار وضعیت"</string>
@@ -511,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای رابط کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"اتصال به سرویس‌های شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"دسترسی به حالت «مزاحم نشوید»"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
@@ -521,9 +536,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلویزیون را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلفن را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"تغییر قفل صفحه"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"تغییر قفل صفحه."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"قفل صفحه را تغییر می‌دهد."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"قفل کردن صفحه"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"نحوه و زمان قفل شدن صفحه را کنترل کنید."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"نحوه و زمان قفل شدن صفحه را کنترل می‌کند."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"پاک کردن تمام داده‌ها"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"با انجام بازنشانی به داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"داده‌های تلویزیون را بدون هشدار با انجام بازنشانی به داده کارخانه پاک کنید."</string>
@@ -698,19 +713,19 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"لطفاً به راهنمای کاربر مراجعه کرده یا با مرکز پشتیبانی از مشتریان تماس بگیرید."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"سیم کارت قفل شد."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"بازگشایی قفل سیم کارت..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"‏الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"‏الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. \n\nپس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"گذرواژهٔ خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کرده‌اید. \n\nپس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏پین را<xliff:g id="NUMBER_0">%d</xliff:g>  بار اشتباه تایپ کرده‎اید. \n\nپس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که برای بازگشایی قفل رایانهٔ لوحی خود به Google وارد شوید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏الگوی بازگشایی را <xliff:g id="NUMBER_0">%d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، از شما خواسته خواهد شد تا با استفاده از ورود به سیستم Google، قفل تلویزیون‌تان را باز کنید.\n\n پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه، دوباره امتحان کنید."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر از شما خواسته می‎شود که برای بازگشایی قفل گوشی خود به برنامهٔ Google وارد شوید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏الگوی قفل‌گشایی را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر از شما خواسته می‎شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید.\n\n پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل رایانهٔ لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، رایانهٔ لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"<xliff:g id="NUMBER_0">%d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و اطلاعات کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از<xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"شما به اشتباه اقدام به باز کردن قفل <xliff:g id="NUMBER">%d</xliff:g> رایانهٔ لوحی کرده‌اید. رایانهٔ لوحی در حال حاضر به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"<xliff:g id="NUMBER">%d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. اکنون تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن در حال حاضر به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"در <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"پس از <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"الگو را فراموش کرده‌اید؟"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"بازگشایی قفل حساب"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
@@ -1470,7 +1485,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"توسط سرپرستتان نصب شد"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود ماندگاری باتری، ابزار صرفه‌جویی در مصرف باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی متکی هستند، تا زمانی که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nابزار صرفه‌جویی در مصرف باتری به صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود ماندگاری باتری، ذخیره کننده باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی متکی هستند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nذخیره کننده باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

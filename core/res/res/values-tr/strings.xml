@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"İş profili silindi"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Eksik yönetici uygulaması nedeniyle iş profili silindi."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"İş profili yönetici uygulaması eksik ya da bozuk. Bunun sonucunda iş profiliniz ve ilgili veriler silindi. Yardım almak için yöneticiniz ile iletişim kurun."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız silinecek"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Yönetici uygulamasında bileşen eksik ya da uygulama bozuk ve kullanılamaz durumda. Cihazınız şimdi silinecek. Yardım için yöneticinizle iletişim kurun."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Telefon zili kapalı"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Telefon zili titreşimde"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Telefon zili açık"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Güncellemeye hazırlanın"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Güncelleme paketi işleniyor…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Kapanıyor…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tabletiniz kapanacak."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV\'niz kapatılacak."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kişiler"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kişilerinize erişme"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Konum"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"konumunuza erişme"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sosyal bilgileriniz"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kişileriniz ve sosyal bağlantılarınızla ilgili bilgilere doğrudan erişim."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Takvim"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kullanılabilir hesaplara erişin."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abone olunan yayınları okuma"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Uygulamaya, o anda senkronize olan özet akışları ile ilgili bilgi alma izni verir."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS iletileri gönderme ve görüntüleme"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Uygulamaya SMS iletisi gönderme izni verir. Bu durum beklenmeyen ödemelere neden olabilir. Kötü amaçlı uygulamalar onayınız olmadan iletiler göndererek sizi zarara uğratabilir."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"kısa mesajlarımı (SMS veya MMS) oku"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Uygulamaya tabletinizde veya SIM kartta saklanan SMS iletilerini okuma izni verir. Bu izin, uygulamanın tüm SMS iletilerini içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"İzin sahibinin, operatör mesajlaşma hizmetinin üst düzey arayüzüne bağlanmasına olanak verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"operatör hizmetlerine bağlan"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"İzin sahibinin, operatör hizmetlerine bağlanmasına olanak tanır. Normal uygulamalarda hiçbir zaman gerekmez."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Rahatsız Etmeyin özelliğine erişme"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Uygulamaya, Rahatsız Etmeyin yapılandırmasını okuma ve yazma izni verir."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
@@ -521,8 +535,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde tableti kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde TV\'yi kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde telefonu kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekran kilidini değiştir"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran kilidini değiştirin."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekran kilidini değiştirme"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran kilidini değiştirme."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranı kilitleme"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranın nasıl ve ne zaman kilitlendiğini denetleme."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri silme"</string>
@@ -1064,8 +1078,8 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB hata ayıklama özelliğini devre dışı bırakmak için dokunun."</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Klavyeyi değiştirin"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Klavyeleri seç"</string>
+    <string name="select_input_method" msgid="8547250819326693584">"Klavyeyi değiştir"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Klavyeyi seç"</string>
     <string name="show_ime" msgid="9157568568695230830">"Giriş yöntemini göster"</string>
     <string name="hardware" msgid="7517821086888990278">"Donanım"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Klavye düzeni seçin"</string>
@@ -1087,7 +1101,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Çıkarmayın"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Kurulum"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Çıkar"</string>
-    <string name="ext_media_browse_action" msgid="8322172381028546087">"Keşfedin"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Keşfet"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> bulunamıyor"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"Bu cihazı yeniden yerleştirin"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> taşınıyor"</string>

@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"ប្រវត្តិរូបការងារត្រូវបានលុប"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ប្រវត្តិរូបការងារត្រូវបានលុបដោយសារបាត់បង់កម្មវិធីគ្រប់គ្រង។"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ប្រវត្តិរូបការងាររបស់អ្នកអាចបាត់បង់ ឬមានបញ្ហា។ ជាលទ្ធផល ប្រវត្តិរូបការងាររបស់អ្នក និងទិន្នន័យដែលពាក់ព័ន្ធត្រូវបានលុប។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"កម្មវិធីគ្រប់គ្រងបាត់បង់សមាសធាតុ ឬមានបញ្ហា ហើយមិនអាចប្រើបានទេ។ ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុបឥឡូវនេះ។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"បិទ​កម្ម​វិធី​រោទ៍"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"កម្មវិធី​រោទ៍​ញ័រ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"បើក​កម្មវិធី​រោទ៍"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"រៀបចំធ្វើបច្ចុប្បន្នភាព"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"កំពុងដំណើរការកញ្ចប់នេះ…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"កំពុង​បិទ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​នឹង​បិទ។"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ទូរទស្សន៍របស់អ្នកបិទ។"</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ទីតាំង"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"ចូលដំណើរការទីតាំងរបស់អ្នក"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ព័ត៌មាន​សង្គម​របស់​អ្នក"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​ទំនាក់ទំនង និង​ការ​ភ្ជាប់​សង្គម​របស់​អ្នក។"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ប្រតិទិន"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ចូល​ដំណើរការ​គណនី​ដែល​មាន។"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"អាន​អត្ថបទ​ព័ត៌មាន​បាន​ជាវ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​លម្អិត​អំពី​អត្ថបទ​ព័ត៌មាន​​បាន​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្ន។"</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"ផ្ញើ និងមើលសារ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ឲ្យ​កម្មវិធី​ផ្ញើ​សារ​ SMS ។ វា​អាច​គិត​ថ្លៃ​សេវាកម្ម​ដែល​មិន​រំពឹង​ទុក។ កម្មវិធី​ព្យាបាទ​អាច​គិត​ថ្លៃ​សេវាកម្ម​ពី​អ្នក​ ដោយ​ផ្ញើ​សារ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"អាន​សារ​អត្ថបទ​របស់​អ្នក (SMS ឬ MMS​)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ឲ្យ​កម្មវិធី​​អាន​សារ SMS ដែល​មាន​ក្នុង​កុំព្យូទ័រ​បន្ទះ ឬ​ស៊ីម​កាត។ វា​ឲ្យ​កម្មវិធី​អាន​សារ SMS ទាក់ទង​នឹង​មាតិកា ឬ​ព័ត៌មាន​សម្ងាត់។"</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ភ្ជាប់ទៅក្រុមហ៊ុនផ្តល់សេវាកម្ម"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"អនុញ្ញាតឲ្យម្ចាស់ភ្ជាប់ទៅសេវាកម្មក្រុមហ៊ុនផ្តល់សេវាកម្ម។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ចូលដំណើរការ កុំរំខាន"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"អនុញ្ញាតឲ្យកម្មវិធីអាន និងសរសេរការកំណត់រចនាសម្ព័ន្ធមុខងារ កុំរំខាន។"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>

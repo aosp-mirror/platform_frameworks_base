@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Profil professionnel supprimé"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil professionnel supprimé en raison de l\'application d\'administration manquante."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Le profil professionnel de l\'application d\'administration est manquant ou corrompu. Votre profil professionnel et ses données connexes ont donc été supprimés. Communiquez avec votre administrateur pour obtenir de l\'assistance."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Le contenu de votre appareil sera effacé"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Des éléments de l\'application d\'administration sont manquants ou celle-ci est corrompue, ce qui la rend inutilisable. Le contenu de votre appareil sera maintenant effacé. Communiquez avec votre administrateur pour obtenir de l\'assistance."</string>
     <string name="me" msgid="6545696007631404292">"Moi"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Sonnerie désactivée"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Sonnerie en mode vibreur"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Sonnerie activée"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Préparation pour la mise à jour"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Traitement du paquet de mise à jour en cours..."</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Arrêt en cours..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Votre tablette va s\'éteindre."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Votre téléviseur va s\'éteindre."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"accéder à votre position"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Vos données sur les réseaux sociaux"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accès direct aux informations sur vos contacts et vos amis sur les réseaux sociaux"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accéder aux comptes disponibles"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lire les flux auxquels vous êtes abonné"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet à l\'application d\'obtenir des données sur les flux en cours de synchronisation."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"envoyer et afficher des messages texte"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet à l\'application d\'envoyer des messages texte. Cette autorisation peut entraîner des frais inattendus. Des applications malveillantes peuvent générer des frais en envoyant des messages sans votre consentement."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"voir les messages texte ou multimédias"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permet à l\'application de lire les SMS stockés sur votre tablette ou sur la carte SIM. Cette autorisation lui permet de lire tous les SMS, indépendamment de leur contenu ou de leur caractère confidentiel."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de messagerie d\'un fournisseur. Les applications standards ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"s\'associer aux services d\'un fournisseur"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permet à l\'application autorisée de s\'associer aux services d\'un fournisseur. Ne devrait pas être nécessaire pour les applications standards."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accéder au mode Ne pas déranger"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>

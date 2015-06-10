@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dias"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Perfil de trabalho eliminado"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Perfil de trabalho eliminado devido a aplicação de administração em falta."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"A aplicação de administração do perfil de trabalho está em falta ou corrompida. Consequentemente, o seu perfil de trabalho e os dados relacionados foram eliminados. Contacte o seu administrador para obter assistência."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"O seu dispositivo será apagado"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"A aplicação de administração tem componentes em falta ou corrompidos e não podem ser utilizados. O seu dispositivo será agora apagado. Contacte o seu administrador para obter assistência."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Campainha desativada"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Campainha em vibração."</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Campainha ativada"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Preparar para a atualização"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"A processar o pacote de atualização…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"A encerrar..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"O seu tablet irá encerrar."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"A sua TV será encerrada."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"aceder aos contactos"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localização"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"aceder à sua localização"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"As suas informações sociais"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acesso direto às informações sobre os seus contactos e ligações sociais."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendário"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Aceda às contas disponíveis."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds subscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite à aplicação obter detalhes acerca dos feeds atualmente sincronizados."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e ver mensagens SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite que a aplicação envie mensagens SMS. Isto pode resultar em custos inesperados. As aplicações maliciosas podem fazer com que incorra em custos, enviando mensagens sem a sua confirmação."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler as mensagens de texto (SMS ou MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite que a aplicação leia mensagens SMS guardadas no tablet ou no cartão SIM. Permite que a aplicação leia todas as mensagens SMS, independentemente do conteúdo ou da confidencialidade das mesmas."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite ao titular ligar à interface de nível superior do serviço de mensagens de um operador. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular a serviços do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite ao titular vincular-se a serviços do operador. Nunca deverá ser necessário nas aplicações normais."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"aceder a Não incomodar"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite à aplicação ler e alterar a configuração de Não incomodar"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras de palavra-passe"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controlar o comprimento e os carateres permitidos nos PINs e nas palavras-passe do bloqueio de ecrã."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizar tentativas de desbloqueio do ecrã"</string>

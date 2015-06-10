@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Work 設定檔已遭刪除"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work 設定檔因管理員應用程式遺失而遭到刪除。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Work 設定檔管理員應用程式遺失或已毀損，因此系統刪除了您的 Work 設定檔和相關資料。如需協助，請與您的管理員聯絡。"</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置資料將遭到清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理員應用程式因遺失元件或已毀損而無法使用，您的裝置資料將隨即遭到清除。如需相關協助，請與您的管理員聯絡。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"鈴聲震動"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"鈴聲開啟"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"準備進行更新"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"正在處理更新套件…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"關機中…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板電腦將會關機。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的電視即將關閉。"</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"聯絡人"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"存取您的聯絡人"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"存取您的位置資訊"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交資訊"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接存取您的聯絡人資訊與社交網站資訊。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日曆"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"讀取訂閱資訊提供"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允許應用程式取得目前已同步處理的資訊提供詳細資料。"</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"傳送及查看簡訊"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允許應用程式傳送簡訊，但可能產生非預期的費用。惡意應用程式可能利用此功能擅自傳送簡訊，增加您不必要的額外支出。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"讀取您的簡訊 (SMS 或 MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允許應用程式讀取平板電腦或 SIM 卡上儲存的簡訊。這項權限可讓應用程式讀取所有簡訊，包括各種內容及機密簡訊。"</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式與行動通訊業者簡訊服務的頂層介面繫結 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"與行動通訊業者服務繫結"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允許應用程式繫結至行動通訊業者服務 (一般應用程式並不需要)。"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"存取「零打擾」模式"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允許應用程式讀取及寫入「零打擾」設定。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>

@@ -172,6 +172,8 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Eliminouse o perfil de traballo"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Eliminouse o perfil de traballo porque falta a aplicación de administración."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Falta a aplicación de administración no perfil de traballo ou ben está danada. Como resultado, eliminouse o teu perfil de traballo e os datos relacionados. Ponte en contacto co teu administrador para obter asistencia."</string>
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Borrarase o teu dispositivo"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Non se pode utilizar a aplicación de administración porque lle faltan compoñentes ou están danados. Agora borrarase o teu dispositivo. Ponte en contacto co teu administrador para obter asistencia."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
@@ -186,8 +188,18 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Timbre desactivado"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Timbre en vibración"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activado"</string>
-    <string name="reboot_to_recovery_title" msgid="7851482804359554338">"Prepara a actualización"</string>
-    <string name="reboot_to_recovery_progress" msgid="983446780859314345">"Procesando paquete de actualización…"</string>
+    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
+    <skip />
+    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
+    <skip />
+    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Apagarase o tablet."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"A televisión apagarase."</string>
@@ -224,7 +236,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"acceder aos teus contactos"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localización"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"acceder á túa localización"</string>
+    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"A túa información social"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acceso directo a información acerca dos teus contactos e as conexións sociais."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
@@ -273,8 +286,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acceder ás contas dispoñibles."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds subscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite á aplicación obter detalles acerca dos feeds sincronizados actualmente."</string>
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e consultar mensaxes de SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite á aplicación enviar mensaxes SMS. É posible que esta acción implique custos inesperados. É posible que as aplicacións maliciosas che custen diñeiro debido ao envío de mensaxes sen a túa confirmación."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler as túas mensaxes de texto (SMS ou MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite á aplicación ler as mensaxes SMS que están almacenadas no teu tablet ou tarxeta SIM. Isto permite á aplicación ler todas as mensaxes SMS, independentemente do seu contido ou confidencialidade."</string>
@@ -512,6 +524,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxería. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular aos servizos do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite ao titular vincularse aos servizos do operador. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"acceso ao modo Non molestar"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer as normas de contrasinal"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controla a lonxitude e os caracteres permitidos nos contrasinais e nos PIN de bloqueo da pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisar os intentos de desbloqueo da pantalla"</string>
@@ -1506,7 +1520,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Ata que desactives isto"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Ata que desactives Non molestar"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Ata que desactives o modo Non molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non molestar"</string>
