@@ -1037,6 +1037,14 @@ public final class Pm {
                 params.abiOverride = checkAbiArgument(nextOptionData());
             } else if (opt.equals("--user")) {
                 userId = Integer.parseInt(nextOptionData());
+            } else if (opt.equals("--install-location")) {
+                params.installLocation = Integer.parseInt(nextOptionData());
+            } else if (opt.equals("--force-uuid")) {
+                params.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
+                params.volumeUuid = nextOptionData();
+                if ("internal".equals(params.volumeUuid)) {
+                    params.volumeUuid = null;
+                }
             } else {
                 throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -1885,6 +1893,8 @@ public final class Pm {
         System.err.println("       pm dump PACKAGE");
         System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [--user USER_ID] [PATH]");
         System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
+        System.err.println("               [--install-location 0/1/2]");
+        System.err.println("               [--force-uuid internal|UUID]");
         System.err.println("       pm install-write [-S BYTES] SESSION_ID SPLIT_NAME [PATH]");
         System.err.println("       pm install-commit SESSION_ID");
         System.err.println("       pm install-abandon SESSION_ID");
