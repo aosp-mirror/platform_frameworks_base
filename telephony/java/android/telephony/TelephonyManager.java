@@ -193,7 +193,7 @@ public class TelephonyManager {
     //
 
     /**
-     * Broadcast intent action indicating that the call state (cellular)
+     * Broadcast intent action indicating that the call state
      * on the device has changed.
      *
      * <p>
@@ -2437,10 +2437,23 @@ public class TelephonyManager {
     public static final int CALL_STATE_OFFHOOK = 2;
 
     /**
-     * Returns a constant indicating the call state (cellular) on the device.
+     * Returns one of the following constants that represents the current state of all
+     * phone calls.
+     *
+     * {@link TelephonyManager#CALL_STATE_RINGING}
+     * {@link TelephonyManager#CALL_STATE_OFFHOOK}
+     * {@link TelephonyManager#CALL_STATE_IDLE}
      */
     public int getCallState() {
-        return getCallState(getDefaultSubscription());
+        try {
+            ITelecomService telecom = getTelecomService();
+            if (telecom != null) {
+                return telecom.getCallState();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getCallState", e);
+        }
+        return CALL_STATE_IDLE;
     }
 
     /**
