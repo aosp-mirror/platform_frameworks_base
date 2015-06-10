@@ -868,6 +868,8 @@
         <attr name="dialogPreferenceStyle" format="reference" />
         <!-- Default style for EditTextPreference. -->
         <attr name="editTextPreferenceStyle" format="reference" />
+        <!-- @hide Default style for SeekBarDialogPreference. -->
+        <attr name="seekBarDialogPreferenceStyle" format="reference" />
         <!-- Default style for RingtonePreference. -->
         <attr name="ringtonePreferenceStyle" format="reference" />
         <!-- The preference layout that has the child/tabbed effect. -->
