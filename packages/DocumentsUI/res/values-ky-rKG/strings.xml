@@ -80,8 +80,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл көчүрүлбөй койду</item>
     </plurals>
     <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="other">Бул <xliff:g id="COUNT_1">%1$d</xliff:g> файлдар жылдырылбай жатат</item>
-      <item quantity="one">Бул <xliff:g id="COUNT_0">%1$d</xliff:g> файл жылдырылбай жатат</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> файл жылдырылбай калды</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл жылдырылбай калды</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Чоо-жайын билүү үчүн тийип коюңуз"</string>
     <string name="retry" msgid="7564024179122207376">"Дагы аракет кылуу"</string>

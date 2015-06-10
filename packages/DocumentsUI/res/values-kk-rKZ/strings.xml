@@ -91,5 +91,5 @@
       <item quantity="other">Аралық сақтағышқа <xliff:g id="COUNT_1">%1$d</xliff:g> файл көшірілді.</item>
       <item quantity="one">Аралық сақтағышқа <xliff:g id="COUNT_0">%1$d</xliff:g> файл көшірілді.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Таңбалған файлдарды бұл орынға қою мүмкін емес."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Таңдалған файлдарды бұл орынға қою мүмкін емес."</string>
 </resources>
