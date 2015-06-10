@@ -3489,57 +3489,90 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println();
             for (int i=0; i<sippers.size(); i++) {
                 final BatterySipper bs = sippers.get(i);
+                pw.print(prefix);
                 switch (bs.drainType) {
                     case IDLE:
-                        pw.print(prefix); pw.print("    Idle: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Idle: ");
                         break;
                     case CELL:
-                        pw.print(prefix); pw.print("    Cell standby: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Cell standby: ");
                         break;
                     case PHONE:
-                        pw.print(prefix); pw.print("    Phone calls: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Phone calls: ");
                         break;
                     case WIFI:
-                        pw.print(prefix); pw.print("    Wifi: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Wifi: ");
                         break;
                     case BLUETOOTH:
-                        pw.print(prefix); pw.print("    Bluetooth: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Bluetooth: ");
                         break;
                     case SCREEN:
-                        pw.print(prefix); pw.print("    Screen: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Screen: ");
                         break;
                     case FLASHLIGHT:
-                        pw.print(prefix); pw.print("    Flashlight: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Flashlight: ");
                         break;
                     case APP:
-                        pw.print(prefix); pw.print("    Uid ");
+                        pw.print("    Uid ");
                         UserHandle.formatUid(pw, bs.uidObj.getUid());
-                        pw.print(": "); printmAh(pw, bs.totalPowerMah); pw.println();
+                        pw.print(": ");
                         break;
                     case USER:
-                        pw.print(prefix); pw.print("    User "); pw.print(bs.userId);
-                        pw.print(": "); printmAh(pw, bs.totalPowerMah); pw.println();
+                        pw.print("    User "); pw.print(bs.userId);
+                        pw.print(": ");
                         break;
                     case UNACCOUNTED:
-                        pw.print(prefix); pw.print("    Unaccounted: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Unaccounted: ");
                         break;
                     case OVERCOUNTED:
-                        pw.print(prefix); pw.print("    Over-counted: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Over-counted: ");
                         break;
                     case CAMERA:
-                        pw.print(prefix); pw.print("    Camera: "); printmAh(pw, bs.totalPowerMah);
-                        pw.println();
+                        pw.print("    Camera: ");
+                        break;
+                    default:
+                        pw.print("    ???: ");
                         break;
                 }
+                printmAh(pw, bs.totalPowerMah);
+
+                if (bs.drainType == BatterySipper.DrainType.APP) {
+                    pw.print(" (");
+                    if (bs.cpuPowerMah != 0) {
+                        pw.print(" cpu=");
+                        printmAh(pw, bs.cpuPowerMah);
+                    }
+                    if (bs.wakeLockPowerMah != 0) {
+                        pw.print(" wake=");
+                        printmAh(pw, bs.wakeLockPowerMah);
+                    }
+                    if (bs.mobileRadioPowerMah != 0) {
+                        pw.print(" radio=");
+                        printmAh(pw, bs.mobileRadioPowerMah);
+                    }
+                    if (bs.wifiPowerMah != 0) {
+                        pw.print(" wifi=");
+                        printmAh(pw, bs.wifiPowerMah);
+                    }
+                    if (bs.gpsPowerMah != 0) {
+                        pw.print(" gps=");
+                        printmAh(pw, bs.gpsPowerMah);
+                    }
+                    if (bs.sensorPowerMah != 0) {
+                        pw.print(" sensor=");
+                        printmAh(pw, bs.sensorPowerMah);
+                    }
+                    if (bs.cameraPowerMah != 0) {
+                        pw.print(" camera=");
+                        printmAh(pw, bs.cameraPowerMah);
+                    }
+                    if (bs.flashlightPowerMah != 0) {
+                        pw.print(" flash=");
+                        printmAh(pw, bs.flashlightPowerMah);
+                    }
+                    pw.print(" )");
+                }
+                pw.println();
             }
             pw.println();
         }
