@@ -34,6 +34,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import java.text.NumberFormat;
 
@@ -138,6 +139,10 @@ public class KeyguardStatusBarView extends RelativeLayout
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
         ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+    }
+
+    public void setUserSwitcherController(UserSwitcherController controller) {
+        mMultiUserSwitch.setUserSwitcherController(controller);
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
