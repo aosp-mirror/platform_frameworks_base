@@ -22,15 +22,15 @@
 
     <TextView
         android:id="@+id/volume_row_header"
-        style="?android:attr/textAppearanceButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.Volume.Header"
         android:paddingBottom="0dp"
         android:paddingEnd="12dp"
-        android:paddingStart="13dp"
-        android:paddingTop="8dp" />
+        android:paddingStart="12dp"
+        android:paddingTop="4dp" />
 
     <com.android.keyguard.AlphaOptimizedImageButton
         android:id="@+id/volume_row_icon"
