@@ -18,6 +18,9 @@ package android.content;
 
 import android.annotation.AttrRes;
 import android.annotation.CheckResult;
+import android.annotation.ColorInt;
+import android.annotation.ColorRes;
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -436,8 +439,8 @@ public abstract class Context {
      * @throws android.content.res.Resources.NotFoundException if the given ID
      *         does not exist.
      */
-    @Nullable
-    public final int getColor(int id) {
+    @ColorInt
+    public final int getColor(@ColorRes int id) {
         return getResources().getColor(id, getTheme());
     }
 
@@ -454,7 +457,7 @@ public abstract class Context {
      *         does not exist.
      */
     @Nullable
-    public final Drawable getDrawable(int id) {
+    public final Drawable getDrawable(@DrawableRes int id) {
         return getResources().getDrawable(id, getTheme());
     }
 
@@ -471,7 +474,7 @@ public abstract class Context {
      *         does not exist.
      */
     @Nullable
-    public final ColorStateList getColorStateList(int id) {
+    public final ColorStateList getColorStateList(@ColorRes int id) {
         return getResources().getColorStateList(id, getTheme());
     }
 
