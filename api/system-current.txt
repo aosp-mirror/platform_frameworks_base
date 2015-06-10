@@ -3535,6 +3535,7 @@ package android.app {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public void onProvideAssistContent(android.app.assist.AssistContent);
     method public void onProvideAssistData(android.os.Bundle);
+    method public android.net.Uri onProvideReferrer();
     method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
@@ -5585,8 +5586,11 @@ package android.app {
     field public static final int MODE_NIGHT_YES = 2; // 0x2
   }
 
-  public class VoiceInteractor {
+  public final class VoiceInteractor {
+    method public android.app.VoiceInteractor.Request getActiveRequest(java.lang.String);
+    method public android.app.VoiceInteractor.Request[] getActiveRequests();
     method public boolean submitRequest(android.app.VoiceInteractor.Request);
+    method public boolean submitRequest(android.app.VoiceInteractor.Request, java.lang.String);
     method public boolean[] supportsCommands(java.lang.String[]);
   }
 
@@ -5649,6 +5653,7 @@ package android.app {
     method public void cancel();
     method public android.app.Activity getActivity();
     method public android.content.Context getContext();
+    method public java.lang.String getName();
     method public void onAttached(android.app.Activity);
     method public void onCancel();
     method public void onDetached();

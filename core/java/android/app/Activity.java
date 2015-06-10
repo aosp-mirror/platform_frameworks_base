@@ -4279,6 +4279,10 @@ public class Activity extends ContextThemeWrapper
         if (mParent == null) {
             int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
+                Uri referrer = onProvideReferrer();
+                if (referrer != null) {
+                    intent.putExtra(Intent.EXTRA_REFERRER, referrer);
+                }
                 intent.migrateExtraStreamToClipData();
                 intent.prepareToLeaveProcess();
                 result = ActivityManagerNative.getDefault()
@@ -4463,6 +4467,10 @@ public class Activity extends ContextThemeWrapper
     @Override
     public void startActivityForResult(
             String who, Intent intent, int requestCode, @Nullable Bundle options) {
+        Uri referrer = onProvideReferrer();
+        if (referrer != null) {
+            intent.putExtra(Intent.EXTRA_REFERRER, referrer);
+        }
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, who,
@@ -4612,6 +4620,16 @@ public class Activity extends ContextThemeWrapper
         if (mReferrer != null) {
             return new Uri.Builder().scheme("android-app").authority(mReferrer).build();
         }
+        return null;
+    }
+
+    /**
+     * Override to generate the desired referrer for the content currently being shown
+     * by the app.  The default implementation returns null, meaning the referrer will simply
+     * be the android-app: of the package name of this activity.  Return a non-null Uri to
+     * have that supplied as the {@link Intent#EXTRA_REFERRER} of any activities started from it.
+     */
+    public Uri onProvideReferrer() {
         return null;
     }
 
