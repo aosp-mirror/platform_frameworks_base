@@ -20,6 +20,7 @@
 <!-- This is the combined status bar / notification panel window. -->
 <com.android.systemui.statusbar.phone.StatusBarWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
@@ -29,6 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
+            sysui:ignoreRightInset="true"
             >
         <ImageView android:id="@+id/backdrop_back"
                    android:layout_width="match_parent"
@@ -44,7 +46,9 @@
     <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no" />
+        android:importantForAccessibility="no"
+        sysui:ignoreRightInset="true"
+        />
 
     <com.android.systemui.statusbar.AlphaOptimizedView
         android:id="@+id/heads_up_scrim"
@@ -89,6 +93,8 @@
     <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no" />
+        android:importantForAccessibility="no"
+        sysui:ignoreRightInset="true"
+        />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
