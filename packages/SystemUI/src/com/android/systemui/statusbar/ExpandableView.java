@@ -133,6 +133,14 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+        if (filterMotionEvent(ev)) {
+            return super.dispatchGenericMotionEvent(ev);
+        }
+        return false;
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (filterMotionEvent(ev)) {
             return super.dispatchTouchEvent(ev);
@@ -142,6 +150,8 @@ public abstract class ExpandableView extends FrameLayout {
 
     protected boolean filterMotionEvent(MotionEvent event) {
         return event.getActionMasked() != MotionEvent.ACTION_DOWN
+                && event.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER
+                && event.getActionMasked() != MotionEvent.ACTION_HOVER_MOVE
                 || event.getY() > mClipTopAmount && event.getY() < mActualHeight;
     }
 
@@ -343,6 +353,7 @@ public abstract class ExpandableView extends FrameLayout {
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         super.getBoundsOnScreen(outRect, clipToParent);
         outRect.bottom = (int) (outRect.top + getActualHeight());
+        outRect.top += getClipTopAmount();
     }
 
     public int getContentHeight() {
