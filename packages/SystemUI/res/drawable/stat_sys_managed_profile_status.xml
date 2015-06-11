@@ -20,10 +20,10 @@ Copyright (C) 2015 The Android Open Source Project
         android:viewportHeight="17.0">
     <group android:translateX="2.0">
         <path
-            android:fillColor="#FF000000"
+            android:fillColor="@android:color/white"
             android:pathData="M9.9,11.6H7v-1.1H2.1v2.8c0,0.8,0.6,1.4,1.4,1.4h9.9c0.8,0,1.4,-0.6,1.4,-1.4v-2.8H9.9V11.6z"/>
         <path
-            android:fillColor="#FF000000"
+            android:fillColor="@android:color/white"
             android:pathData="M14.1,4.2h-2.5V3.2l-1.1,-1.1H6.3L5.3,3.2v1H2.8C2,4.2,1.4,4.9,1.4,5.6v2.8c0,0.8,0.6,1.4,1.4,1.4H7V8.8h2.8v1.1h4.2     c0.8,0,1.4,-0.6,1.4,-1.4V5.6C15.5,4.9,14.8,4.2,14.1,4.2z M10.6,4.2H6.3V3.2h4.2V4.2z"/>
     </group>
 </vector>

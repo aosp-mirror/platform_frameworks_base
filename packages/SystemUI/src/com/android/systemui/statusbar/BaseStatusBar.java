@@ -65,6 +65,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -395,8 +396,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (recentTask != null && recentTask.size() > 0) {
                     UserInfo user = mUserManager.getUserInfo(recentTask.get(0).userId);
                     if (user != null && user.isManagedProfile()) {
-                        Toast.makeText(mContext, R.string.managed_profile_foreground_toast,
-                                Toast.LENGTH_SHORT).show();
+                        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                                Context.LAYOUT_INFLATER_SERVICE);
+                        View layout = inflater.inflate(R.layout.managed_profile_toast, null);
+                        Toast toast = new Toast(mContext);
+                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+                        toast.setDuration(Toast.LENGTH_SHORT);
+                        toast.setView(layout);
+                        toast.show();
                     }
                 }
             } else if (BANNER_ACTION_CANCEL.equals(action) || BANNER_ACTION_SETUP.equals(action)) {
