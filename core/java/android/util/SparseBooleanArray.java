@@ -185,6 +185,11 @@ public class SparseBooleanArray implements Cloneable {
         mValues[index] = value;
     }
 
+    /** @hide */
+    public void setKeyAt(int index, int key) {
+        mKeys[index] = key;
+    }
+
     /**
      * Returns the index for which {@link #keyAt} would return the
      * specified key, or a negative number if the specified

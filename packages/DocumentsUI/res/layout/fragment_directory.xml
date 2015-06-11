@@ -28,24 +28,23 @@
         android:visibility="gone"
         style="@android:style/TextAppearance.Material.Subhead" />
 
+    <!-- The 'list' view is still used for RecentsCreateFragment -->
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <GridView
-        android:id="@+id/grid"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingStart="@dimen/grid_padding_horiz"
         android:paddingEnd="@dimen/grid_padding_horiz"
         android:paddingTop="@dimen/grid_padding_vert"
         android:paddingBottom="@dimen/grid_padding_vert"
-        android:horizontalSpacing="@dimen/grid_item_padding"
-        android:verticalSpacing="@dimen/grid_item_padding"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:drawSelectorOnTop="true"
-        android:visibility="gone" />
+        android:drawSelectorOnTop="true" />
 
 </com.android.documentsui.DirectoryView>
