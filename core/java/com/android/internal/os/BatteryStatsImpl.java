@@ -4634,7 +4634,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         @Override
         public void noteWifiBatchedScanStartedLocked(int csph, long elapsedRealtimeMs) {
             int bin = 0;
-            while (csph > 8 && bin < NUM_WIFI_BATCHED_SCAN_BINS) {
+            while (csph > 8 && bin < NUM_WIFI_BATCHED_SCAN_BINS-1) {
                 csph = csph >> 3;
                 bin++;
             }
