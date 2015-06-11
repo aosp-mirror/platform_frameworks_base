@@ -210,7 +210,10 @@ public class StackScrollState {
         int oldVisibility = view.getVisibility();
         int newVisibility = becomesInvisible ? View.INVISIBLE : View.VISIBLE;
         if (newVisibility != oldVisibility) {
-            view.setVisibility(newVisibility);
+            if (!(view instanceof ExpandableView) || !((ExpandableView) view).willBeGone()) {
+                // We don't want views to change visibility when they are animating to GONE
+                view.setVisibility(newVisibility);
+            }
         }
 
         // apply yTranslation

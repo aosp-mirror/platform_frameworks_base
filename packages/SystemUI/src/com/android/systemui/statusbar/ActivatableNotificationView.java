@@ -540,9 +540,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void startAppearAnimation(boolean isAppearing, float translationDirection, long delay,
             long duration, final Runnable onFinishedRunnable) {
-        if (mAppearAnimator != null) {
-            mAppearAnimator.cancel();
-        }
+        cancelAppearAnimation();
         mAnimationTranslationY = translationDirection * getActualHeight();
         if (mAppearAnimationFraction == -1.0f) {
             // not initialized yet, we start anew
@@ -611,6 +609,17 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             }
         });
         mAppearAnimator.start();
+    }
+
+    private void cancelAppearAnimation() {
+        if (mAppearAnimator != null) {
+            mAppearAnimator.cancel();
+        }
+    }
+
+    public void cancelAppearDrawing() {
+        cancelAppearAnimation();
+        enableAppearDrawing(false);
     }
 
     private void updateAppearRect() {
