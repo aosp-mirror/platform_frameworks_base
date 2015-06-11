@@ -2354,7 +2354,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            NativeDaemonEvent event = mConnector.execute(
+            NativeDaemonEvent event = mCryptConnector.execute(
                 "cryptfs", "createnewuserdir", userHandle, path);
             if (!"0".equals(event.getMessage())) {
                 String error = "createnewuserdir sent unexpected message: "
@@ -2383,7 +2383,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            NativeDaemonEvent event = mConnector.execute(
+            NativeDaemonEvent event = mCryptConnector.execute(
                 "cryptfs", "deleteuserkey", userHandle);
             if (!"0".equals(event.getMessage())) {
                 String error = "deleteuserkey sent unexpected message: "
