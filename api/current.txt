@@ -17,7 +17,6 @@ package android {
     field public static final java.lang.String ACCESS_WIFI_STATE = "android.permission.ACCESS_WIFI_STATE";
     field public static final java.lang.String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final java.lang.String ADD_VOICEMAIL = "com.android.voicemail.permission.ADD_VOICEMAIL";
-    field public static final java.lang.String AUTHENTICATE_ACCOUNTS = "android.permission.AUTHENTICATE_ACCOUNTS";
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
@@ -86,7 +85,6 @@ package android {
     field public static final java.lang.String INTERNET = "android.permission.INTERNET";
     field public static final java.lang.String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
     field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
-    field public static final java.lang.String MANAGE_ACCOUNTS = "android.permission.MANAGE_ACCOUNTS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
     field public static final java.lang.String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
     field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
@@ -145,7 +143,6 @@ package android {
     field public static final java.lang.String TRANSMIT_IR = "android.permission.TRANSMIT_IR";
     field public static final java.lang.String UNINSTALL_SHORTCUT = "com.android.launcher.permission.UNINSTALL_SHORTCUT";
     field public static final java.lang.String UPDATE_DEVICE_STATS = "android.permission.UPDATE_DEVICE_STATS";
-    field public static final java.lang.String USE_CREDENTIALS = "android.permission.USE_CREDENTIALS";
     field public static final java.lang.String USE_FINGERPRINT = "android.permission.USE_FINGERPRINT";
     field public static final java.lang.String USE_SIP = "android.permission.USE_SIP";
     field public static final java.lang.String VIBRATE = "android.permission.VIBRATE";
