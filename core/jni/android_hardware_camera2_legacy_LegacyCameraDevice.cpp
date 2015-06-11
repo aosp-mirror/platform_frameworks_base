@@ -689,6 +689,23 @@ static jint LegacyCameraDevice_nativeSetNextTimestamp(JNIEnv* env, jobject thiz,
     return NO_ERROR;
 }
 
+static jint LegacyCameraDevice_nativeSetScalingMode(JNIEnv* env, jobject thiz, jobject surface,
+        jint mode) {
+    ALOGV("nativeSetScalingMode");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    status_t err = NO_ERROR;
+    if ((err = native_window_set_scaling_mode(anw.get(), static_cast<int>(mode))) != NO_ERROR) {
+        ALOGE("%s: Unable to set surface scaling mode, error %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+    return NO_ERROR;
+}
+
 static jint LegacyCameraDevice_nativeGetJpegFooterSize(JNIEnv* env, jobject thiz) {
     ALOGV("nativeGetJpegFooterSize");
     return static_cast<jint>(sizeof(struct camera3_jpeg_blob));
@@ -733,6 +750,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeDetectSurfaceUsageFlags",
     "(Landroid/view/Surface;)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceUsageFlags },
+    { "nativeSetScalingMode",
+    "(Landroid/view/Surface;I)I",
+    (void *)LegacyCameraDevice_nativeSetScalingMode },
 };
 
 // Get all the required offsets in java class and register native functions

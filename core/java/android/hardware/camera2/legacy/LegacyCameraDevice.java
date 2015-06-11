@@ -87,6 +87,9 @@ public class LegacyCameraDevice implements AutoCloseable {
 
     public static final int MAX_DIMEN_FOR_ROUNDING = 1080; // maximum allowed width for rounding
 
+    // Keep up to date with values in system/core/include/system/window.h
+    public static final int NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW = 1;
+
     private CaptureResultExtras getExtrasFromRequest(RequestHolder holder) {
         if (holder == null) {
             return new CaptureResultExtras(ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE,
@@ -690,6 +693,13 @@ public class LegacyCameraDevice implements AutoCloseable {
         LegacyExceptionUtils.throwOnError(nativeSetNextTimestamp(surface, timestamp));
     }
 
+    static void setScalingMode(Surface surface, int mode)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        LegacyExceptionUtils.throwOnError(nativeSetScalingMode(surface, mode));
+    }
+
+
     private static native int nativeDetectSurfaceType(Surface surface);
 
     private static native int nativeDetectSurfaceDimens(Surface surface,
@@ -716,6 +726,8 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static native int nativeSetNextTimestamp(Surface surface, long timestamp);
 
     private static native int nativeDetectSurfaceUsageFlags(Surface surface);
+
+    private static native int nativeSetScalingMode(Surface surface, int scalingMode);
 
     static native int nativeGetJpegFooterSize();
 }
