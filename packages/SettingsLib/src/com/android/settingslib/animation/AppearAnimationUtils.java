@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License
  */
 
-package com.android.keyguard;
+package com.android.settingslib.animation;
 
 import android.content.Context;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import com.android.settingslib.R;
 
 /**
  * A class to make nice appear transitions for views in a tabular layout.
@@ -33,7 +35,7 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
     private final AppearAnimationProperties mProperties = new AppearAnimationProperties();
     protected final float mDelayScale;
     private final long mDuration;
-    protected boolean mScaleTranslationWithRow;
+    protected RowTranslationScaler mRowTranslationScaler;
     protected boolean mAppearing;
 
     public AppearAnimationUtils(Context ctx) {
@@ -49,19 +51,18 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
                 R.dimen.appear_y_translation_start) * translationScaleFactor;
         mDelayScale = delayScaleFactor;
         mDuration = duration;
-        mScaleTranslationWithRow = false;
         mAppearing = true;
     }
 
-    public void startAnimation(View[][] objects, final Runnable finishListener) {
-        startAnimation(objects, finishListener, this);
+    public void startAnimation2d(View[][] objects, final Runnable finishListener) {
+        startAnimation2d(objects, finishListener, this);
     }
 
     public void startAnimation(View[] objects, final Runnable finishListener) {
         startAnimation(objects, finishListener, this);
     }
 
-    public <T> void startAnimation(T[][] objects, final Runnable finishListener,
+    public <T> void startAnimation2d(T[][] objects, final Runnable finishListener,
             AppearAnimationCreator<T> creator) {
         AppearAnimationProperties properties = getDelays(objects);
         startAnimations(properties, objects, finishListener, creator);
@@ -86,8 +87,13 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
             if (properties.maxDelayRowIndex == row && properties.maxDelayColIndex == 0) {
                 endRunnable = finishListener;
             }
+            float translationScale = mRowTranslationScaler != null
+                    ? mRowTranslationScaler.getRowTranslationScale(row, properties.delays.length)
+                    : 1f;
+            float translation = translationScale * mStartTranslation;
             creator.createAnimation(objects[row], delay, mDuration,
-                    mStartTranslation, true /* appearing */, mInterpolator, endRunnable);
+                    mAppearing ? translation : -translation,
+                    mAppearing, mInterpolator, endRunnable);
         }
     }
 
@@ -99,10 +105,10 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         }
         for (int row = 0; row < properties.delays.length; row++) {
             long[] columns = properties.delays[row];
-            float translation = mScaleTranslationWithRow
-                    ? (float) (Math.pow((properties.delays.length - row), 2)
-                    / properties.delays.length * mStartTranslation)
-                    : mStartTranslation;
+            float translationScale = mRowTranslationScaler != null
+                    ? mRowTranslationScaler.getRowTranslationScale(row, properties.delays.length)
+                    : 1f;
+            float translation = translationScale * mStartTranslation;
             for (int col = 0; col < columns.length; col++) {
                 long delay = columns[col];
                 Runnable endRunnable = null;
@@ -192,5 +198,9 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         public long[][] delays;
         public int maxDelayRowIndex;
         public int maxDelayColIndex;
+    }
+
+    public interface RowTranslationScaler {
+        float getRowTranslationScale(int row, int numRows);
     }
 }
