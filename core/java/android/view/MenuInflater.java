@@ -25,11 +25,8 @@ import android.annotation.MenuRes;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -337,11 +334,6 @@ public class MenuInflater {
         
         private ActionProvider itemActionProvider;
 
-        private ColorStateList itemIconTintList;
-        private boolean itemIconTintListSet;
-        private PorterDuff.Mode itemIconTintMode;
-        private boolean itemIconTintModeSet;
-
         private static final int defaultGroupId = NO_ID;
         private static final int defaultItemId = NO_ID;
         private static final int defaultItemCategory = 0;
@@ -432,23 +424,6 @@ public class MenuInflater {
                 itemActionProvider = null;
             }
 
-            if (a.hasValueOrEmpty(com.android.internal.R.styleable.MenuItem_iconTint)) {
-                itemIconTintList = a.getColorStateList(
-                        com.android.internal.R.styleable.MenuItem_iconTint);
-                itemIconTintListSet = true;
-            } else {
-                itemIconTintList = null;
-                itemIconTintListSet = false;
-            }
-            if (a.hasValueOrEmpty(com.android.internal.R.styleable.MenuItem_iconTintMode)) {
-                itemIconTintMode = Drawable.parseTintMode(
-                        a.getInt(com.android.internal.R.styleable.MenuItem_iconTintMode, -1), null);
-                itemIconTintModeSet = true;
-            } else {
-                itemIconTintMode = null;
-                itemIconTintModeSet = false;
-            }
-
             a.recycle();
 
             itemAdded = false;
@@ -510,13 +485,6 @@ public class MenuInflater {
             }
             if (itemActionProvider != null) {
                 item.setActionProvider(itemActionProvider);
-            }
-
-            if (itemIconTintListSet) {
-                item.setIconTintList(itemIconTintList);
-            }
-            if (itemIconTintModeSet) {
-                item.setIconTintMode(itemIconTintMode);
             }
         }
 

@@ -21,10 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -64,6 +62,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     private static final boolean ACTIONBAR_ANIMATIONS_ENABLED = false;
 
     private OverflowMenuButton mOverflowButton;
+    private Drawable mPendingOverflowIcon;
+    private boolean mPendingOverflowIconSet;
     private boolean mReserveOverflow;
     private boolean mReserveOverflowSet;
     private int mWidthLimit;
@@ -84,8 +84,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     private OpenOverflowRunnable mPostedOpenRunnable;
     private ActionMenuPopupCallback mPopupCallback;
-
-    private TintInfo mOverflowTintInfo;
 
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
@@ -154,9 +152,13 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         if (mReserveOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mSystemContext);
+                if (mPendingOverflowIconSet) {
+                    mOverflowButton.setImageDrawable(mPendingOverflowIcon);
+                    mPendingOverflowIcon = null;
+                    mPendingOverflowIconSet = false;
+                }
                 final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
                 mOverflowButton.measure(spec, spec);
-                applyOverflowTint();
             }
             width -= mOverflowButton.getMeasuredWidth();
         } else {
@@ -196,6 +198,24 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     public void setExpandedActionViewsExclusive(boolean isExclusive) {
         mExpandedActionViewsExclusive = isExclusive;
+    }
+
+    public void setOverflowIcon(Drawable icon) {
+        if (mOverflowButton != null) {
+            mOverflowButton.setImageDrawable(icon);
+        } else {
+            mPendingOverflowIconSet = true;
+            mPendingOverflowIcon = icon;
+        }
+    }
+
+    public Drawable getOverflowIcon() {
+        if (mOverflowButton != null) {
+            return mOverflowButton.getDrawable();
+        } else if (mPendingOverflowIconSet) {
+            return mPendingOverflowIcon;
+        }
+        return null;
     }
 
     @Override
@@ -449,7 +469,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         if (hasOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mSystemContext);
-                applyOverflowTint();
             }
             ViewGroup parent = (ViewGroup) mOverflowButton.getParent();
             if (parent != mMenuView) {
@@ -764,40 +783,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
     }
 
-    public void setOverflowTintList(ColorStateList tint) {
-        if (mOverflowTintInfo == null) {
-            mOverflowTintInfo = new TintInfo();
-        }
-        mOverflowTintInfo.mTintList = tint;
-        mOverflowTintInfo.mHasTintList = true;
-
-        applyOverflowTint();
-    }
-
-    public void setOverflowTintMode(PorterDuff.Mode tintMode) {
-        if (mOverflowTintInfo == null) {
-            mOverflowTintInfo = new TintInfo();
-        }
-        mOverflowTintInfo.mTintMode = tintMode;
-        mOverflowTintInfo.mHasTintMode = true;
-
-        applyOverflowTint();
-    }
-
-    private void applyOverflowTint() {
-        final TintInfo tintInfo = mOverflowTintInfo;
-        if (tintInfo != null && (tintInfo.mHasTintList || tintInfo.mHasTintMode)) {
-            if (mOverflowButton != null) {
-                if (tintInfo.mHasTintList) {
-                    mOverflowButton.setImageTintList(tintInfo.mTintList);
-                }
-                if (tintInfo.mHasTintMode) {
-                    mOverflowButton.setImageTintMode(tintInfo.mTintMode);
-                }
-            }
-        }
-    }
-
     private static class SavedState implements Parcelable {
         public int openSubMenuId;
 
@@ -1023,13 +1008,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
     }
 
-    private static class TintInfo {
-        ColorStateList mTintList;
-        PorterDuff.Mode mTintMode;
-        boolean mHasTintMode;
-        boolean mHasTintList;
-    }
-
     /**
      * This class holds layout information for a menu item. This is used to determine
      * pre- and post-layout information about menu items, which will then be used to
@@ -1077,5 +1055,4 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             this.animType = animType;
         }
     }
-
 }
