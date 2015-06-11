@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -508,6 +509,11 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        // While action bar is expanded, the state stack UI is hidden.
+        if (mSearchManager.cancelSearch()) {
+            return;
+        }
+
         if (!mState.stackTouched) {
             super.onBackPressed();
             return;
