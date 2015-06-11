@@ -47,7 +47,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
@@ -79,7 +78,6 @@ public class NavigationBarView extends LinearLayout {
     private Drawable mRecentLandIcon;
 
     private NavigationBarViewTaskSwitchHelper mTaskSwitchHelper;
-    private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
 
@@ -92,7 +90,6 @@ public class NavigationBarView extends LinearLayout {
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
     private boolean mIsLayoutRtl;
-    private boolean mDelegateIntercepted;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -180,7 +177,6 @@ public class NavigationBarView extends LinearLayout {
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
-        mDelegateHelper = new DelegateViewHelper(this);
         mTaskSwitchHelper = new NavigationBarViewTaskSwitchHelper(context);
 
         getIcons(res);
@@ -192,13 +188,8 @@ public class NavigationBarView extends LinearLayout {
         return mBarTransitions;
     }
 
-    public void setDelegateView(View view) {
-        mDelegateHelper.setDelegateView(view);
-    }
-
     public void setBar(PhoneStatusBar phoneStatusBar) {
         mTaskSwitchHelper.setBar(phoneStatusBar);
-        mDelegateHelper.setBar(phoneStatusBar);
     }
 
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
@@ -208,44 +199,21 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        initDownStates(event);
-        if (!mDelegateIntercepted && mTaskSwitchHelper.onTouchEvent(event)) {
+        if (mTaskSwitchHelper.onTouchEvent(event)) {
             return true;
         }
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
-        if (mDelegateHelper != null && mDelegateIntercepted) {
-            boolean ret = mDelegateHelper.onInterceptTouchEvent(event);
-            if (ret) return true;
-        }
         return super.onTouchEvent(event);
-    }
-
-    private void initDownStates(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mDelegateIntercepted = false;
-        }
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        initDownStates(event);
-        boolean intercept = mTaskSwitchHelper.onInterceptTouchEvent(event);
-        if (!intercept) {
-            mDelegateIntercepted = mDelegateHelper.onInterceptTouchEvent(event);
-            intercept = mDelegateIntercepted;
-        } else {
-            MotionEvent cancelEvent = MotionEvent.obtain(event);
-            cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
-            mDelegateHelper.onInterceptTouchEvent(cancelEvent);
-            cancelEvent.recycle();
-        }
-        return intercept;
+        return mTaskSwitchHelper.onInterceptTouchEvent(event);
     }
 
     public void abortCurrentGesture() {
-        mDelegateHelper.abortCurrentGesture();
         getHomeButton().abortCurrentGesture();
     }
 
@@ -461,10 +429,6 @@ public class NavigationBarView extends LinearLayout {
             Log.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
         }
 
-        // swap to x coordinate if orientation is not in vertical
-        if (mDelegateHelper != null) {
-            mDelegateHelper.setSwapXY(mVertical);
-        }
         updateTaskSwitchHelper();
 
         setNavigationIconHints(mNavigationIconHints, true);
@@ -473,12 +437,6 @@ public class NavigationBarView extends LinearLayout {
     private void updateTaskSwitchHelper() {
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
         mTaskSwitchHelper.setBarState(mVertical, isRtl);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        mDelegateHelper.setInitialTouchRegion(getHomeButton(), getBackButton(), getRecentsButton());
     }
 
     @Override

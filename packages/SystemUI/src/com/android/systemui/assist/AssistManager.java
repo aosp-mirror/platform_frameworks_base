@@ -116,7 +116,6 @@ public class AssistManager {
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         WindowManager.LayoutParams lp = getLayoutParams();
         mWindowManager.addView(mView, lp);
-        mBar.getNavigationBarView().setDelegateView(mView);
         if (visible) {
             mView.show(true /* show */, false /* animate */);
         }
