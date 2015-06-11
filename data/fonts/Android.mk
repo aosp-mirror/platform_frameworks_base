@@ -17,8 +17,8 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# Use full Noto Sans Japanese font on extended footprint
-ifeq ($(EXTENDED_FONT_FOOTPRINT),true)
+# Use full Noto Sans Japanese font on non-smaller footprints
+ifneq ($(SMALLER_FONT_FOOTPRINT),true)
 FONT_NOTOSANS_JP_FULL := true
 endif
 
@@ -38,7 +38,7 @@ ALL_MODULES.$(1).INSTALLED := \
 endef
 
 ##########################################
-# The following fonts are distributed as symlink only.
+# The following fonts are just symlinks, for backward compatibility.
 ##########################################
 $(eval $(call create-font-symlink,DroidSans.ttf,Roboto-Regular.ttf))
 $(eval $(call create-font-symlink,DroidSans-Bold.ttf,Roboto-Bold.ttf))
@@ -54,7 +54,7 @@ extra_font_files := \
 ################################
 # Do not include Motoya on space-constrained devices
 ifneq ($(SMALLER_FONT_FOOTPRINT),true)
-# Do not include Motoya if we are including full NotoSans
+# Do not include Motoya if we are including Noto Sans Japanese
 ifneq ($(FONT_NOTOSANS_JP_FULL),true)
 
 include $(CLEAR_VARS)
@@ -82,26 +82,19 @@ include $(BUILD_PREBUILT)
 extra_font_files :=
 
 ################################
-# Include DroidSansFallback only on non-EXTENDED_FONT_FOOTPRINT builds
-ifneq ($(EXTENDED_FONT_FOOTPRINT),true)
-
-# Include a subset of DroidSansFallback on SMALLER_FONT_FOOTPRINT build
+# Include the DroidSansFallback subset on SMALLER_FONT_FOOTPRINT build
 ifeq ($(SMALLER_FONT_FOOTPRINT),true)
-droidsans_fallback_src := DroidSansFallback.ttf
-else  # !SMALLER_FONT_FOOTPRINT
-droidsans_fallback_src := DroidSansFallbackFull.ttf
-endif  # SMALLER_FONT_FOOTPRINT
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansFallback.ttf
-LOCAL_SRC_FILES := $(droidsans_fallback_src)
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
 droidsans_fallback_src :=
 
-endif  # !EXTENDED_FONT_FOOTPRINT
+endif  # SMALLER_FONT_FOOTPRINT
 
 ################################
 # Build the rest of font files as prebuilt.
