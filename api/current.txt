@@ -7721,6 +7721,7 @@ package android.content {
     method public final java.lang.String getString(int, java.lang.Object...);
     method public abstract java.lang.Object getSystemService(java.lang.String);
     method public final T getSystemService(java.lang.Class<T>);
+    method public abstract java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public final java.lang.CharSequence getText(int);
     method public abstract android.content.res.Resources.Theme getTheme();
     method public abstract deprecated android.graphics.drawable.Drawable getWallpaper();
