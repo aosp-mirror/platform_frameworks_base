@@ -173,7 +173,6 @@ public final class NetworkCapabilities implements Parcelable {
      * Indicates that connectivity on this network was successfully validated. For example, for a
      * network with NET_CAPABILITY_INTERNET, it means that Internet connectivity was successfully
      * detected.
-     * @hide
      */
     public static final int NET_CAPABILITY_VALIDATED      = 16;
 
