@@ -1,12 +1,3 @@
-package android {
-
-  public static final class Manifest.permission {
-    field public static final java.lang.String SUBSCRIBED_FEEDS_READ = "android.permission.SUBSCRIBED_FEEDS_READ";
-    field public static final java.lang.String SUBSCRIBED_FEEDS_WRITE = "android.permission.SUBSCRIBED_FEEDS_WRITE";
-  }
-
-}
-
 package android.content.pm {
 
   public class PackageInfo implements android.os.Parcelable {
