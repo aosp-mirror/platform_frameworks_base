@@ -16,11 +16,13 @@
 
 package android.content.pm;
 
+import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
@@ -75,6 +77,21 @@ public abstract class PackageManager {
         public NameNotFoundException(String name) {
             super(name);
         }
+    }
+
+    /**
+     * Listener for changes in permissions granted to a UID.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OnPermissionsChangedListener {
+
+        /**
+         * Called when the permissions for a UID change.
+         * @param uid The UID with a change.
+         */
+        public void onPermissionsChanged(int uid);
     }
 
     /**
@@ -4293,6 +4310,27 @@ public abstract class PackageManager {
      * Return whether the device has been booted into safe mode.
      */
     public abstract boolean isSafeMode();
+
+    /**
+     * Adds a listener for permission changes for installed packages.
+     *
+     * @param listener The listener to add.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
+    public abstract void addOnPermissionsChangeListener(OnPermissionsChangedListener listener);
+
+    /**
+     * Remvoes a listener for permission changes for installed packages.
+     *
+     * @param listener The listener to remove.
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract void removeOnPermissionsChangeListener(OnPermissionsChangedListener listener);
 
     /**
      * Return the {@link KeySet} associated with the String alias for this
