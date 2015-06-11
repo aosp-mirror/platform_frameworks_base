@@ -679,6 +679,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (resolvedActivities.get(0).activityInfo.exported) {
             intent.putExtra(PrintService.EXTRA_PRINT_JOB_INFO, mPrintJob);
             intent.putExtra(PrintService.EXTRA_PRINTER_INFO, printer);
+            intent.putExtra(PrintService.EXTRA_PRINT_JOB_INFO,
+                    mPrintedDocument.getDocumentInfo().info);
 
             // This is external activity and may not be there.
             try {
