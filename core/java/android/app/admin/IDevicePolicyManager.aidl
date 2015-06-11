@@ -220,7 +220,6 @@ interface IDevicePolicyManager {
 
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
-    void sendDeviceInitializerStatus(int statusCode, String description);
     void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);
     SystemUpdatePolicy getSystemUpdatePolicy();
 

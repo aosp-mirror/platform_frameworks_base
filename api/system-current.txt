@@ -5783,23 +5783,6 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_LOCK_TASK_PACKAGE = "android.app.extra.LOCK_TASK_PACKAGE";
   }
 
-  public class DeviceInitializerStatus {
-    field public static final int FLAG_STATUS_CUSTOM = 33554432; // 0x2000000
-    field public static final int FLAG_STATUS_ERROR = 16777216; // 0x1000000
-    field public static final int FLAG_STATUS_HIGH_PRIORITY = 134217728; // 0x8000000
-    field public static final int FLAG_STATUS_RESERVED = 67108864; // 0x4000000
-    field public static final int STATUS_ERROR_CONNECT_WIFI = 16777237; // 0x1000015
-    field public static final int STATUS_ERROR_DELETE_APPS = 16777242; // 0x100001a
-    field public static final int STATUS_ERROR_DOUBLE_BUMP = 16777246; // 0x100001e
-    field public static final int STATUS_ERROR_DOWNLOAD_PACKAGE = 16777239; // 0x1000017
-    field public static final int STATUS_ERROR_INSTALL_PACKAGE = 16777240; // 0x1000018
-    field public static final int STATUS_ERROR_RESET_PROTECTION_BLOCKING_PROVISIONING = 16777238; // 0x1000016
-    field public static final int STATUS_ERROR_SET_DEVICE_POLICY = 16777241; // 0x1000019
-    field public static final int STATUS_STATE_CONNECTING_BLUETOOTH_PROXY = 134217736; // 0x8000008
-    field public static final int STATUS_STATE_DEVICE_PROVISIONED = 134217738; // 0x800000a
-    field public static final int STATUS_STATE_DISCONNECTING_BLUETOOTH_PROXY = 134217737; // 0x8000009
-  }
-
   public class DevicePolicyManager {
     method public void addCrossProfileIntentFilter(android.content.ComponentName, android.content.IntentFilter, int);
     method public boolean addCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
@@ -5876,7 +5859,6 @@ package android.app.admin {
     method public boolean removeCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean resetPassword(java.lang.String, int);
-    method public void sendDeviceInitializerStatus(int, java.lang.String);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public deprecated boolean setActiveProfileOwner(android.content.ComponentName, java.lang.String) throws java.lang.IllegalArgumentException;
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
@@ -5929,7 +5911,6 @@ package android.app.admin {
     field public static final java.lang.String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
     field public static final java.lang.String ACTION_PROVISION_MANAGED_DEVICE = "android.app.action.PROVISION_MANAGED_DEVICE";
     field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.PROVISION_MANAGED_PROFILE";
-    field public static final java.lang.String ACTION_SEND_DEVICE_INITIALIZER_STATUS = "android.app.action.SEND_DEVICE_INITIALIZER_STATUS";
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
     field public static final java.lang.String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
@@ -5941,15 +5922,9 @@ package android.app.admin {
     field public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0; // 0x0
     field public static final java.lang.String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
-    field public static final java.lang.String EXTRA_DEVICE_INITIALIZER_STATUS_CODE = "android.app.extra.DEVICE_INITIALIZER_STATUS_CODE";
-    field public static final java.lang.String EXTRA_DEVICE_INITIALIZER_STATUS_DESCRIPTION = "android.app.extra.DEVICE_INITIALIZER_STATUS_DESCRIPTION";
     field public static final java.lang.String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE = "android.app.extra.PROVISIONING_ACCOUNT_TO_MIGRATE";
     field public static final java.lang.String EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE = "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE";
-    field public static final java.lang.String EXTRA_PROVISIONING_BT_DEVICE_ID = "android.app.extra.PROVISIONING_BT_DEVICE_ID";
-    field public static final java.lang.String EXTRA_PROVISIONING_BT_MAC_ADDRESS = "android.app.extra.PROVISIONING_BT_MAC_ADDRESS";
-    field public static final java.lang.String EXTRA_PROVISIONING_BT_USE_PROXY = "android.app.extra.PROVISIONING_BT_USE_PROXY";
-    field public static final java.lang.String EXTRA_PROVISIONING_BT_UUID = "android.app.extra.PROVISIONING_BT_UUID";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME = "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE = "android.app.extra.PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE";

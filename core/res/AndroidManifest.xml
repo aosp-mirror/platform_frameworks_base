@@ -90,7 +90,6 @@
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
-    <protected-broadcast android:name="android.app.action.SEND_DEVICE_INITIALIZER_STATUS" />
 
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />
@@ -2440,11 +2439,6 @@
          to request all runtime permissions to be granted at installation.
      @hide -->
     <permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS"
-        android:protectionLevel="signature" />
-
-    <!-- Allows receiving status updates from a device initializer.
-         @hide Not for use by third-party applications. -->
-    <permission android:name="android.permission.RECEIVE_DEVICE_INITIALIZER_STATUS"
         android:protectionLevel="signature" />
 
     <!-- The system process that is allowed to bind to services in carrier apps will
