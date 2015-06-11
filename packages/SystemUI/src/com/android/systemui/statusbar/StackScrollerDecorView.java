@@ -32,7 +32,6 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     protected View mContent;
     private boolean mIsVisible;
     private boolean mAnimating;
-    private boolean mWillBeGone;
 
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -132,14 +131,6 @@ public abstract class StackScrollerDecorView extends ExpandableView {
 
     public void cancelAnimation() {
         mContent.animate().cancel();
-    }
-
-    public boolean willBeGone() {
-        return mWillBeGone;
-    }
-
-    public void setWillBeGone(boolean willBeGone) {
-        mWillBeGone = willBeGone;
     }
 
     protected abstract View findContentView();

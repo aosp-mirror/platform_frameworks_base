@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
@@ -226,6 +227,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mTrackingHeadsUp;
     private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
+    private NotificationOverflowContainer mOverflowContainer;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -1368,16 +1370,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         int childCount = getChildCount();
         int count = 0;
         for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child.getVisibility() != View.GONE && !child.willBeGone()) {
                 count++;
             }
-        }
-        if (mDismissView.willBeGone()) {
-            count--;
-        }
-        if (mEmptyShadeView.willBeGone()) {
-            count--;
         }
         return count;
     }
@@ -2470,7 +2466,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mEmptyShadeView.setVisibility(newVisibility);
                 mEmptyShadeView.setWillBeGone(false);
                 updateContentHeight();
-                notifyHeightChangeListener(mDismissView);
+                notifyHeightChangeListener(mEmptyShadeView);
             } else {
                 Runnable onFinishedRunnable = new Runnable() {
                     @Override
@@ -2478,7 +2474,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         mEmptyShadeView.setVisibility(GONE);
                         mEmptyShadeView.setWillBeGone(false);
                         updateContentHeight();
-                        notifyHeightChangeListener(mDismissView);
+                        notifyHeightChangeListener(mEmptyShadeView);
                     }
                 };
                 if (mAnimationsEnabled) {
@@ -2488,6 +2484,45 @@ public class NotificationStackScrollLayout extends ViewGroup
                     mEmptyShadeView.setInvisible();
                     onFinishedRunnable.run();
                 }
+            }
+        }
+    }
+
+    public void setOverflowContainer(NotificationOverflowContainer overFlowContainer) {
+        mOverflowContainer = overFlowContainer;
+        addView(mOverflowContainer);
+    }
+
+    public void updateOverflowContainerVisibility(boolean visible) {
+        int oldVisibility = mOverflowContainer.willBeGone() ? GONE
+                : mOverflowContainer.getVisibility();
+        final int newVisibility = visible ? VISIBLE : GONE;
+        if (oldVisibility != newVisibility) {
+            Runnable onFinishedRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    mOverflowContainer.setVisibility(newVisibility);
+                    mOverflowContainer.setWillBeGone(false);
+                    updateContentHeight();
+                    notifyHeightChangeListener(mOverflowContainer);
+                }
+            };
+            if (!mAnimationsEnabled || !mIsExpanded) {
+                mOverflowContainer.cancelAppearDrawing();
+                onFinishedRunnable.run();
+            } else if (newVisibility != GONE) {
+                mOverflowContainer.performAddAnimation(0,
+                        StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                mOverflowContainer.setVisibility(newVisibility);
+                mOverflowContainer.setWillBeGone(false);
+                updateContentHeight();
+                notifyHeightChangeListener(mOverflowContainer);
+            } else {
+                mOverflowContainer.performRemoveAnimation(
+                        StackStateAnimator.ANIMATION_DURATION_STANDARD,
+                        0.0f,
+                        onFinishedRunnable);
+                mOverflowContainer.setWillBeGone(true);
             }
         }
     }
