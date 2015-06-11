@@ -1105,12 +1105,7 @@ public final class ViewRootImpl implements ViewParent,
                 Debug.startMethodTracing("ViewAncestor");
             }
 
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "performTraversals");
-            try {
-                performTraversals();
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            }
+            performTraversals();
 
             if (mProfile) {
                 Debug.stopMethodTracing();

@@ -22,6 +22,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Log;
 import android.util.TimeUtils;
 
@@ -158,6 +159,14 @@ public final class Choreographer {
      * @hide
      */
     FrameInfo mFrameInfo = new FrameInfo();
+
+    /**
+     * Must be kept in sync with CALLBACK_* ints below, used to index into this array.
+     * @hide
+     */
+    private static final String[] CALLBACK_TRACE_TITLES = {
+            "input", "animation", "traversal", "commit"
+    };
 
     /**
      * Callback type: Input callback.  Runs first.
@@ -584,16 +593,22 @@ public final class Choreographer {
             mLastFrameTimeNanos = frameTimeNanos;
         }
 
-        mFrameInfo.markInputHandlingStart();
-        doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Choreographer#doFrame");
 
-        mFrameInfo.markAnimationsStart();
-        doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
+            mFrameInfo.markInputHandlingStart();
+            doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
 
-        mFrameInfo.markPerformTraversalsStart();
-        doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
+            mFrameInfo.markAnimationsStart();
+            doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
 
-        doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos);
+            mFrameInfo.markPerformTraversalsStart();
+            doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
+
+            doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
 
         if (DEBUG_FRAMES) {
             final long endNanos = System.nanoTime();
@@ -627,6 +642,7 @@ public final class Choreographer {
             // safe by ensuring the commit time is always at least one frame behind.
             if (callbackType == Choreographer.CALLBACK_COMMIT) {
                 final long jitterNanos = now - frameTimeNanos;
+                Trace.traceCounter(Trace.TRACE_TAG_VIEW, "jitterNanos", (int) jitterNanos);
                 if (jitterNanos >= 2 * mFrameIntervalNanos) {
                     final long lastFrameOffset = jitterNanos % mFrameIntervalNanos
                             + mFrameIntervalNanos;
@@ -644,6 +660,7 @@ public final class Choreographer {
             }
         }
         try {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, CALLBACK_TRACE_TITLES[callbackType]);
             for (CallbackRecord c = callbacks; c != null; c = c.next) {
                 if (DEBUG_FRAMES) {
                     Log.d(TAG, "RunCallback: type=" + callbackType
@@ -661,6 +678,7 @@ public final class Choreographer {
                     callbacks = next;
                 } while (callbacks != null);
             }
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 
