@@ -2443,8 +2443,6 @@ public abstract class Context {
      *
      * @param serviceClass The class of the desired service.
      * @return The service name or null if the class is not a supported system service.
-     *
-     * @hide
      */
     public abstract String getSystemServiceName(Class<?> serviceClass);
 
