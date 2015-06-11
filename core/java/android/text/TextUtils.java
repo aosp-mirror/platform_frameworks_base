@@ -1790,6 +1790,15 @@ public class TextUtils {
         }
     }
 
+    /**
+     * Return localized string representing the given number of selected items.
+     *
+     * @hide
+     */
+    public static CharSequence formatSelectedCount(int count) {
+        return Resources.getSystem().getQuantityString(R.plurals.selected_count, count, count);
+    }
+
     private static Object sLock = new Object();
 
     private static char[] sTemp = null;
