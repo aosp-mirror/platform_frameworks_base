@@ -35,6 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
+        android:contentDescription="@string/accessibility_brightness"
         systemui:text="@string/status_bar_settings_auto_brightness_label" />
 
 </LinearLayout>
