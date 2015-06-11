@@ -24,6 +24,7 @@ import android.os.Messenger;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Protocol;
 
 /**
@@ -176,9 +177,9 @@ public class NetworkFactory extends Handler {
 
     private void handleRemoveRequest(NetworkRequest request) {
         NetworkRequestInfo n = mNetworkRequests.get(request.requestId);
-        if (n != null && n.requested) {
+        if (n != null) {
             mNetworkRequests.remove(request.requestId);
-            releaseNetworkFor(n.request);
+            if (n.requested) releaseNetworkFor(n.request);
         }
     }
 
@@ -271,6 +272,11 @@ public class NetworkFactory extends Handler {
 
     public void setCapabilityFilter(NetworkCapabilities netCap) {
         sendMessage(obtainMessage(CMD_SET_FILTER, new NetworkCapabilities(netCap)));
+    }
+
+    @VisibleForTesting
+    protected int getRequestCount() {
+        return mNetworkRequests.size();
     }
 
     protected void log(String s) {
