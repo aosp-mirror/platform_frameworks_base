@@ -1245,7 +1245,6 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB డ్రైవ్"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB డ్రైవ్"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB నిల్వ"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"సవరించు"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"డేటా వినియోగం హెచ్చరిక"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"వినియోగం మరియు సెట్టింగ్‌లను వీక్షించడానికి తాకండి."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G డేటా పరిమితిని చేరుకుంది"</string>
