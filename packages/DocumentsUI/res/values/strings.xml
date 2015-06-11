@@ -68,9 +68,6 @@
     <!-- Button label that copies files to the current directory [CHAR LIMIT=24] -->
     <string name="button_copy">Copy</string>
 
-    <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
-    <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
-
     <!-- Mode that sorts documents by their display name alphabetically [CHAR LIMIT=24] -->
     <string name="sort_name">By name</string>
     <!-- Mode that sorts documents by their last modified time in descending order; most recent first [CHAR LIMIT=24] -->

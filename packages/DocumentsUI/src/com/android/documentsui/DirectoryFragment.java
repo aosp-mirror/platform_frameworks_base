@@ -54,6 +54,7 @@ import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
 import android.text.format.Time;
@@ -474,8 +475,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
-            mode.setTitle(getResources()
-                    .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
+            mode.setTitle(TextUtils.formatSelectedCount(mCurrentView.getCheckedItemCount()));
             return true;
         }
 
@@ -571,8 +571,7 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            mode.setTitle(getResources()
-                    .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
+            mode.setTitle(TextUtils.formatSelectedCount(mCurrentView.getCheckedItemCount()));
         }
     };
 
