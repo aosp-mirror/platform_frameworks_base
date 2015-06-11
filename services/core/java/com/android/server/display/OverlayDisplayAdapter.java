@@ -174,9 +174,11 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                             if (width >= MIN_WIDTH && width <= MAX_WIDTH
                                     && height >= MIN_HEIGHT && height <= MAX_HEIGHT
                                     && densityDpi >= DisplayMetrics.DENSITY_LOW
-                                    && densityDpi <= DisplayMetrics.DENSITY_XXHIGH) {
+                                    && densityDpi <= DisplayMetrics.DENSITY_XXXHIGH) {
                                 modes.add(new OverlayMode(width, height, densityDpi));
                                 continue;
+                            } else {
+                                Slog.w(TAG, "Ignoring out-of-range overlay display mode: " + mode);
                             }
                         } catch (NumberFormatException ex) {
                         }
