@@ -19,38 +19,31 @@ package android.security.keystore;
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 
 import com.android.org.conscrypt.NativeConstants;
-import com.android.org.conscrypt.OpenSSLEngine;
 
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.security.KeyStoreParameter;
-import android.security.keymaster.ExportResult;
-import android.security.keymaster.KeymasterDefs;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -1203,14 +1196,14 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
     private void assertPrivateKeyEntryEquals(PrivateKeyEntry keyEntry, PrivateKey expectedKey,
             Certificate expectedCert, Collection<Certificate> expectedChain) throws Exception {
-        if (expectedKey instanceof ECPrivateKey) {
+        if (expectedKey instanceof ECKey) {
             assertEquals("Returned PrivateKey should be what we inserted",
-                    ((ECPrivateKey) expectedKey).getParams().getCurve(),
-                    ((ECPublicKey) keyEntry.getCertificate().getPublicKey()).getParams().getCurve());
-        } else if (expectedKey instanceof RSAPrivateKey) {
+                    ((ECKey) expectedKey).getParams().getCurve(),
+                    ((ECKey) keyEntry.getCertificate().getPublicKey()).getParams().getCurve());
+        } else if (expectedKey instanceof RSAKey) {
             assertEquals("Returned PrivateKey should be what we inserted",
-                    ((RSAPrivateKey) expectedKey).getModulus(),
-                    ((RSAPrivateKey) keyEntry.getPrivateKey()).getModulus());
+                    ((RSAKey) expectedKey).getModulus(),
+                    ((RSAKey) keyEntry.getPrivateKey()).getModulus());
         }
 
         assertEquals("Returned Certificate should be what we inserted", expectedCert,
@@ -1263,15 +1256,14 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
         assertNotNull("Key should exist", key);
 
-        assertTrue("Should be a RSAPrivateKey", key instanceof RSAPrivateKey);
-
-        RSAPrivateKey actualKey = (RSAPrivateKey) key;
+        assertTrue("Should be a PrivateKey", key instanceof PrivateKey);
+        assertTrue("Should be a RSAKey", key instanceof RSAKey);
 
         KeyFactory keyFact = KeyFactory.getInstance("RSA");
         PrivateKey expectedKey = keyFact.generatePrivate(new PKCS8EncodedKeySpec(FAKE_RSA_KEY_1));
 
         assertEquals("Inserted key should be same as retrieved key",
-                ((RSAPrivateKey) expectedKey).getModulus(), actualKey.getModulus());
+                ((RSAKey) expectedKey).getModulus(), ((RSAKey) key).getModulus());
     }
 
     public void testKeyStore_GetKey_NoPassword_Unencrypted_Success() throws Exception {
@@ -1287,15 +1279,14 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
         assertNotNull("Key should exist", key);
 
-        assertTrue("Should be a RSAPrivateKey", key instanceof RSAPrivateKey);
-
-        RSAPrivateKey actualKey = (RSAPrivateKey) key;
+        assertTrue("Should be a PrivateKey", key instanceof PrivateKey);
+        assertTrue("Should be a RSAKey", key instanceof RSAKey);
 
         KeyFactory keyFact = KeyFactory.getInstance("RSA");
         PrivateKey expectedKey = keyFact.generatePrivate(new PKCS8EncodedKeySpec(FAKE_RSA_KEY_1));
 
         assertEquals("Inserted key should be same as retrieved key",
-                ((RSAPrivateKey) expectedKey).getModulus(), actualKey.getModulus());
+                ((RSAKey) expectedKey).getModulus(), ((RSAKey) key).getModulus());
     }
 
     public void testKeyStore_GetKey_Certificate_Encrypted_Failure() throws Exception {
@@ -1926,31 +1917,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
             Date notAfter) throws Exception {
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
 
-        final PrivateKey privKey;
-        final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
-        try {
-            privKey = engine.getPrivateKeyById(privateKeyAlias);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException("Can't get key", e);
-        }
-
-        ExportResult exportResult =
-                keyStore.exportKey(privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null);
-        assertEquals(KeyStore.NO_ERROR, exportResult.resultCode);
-        final byte[] pubKeyBytes = exportResult.exportData;
-
-        final PublicKey pubKey;
-        try {
-            final KeyFactory keyFact = KeyFactory.getInstance("RSA");
-            pubKey = keyFact.generatePublic(new X509EncodedKeySpec(pubKeyBytes));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Can't instantiate RSA key generator", e);
-        } catch (InvalidKeySpecException e) {
-            throw new IllegalStateException("keystore returned invalid key encoding", e);
-        }
+        KeyPair keyPair = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
+                keyStore, privateKeyAlias);
 
         final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-        certGen.setPublicKey(pubKey);
+        certGen.setPublicKey(keyPair.getPublic());
         certGen.setSerialNumber(serialNumber);
         certGen.setSubjectDN(subjectDN);
         certGen.setIssuerDN(subjectDN);
@@ -1958,7 +1929,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         certGen.setNotAfter(notAfter);
         certGen.setSignatureAlgorithm("sha1WithRSA");
 
-        final X509Certificate cert = certGen.generate(privKey);
+        final X509Certificate cert = certGen.generate(keyPair.getPrivate());
 
         return cert;
     }

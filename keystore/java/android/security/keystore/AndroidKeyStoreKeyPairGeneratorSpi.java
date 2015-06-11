@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.security.Credentials;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore;
-import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
@@ -44,29 +43,24 @@ import com.android.org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import com.android.org.bouncycastle.jce.X509Principal;
 import com.android.org.bouncycastle.jce.provider.X509CertificateObject;
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
-import com.android.org.conscrypt.OpenSSLEngine;
 
 import libcore.util.EmptyArray;
 
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyPairGeneratorSpi;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -147,6 +141,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         SUPPORTED_EC_NIST_CURVE_NAMES.addAll(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.keySet());
         Collections.sort(SUPPORTED_EC_NIST_CURVE_NAMES);
     }
+
     private final int mOriginalKeymasterAlgorithm;
 
     private KeyStore mKeyStore;
@@ -431,24 +426,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         args.addInts(KeymasterDefs.KM_TAG_PADDING, mKeymasterSignaturePaddings);
         args.addInts(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
 
-        // TODO: Remove the digest and padding NONE workaround below once Android Keystore returns
-        // keys which are backed by AndroidKeyStoreBCWorkaround provider instead of Conscrypt. The
-        // workaround is needed because Conscrypt (via keystore-engine) uses old KeyStore API which
-        // translates into digest NONE and padding NONE in the new API. keystore-engine cannot be
-        // updated to pass in the correct padding and digest values because it uses
-        // OpenSSL/BoringSSL engine which performs digesting and padding prior before invoking
-        // KeyStore API.
-        if (!com.android.internal.util.ArrayUtils.contains(
-                mKeymasterDigests, KeymasterDefs.KM_DIGEST_NONE)) {
-            args.addInt(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
-        }
-        if ((!com.android.internal.util.ArrayUtils.contains(
-                mKeymasterSignaturePaddings, KeymasterDefs.KM_PAD_NONE))
-                && (!com.android.internal.util.ArrayUtils.contains(
-                        mKeymasterEncryptionPaddings, KeymasterDefs.KM_PAD_NONE))) {
-            args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        }
-
         KeymasterUtils.addUserAuthArgs(args,
                 mSpec.isUserAuthenticationRequired(),
                 mSpec.getUserAuthenticationValidityDurationSeconds());
@@ -483,40 +460,23 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         "Failed to generate key pair", KeyStore.getKeyStoreException(errorCode));
             }
 
-            final PrivateKey privKey;
-            final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
+            KeyPair result;
             try {
-                privKey = engine.getPrivateKeyById(privateKeyAlias);
-            } catch (InvalidKeyException e) {
-                throw new ProviderException("Failed to obtain generated private key", e);
+                result = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
+                        mKeyStore, privateKeyAlias);
+            } catch (UnrecoverableKeyException e) {
+                throw new ProviderException("Failed to load generated key pair from keystore", e);
             }
 
-            ExportResult exportResult =
-                    mKeyStore.exportKey(
-                            privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null);
-            if (exportResult == null) {
-                throw new KeyStoreConnectException();
-            } else if (exportResult.resultCode != KeyStore.NO_ERROR) {
+            if (!mJcaKeyAlgorithm.equalsIgnoreCase(result.getPrivate().getAlgorithm())) {
                 throw new ProviderException(
-                        "Failed to obtain X.509 form of generated public key",
-                        KeyStore.getKeyStoreException(exportResult.resultCode));
-            }
-            final byte[] pubKeyBytes = exportResult.exportData;
-
-            final PublicKey pubKey;
-            try {
-                final KeyFactory keyFact = KeyFactory.getInstance(mJcaKeyAlgorithm);
-                pubKey = keyFact.generatePublic(new X509EncodedKeySpec(pubKeyBytes));
-            } catch (NoSuchAlgorithmException e) {
-                throw new ProviderException(
-                        "Failed to obtain " + mJcaKeyAlgorithm + " KeyFactory", e);
-            } catch (InvalidKeySpecException e) {
-                throw new ProviderException("Invalid X.509 encoding of generated public key", e);
+                        "Generated key pair algorithm does not match requested algorithm: "
+                        + result.getPrivate().getAlgorithm() + " vs " + mJcaKeyAlgorithm);
             }
 
             final X509Certificate cert;
             try {
-                cert = generateSelfSignedCertificate(privKey, pubKey);
+                cert = generateSelfSignedCertificate(result.getPrivate(), result.getPublic());
             } catch (Exception e) {
                 throw new ProviderException("Failed to generate self-signed certificate", e);
             }
@@ -539,7 +499,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         KeyStore.getKeyStoreException(insertErrorCode));
             }
 
-            KeyPair result = new KeyPair(pubKey, privKey);
             success = true;
             return result;
         } finally {

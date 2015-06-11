@@ -17,6 +17,7 @@
 package android.security.keystore;
 
 import java.security.PublicKey;
+import java.util.Arrays;
 
 /**
  * {@link PublicKey} backed by Android Keystore.
@@ -40,5 +41,31 @@ public class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implements Publ
     @Override
     public byte[] getEncoded() {
         return ArrayUtils.cloneIfNotEmpty(mEncoded);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(mEncoded);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AndroidKeyStorePublicKey other = (AndroidKeyStorePublicKey) obj;
+        if (!Arrays.equals(mEncoded, other.mEncoded)) {
+            return false;
+        }
+        return true;
     }
 }
