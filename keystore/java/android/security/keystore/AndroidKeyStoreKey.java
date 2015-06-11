@@ -52,4 +52,42 @@ public class AndroidKeyStoreKey implements Key {
         // This key does not export its key material
         return null;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((mAlgorithm == null) ? 0 : mAlgorithm.hashCode());
+        result = prime * result + ((mAlias == null) ? 0 : mAlias.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AndroidKeyStoreKey other = (AndroidKeyStoreKey) obj;
+        if (mAlgorithm == null) {
+            if (other.mAlgorithm != null) {
+                return false;
+            }
+        } else if (!mAlgorithm.equals(other.mAlgorithm)) {
+            return false;
+        }
+        if (mAlias == null) {
+            if (other.mAlias != null) {
+                return false;
+            }
+        } else if (!mAlias.equals(other.mAlias)) {
+            return false;
+        }
+        return true;
+    }
 }

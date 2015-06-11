@@ -16,9 +16,6 @@
 
 package android.security.keystore;
 
-import com.android.org.conscrypt.OpenSSLEngine;
-import com.android.org.conscrypt.OpenSSLKeyHolder;
-
 import libcore.util.EmptyArray;
 
 import android.security.Credentials;
@@ -35,7 +32,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -45,6 +41,7 @@ import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -59,7 +56,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
@@ -92,59 +88,17 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException,
             UnrecoverableKeyException {
         if (isPrivateKeyEntry(alias)) {
-            final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
-            try {
-                return engine.getPrivateKeyById(Credentials.USER_PRIVATE_KEY + alias);
-            } catch (InvalidKeyException e) {
-                UnrecoverableKeyException t = new UnrecoverableKeyException("Can't get key");
-                t.initCause(e);
-                throw t;
-            }
+            String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
+            return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
+                    mKeyStore, privateKeyAlias);
         } else if (isSecretKeyEntry(alias)) {
-            KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
-            String keyAliasInKeystore = Credentials.USER_SECRET_KEY + alias;
-            int errorCode = mKeyStore.getKeyCharacteristics(
-                    keyAliasInKeystore, null, null, keyCharacteristics);
-            if (errorCode != KeyStore.NO_ERROR) {
-                throw (UnrecoverableKeyException)
-                        new UnrecoverableKeyException("Failed to load information about key")
-                                .initCause(mKeyStore.getInvalidKeyException(alias, errorCode));
-            }
-
-            int keymasterAlgorithm =
-                    keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ALGORITHM, -1);
-            if (keymasterAlgorithm == -1) {
-                keymasterAlgorithm =
-                        keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ALGORITHM, -1);
-            }
-            if (keymasterAlgorithm == -1) {
-                throw new UnrecoverableKeyException("Key algorithm unknown");
-            }
-
-            List<Integer> keymasterDigests =
-                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST);
-            int keymasterDigest;
-            if (keymasterDigests.isEmpty()) {
-                keymasterDigest = -1;
-            } else {
-                // More than one digest can be permitted for this key. Use the first one to form the
-                // JCA key algorithm name.
-                keymasterDigest = keymasterDigests.get(0);
-            }
-
-            @KeyProperties.KeyAlgorithmEnum String keyAlgorithmString;
-            try {
-                keyAlgorithmString = KeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
-                        keymasterAlgorithm, keymasterDigest);
-            } catch (IllegalArgumentException e) {
-                throw (UnrecoverableKeyException)
-                        new UnrecoverableKeyException("Unsupported secret key type").initCause(e);
-            }
-
-            return new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmString);
+            String secretKeyAlias = Credentials.USER_SECRET_KEY + alias;
+            return AndroidKeyStoreProvider.loadAndroidKeyStoreSecretKeyFromKeystore(
+                    mKeyStore, secretKeyAlias);
+        } else {
+            // Key not found
+            return null;
         }
-
-        return null;
     }
 
     @Override
@@ -188,22 +142,36 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         byte[] certificate = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
         if (certificate != null) {
-            return toCertificate(certificate);
+            return wrapIntoKeyStoreCertificate(
+                    Credentials.USER_PRIVATE_KEY + alias, toCertificate(certificate));
         }
 
         certificate = mKeyStore.get(Credentials.CA_CERTIFICATE + alias);
         if (certificate != null) {
-            return toCertificate(certificate);
+            return wrapIntoKeyStoreCertificate(
+                    Credentials.USER_PRIVATE_KEY + alias, toCertificate(certificate));
         }
 
         return null;
     }
 
+    /**
+     * Wraps the provided cerificate into {@link KeyStoreX509Certificate} so that the public key
+     * returned by the certificate contains information about the alias of the private key in
+     * keystore. This is needed so that Android Keystore crypto operations using public keys can
+     * find out which key alias to use. These operations cannot work without an alias.
+     */
+    private static KeyStoreX509Certificate wrapIntoKeyStoreCertificate(
+            String privateKeyAlias, X509Certificate certificate) {
+        return (certificate != null)
+                ? new KeyStoreX509Certificate(privateKeyAlias, certificate) : null;
+    }
+
     private static X509Certificate toCertificate(byte[] bytes) {
         try {
             final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            return (X509Certificate) certFactory
-                    .generateCertificate(new ByteArrayInputStream(bytes));
+            return (X509Certificate) certFactory.generateCertificate(
+                    new ByteArrayInputStream(bytes));
         } catch (CertificateException e) {
             Log.w(NAME, "Couldn't parse certificate in keystore", e);
             return null;
@@ -214,8 +182,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     private static Collection<X509Certificate> toCertificates(byte[] bytes) {
         try {
             final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            return (Collection<X509Certificate>) certFactory
-                    .generateCertificates(new ByteArrayInputStream(bytes));
+            return (Collection<X509Certificate>) certFactory.generateCertificates(
+                            new ByteArrayInputStream(bytes));
         } catch (CertificateException e) {
             Log.w(NAME, "Couldn't parse certificates in keystore", e);
             return new ArrayList<X509Certificate>();
@@ -406,9 +374,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         final String pkeyAlias;
-        if (key instanceof OpenSSLKeyHolder) {
-            pkeyAlias = ((OpenSSLKeyHolder) key).getOpenSSLKey().getAlias();
-        } else if (key instanceof AndroidKeyStorePrivateKey) {
+        if (key instanceof AndroidKeyStorePrivateKey) {
             pkeyAlias = ((AndroidKeyStoreKey) key).getAlias();
         } else {
             pkeyAlias = null;
@@ -851,6 +817,19 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         if (cert == null) {
             return null;
         }
+        if (!"X.509".equalsIgnoreCase(cert.getType())) {
+            // Only X.509 certificates supported
+            return null;
+        }
+        byte[] targetCertBytes;
+        try {
+            targetCertBytes = cert.getEncoded();
+        } catch (CertificateEncodingException e) {
+            return null;
+        }
+        if (targetCertBytes == null) {
+            return null;
+        }
 
         final Set<String> nonCaEntries = new HashSet<String>();
 
@@ -868,10 +847,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     continue;
                 }
 
-                final Certificate c = toCertificate(certBytes);
                 nonCaEntries.add(alias);
 
-                if (cert.equals(c)) {
+                if (Arrays.equals(certBytes, targetCertBytes)) {
                     return alias;
                 }
             }
@@ -893,9 +871,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     continue;
                 }
 
-                final Certificate c =
-                        toCertificate(mKeyStore.get(Credentials.CA_CERTIFICATE + alias));
-                if (cert.equals(c)) {
+                if (Arrays.equals(certBytes, targetCertBytes)) {
                     return alias;
                 }
             }
@@ -954,4 +930,25 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
     }
 
+    /**
+     * {@link X509Certificate} which returns {@link AndroidKeyStorePublicKey} from
+     * {@link #getPublicKey()}. This is so that crypto operations on these public keys contain
+     * can find out which keystore private key entry to use. This is needed so that Android Keystore
+     * crypto operations using public keys can find out which key alias to use. These operations
+     * require an alias.
+     */
+    static class KeyStoreX509Certificate extends DelegatingX509Certificate {
+        private final String mPrivateKeyAlias;
+        KeyStoreX509Certificate(String privateKeyAlias, X509Certificate delegate) {
+            super(delegate);
+            mPrivateKeyAlias = privateKeyAlias;
+        }
+
+        @Override
+        public PublicKey getPublicKey() {
+            PublicKey original = super.getPublicKey();
+            return AndroidKeyStoreProvider.getAndroidKeyStorePublicKey(
+                    mPrivateKeyAlias, original.getAlgorithm(), original.getEncoded());
+        }
+    }
 }
