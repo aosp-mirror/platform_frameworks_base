@@ -157,7 +157,7 @@ class UserUsageStatsService {
             if (pi.applicationInfo != null && (firstUpdate || pi.applicationInfo.isSystemApp())
                     && getBeginIdleTime(packageName) == -1) {
                 for (IntervalStats stats : mCurrentStats) {
-                    stats.update(packageName, currentTimeMillis, Event.INTERACTION);
+                    stats.update(packageName, currentTimeMillis, Event.SYSTEM_INTERACTION);
                     stats.updateBeginIdleTime(packageName, deviceUsageTime);
                     mStatsChanged = true;
                 }
@@ -199,7 +199,7 @@ class UserUsageStatsService {
         if (currentDailyStats.events == null) {
             currentDailyStats.events = new TimeSparseArray<>();
         }
-        if (event.mEventType != UsageEvents.Event.INTERACTION) {
+        if (event.mEventType != UsageEvents.Event.SYSTEM_INTERACTION) {
             currentDailyStats.events.put(event.mTimeStamp, event);
         }
 
@@ -226,9 +226,9 @@ class UserUsageStatsService {
         notifyStatsChanged();
     }
 
-    void setLastUsedTime(String packageName, long lastUsedTime) {
+    void setSystemLastUsedTime(String packageName, long lastUsedTime) {
         for (IntervalStats stats : mCurrentStats) {
-            stats.updateLastUsedTime(packageName, lastUsedTime);
+            stats.updateSystemLastUsedTime(packageName, lastUsedTime);
         }
         notifyStatsChanged();
     }
@@ -397,13 +397,13 @@ class UserUsageStatsService {
         }
     }
 
-    long getLastUsedTime(String packageName) {
+    long getSystemLastUsedTime(String packageName) {
         final IntervalStats yearly = mCurrentStats[UsageStatsManager.INTERVAL_YEARLY];
         UsageStats packageUsage;
         if ((packageUsage = yearly.packageStats.get(packageName)) == null) {
             return -1;
         } else {
-            return packageUsage.getLastTimeUsed();
+            return packageUsage.getLastTimeSystemUsed();
         }
     }
 
@@ -586,8 +586,11 @@ class UserUsageStatsService {
         for (int i = 0; i < pkgCount; i++) {
             final UsageStats usageStats = pkgStats.valueAt(i);
             pw.printPair("package", usageStats.mPackageName);
-            pw.printPair("totalTime", formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
+            pw.printPair("totalTime",
+                    formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
             pw.printPair("lastTime", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.printPair("lastTimeSystem",
+                    formatDateTime(usageStats.mLastTimeSystemUsed, prettyDates));
             pw.printPair("inactiveTime",
                     formatElapsedTime(screenOnTime - usageStats.mBeginIdleTime, prettyDates));
             pw.println();
@@ -596,8 +599,7 @@ class UserUsageStatsService {
 
         pw.println("configurations");
         pw.increaseIndent();
-        final ArrayMap<Configuration, ConfigurationStats> configStats =
-                stats.configurations;
+        final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
         final int configCount = configStats.size();
         for (int i = 0; i < configCount; i++) {
             final ConfigurationStats config = configStats.valueAt(i);
@@ -659,8 +661,10 @@ class UserUsageStatsService {
                 return "CONTINUE_PREVIOUS_DAY";
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 return "CONFIGURATION_CHANGE";
-            case UsageEvents.Event.INTERACTION:
-                return "INTERACTION";
+            case UsageEvents.Event.SYSTEM_INTERACTION:
+                return "SYSTEM_INTERACTION";
+            case UsageEvents.Event.USER_INTERACTION:
+                return "USER_INTERACTION";
             default:
                 return "UNKNOWN";
         }

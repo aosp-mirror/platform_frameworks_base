@@ -68,9 +68,15 @@ public final class UsageEvents implements Parcelable {
         public static final int CONFIGURATION_CHANGE = 5;
 
         /**
-         * An event type denoting that a package was interacted with in some way.
+         * An event type denoting that a package was interacted with in some way by the system.
+         * @hide
          */
-        public static final int INTERACTION = 6;
+        public static final int SYSTEM_INTERACTION = 6;
+
+        /**
+         * An event type denoting that a package was interacted with in some way by the user.
+         */
+        public static final int USER_INTERACTION = 7;
 
         /**
          * {@hide}
