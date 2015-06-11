@@ -114,11 +114,6 @@ public class CarrierConfigManager {
      * (Some carriers require that emergency calls *not* be logged, presumably to avoid the risk of
      * accidental redialing from the call log UI. This is a good idea, so the default here is
      * false.)
-     * <p>
-     * TODO: on the other hand, it might still be useful to have some record of the emergency calls
-     * you've made, or to be able to look up the exact date/time of an emergency call. So perhaps we
-     * <b>should</b> log those calls, but instead fix the call log to disable the "call" button for
-     * emergency numbers.
      */
     public static final String
             KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL = "allow_emergency_numbers_in_call_log_bool";
