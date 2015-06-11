@@ -234,6 +234,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/symbols/system/lib/libinputflingerh
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/lib/libinputflingerhost.so $(PRODUCT_OUT)/obj_arm/lib/libinputflingerhost.so)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libinputflingerhost_intermediates $(PRODUCT_OUT)/obj_arm/SHARED_LIBRARIES/libinputflingerhost_intermediates)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/target/common/obj/framework.aidl)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates)
 
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
