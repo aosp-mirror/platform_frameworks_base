@@ -360,7 +360,7 @@ public class QSPanel extends ViewGroup {
     }
 
     private void handleShowDetailTile(TileRecord r, boolean show) {
-        if ((mDetailRecord != null) == show) return;
+        if ((mDetailRecord != null) == show && mDetailRecord == r) return;
 
         if (show) {
             r.detailAdapter = r.tile.getDetailAdapter();
@@ -373,7 +373,8 @@ public class QSPanel extends ViewGroup {
     }
 
     private void handleShowDetailImpl(Record r, boolean show, int x, int y) {
-        if ((mDetailRecord != null) == show) return;  // already in right state
+        boolean visibleDiff = (mDetailRecord != null) != show;
+        if (!visibleDiff && mDetailRecord == r) return;  // already in right state
         DetailAdapter detailAdapter = null;
         AnimatorListener listener = null;
         if (show) {
@@ -399,7 +400,7 @@ public class QSPanel extends ViewGroup {
                     mContext.getString(detailAdapter.getTitle())));
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
-            if (r instanceof TileRecord) {
+            if (r instanceof TileRecord && visibleDiff) {
                 ((TileRecord) r).openingDetail = true;
             }
         } else {
@@ -411,7 +412,9 @@ public class QSPanel extends ViewGroup {
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         fireShowingDetail(show ? detailAdapter : null);
-        mClipper.animateCircularClip(x, y, show, listener);
+        if (visibleDiff) {
+            mClipper.animateCircularClip(x, y, show, listener);
+        }
     }
 
     private void setGridContentVisibility(boolean visible) {
