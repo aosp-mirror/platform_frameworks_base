@@ -231,6 +231,19 @@ public abstract class PrintService extends Service {
      */
     public static final String EXTRA_PRINTER_INFO = "android.intent.extra.print.EXTRA_PRINTER_INFO";
 
+    /**
+     * If you declared an optional activity with advanced print options via the
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * attribute, this extra is used to pass in the meta-data for the currently printed
+     * document as a {@link android.print.PrintDocumentInfo} to your activity allowing
+     * you to inspect it.
+     *
+     * @see #EXTRA_PRINT_JOB_INFO
+     * @see #EXTRA_PRINTER_INFO
+     */
+    public static final String EXTRA_PRINT_DOCUMENT_INFO =
+            "android.printservice.extra.PRINT_DOCUMENT_INFO";
+
     private Handler mHandler;
 
     private IPrintServiceClient mClient;
