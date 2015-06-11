@@ -741,6 +741,15 @@ public class MidiService extends IMidiManager.Stub {
         MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,
                 inputPortNames, outputPortNames, properties, isPrivate);
 
+        if (server != null) {
+            try {
+                server.setDeviceInfo(deviceInfo);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in setDeviceInfo()");
+                return null;
+            }
+        }
+
         Device device = null;
         BluetoothDevice bluetoothDevice = null;
         if (type == MidiDeviceInfo.TYPE_BLUETOOTH) {

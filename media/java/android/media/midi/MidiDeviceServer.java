@@ -269,8 +269,20 @@ public final class MidiDeviceServer implements Closeable {
         public MidiDeviceInfo getDeviceInfo() {
             return mDeviceInfo;
         }
+
+        @Override
+        public void setDeviceInfo(MidiDeviceInfo deviceInfo) {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("setDeviceInfo should only be called by MidiService");
+            }
+            if (mDeviceInfo != null) {
+                throw new IllegalStateException("setDeviceInfo should only be called once");
+            }
+            mDeviceInfo = deviceInfo;
+        }
     };
 
+    // Constructor for MidiManager.createDeviceServer()
     /* package */ MidiDeviceServer(IMidiManager midiManager, MidiReceiver[] inputPortReceivers,
             int numOutputPorts, Callback callback) {
         mMidiManager = midiManager;
@@ -292,19 +304,19 @@ public final class MidiDeviceServer implements Closeable {
         mGuard.open("close");
     }
 
+    // Constructor for MidiDeviceService.onCreate()
+    /* package */ MidiDeviceServer(IMidiManager midiManager, MidiReceiver[] inputPortReceivers,
+           MidiDeviceInfo deviceInfo, Callback callback) {
+        this(midiManager, inputPortReceivers, deviceInfo.getOutputPortCount(), callback);
+        mDeviceInfo = deviceInfo;
+    }
+
     /* package */ IMidiDeviceServer getBinderInterface() {
         return mServer;
     }
 
     public IBinder asBinder() {
         return mServer.asBinder();
-    }
-
-    /* package */ void setDeviceInfo(MidiDeviceInfo deviceInfo) {
-        if (mDeviceInfo != null) {
-            throw new IllegalStateException("setDeviceInfo should only be called once");
-        }
-        mDeviceInfo = deviceInfo;
     }
 
     private void updateDeviceStatus() {
