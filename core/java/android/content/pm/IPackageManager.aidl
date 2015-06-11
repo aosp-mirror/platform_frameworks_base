@@ -31,6 +31,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
@@ -490,4 +491,7 @@ interface IPackageManager {
     KeySet getSigningKeySet(String packageName);
     boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
     boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
+
+    void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
+    void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
 }

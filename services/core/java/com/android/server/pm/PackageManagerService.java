@@ -92,6 +92,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -144,6 +145,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -522,6 +524,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private AtomicInteger mNextMoveId = new AtomicInteger();
     private final MoveCallbacks mMoveCallbacks;
+
+    private final OnPermissionChangeListeners mOnPermissionChangeListeners;
 
     // Cache of users who need badging.
     SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
@@ -1730,6 +1734,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(this);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
+
+        mOnPermissionChangeListeners = new OnPermissionChangeListeners(
+                FgThread.get().getLooper());
 
         getDefaultDisplayMetrics(context, mMetrics);
 
@@ -3195,9 +3202,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
                     gidsChanged = true;
-                }
-                break;
+                } break;
             }
+
+            mOnPermissionChangeListeners.onPermissionsChanged(pkg.applicationInfo.uid);
 
             // Not critical if that is lost - app has to request again.
             mSettings.writeRuntimePermissionsForUserLPr(userId, false);
@@ -3254,6 +3262,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     PermissionsState.PERMISSION_OPERATION_FAILURE) {
                 return;
             }
+
+            mOnPermissionChangeListeners.onPermissionsChanged(pkg.applicationInfo.uid);
 
             // Critical, after this call app should never have the permission.
             mSettings.writeRuntimePermissionsForUserLPr(userId, true);
@@ -3394,6 +3404,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+    }
+
+    @Override
+    public void addOnPermissionsChangeListener(IOnPermissionsChangeListener listener) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
+                "addOnPermissionsChangeListener");
+
+        synchronized (mPackages) {
+            mOnPermissionChangeListeners.addListenerLocked(listener);
+        }
+    }
+
+    @Override
+    public void removeOnPermissionsChangeListener(IOnPermissionsChangeListener listener) {
+        synchronized (mPackages) {
+            mOnPermissionChangeListeners.removeListenerLocked(listener);
+        }
     }
 
     @Override
@@ -15294,6 +15322,59 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             synchronized (mLastStatus) {
                 mLastStatus.put(moveId, status);
+            }
+        }
+    }
+
+    private final class OnPermissionChangeListeners extends Handler {
+        private static final int MSG_ON_PERMISSIONS_CHANGED = 1;
+
+        private final RemoteCallbackList<IOnPermissionsChangeListener> mPermissionListeners =
+                new RemoteCallbackList<>();
+
+        public OnPermissionChangeListeners(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ON_PERMISSIONS_CHANGED: {
+                    final int uid = msg.arg1;
+                    handleOnPermissionsChanged(uid);
+                } break;
+            }
+        }
+
+        public void addListenerLocked(IOnPermissionsChangeListener listener) {
+            mPermissionListeners.register(listener);
+
+        }
+
+        public void removeListenerLocked(IOnPermissionsChangeListener listener) {
+            mPermissionListeners.unregister(listener);
+        }
+
+        public void onPermissionsChanged(int uid) {
+            if (mPermissionListeners.getRegisteredCallbackCount() > 0) {
+                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
+            }
+        }
+
+        private void handleOnPermissionsChanged(int uid) {
+            final int count = mPermissionListeners.beginBroadcast();
+            try {
+                for (int i = 0; i < count; i++) {
+                    IOnPermissionsChangeListener callback = mPermissionListeners
+                            .getBroadcastItem(i);
+                    try {
+                        callback.onPermissionsChanged(uid);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Permission listener is dead", e);
+                    }
+                }
+            } finally {
+                mPermissionListeners.finishBroadcast();
             }
         }
     }
