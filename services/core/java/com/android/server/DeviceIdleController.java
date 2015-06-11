@@ -22,6 +22,7 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -29,12 +30,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.hardware.display.DisplayManager;
 import android.net.INetworkPolicyManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -48,11 +51,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
+import android.util.KeyValueListParser;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
@@ -62,7 +65,6 @@ import android.view.Display;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -103,84 +105,7 @@ public class DeviceIdleController extends SystemService
 
     // TODO: These need to be moved to system settings.
 
-    /**
-     * This is the time, after becoming inactive, at which we start looking at the
-     * motion sensor to determine if the device is being left alone.  We don't do this
-     * immediately after going inactive just because we don't want to be continually running
-     * the significant motion sensor whenever the screen is off.
-     */
 
-    private static final long DEFAULT_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 30*60*1000L
-            : 3 * 60 * 1000L;
-
-    /**
-     * If we don't receive a callback from AnyMotion in this amount of time, we will change from
-     * STATE_SENSING to STATE_INACTIVE, and any AnyMotion callbacks while not in STATE_SENSING will
-     * be ignored.
-     */
-    private static final long DEFAULT_SENSING_TIMEOUT = !DEBUG ? 5 * 60 * 1000L : 60 * 1000L;
-
-    /**
-     * This is the time, after seeing motion, that we wait after becoming inactive from
-     * that until we start looking for motion again.
-     */
-    private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 10*60*1000L
-            : 60 * 1000L;
-
-    /**
-     * This is the time, after the inactive timeout elapses, that we will wait looking
-     * for significant motion until we truly consider the device to be idle.
-     */
-
-    private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT = !COMPRESS_TIME ? 30*60*1000L
-            : 3 * 60 * 1000L;
-
-    /**
-     * This is the initial time, after being idle, that we will allow ourself to be back
-     * in the IDLE_PENDING state allowing the system to run normally until we return to idle.
-     */
-
-    private static final long DEFAULT_IDLE_PENDING_TIMEOUT = !COMPRESS_TIME ? 5*60*1000L
-            : 30 * 1000L;
-
-    /**
-     * Maximum pending idle timeout (time spent running) we will be allowed to use.
-     */
-    private static final long DEFAULT_MAX_IDLE_PENDING_TIMEOUT = !COMPRESS_TIME ? 10*60*1000L
-            : 60 * 1000L;
-    /**
-     * Scaling factor to apply to current pending idle timeout each time we cycle through
-     * that state.
-     */
-    private static final float DEFAULT_IDLE_PENDING_FACTOR = 2f;
-    /**
-     * This is the initial time that we want to sit in the idle state before waking up
-     * again to return to pending idle and allowing normal work to run.
-     */
-
-    private static final long DEFAULT_IDLE_TIMEOUT = !COMPRESS_TIME ? 60*60*1000L
-            : 6 * 60 * 1000L;
-
-    /**
-     * Maximum idle duration we will be allowed to use.
-     */
-    private static final long DEFAULT_MAX_IDLE_TIMEOUT = !COMPRESS_TIME ? 6*60*60*1000L
-            : 30 * 60 * 1000L;
-    /**
-     * Scaling factor to apply to current idle timeout each time we cycle through that state.
-     */
-    private static final float DEFAULT_IDLE_FACTOR = 2f;
-    /**
-     * This is the minimum time we will allow until the next upcoming alarm for us to
-     * actually go in to idle mode.
-     */
-    private static final long DEFAULT_MIN_TIME_TO_ALARM = !COMPRESS_TIME ? 60*60*1000L
-            : 6 * 60 * 1000L;
-
-    /**
-     * Max amount of time to temporarily whitelist an app when it receives a high priority tickle.
-     */
-    private static final long MAX_TEMP_APP_WHITELIST_DURATION = 5 * 60 * 1000L;
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
@@ -305,6 +230,230 @@ public class DeviceIdleController extends SystemService
             }
         }
     };
+
+    /**
+     * All times are in milliseconds. These constants are kept synchronized with the system
+     * global Settings. Any access to this class or its fields should be done while
+     * holding the DeviceIdleController lock.
+     */
+    private class Constants extends ContentObserver {
+        // Key names stored in the settings value.
+        private static final String KEY_INACTIVE_TIMEOUT = "inactive_to";
+        private static final String KEY_SENSING_TIMEOUT = "sensing_to";
+        private static final String KEY_MOTION_INACTIVE_TIMEOUT = "motion_inactive_to";
+        private static final String KEY_IDLE_AFTER_INACTIVE_TIMEOUT = "idle_after_inactive_to";
+        private static final String KEY_IDLE_PENDING_TIMEOUT = "idle_pending_to";
+        private static final String KEY_MAX_IDLE_PENDING_TIMEOUT = "max_idle_pending_to";
+        private static final String KEY_IDLE_PENDING_FACTOR = "idle_pending_factor";
+        private static final String KEY_IDLE_TIMEOUT = "idle_to";
+        private static final String KEY_MAX_IDLE_TIMEOUT = "max_idle_to";
+        private static final String KEY_IDLE_FACTOR = "idle_factor";
+        private static final String KEY_MIN_TIME_TO_ALARM = "min_time_to_alarm";
+        private static final String KEY_MAX_TEMP_APP_WHITELIST_DURATION =
+                "max_temp_app_whitelist_duration";
+
+        /**
+         * This is the time, after becoming inactive, at which we start looking at the
+         * motion sensor to determine if the device is being left alone.  We don't do this
+         * immediately after going inactive just because we don't want to be continually running
+         * the significant motion sensor whenever the screen is off.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_INACTIVE_TIMEOUT
+         */
+        public long INACTIVE_TIMEOUT;
+
+        /**
+         * If we don't receive a callback from AnyMotion in this amount of time, we will change from
+         * STATE_SENSING to STATE_INACTIVE, and any AnyMotion callbacks while not in STATE_SENSING
+         * will be ignored.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_SENSING_TIMEOUT
+         */
+        public long SENSING_TIMEOUT;
+
+        /**
+         * This is the time, after seeing motion, that we wait after becoming inactive from
+         * that until we start looking for motion again.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MOTION_INACTIVE_TIMEOUT
+         */
+        public long MOTION_INACTIVE_TIMEOUT;
+
+        /**
+         * This is the time, after the inactive timeout elapses, that we will wait looking
+         * for significant motion until we truly consider the device to be idle.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_IDLE_AFTER_INACTIVE_TIMEOUT
+         */
+        public long IDLE_AFTER_INACTIVE_TIMEOUT;
+
+        /**
+         * This is the initial time, after being idle, that we will allow ourself to be back
+         * in the IDLE_PENDING state allowing the system to run normally until we return to idle.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_IDLE_PENDING_TIMEOUT
+         */
+        public long IDLE_PENDING_TIMEOUT;
+
+        /**
+         * Maximum pending idle timeout (time spent running) we will be allowed to use.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MAX_IDLE_PENDING_TIMEOUT
+         */
+        public long MAX_IDLE_PENDING_TIMEOUT;
+
+        /**
+         * Scaling factor to apply to current pending idle timeout each time we cycle through
+         * that state.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_IDLE_PENDING_FACTOR
+         */
+        public float IDLE_PENDING_FACTOR;
+
+        /**
+         * This is the initial time that we want to sit in the idle state before waking up
+         * again to return to pending idle and allowing normal work to run.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_IDLE_TIMEOUT
+         */
+        public long IDLE_TIMEOUT;
+
+        /**
+         * Maximum idle duration we will be allowed to use.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MAX_IDLE_TIMEOUT
+         */
+        public long MAX_IDLE_TIMEOUT;
+
+        /**
+         * Scaling factor to apply to current idle timeout each time we cycle through that state.
+          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_IDLE_FACTOR
+         */
+        public float IDLE_FACTOR;
+
+        /**
+         * This is the minimum time we will allow until the next upcoming alarm for us to
+         * actually go in to idle mode.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MIN_TIME_TO_ALARM
+         */
+        public long MIN_TIME_TO_ALARM;
+
+        /**
+         * Max amount of time to temporarily whitelist an app when it receives a high priority
+         * tickle.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MAX_TEMP_APP_WHITELIST_DURATION
+         */
+        public long MAX_TEMP_APP_WHITELIST_DURATION;
+
+        private final ContentResolver mResolver;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        public Constants(Handler handler, ContentResolver resolver) {
+            super(handler);
+            mResolver = resolver;
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS), false, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateConstants();
+        }
+
+        private void updateConstants() {
+            synchronized (DeviceIdleController.this) {
+                try {
+                    mParser.setString(Settings.Global.getString(mResolver,
+                            Settings.Global.DEVICE_IDLE_CONSTANTS));
+                } catch (IllegalArgumentException e) {
+                    // Failed to parse the settings string, log this and move on
+                    // with defaults.
+                    Slog.e(TAG, "Bad device idle settings", e);
+                }
+
+                INACTIVE_TIMEOUT = mParser.getLong(KEY_INACTIVE_TIMEOUT,
+                        !COMPRESS_TIME ? 30 * 60 * 1000L : 3 * 60 * 1000L);
+                SENSING_TIMEOUT = mParser.getLong(KEY_SENSING_TIMEOUT,
+                        !DEBUG ? 5 * 60 * 1000L : 60 * 1000L);
+                MOTION_INACTIVE_TIMEOUT = mParser.getLong(KEY_MOTION_INACTIVE_TIMEOUT,
+                        !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
+                IDLE_AFTER_INACTIVE_TIMEOUT = mParser.getLong(KEY_IDLE_AFTER_INACTIVE_TIMEOUT,
+                        !COMPRESS_TIME ? 30 * 60 * 1000L : 3 * 60 * 1000L);
+                IDLE_PENDING_TIMEOUT = mParser.getLong(KEY_IDLE_PENDING_TIMEOUT,
+                        !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L);
+                MAX_IDLE_PENDING_TIMEOUT = mParser.getLong(KEY_MAX_IDLE_PENDING_TIMEOUT,
+                        !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
+                IDLE_PENDING_FACTOR = mParser.getFloat(KEY_IDLE_PENDING_FACTOR,
+                        2f);
+                IDLE_TIMEOUT = mParser.getLong(KEY_IDLE_TIMEOUT,
+                        !COMPRESS_TIME ? 60 * 60 * 1000L : 6 * 60 * 1000L);
+                MAX_IDLE_TIMEOUT = mParser.getLong(KEY_MAX_IDLE_TIMEOUT,
+                        !COMPRESS_TIME ? 6 * 60 * 60 * 1000L : 30 * 60 * 1000L);
+                IDLE_FACTOR = mParser.getFloat(KEY_IDLE_FACTOR,
+                        2f);
+                MIN_TIME_TO_ALARM = mParser.getLong(KEY_MIN_TIME_TO_ALARM,
+                        !COMPRESS_TIME ? 60 * 60 * 1000L : 6 * 60 * 1000L);
+                MAX_TEMP_APP_WHITELIST_DURATION = mParser.getLong(KEY_MAX_TEMP_APP_WHITELIST_DURATION,
+                        5 * 60 * 1000L);
+            }
+        }
+
+        void dump(PrintWriter pw) {
+            pw.println("  Settings:");
+
+            pw.print("    DOZE_INACTIVE_TIMEOUT=");
+            TimeUtils.formatDuration(INACTIVE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_SENSING_TIMEOUT=");
+            TimeUtils.formatDuration(SENSING_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_MOTION_INACTIVE_TIMEOUT=");
+            TimeUtils.formatDuration(MOTION_INACTIVE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_IDLE_AFTER_INACTIVE_TIMEOUT=");
+            TimeUtils.formatDuration(IDLE_AFTER_INACTIVE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_IDLE_PENDING_TIMEOUT=");
+            TimeUtils.formatDuration(IDLE_PENDING_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_MAX_IDLE_PENDING_TIMEOUT=");
+            TimeUtils.formatDuration(MAX_IDLE_PENDING_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_IDLE_PENDING_FACTOR=");
+            pw.println(IDLE_PENDING_FACTOR);
+
+            pw.print("    DOZE_IDLE_TIMEOUT=");
+            TimeUtils.formatDuration(IDLE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_MAX_IDLE_TIMEOUT=");
+            TimeUtils.formatDuration(MAX_IDLE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    DOZE_IDLE_FACTOR=");
+            pw.println(IDLE_FACTOR);
+
+            pw.print("    DOZE_MIN_TIME_TO_ALARM=");
+            TimeUtils.formatDuration(MIN_TIME_TO_ALARM, pw);
+            pw.println();
+
+            pw.print("    DOZE_MAX_TEMP_APP_WHITELIST_DURATION=");
+            TimeUtils.formatDuration(MAX_TEMP_APP_WHITELIST_DURATION, pw);
+            pw.println();
+        }
+    }
+
+    private Constants mConstants;
 
     @Override
     public void onAnyMotionResult(int result) {
@@ -474,6 +623,8 @@ public class DeviceIdleController extends SystemService
                 }
             }
 
+            mConstants = new Constants(mHandler, getContext().getContentResolver());
+
             readConfigFileLocked();
             updateWhitelistAppIdsLocked();
 
@@ -482,7 +633,7 @@ public class DeviceIdleController extends SystemService
             // a battery update the next time the level drops.
             mCharging = true;
             mState = STATE_ACTIVE;
-            mInactiveTimeout = DEFAULT_INACTIVE_TIMEOUT;
+            mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
         }
 
         publishBinderService(SERVICE_NAME, new BinderService());
@@ -613,14 +764,12 @@ public class DeviceIdleController extends SystemService
      */
     public void addPowerSaveTempWhitelistAppInternal(String packageName, long duration,
             int userId) {
-        if (duration > MAX_TEMP_APP_WHITELIST_DURATION) {
-            duration = MAX_TEMP_APP_WHITELIST_DURATION;
-        }
         try {
             int uid = getContext().getPackageManager().getPackageUid(packageName, userId);
             int appId = UserHandle.getAppId(uid);
             final long timeNow = System.currentTimeMillis();
             synchronized (this) {
+                duration = Math.min(duration, mConstants.MAX_TEMP_APP_WHITELIST_DURATION);
                 long currentEndTime = mTempWhitelistAppIdEndTimes.get(appId);
                 // Set the new end time
                 mTempWhitelistAppIdEndTimes.put(appId, timeNow + duration);
@@ -704,7 +853,7 @@ public class DeviceIdleController extends SystemService
             EventLogTags.writeDeviceIdle(STATE_ACTIVE, reason);
             scheduleReportActiveLocked(false);
             mState = STATE_ACTIVE;
-            mInactiveTimeout = DEFAULT_INACTIVE_TIMEOUT;
+            mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
             mNextIdlePendingDelay = 0;
             mNextIdleDelay = 0;
             cancelAlarmLocked();
@@ -731,7 +880,7 @@ public class DeviceIdleController extends SystemService
      * within the DEFAULT_SENSING_TIMEOUT, to return to STATE_INACTIVE.
      */
     void enterInactiveStateLocked() {
-        mInactiveTimeout = DEFAULT_INACTIVE_TIMEOUT;
+        mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
         becomeInactiveIfAppropriateLocked();
     }
 
@@ -740,7 +889,7 @@ public class DeviceIdleController extends SystemService
         EventLogTags.writeDeviceIdleStep();
 
         final long now = SystemClock.elapsedRealtime();
-        if ((now+DEFAULT_MIN_TIME_TO_ALARM) > mAlarmManager.getNextWakeFromIdleTime()) {
+        if ((now+mConstants.MIN_TIME_TO_ALARM) > mAlarmManager.getNextWakeFromIdleTime()) {
             // Whoops, there is an upcoming alarm.  We don't actually want to go idle.
             if (mState != STATE_ACTIVE) {
                 becomeActiveLocked("alarm");
@@ -753,10 +902,10 @@ public class DeviceIdleController extends SystemService
                 // We have now been inactive long enough, it is time to start looking
                 // for significant motion and sleep some more while doing so.
                 startMonitoringSignificantMotion();
-                scheduleAlarmLocked(DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT, false);
+                scheduleAlarmLocked(mConstants.IDLE_AFTER_INACTIVE_TIMEOUT, false);
                 // Reset the upcoming idle delays.
-                mNextIdlePendingDelay = DEFAULT_IDLE_PENDING_TIMEOUT;
-                mNextIdleDelay = DEFAULT_IDLE_TIMEOUT;
+                mNextIdlePendingDelay = mConstants.IDLE_PENDING_TIMEOUT;
+                mNextIdleDelay = mConstants.IDLE_TIMEOUT;
                 mState = STATE_IDLE_PENDING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_IDLE_PENDING.");
                 EventLogTags.writeDeviceIdle(mState, "step");
@@ -764,7 +913,7 @@ public class DeviceIdleController extends SystemService
             case STATE_IDLE_PENDING:
                 mState = STATE_SENSING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
-                scheduleSensingAlarmLocked(DEFAULT_SENSING_TIMEOUT);
+                scheduleSensingAlarmLocked(mConstants.SENSING_TIMEOUT);
                 mAnyMotionDetector.checkForAnyMotion();
                 break;
             case STATE_SENSING:
@@ -773,11 +922,9 @@ public class DeviceIdleController extends SystemService
                 scheduleAlarmLocked(mNextIdleDelay, true);
                 if (DEBUG) Slog.d(TAG, "Moved to STATE_IDLE. Next alarm in " + mNextIdleDelay +
                         " ms.");
-                mNextIdleDelay = (long)(mNextIdleDelay * DEFAULT_IDLE_FACTOR);
+                mNextIdleDelay = (long)(mNextIdleDelay * mConstants.IDLE_FACTOR);
                 if (DEBUG) Slog.d(TAG, "Setting mNextIdleDelay = " + mNextIdleDelay);
-                if (mNextIdleDelay > DEFAULT_MAX_IDLE_TIMEOUT) {
-                    mNextIdleDelay = DEFAULT_MAX_IDLE_TIMEOUT;
-                }
+                mNextIdleDelay = Math.min(mNextIdleDelay, mConstants.MAX_IDLE_TIMEOUT);
                 mState = STATE_IDLE;
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
@@ -786,10 +933,8 @@ public class DeviceIdleController extends SystemService
                 scheduleAlarmLocked(mNextIdlePendingDelay, false);
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE to STATE_IDLE_MAINTENANCE. " +
                         "Next alarm in " + mNextIdlePendingDelay + " ms.");
-                mNextIdlePendingDelay = (long)(mNextIdlePendingDelay*DEFAULT_IDLE_PENDING_FACTOR);
-                if (mNextIdlePendingDelay > DEFAULT_MAX_IDLE_PENDING_TIMEOUT) {
-                    mNextIdlePendingDelay = DEFAULT_MAX_IDLE_PENDING_TIMEOUT;
-                }
+                mNextIdlePendingDelay = Math.min(mConstants.MAX_IDLE_PENDING_TIMEOUT,
+                        (long)(mNextIdlePendingDelay * mConstants.IDLE_PENDING_FACTOR));
                 mState = STATE_IDLE_MAINTENANCE;
                 EventLogTags.writeDeviceIdle(mState, "step");
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
@@ -807,7 +952,7 @@ public class DeviceIdleController extends SystemService
         if (mState != STATE_ACTIVE) {
             scheduleReportActiveLocked(true);
             mState = STATE_ACTIVE;
-            mInactiveTimeout = DEFAULT_MOTION_INACTIVE_TIMEOUT;
+            mInactiveTimeout = mConstants.MOTION_INACTIVE_TIMEOUT;
             EventLogTags.writeDeviceIdle(mState, "motion");
             becomeInactiveIfAppropriateLocked();
         }
@@ -1179,6 +1324,9 @@ public class DeviceIdleController extends SystemService
                     pw.println();
                 }
             }
+
+            mConstants.dump(pw);
+
             pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);
             pw.print("  mIdleDisabled="); pw.println(mIdleDisabled);
