@@ -1797,9 +1797,16 @@ public class InputMethodService extends AbstractInputMethodService {
     private void requestShowSelf(int flags) {
         mImm.showSoftInputFromInputMethod(mToken, flags);
     }
-
+    
     private boolean handleBack(boolean doIt) {
         if (mShowInputRequested) {
+            if (isExtractViewShown() && mExtractView instanceof ExtractEditLayout) {
+                ExtractEditLayout extractEditLayout = (ExtractEditLayout) mExtractView;
+                if (extractEditLayout.isActionModeStarted()) {
+                    if (doIt) extractEditLayout.finishActionMode();
+                    return true;
+                }
+            }
             // If the soft input area is shown, back closes it and we
             // consume the back key.
             if (doIt) requestHideSelf(0);

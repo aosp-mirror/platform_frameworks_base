@@ -1245,6 +1245,7 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"Μονάδα USB"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Μονάδα USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Χώρος αποθήκευσης USB"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Επεξεργασία"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Προειδοποίηση χρήσης δεδομένων"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Αγγίξτε για προβολή χρήσης/ρυθμ."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Συμπλ. το όριο δεδομένων 2G-3G"</string>
