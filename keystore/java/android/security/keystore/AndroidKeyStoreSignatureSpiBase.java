@@ -25,7 +25,7 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 
-import com.android.org.conscrypt.util.EmptyArray;
+import libcore.util.EmptyArray;
 
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
