@@ -25,6 +25,7 @@ import android.media.AudioAttributes;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
@@ -64,15 +65,6 @@ public class ExpandHelper implements Gefingerpoken {
     // 2f: maximum brightness is stretching a 1U to 3U, or a 4U to 6U
     private static final float STRETCH_INTERVAL = 2f;
 
-    // level of glow for a touch, without overstretch
-    // overstretch fills the range (GLOW_BASE, 1.0]
-    private static final float GLOW_BASE = 0.5f;
-
-    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-            .build();
-
     @SuppressWarnings("unused")
     private Context mContext;
 
@@ -94,13 +86,11 @@ public class ExpandHelper implements Gefingerpoken {
     private float mLastSpanY;
     private int mTouchSlop;
     private float mLastMotionY;
-    private int mPopDuration;
     private float mPullGestureMinXSpan;
     private Callback mCallback;
     private ScaleGestureDetector mSGD;
     private ViewScaler mScaler;
     private ObjectAnimator mScaleAnimation;
-    private Vibrator mVibrator;
     private boolean mEnabled = true;
     private ExpandableView mResizedView;
     private float mCurrentHeight;
@@ -174,7 +164,6 @@ public class ExpandHelper implements Gefingerpoken {
         mScaler = new ViewScaler();
         mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
-        mPopDuration = mContext.getResources().getInteger(R.integer.blinds_pop_duration_ms);
         mPullGestureMinXSpan = mContext.getResources().getDimension(R.dimen.pull_span_min);
 
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
@@ -452,7 +441,9 @@ public class ExpandHelper implements Gefingerpoken {
                     }
 
                     if (!mHasPopped) {
-                        vibrate(mPopDuration);
+                        if (mEventSource != null) {
+                            mEventSource.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                        }
                         mHasPopped = true;
                     }
 
@@ -599,17 +590,6 @@ public class ExpandHelper implements Gefingerpoken {
      */
     public void onlyObserveMovements(boolean onlyMovements) {
         mOnlyMovements = onlyMovements;
-    }
-
-    /**
-     * Triggers haptic feedback.
-     */
-    private synchronized void vibrate(long duration) {
-        if (mVibrator == null) {
-            mVibrator = (android.os.Vibrator)
-                    mContext.getSystemService(Context.VIBRATOR_SERVICE);
-        }
-        mVibrator.vibrate(duration, VIBRATION_ATTRIBUTES);
     }
 }
 
