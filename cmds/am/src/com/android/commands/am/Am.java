@@ -305,11 +305,23 @@ public class Am extends BaseCommand {
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
                 "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]\n" +
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
+                "        (mutiple extras passed as Integer[])\n" +
+                "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
+                "        (mutiple extras passed as List<Integer>)\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
+                "        (mutiple extras passed as Long[])\n" +
+                "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
+                "        (mutiple extras passed as List<Long>)\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
+                "        (mutiple extras passed as Float[])\n" +
+                "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
+                "        (mutiple extras passed as List<Float>)\n" +
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
-                "        (to embed a comma into a string escape it using \"\\,\")\n" +
-                "    [-n <COMPONENT>] [-p <PACKAGE>] [-f <FLAGS>]\n" +
+                "        (mutiple extras passed as String[]; to embed a comma into a string,\n" +
+                "         escape it using \"\\,\")\n" +
+                "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
+                "        (mutiple extras passed as List<String>; to embed a comma into a string,\n" +
+                "         escape it using \"\\,\")\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
@@ -490,6 +502,15 @@ public class Am extends BaseCommand {
                     list[i] = Integer.decode(strings[i]);
                 }
                 intent.putExtra(key, list);
+            } else if (opt.equals("--eial")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                ArrayList<Integer> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(Integer.decode(strings[i]));
+                }
+                intent.putExtra(key, list);
             } else if (opt.equals("--el")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -501,6 +522,16 @@ public class Am extends BaseCommand {
                 long[] list = new long[strings.length];
                 for (int i = 0; i < strings.length; i++) {
                     list[i] = Long.valueOf(strings[i]);
+                }
+                intent.putExtra(key, list);
+                hasIntentInfo = true;
+            } else if (opt.equals("--elal")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                ArrayList<Long> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(Long.valueOf(strings[i]));
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;
@@ -519,6 +550,16 @@ public class Am extends BaseCommand {
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;
+            } else if (opt.equals("--efal")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                ArrayList<Float> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(Float.valueOf(strings[i]));
+                }
+                intent.putExtra(key, list);
+                hasIntentInfo = true;
             } else if (opt.equals("--esa")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -527,6 +568,19 @@ public class Am extends BaseCommand {
                 // again for the regex, thus four escape characters become one.
                 String[] strings = value.split("(?<!\\\\),");
                 intent.putExtra(key, strings);
+                hasIntentInfo = true;
+            } else if (opt.equals("--esal")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                // Split on commas unless they are preceeded by an escape.
+                // The escape character must be escaped for the string and
+                // again for the regex, thus four escape characters become one.
+                String[] strings = value.split("(?<!\\\\),");
+                ArrayList<String> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(strings[i]);
+                }
+                intent.putExtra(key, list);
                 hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
