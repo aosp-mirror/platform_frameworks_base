@@ -45,7 +45,7 @@ import java.util.Map;
 class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private static final String TAG = "ResolverComparator";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // Two weeks
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
