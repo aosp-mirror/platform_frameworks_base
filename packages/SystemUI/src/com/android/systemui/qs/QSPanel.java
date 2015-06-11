@@ -404,7 +404,9 @@ public class QSPanel extends ViewGroup {
                 ((TileRecord) r).openingDetail = true;
             }
         } else {
-            MetricsLogger.hidden(mContext, mDetailRecord.detailAdapter.getMetricsCategory());
+            if (mDetailRecord != null) {
+                MetricsLogger.hidden(mContext, mDetailRecord.detailAdapter.getMetricsCategory());
+            }
             mClosingDetail = true;
             setGridContentVisibility(true);
             listener = mTeardownDetailWhenDone;
