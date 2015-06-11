@@ -84,7 +84,11 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jobject jbitmap,
                                       jint tileModeX, jint tileModeY)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    if (jbitmap) {
+        // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
+        // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
+        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    }
     SkShader* s = SkShader::CreateBitmapShader(bitmap,
                                         (SkShader::TileMode)tileModeX,
                                         (SkShader::TileMode)tileModeY);
