@@ -74,6 +74,8 @@ public class ToggleSlider extends RelativeLayout {
         mLabel = (TextView) findViewById(R.id.label);
         mLabel.setText(a.getString(R.styleable.ToggleSlider_text));
 
+        setLabelFor(R.id.slider); // use our a11y text to annotate, not replace, the slider's
+
         a.recycle();
     }
 
