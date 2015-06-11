@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -32,6 +33,7 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
     private NotificationOverflowIconsView mIconsView;
     private ViewInvertHelper mViewInvertHelper;
     private boolean mDark;
+    private View mContent;
 
     public NotificationOverflowContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -43,7 +45,8 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
         mIconsView = (NotificationOverflowIconsView) findViewById(R.id.overflow_icons_view);
         mIconsView.setMoreText((TextView) findViewById(R.id.more_text));
         mIconsView.setOverflowIndicator(findViewById(R.id.more_icon_overflow));
-        mViewInvertHelper = new ViewInvertHelper(findViewById(R.id.content),
+        mContent = findViewById(R.id.content);
+        mViewInvertHelper = new ViewInvertHelper(mContent,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
@@ -57,6 +60,11 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
         } else {
             mViewInvertHelper.update(dark);
         }
+    }
+
+    @Override
+    protected View getContentView() {
+        return mContent;
     }
 
     public NotificationOverflowIconsView getIconsView() {
