@@ -222,6 +222,12 @@ package android {
     ctor public R.attr();
     field public static final int __reserved0 = 16844020; // 0x10104f4
     field public static final int __reserved1 = 16844019; // 0x10104f3
+    field public static final int __reserved2 = 16843999; // 0x10104df
+    field public static final int __reserved3 = 16844000; // 0x10104e0
+    field public static final int __reserved4 = 16844001; // 0x10104e1
+    field public static final int __reserved5 = 16844002; // 0x10104e2
+    field public static final int __reserved6 = 16844003; // 0x10104e3
+    field public static final int __reserved7 = 16844004; // 0x10104e4
     field public static final int absListViewStyle = 16842858; // 0x101006a
     field public static final int accessibilityEventTypes = 16843648; // 0x1010380
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
@@ -661,8 +667,6 @@ package android {
     field public static final int hyphenationFrequency = 16844024; // 0x10104f8
     field public static final int icon = 16842754; // 0x1010002
     field public static final int iconPreview = 16843337; // 0x1010249
-    field public static final int iconTint = 16843999; // 0x10104df
-    field public static final int iconTintMode = 16844000; // 0x10104e0
     field public static final int iconifiedByDefault = 16843514; // 0x10102fa
     field public static final int id = 16842960; // 0x10100d0
     field public static final int ignoreGravity = 16843263; // 0x10101ff
@@ -874,8 +878,6 @@ package android {
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
     field public static final int navigationIcon = 16843968; // 0x10104c0
     field public static final int navigationMode = 16843471; // 0x10102cf
-    field public static final int navigationTint = 16844003; // 0x10104e3
-    field public static final int navigationTintMode = 16844004; // 0x10104e4
     field public static final int negativeButtonText = 16843254; // 0x10101f6
     field public static final int nestedScrollingEnabled = 16843830; // 0x1010436
     field public static final int nextFocusDown = 16842980; // 0x10100e4
@@ -907,8 +909,6 @@ package android {
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
-    field public static final int overflowTint = 16844001; // 0x10104e1
-    field public static final int overflowTintMode = 16844002; // 0x10104e2
     field public static final int overlapAnchor = 16843874; // 0x1010462
     field public static final int overridesImplicitlyEnabledSubtype = 16843682; // 0x10103a2
     field public static final int packageNames = 16843649; // 0x1010381
@@ -35492,8 +35492,6 @@ package android.view {
     method public abstract android.view.MenuItem setEnabled(boolean);
     method public abstract android.view.MenuItem setIcon(android.graphics.drawable.Drawable);
     method public abstract android.view.MenuItem setIcon(int);
-    method public abstract android.view.MenuItem setIconTintList(android.content.res.ColorStateList);
-    method public abstract android.view.MenuItem setIconTintMode(android.graphics.PorterDuff.Mode);
     method public abstract android.view.MenuItem setIntent(android.content.Intent);
     method public abstract android.view.MenuItem setNumericShortcut(char);
     method public abstract android.view.MenuItem setOnActionExpandListener(android.view.MenuItem.OnActionExpandListener);
@@ -39554,14 +39552,14 @@ package android.widget {
     ctor public ActionMenuView(android.content.Context, android.util.AttributeSet);
     method public void dismissPopupMenus();
     method public android.view.Menu getMenu();
+    method public android.graphics.drawable.Drawable getOverflowIcon();
     method public int getPopupTheme();
     method public boolean hideOverflowMenu();
     method public boolean isOverflowMenuShowing();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onDetachedFromWindow();
     method public void setOnMenuItemClickListener(android.widget.ActionMenuView.OnMenuItemClickListener);
-    method public void setOverflowTintList(android.content.res.ColorStateList);
-    method public void setOverflowTintMode(android.graphics.PorterDuff.Mode);
+    method public void setOverflowIcon(android.graphics.drawable.Drawable);
     method public void setPopupTheme(int);
     method public boolean showOverflowMenu();
   }
@@ -41851,6 +41849,7 @@ package android.widget {
     method public android.view.Menu getMenu();
     method public java.lang.CharSequence getNavigationContentDescription();
     method public android.graphics.drawable.Drawable getNavigationIcon();
+    method public android.graphics.drawable.Drawable getOverflowIcon();
     method public int getPopupTheme();
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();
@@ -41870,11 +41869,8 @@ package android.widget {
     method public void setNavigationIcon(int);
     method public void setNavigationIcon(android.graphics.drawable.Drawable);
     method public void setNavigationOnClickListener(android.view.View.OnClickListener);
-    method public void setNavigationTintList(android.content.res.ColorStateList);
-    method public void setNavigationTintMode(android.graphics.PorterDuff.Mode);
     method public void setOnMenuItemClickListener(android.widget.Toolbar.OnMenuItemClickListener);
-    method public void setOverflowTintList(android.content.res.ColorStateList);
-    method public void setOverflowTintMode(android.graphics.PorterDuff.Mode);
+    method public void setOverflowIcon(android.graphics.drawable.Drawable);
     method public void setPopupTheme(int);
     method public void setSubtitle(int);
     method public void setSubtitle(java.lang.CharSequence);
