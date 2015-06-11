@@ -30,6 +30,7 @@
 #include <gui/SurfaceComposerClient.h>
 #include <gui/ISurfaceComposer.h>
 
+#include <ui/DisplayInfo.h>
 #include <ui/PixelFormat.h>
 
 // TODO: Fix Skia.
@@ -159,9 +160,35 @@ int main(int argc, char** argv)
     uint32_t w, s, h, f;
     size_t size = 0;
 
+    // Maps orientations from DisplayInfo to ISurfaceComposer
+    static const uint32_t ORIENTATION_MAP[] = {
+        ISurfaceComposer::eRotateNone, // 0 == DISPLAY_ORIENTATION_0
+        ISurfaceComposer::eRotate270, // 1 == DISPLAY_ORIENTATION_90
+        ISurfaceComposer::eRotate180, // 2 == DISPLAY_ORIENTATION_180
+        ISurfaceComposer::eRotate90, // 3 == DISPLAY_ORIENTATION_270
+    };
+
     ScreenshotClient screenshot;
     sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
-    if (display != NULL && screenshot.update(display, Rect(), false) == NO_ERROR) {
+    if (display == NULL) {
+        fprintf(stderr, "Unable to get handle for display %d\n", displayId);
+        return 1;
+    }
+
+    Vector<DisplayInfo> configs;
+    SurfaceComposerClient::getDisplayConfigs(display, &configs);
+    int activeConfig = SurfaceComposerClient::getActiveConfig(display);
+    if (static_cast<size_t>(activeConfig) >= configs.size()) {
+        fprintf(stderr, "Active config %d not inside configs (size %zu)\n",
+                activeConfig, configs.size());
+        return 1;
+    }
+    uint8_t displayOrientation = configs[activeConfig].orientation;
+    uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
+
+    status_t result = screenshot.update(display, Rect(), 0, 0, 0, -1U,
+            false, captureOrientation);
+    if (result == NO_ERROR) {
         base = screenshot.getPixels();
         w = screenshot.getWidth();
         h = screenshot.getHeight();
