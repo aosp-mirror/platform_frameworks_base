@@ -82,6 +82,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -909,6 +910,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    MetricsLogger.action(mContext, MetricsLogger.ACTION_NOTE_INFO);
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
@@ -929,6 +931,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         .setClassName(pkg, infos.get(0).activityInfo.name);
                 appSettingsButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
+                        MetricsLogger.action(mContext, MetricsLogger.ACTION_APP_NOTE_SETTINGS);
                         startAppOwnNotificationSettingsActivity(appSettingsLaunchIntent,
                                 sbn.getId(),
                                 sbn.getTag(),
@@ -975,6 +978,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return false;
                 }
 
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_NOTE_CONTROLS);
                 guts.setVisibility(View.VISIBLE);
                 final double horz = Math.max(guts.getWidth() - x, x);
                 final double vert = Math.max(guts.getActualHeight() - y, y);
