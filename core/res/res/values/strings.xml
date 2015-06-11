@@ -1281,12 +1281,6 @@
     <string name="permdesc_readSyncStats">Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced. </string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_subscribedFeedsWrite">write subscribed feeds</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_subscribedFeedsWrite">Allows the app to modify
-        your currently synced feeds. Malicious apps may change your synced feeds.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readDictionary">read terms you added to the dictionary</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readDictionary">Allows the app to read all words,
