@@ -3028,9 +3028,14 @@
     <string name="ext_media_ready_notification_message">For transferring photos and media</string>
 
     <!-- Notification title when external media is unmountable (corrupt) [CHAR LIMIT=30] -->
-    <string name="ext_media_unmountable_notification_title">Damaged <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_unmountable_notification_title">Corrupted <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unmountable_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> is damaged; try reformatting it</string>
+    <string name="ext_media_unmountable_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Touch to fix.</string>
+
+    <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
+    <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Notification body when external media is unsupported [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Touch to set up in a supported format.</string>
 
     <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>
@@ -3048,7 +3053,7 @@
     <string name="ext_media_unmounting_notification_message">Don\'t remove</string>
 
     <!-- Notification action to setup external media [CHAR LIMIT=20] -->
-    <string name="ext_media_init_action">Setup</string>
+    <string name="ext_media_init_action">Set up</string>
     <!-- Notification action to unmount external media [CHAR LIMIT=20] -->
     <string name="ext_media_unmount_action">Eject</string>
     <!-- Notification action to browse external media [CHAR LIMIT=20] -->
@@ -3073,6 +3078,29 @@
     <string name="ext_media_move_failure_title">Couldn\'t move data</string>
     <!-- Notification title when moving data to external storage failed [CHAR LIMIT=64] -->
     <string name="ext_media_move_failure_message">Data left at original location</string>
+
+    <!-- Short summary of storage media status when removed [CHAR LIMIT=32] -->
+    <string name="ext_media_status_removed">Removed</string>
+    <!-- Short summary of storage media status when unmounted [CHAR LIMIT=32] -->
+    <string name="ext_media_status_unmounted">Ejected</string>
+    <!-- Short summary of storage media status when checking [CHAR LIMIT=32] -->
+    <string name="ext_media_status_checking">Checking\u2026</string>
+    <!-- Short summary of storage media status when mounted [CHAR LIMIT=32] -->
+    <string name="ext_media_status_mounted">Ready</string>
+    <!-- Short summary of storage media status when mounted read-only [CHAR LIMIT=32] -->
+    <string name="ext_media_status_mounted_ro">Read-only</string>
+    <!-- Short summary of storage media status when removed unsafely [CHAR LIMIT=32] -->
+    <string name="ext_media_status_bad_removal">Removed unsafely</string>
+    <!-- Short summary of storage media status when unmountable [CHAR LIMIT=32] -->
+    <string name="ext_media_status_unmountable">Corrupted</string>
+    <!-- Short summary of storage media status when unsupported [CHAR LIMIT=32] -->
+    <string name="ext_media_status_unsupported">Unsupported</string>
+    <!-- Short summary of storage media status when ejecting [CHAR LIMIT=32] -->
+    <string name="ext_media_status_ejecting">Ejecting\u2026</string>
+    <!-- Short summary of storage media status when formatting [CHAR LIMIT=32] -->
+    <string name="ext_media_status_formatting">Formatting\u2026</string>
+    <!-- Short summary of storage media status when missing [CHAR LIMIT=32] -->
+    <string name="ext_media_status_missing">Not inserted</string>
 
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found.</string>
