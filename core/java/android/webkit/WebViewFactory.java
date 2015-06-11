@@ -333,8 +333,8 @@ public final class WebViewFactory {
                         newVmSize = Math.max(newVmSize, f.length());
                         continue;
                     }
-                    if (path.contains("!")) {
-                        String[] split = TextUtils.split(path, "!");
+                    if (path.contains("!/")) {
+                        String[] split = TextUtils.split(path, "!/");
                         if (split.length == 2) {
                             try {
                                 ZipFile z = new ZipFile(split[0]);
@@ -384,7 +384,7 @@ public final class WebViewFactory {
                 ZipEntry e = z.getEntry(entry);
                 if (e != null && e.getMethod() == ZipEntry.STORED) {
                     // Return a path formatted for dlopen() load from APK.
-                    return apkPath + "!" + entry;
+                    return apkPath + "!/" + entry;
                 }
             }
         } catch (IOException e) {
