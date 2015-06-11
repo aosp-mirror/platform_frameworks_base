@@ -514,6 +514,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mDreamingLockscreen;
     boolean mDreamingSleepTokenNeeded;
     SleepToken mDreamingSleepToken;
+    SleepToken mScreenOffSleepToken;
     boolean mKeyguardSecure;
     boolean mKeyguardSecureIncludingHidden;
     volatile boolean mKeyguardOccluded;
@@ -5385,6 +5386,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void screenTurnedOff() {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turned off...");
 
+        updateScreenOffSleepToken(true);
         synchronized (mLock) {
             mScreenOnEarly = false;
             mScreenOnFully = false;
@@ -5399,6 +5401,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void screenTurningOn(final ScreenOnListener screenOnListener) {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turning on...");
 
+        updateScreenOffSleepToken(false);
         synchronized (mLock) {
             mScreenOnEarly = true;
             mScreenOnFully = false;
@@ -6021,6 +6024,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             if (mDreamingSleepToken != null) {
                 mDreamingSleepToken.release();
+                mDreamingSleepToken = null;
+            }
+        }
+    }
+
+    private void updateScreenOffSleepToken(boolean acquire) {
+        if (acquire) {
+            if (mScreenOffSleepToken == null) {
+                mScreenOffSleepToken = mActivityManagerInternal.acquireSleepToken("ScreenOff");
+            }
+        } else {
+            if (mScreenOffSleepToken != null) {
+                mScreenOffSleepToken.release();
+                mScreenOffSleepToken = null;
             }
         }
     }
