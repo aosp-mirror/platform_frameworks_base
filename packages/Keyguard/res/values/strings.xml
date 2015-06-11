@@ -299,6 +299,42 @@
     <!-- Description of airplane mode -->
     <string name="airplane_mode">Airplane mode</string>
 
+    <!-- An explanation text that the pattern needs to be solved since the device has just been restarted. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_restart_pattern">Pattern required when you restart device.</string>
+
+    <!-- An explanation text that the pin needs to be entered since the device has just been restarted. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_restart_pin">PIN required when you restart device.</string>
+
+    <!-- An explanation text that the password needs to be entered since the device has just been restarted. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_restart_password">Password required when you restart device.</string>
+
+    <!-- An explanation text that the pattern needs to be solved since profiles have just been switched. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_switch_profiles_pattern">Pattern required when you switch profiles.</string>
+
+    <!-- An explanation text that the pin needs to be entered since profiles have just been switched. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_switch_profiles_pin">PIN required when you switch profiles.</string>
+
+    <!-- An explanation text that the password needs to be entered since profiles have just been switched. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_switch_profiles_password">Password required when you switch profiles.</string>
+
+    <!-- An explanation text that the pattern needs to be solved since it hasn't been solved in a while. [CHAR LIMIT=80]-->
+    <plurals name="kg_prompt_reason_time_pattern">
+        <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm pattern.</item>
+        <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hours. Confirm pattern.</item>
+    </plurals>
+
+    <!-- An explanation text that the pin needs to be entered since it hasn't been entered in a while. [CHAR LIMIT=80]-->
+    <plurals name="kg_prompt_reason_time_pin">
+        <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm PIN.</item>
+        <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hours. Confirm PIN.</item>
+    </plurals>
+
+    <!-- An explanation text that the password needs to be entered since it hasn't been entered in a while. [CHAR LIMIT=80]-->
+    <plurals name="kg_prompt_reason_time_password">
+        <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm password.</item>
+        <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hours. Confirm password.</item>
+    </plurals>
+
     <!-- Fingerprint hint message when finger was not recognized.-->
     <string name="fingerprint_not_recognized">Not recognized</string>
 
