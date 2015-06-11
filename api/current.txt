@@ -179,6 +179,7 @@ package android {
     field public static final java.lang.String SENSORS = "android.permission-group.SENSORS";
     field public static final java.lang.String SMS = "android.permission-group.SMS";
     field public static final java.lang.String SOCIAL_INFO = "android.permission-group.SOCIAL_INFO";
+    field public static final java.lang.String STORAGE = "android.permission-group.STORAGE";
     field public static final java.lang.String USER_DICTIONARY = "android.permission-group.USER_DICTIONARY";
   }
 
