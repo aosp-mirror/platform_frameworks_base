@@ -18,8 +18,6 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -44,7 +42,6 @@ public class ActionMenuItem implements MenuItem {
     
     private Drawable mIconDrawable;
     private int mIconResId = NO_ICON;
-    private TintInfo mIconTintInfo;
     
     private Context mContext;
     
@@ -161,14 +158,12 @@ public class ActionMenuItem implements MenuItem {
     public MenuItem setIcon(Drawable icon) {
         mIconDrawable = icon;
         mIconResId = NO_ICON;
-        applyIconTint();
         return this;
     }
 
     public MenuItem setIcon(int iconRes) {
         mIconResId = iconRes;
         mIconDrawable = mContext.getDrawable(iconRes);
-        applyIconTint();
         return this;
     }
 
@@ -278,49 +273,5 @@ public class ActionMenuItem implements MenuItem {
     public MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
         // No need to save the listener; ActionMenuItem does not support collapsing items.
         return this;
-    }
-
-    @Override
-    public MenuItem setIconTintList(ColorStateList tintList) {
-        if (mIconTintInfo == null) {
-            mIconTintInfo = new TintInfo();
-        }
-        mIconTintInfo.mTintList = tintList;
-        mIconTintInfo.mHasTintList = true;
-        applyIconTint();
-        return this;
-    }
-
-    @Override
-    public MenuItem setIconTintMode(PorterDuff.Mode tintMode) {
-        if (mIconTintInfo == null) {
-            mIconTintInfo = new TintInfo();
-        }
-        mIconTintInfo.mTintMode = tintMode;
-        mIconTintInfo.mHasTintMode = true;
-        applyIconTint();
-        return this;
-    }
-
-    private void applyIconTint() {
-        final TintInfo tintInfo = mIconTintInfo;
-        if (mIconDrawable != null && tintInfo != null) {
-            if (tintInfo.mHasTintList || tintInfo.mHasTintMode) {
-                mIconDrawable = mIconDrawable.mutate();
-                if (tintInfo.mHasTintList) {
-                    mIconDrawable.setTintList(tintInfo.mTintList);
-                }
-                if (tintInfo.mHasTintMode) {
-                    mIconDrawable.setTintMode(tintInfo.mTintMode);
-                }
-            }
-        }
-    }
-
-    private static class TintInfo {
-        ColorStateList mTintList;
-        PorterDuff.Mode mTintMode;
-        boolean mHasTintMode;
-        boolean mHasTintList;
     }
 }
