@@ -1113,27 +1113,6 @@
       the list of accounts known by the phone.  This may include any accounts
       created by applications you have installed.</string>
 
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_authenticateAccounts">create accounts and set passwords</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_authenticateAccounts">Allows the app
-    to use the account authenticator capabilities of the
-    AccountManager, including creating accounts and getting and
-    setting their passwords.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageAccounts">add or remove accounts</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_manageAccounts">Allows the app to
-    perform operations like adding and removing accounts, and deleting
-    their password.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_useCredentials">use accounts on the device</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_useCredentials">Allows the app to request authentication tokens.</string>
-
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNetworkState">view network connections</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

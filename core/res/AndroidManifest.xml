@@ -990,32 +990,10 @@
 
     <!-- Allows access to the list of accounts in the Accounts Service -->
     <permission android:name="android.permission.GET_ACCOUNTS"
-        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:permissionGroup="android.permission-group.CONTACTS"
         android:protectionLevel="normal"
         android:description="@string/permdesc_getAccounts"
         android:label="@string/permlab_getAccounts" />
-
-    <!-- Allows an application to act as an AccountAuthenticator for
-         the AccountManager -->
-    <permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"
-        android:permissionGroup="android.permission-group.ACCOUNTS"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_authenticateAccounts"
-        android:description="@string/permdesc_authenticateAccounts" />
-
-    <!-- Allows an application to request authtokens from the AccountManager -->
-    <permission android:name="android.permission.USE_CREDENTIALS"
-        android:permissionGroup="android.permission-group.ACCOUNTS"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_useCredentials"
-        android:description="@string/permdesc_useCredentials" />
-
-    <!-- Allows an application to manage the list of accounts in the AccountManager -->
-    <permission android:name="android.permission.MANAGE_ACCOUNTS"
-        android:permissionGroup="android.permission-group.ACCOUNTS"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_manageAccounts"
-        android:description="@string/permdesc_manageAccounts" />
 
     <!-- @SystemApi Allows applications to call into AccountAuthenticators.
     <p>Not for use by third-party applications. -->
