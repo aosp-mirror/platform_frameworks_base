@@ -2691,5 +2691,5 @@
   <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" />
   <public type="attr" name="scrollIndicators" />
   <public type="attr" name="hyphenationFrequency" />
-  <public type="attr" name="fingerprintDrawable" />
+  <public type="attr" name="fingerprintAuthDrawable" />
 </resources>
