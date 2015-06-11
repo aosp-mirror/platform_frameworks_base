@@ -1204,10 +1204,14 @@
     <permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
         android:protectionLevel="system|signature" />
 
-
     <!-- @SystemApi Allows an application to control the in-call experience.
          @hide -->
     <permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"
+        android:protectionLevel="system|signature" />
+
+    <!-- Allows an application to receive STK related commands.
+         @hide -->
+    <permission android:name="android.permission.RECEIVE_STK_COMMANDS"
         android:protectionLevel="system|signature" />
 
     <!-- ================================== -->
