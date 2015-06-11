@@ -7087,6 +7087,36 @@ public final class Settings {
                 BLUETOOTH_SAP_PRIORITY_PREFIX = "bluetooth_sap_priority_";
 
         /**
+         * Device Idle (Doze) specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "inactive_timeout=60000,sensing_timeout=400000"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * inactive_to                      (long)
+         * sensing_to                       (long)
+         * motion_inactive_to               (long)
+         * idle_after_inactive_to           (long)
+         * idle_pending_to                  (long)
+         * max_idle_pending_to              (long)
+         * idle_pending_factor              (float)
+         * idle_to                          (long)
+         * max_idle_to                      (long)
+         * idle_factor                      (float)
+         * min_time_to_alarm                (long)
+         * max_temp_app_whitelist_duration  (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.DeviceIdleController.Constants
+         */
+        public static final String DEVICE_IDLE_CONSTANTS = "device_idle_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
