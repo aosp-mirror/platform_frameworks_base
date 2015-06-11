@@ -1256,7 +1256,7 @@ public abstract class Context {
      * @param intent The description of the activity to start.
      *
      * @throws ActivityNotFoundException &nbsp;
-     *
+     *`
      * @see #startActivity(Intent, Bundle)
      * @see PackageManager#resolveActivity
      */
