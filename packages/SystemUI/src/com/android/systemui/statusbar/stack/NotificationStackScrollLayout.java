@@ -2292,6 +2292,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void onChildAnimationFinished() {
         requestChildrenUpdate();
+        runAnimationFinishedRunnables();
+    }
+
+    private void runAnimationFinishedRunnables() {
         for (Runnable runnable : mAnimationFinishedRunnables) {
             runnable.run();
         }
@@ -2349,6 +2353,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mListener != null) {
             mListener.onChildLocationsChanged(this);
         }
+        runAnimationFinishedRunnables();
     }
 
     public void setSpeedBumpView(SpeedBumpView speedBumpView) {
