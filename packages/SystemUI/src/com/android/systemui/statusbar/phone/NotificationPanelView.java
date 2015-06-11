@@ -1720,8 +1720,11 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateKeyguardBottomAreaAlpha() {
-        mKeyguardBottomArea.setAlpha(
-                Math.min(getKeyguardContentsAlpha(), 1 - getQsExpansionFraction()));
+        float alpha = Math.min(getKeyguardContentsAlpha(), 1 - getQsExpansionFraction());
+        mKeyguardBottomArea.setAlpha(alpha);
+        mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
+                ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
 
     private float getNotificationsTopY() {
