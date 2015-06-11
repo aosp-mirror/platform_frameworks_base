@@ -26417,6 +26417,7 @@ package android.printservice {
     method protected abstract void onPrintJobQueued(android.printservice.PrintJob);
     method protected abstract void onRequestCancelPrintJob(android.printservice.PrintJob);
     field public static final java.lang.String EXTRA_PRINTER_INFO = "android.intent.extra.print.EXTRA_PRINTER_INFO";
+    field public static final java.lang.String EXTRA_PRINT_DOCUMENT_INFO = "android.printservice.extra.PRINT_DOCUMENT_INFO";
     field public static final java.lang.String EXTRA_PRINT_JOB_INFO = "android.intent.extra.print.PRINT_JOB_INFO";
     field public static final java.lang.String SERVICE_INTERFACE = "android.printservice.PrintService";
     field public static final java.lang.String SERVICE_META_DATA = "android.printservice";
