@@ -49,6 +49,12 @@ struct fields_t {
 };
 static fields_t fields;
 
+// Get an ID that's unique within this process.
+static int32_t createProcessUniqueId() {
+    static volatile int32_t globalCounter = 0;
+    return android_atomic_inc(&globalCounter);
+}
+
 // ----------------------------------------------------------------------------
 
 static void SurfaceTexture_setSurfaceTexture(JNIEnv* env, jobject thiz,
@@ -253,6 +259,11 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
                 "Unable to create native SurfaceTexture");
         return;
     }
+    surfaceTexture->setName(String8::format("SurfaceTexture-%d-%d-%d",
+            (isDetached ? 0 : texName),
+            getpid(),
+            createProcessUniqueId()));
+
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);
 
