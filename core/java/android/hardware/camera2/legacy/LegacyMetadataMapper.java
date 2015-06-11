@@ -415,8 +415,9 @@ public class LegacyMetadataMapper {
             Range<Integer>[] ranges = new Range[rangesSize];
             int i = 0;
             for (int[] r : fpsRanges) {
-                ranges[i++] = Range.create(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                        r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+                ranges[i++] = Range.create(
+                        (int) Math.floor(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.0),
+                        (int) Math.ceil(r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.0));
             }
             m.set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
         }
