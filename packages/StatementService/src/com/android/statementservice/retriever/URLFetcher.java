@@ -60,33 +60,36 @@ public class URLFetcher {
             throw new IllegalArgumentException("The url protocol should be on http or https.");
         }
 
-        HttpURLConnection connection;
-        connection = (HttpURLConnection) url.openConnection();
-        connection.setInstanceFollowRedirects(true);
-        connection.setConnectTimeout(connectionTimeoutMillis);
-        connection.setReadTimeout(connectionTimeoutMillis);
-        connection.setUseCaches(true);
-        connection.setInstanceFollowRedirects(false);
-        connection.addRequestProperty("Cache-Control", "max-stale=60");
-
-        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            Log.e(TAG, "The responses code is not 200 but "  + connection.getResponseCode());
-            return new WebContent("", DO_NOT_CACHE_RESULT);
-        }
-
-        if (connection.getContentLength() > fileSizeLimit) {
-            Log.e(TAG, "The content size of the url is larger than "  + fileSizeLimit);
-            return new WebContent("", DO_NOT_CACHE_RESULT);
-        }
-
-        Long expireTimeMillis = getExpirationTimeMillisFromHTTPHeader(connection.getHeaderFields());
-
+        HttpURLConnection connection = null;
         try {
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setInstanceFollowRedirects(true);
+            connection.setConnectTimeout(connectionTimeoutMillis);
+            connection.setReadTimeout(connectionTimeoutMillis);
+            connection.setUseCaches(true);
+            connection.setInstanceFollowRedirects(false);
+            connection.addRequestProperty("Cache-Control", "max-stale=60");
+
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                Log.e(TAG, "The responses code is not 200 but "  + connection.getResponseCode());
+                return new WebContent("", DO_NOT_CACHE_RESULT);
+            }
+
+            if (connection.getContentLength() > fileSizeLimit) {
+                Log.e(TAG, "The content size of the url is larger than "  + fileSizeLimit);
+                return new WebContent("", DO_NOT_CACHE_RESULT);
+            }
+
+            Long expireTimeMillis = getExpirationTimeMillisFromHTTPHeader(
+                    connection.getHeaderFields());
+
             return new WebContent(inputStreamToString(
                     connection.getInputStream(), connection.getContentLength(), fileSizeLimit),
                 expireTimeMillis);
         } finally {
-            connection.disconnect();
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
