@@ -1407,7 +1407,7 @@ public class NotificationManagerService extends SystemService {
                                 mAppUsageStats.reportEvent(r.sbn.getPackageName(),
                                         userId == UserHandle.USER_ALL ? UserHandle.USER_OWNER
                                                 : userId,
-                                        UsageEvents.Event.INTERACTION);
+                                        UsageEvents.Event.USER_INTERACTION);
                                 r.setSeen();
                             }
                         }
