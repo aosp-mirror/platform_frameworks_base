@@ -76,7 +76,7 @@ public abstract class MediaBrowserService extends Service {
     public static final String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";
 
     /**
-     * A key for passing the MediaItem to the ResultReceiver in getMediaItem.
+     * A key for passing the MediaItem to the ResultReceiver in getItem.
      *
      * @hide
      */
@@ -109,6 +109,7 @@ public abstract class MediaBrowserService extends Service {
      * be thrown.
      *
      * @see MediaBrowserService#onLoadChildren
+     * @see MediaBrowserService#onGetMediaItem
      */
     public class Result<T> {
         private Object mDebug;
@@ -279,20 +280,7 @@ public abstract class MediaBrowserService extends Service {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    final Result<MediaBrowser.MediaItem> result
-                            = new Result<MediaBrowser.MediaItem>(mediaId) {
-                        @Override
-                        void onResultSent(MediaBrowser.MediaItem item) {
-                            Bundle bundle = new Bundle();
-                            bundle.putParcelable(KEY_MEDIA_ITEM, item);
-                            receiver.send(0, bundle);
-                        }
-                    };
-                    try {
-                        MediaBrowserService.this.getMediaItem(mediaId, result);
-                    } catch (UnsupportedOperationException e) {
-                        receiver.send(-1, null);
-                    }
+                    performLoadItem(mediaId, receiver);
                 }
             });
         }
@@ -357,8 +345,7 @@ public abstract class MediaBrowserService extends Service {
             @NonNull Result<List<MediaBrowser.MediaItem>> result);
 
     /**
-     * Called to get a specific media item. The mediaId should be the same id
-     * that would be returned for this item when it is in a list of child items.
+     * Called to get information about a specific media item.
      * <p>
      * Implementations must call {@link Result#sendResult result.sendResult}. If
      * loading the item will be an expensive operation {@link Result#detach
@@ -366,17 +353,15 @@ public abstract class MediaBrowserService extends Service {
      * then {@link Result#sendResult result.sendResult} called when the item has
      * been loaded.
      * <p>
-     * The default implementation throws an exception.
+     * The default implementation sends a null result.
      *
-     * @param mediaId The id for the specific
+     * @param itemId The id for the specific
      *            {@link android.media.browse.MediaBrowser.MediaItem}.
      * @param result The Result to send the item to, or null if the id is
      *            invalid.
-     * @throws UnsupportedOperationException
      */
-    public void getMediaItem(String mediaId, Result<MediaBrowser.MediaItem> result)
-            throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("getMediaItem is not supported.");
+    public void onLoadItem(String itemId, Result<MediaBrowser.MediaItem> result) {
+        result.sendResult(null);
     }
 
     /**
@@ -512,6 +497,25 @@ public abstract class MediaBrowserService extends Service {
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadChildren must call detach() or sendResult()"
                     + " before returning for package=" + connection.pkg + " id=" + parentId);
+        }
+    }
+
+    private void performLoadItem(String itemId, final ResultReceiver receiver) {
+        final Result<MediaBrowser.MediaItem> result =
+                new Result<MediaBrowser.MediaItem>(itemId) {
+            @Override
+            void onResultSent(MediaBrowser.MediaItem item) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(KEY_MEDIA_ITEM, item);
+                receiver.send(0, bundle);
+            }
+        };
+
+        MediaBrowserService.this.onLoadItem(itemId, result);
+
+        if (!result.isDone()) {
+            throw new IllegalStateException("onLoadItem must call detach() or sendResult()"
+                    + " before returning for id=" + itemId);
         }
     }
 
