@@ -1062,9 +1062,9 @@ public class LinearLayout extends ViewGroup {
                 // use as much space as it wants because we can shrink things
                 // later (and re-measure).
                 if (baselineAligned) {
-                    final int freeWidthSpec = MeasureSpec.makeMeasureSpec(
+                    final int freeWidthSpec = MeasureSpec.makeSafeMeasureSpec(
                             MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.UNSPECIFIED);
-                    final int freeHeightSpec = MeasureSpec.makeMeasureSpec(
+                    final int freeHeightSpec = MeasureSpec.makeSafeMeasureSpec(
                             MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED);
                     child.measure(freeWidthSpec, freeHeightSpec);
                 } else {

@@ -367,7 +367,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
         if (mTitleLayout != null && mCustomView == null) {
             if (mTitleOptional) {
-                final int titleWidthSpec = MeasureSpec.makeMeasureSpec(contentWidth,
+                final int titleWidthSpec = MeasureSpec.makeSafeMeasureSpec(contentWidth,
                         MeasureSpec.UNSPECIFIED);
                 mTitleLayout.measure(titleWidthSpec, childSpecHeight);
                 final int titleWidth = mTitleLayout.getMeasuredWidth();
