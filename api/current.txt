@@ -30740,7 +30740,7 @@ package android.telephony {
     field public static final java.lang.String KEY_USE_HFA_FOR_PROVISIONING_BOOL = "use_hfa_for_provisioning_bool";
     field public static final java.lang.String KEY_USE_OTASP_FOR_PROVISIONING_BOOL = "use_otasp_for_provisioning_bool";
     field public static final java.lang.String KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL = "voicemail_notification_persistent_bool";
-    field public static final java.lang.String KEY_VOICE_PRIVACY_DISABLE_BOOL = "voice_privacy_disable_bool";
+    field public static final java.lang.String KEY_VOICE_PRIVACY_DISABLE_UI_BOOL = "voice_privacy_disable_ui_bool";
     field public static final java.lang.String KEY_VOLTE_REPLACEMENT_RAT_INT = "volte_replacement_rat_int";
     field public static final java.lang.String KEY_WORLD_PHONE_BOOL = "world_phone_bool";
   }

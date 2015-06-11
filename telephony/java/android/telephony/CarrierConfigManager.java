@@ -124,7 +124,7 @@ public class CarrierConfigManager {
             KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL = "allow_emergency_numbers_in_call_log_bool";
 
     /** If true, removes the Voice Privacy option from Call Settings */
-    public static final String KEY_VOICE_PRIVACY_DISABLE_BOOL = "voice_privacy_disable_bool";
+    public static final String KEY_VOICE_PRIVACY_DISABLE_UI_BOOL = "voice_privacy_disable_ui_bool";
 
     /** Control whether users can reach the carrier portions of Cellular Network Settings. */
     public static final String
@@ -302,7 +302,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_HFA_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_USE_OTASP_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL, false);
-        sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_UI_BOOL, false);
         sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
