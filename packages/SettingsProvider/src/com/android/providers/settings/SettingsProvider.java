@@ -516,7 +516,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void dumpSettings(Cursor cursor, PrintWriter pw) {
-        if (!cursor.moveToFirst()) {
+        if (cursor == null || !cursor.moveToFirst()) {
             return;
         }
 
