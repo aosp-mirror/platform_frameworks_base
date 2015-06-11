@@ -80,6 +80,12 @@ public class DiskInfo implements Parcelable {
         if (label.toLowerCase().contains("generic")) {
             return false;
         }
+        if (label.toLowerCase().startsWith("usb")) {
+            return false;
+        }
+        if (label.toLowerCase().startsWith("multiple")) {
+            return false;
+        }
         return true;
     }
 
