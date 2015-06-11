@@ -161,7 +161,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
     }
 
     @Override
-    public void onMuted(boolean muted) {
+    public void onMuted(boolean muted, boolean zenMuted) {
         // noop
     }
 
