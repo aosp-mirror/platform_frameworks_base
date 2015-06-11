@@ -117,6 +117,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_FINGERPRINT_AUTH_FAILED = 326;
     private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
+    private static final int MSG_AIRPLANE_MODE_CHANGED = 329;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -222,6 +223,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 case MSG_SIM_SUBSCRIPTION_INFO_CHANGED:
                     handleSimSubscriptionInfoChanged();
                     break;
+                case MSG_AIRPLANE_MODE_CHANGED:
+                    handleAirplaneModeChanged();
+                    break;
             }
         }
     };
@@ -297,6 +301,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 }
             }
         }
+        for (int j = 0; j < mCallbacks.size(); j++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+            if (cb != null) {
+                cb.onRefreshCarrierInfo();
+            }
+        }
+    }
+
+    private void handleAirplaneModeChanged() {
         for (int j = 0; j < mCallbacks.size(); j++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
             if (cb != null) {
@@ -486,6 +499,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
+            } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
+                mHandler.sendEmptyMessage(MSG_AIRPLANE_MODE_CHANGED);
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 dispatchBootCompleted();
             }
@@ -721,6 +736,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
