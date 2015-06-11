@@ -707,7 +707,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
         mKeyguardIconOverflowContainer.setOnActivatedListener(this);
         mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
-        mStackScroller.addView(mKeyguardIconOverflowContainer);
+        mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
 
         SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_speed_bump, mStackScroller, false);
