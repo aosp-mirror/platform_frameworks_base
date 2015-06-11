@@ -46,6 +46,7 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_UNREGISTER_PHONE_ACCOUNT = "unregister-phone-account";
     private static final String COMMAND_SET_DEFAULT_DIALER = "set-default-dialer";
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
+    private static final String COMMAND_GET_SYSTEM_DIALER = "get-system-dialer";
 
     private ComponentName mComponent;
     private String mAccountId;
@@ -60,7 +61,8 @@ public final class Telecom extends BaseCommand {
                 "usage: telecom register-phone-account <COMPONENT> <ID> <LABEL>\n" +
                 "usage: telecom unregister-phone-account <COMPONENT> <ID>\n" +
                 "usage: telecom set-default-dialer <PACKAGE>\n" +
-                "usage: telecom get-default-dialer <PACKAGE>\n" +
+                "usage: telecom get-default-dialer\n" +
+                "usage: telecom get-system-dialer\n" +
                 "\n" +
                 "telecom set-phone-account-enabled: Enables the given phone account, if it has \n" +
                 " already been registered with Telecom.\n" +
@@ -70,7 +72,9 @@ public final class Telecom extends BaseCommand {
                 "\n" +
                 "telecom set-default-dialer: Sets the default dialer to the given component. \n" +
                 "\n" +
-                "telecom get-default-dialer: Displays the current default dialer. \n"
+                "telecom get-default-dialer: Displays the current default dialer. \n" +
+                "\n" +
+                "telecom get-system-dialer: Displays the current system dialer. \n"
                 );
     }
 
@@ -102,6 +106,9 @@ public final class Telecom extends BaseCommand {
                 break;
             case COMMAND_GET_DEFAULT_DIALER:
                 runGetDefaultDialer();
+                break;
+            case COMMAND_GET_SYSTEM_DIALER:
+                runGetSystemDialer();
                 break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
@@ -146,6 +153,10 @@ public final class Telecom extends BaseCommand {
 
     private void runGetDefaultDialer() throws RemoteException {
         System.out.println(mTelecomService.getDefaultDialerPackage());
+    }
+
+    private void runGetSystemDialer() throws RemoteException {
+        System.out.println(mTelecomService.getSystemDialerPackage());
     }
 
     private PhoneAccountHandle getPhoneAccountHandleFromArgs() {
