@@ -93,6 +93,12 @@ public final class DocumentsContract {
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
     /**
+     * Set this in a DocumentsUI intent to cause a package's own roots to be
+     * excluded from the roots list.
+     */
+    public static final String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
+
+    /**
      * Included in {@link AssetFileDescriptor#getExtras()} when returned
      * thumbnail should be rotated.
      *
