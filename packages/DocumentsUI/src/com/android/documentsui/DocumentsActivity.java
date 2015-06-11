@@ -246,6 +246,8 @@ public class DocumentsActivity extends BaseActivity {
                     CopyService.TRANSFER_MODE_NONE);
         }
 
+        state.excludedAuthorities = getExcludedAuthorities();
+
         return state;
     }
 
