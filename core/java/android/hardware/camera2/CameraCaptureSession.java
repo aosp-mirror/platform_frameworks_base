@@ -150,9 +150,17 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * {@link CaptureRequest.Builder#addTarget}) must be a subset of the surfaces provided when this
      * capture session was created.</p>
      *
-     * <p>Multiple requests can be in progress at once. They are processed in
-     * first-in, first-out order, with minimal delays between each
-     * capture. Requests submitted through this method have higher priority than
+     * <p>Multiple regular and reprocess requests can be in progress at once. If there are only
+     * regular requests or reprocess requests in progress, they are processed in first-in,
+     * first-out order. If there are both regular and reprocess requests in progress, regular
+     * requests are processed in first-in, first-out order and reprocess requests are processed in
+     * first-in, first-out order, respectively. However, the processing order of a regular request
+     * and a reprocess request in progress is not specified. In other words, a regular request
+     * will always be processed before regular requets that are submitted later. A reprocess request
+     * will always be processed before reprocess requests that are submitted later. However, a
+     * regular request may not be processed before reprocess requests that are submitted later.<p>
+     *
+     * <p>Requests submitted through this method have higher priority than
      * those submitted through {@link #setRepeatingRequest} or
      * {@link #setRepeatingBurst}, and will be processed as soon as the current
      * repeat/repeatBurst processing completes.</p>
@@ -207,10 +215,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * not be interleaved with requests submitted by other capture or repeat
      * calls.
      *
-     * <p>The requests will be captured in order, each capture producing one {@link CaptureResult}
-     * and image buffers for one or more target {@link android.view.Surface surfaces}. The target
-     * surfaces (set with {@link CaptureRequest.Builder#addTarget}) must be a subset of the surfaces
-     * provided when this capture session was created.</p>
+     * <p>Regular and reprocess requests can be mixed together in a single burst. Regular requests
+     * will be captured in order and reprocess requests will be processed in order, respectively.
+     * However, the processing order between a regular request and a reprocess request is not
+     * specified. Each capture produces one {@link CaptureResult} and image buffers for one or more
+     * target {@link android.view.Surface surfaces}. The target surfaces (set with
+     * {@link CaptureRequest.Builder#addTarget}) must be a subset of the surfaces provided when
+     * this capture session was created.</p>
      *
      * <p>The main difference between this method and simply calling
      * {@link #capture} repeatedly is that this method guarantees that no
