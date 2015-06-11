@@ -150,13 +150,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
 
-        // Poke the wakelock any time the text is selected or modified
-        mPasswordEntry.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                onUserInput();
-            }
-        });
-
         mPasswordEntry.setUserActivityListener(new PasswordTextView.UserActivityListener() {
             @Override
             public void onUserActivity() {
