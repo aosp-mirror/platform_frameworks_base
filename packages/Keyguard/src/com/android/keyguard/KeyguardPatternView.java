@@ -36,6 +36,9 @@ import android.widget.LinearLayout;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.settingslib.animation.AppearAnimationCreator;
+import com.android.settingslib.animation.AppearAnimationUtils;
+import com.android.settingslib.animation.DisappearAnimationUtils;
 
 import java.util.List;
 
@@ -325,7 +328,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 .setDuration(500)
                 .setInterpolator(mAppearAnimationUtils.getInterpolator())
                 .translationY(0);
-        mAppearAnimationUtils.startAnimation(
+        mAppearAnimationUtils.startAnimation2d(
                 mLockPatternView.getCellStates(),
                 new Runnable() {
                     @Override
@@ -353,7 +356,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 .setDuration(300)
                 .setInterpolator(mDisappearAnimationUtils.getInterpolator())
                 .translationY(-mDisappearAnimationUtils.getStartTranslation());
-        mDisappearAnimationUtils.startAnimation(mLockPatternView.getCellStates(),
+        mDisappearAnimationUtils.startAnimation2d(mLockPatternView.getCellStates(),
                 new Runnable() {
                     @Override
                     public void run() {
