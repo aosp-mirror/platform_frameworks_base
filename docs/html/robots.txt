@@ -15,5 +15,4 @@ Disallow: /shareables/
 Disallow: /guide/tutorials/
 Disallow: /guide/samples/
 Disallow: /community/
-Disallow: /preview/
 Sitemap: http://developer.android.com/sitemap.txt
