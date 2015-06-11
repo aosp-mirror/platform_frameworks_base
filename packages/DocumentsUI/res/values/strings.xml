@@ -45,7 +45,7 @@
     <!-- Menu item title that deletes the selected documents [CHAR LIMIT=24] -->
     <string name="menu_delete">Delete</string>
     <!-- Menu item title that selects all documents in the current directory [CHAR LIMIT=24] -->
-    <string name="menu_select_all">Select All</string>
+    <string name="menu_select_all">Select all</string>
     <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
     <string name="menu_copy">Copy to\u2026</string>
     <!-- Menu item title that moves the selected documents [CHAR LIMIT=24] -->
