@@ -1229,8 +1229,11 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         return static_cast<jint>(PublicFormat::PRIVATE);
     } else {
         CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
+        int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
+                static_cast<PublicFormat>(readerFormat));
+        int32_t fmt = applyFormatOverrides(buffer->flexFormat, readerHalFormat);
         PublicFormat publicFmt = android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-                buffer->flexFormat, buffer->dataSpace);
+                fmt, buffer->dataSpace);
         return static_cast<jint>(publicFmt);
     }
 }
