@@ -286,7 +286,7 @@ static JNINativeMethod gMethods[] = {
         "(Ljava/lang/Object;ILjava/lang/Object;)I",
         (void*)android_media_SoundPool_native_setup
     },
-    {   "release",
+    {   "native_release",
         "()V",
         (void*)android_media_SoundPool_release
     }
