@@ -36183,7 +36183,7 @@ package android.util {
   public final class ArrayMap implements java.util.Map {
     ctor public ArrayMap();
     ctor public ArrayMap(int);
-    ctor public ArrayMap(android.util.ArrayMap);
+    ctor public ArrayMap(android.util.ArrayMap<K, V>);
     method public void clear();
     method public boolean containsAll(java.util.Collection<?>);
     method public boolean containsKey(java.lang.Object);
@@ -36206,6 +36206,31 @@ package android.util {
     method public int size();
     method public V valueAt(int);
     method public java.util.Collection<V> values();
+  }
+
+  public final class ArraySet implements java.util.Collection java.util.Set {
+    ctor public ArraySet();
+    ctor public ArraySet(int);
+    ctor public ArraySet(android.util.ArraySet<E>);
+    method public boolean add(E);
+    method public void addAll(android.util.ArraySet<? extends E>);
+    method public boolean addAll(java.util.Collection<? extends E>);
+    method public void clear();
+    method public boolean contains(java.lang.Object);
+    method public boolean containsAll(java.util.Collection<?>);
+    method public void ensureCapacity(int);
+    method public int indexOf(java.lang.Object);
+    method public boolean isEmpty();
+    method public java.util.Iterator<E> iterator();
+    method public boolean remove(java.lang.Object);
+    method public boolean removeAll(android.util.ArraySet<? extends E>);
+    method public boolean removeAll(java.util.Collection<?>);
+    method public E removeAt(int);
+    method public boolean retainAll(java.util.Collection<?>);
+    method public int size();
+    method public java.lang.Object[] toArray();
+    method public T[] toArray(T[]);
+    method public E valueAt(int);
   }
 
   public class AtomicFile {
