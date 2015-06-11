@@ -4186,4 +4186,9 @@
          notification_template_material_inbox.xml.
          DO NOT TRANSLATE -->
     <string name="notification_inbox_ellipsis">\u2026</string>
+
+    <!-- Label describing the number of selected items [CHAR LIMIT=48] -->
+    <plurals name="selected_count">
+        <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
+    </plurals>
 </resources>
