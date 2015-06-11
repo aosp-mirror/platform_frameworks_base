@@ -29,15 +29,14 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.keystore.KeyInfo;
+import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.Principal;
 import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -47,7 +46,6 @@ import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.android.org.conscrypt.OpenSSLEngine;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
 /**
@@ -89,8 +87,6 @@ import com.android.org.conscrypt.TrustedCertificateStore;
  */
 // TODO reference intent for credential installation when public
 public final class KeyChain {
-
-    private static final String TAG = "KeyChain";
 
     /**
      * @hide Also used by KeyChainService implementation
@@ -372,15 +368,14 @@ public final class KeyChain {
             if (keyId == null) {
                 throw new KeyChainException("keystore had a problem");
             }
-
-            final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
-            return engine.getPrivateKeyById(keyId);
+            return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
+                    KeyStore.getInstance(), keyId);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {
             // only certain RuntimeExceptions can be propagated across the IKeyChainService call
             throw new KeyChainException(e);
-        } catch (InvalidKeyException e) {
+        } catch (UnrecoverableKeyException e) {
             throw new KeyChainException(e);
         } finally {
             keyChainConnection.close();

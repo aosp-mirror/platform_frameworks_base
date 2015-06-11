@@ -331,7 +331,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             if (keyType == null) {
                 throw new NullPointerException("keyType == null");
             } else {
-                if (KeyStore.getKeyTypeForAlgorithm(keyType) == -1) {
+                try {
+                    KeyProperties.KeyAlgorithm.toKeymasterAsymmetricKeyAlgorithm(keyType);
+                } catch (IllegalArgumentException e) {
                     throw new NoSuchAlgorithmException("Unsupported key type: " + keyType);
                 }
             }

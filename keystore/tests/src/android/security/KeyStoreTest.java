@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
-import android.os.ServiceManager;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
@@ -34,12 +33,8 @@ import android.test.suitebuilder.annotation.MediumTest;
 import com.android.org.conscrypt.NativeConstants;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.security.spec.RSAKeyGenParameterSpec;
-
-import android.util.Log;
-import android.util.Base64;
 
 /**
  * Junit / Instrumentation test case for KeyStore class
