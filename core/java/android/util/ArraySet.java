@@ -42,8 +42,6 @@ import java.util.Set;
  * you have no control over this shrinking -- if you set a capacity and then remove an
  * item, it may reduce the capacity to better match the current size.  In the future an
  * explicit call to set the capacity should turn off this aggressive shrinking behavior.</p>
- *
- * @hide
  */
 public final class ArraySet<E> implements Collection<E>, Set<E> {
     private static final boolean DEBUG = false;
@@ -660,11 +658,24 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return mCollections;
     }
 
+    /**
+     * Return an {@link java.util.Iterator} over all values in the set.
+     *
+     * <p><b>Note:</b> this is a fairly inefficient way to access the array contents, it
+     * requires generating a number of temporary objects and allocates additional state
+     * information associated with the container that will remain for the life of the container.</p>
+     */
     @Override
     public Iterator<E> iterator() {
         return getCollection().getKeySet().iterator();
     }
 
+    /**
+     * Determine if the array set contains all of the values in the given collection.
+     * @param collection The collection whose contents are to be checked against.
+     * @return Returns true if this array set contains a value for every entry
+     * in <var>collection</var>, else returns false.
+     */
     @Override
     public boolean containsAll(Collection<?> collection) {
         Iterator<?> it = collection.iterator();
@@ -676,6 +687,10 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return true;
     }
 
+    /**
+     * Perform an {@link #add(Object)} of all values in <var>collection</var>
+     * @param collection The collection whose contents are to be retrieved.
+     */
     @Override
     public boolean addAll(Collection<? extends E> collection) {
         ensureCapacity(mSize + collection.size());
@@ -686,6 +701,11 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return added;
     }
 
+    /**
+     * Remove all values in the array set that exist in the given collection.
+     * @param collection The collection whose contents are to be used to remove values.
+     * @return Returns true if any values were removed from the array set, else false.
+     */
     @Override
     public boolean removeAll(Collection<?> collection) {
         boolean removed = false;
@@ -695,6 +715,12 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return removed;
     }
 
+    /**
+     * Remove all values in the array set that do <b>not</b> exist in the given collection.
+     * @param collection The collection whose contents are to be used to determine which
+     * values to keep.
+     * @return Returns true if any values were removed from the array set, else false.
+     */
     @Override
     public boolean retainAll(Collection<?> collection) {
         boolean removed = false;
