@@ -35,6 +35,7 @@ import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.*;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 
@@ -1179,7 +1180,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mService.updateOomAdjLocked();
 
         final TaskRecord task = r.task;
-        if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
+        if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE ||
+                task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV) {
             setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE", false);
         }
 
@@ -3785,6 +3787,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         switch (lockTaskAuth) {
             case LOCK_TASK_AUTH_DONT_LOCK:
                 return !mLockTaskModeTasks.isEmpty();
+            case LOCK_TASK_AUTH_LAUNCHABLE_PRIV:
             case LOCK_TASK_AUTH_LAUNCHABLE:
             case LOCK_TASK_AUTH_WHITELISTED:
                 return false;
@@ -3801,12 +3804,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean didSomething = false;
         for (int taskNdx = mLockTaskModeTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord lockedTask = mLockTaskModeTasks.get(taskNdx);
-            if (lockedTask.mLockTaskMode != LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED) {
-                continue;
-            }
-            final boolean wasLaunchable = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE;
+            final boolean wasWhitelisted =
+                    (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) ||
+                    (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED);
             lockedTask.setLockTaskAuth();
-            if (wasLaunchable && lockedTask.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE) {
+            final boolean isWhitelisted =
+                    (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) ||
+                    (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED);
+            if (wasWhitelisted && !isWhitelisted) {
                 // Lost whitelisting authorization. End it now.
                 if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "onLockTaskPackagesUpdated: removing " +
                         lockedTask + " mLockTaskAuth=" + lockedTask.lockTaskAuthToString());
