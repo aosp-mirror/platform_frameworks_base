@@ -9,6 +9,8 @@ PREREQUISITES
 2. numpy
 3. matplotlib
 
+eg. sudo apt-get install python-numpy python-matplotlib
+
 
 USAGE
 -----
