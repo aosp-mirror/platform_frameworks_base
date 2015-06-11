@@ -18525,7 +18525,7 @@ package android.media.browse {
     method public void connect();
     method public void disconnect();
     method public android.os.Bundle getExtras();
-    method public void getMediaItem(java.lang.String, android.media.browse.MediaBrowser.MediaItemCallback);
+    method public void getItem(java.lang.String, android.media.browse.MediaBrowser.ItemCallback);
     method public java.lang.String getRoot();
     method public android.content.ComponentName getServiceComponent();
     method public android.media.session.MediaSession.Token getSessionToken();
@@ -18541,6 +18541,12 @@ package android.media.browse {
     method public void onConnectionSuspended();
   }
 
+  public static abstract class MediaBrowser.ItemCallback {
+    ctor public MediaBrowser.ItemCallback();
+    method public void onError(java.lang.String);
+    method public void onItemLoaded(android.media.browse.MediaBrowser.MediaItem);
+  }
+
   public static class MediaBrowser.MediaItem implements android.os.Parcelable {
     ctor public MediaBrowser.MediaItem(android.media.MediaDescription, int);
     method public int describeContents();
@@ -18553,12 +18559,6 @@ package android.media.browse {
     field public static final android.os.Parcelable.Creator<android.media.browse.MediaBrowser.MediaItem> CREATOR;
     field public static final int FLAG_BROWSABLE = 1; // 0x1
     field public static final int FLAG_PLAYABLE = 2; // 0x2
-  }
-
-  public static abstract class MediaBrowser.MediaItemCallback {
-    ctor public MediaBrowser.MediaItemCallback();
-    method public void onError();
-    method public void onMediaItemLoaded(android.media.browse.MediaBrowser.MediaItem);
   }
 
   public static abstract class MediaBrowser.SubscriptionCallback {
@@ -30842,12 +30842,12 @@ package android.service.media {
   public abstract class MediaBrowserService extends android.app.Service {
     ctor public MediaBrowserService();
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
-    method public void getMediaItem(java.lang.String, android.service.media.MediaBrowserService.Result<android.media.browse.MediaBrowser.MediaItem>) throws java.lang.UnsupportedOperationException;
     method public android.media.session.MediaSession.Token getSessionToken();
     method public void notifyChildrenChanged(java.lang.String);
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.service.media.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
     method public abstract void onLoadChildren(java.lang.String, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>);
+    method public void onLoadItem(java.lang.String, android.service.media.MediaBrowserService.Result<android.media.browse.MediaBrowser.MediaItem>) throws java.lang.UnsupportedOperationException;
     method public void setSessionToken(android.media.session.MediaSession.Token);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";
   }
