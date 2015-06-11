@@ -384,6 +384,8 @@ public class RequestThreadManager {
                             callbackOutputSizes.add(outSize);
                             break;
                         default:
+                            LegacyCameraDevice.setScalingMode(s, LegacyCameraDevice.
+                                    NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
                             mPreviewOutputs.add(s);
                             previewOutputSizes.add(outSize);
                             break;
