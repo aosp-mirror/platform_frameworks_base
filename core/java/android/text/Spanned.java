@@ -187,12 +187,11 @@ extends CharSequence
     public int getSpanFlags(Object tag);
 
     /**
-     * Return the first offset greater than or equal to <code>start</code>
-     * where a markup object of class <code>type</code> begins or ends,
-     * or <code>limit</code> if there are no starts or ends greater than or
-     * equal to <code>start</code> but less than <code>limit</code>.  Specify
-     * <code>null</code> or Object.class for the type if you want every
-     * transition regardless of type.
+     * Return the first offset greater than <code>start</code> where a markup
+     * object of class <code>type</code> begins or ends, or <code>limit</code>
+     * if there are no starts or ends greater than <code>start</code> but less
+     * than <code>limit</code>. Specify <code>null</code> or Object.class for
+     * the type if you want every transition regardless of type.
      */
     public int nextSpanTransition(int start, int limit, Class type);
 }
