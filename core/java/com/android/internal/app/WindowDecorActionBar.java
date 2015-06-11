@@ -47,7 +47,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.ActionMode;
-import android.view.ActionMode.Callback;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -105,6 +104,10 @@ public class WindowDecorActionBar extends ActionBar implements
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
 
     private static final int INVALID_POSITION = -1;
+
+    // The fade duration for toolbar and action bar when entering/exiting action mode.
+    private static final long FADE_OUT_DURATION_MS = 100;
+    private static final long FADE_IN_DURATION_MS = 200;
 
     private int mContextDisplayMode;
     private boolean mHasEmbeddedTabs;
@@ -866,8 +869,21 @@ public class WindowDecorActionBar extends ActionBar implements
             hideForActionMode();
         }
 
-        mDecorToolbar.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
-        mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
+        Animator fadeIn, fadeOut;
+        if (toActionMode) {
+            fadeOut = mDecorToolbar.setupAnimatorToVisibility(View.GONE,
+                    FADE_OUT_DURATION_MS);
+            fadeIn = mContextView.setupAnimatorToVisibility(View.VISIBLE,
+                    FADE_IN_DURATION_MS);
+        } else {
+            fadeIn = mDecorToolbar.setupAnimatorToVisibility(View.VISIBLE,
+                    FADE_IN_DURATION_MS);
+            fadeOut = mContextView.setupAnimatorToVisibility(View.GONE,
+                    FADE_OUT_DURATION_MS);
+        }
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(fadeOut, fadeIn);
+        set.start();
         // mTabScrollView's visibility is not affected by action mode.
     }
 
