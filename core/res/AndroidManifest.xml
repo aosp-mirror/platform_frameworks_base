@@ -1580,24 +1580,6 @@
     <permission android:name="android.permission.WRITE_APN_SETTINGS"
         android:protectionLevel="signature|system" />
 
-    <!-- Allows an application to allow access the subscribed feeds ContentProvider.
-         @hide
-         @removed
-     -->
-    <permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"
-        android:label="@string/permlab_subscribedFeedsRead"
-        android:description="@string/permdesc_subscribedFeedsRead"
-        android:protectionLevel="normal" />
-
-    <!--
-        @hide
-        @removed
-    -->
-    <permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"
-        android:label="@string/permlab_subscribedFeedsWrite"
-        android:description="@string/permdesc_subscribedFeedsWrite"
-        android:protectionLevel="dangerous" />
-
     <!-- Allows applications to change network connectivity state -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:description="@string/permdesc_changeNetworkState"
