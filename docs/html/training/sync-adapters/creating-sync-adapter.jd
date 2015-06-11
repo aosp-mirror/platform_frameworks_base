@@ -583,6 +583,13 @@ public class MainActivity extends FragmentActivity {
         running the sync adapter, see <a href="running-sync-adapter.html"
         >Running A Sync Adapter</a>.
     </dd>
+    <dt>
+{@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS android.permission.AUTHENTICATE_ACCOUNTS}
+    </dt>
+    <dd>
+        Allows you to use the authenticator component you created in the lesson
+        <a href="creating-authenticator.html">Creating a Stub Authenticator</a>.
+    </dd>
 </dl>
 <p>
     The following snippet shows how to add the permissions:
