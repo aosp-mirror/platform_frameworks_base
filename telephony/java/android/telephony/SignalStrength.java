@@ -469,7 +469,12 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * Get signal level as an int from 0..4
+     * Retrieve an abstract level value for the overall signal strength.
+     *
+     * @return a single integer from 0 to 4 representing the general signal quality.
+     *     This may take into account many different radio technology inputs.
+     *     0 represents very poor signal strength
+     *     while 4 represents a very strong signal strength.
      */
     public int getLevel() {
         int level;
