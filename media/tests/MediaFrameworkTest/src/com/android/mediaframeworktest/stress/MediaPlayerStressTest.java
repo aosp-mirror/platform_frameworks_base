@@ -65,6 +65,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
     private int mTotalBadInterleaving = 0;
     private int mTotalNotSeekable = 0;
     private int mTotalMetaDataUpdate = 0;
+    private int mTotalFailedToCompleteWithNoError = 0;
 
     //Test result output file
     private static final String PLAYBACK_RESULT = "PlaybackTestResult.txt";
@@ -78,6 +79,8 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
         output.write(" Bad Interleaving: " + CodecTest.mMediaInfoBadInterleavingCount);
         output.write(" Not Seekable: " + CodecTest.mMediaInfoNotSeekableCount);
         output.write(" Info Meta data update: " + CodecTest.mMediaInfoMetdataUpdateCount);
+        output.write(" Failed To Complete With No Error: " +
+                CodecTest.mFailedToCompleteWithNoError);
         output.write("\n");
     }
 
@@ -90,15 +93,20 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
         output.write("Total Bad Interleaving: " + mTotalBadInterleaving + "\n");
         output.write("Total Not Seekable: " + mTotalNotSeekable + "\n");
         output.write("Total Info Meta data update: " + mTotalMetaDataUpdate + "\n");
+        output.write("Total Failed To Complete With No Error: " +
+                mTotalFailedToCompleteWithNoError);
         output.write("\n");
     }
 
     private void updateTestResult(){
-        if (CodecTest.onCompleteSuccess){
+        if (CodecTest.onCompleteSuccess) {
             mTotalComplete++;
         }
-        else if (CodecTest.mPlaybackError){
+        else if (CodecTest.mPlaybackError) {
             mTotalPlaybackError++;
+        }
+        else if (CodecTest.mFailedToCompleteWithNoError) {
+            mTotalFailedToCompleteWithNoError++;
         }
         mTotalInfoUnknown += CodecTest.mMediaInfoUnknownCount;
         mTotalVideoTrackLagging += CodecTest.mMediaInfoVideoTrackLaggingCount;
