@@ -293,7 +293,8 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
         res = native_window_set_usage(anw.get(), GRALLOC_USAGE_SW_WRITE_OFTEN);
         if (res != OK) {
             ALOGE("%s: Configure usage %08x for format %08x failed: %s (%d)",
-                    __FUNCTION__, GRALLOC_USAGE_SW_WRITE_OFTEN, format, strerror(-res), res);
+                  __FUNCTION__, static_cast<unsigned int>(GRALLOC_USAGE_SW_WRITE_OFTEN),
+                  format, strerror(-res), res);
             jniThrowRuntimeException(env, "Failed to SW_WRITE_OFTEN configure usage");
             return 0;
         }
