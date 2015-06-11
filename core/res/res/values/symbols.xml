@@ -2291,5 +2291,20 @@
   <java-symbol type="string" name="config_radio_access_family" />
   <java-symbol type="string" name="notification_inbox_ellipsis" />
   <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
+
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
+  <java-symbol type="string" name="ext_media_status_removed" />
+  <java-symbol type="string" name="ext_media_status_unmounted" />
+  <java-symbol type="string" name="ext_media_status_checking" />
+  <java-symbol type="string" name="ext_media_status_mounted" />
+  <java-symbol type="string" name="ext_media_status_mounted_ro" />
+  <java-symbol type="string" name="ext_media_status_bad_removal" />
+  <java-symbol type="string" name="ext_media_status_unmountable" />
+  <java-symbol type="string" name="ext_media_status_unsupported" />
+  <java-symbol type="string" name="ext_media_status_ejecting" />
+  <java-symbol type="string" name="ext_media_status_formatting" />
+  <java-symbol type="string" name="ext_media_status_missing" />
+  <java-symbol type="string" name="ext_media_unsupported_notification_message" />
+  <java-symbol type="string" name="ext_media_unsupported_notification_title" />
+
 </resources>
