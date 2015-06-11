@@ -1924,6 +1924,28 @@ public class CameraDeviceImpl extends CameraDevice {
         return mCharacteristics;
     }
 
+    /**
+     * A high speed output surface can only be preview or hardware encoder surface.
+     *
+     * @param surface The high speed output surface to be checked.
+     */
+    private void checkHighSpeedSurfaceFormat(Surface surface) {
+        // TODO: remove this override since the default format should be
+        // ImageFormat.PRIVATE. b/9487482
+        final int HAL_FORMAT_RGB_START = 1; // HAL_PIXEL_FORMAT_RGBA_8888 from graphics.h
+        final int HAL_FORMAT_RGB_END = 5; // HAL_PIXEL_FORMAT_BGRA_8888 from graphics.h
+        int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
+        if (surfaceFormat >= HAL_FORMAT_RGB_START &&
+                surfaceFormat <= HAL_FORMAT_RGB_END) {
+            surfaceFormat = ImageFormat.PRIVATE;
+        }
+
+        if (surfaceFormat != ImageFormat.PRIVATE) {
+            throw new IllegalArgumentException("Surface format(" + surfaceFormat + ") is not"
+                    + " for preview or hardware video encoding!");
+        }
+    }
+
     private void checkConstrainedHighSpeedSurfaces(Collection<Surface> surfaces,
             Range<Integer> fpsRange) {
         if (surfaces == null || surfaces.size() == 0 || surfaces.size() > 2) {
@@ -1948,15 +1970,10 @@ public class CameraDeviceImpl extends CameraDevice {
         }
 
         for (Surface surface : surfaces) {
+            checkHighSpeedSurfaceFormat(surface);
+
             // Surface size must be supported high speed sizes.
             Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
-            int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
-
-            if (surfaceFormat != ImageFormat.PRIVATE) {
-                throw new IllegalArgumentException("Surface format is not for preview or"
-                        + " hardware video encoding" + surfaceFormat);
-            }
-
             if (!highSpeedSizes.contains(surfaceSize)) {
                 throw new IllegalArgumentException("Surface size " + surfaceSize.toString() + " is"
                         + " not part of the high speed supported size list " +

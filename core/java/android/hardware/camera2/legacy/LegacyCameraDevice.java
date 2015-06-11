@@ -565,7 +565,7 @@ public class LegacyCameraDevice implements AutoCloseable {
             throw new IllegalArgumentException("Surface was abandoned", e);
         }
 
-        return previewConsumer && (surfaceFormat == ImageFormat.PRIVATE);
+        return previewConsumer;
     }
 
     public static boolean isVideoEncoderConsumer(Surface output) {
@@ -583,7 +583,7 @@ public class LegacyCameraDevice implements AutoCloseable {
             throw new IllegalArgumentException("Surface was abandoned", e);
         }
 
-        return videoEncoderConsumer && (surfaceFormat == ImageFormat.PRIVATE);
+        return videoEncoderConsumer;
     }
 
     /**
