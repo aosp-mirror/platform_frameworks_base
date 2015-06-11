@@ -18638,7 +18638,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (packages != null) {
                 for (int i = 0; i < packages.length; i++) {
                     mUsageStatsService.reportEvent(packages[i], app.userId,
-                            UsageEvents.Event.INTERACTION);
+                            UsageEvents.Event.SYSTEM_INTERACTION);
                 }
             }
         }

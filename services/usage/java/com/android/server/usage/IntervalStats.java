@@ -110,7 +110,10 @@ class IntervalStats {
             usageStats.mLastEvent = eventType;
         }
 
-        usageStats.mLastTimeUsed = timeStamp;
+        if (eventType != UsageEvents.Event.SYSTEM_INTERACTION) {
+            usageStats.mLastTimeUsed = timeStamp;
+        }
+        usageStats.mLastTimeSystemUsed = timeStamp;
         usageStats.mEndTimeStamp = timeStamp;
 
         if (eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
@@ -131,9 +134,9 @@ class IntervalStats {
         usageStats.mBeginIdleTime = timeStamp;
     }
 
-    void updateLastUsedTime(String packageName, long lastUsedTime) {
+    void updateSystemLastUsedTime(String packageName, long lastUsedTime) {
         UsageStats usageStats = getOrCreateUsageStats(packageName);
-        usageStats.mLastTimeUsed = lastUsedTime;
+        usageStats.mLastTimeSystemUsed = lastUsedTime;
     }
 
     void updateConfigurationStats(Configuration config, long timeStamp) {

@@ -55,6 +55,7 @@ final class UsageStatsXmlV1 {
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
+    private static final String LAST_TIME_ACTIVE_SYSTEM_ATTR = "lastTimeActiveSystem";
     private static final String BEGIN_IDLE_TIME_ATTR = "beginIdleTime";
     private static final String END_TIME_ATTR = "endTime";
     private static final String TIME_ATTR = "time";
@@ -71,6 +72,16 @@ final class UsageStatsXmlV1 {
         // Apply the offset to the beginTime to find the absolute time.
         stats.mLastTimeUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
                 parser, LAST_TIME_ACTIVE_ATTR);
+
+        final String lastTimeUsedSystem = parser.getAttributeValue(null,
+                LAST_TIME_ACTIVE_SYSTEM_ATTR);
+        if (TextUtils.isEmpty(lastTimeUsedSystem)) {
+            // If the field isn't present, use the old one.
+            stats.mLastTimeSystemUsed = stats.mLastTimeUsed;
+        } else {
+            stats.mLastTimeSystemUsed = statsOut.beginTime + Long.parseLong(lastTimeUsedSystem);
+        }
+
         final String beginIdleTime = parser.getAttributeValue(null, BEGIN_IDLE_TIME_ATTR);
         if (!TextUtils.isEmpty(beginIdleTime)) {
             stats.mBeginIdleTime = Long.parseLong(beginIdleTime);
@@ -130,6 +141,8 @@ final class UsageStatsXmlV1 {
         // Write the time offset.
         XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR,
                 usageStats.mLastTimeUsed - stats.beginTime);
+        XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_SYSTEM_ATTR,
+                usageStats.mLastTimeSystemUsed - stats.beginTime);
 
         XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
