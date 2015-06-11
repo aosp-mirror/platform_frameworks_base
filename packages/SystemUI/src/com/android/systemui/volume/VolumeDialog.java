@@ -17,6 +17,7 @@
 package com.android.systemui.volume;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
+import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.LayoutTransition;
@@ -422,17 +423,15 @@ public class VolumeDialog {
 
     protected void rescheduleTimeoutH() {
         mHandler.removeMessages(H.DISMISS);
-        int timeout = -1;
-        if (!mAccessibility.mFeedbackEnabled) {
-            timeout = computeTimeoutH();
-            mHandler.sendMessageDelayed(mHandler
-                    .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
-        }
+        final int timeout = computeTimeoutH();
+        mHandler.sendMessageDelayed(mHandler
+                .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
         if (D.BUG) Log.d(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
         mController.userActivity();
     }
 
     private int computeTimeoutH() {
+        if (mAccessibility.mFeedbackEnabled) return 20000;
         if (mSafetyWarning != null) return 5000;
         if (mExpanded || mExpanding) return 5000;
         if (mActiveStream == AudioManager.STREAM_MUSIC) return 1500;
@@ -959,7 +958,7 @@ public class VolumeDialog {
         }
     }
 
-    private final class Accessibility {
+    private final class Accessibility extends AccessibilityDelegate {
         private AccessibilityManager mMgr;
         private boolean mFeedbackEnabled;
 
@@ -976,14 +975,7 @@ public class VolumeDialog {
                     updateFeedbackEnabled();
                 }
             });
-            mDialogView.setAccessibilityDelegate(new AccessibilityDelegate() {
-                @Override
-                public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
-                        AccessibilityEvent event) {
-                    rescheduleTimeoutH();
-                    return super.onRequestSendAccessibilityEvent(host, child, event);
-                }
-            });
+            mDialogView.setAccessibilityDelegate(this);
             mMgr.addAccessibilityStateChangeListener(new AccessibilityStateChangeListener() {
                 @Override
                 public void onAccessibilityStateChanged(boolean enabled) {
@@ -993,15 +985,23 @@ public class VolumeDialog {
             updateFeedbackEnabled();
         }
 
+        @Override
+        public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
+                AccessibilityEvent event) {
+            rescheduleTimeoutH();
+            return super.onRequestSendAccessibilityEvent(host, child, event);
+        }
+
         private void updateFeedbackEnabled() {
             mFeedbackEnabled = computeFeedbackEnabled();
         }
 
         private boolean computeFeedbackEnabled() {
+            // are there any enabled non-generic a11y services?
             final List<AccessibilityServiceInfo> services =
                     mMgr.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
             for (AccessibilityServiceInfo asi : services) {
-                if ((asi.feedbackType & FEEDBACK_ALL_MASK) != 0) {
+                if (asi.feedbackType != 0 && asi.feedbackType != FEEDBACK_GENERIC) {
                     return true;
                 }
             }
