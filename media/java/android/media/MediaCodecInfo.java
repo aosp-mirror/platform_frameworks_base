@@ -1382,7 +1382,7 @@ public final class MediaCodecInfo {
             // upper limit.
             // for now we are keeping the profile specific "width/height
             // in macroblocks" limits.
-            if (Integer.valueOf(1).equals(map.get("feature-can-swap-width-height"))) {
+            if (map.containsKey("feature-can-swap-width-height")) {
                 if (widths != null) {
                     mSmallerDimensionUpperLimit =
                         Math.min(widths.getUpper(), heights.getUpper());
