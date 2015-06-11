@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
 import android.os.Parcel;
@@ -125,7 +126,9 @@ public final class TvInputInfo implements Parcelable {
     private String mSettingsActivity;
 
     private HdmiDeviceInfo mHdmiDeviceInfo;
+    private int mLabelRes;
     private String mLabel;
+    private Icon mIcon;
     private Uri mIconUri;
     private boolean mIsConnectedToHdmiSwitch;
 
@@ -155,7 +158,7 @@ public final class TvInputInfo implements Parcelable {
             throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForComponentName(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
-                null, TYPE_TUNER, false, null, null, false);
+                null, TYPE_TUNER, false, 0, null, null, null, false);
     }
 
     /**
@@ -165,11 +168,11 @@ public final class TvInputInfo implements Parcelable {
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param hdmiDeviceInfo The HdmiDeviceInfo for a HDMI CEC logical device.
      * @param parentId The ID of this TV input's parent input. {@code null} if none exists.
+     * @param label The label of this TvInputInfo. If it is {@code null} or empty, {@code service}
+     *            label will be loaded.
      * @param iconUri The {@link android.net.Uri} to load the icon image. See
      *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
      *            the application icon of {@code service} will be loaded.
-     * @param label The label of this TvInputInfo. If it is {@code null} or empty, {@code service}
-     *            label will be loaded.
      * @hide
      */
     @SystemApi
@@ -179,7 +182,34 @@ public final class TvInputInfo implements Parcelable {
         boolean isConnectedToHdmiSwitch = (hdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
         TvInputInfo input = createTvInputInfo(context, service, generateInputIdForHdmiDevice(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hdmiDeviceInfo), parentId, TYPE_HDMI, true, label, iconUri, isConnectedToHdmiSwitch);
+                hdmiDeviceInfo), parentId, TYPE_HDMI, true, 0, label, null, iconUri,
+                isConnectedToHdmiSwitch);
+        input.mHdmiDeviceInfo = hdmiDeviceInfo;
+        return input;
+    }
+
+    /**
+     * Create a new instance of the TvInputInfo class, instantiating it from the given Context,
+     * ResolveInfo, and HdmiDeviceInfo.
+     *
+     * @param service The ResolveInfo returned from the package manager about this TV input service.
+     * @param hdmiDeviceInfo The HdmiDeviceInfo for a HDMI CEC logical device.
+     * @param parentId The ID of this TV input's parent input. {@code null} if none exists.
+     * @param labelRes The label resource ID of this TvInputInfo. If it is {@code 0},
+     *            {@code service} label will be loaded.
+     * @param icon The {@link android.graphics.drawable.Icon} to load the icon image. If it is
+     *            {@code null}, the application icon of {@code service} will be loaded.
+     * @hide
+     */
+    @SystemApi
+    public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
+            HdmiDeviceInfo hdmiDeviceInfo, String parentId, int labelRes, Icon icon)
+            throws XmlPullParserException, IOException {
+        boolean isConnectedToHdmiSwitch = (hdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
+        TvInputInfo input = createTvInputInfo(context, service, generateInputIdForHdmiDevice(
+                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
+                hdmiDeviceInfo), parentId, TYPE_HDMI, true, labelRes, null, icon, null,
+                isConnectedToHdmiSwitch);
         input.mHdmiDeviceInfo = hdmiDeviceInfo;
         return input;
     }
@@ -190,11 +220,11 @@ public final class TvInputInfo implements Parcelable {
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param hardwareInfo The TvInputHardwareInfo for a TV input hardware device.
+     * @param label The label of this TvInputInfo. If it is {@code null} or empty, {@code service}
+     *            label will be loaded.
      * @param iconUri The {@link android.net.Uri} to load the icon image. See
      *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
      *            the application icon of {@code service} will be loaded.
-     * @param label The label of this TvInputInfo. If it is {@code null} or empty, {@code service}
-     *            label will be loaded.
      * @hide
      */
     @SystemApi
@@ -204,12 +234,34 @@ public final class TvInputInfo implements Parcelable {
         int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
         return createTvInputInfo(context, service, generateInputIdForHardware(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null, inputType, true, label, iconUri, false);
+                hardwareInfo), null, inputType, true, 0, label, null, iconUri, false);
     }
 
-    private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            String id, String parentId, int inputType, boolean isHardwareInput, String label,
-            Uri iconUri, boolean isConnectedToHdmiSwitch)
+    /**
+     * Create a new instance of the TvInputInfo class, instantiating it from the given Context,
+     * ResolveInfo, and TvInputHardwareInfo.
+     *
+     * @param service The ResolveInfo returned from the package manager about this TV input service.
+     * @param hardwareInfo The TvInputHardwareInfo for a TV input hardware device.
+     * @param labelRes The label resource ID of this TvInputInfo. If it is {@code 0},
+     *            {@code service} label will be loaded.
+     * @param icon The {@link android.graphics.drawable.Icon} to load the icon image. If it is
+     *            {@code null}, the application icon of {@code service} will be loaded.
+     * @hide
+     */
+    @SystemApi
+    public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
+            TvInputHardwareInfo hardwareInfo, int labelRes, Icon icon)
+            throws XmlPullParserException, IOException {
+        int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
+        return createTvInputInfo(context, service, generateInputIdForHardware(
+                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
+                hardwareInfo), null, inputType, true, labelRes, null, icon, null, false);
+    }
+
+    private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service, String id,
+            String parentId, int inputType, boolean isHardwareInput, int labelRes, String label,
+            Icon icon, Uri iconUri, boolean isConnectedToHdmiSwitch)
                     throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
@@ -254,7 +306,9 @@ public final class TvInputInfo implements Parcelable {
             }
             sa.recycle();
 
+            input.mLabelRes = labelRes;
             input.mLabel = label;
+            input.mIcon = icon;
             input.mIconUri = iconUri;
             input.mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
             return input;
@@ -426,11 +480,13 @@ public final class TvInputInfo implements Parcelable {
      *         a label, its name is returned.
      */
     public CharSequence loadLabel(@NonNull Context context) {
-        if (TextUtils.isEmpty(mLabel)) {
-            return mService.loadLabel(context.getPackageManager());
-        } else {
+        if (mLabelRes != 0) {
+            return context.getPackageManager().getText(mService.serviceInfo.packageName, mLabelRes,
+                    null);
+        } else if (!TextUtils.isEmpty(mLabel)) {
             return mLabel;
         }
+        return mService.loadLabel(context.getPackageManager());
     }
 
     /**
@@ -454,19 +510,20 @@ public final class TvInputInfo implements Parcelable {
      *         application's icon is returned. If it's unavailable too, {@code null} is returned.
      */
     public Drawable loadIcon(@NonNull Context context) {
-        if (mIconUri == null) {
-            return loadServiceIcon(context);
-        }
-        try (InputStream is = context.getContentResolver().openInputStream(mIconUri)) {
-            Drawable drawable = Drawable.createFromStream(is, null);
-            if (drawable == null) {
-                return loadServiceIcon(context);
+        if (mIcon != null) {
+            return mIcon.loadDrawable(context);
+        } else if (mIconUri != null) {
+            try (InputStream is = context.getContentResolver().openInputStream(mIconUri)) {
+                Drawable drawable = Drawable.createFromStream(is, null);
+                if (drawable != null) {
+                    return drawable;
+                }
+            } catch (IOException e) {
+                Log.w(TAG, "Loading the default icon due to a failure on loading " + mIconUri, e);
+                // Falls back.
             }
-            return drawable;
-        } catch (IOException e) {
-            Log.w(TAG, "Loading the default icon due to a failure on loading " + mIconUri, e);
-            return loadServiceIcon(context);
         }
+        return loadServiceIcon(context);
     }
 
     @Override
@@ -516,7 +573,9 @@ public final class TvInputInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeByte(mIsHardwareInput ? (byte) 1 : 0);
         dest.writeParcelable(mHdmiDeviceInfo, flags);
+        dest.writeParcelable(mIcon, flags);
         dest.writeParcelable(mIconUri, flags);
+        dest.writeInt(mLabelRes);
         dest.writeString(mLabel);
         dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
     }
@@ -591,7 +650,9 @@ public final class TvInputInfo implements Parcelable {
         mType = in.readInt();
         mIsHardwareInput = in.readByte() == 1 ? true : false;
         mHdmiDeviceInfo = in.readParcelable(null);
+        mIcon = in.readParcelable(null);
         mIconUri = in.readParcelable(null);
+        mLabelRes = in.readInt();
         mLabel = in.readString();
         mIsConnectedToHdmiSwitch = in.readByte() == 1 ? true : false;
     }
