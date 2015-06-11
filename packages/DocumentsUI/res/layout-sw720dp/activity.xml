@@ -19,7 +19,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Toolbar
+    <com.android.documentsui.DocumentsToolBar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
@@ -34,7 +34,7 @@
             android:layout_marginStart="4dp"
             android:overlapAnchor="true" />
 
-    </Toolbar>
+    </com.android.documentsui.DocumentsToolBar>
 
     <LinearLayout
         android:layout_width="match_parent"
