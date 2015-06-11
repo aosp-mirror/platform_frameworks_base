@@ -35,6 +35,7 @@ import android.os.ServiceManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 
+import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
 
@@ -125,10 +126,12 @@ public class SoundPool {
 
     private EventHandler mEventHandler;
     private SoundPool.OnLoadCompleteListener mOnLoadCompleteListener;
+    private boolean mHasAppOpsPlayAudio;
 
     private final Object mLock;
     private final AudioAttributes mAttributes;
     private final IAppOpsService mAppOps;
+    private final IAppOpsCallback mAppOpsCallback;
 
     /**
      * Constructor. Constructs a SoundPool object with the following
@@ -159,6 +162,24 @@ public class SoundPool {
         mAttributes = attributes;
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
+        // initialize mHasAppOpsPlayAudio
+        updateAppOpsPlayAudio();
+        // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
+        mAppOpsCallback = new IAppOpsCallback.Stub() {
+            public void opChanged(int op, String packageName) {
+                synchronized (mLock) {
+                    if (op == AppOpsManager.OP_PLAY_AUDIO) {
+                        updateAppOpsPlayAudio();
+                    }
+                }
+            }
+        };
+        try {
+            mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
+                    ActivityThread.currentPackageName(), mAppOpsCallback);
+        } catch (RemoteException e) {
+            mHasAppOpsPlayAudio = false;
+        }
     }
 
     /**
@@ -168,7 +189,16 @@ public class SoundPool {
      * object. The SoundPool can no longer be used and the reference
      * should be set to null.
      */
-    public native final void release();
+    public final void release() {
+        try {
+            mAppOps.stopWatchingMode(mAppOpsCallback);
+        } catch (RemoteException e) {
+            // nothing to do here, the SoundPool is being released anyway
+        }
+        native_release();
+    }
+
+    private native final void native_release();
 
     protected void finalize() { release(); }
 
@@ -466,13 +496,17 @@ public class SoundPool {
         if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
             return false;
         }
+        return !mHasAppOpsPlayAudio;
+    }
+
+    private void updateAppOpsPlayAudio() {
         try {
             final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
                     mAttributes.getUsage(),
                     Process.myUid(), ActivityThread.currentPackageName());
-            return mode != AppOpsManager.MODE_ALLOWED;
+            mHasAppOpsPlayAudio = (mode == AppOpsManager.MODE_ALLOWED);
         } catch (RemoteException e) {
-            return false;
+            mHasAppOpsPlayAudio = false;
         }
     }
 
