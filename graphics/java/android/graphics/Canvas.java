@@ -1728,8 +1728,7 @@ public class Canvas {
      * @param contextIndex the start of the context for shaping.  Must be
      *         no greater than index.
      * @param contextCount the number of characters in the context for shaping.
-     *         contexIndex + contextCount must be no less than index
-     *         + count.
+     *         contexIndex + contextCount must be no less than index + count.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
@@ -1744,12 +1743,14 @@ public class Canvas {
         if (paint == null) {
             throw new NullPointerException("paint is null");
         }
-        if ((index | count | text.length - index - count) < 0) {
+        if ((index | count | contextIndex | contextCount | index - contextIndex
+                | (contextIndex + contextCount) - (index + count)
+                | text.length - (contextIndex + contextCount)) < 0) {
             throw new IndexOutOfBoundsException();
         }
 
-        native_drawTextRun(mNativeCanvasWrapper, text, index, count,
-                contextIndex, contextCount, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+        native_drawTextRun(mNativeCanvasWrapper, text, index, count, contextIndex, contextCount,
+                x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     /**
@@ -1796,14 +1797,15 @@ public class Canvas {
         if (paint == null) {
             throw new NullPointerException("paint is null");
         }
-        if ((start | end | end - start | text.length() - end) < 0) {
+        if ((start | end | contextStart | contextEnd | start - contextStart | end - start
+                | contextEnd - end | text.length() - contextEnd) < 0) {
             throw new IndexOutOfBoundsException();
         }
 
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
-            native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end,
-                    contextStart, contextEnd, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+            native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end, contextStart,
+                    contextEnd, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, isRtl, paint);
