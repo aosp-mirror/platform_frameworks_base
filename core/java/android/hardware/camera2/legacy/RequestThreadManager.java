@@ -412,12 +412,18 @@ public class RequestThreadManager {
         mParams.setPreviewFpsRange(bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
                 bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
 
+        Size smallestSupportedJpegSize = calculatePictureSize(mCallbackOutputs,
+                callbackOutputSizes, mParams);
+
         if (previewOutputSizes.size() > 0) {
 
             Size largestOutput = SizeAreaComparator.findLargestByArea(previewOutputSizes);
 
             // Find largest jpeg dimension - assume to have the same aspect ratio as sensor.
             Size largestJpegDimen = ParameterUtils.getLargestSupportedJpegSizeByArea(mParams);
+
+            Size chosenJpegDimen = (smallestSupportedJpegSize != null) ? smallestSupportedJpegSize
+                    : largestJpegDimen;
 
             List<Size> supportedPreviewSizes = ParameterUtils.convertSizeList(
                     mParams.getSupportedPreviewSizes());
@@ -430,7 +436,7 @@ public class RequestThreadManager {
             for (Size s : supportedPreviewSizes) {
                 long currArea = s.getWidth() * s.getHeight();
                 long bestArea = bestPreviewDimen.getWidth() * bestPreviewDimen.getHeight();
-                if (checkAspectRatiosMatch(largestJpegDimen, s) && (currArea < bestArea &&
+                if (checkAspectRatiosMatch(chosenJpegDimen, s) && (currArea < bestArea &&
                         currArea >= largestOutputArea)) {
                     bestPreviewDimen = s;
                 }
@@ -451,8 +457,6 @@ public class RequestThreadManager {
             }
         }
 
-        Size smallestSupportedJpegSize = calculatePictureSize(mCallbackOutputs,
-                callbackOutputSizes, mParams);
         if (smallestSupportedJpegSize != null) {
             /*
              * Set takePicture size to the smallest supported JPEG size large enough
