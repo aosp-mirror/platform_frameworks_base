@@ -72,6 +72,12 @@ static struct {
     jmethodID ctor;
 } gSurfacePlaneClassInfo;
 
+// Get an ID that's unique within this process.
+static int32_t createProcessUniqueId() {
+    static volatile int32_t globalCounter = 0;
+    return android_atomic_inc(&globalCounter);
+}
+
 // ----------------------------------------------------------------------------
 
 class JNIImageReaderContext : public ConsumerBase::FrameAvailableListener
@@ -808,6 +814,9 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     sp<ConsumerBase> consumer;
     sp<CpuConsumer> cpuConsumer;
     sp<BufferItemConsumer> opaqueConsumer;
+    String8 consumerName = String8::format("ImageReader-%dx%df%xm%d-%d-%d",
+            width, height, format, maxImages, getpid(),
+            createProcessUniqueId());
     if (isFormatOpaque(nativeFormat)) {
         // Use the SW_READ_NEVER usage to tell producer that this format is not for preview or video
         // encoding. The only possibility will be ZSL output.
@@ -819,6 +828,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
             return;
         }
         ctx->setOpaqueConsumer(opaqueConsumer);
+        opaqueConsumer->setName(consumerName);
         consumer = opaqueConsumer;
     } else {
         cpuConsumer = new CpuConsumer(gbConsumer, maxImages, /*controlledByApp*/true);
@@ -828,6 +838,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
             return;
         }
         ctx->setCpuConsumer(cpuConsumer);
+        cpuConsumer->setName(consumerName);
         consumer = cpuConsumer;
     }
 
