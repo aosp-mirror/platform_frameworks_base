@@ -28,6 +28,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a single operation to be performed as part of a batch of operations.
+ *
+ * @see ContentProvider#applyBatch(ArrayList)
+ */
 public class ContentProviderOperation implements Parcelable {
     /** @hide exposed for unit tests */
     public final static int TYPE_INSERT = 1;
@@ -195,10 +200,19 @@ public class ContentProviderOperation implements Parcelable {
         return new Builder(TYPE_ASSERT, uri);
     }
 
+    /**
+     * Gets the Uri for the target of the operation.
+     */
     public Uri getUri() {
         return mUri;
     }
 
+    /**
+     * Returns true if the operation allows yielding the database to other transactions
+     * if the database is contended.
+     *
+     * @see android.database.sqlite.SQLiteDatabase#yieldIfContendedSafely()
+     */
     public boolean isYieldAllowed() {
         return mYieldAllowed;
     }
@@ -208,26 +222,58 @@ public class ContentProviderOperation implements Parcelable {
         return mType;
     }
 
+    /**
+     * Returns true if the operation represents an insertion.
+     *
+     * @see #newInsert
+     */
     public boolean isInsert() {
         return mType == TYPE_INSERT;
     }
 
+    /**
+     * Returns true if the operation represents a deletion.
+     *
+     * @see #newDelete
+     */
     public boolean isDelete() {
         return mType == TYPE_DELETE;
     }
 
+    /**
+     * Returns true if the operation represents an update.
+     *
+     * @see #newUpdate
+     */
     public boolean isUpdate() {
         return mType == TYPE_UPDATE;
     }
 
+    /**
+     * Returns true if the operation represents an assert query.
+     *
+     * @see #newAssertQuery
+     */
     public boolean isAssertQuery() {
         return mType == TYPE_ASSERT;
     }
 
+    /**
+     * Returns true if the operation represents an insertion, deletion, or update.
+     *
+     * @see #isInsert
+     * @see #isDelete
+     * @see #isUpdate
+     */
     public boolean isWriteOperation() {
         return mType == TYPE_DELETE || mType == TYPE_INSERT || mType == TYPE_UPDATE;
     }
 
+    /**
+     * Returns true if the operation represents an assert query.
+     *
+     * @see #isAssertQuery
+     */
     public boolean isReadOperation() {
         return mType == TYPE_ASSERT;
     }
@@ -617,7 +663,7 @@ public class ContentProviderOperation implements Parcelable {
         }
 
         /**
-         * If set then if the number of rows affected by this operation do not match
+         * If set then if the number of rows affected by this operation does not match
          * this count {@link OperationApplicationException} will be throw.
          * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
@@ -631,6 +677,12 @@ public class ContentProviderOperation implements Parcelable {
             return this;
         }
 
+        /**
+         * If set to true then the operation allows yielding the database to other transactions
+         * if the database is contended.
+         * @return this builder, to allow for chaining.
+         * @see android.database.sqlite.SQLiteDatabase#yieldIfContendedSafely()
+         */
         public Builder withYieldAllowed(boolean yieldAllowed) {
             mYieldAllowed = yieldAllowed;
             return this;
