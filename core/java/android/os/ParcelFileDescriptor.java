@@ -621,6 +621,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             final int fd = getFd();
             Parcel.clearFileDescriptor(mFd);
             writeCommStatusAndClose(Status.DETACHED, null);
+            mClosed = true;
+            mGuard.close();
+            releaseResources();
             return fd;
         }
     }
