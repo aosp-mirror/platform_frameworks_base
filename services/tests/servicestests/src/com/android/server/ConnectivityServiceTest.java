@@ -235,6 +235,27 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             // Prevent wrapped ConnectivityService from trying to write to SystemProperties.
             return 0;
         }
+
+        @Override
+        protected int reserveNetId() {
+            while (true) {
+                final int netId = super.reserveNetId();
+
+                // Don't overlap test NetIDs with real NetIDs as binding sockets to real networks
+                // can have odd side-effects, like network validations succeeding.
+                final Network[] networks = ConnectivityManager.from(getContext()).getAllNetworks();
+                boolean overlaps = false;
+                for (Network network : networks) {
+                    if (netId == network.netId) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+                if (overlaps) continue;
+
+                return netId;
+            }
+        }
     }
 
     @Override
