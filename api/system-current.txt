@@ -4095,6 +4095,7 @@ package android.app {
   public deprecated class AssistContent {
     ctor public AssistContent();
     method public android.content.ClipData getClipData();
+    method public android.os.Bundle getExtras();
     method public android.net.Uri getWebUri();
     method public boolean isAppProvidedIntent();
     method public void setClipData(android.content.ClipData);
@@ -4153,6 +4154,7 @@ package android.app {
   }
 
   public static class AssistStructure.WindowNode {
+    method public int getDisplayId();
     method public int getHeight();
     method public int getLeft();
     method public android.app.AssistStructure.ViewNode getRootViewNode();
@@ -8688,8 +8690,6 @@ package android.content {
     field public static final int NO_MATCH_CATEGORY = -4; // 0xfffffffc
     field public static final int NO_MATCH_DATA = -2; // 0xfffffffe
     field public static final int NO_MATCH_TYPE = -1; // 0xffffffff
-    field public static final java.lang.String SCHEME_HTTP = "http";
-    field public static final java.lang.String SCHEME_HTTPS = "https";
     field public static final int SYSTEM_HIGH_PRIORITY = 1000; // 0x3e8
     field public static final int SYSTEM_LOW_PRIORITY = -1000; // 0xfffffc18
   }
@@ -39330,6 +39330,7 @@ package android.view {
 
   public abstract class ViewStructure {
     ctor public ViewStructure();
+    method public abstract int addChildCount(int);
     method public abstract void asyncCommit();
     method public abstract android.view.ViewAssistStructure asyncNewChild(int);
     method public abstract int getChildCount();

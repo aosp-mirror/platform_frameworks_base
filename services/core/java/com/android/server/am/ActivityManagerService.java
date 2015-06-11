@@ -19382,14 +19382,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             enforceCallingPermission(android.Manifest.permission.SET_DEBUG_APP,
                     "setDumpHeapDebugLimit()");
         } else {
-            if (!Build.IS_DEBUGGABLE) {
-                throw new SecurityException("Not running a debuggable build");
-            }
             synchronized (mPidsSelfLocked) {
                 ProcessRecord proc = mPidsSelfLocked.get(Binder.getCallingPid());
                 if (proc == null) {
                     throw new SecurityException("No process found for calling pid "
                             + Binder.getCallingPid());
+                }
+                if (!Build.IS_DEBUGGABLE
+                        && (proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                    throw new SecurityException("Not running a debuggable build");
                 }
                 processName = proc.processName;
                 uid = proc.uid;
