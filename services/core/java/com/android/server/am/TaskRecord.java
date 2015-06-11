@@ -134,12 +134,15 @@ final class TaskRecord {
 
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
-    /** Can enter lockTask with user approval. Can never start over existing lockTask task. */
+    /** Can enter app pinning with user approval. Can never start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_PINNABLE = 1;
     /** Starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_LAUNCHABLE = 2;
-    /** Can enter lockTask with user approval. Can start over existing lockTask task. */
+    /** Can enter lockTask without user approval. Can start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_WHITELISTED = 3;
+    /** Priv-app that starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing
+     * lockTask task. */
+    final static int LOCK_TASK_AUTH_LAUNCHABLE_PRIV = 4;
     int mLockTaskAuth = LOCK_TASK_AUTH_PINNABLE;
 
     int mLockTaskUid = -1;  // The uid of the application that called startLockTask().
@@ -747,11 +750,18 @@ final class TaskRecord {
             case LOCK_TASK_AUTH_PINNABLE: return "LOCK_TASK_AUTH_PINNABLE";
             case LOCK_TASK_AUTH_LAUNCHABLE: return "LOCK_TASK_AUTH_LAUNCHABLE";
             case LOCK_TASK_AUTH_WHITELISTED: return "LOCK_TASK_AUTH_WHITELISTED";
+            case LOCK_TASK_AUTH_LAUNCHABLE_PRIV: return "LOCK_TASK_AUTH_LAUNCHABLE_PRIV";
             default: return "unknown=" + mLockTaskAuth;
         }
     }
 
     void setLockTaskAuth() {
+        if (!mPrivileged &&
+                (mLockTaskMode == LOCK_TASK_LAUNCH_MODE_ALWAYS ||
+                        mLockTaskMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
+            // Non-priv apps are not allowed to use always or never, fall back to default
+            mLockTaskMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        }
         switch (mLockTaskMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
                 mLockTaskAuth = isLockTaskWhitelistedLocked() ?
@@ -759,13 +769,11 @@ final class TaskRecord {
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_NEVER:
-                mLockTaskAuth = mPrivileged ?
-                        LOCK_TASK_AUTH_DONT_LOCK : LOCK_TASK_AUTH_PINNABLE;
+                mLockTaskAuth = LOCK_TASK_AUTH_DONT_LOCK;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_ALWAYS:
-                mLockTaskAuth = mPrivileged ?
-                        LOCK_TASK_AUTH_LAUNCHABLE: LOCK_TASK_AUTH_PINNABLE;
+                mLockTaskAuth = LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
