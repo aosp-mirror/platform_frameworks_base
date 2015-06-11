@@ -2275,7 +2275,7 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 final String alias = getCaCertAlias(certBuffer);
-                mService.uninstallCaCert(admin, alias);
+                mService.uninstallCaCerts(admin, new String[] {alias});
             } catch (CertificateException e) {
                 Log.w(TAG, "Unable to parse certificate", e);
             } catch (RemoteException e) {
@@ -2322,12 +2322,11 @@ public class DevicePolicyManager {
      */
     public void uninstallAllUserCaCerts(@Nullable ComponentName admin) {
         if (mService != null) {
-            for (String alias : new TrustedCertificateStore().userAliases()) {
-                try {
-                    mService.uninstallCaCert(admin, alias);
-                } catch (RemoteException re) {
-                    Log.w(TAG, "Failed talking with device policy service", re);
-                }
+            try {
+                mService.uninstallCaCerts(admin, new TrustedCertificateStore().userAliases()
+                        .toArray(new String[0]));
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed talking with device policy service", re);
             }
         }
     }
