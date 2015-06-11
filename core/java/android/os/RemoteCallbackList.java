@@ -77,7 +77,6 @@ public class RemoteCallbackList<E extends IInterface> {
     public boolean register(E callback) {
         return register(callback, null);
     }
-    
     /**
      * Add a new callback to the list.  This callback will remain in the list
      * until a corresponding call to {@link #unregister} or its hosting process

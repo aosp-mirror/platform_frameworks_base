@@ -224,6 +224,18 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void addOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public void removeOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int checkSignatures(String pkg1, String pkg2) {
         throw new UnsupportedOperationException();
