@@ -6368,6 +6368,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
             derivePackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
+
+            // Some system apps still use directory structure for native libraries
+            // in which case we might end up not detecting abi solely based on apk
+            // structure. Try to detect abi based on directory structure.
+            if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
+                    pkg.applicationInfo.primaryCpuAbi == null) {
+                setBundledAppAbisAndRoots(pkg, pkgSetting);
+                setNativeLibraryPaths(pkg);
+            }
+
         } else {
             if ((scanFlags & SCAN_MOVE) != 0) {
                 // We haven't run dex-opt for this move (since we've moved the compiled output too)
@@ -7269,6 +7279,33 @@ public class PackageManagerService extends IPackageManager.Stub {
                 info.secondaryNativeLibraryDir = new File(info.nativeLibraryRootDir,
                         VMRuntime.getInstructionSet(info.secondaryCpuAbi)).getAbsolutePath();
             }
+        }
+    }
+
+    /**
+     * Calculate the abis and roots for a bundled app. These can uniquely
+     * be determined from the contents of the system partition, i.e whether
+     * it contains 64 or 32 bit shared libraries etc. We do not validate any
+     * of this information, and instead assume that the system was built
+     * sensibly.
+     */
+    private void setBundledAppAbisAndRoots(PackageParser.Package pkg,
+                                           PackageSetting pkgSetting) {
+        final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
+
+        // If "/system/lib64/apkname" exists, assume that is the per-package
+        // native library directory to use; otherwise use "/system/lib/apkname".
+        final String apkRoot = calculateBundledApkRoot(pkg.applicationInfo.sourceDir);
+        setBundledAppAbi(pkg, apkRoot, apkName);
+        // pkgSetting might be null during rescan following uninstall of updates
+        // to a bundled app, so accommodate that possibility.  The settings in
+        // that case will be established later from the parsed package.
+        //
+        // If the settings aren't null, sync them up with what we've just derived.
+        // note that apkRoot isn't stored in the package settings.
+        if (pkgSetting != null) {
+            pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
+            pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         }
     }
 
