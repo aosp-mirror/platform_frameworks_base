@@ -2306,5 +2306,6 @@
   <java-symbol type="string" name="ext_media_status_missing" />
   <java-symbol type="string" name="ext_media_unsupported_notification_message" />
   <java-symbol type="string" name="ext_media_unsupported_notification_title" />
+  <java-symbol type="plurals" name="selected_count" />
 
 </resources>
