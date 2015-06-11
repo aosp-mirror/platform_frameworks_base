@@ -1058,18 +1058,20 @@
          lockTask mode is disabled.
          <p>While in lockTask mode with multiple permitted tasks running, each launched task is
          permitted to finish, transitioning to the previous locked task, until there is only one
-         task remaining. At that point the last task running is not permitted to finish. -->
+         task remaining. At that point the last task running is not permitted to finish, unless it
+         uses the value always. -->
     <attr name="lockTaskMode">
         <!-- This is the default value. Tasks will not launch into lockTask mode but can be
              placed there by calling {@link android.app.Activity#startLockTask}. If a task with
              this mode has been whitelisted using {@link
-             android.app.admin.DevicePolicyManager#setLockTaskPackages} then calling startLockTask
-             will enter lockTask mode immediately, otherwise the user will be presented with a
-             dialog to approve entering lockTask mode.
+             android.app.admin.DevicePolicyManager#setLockTaskPackages} then calling
+             {@link android.app.Activity#startLockTask} will enter lockTask mode immediately,
+             otherwise the user will be presented with a dialog to approve entering pinned mode.
              <p>If the system is already in lockTask mode when a new task rooted at this activity
              is launched that task will or will not start depending on whether the package of this
              activity has been whitelisted.
-             <p>Tasks rooted at this activity can only exit lockTask mode using stopLockTask(). -->
+             <p>Tasks rooted at this activity can only exit lockTask mode using
+             {@link android.app.Activity#stopLockTask}. -->
         <enum name="normal" value="0"/>
         <!-- Tasks will not launch into lockTask mode and cannot be placed there using
              {@link android.app.Activity#startLockTask} or be pinned from the Overview screen.
@@ -1082,16 +1084,17 @@
         <!-- Tasks rooted at this activity will always launch into lockTask mode. If the system is
              already in lockTask mode when this task is launched then the new task will be launched
              on top of the current task. Tasks launched in this mode are capable of exiting
-             lockTask mode using finish(), whereas tasks entering lockTask mode using
-             startLockTask() must use stopLockTask() to exit.
+             lockTask mode using {@link android.app.Activity#finish()}.
              <p>Note: This mode is only available to system and privileged applications.
              Non-privileged apps with this value will be treated as normal.
              -->
         <enum name="always" value="2"/>
         <!-- If the DevicePolicyManager (DPM) authorizes this package ({@link
              android.app.admin.DevicePolicyManager#setLockTaskPackages}) then this mode is
-             identical to always. If the DPM does not authorize this package then this
-             mode is identical to normal. -->
+             identical to always, except that the activity needs to call
+             {@link android.app.Activity#stopLockTask} before being able to finish if it is the last
+             locked task.
+             If the DPM does not authorize this package then this mode is identical to normal. -->
         <enum name="if_whitelisted" value="3"/>
     </attr>
     <!-- When set installer will extract native libraries. If set to false

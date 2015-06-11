@@ -3975,6 +3975,9 @@ public class DevicePolicyManager {
      * <p>Any packages that shares uid with an allowed package will also be allowed
      * to activate lock task.
      *
+     * From {@link android.os.Build.VERSION_CODES#MNC} removing packages from the lock task
+     * package list results in locked tasks belonging to those packages to be finished.
+     *
      * This function can only be called by the device owner.
      * @param packages The list of packages allowed to enter lock task mode
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
