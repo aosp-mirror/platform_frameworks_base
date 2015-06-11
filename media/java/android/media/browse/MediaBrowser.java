@@ -375,7 +375,7 @@ public final class MediaBrowser {
      * @param mediaId The id of the item to retrieve.
      * @param cb The callback to receive the result on.
      */
-    public void getMediaItem(@NonNull String mediaId, @NonNull final MediaItemCallback cb) {
+    public void getItem(final @NonNull String mediaId, @NonNull final ItemCallback cb) {
         if (TextUtils.isEmpty(mediaId)) {
             throw new IllegalArgumentException("mediaId is empty.");
         }
@@ -387,7 +387,7 @@ public final class MediaBrowser {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    cb.onError();
+                    cb.onError(mediaId);
                 }
             });
             return;
@@ -397,15 +397,15 @@ public final class MediaBrowser {
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 if (resultCode != 0 || resultData == null
                         || !resultData.containsKey(MediaBrowserService.KEY_MEDIA_ITEM)) {
-                    cb.onError();
+                    cb.onError(mediaId);
                     return;
                 }
                 Parcelable item = resultData.getParcelable(MediaBrowserService.KEY_MEDIA_ITEM);
                 if (!(item instanceof MediaItem)) {
-                    cb.onError();
+                    cb.onError(mediaId);
+                    return;
                 }
-                cb.onMediaItemLoaded((MediaItem) resultData.getParcelable(
-                        MediaBrowserService.KEY_MEDIA_ITEM));
+                cb.onItemLoaded((MediaItem)item);
             }
         };
         try {
@@ -415,7 +415,7 @@ public final class MediaBrowser {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    cb.onError();
+                    cb.onError(mediaId);
                 }
             });
         }
@@ -728,6 +728,9 @@ public final class MediaBrowser {
     public static abstract class SubscriptionCallback {
         /**
          * Called when the list of children is loaded or updated.
+         *
+         * @param parentId The media id of the parent media item.
+         * @param children The children which were loaded.
          */
         public void onChildrenLoaded(@NonNull String parentId,
                                      @NonNull List<MediaItem> children) {
@@ -739,29 +742,32 @@ public final class MediaBrowser {
          * If this is called, the subscription remains until {@link MediaBrowser#unsubscribe}
          * called, because some errors may heal themselves.
          * </p>
+         *
+         * @param parentId The media id of the parent media item whose children could
+         * not be loaded.
          */
-        public void onError(@NonNull String id) {
+        public void onError(@NonNull String parentId) {
         }
     }
 
     /**
-     * Callback for receiving the result of {@link #getMediaItem}.
+     * Callback for receiving the result of {@link #getItem}.
      */
-    public static abstract class MediaItemCallback {
-
+    public static abstract class ItemCallback {
         /**
          * Called when the item has been returned by the browser service.
          *
          * @param item The item that was returned or null if it doesn't exist.
          */
-        public void onMediaItemLoaded(MediaItem item) {
+        public void onItemLoaded(MediaItem item) {
         }
 
         /**
-         * Called when the id doesn't exist or there was an error retrieving the
-         * item.
+         * Called when the item doesn't exist or there was an error retrieving it.
+         *
+         * @param itemId The media id of the media item which could not be loaded.
          */
-        public void onError() {
+        public void onError(@NonNull String itemId) {
         }
     }
 
