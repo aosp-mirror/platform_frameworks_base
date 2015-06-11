@@ -51,7 +51,10 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static android.Manifest.permission.AUTHENTICATE_ACCOUNTS;
 import static android.Manifest.permission.GET_ACCOUNTS;
+import static android.Manifest.permission.MANAGE_ACCOUNTS;
+import static android.Manifest.permission.USE_CREDENTIALS;
 
 /**
  * This class provides access to a centralized registry of the user's
@@ -316,12 +319,14 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that owns the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
      *
-     * @param account The account to query for a password. Must not be {@code null}.
+     * @param account The account to query for a password
      * @return The account's password, null if none or if the account doesn't exist
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public String getPassword(final Account account) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -340,12 +345,14 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that owns the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
      *
      * @param account The account to query for user data
      * @return The user data, null if the account or key doesn't exist
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public String getUserData(final Account account, final String key) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (key == null) throw new IllegalArgumentException("key is null");
@@ -655,8 +662,10 @@ public class AccountManager {
      * wizards associated with authenticators, not directly by applications.
      *
      * <p>It is safe to call this method from the main thread.
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that owns the specified account.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the added account's authenticator.
      *
      * @param account The {@link Account} to add
      * @param password The password to associate with the account, null for none
@@ -664,6 +673,7 @@ public class AccountManager {
      * @return True if the account was successfully added, false if the account
      *     already exists, the account is null, or another error occurs.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -682,13 +692,14 @@ public class AccountManager {
      * <p>
      * It is not safe to call this method from the main thread. As such, call it
      * from another thread.
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that owns the specified account.
+     * <p>
+     * This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and should be
+     * called from the account's authenticator.
      *
      * @param account The {@link Account} to be updated.
-     * @return boolean {@code true} if the authentication of the account has been successfully
-     *         acknowledged. Otherwise {@code false}.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public boolean notifyAccountAuthenticated(Account account) {
         if (account == null)
             throw new IllegalArgumentException("account is null");
@@ -706,8 +717,9 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and have the same UID as the account's authenticator.
      *
      * @param account The {@link Account} to rename
      * @param newName String name to be associated with the account.
@@ -719,6 +731,7 @@ public class AccountManager {
      *     after the name change. If successful the account's name will be the
      *     specified new name.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public AccountManagerFuture<Account> renameAccount(
             final Account account,
             @Size(min = 1) final String newName,
@@ -770,8 +783,11 @@ public class AccountManager {
      * The authenticator may have its own policies preventing account
      * deletion, in which case the account will not be deleted.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
      *
      * @param account The {@link Account} to remove
      * @param callback Callback to invoke when the request completes,
@@ -784,16 +800,15 @@ public class AccountManager {
      *     {@link #removeAccount(Account, Activity, AccountManagerCallback, Handler)}
      *     instead
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     @Deprecated
     public AccountManagerFuture<Boolean> removeAccount(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         return new Future2Task<Boolean>(handler, callback) {
-            @Override
             public void doWork() throws RemoteException {
                 mService.removeAccount(mResponse, account, false);
             }
-            @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
                     throw new AuthenticatorException("no result in response");
@@ -812,8 +827,8 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
      *
      * @param account The {@link Account} to remove
      * @param activity The {@link Activity} context to use for launching a new
@@ -840,11 +855,11 @@ public class AccountManager {
      *      adding accounts (of this type) has been disabled by policy
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> removeAccount(final Account account,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         return new AmsTask(activity, handler, callback) {
-            @Override
             public void doWork() throws RemoteException {
                 mService.removeAccount(mResponse, account, activity != null);
             }
@@ -865,11 +880,9 @@ public class AccountManager {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (userHandle == null) throw new IllegalArgumentException("userHandle is null");
         return new Future2Task<Boolean>(handler, callback) {
-            @Override
             public void doWork() throws RemoteException {
                 mService.removeAccountAsUser(mResponse, account, false, userHandle.getIdentifier());
             }
-            @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
                     throw new AuthenticatorException("no result in response");
@@ -905,14 +918,17 @@ public class AccountManager {
      * in which case the account will not be deleted.
      * <p>
      * It is safe to call this method from the main thread.
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>
+     * This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and to have the
+     * same UID or signature as the account's authenticator.
      *
      * @param account The {@link Account} to delete.
      * @return True if the account was successfully deleted, false if the
      *         account did not exist, the account is null, or another error
      *         occurs.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public boolean removeAccountExplicitly(Account account) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -932,9 +948,14 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS} or
+     * {@link android.Manifest.permission#USE_CREDENTIALS}
+     *
      * @param accountType The account type of the auth token to invalidate, must not be null
      * @param authToken The auth token to invalidate, may be null
      */
+    @RequiresPermission(anyOf = {MANAGE_ACCOUNTS, USE_CREDENTIALS})
     public void invalidateAuthToken(final String accountType, final String authToken) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         try {
@@ -955,15 +976,16 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
      *
-     * @param account The account for which an auth token is to be fetched. Cannot be {@code null}.
-     * @param authTokenType The type of auth token to fetch. Cannot be {@code null}. 
+     * @param account The account to fetch an auth token for
+     * @param authTokenType The type of auth token to fetch, see {#getAuthToken}
      * @return The cached auth token for this account and type, or null if
      *     no auth token is cached or the account does not exist.
-     * @see #getAuthToken
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public String peekAuthToken(final Account account, final String authTokenType) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -983,12 +1005,14 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and have the same UID as the account's authenticator.
      *
-     * @param account The account whose password is to be set. Cannot be {@code null}.
+     * @param account The account to set a password for
      * @param password The password to set, null to clear the password
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public void setPassword(final Account account, final String password) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -1006,14 +1030,14 @@ public class AccountManager {
      * permissions, and may be used by applications or management interfaces
      * to "sign out" from an account.
      *
-     * <p>This method only successfully clear the account's password when the
-     * caller has the same signature as the authenticator that owns the
-     * specified account. Otherwise, this method will silently fail.
-     *
      * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}
      *
      * @param account The account whose password to clear
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public void clearPassword(final Account account) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -1031,13 +1055,15 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
      *
-     * @param account Account whose user data is to be set. Must not be {@code null}.
-     * @param key String user data key to set.  Must not be null
-     * @param value String value to set, {@code null} to clear this user data key
+     * @param account The account to set the userdata for
+     * @param key The userdata key to set.  Must not be null
+     * @param value The value to set, null to clear this userdata key
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public void setUserData(final Account account, final String key, final String value) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (key == null) throw new IllegalArgumentException("key is null");
@@ -1057,13 +1083,15 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
      *
      * @param account The account to set an auth token for
      * @param authTokenType The type of the auth token, see {#getAuthToken}
      * @param authToken The auth token to add to the cache
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public void setAuthToken(Account account, final String authTokenType, final String authToken) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -1082,6 +1110,9 @@ public class AccountManager {
      * <p>This method may block while a network request completes, and must
      * never be made from the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, see {@link #getAuthToken getAuthToken()}
      * @param notifyAuthFailure If true, display a notification and return null
@@ -1095,6 +1126,7 @@ public class AccountManager {
      * @throws java.io.IOException if the authenticator experienced an I/O problem
      *     creating a new auth token, usually because of network trouble
      */
+    @RequiresPermission(USE_CREDENTIALS)
     public String blockingGetAuthToken(Account account, String authTokenType,
             boolean notifyAuthFailure)
             throws OperationCanceledException, IOException, AuthenticatorException {
@@ -1133,6 +1165,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, an authenticator-dependent
      *     string token, must not be null
@@ -1166,6 +1201,7 @@ public class AccountManager {
      * authenticator-dependent.  The caller should verify the validity of the
      * account before requesting an auth token.
      */
+    @RequiresPermission(USE_CREDENTIALS)
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final Bundle options,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
@@ -1217,6 +1253,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, an authenticator-dependent
      *     string token, must not be null
@@ -1253,6 +1292,7 @@ public class AccountManager {
      * boolean, AccountManagerCallback, android.os.Handler)} instead
      */
     @Deprecated
+    @RequiresPermission(USE_CREDENTIALS)
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType,
             final boolean notifyAuthFailure,
@@ -1293,6 +1333,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, an authenticator-dependent
      *     string token, must not be null
@@ -1328,6 +1371,7 @@ public class AccountManager {
      * authenticator-dependent.  The caller should verify the validity of the
      * account before requesting an auth token.
      */
+    @RequiresPermission(USE_CREDENTIALS)
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final Bundle options,
             final boolean notifyAuthFailure,
@@ -1356,6 +1400,9 @@ public class AccountManager {
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
      *
      * @param accountType The type of account to add; must not be null
      * @param authTokenType The type of auth token (see {@link #getAuthToken})
@@ -1394,6 +1441,7 @@ public class AccountManager {
      *      creating a new account, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> addAccount(final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final Bundle addAccountOptions,
@@ -1538,6 +1586,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
      * @param account The account to confirm password knowledge for
      * @param options Authenticator-specific options for the request;
      *     if the {@link #KEY_PASSWORD} string field is present, the
@@ -1564,11 +1615,11 @@ public class AccountManager {
      * If no activity or password was specified, the returned Bundle contains
      * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
      * password prompt.
-     *
+     * 
      * <p>Also the returning Bundle may contain {@link
      * #KEY_LAST_AUTHENTICATED_TIME} indicating the last time the
      * credential was validated/created.
-     *
+     * 
      * If an error occurred,{@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if the authenticator failed to respond
@@ -1578,6 +1629,7 @@ public class AccountManager {
      *      verifying the password, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> confirmCredentials(final Account account,
             final Bundle options,
             final Activity activity,
@@ -1616,6 +1668,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
      * @param account The account to update credentials for
      * @param authTokenType The credentials entered must allow an auth token
      *     of this type to be created (but no actual auth token is returned);
@@ -1651,6 +1706,7 @@ public class AccountManager {
      *      verifying the password, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> updateCredentials(final Account account,
             final String authTokenType,
             final Bundle options, final Activity activity,
@@ -1673,8 +1729,8 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
-     * <p>This method requires the caller to have the same signature as the
-     * authenticator associated with the specified account type.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
      *
      * @param accountType The account type associated with the authenticator
      *     to adjust
@@ -1702,6 +1758,7 @@ public class AccountManager {
      *      updating settings, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> editProperties(final String accountType,
             final Activity activity, final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
@@ -2196,6 +2253,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
      * @param accountType The account type required
      *     (see {@link #getAccountsByType}), must not be null
      * @param authTokenType The desired auth token type
@@ -2232,6 +2292,7 @@ public class AccountManager {
      *      updating settings, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> getAuthTokenByFeatures(
             final String accountType, final String authTokenType, final String[] features,
             final Activity activity, final Bundle addAccountOptions,
