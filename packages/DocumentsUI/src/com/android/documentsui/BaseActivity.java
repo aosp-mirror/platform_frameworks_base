@@ -102,7 +102,7 @@ abstract class BaseActivity extends Activity {
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.activity, menu);
-        mSearchManager.install(menu.findItem(R.id.menu_search));
+        mSearchManager.install((DocumentsToolBar) findViewById(R.id.toolbar));
 
         return showMenu;
     }
@@ -690,19 +690,24 @@ abstract class BaseActivity extends Activity {
      * Facade over the various search parts in the menu.
      */
     final class SearchManager implements
-            SearchView.OnCloseListener, OnActionExpandListener, OnQueryTextListener {
+            SearchView.OnCloseListener, OnActionExpandListener, OnQueryTextListener,
+            DocumentsToolBar.OnActionViewCollapsedListener {
 
         private boolean mSearchExpanded;
         private boolean mIgnoreNextClose;
         private boolean mIgnoreNextCollapse;
 
+        private DocumentsToolBar mActionBar;
         private MenuItem mMenu;
         private SearchView mView;
 
-        public void install(MenuItem menu) {
-            mMenu = menu;
-            mView = (SearchView) menu.getActionView();
+        public void install(DocumentsToolBar actionBar) {
+            assert(mActionBar == null);
+            mActionBar = actionBar;
+            mMenu = actionBar.getSearchMenu();
+            mView = (SearchView) mMenu.getActionView();
 
+            mActionBar.setOnActionViewCollapsedListener(this);
             mMenu.setOnActionExpandListener(this);
             mView.setOnQueryTextListener(this);
             mView.setOnCloseListener(this);
@@ -753,6 +758,19 @@ abstract class BaseActivity extends Activity {
             }
         }
 
+        /**
+         * Cancels current search operation.
+         * @return True if it cancels search. False if it does not operate
+         *     search currently.
+         */
+        boolean cancelSearch() {
+            if (mActionBar.hasExpandedActionView()) {
+                mActionBar.collapseActionView();
+                return true;
+            }
+            return false;
+        }
+
         boolean isSearching() {
             return getDisplayState().currentSearch != null;
         }
@@ -788,7 +806,6 @@ abstract class BaseActivity extends Activity {
                 mIgnoreNextCollapse = false;
                 return true;
             }
-
             getDisplayState().currentSearch = null;
             onCurrentDirectoryChanged(ANIM_NONE);
             return true;
@@ -806,6 +823,11 @@ abstract class BaseActivity extends Activity {
         @Override
         public boolean onQueryTextChange(String newText) {
             return false;
+        }
+
+        @Override
+        public void onActionViewCollapsed() {
+            updateActionBar();
         }
     }
 }
