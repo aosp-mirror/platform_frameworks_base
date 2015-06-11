@@ -9524,6 +9524,7 @@ package android.content.pm {
 
   public abstract class PackageManager {
     ctor public PackageManager();
+    method public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract deprecated void addPackageToPreferred(java.lang.String);
     method public abstract boolean addPermission(android.content.pm.PermissionInfo);
     method public abstract boolean addPermissionAsync(android.content.pm.PermissionInfo);
@@ -9597,6 +9598,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentServices(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract deprecated void removePackageFromPreferred(java.lang.String);
     method public abstract void removePermission(java.lang.String);
     method public abstract android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
@@ -9770,6 +9772,10 @@ package android.content.pm {
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
     ctor public PackageManager.NameNotFoundException();
     ctor public PackageManager.NameNotFoundException(java.lang.String);
+  }
+
+  public static abstract interface PackageManager.OnPermissionsChangedListener {
+    method public abstract void onPermissionsChanged(int);
   }
 
   public static abstract class PackageManager.PermissionFlags implements java.lang.annotation.Annotation {
@@ -34181,6 +34187,7 @@ package android.test.mock {
 
   public class MockPackageManager extends android.content.pm.PackageManager {
     ctor public MockPackageManager();
+    method public void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void addPackageToPreferred(java.lang.String);
     method public boolean addPermission(android.content.pm.PermissionInfo);
     method public boolean addPermissionAsync(android.content.pm.PermissionInfo);
@@ -34255,6 +34262,7 @@ package android.test.mock {
     method public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(android.content.Intent, int);
     method public java.util.List<android.content.pm.ResolveInfo> queryIntentServices(android.content.Intent, int);
     method public java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void removePackageFromPreferred(java.lang.String);
     method public void removePermission(java.lang.String);
     method public android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
