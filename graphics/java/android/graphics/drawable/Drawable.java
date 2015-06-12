@@ -809,6 +809,14 @@ public abstract class Drawable {
      * {@link android.graphics.PixelFormat#TRANSPARENT}, or
      * {@link android.graphics.PixelFormat#OPAQUE}.
      *
+     * <p>An OPAQUE drawable is one that draws all all content within its bounds, completely
+     * covering anything behind the drawable. A TRANSPARENT drawable is one that draws nothing
+     * within its bounds, allowing everything behind it to show through. A TRANSLUCENT drawable
+     * is a drawable in any other state, where the drawable will draw some, but not all,
+     * of the content within its bounds and at least some content behind the drawable will
+     * be visible. If the visibility of the drawable's contents cannot be determined, the
+     * safest/best return value is TRANSLUCENT.
+     *
      * <p>Generally a Drawable should be as conservative as possible with the
      * value it returns.  For example, if it contains multiple child drawables
      * and only shows one of them at a time, if only one of the children is
