@@ -86,5 +86,9 @@
     <declare-styleable name="StatusBarWindowView_Layout">
         <attr name="ignoreRightInset" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="AlphaOptimizedImageView">
+        <attr name="hasOverlappingRendering" format="boolean" />
+    </declare-styleable>
 </resources>
 
