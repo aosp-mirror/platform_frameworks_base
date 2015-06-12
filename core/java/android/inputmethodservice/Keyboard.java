@@ -410,7 +410,8 @@ public class Keyboard {
          * <ul>
          *     <li>This is a sticky key, that is, {@link #sticky} is {@code true}.
          *     <li>The parameter {@code inside} is {@code true}.
-         *     <li>{@link Build.VERSION.SDK_INT} is greater than {@link VERSION_CODES.LOLLIPOP_MR1}.
+         *     <li>{@link android.os.Build.VERSION#SDK_INT} is greater than
+         *         {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
          * </ul>
          *
          * @param inside whether the finger was released inside the key. Works only on Android M and
