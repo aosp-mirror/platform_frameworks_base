@@ -578,6 +578,11 @@
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_dictionary">Read or write words in user dictionary.</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_bookmarks">Bookmarks and History</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_bookmarks">Direct access to bookmarks and browser history.</string>
+
     <!-- Title of a category of application permissioncds, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -2249,6 +2254,41 @@
 
     <!-- Label in a web form for "Emirate" [CHAR-LIMIT=NONE]  -->
     <string name="autofill_emirate">Emirate</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permlab_readHistoryBookmarks">read your Web bookmarks and history</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_readHistoryBookmarks">Allows the app to read the
+     history of all URLs that the Browser has visited, and all of the Browser\'s
+     bookmarks. Note: this permission may not be enforced by third-party
+     browsers or other  applications with web browsing capabilities.</string>
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+
+    <string name="permlab_writeHistoryBookmarks">write web bookmarks and history</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_writeHistoryBookmarks" product="tablet">Allows the
+        app to modify the Browser\'s history or bookmarks stored on your tablet.
+        This may allow the app to erase or modify Browser data.  Note: this
+        permission may note be enforced by third-party browsers or other
+        applications with web browsing capabilities.</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_writeHistoryBookmarks" product="tv">Allows the
+        app to modify the Browser\'s history or bookmarks stored on your TV.
+        This may allow the app to erase or modify Browser data.  Note: this
+        permission may note be enforced by third-party browsers or other
+        applications with web browsing capabilities.</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_writeHistoryBookmarks" product="default">Allows the
+        app to modify the Browser\'s history or bookmarks stored on your phone.
+        This may allow the app to erase or modify Browser data.  Note:
+        this permission may note be enforced by third-party browsers or other
+        applications with web browsing capabilities.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
     they want to allow the application to do this. -->
