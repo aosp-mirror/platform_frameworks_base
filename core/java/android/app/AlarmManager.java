@@ -142,13 +142,22 @@ public class AlarmManager {
     public static final int FLAG_ALLOW_WHILE_IDLE = 1<<2;
 
     /**
+     * Flag for alarms: same as {@link #FLAG_ALLOW_WHILE_IDLE}, but doesn't have restrictions
+     * on how frequently it can be scheduled.  Only available (and automatically applied) to
+     * system alarms.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED = 1<<3;
+
+    /**
      * Flag for alarms: this alarm marks the point where we would like to come out of idle
      * mode.  It may be moved by the alarm manager to match the first wake-from-idle alarm.
      * Scheduling an alarm with this flag puts the alarm manager in to idle mode, where it
      * avoids scheduling any further alarms until the marker alarm is executed.
      * @hide
      */
-    public static final int FLAG_IDLE_UNTIL = 1<<3;
+    public static final int FLAG_IDLE_UNTIL = 1<<4;
 
     private final IAlarmManager mService;
     private final boolean mAlwaysExact;
@@ -565,6 +574,12 @@ public class AlarmManager {
      * of the device when idle (and thus cause significant battery blame to the app scheduling
      * them), so they should be used with care.
      *
+     * <p>To reduce abuse, there are restrictions on how frequently these alarms will go off
+     * for a particular application.  Under normal system operation, it will not dispatch these
+     * alarms more than about every minute (at which point every such pending alarm is
+     * dispatched); when in low-power idle modes this duration may be significantly longer,
+     * such as 15 minutes.</p>
+     *
      * <p>Unlike other alarms, the system is free to reschedule this type of alarm to happen
      * out of order with any other alarms, even those from the same app.  This will clearly happen
      * when the device is idle (since this alarm can go off while idle, when any other alarms
@@ -607,6 +622,12 @@ public class AlarmManager {
      * sound so the user is aware of it.  These alarms can significantly impact the power use
      * of the device when idle (and thus cause significant battery blame to the app scheduling
      * them), so they should be used with care.
+     *
+     * <p>To reduce abuse, there are restrictions on how frequently these alarms will go off
+     * for a particular application.  Under normal system operation, it will not dispatch these
+     * alarms more than about every minute (at which point every such pending alarm is
+     * dispatched); when in low-power idle modes this duration may be significantly longer,
+     * such as 15 minutes.</p>
      *
      * <p>Unlike other alarms, the system is free to reschedule this type of alarm to happen
      * out of order with any other alarms, even those from the same app.  This will clearly happen
