@@ -17,34 +17,49 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.android.systemui.R;
+
 /**
- * An ImageView which does not have overlapping rendering commands and therefore does not need a
- * layer when alpha is changed.
+ * An ImageView which supports an attribute specifying whether it has overlapping rendering
+ * commands and therefore does not need a layer when alpha is changed.
  */
-public class AlphaOptimizedImageView extends ImageView
-{
+public class AlphaOptimizedImageView extends ImageView {
+    private final boolean mHasOverlappingRendering;
+
     public AlphaOptimizedImageView(Context context) {
-        super(context);
+        this(context, null /* attrs */);
     }
 
     public AlphaOptimizedImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0 /* defStyleAttr */);
     }
 
     public AlphaOptimizedImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0 /* defStyleRes */);
     }
 
     public AlphaOptimizedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
+                R.styleable.AlphaOptimizedImageView, 0, 0);
+
+        try {
+            // Default to true, which is what View.java defaults to
+            mHasOverlappingRendering = a.getBoolean(
+                    R.styleable.AlphaOptimizedImageView_hasOverlappingRendering, true);
+        } finally {
+            a.recycle();
+        }
     }
 
     @Override
     public boolean hasOverlappingRendering() {
-        return false;
+        return mHasOverlappingRendering;
     }
 }

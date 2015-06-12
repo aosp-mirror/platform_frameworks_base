@@ -20,6 +20,7 @@
 <!-- extends LinearLayout -->
 <com.android.systemui.statusbar.SignalClusterView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     android:gravity="center_vertical"
@@ -43,6 +44,7 @@
             android:id="@+id/ethernet"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            systemui:hasOverlappingRendering="false"
             />
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:theme="@style/DualToneDarkTheme"
@@ -50,6 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:alpha="0.0"
+            systemui:hasOverlappingRendering="false"
             />
     </FrameLayout>
     <FrameLayout
@@ -62,6 +65,7 @@
             android:id="@+id/wifi_signal"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            systemui:hasOverlappingRendering="false"
             />
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:theme="@style/DualToneDarkTheme"
@@ -69,6 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:alpha="0.0"
+            systemui:hasOverlappingRendering="false"
             />
     </FrameLayout>
     <View
@@ -94,6 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:src="@drawable/stat_sys_no_sims"
+            systemui:hasOverlappingRendering="false"
             />
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:theme="@style/DualToneDarkTheme"
@@ -102,6 +108,7 @@
             android:layout_width="wrap_content"
             android:src="@drawable/stat_sys_no_sims"
             android:alpha="0.0"
+            systemui:hasOverlappingRendering="false"
             />
     </FrameLayout>
     <View
