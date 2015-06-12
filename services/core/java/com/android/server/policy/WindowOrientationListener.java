@@ -24,10 +24,10 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.util.Log;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * A special helper class used by the WindowManager
@@ -40,8 +40,6 @@ import java.io.PrintWriter;
  *
  * You can also visualize the behavior of the WindowOrientationListener.
  * Refer to frameworks/base/tools/orientationplot/README.txt for details.
- *
- * @hide
  */
 public abstract class WindowOrientationListener {
     private static final String TAG = "WindowOrientationListener";
@@ -90,7 +88,7 @@ public abstract class WindowOrientationListener {
                 ? Sensor.TYPE_GRAVITY : Sensor.TYPE_ACCELEROMETER);
         if (mSensor != null) {
             // Create listener only if sensors do exist
-            mSensorEventListener = new SensorEventListenerImpl();
+            mSensorEventListener = new SensorEventListenerImpl(context);
         }
     }
 
@@ -101,12 +99,12 @@ public abstract class WindowOrientationListener {
     public void enable() {
         synchronized (mLock) {
             if (mSensor == null) {
-                Log.w(TAG, "Cannot detect sensors. Not enabled");
+                Slog.w(TAG, "Cannot detect sensors. Not enabled");
                 return;
             }
             if (mEnabled == false) {
                 if (LOG) {
-                    Log.d(TAG, "WindowOrientationListener enabled");
+                    Slog.d(TAG, "WindowOrientationListener enabled");
                 }
                 mSensorEventListener.resetLocked();
                 mSensorManager.registerListener(mSensorEventListener, mSensor, mRate, mHandler);
@@ -121,12 +119,12 @@ public abstract class WindowOrientationListener {
     public void disable() {
         synchronized (mLock) {
             if (mSensor == null) {
-                Log.w(TAG, "Cannot detect sensors. Invalid disable");
+                Slog.w(TAG, "Cannot detect sensors. Invalid disable");
                 return;
             }
             if (mEnabled == true) {
                 if (LOG) {
-                    Log.d(TAG, "WindowOrientationListener disabled");
+                    Slog.d(TAG, "WindowOrientationListener disabled");
                 }
                 mSensorManager.unregisterListener(mSensorEventListener);
                 mEnabled = false;
@@ -296,7 +294,7 @@ public abstract class WindowOrientationListener {
         // If the tilt angle remains greater than the specified angle for a minimum of
         // the specified time, then the device is deemed to be lying flat
         // (just chillin' on a table).
-        private static final float FLAT_ANGLE = 75;
+        private static final float FLAT_ANGLE = 80;
         private static final long FLAT_TIME_NANOS = 1000 * NANOS_PER_MS;
 
         // If the tilt angle has increased by at least delta degrees within the specified amount
@@ -361,8 +359,24 @@ public abstract class WindowOrientationListener {
             SensorManager.STANDARD_GRAVITY + ACCELERATION_TOLERANCE;
 
         // Maximum absolute tilt angle at which to consider orientation data.  Beyond this (i.e.
-        // when screen is facing the sky or ground), we completely ignore orientation data.
-        private static final int MAX_TILT = 75;
+        // when screen is facing the sky or ground), we completely ignore orientation data
+        // because it's too unstable.
+        private static final int MAX_TILT = 80;
+
+        // The tilt angle below which we conclude that the user is holding the device
+        // overhead reading in bed and lock into that state.
+        private static final int TILT_OVERHEAD_ENTER = -40;
+
+        // The tilt angle above which we conclude that the user would like a rotation
+        // change to occur and unlock from the overhead state.
+        private static final int TILT_OVERHEAD_EXIT = -15;
+
+        // The gap angle in degrees between adjacent orientation angles for hysteresis.
+        // This creates a "dead zone" between the current orientation and a proposed
+        // adjacent orientation.  No orientation proposal is made when the orientation
+        // angle is within the gap between the current orientation and the adjacent
+        // orientation.
+        private static final int ADJACENT_ORIENTATION_ANGLE_GAP = 45;
 
         // The tilt angle range in degrees for each orientation.
         // Beyond these tilt angles, we don't even consider transitioning into the
@@ -375,27 +389,12 @@ public abstract class WindowOrientationListener {
         // facing up (resting on a table).
         // The ideal tilt angle is 0 (when the device is vertical) so the limits establish
         // how close to vertical the device must be in order to change orientation.
-        private final int[][] TILT_TOLERANCE = new int[][] {
-            /* ROTATION_0   */ { -25, 70 },
+        private final int[][] mTiltToleranceConfig = new int[][] {
+            /* ROTATION_0   */ { -25, 70 }, // note: these are overridden by config.xml
             /* ROTATION_90  */ { -25, 65 },
             /* ROTATION_180 */ { -25, 60 },
             /* ROTATION_270 */ { -25, 65 }
         };
-
-        // The tilt angle below which we conclude that the user is holding the device
-        // overhead reading in bed and lock into that state.
-        private final int TILT_OVERHEAD_ENTER = -40;
-
-        // The tilt angle above which we conclude that the user would like a rotation
-        // change to occur and unlock from the overhead state.
-        private final int TILT_OVERHEAD_EXIT = -15;
-
-        // The gap angle in degrees between adjacent orientation angles for hysteresis.
-        // This creates a "dead zone" between the current orientation and a proposed
-        // adjacent orientation.  No orientation proposal is made when the orientation
-        // angle is within the gap between the current orientation and the adjacent
-        // orientation.
-        private static final int ADJACENT_ORIENTATION_ANGLE_GAP = 45;
 
         // Timestamp and value of the last accelerometer sample.
         private long mLastFilteredTimestampNanos;
@@ -430,10 +429,31 @@ public abstract class WindowOrientationListener {
         private boolean mOverhead;
 
         // History of observed tilt angles.
-        private static final int TILT_HISTORY_SIZE = 40;
+        private static final int TILT_HISTORY_SIZE = 200;
         private float[] mTiltHistory = new float[TILT_HISTORY_SIZE];
         private long[] mTiltHistoryTimestampNanos = new long[TILT_HISTORY_SIZE];
         private int mTiltHistoryIndex;
+
+        public SensorEventListenerImpl(Context context) {
+            // Load tilt tolerance configuration.
+            int[] tiltTolerance = context.getResources().getIntArray(
+                    com.android.internal.R.array.config_autoRotationTiltTolerance);
+            if (tiltTolerance.length == 8) {
+                for (int i = 0; i < 4; i++) {
+                    int min = tiltTolerance[i * 2];
+                    int max = tiltTolerance[i * 2 + 1];
+                    if (min >= -90 && min <= max && max <= 90) {
+                        mTiltToleranceConfig[i][0] = min;
+                        mTiltToleranceConfig[i][1] = max;
+                    } else {
+                        Slog.wtf(TAG, "config_autoRotationTiltTolerance contains invalid range: "
+                                + "min=" + min + ", max=" + max);
+                    }
+                }
+            } else {
+                Slog.wtf(TAG, "config_autoRotationTiltTolerance should have exactly 8 elements");
+            }
+        }
 
         public int getProposedRotationLocked() {
             return mProposedRotation;
@@ -451,6 +471,18 @@ public abstract class WindowOrientationListener {
             pw.println(prefix + "mAccelerating=" + mAccelerating);
             pw.println(prefix + "mOverhead=" + mOverhead);
             pw.println(prefix + "mTouched=" + mTouched);
+            pw.print(prefix + "mTiltToleranceConfig=[");
+            for (int i = 0; i < 4; i++) {
+                if (i != 0) {
+                    pw.print(", ");
+                }
+                pw.print("[");
+                pw.print(mTiltToleranceConfig[i][0]);
+                pw.print(", ");
+                pw.print(mTiltToleranceConfig[i][1]);
+                pw.print("]");
+            }
+            pw.println("]");
         }
 
         @Override
@@ -658,8 +690,8 @@ public abstract class WindowOrientationListener {
          * Returns true if the tilt angle is acceptable for a given predicted rotation.
          */
         private boolean isTiltAngleAcceptableLocked(int rotation, int tiltAngle) {
-            return tiltAngle >= TILT_TOLERANCE[rotation][0]
-                    && tiltAngle <= TILT_TOLERANCE[rotation][1];
+            return tiltAngle >= mTiltToleranceConfig[rotation][0]
+                    && tiltAngle <= mTiltToleranceConfig[rotation][1];
         }
 
         /**

@@ -440,7 +440,7 @@ class Plotter:
 # Notice
 print "Window Orientation Listener plotting tool"
 print "-----------------------------------------\n"
-print "Please turn on the Window Orientation Listener logging in Development Settings."
+print "Please turn on the Window Orientation Listener logging.  See README.txt."
 
 # Start adb.
 print "Starting adb logcat.\n"
