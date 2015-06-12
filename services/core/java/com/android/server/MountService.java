@@ -994,6 +994,7 @@ class MountService extends IMountService.Stub
     private void onDiskScannedLocked(DiskInfo disk) {
         final Intent intent = new Intent(DiskInfo.ACTION_DISK_SCANNED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.id);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.WRITE_MEDIA_STORAGE);
 
