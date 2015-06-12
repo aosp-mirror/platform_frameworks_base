@@ -1113,23 +1113,32 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             // correct delta from when we should start reading (aka when we are on battery).
             WifiActivityEnergyInfo info = mWifiManager.reportActivityInfo();
             if (info != null && info.isValid()) {
+                if (info.mControllerEnergyUsed < 0 || info.mControllerIdleTimeMs < 0 ||
+                        info.mControllerRxTimeMs < 0 || info.mControllerTxTimeMs < 0) {
+                    Slog.wtf(TAG, "Reported WiFi energy data is invalid: " + info);
+                    return null;
+                }
+
                 // We will modify the last info object to be the delta, and store the new
                 // WifiActivityEnergyInfo object as our last one.
                 final WifiActivityEnergyInfo result = mLastInfo;
                 result.mTimestamp = info.getTimeStamp();
                 result.mStackState = info.getStackState();
+
+                // These times seem to be the most reliable.
                 result.mControllerTxTimeMs =
                         info.mControllerTxTimeMs - mLastInfo.mControllerTxTimeMs;
                 result.mControllerRxTimeMs =
                         info.mControllerRxTimeMs - mLastInfo.mControllerRxTimeMs;
-                result.mControllerEnergyUsed =
-                        info.mControllerEnergyUsed - mLastInfo.mControllerEnergyUsed;
 
                 // WiFi calculates the idle time as a difference from the on time and the various
                 // Rx + Tx times. There seems to be some missing time there because this sometimes
                 // becomes negative. Just cap it at 0 and move on.
+                // b/21613534
                 result.mControllerIdleTimeMs =
                         Math.max(0, info.mControllerIdleTimeMs - mLastInfo.mControllerIdleTimeMs);
+                result.mControllerEnergyUsed =
+                        Math.max(0, info.mControllerEnergyUsed - mLastInfo.mControllerEnergyUsed);
 
                 if (result.mControllerTxTimeMs < 0 ||
                         result.mControllerRxTimeMs < 0) {
