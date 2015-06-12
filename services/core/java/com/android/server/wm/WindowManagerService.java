@@ -577,8 +577,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public SettingsObserver() {
             super(new Handler());
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(mShowImeWithHardKeyboardUri, false, this);
-            resolver.registerContentObserver(mDisplayInversionEnabledUri, false, this);
+            resolver.registerContentObserver(mShowImeWithHardKeyboardUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDisplayInversionEnabledUri, false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override
