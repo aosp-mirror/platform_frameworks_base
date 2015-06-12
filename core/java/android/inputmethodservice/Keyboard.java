@@ -400,16 +400,26 @@ public class Keyboard {
         public void onPressed() {
             pressed = !pressed;
         }
-        
+
         /**
-         * Changes the pressed state of the key. If it is a sticky key, it will also change the
-         * toggled state of the key if the finger was release inside.
-         * @param inside whether the finger was released inside the key
+         * Changes the pressed state of the key.
+         *
+         * <p>Toggled state of the key will be flipped when all the following conditions are
+         * fulfilled:</p>
+         *
+         * <ul>
+         *     <li>This is a sticky key, that is, {@link #sticky} is {@code true}.
+         *     <li>The parameter {@code inside} is {@code true}.
+         *     <li>{@link Build.VERSION.SDK_INT} is greater than {@link VERSION_CODES.LOLLIPOP_MR1}.
+         * </ul>
+         *
+         * @param inside whether the finger was released inside the key. Works only on Android M and
+         * later. See the method document for details.
          * @see #onPressed()
          */
         public void onReleased(boolean inside) {
             pressed = !pressed;
-            if (sticky) {
+            if (sticky && inside) {
                 on = !on;
             }
         }
