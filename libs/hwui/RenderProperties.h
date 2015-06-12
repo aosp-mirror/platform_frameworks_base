@@ -28,6 +28,7 @@
 #include <SkRegion.h>
 #include <SkXfermode.h>
 
+#include "Caches.h"
 #include "Rect.h"
 #include "RevealClip.h"
 #include "Outline.h"
@@ -577,10 +578,13 @@ public:
     }
 
     bool promotedToLayer() const {
+        const int maxTextureSize = Caches::getInstance().maxTextureSize;
         return mLayerProperties.mType == LayerType::None
                 && !MathUtils::isZero(mPrimitiveFields.mAlpha)
                 && mPrimitiveFields.mAlpha < 1
-                && mPrimitiveFields.mHasOverlappingRendering;
+                && mPrimitiveFields.mHasOverlappingRendering
+                && mPrimitiveFields.mWidth <= maxTextureSize
+                && mPrimitiveFields.mHeight <= maxTextureSize;
     }
 
     LayerType effectiveLayerType() const {

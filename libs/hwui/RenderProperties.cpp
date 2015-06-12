@@ -152,7 +152,24 @@ void RenderProperties::debugOutputProperties(const int level) const {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
         }
 
-        ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
+        if (CC_LIKELY(isLayer || !getHasOverlappingRendering())) {
+            // simply scale rendering content's alpha
+            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
+        } else {
+            // savelayeralpha to create an offscreen buffer to apply alpha
+            Rect layerBounds(0, 0, getWidth(), getHeight());
+            if (clipFlags) {
+                getClippingRectForFlags(clipFlags, &layerBounds);
+                clipFlags = 0; // all clipping done by savelayer
+            }
+            ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
+                    (int)layerBounds.left, (int)layerBounds.top,
+                    (int)layerBounds.right, (int)layerBounds.bottom,
+                    (int)(mPrimitiveFields.mAlpha * 255),
+                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
+        }
+
+
     }
     if (clipFlags) {
         Rect clipRect;
