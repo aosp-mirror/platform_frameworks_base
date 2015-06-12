@@ -2917,6 +2917,42 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"about"
   },
   {
+    "title":"App Configurations, Testing and Launchers",
+    "titleFriendly":"",
+    "summary":"With Android for Work you can make your apps remotely configurable. We also cover how to test your app in a managed environment.",
+    "url":"https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
+    "lang":"en",
+    "type":"about"
+  },
+  {
+    "title":"Building an enterprise ready app",
+    "titleFriendly":"",
+    "summary":"A holistic view of Android for Work for developers.",
+    "url":"https://www.youtube.com/watch?v=dH41OutAMNM",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
+    "lang":"en",
+    "type":"develop"
+  },
+  {
+    "title":"Android for Work: Single Use Devices",
+    "titleFriendly":"",
+    "summary":"Single-purpose computers are everywhere, and Android can meet that need.",
+    "url":"https://www.youtube.com/watch?v=j3QC6hcpy90",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
+    "lang":"en",
+    "type":"about"
+  },
+  {
     "title":"Discover YouTube cards",
     "titleFriendly":"",
     "summary":"Find out more about YouTube cards, the options available, and how to use them to get the most from your YouTube content.",
