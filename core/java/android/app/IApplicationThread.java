@@ -96,8 +96,9 @@ public interface IApplicationThread extends IInterface {
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, ProfilerInfo profilerInfo, Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
-            int debugMode, boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
-            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
+            int debugMode, boolean openGlTrace, boolean trackAllocation,
+            boolean restrictedBackupMode, boolean persistent, Configuration config,
+            CompatibilityInfo compatInfo, Map<String, IBinder> services,
             Bundle coreSettings) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
