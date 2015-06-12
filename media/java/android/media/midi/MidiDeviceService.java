@@ -83,9 +83,7 @@ abstract public class MidiDeviceService extends Service {
             if (inputPortReceivers == null) {
                 inputPortReceivers = new MidiReceiver[0];
             }
-            server = new MidiDeviceServer(mMidiManager, inputPortReceivers,
-                    deviceInfo.getOutputPortCount(), mCallback);
-            server.setDeviceInfo(deviceInfo);
+            server = new MidiDeviceServer(mMidiManager, inputPortReceivers, deviceInfo, mCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in IMidiManager.getServiceDeviceInfo");
             server = null;
