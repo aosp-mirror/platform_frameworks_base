@@ -318,7 +318,6 @@ public final class MidiManager {
                 Log.e(TAG, "registerVirtualDevice failed");
                 return null;
             }
-            server.setDeviceInfo(deviceInfo);
             return server;
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in createVirtualDevice");
