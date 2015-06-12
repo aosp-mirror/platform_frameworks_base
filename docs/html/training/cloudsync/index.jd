@@ -21,10 +21,8 @@ helps you build rich cloud-enabled apps that sync their data to a remote web
 service, making sure all your devices always stay in sync, and your valuable
 data is always backed up to the cloud.</p>
 
-<p>This class covers different strategies for cloud enabled applications.  It
-covers syncing data with the cloud using your own back-end web application, and
-backing up data using the cloud so that users can restore their data when
-installing your application on a new device.
+<p>This class covers strategies for backing up data using the cloud so that
+users can restore their data when installing your application on a new device.
 </p>
 
 <h2>Lessons</h2>
@@ -34,9 +32,5 @@ installing your application on a new device.
   <dd>Learn how to integrate the Backup API into your Android Application, so
   that user data such as preferences, notes, and high scores update seamlessly
   across all of a user's devices</dd>
-  <dt><strong><a href="gcm.html">Making the Most of Google Cloud Messaging</a></strong></dt>
-  <dd>Learn how to efficiently send multicast messages, react intelligently to
-  incoming Google Cloud Messaging (GCM) messages, and use GCM messages to
-  efficiently sync with the server.</dd>
 </dl>
 
