@@ -24,6 +24,6 @@
     android:paddingTop="0dp"
     android:paddingBottom="0dp"
     android:paddingEnd="4dp"
-    android:src="@drawable/ic_menu_moreoverflow_material"
+    android:src="?attr/floatingToolbarOpenDrawable"
     android:contentDescription="@string/floating_toolbar_open_overflow_description"
-    android:background="?attr/selectableItemBackgroundBorderless" />
+    android:background="?attr/floatingToolbarItemBackgroundBorderlessDrawable" />

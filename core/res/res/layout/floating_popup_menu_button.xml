@@ -30,5 +30,5 @@
     android:fontFamily="sans-serif-medium"
     android:textSize="@dimen/floating_toolbar_text_size"
     android:textAllCaps="true"
-    android:textColor="?attr/colorForeground"
-    android:background="?attr/selectableItemBackground" />
+    android:textColor="?attr/floatingToolbarForegroundColor"
+    android:background="?attr/floatingToolbarItemBackgroundDrawable" />
