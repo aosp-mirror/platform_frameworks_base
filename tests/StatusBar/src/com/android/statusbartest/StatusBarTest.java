@@ -153,25 +153,24 @@ public class StatusBarTest extends TestActivity
         },
         new Test("Priority notification") {
             public void run() {
-                Notification not = new Notification();
-                not.icon = R.drawable.stat_sys_phone;
-                not.when = System.currentTimeMillis()-(1000*60*60*24);
-                not.setLatestEventInfo(StatusBarTest.this,
-                                "Incoming call",
-                                "from: Imperious Leader",
-                                null
-                                );
-                not.flags |= Notification.FLAG_HIGH_PRIORITY;
                 Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
                 int id = (int)System.currentTimeMillis(); // XXX HAX
                 fullScreenIntent.putExtra("id", id);
-                not.fullScreenIntent = PendingIntent.getActivity(
+                PendingIntent pi = PendingIntent.getActivity(
                     StatusBarTest.this,
                     0,
                     fullScreenIntent,
                     PendingIntent.FLAG_CANCEL_CURRENT);
-                // if you tap on it you should get the original alert box
-                not.contentIntent = not.fullScreenIntent;
+                Notification not = new Notification.Builder(StatusBarTest.this)
+                        .setSmallIcon(R.drawable.stat_sys_phone)
+                        .setWhen(System.currentTimeMillis() - (1000 * 60 * 60 * 24))
+                        .setContentTitle("Incoming call")
+                        .setContentText("from: Imperious Leader")
+                        .setContentIntent(pi)
+                        .setFullScreenIntent(pi, true)
+                        .setPriority(Notification.PRIORITY_HIGH)
+                        .build();
+
                 mNotificationManager.notify(id, not);
             }
         },
