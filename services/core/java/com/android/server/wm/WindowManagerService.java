@@ -5919,11 +5919,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mContext.getResources().getConfiguration().isScreenRound()
                 && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowShowCircularMask)) {
+            final int currentUserId;
+            synchronized(mWindowMap) {
+                currentUserId = mCurrentUserId;
+            }
             // Device configuration calls for a circular display mask, but we only enable the mask
             // if the accessibility color inversion feature is disabled, as the inverted mask
             // causes artifacts.
             int inversionState = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUserId);
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, currentUserId);
             int showMask = (inversionState == 1) ? 0 : 1;
             Message m = mH.obtainMessage(H.SHOW_CIRCULAR_DISPLAY_MASK);
             m.arg1 = showMask;
@@ -7424,10 +7428,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void updateShowImeWithHardKeyboard() {
-        final boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0,
-                mCurrentUserId) == 1;
         synchronized (mWindowMap) {
+            final boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(), Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0,
+                    mCurrentUserId) == 1;
             if (mShowImeWithHardKeyboard != showImeWithHardKeyboard) {
                 mShowImeWithHardKeyboard = showImeWithHardKeyboard;
                 mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
