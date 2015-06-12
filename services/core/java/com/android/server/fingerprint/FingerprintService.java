@@ -706,9 +706,22 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public long getAuthenticatorId(String opPackageName) {
-            if (!canUseFingerprint(opPackageName)) {
-                return 0;
-            }
+            // In this method, we're not checking whether the caller is permitted to use fingerprint
+            // API because current authenticator ID is leaked (in a more contrived way) via Android
+            // Keystore (android.security.keystore package): the user of that API can create a key
+            // which requires fingerprint authentication for its use, and then query the key's
+            // characteristics (hidden API) which returns, among other things, fingerprint
+            // authenticator ID which was active at key creation time.
+            //
+            // Reason: The part of Android Keystore which runs inside an app's process invokes this
+            // method in certain cases. Those cases are not always where the developer demonstrates
+            // explicit intent to use fingerprint functionality. Thus, to avoiding throwing an
+            // unexpected SecurityException this method does not check whether its caller is
+            // permitted to use fingerprint API.
+            //
+            // The permission check should be restored once Android Keystore no longer invokes this
+            // method from inside app processes.
+
             return FingerprintService.this.getAuthenticatorId();
         }
     }
