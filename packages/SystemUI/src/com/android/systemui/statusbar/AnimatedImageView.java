@@ -25,9 +25,14 @@ import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
 
 @RemoteView
-public class AnimatedImageView extends ImageView {
+public class AnimatedImageView extends AlphaOptimizedImageView {
     AnimationDrawable mAnim;
     boolean mAttached;
+
+    // Tracks the last image that was set, so that we don't refresh the image if it is exactly
+    // the same as the previous one. If this is a resid, we track that. If it's a drawable, we
+    // track the hashcode of the drawable.
+    int mDrawableId;
 
     public AnimatedImageView(Context context) {
         super(context);
@@ -43,7 +48,7 @@ public class AnimatedImageView extends ImageView {
             mAnim.stop();
         }
         if (drawable instanceof AnimationDrawable) {
-            mAnim = (AnimationDrawable)drawable;
+            mAnim = (AnimationDrawable) drawable;
             if (isShown()) {
                 mAnim.start();
             }
@@ -54,6 +59,13 @@ public class AnimatedImageView extends ImageView {
 
     @Override
     public void setImageDrawable(Drawable drawable) {
+        if (drawable != null) {
+            if (mDrawableId == drawable.hashCode()) return;
+
+            mDrawableId = drawable.hashCode();
+        } else {
+            mDrawableId = 0;
+        }
         super.setImageDrawable(drawable);
         updateAnim();
     }
@@ -61,6 +73,9 @@ public class AnimatedImageView extends ImageView {
     @Override
     @android.view.RemotableViewMethod
     public void setImageResource(int resid) {
+        if (mDrawableId == resid) return;
+
+        mDrawableId = resid;
         super.setImageResource(resid);
         updateAnim();
     }
