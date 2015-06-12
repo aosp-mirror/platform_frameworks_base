@@ -101,13 +101,10 @@ public abstract class KeymasterUtils {
             // fingerprint-only auth.
             FingerprintManager fingerprintManager =
                     KeyStore.getApplicationContext().getSystemService(FingerprintManager.class);
-            if ((fingerprintManager == null) || (!fingerprintManager.isHardwareDetected())) {
-                throw new IllegalStateException(
-                        "This device does not support keys which require authentication for every"
-                        + " use -- this requires fingerprint authentication which is not"
-                        + " available on this device");
-            }
-            long fingerprintOnlySid = fingerprintManager.getAuthenticatorId();
+            // TODO: Restore USE_FINGERPRINT permission check in
+            // FingerprintManager.getAuthenticatorId once the ID is no longer needed here.
+            long fingerprintOnlySid =
+                    (fingerprintManager != null) ? fingerprintManager.getAuthenticatorId() : 0;
             if (fingerprintOnlySid == 0) {
                 throw new IllegalStateException(
                         "At least one fingerprint must be enrolled to create keys requiring user"
