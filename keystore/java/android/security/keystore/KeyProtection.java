@@ -305,9 +305,6 @@ public final class KeyProtection implements ProtectionParameter {
          * @param purposes set of purposes (e.g., encrypt, decrypt, sign) for which the key can be
          *        used. Attempts to use the key for any other purpose will be rejected.
          *
-         *        <p><b>NOTE: The {@code purposes} parameter has currently no effect on asymmetric
-         *        key pairs.</b>
-         *
          *        <p>See {@link KeyProperties}.{@code PURPOSE} flags.
          */
         public Builder(@KeyProperties.PurposeEnum int purposes) {
@@ -318,8 +315,6 @@ public final class KeyProtection implements ProtectionParameter {
          * Sets the time instant before which the key is not yet valid.
          *
          * <p>By default, the key is valid at any instant.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityEnd(Date)
          */
@@ -333,8 +328,6 @@ public final class KeyProtection implements ProtectionParameter {
          * Sets the time instant after which the key is no longer valid.
          *
          * <p>By default, the key is valid at any instant.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -352,8 +345,6 @@ public final class KeyProtection implements ProtectionParameter {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
         @NonNull
@@ -367,8 +358,6 @@ public final class KeyProtection implements ProtectionParameter {
          * verification.
          *
          * <p>By default, the key is valid at any instant.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
@@ -385,8 +374,6 @@ public final class KeyProtection implements ProtectionParameter {
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * <p>See {@link KeyProperties}.{@code ENCRYPTION_PADDING} constants.
          */
         @NonNull
@@ -402,8 +389,6 @@ public final class KeyProtection implements ProtectionParameter {
          * will be rejected.
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * <p>See {@link KeyProperties}.{@code SIGNATURE_PADDING} constants.
          */
@@ -423,8 +408,6 @@ public final class KeyProtection implements ProtectionParameter {
          * {@link Key#getAlgorithm()}. For asymmetric signing keys the set of digest algorithms
          * must be specified.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * <p>See {@link KeyProperties}.{@code DIGEST} constants.
          */
         @NonNull
@@ -439,8 +422,6 @@ public final class KeyProtection implements ProtectionParameter {
          * modes will be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * <p>See {@link KeyProperties}.{@code BLOCK_MODE} constants.
          */
@@ -483,8 +464,6 @@ public final class KeyProtection implements ProtectionParameter {
          * <li>If you are using RSA encryption without padding, consider switching to padding
          * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
          * </ul>
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          */
         @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
@@ -505,8 +484,6 @@ public final class KeyProtection implements ProtectionParameter {
          * <a href="{@docRoot}training/articles/keystore.html#UserAuthentication">More
          * information</a>.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
         @NonNull
@@ -520,8 +497,6 @@ public final class KeyProtection implements ProtectionParameter {
          * successfully authenticated. This has effect only if user authentication is required.
          *
          * <p>By default, the user needs to authenticate for every use of the key.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
