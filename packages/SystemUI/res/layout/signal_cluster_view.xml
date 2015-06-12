@@ -84,8 +84,10 @@
         >
     </LinearLayout>
     <FrameLayout
+        android:id="@+id/no_sims_combo"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content">
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/accessibility_no_sims">
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:theme="@style/DualToneLightTheme"
             android:id="@+id/no_sims"
