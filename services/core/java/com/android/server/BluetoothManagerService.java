@@ -21,8 +21,8 @@ import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetooth;
-import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothHeadset;
 import android.bluetooth.IBluetoothManager;
 import android.bluetooth.IBluetoothManagerCallback;
@@ -37,6 +37,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -56,11 +57,8 @@ import android.util.Log;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.HashMap;
 import java.util.Map;
-
-import java.util.*;
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
     private static final boolean DBG = true;
@@ -259,6 +257,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mName = null;
         mErrorRecoveryRetryCounter = 0;
         mContentResolver = context.getContentResolver();
+        // Observe BLE scan only mode settings change.
+        registerForBleScanModeChange();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
         IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
@@ -458,6 +458,40 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return false;
     }
 
+    // Monitor change of BLE scan only mode settings.
+    private void registerForBleScanModeChange() {
+        ContentObserver contentObserver = new ContentObserver(null) {
+            @Override
+            public void onChange(boolean selfChange) {
+                if (!isBleScanAlwaysAvailable()) {
+                    disableBleScanMode();
+                    clearBleApps();
+                    try {
+                        if (mBluetooth != null) mBluetooth.onBrEdrDown();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error when disabling bluetooth", e);
+                    }
+                }
+            }
+        };
+
+        mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE),
+                false, contentObserver);
+    }
+
+    // Disable ble scan only mode.
+    private void disableBleScanMode() {
+        try {
+            if (mBluetooth != null && (mBluetooth.getState() != BluetoothAdapter.STATE_ON)) {
+                if (DBG) Log.d(TAG, "Reseting the mEnable flag for clean disable");
+                mEnable = false;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "getState()", e);
+        }
+    }
+
     public int updateBleAppCount(IBinder token, boolean enable) {
         if (enable) {
             ClientDeathRecipient r = mBleApps.get(token);
@@ -478,11 +512,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         } else  {
             ClientDeathRecipient r = mBleApps.get(token);
             if (r != null) {
-                try {
-                    token.linkToDeath(r, 0);
-                } catch (RemoteException ex) {
-                    throw new IllegalArgumentException("Wake lock is already dead.");
-                }
+                // Unregister death recipient as the app goes away.
+                token.unlinkToDeath(r, 0);
                 mBleApps.remove(token);
                 synchronized (this) {
                     if (mBleAppCount > 0) --mBleAppCount;
@@ -492,16 +523,17 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
         if (DBG) Log.d(TAG, "Updated BleAppCount" + mBleAppCount);
         if (mBleAppCount == 0 && mEnable) {
-            try {
-                if (mBluetooth != null && (mBluetooth.getState() != BluetoothAdapter.STATE_ON)) {
-                    if (DBG) Log.d(TAG, "Reseting the mEnable flag for clean disable");
-                    mEnable = false;
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "getState()", e);
-            }
+            disableBleScanMode();
         }
         return mBleAppCount;
+    }
+
+    // Clear all apps using BLE scan only mode.
+    private void clearBleApps() {
+        synchronized (this) {
+            mBleApps.clear();
+            mBleAppCount = 0;
+        }
     }
 
     /** @hide*/
