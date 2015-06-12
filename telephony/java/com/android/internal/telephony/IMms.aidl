@@ -34,8 +34,7 @@ interface IMms {
      *  PDU format
      * @param locationUrl the optional location url for where this message should be sent to
      * @param configOverrides the carrier-specific messaging configuration values to override for
-     *  sending the message. See {@link android.telephony.MessagingConfigurationManager} for the
-     *  value names and types.
+     *  sending the message. See {@link android.telephony.SmsManager} for the value names and types.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
@@ -51,8 +50,8 @@ interface IMms {
      *  from the MMS WAP push notification
      * @param contentUri a contentUri to which the downloaded MMS message will be written
      * @param configOverrides the carrier-specific messaging configuration values to override for
-     *  downloading the message. See {@link android.telephony.MessagingConfigurationManager} for the
-     *  value names and types.
+     *  downloading the message. See {@link android.telephony.SmsManager} for the value names and
+     *  types.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      */
@@ -165,8 +164,7 @@ interface IMms {
      * @param callingPkg the package name of the calling app
      * @param messageUri the URI of the stored message
      * @param configOverrides the carrier-specific messaging configuration values to override for
-     *  sending the message. See {@link android.telephony.MessagingConfigurationManager} for the
-     *  value names and types.
+     *  sending the message. See {@link android.telephony.SmsManager} for the value names and types.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
