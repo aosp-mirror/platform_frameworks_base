@@ -1218,10 +1218,8 @@ public abstract class ContentResolver {
      *               the field. Passing an empty ContentValues will create an empty row.
      * @return the URL of the newly created row.
      */
-    public final @Nullable Uri insert(@NonNull Uri url, @NonNull ContentValues values) {
+    public final @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues values) {
         Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(values, "values");
-
         IContentProvider provider = acquireProvider(url);
         if (provider == null) {
             throw new IllegalArgumentException("Unknown URL " + url);
@@ -1350,10 +1348,9 @@ public abstract class ContentResolver {
      * @return the number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
-    public final int update(@NonNull Uri uri, @NonNull ContentValues values,
+    public final int update(@NonNull Uri uri, @Nullable ContentValues values,
             @Nullable String where, @Nullable String[] selectionArgs) {
         Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(values, "values");
         IContentProvider provider = acquireProvider(uri);
         if (provider == null) {
             throw new IllegalArgumentException("Unknown URI " + uri);
