@@ -19,6 +19,7 @@ package android.content;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.pm.PathPermission;
@@ -639,7 +640,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * {@link #onCreate} has been called -- this will return {@code null} in the
      * constructor.
      */
-    public final Context getContext() {
+    public final @Nullable Context getContext() {
         return mContext;
     }
 
@@ -667,7 +668,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @throws SecurityException if the calling package doesn't belong to the
      *             calling UID.
      */
-    public final String getCallingPackage() {
+    public final @Nullable String getCallingPackage() {
         final String pkg = mCallingPackage.get();
         if (pkg != null) {
             mTransport.mAppOpsManager.checkPackage(Binder.getCallingUid(), pkg);
@@ -716,7 +717,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param permission Name of the permission required for read-only access.
      */
-    protected final void setReadPermission(String permission) {
+    protected final void setReadPermission(@Nullable String permission) {
         mReadPermission = permission;
     }
 
@@ -727,7 +728,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      */
-    public final String getReadPermission() {
+    public final @Nullable String getReadPermission() {
         return mReadPermission;
     }
 
@@ -738,7 +739,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param permission Name of the permission required for read/write access.
      */
-    protected final void setWritePermission(String permission) {
+    protected final void setWritePermission(@Nullable String permission) {
         mWritePermission = permission;
     }
 
@@ -749,7 +750,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      */
-    public final String getWritePermission() {
+    public final @Nullable String getWritePermission() {
         return mWritePermission;
     }
 
@@ -760,7 +761,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param permissions Array of path permission descriptions.
      */
-    protected final void setPathPermissions(PathPermission[] permissions) {
+    protected final void setPathPermissions(@Nullable PathPermission[] permissions) {
         mPathPermissions = permissions;
     }
 
@@ -771,7 +772,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      */
-    public final PathPermission[] getPathPermissions() {
+    public final @Nullable PathPermission[] getPathPermissions() {
         return mPathPermissions;
     }
 
@@ -897,8 +898,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *      If {@code null} then the provider is free to define the sort order.
      * @return a Cursor or {@code null}.
      */
-    public abstract Cursor query(Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder);
+    public abstract @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
+            @Nullable String selection, @Nullable String[] selectionArgs,
+            @Nullable String sortOrder);
 
     /**
      * Implement this to handle query requests from clients with support for cancellation.
@@ -963,9 +965,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * when the query is executed.
      * @return a Cursor or {@code null}.
      */
-    public Cursor query(Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder,
-            CancellationSignal cancellationSignal) {
+    public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
+            @Nullable String selection, @Nullable String[] selectionArgs,
+            @Nullable String sortOrder, @Nullable CancellationSignal cancellationSignal) {
         return query(uri, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -987,7 +989,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param uri the URI to query.
      * @return a MIME type string, or {@code null} if there is no type.
      */
-    public abstract String getType(Uri uri);
+    public abstract @Nullable String getType(@NonNull Uri uri);
 
     /**
      * Implement this to support canonicalization of URIs that refer to your
@@ -1019,7 +1021,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return Return the canonical representation of <var>url</var>, or null if
      * canonicalization of that Uri is not supported.
      */
-    public Uri canonicalize(Uri url) {
+    public @Nullable Uri canonicalize(@NonNull Uri url) {
         return null;
     }
 
@@ -1037,7 +1039,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * the data identified by the canonical representation can not be found in
      * the current environment.
      */
-    public Uri uncanonicalize(Uri url) {
+    public @Nullable Uri uncanonicalize(@NonNull Uri url) {
         return url;
     }
 
@@ -1070,7 +1072,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *     This must not be {@code null}.
      * @return The URI for the newly inserted item.
      */
-    public abstract Uri insert(Uri uri, ContentValues values);
+    public abstract @Nullable Uri insert(@NonNull Uri uri, @NonNull ContentValues values);
 
     /**
      * Override this to handle requests to insert a set of new rows, or the
@@ -1087,7 +1089,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *    This must not be {@code null}.
      * @return The number of values that were inserted.
      */
-    public int bulkInsert(Uri uri, ContentValues[] values) {
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
         int numValues = values.length;
         for (int i = 0; i < numValues; i++) {
             insert(uri, values[i]);
@@ -1115,7 +1117,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return The number of rows affected.
      * @throws SQLException
      */
-    public abstract int delete(Uri uri, String selection, String[] selectionArgs);
+    public abstract int delete(@NonNull Uri uri, @Nullable String selection,
+            @Nullable String[] selectionArgs);
 
     /**
      * Implement this to handle requests to update one or more rows.
@@ -1134,8 +1137,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
-    public abstract int update(Uri uri, ContentValues values, String selection,
-            String[] selectionArgs);
+    public abstract int update(@NonNull Uri uri, @NonNull ContentValues values,
+            @Nullable String selection, @Nullable String[] selectionArgs);
 
     /**
      * Override this to handle requests to open a file blob.
@@ -1194,7 +1197,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #getType(android.net.Uri)
      * @see ParcelFileDescriptor#parseMode(String)
      */
-    public ParcelFileDescriptor openFile(Uri uri, String mode)
+    public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode)
             throws FileNotFoundException {
         throw new FileNotFoundException("No files supported by provider at "
                 + uri);
@@ -1264,8 +1267,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #getType(android.net.Uri)
      * @see ParcelFileDescriptor#parseMode(String)
      */
-    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal)
-            throws FileNotFoundException {
+    public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
         return openFile(uri, mode);
     }
 
@@ -1320,7 +1323,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openFileHelper(Uri, String)
      * @see #getType(android.net.Uri)
      */
-    public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+    public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode)
             throws FileNotFoundException {
         ParcelFileDescriptor fd = openFile(uri, mode);
         return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
@@ -1383,8 +1386,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openFileHelper(Uri, String)
      * @see #getType(android.net.Uri)
      */
-    public AssetFileDescriptor openAssetFile(Uri uri, String mode, CancellationSignal signal)
-            throws FileNotFoundException {
+    public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
         return openAssetFile(uri, mode);
     }
 
@@ -1402,8 +1405,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return Returns a new ParcelFileDescriptor that can be used by the
      * client to access the file.
      */
-    protected final ParcelFileDescriptor openFileHelper(Uri uri,
-            String mode) throws FileNotFoundException {
+    protected final @NonNull ParcelFileDescriptor openFileHelper(@NonNull Uri uri,
+            @NonNull String mode) throws FileNotFoundException {
         Cursor c = query(uri, new String[]{"_data"}, null, null, null);
         int count = (c != null) ? c.getCount() : 0;
         if (count != 1) {
@@ -1449,7 +1452,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openTypedAssetFile(Uri, String, Bundle)
      * @see ClipDescription#compareMimeTypes(String, String)
      */
-    public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+    public @Nullable String[] getStreamTypes(@NonNull Uri uri, @NonNull String mimeTypeFilter) {
         return null;
     }
 
@@ -1498,8 +1501,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openAssetFile(Uri, String)
      * @see ClipDescription#compareMimeTypes(String, String)
      */
-    public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
-            throws FileNotFoundException {
+    public @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
+            @NonNull String mimeTypeFilter, @Nullable Bundle opts) throws FileNotFoundException {
         if ("*/*".equals(mimeTypeFilter)) {
             // If they can take anything, the untyped open call is good enough.
             return openAssetFile(uri, "r");
@@ -1565,9 +1568,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openAssetFile(Uri, String)
      * @see ClipDescription#compareMimeTypes(String, String)
      */
-    public AssetFileDescriptor openTypedAssetFile(
-            Uri uri, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
-            throws FileNotFoundException {
+    public @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
+            @NonNull String mimeTypeFilter, @Nullable Bundle opts,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
         return openTypedAssetFile(uri, mimeTypeFilter, opts);
     }
 
@@ -1589,8 +1592,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
          * @param opts Options supplied by caller.
          * @param args Your own custom arguments.
          */
-        public void writeDataToPipe(ParcelFileDescriptor output, Uri uri, String mimeType,
-                Bundle opts, T args);
+        public void writeDataToPipe(@NonNull ParcelFileDescriptor output, @NonNull Uri uri,
+                @NonNull String mimeType, @Nullable Bundle opts, @Nullable T args);
     }
 
     /**
@@ -1610,9 +1613,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * the pipe.  This should be returned to the caller for reading; the caller
      * is responsible for closing it when done.
      */
-    public <T> ParcelFileDescriptor openPipeHelper(final Uri uri, final String mimeType,
-            final Bundle opts, final T args, final PipeDataWriter<T> func)
-            throws FileNotFoundException {
+    public @NonNull <T> ParcelFileDescriptor openPipeHelper(final @NonNull Uri uri,
+            final @NonNull String mimeType, final @Nullable Bundle opts, final @Nullable T args,
+            final @NonNull PipeDataWriter<T> func) throws FileNotFoundException {
         try {
             final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
 
@@ -1717,8 +1720,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @throws OperationApplicationException thrown if any operation fails.
      * @see ContentProviderOperation#apply
      */
-    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
-            throws OperationApplicationException {
+    public @NonNull ContentProviderResult[] applyBatch(
+            @NonNull ArrayList<ContentProviderOperation> operations)
+                    throws OperationApplicationException {
         final int numOperations = operations.size();
         final ContentProviderResult[] results = new ContentProviderResult[numOperations];
         for (int i = 0; i < numOperations; i++) {
@@ -1745,7 +1749,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return provider-defined return value.  May be {@code null}, which is also
      *   the default for providers which don't implement any call methods.
      */
-    public Bundle call(String method, @Nullable String arg, @Nullable Bundle extras) {
+    public @Nullable Bundle call(@NonNull String method, @Nullable String arg,
+            @Nullable Bundle extras) {
         return null;
     }
 
