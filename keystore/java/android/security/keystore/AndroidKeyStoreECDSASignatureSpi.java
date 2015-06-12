@@ -117,7 +117,7 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
     }
 
     @Override
-    protected int getAdditionalEntropyAmountForBegin() {
-        return (isSigning()) ? mGroupSizeBytes : 0;
+    protected int getAdditionalEntropyAmountForSign() {
+        return mGroupSizeBytes;
     }
 }

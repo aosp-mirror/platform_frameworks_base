@@ -232,7 +232,10 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
 
         byte[] result;
         try {
-            result = mChunkedStreamer.doFinal(null, 0, 0);
+            result = mChunkedStreamer.doFinal(
+                    null, 0, 0,
+                    null // no additional entropy needed -- HMAC is deterministic
+                    );
         } catch (KeyStoreException e) {
             throw new ProviderException("Keystore operation failed", e);
         }

@@ -28,12 +28,13 @@ import android.security.KeyStoreException;
  * amount of data in one go because the operations are marshalled via Binder. Secondly, the update
  * operation may consume less data than provided, in which case the caller has to buffer the
  * remainder for next time. The helper exposes {@link #update(byte[], int, int) update} and
- * {@link #doFinal(byte[], int, int) doFinal} operations which can be used to conveniently implement
- * various JCA crypto primitives.
+ * {@link #doFinal(byte[], int, int, byte[]) doFinal} operations which can be used to conveniently
+ * implement various JCA crypto primitives.
  *
  * @hide
  */
 interface KeyStoreCryptoOperationStreamer {
     byte[] update(byte[] input, int inputOffset, int inputLength) throws KeyStoreException;
-    byte[] doFinal(byte[] input, int inputOffset, int inputLength) throws KeyStoreException;
+    byte[] doFinal(byte[] input, int inputOffset, int inputLength, byte[] additionalEntropy)
+            throws KeyStoreException;
 }
