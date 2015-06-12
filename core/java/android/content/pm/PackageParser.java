@@ -36,6 +36,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.PatternMatcher;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -1194,7 +1195,8 @@ public class PackageParser {
         }
     }
 
-    private static String validateName(String name, boolean requiresSeparator) {
+    private static String validateName(String name, boolean requireSeparator,
+            boolean requireFilename) {
         final int N = name.length();
         boolean hasSep = false;
         boolean front = true;
@@ -1216,7 +1218,10 @@ public class PackageParser {
             }
             return "bad character '" + c + "'";
         }
-        return hasSep || !requiresSeparator
+        if (requireFilename && !FileUtils.isValidExtFilename(name)) {
+            return "Invalid filename";
+        }
+        return hasSep || !requireSeparator
                 ? null : "must have at least one '.' separator";
     }
 
@@ -1240,7 +1245,7 @@ public class PackageParser {
 
         final String packageName = attrs.getAttributeValue(null, "package");
         if (!"android".equals(packageName)) {
-            final String error = validateName(packageName, true);
+            final String error = validateName(packageName, true, true);
             if (error != null) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
                         "Invalid manifest package: " + error);
@@ -1252,7 +1257,7 @@ public class PackageParser {
             if (splitName.length() == 0) {
                 splitName = null;
             } else {
-                final String error = validateName(splitName, false);
+                final String error = validateName(splitName, false, false);
                 if (error != null) {
                     throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
                             "Invalid manifest split: " + error);
@@ -1391,7 +1396,7 @@ public class PackageParser {
         String str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
         if (str != null && str.length() > 0) {
-            String nameError = validateName(str, true);
+            String nameError = validateName(str, true, false);
             if (nameError != null && !"android".equals(pkgName)) {
                 outError[0] = "<manifest> specifies bad sharedUserId name \""
                     + str + "\": " + nameError;
@@ -1973,7 +1978,7 @@ public class PackageParser {
                 return null;
             }
             String subName = proc.substring(1);
-            String nameError = validateName(subName, false);
+            String nameError = validateName(subName, false, false);
             if (nameError != null) {
                 outError[0] = "Invalid " + type + " name " + proc + " in package "
                         + pkg + ": " + nameError;
@@ -1981,7 +1986,7 @@ public class PackageParser {
             }
             return (pkg + proc).intern();
         }
-        String nameError = validateName(proc, true);
+        String nameError = validateName(proc, true, false);
         if (nameError != null && !"system".equals(proc)) {
             outError[0] = "Invalid " + type + " name " + proc + " in package "
                     + pkg + ": " + nameError;
