@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -34,6 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BackgroundDexOptService extends JobService {
     static final String TAG = "BackgroundDexOptService";
 
+    static final long RETRY_LATENCY = 4 * AlarmManager.INTERVAL_HOUR;
+
     static final int BACKGROUND_DEXOPT_JOB = 800;
     private static ComponentName sDexoptServiceName = new ComponentName(
             "android",
@@ -46,11 +49,12 @@ public class BackgroundDexOptService extends JobService {
 
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
 
-    public static void schedule(Context context) {
+    public static void schedule(Context context, long minLatency) {
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         JobInfo job = new JobInfo.Builder(BACKGROUND_DEXOPT_JOB, sDexoptServiceName)
                 .setRequiresDeviceIdle(true)
                 .setRequiresCharging(true)
+                .setMinimumLatency(minLatency)
                 .build();
         js.schedule(job);
     }
@@ -62,6 +66,7 @@ public class BackgroundDexOptService extends JobService {
                 (PackageManagerService)ServiceManager.getService("package");
 
         if (pm.isStorageLow()) {
+            schedule(BackgroundDexOptService.this, RETRY_LATENCY);
             return false;
         }
         final ArraySet<String> pkgs = pm.getPackagesThatNeedDexOpt();
@@ -77,7 +82,7 @@ public class BackgroundDexOptService extends JobService {
                 for (String pkg : pkgs) {
                     if (!mIdleTime.get()) {
                         // stopped while still working, so we need to reschedule
-                        schedule(BackgroundDexOptService.this);
+                        schedule(BackgroundDexOptService.this, 0);
                         return;
                     }
                     if (sFailedPackageNames.contains(pkg)) {
