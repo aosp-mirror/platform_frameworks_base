@@ -3289,7 +3289,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             CharSequence title;
             CharSequence details;
             int icon;
-            Notification notification = new Notification();
             if (notifyType == NotificationType.NO_INTERNET &&
                     networkType == ConnectivityManager.TYPE_WIFI) {
                 title = r.getString(R.string.wifi_no_internet, 0);
@@ -3324,14 +3323,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return;
             }
 
-            notification.when = 0;
-            notification.icon = icon;
-            notification.flags = Notification.FLAG_AUTO_CANCEL;
-            notification.tickerText = title;
-            notification.color = mContext.getColor(
-                    com.android.internal.R.color.system_notification_accent_color);
-            notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
-            notification.contentIntent = intent;
+            Notification notification = new Notification.Builder(mContext)
+                    .setWhen(0)
+                    .setSmallIcon(icon)
+                    .setAutoCancel(true)
+                    .setTicker(title)
+                    .setColor(mContext.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(details)
+                    .setContentIntent(intent)
+                    .build();
 
             try {
                 notificationManager.notify(NOTIFICATION_ID, id, notification);

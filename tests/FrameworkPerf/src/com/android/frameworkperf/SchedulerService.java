@@ -26,15 +26,18 @@ public class SchedulerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification status = new Notification(R.drawable.stat_happy, null,
-                System.currentTimeMillis());
-        status.flags |= Notification.FLAG_ONGOING_EVENT;
-        status.setLatestEventInfo(this, "Scheduler Test running",
-                "Scheduler Test running", PendingIntent.getActivity(this, 0,
-                    new Intent(this, FrameworkPerfActivity.class)
-                    .setAction(Intent.ACTION_MAIN)
-                    .addCategory(Intent.CATEGORY_LAUNCHER)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0));
+        Notification status = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.stat_happy)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Scheduler Test running")
+                .setContentText("Scheduler Test running")
+                .setContentIntent(PendingIntent.getActivity(this, 0,
+                        new Intent(this, FrameworkPerfActivity.class)
+                                .setAction(Intent.ACTION_MAIN)
+                                .addCategory(Intent.CATEGORY_LAUNCHER)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0))
+                .setOngoing(true)
+                .build();
         startForeground(1, status);
         return START_STICKY;
     }
