@@ -37,6 +37,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -125,6 +126,7 @@ public final class BridgeContext extends Context {
     private final LayoutlibCallback mLayoutlibCallback;
     private final WindowManager mWindowManager;
     private final DisplayManager mDisplayManager;
+    private final HashMap<View, Integer> mScrollYPos = new HashMap<View, Integer>();
 
     private Resources.Theme mTheme;
 
@@ -1737,5 +1739,14 @@ public final class BridgeContext extends Context {
     public File[] getExternalMediaDirs() {
         // pass
         return new File[0];
+    }
+
+    public void setScrollYPos(@NonNull View view, int scrollPos) {
+        mScrollYPos.put(view, scrollPos);
+    }
+
+    public int getScrollYPos(@NonNull View view) {
+        Integer pos = mScrollYPos.get(view);
+        return pos != null ? pos : 0;
     }
 }

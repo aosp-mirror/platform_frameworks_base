@@ -22,6 +22,7 @@ import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.impl.ParserFactory;
@@ -233,6 +234,13 @@ public final class BridgeInflater extends LayoutInflater {
             Object viewKey = getViewKeyFromParser(attrs, bc, mResourceReference, mIsInMerge);
             if (viewKey != null) {
                 bc.addViewKey(view, viewKey);
+            }
+            String scrollPos = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES, "scrollY");
+            if (scrollPos != null) {
+                if (scrollPos.endsWith("px")) {
+                    int value = Integer.parseInt(scrollPos.substring(0, scrollPos.length() - 2));
+                    bc.setScrollYPos(view, value);
+                }
             }
         }
     }
