@@ -448,8 +448,13 @@ public abstract class Connection extends Conferenceable {
 
         /**
          * Stores a list of the video callbacks, keyed by IBinder.
+         *
+         * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
+         * load factor before resizing, 1 means we only expect a single thread to
+         * access the map so make only a single shard
          */
-        private HashMap<IBinder, IVideoCallback> mVideoCallbacks = new HashMap<>();
+        private ConcurrentHashMap<IBinder, IVideoCallback> mVideoCallbacks =
+                new ConcurrentHashMap<IBinder, IVideoCallback>(8, 0.9f, 1);
 
         /**
          * Default handler used to consolidate binder method calls onto a single thread.
@@ -470,12 +475,16 @@ public abstract class Connection extends Conferenceable {
                         IBinder binder = (IBinder) msg.obj;
                         IVideoCallback callback = IVideoCallback.Stub
                                 .asInterface((IBinder) msg.obj);
+                        if (callback == null) {
+                            Log.w(this, "addVideoProvider - skipped; callback is null.");
+                            break;
+                        }
+
                         if (mVideoCallbacks.containsKey(binder)) {
                             Log.i(this, "addVideoProvider - skipped; already present.");
                             break;
                         }
                         mVideoCallbacks.put(binder, callback);
-                        Log.i(this, "addVideoProvider  "+ mVideoCallbacks.size());
                         break;
                     }
                     case MSG_REMOVE_VIDEO_CALLBACK: {
@@ -594,7 +603,7 @@ public abstract class Connection extends Conferenceable {
 
         public VideoProvider() {
             mBinder = new VideoProvider.VideoProviderBinder();
-            mMessageHandler = new VideoProvider.VideoProviderHandler();
+            mMessageHandler = new VideoProvider.VideoProviderHandler(Looper.getMainLooper());
         }
 
         /**
@@ -763,11 +772,12 @@ public abstract class Connection extends Conferenceable {
          */
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.receiveSessionModifyRequest(videoProfile);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "receiveSessionModifyRequest callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
@@ -793,12 +803,13 @@ public abstract class Connection extends Conferenceable {
         public void receiveSessionModifyResponse(int status,
                 VideoProfile requestedProfile, VideoProfile responseProfile) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.receiveSessionModifyResponse(status, requestedProfile,
                                 responseProfile);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "receiveSessionModifyResponse callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
@@ -819,11 +830,12 @@ public abstract class Connection extends Conferenceable {
          */
         public void handleCallSessionEvent(int event) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.handleCallSessionEvent(event);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "handleCallSessionEvent callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
@@ -843,11 +855,12 @@ public abstract class Connection extends Conferenceable {
          */
         public void changePeerDimensions(int width, int height) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.changePeerDimensions(width, height);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "changePeerDimensions callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
@@ -869,11 +882,12 @@ public abstract class Connection extends Conferenceable {
          */
         public void setCallDataUsage(long dataUsage) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.changeCallDataUsage(dataUsage);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "setCallDataUsage callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
@@ -905,11 +919,12 @@ public abstract class Connection extends Conferenceable {
          */
         public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.changeCameraCapabilities(cameraCapabilities);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "changeCameraCapabilities callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
@@ -929,11 +944,12 @@ public abstract class Connection extends Conferenceable {
          */
         public void changeVideoQuality(int videoQuality) {
             if (mVideoCallbacks != null) {
-                try {
-                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
                         callback.changeVideoQuality(videoQuality);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "changeVideoQuality callback failed", ignored);
                     }
-                } catch (RemoteException ignored) {
                 }
             }
         }
