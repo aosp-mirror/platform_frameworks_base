@@ -601,21 +601,22 @@ final class UiModeManagerService extends SystemService {
             if (mCarModeEnabled) {
                 Intent carModeOffIntent = new Intent(context, DisableCarModeActivity.class);
 
-                Notification n = new Notification();
-                n.icon = R.drawable.stat_notify_car_mode;
-                n.defaults = Notification.DEFAULT_LIGHTS;
-                n.flags = Notification.FLAG_ONGOING_EVENT;
-                n.when = 0;
-                n.color = context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color);
-                n.setLatestEventInfo(
-                        context,
-                        context.getString(R.string.car_mode_disable_notification_title),
-                        context.getString(R.string.car_mode_disable_notification_message),
-                        PendingIntent.getActivityAsUser(context, 0, carModeOffIntent, 0,
-                                null, UserHandle.CURRENT));
+                Notification.Builder n = new Notification.Builder(context)
+                        .setSmallIcon(R.drawable.stat_notify_car_mode)
+                        .setDefaults(Notification.DEFAULT_LIGHTS)
+                        .setOngoing(true)
+                        .setWhen(0)
+                        .setColor(context.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setContentTitle(
+                                context.getString(R.string.car_mode_disable_notification_title))
+                        .setContentText(
+                                context.getString(R.string.car_mode_disable_notification_message))
+                        .setContentIntent(
+                                PendingIntent.getActivityAsUser(context, 0, carModeOffIntent, 0,
+                                        null, UserHandle.CURRENT));
                 mNotificationManager.notifyAsUser(null,
-                        R.string.car_mode_disable_notification_title, n, UserHandle.ALL);
+                        R.string.car_mode_disable_notification_title, n.build(), UserHandle.ALL);
             } else {
                 mNotificationManager.cancelAsUser(null,
                         R.string.car_mode_disable_notification_title, UserHandle.ALL);

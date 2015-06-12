@@ -1714,22 +1714,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Context context = mContext.createPackageContext(process.info.packageName, 0);
                     String text = mContext.getString(R.string.heavy_weight_notification,
                             context.getApplicationInfo().loadLabel(context.getPackageManager()));
-                    Notification notification = new Notification();
-                    notification.icon = com.android.internal.R.drawable.stat_sys_adb; //context.getApplicationInfo().icon;
-                    notification.when = 0;
-                    notification.flags = Notification.FLAG_ONGOING_EVENT;
-                    notification.tickerText = text;
-                    notification.defaults = 0; // please be quiet
-                    notification.sound = null;
-                    notification.vibrate = null;
-                    notification.color = mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color);
-                    notification.setLatestEventInfo(context, text,
-                            mContext.getText(R.string.heavy_weight_notification_detail),
-                            PendingIntent.getActivityAsUser(mContext, 0, root.intent,
-                                    PendingIntent.FLAG_CANCEL_CURRENT, null,
-                                    new UserHandle(root.userId)));
-
+                    Notification notification = new Notification.Builder(context)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(text)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(text)
+                            .setContentText(
+                                    mContext.getText(R.string.heavy_weight_notification_detail))
+                            .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
+                                    root.intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                    new UserHandle(root.userId)))
+                            .build();
                     try {
                         int[] outId = new int[1];
                         inm.enqueueNotificationWithTag("android", "android", null,
@@ -1948,20 +1946,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 String text = mContext.getString(R.string.dump_heap_notification, procName);
-                Notification notification = new Notification();
-                notification.icon = com.android.internal.R.drawable.stat_sys_adb;
-                notification.when = 0;
-                notification.flags = Notification.FLAG_ONGOING_EVENT|Notification.FLAG_AUTO_CANCEL;
-                notification.tickerText = text;
-                notification.defaults = 0; // please be quiet
-                notification.sound = null;
-                notification.vibrate = null;
-                notification.color = mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color);
+
+
                 Intent deleteIntent = new Intent();
                 deleteIntent.setAction(DumpHeapActivity.ACTION_DELETE_DUMPHEAP);
-                notification.deleteIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
-                        deleteIntent, 0, UserHandle.OWNER);
                 Intent intent = new Intent();
                 intent.setClassName("android", DumpHeapActivity.class.getName());
                 intent.putExtra(DumpHeapActivity.KEY_PROCESS, procName);
@@ -1970,11 +1958,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.putExtra(DumpHeapActivity.KEY_DIRECT_LAUNCH, reportPackage);
                 }
                 int userId = UserHandle.getUserId(uid);
-                notification.setLatestEventInfo(mContext, text,
-                        mContext.getText(R.string.dump_heap_notification_detail),
-                        PendingIntent.getActivityAsUser(mContext, 0, intent,
-                                PendingIntent.FLAG_CANCEL_CURRENT, null,
-                                new UserHandle(userId)));
+                Notification notification = new Notification.Builder(mContext)
+                        .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                        .setWhen(0)
+                        .setOngoing(true)
+                        .setAutoCancel(true)
+                        .setTicker(text)
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setContentTitle(text)
+                        .setContentText(
+                                mContext.getText(R.string.dump_heap_notification_detail))
+                        .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
+                                intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                new UserHandle(userId)))
+                        .setDeleteIntent(PendingIntent.getBroadcastAsUser(mContext, 0,
+                                deleteIntent, 0, UserHandle.OWNER))
+                        .build();
 
                 try {
                     int[] outId = new int[1];

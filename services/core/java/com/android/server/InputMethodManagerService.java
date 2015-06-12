@@ -71,6 +71,7 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -212,7 +213,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private NotificationManager mNotificationManager;
     private KeyguardManager mKeyguardManager;
     private StatusBarManagerService mStatusBar;
-    private Notification mImeSwitcherNotification;
+    private Notification.Builder mImeSwitcherNotification;
     private PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
@@ -798,18 +799,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
 
-        mImeSwitcherNotification = new Notification();
-        mImeSwitcherNotification.icon = com.android.internal.R.drawable.ic_notification_ime_default;
-        mImeSwitcherNotification.when = 0;
-        mImeSwitcherNotification.flags = Notification.FLAG_ONGOING_EVENT;
-        mImeSwitcherNotification.tickerText = null;
-        mImeSwitcherNotification.defaults = 0; // please be quiet
-        mImeSwitcherNotification.sound = null;
-        mImeSwitcherNotification.vibrate = null;
-
-        // Tag this notification specially so SystemUI knows it's important
-        mImeSwitcherNotification.extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
-        mImeSwitcherNotification.category = Notification.CATEGORY_SYSTEM;
+        Bundle extras = new Bundle();
+        extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
+        mImeSwitcherNotification = new Notification.Builder(mContext)
+            .setSmallIcon(com.android.internal.R.drawable.ic_notification_ime_default)
+            .setWhen(0)
+            .setOngoing(true)
+            .addExtras(extras)
+            .setCategory(Notification.CATEGORY_SYSTEM)
+            .setColor(com.android.internal.R.color.system_notification_accent_color);
 
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
@@ -1766,11 +1764,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         com.android.internal.R.string.select_input_method);
                 final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
                         mContext, imi, mCurrentSubtype);
-
-                mImeSwitcherNotification.color = mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color);
-                mImeSwitcherNotification.setLatestEventInfo(
-                        mContext, title, summary, mImeSwitchPendingIntent);
+                mImeSwitcherNotification.setContentTitle(title)
+                        .setContentText(summary)
+                        .setContentIntent(mImeSwitchPendingIntent);
                 if ((mNotificationManager != null)
                         && !mWindowManagerService.hasNavigationBar()) {
                     if (DEBUG) {
@@ -1778,7 +1774,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     mNotificationManager.notifyAsUser(null,
                             com.android.internal.R.string.select_input_method,
-                            mImeSwitcherNotification, UserHandle.ALL);
+                            mImeSwitcherNotification.build(), UserHandle.ALL);
                     mNotificationShown = true;
                 }
             } else {

@@ -3260,16 +3260,18 @@ public class SyncManager {
                     R.string.contentServiceTooManyDeletesNotificationDesc);
 
             Context contextForUser = getContextForUser(user);
-            Notification notification =
-                new Notification(R.drawable.stat_notify_sync_error,
-                        mContext.getString(R.string.contentServiceSync),
-                        System.currentTimeMillis());
-            notification.color = contextForUser.getColor(
-                    com.android.internal.R.color.system_notification_accent_color);
-            notification.setLatestEventInfo(contextForUser,
-                    contextForUser.getString(R.string.contentServiceSyncNotificationTitle),
-                    String.format(tooManyDeletesDescFormat.toString(), authorityName),
-                    pendingIntent);
+            Notification notification = new Notification.Builder(contextForUser)
+                    .setSmallIcon(R.drawable.stat_notify_sync_error)
+                    .setTicker(mContext.getString(R.string.contentServiceSync))
+                    .setWhen(System.currentTimeMillis())
+                    .setColor(contextForUser.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .setContentTitle(contextForUser.getString(
+                            R.string.contentServiceSyncNotificationTitle))
+                    .setContentText(
+                            String.format(tooManyDeletesDescFormat.toString(), authorityName))
+                    .setContentIntent(pendingIntent)
+                    .build();
             notification.flags |= Notification.FLAG_ONGOING_EVENT;
             mNotificationMgr.notifyAsUser(null, account.hashCode() ^ authority.hashCode(),
                     notification, user);

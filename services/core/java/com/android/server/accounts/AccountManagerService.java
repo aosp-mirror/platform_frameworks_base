@@ -2005,8 +2005,6 @@ public class AccountManagerService
         String authTokenLabel = intent.getStringExtra(
                 GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_LABEL);
 
-        Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
-                0 /* when */);
         final String titleAndSubtitle =
                 mContext.getString(R.string.permission_request_notification_with_subtitle,
                 account.name);
@@ -2019,11 +2017,16 @@ public class AccountManagerService
         }
         UserHandle user = new UserHandle(userId);
         Context contextForUser = getContextForUser(user);
-        n.color = contextForUser.getColor(
-                com.android.internal.R.color.system_notification_accent_color);
-        n.setLatestEventInfo(contextForUser, title, subtitle,
-                PendingIntent.getActivityAsUser(mContext, 0, intent,
-                        PendingIntent.FLAG_CANCEL_CURRENT, null, user));
+        Notification n = new Notification.Builder(contextForUser)
+                .setSmallIcon(android.R.drawable.stat_sys_warning)
+                .setWhen(0)
+                .setColor(contextForUser.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(subtitle)
+                .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0, intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT, null, user))
+                .build();
         installNotification(getCredentialPermissionNotificationId(
                 account, authTokenType, uid), n, user);
     }
@@ -3542,19 +3545,21 @@ public class AccountManagerService
             } else {
                 final Integer notificationId = getSigninRequiredNotificationId(accounts, account);
                 intent.addCategory(String.valueOf(notificationId));
-                Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
-                        0 /* when */);
                 UserHandle user = new UserHandle(userId);
                 Context contextForUser = getContextForUser(user);
                 final String notificationTitleFormat =
                         contextForUser.getText(R.string.notification_title).toString();
-                n.color = contextForUser.getColor(
-                        com.android.internal.R.color.system_notification_accent_color);
-                n.setLatestEventInfo(contextForUser,
-                        String.format(notificationTitleFormat, account.name),
-                        message, PendingIntent.getActivityAsUser(
-                        mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
-                        null, user));
+                Notification n = new Notification.Builder(contextForUser)
+                        .setWhen(0)
+                        .setSmallIcon(android.R.drawable.stat_sys_warning)
+                        .setColor(contextForUser.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setContentTitle(String.format(notificationTitleFormat, account.name))
+                        .setContentText(message)
+                        .setContentIntent(PendingIntent.getActivityAsUser(
+                                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
+                                null, user))
+                        .build();
                 installNotification(notificationId, n, user);
             }
         } finally {
