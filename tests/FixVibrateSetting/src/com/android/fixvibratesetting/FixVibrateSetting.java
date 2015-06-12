@@ -109,14 +109,20 @@ public class FixVibrateSetting extends Activity implements View.OnClickListener
     }
 
     private void test() {
-        Notification n = new Notification(R.drawable.stat_sys_warning, "Test notification",
-                        System.currentTimeMillis());
         Intent intent = new Intent(this, FixVibrateSetting.class);
         PendingIntent pending = PendingIntent.getActivity(this, 0, intent, 0);
-        n.setLatestEventInfo(this, "Test notification", "Test notification", pending);
 
-        n.vibrate = new long[] { 0, 700, 500, 1000 };
-        n.flags |= Notification.FLAG_AUTO_CANCEL;
+        Notification n = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.stat_sys_warning)
+                .setTicker("Test notification")
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Test notification")
+                .setContentText("Test notification")
+                .setContentIntent(pending)
+                .setVibrate(new long[] { 0, 700, 500, 1000 })
+                .setAutoCancel(true)
+                .build();
+
         mNotificationManager.notify(1, n);
     }
 }
