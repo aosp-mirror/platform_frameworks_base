@@ -201,6 +201,17 @@ public abstract class ViewStructure {
     public abstract void setChildCount(int num);
 
     /**
+     * Add to this view's child count.  This increases the current child count by
+     * <var>num</var> children beyond what was last set by {@link #setChildCount}
+     * or {@link #addChildCount}.  The index at which the new child starts in the child
+     * array is returned.
+     *
+     * @param num The number of new children to add.
+     * @return Returns the index in the child array at which the new children start.
+     */
+    public abstract int addChildCount(int num);
+
+    /**
      * Return the child count as set by {@link #setChildCount}.
      */
     public abstract int getChildCount();
