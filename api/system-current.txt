@@ -37175,6 +37175,7 @@ package android.view {
     field public static final deprecated int MOTION_RANGE_X = 0; // 0x0
     field public static final deprecated int MOTION_RANGE_Y = 1; // 0x1
     field public static final int SOURCE_ANY = -256; // 0xffffff00
+    field public static final int SOURCE_BLUETOOTH_STYLUS = 49154; // 0xc002
     field public static final int SOURCE_CLASS_BUTTON = 1; // 0x1
     field public static final int SOURCE_CLASS_JOYSTICK = 16; // 0x10
     field public static final int SOURCE_CLASS_MASK = 255; // 0xff
