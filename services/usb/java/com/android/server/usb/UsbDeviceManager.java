@@ -727,25 +727,26 @@ public class UsbDeviceManager {
                             com.android.internal.R.string.usb_notification_message);
                     CharSequence title = r.getText(id);
 
-                    Notification notification = new Notification();
-                    notification.icon = com.android.internal.R.drawable.stat_sys_data_usb;
-                    notification.when = 0;
-                    notification.flags = Notification.FLAG_ONGOING_EVENT;
-                    notification.tickerText = title;
-                    notification.defaults = 0; // please be quiet
-                    notification.sound = null;
-                    notification.vibrate = null;
-                    notification.priority = Notification.PRIORITY_MIN;
-
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
                                     "com.android.settings.deviceinfo.UsbModeChooserActivity"));
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
-                    notification.color = mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color);
-                    notification.setLatestEventInfo(mContext, title, message, pi);
-                    notification.visibility = Notification.VISIBILITY_PUBLIC;
+
+                    Notification notification = new Notification.Builder(mContext)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(title)
+                            .setDefaults(0)  // please be quiet
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setContentIntent(pi)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
                     mUsbNotificationId = id;
@@ -765,25 +766,26 @@ public class UsbDeviceManager {
                     CharSequence message = r.getText(
                             com.android.internal.R.string.adb_active_notification_message);
 
-                    Notification notification = new Notification();
-                    notification.icon = com.android.internal.R.drawable.stat_sys_adb;
-                    notification.when = 0;
-                    notification.flags = Notification.FLAG_ONGOING_EVENT;
-                    notification.tickerText = title;
-                    notification.defaults = 0; // please be quiet
-                    notification.sound = null;
-                    notification.vibrate = null;
-                    notification.priority = Notification.PRIORITY_LOW;
-
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
                                     "com.android.settings.DevelopmentSettings"));
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
-                    notification.color = mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color);
-                    notification.setLatestEventInfo(mContext, title, message, pi);
-                    notification.visibility = Notification.VISIBILITY_PUBLIC;
+
+                    Notification notification = new Notification.Builder(mContext)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(title)
+                            .setDefaults(0)  // please be quiet
+                            .setPriority(Notification.PRIORITY_LOW)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setContentIntent(pi)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
                     mAdbNotificationShown = true;
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
