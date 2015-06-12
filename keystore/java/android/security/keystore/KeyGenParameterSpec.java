@@ -449,9 +449,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *        invalid signature. This is OK if the certificate is only used for obtaining the
          *        public key from Android KeyStore.
          *
-         *        <p><b>NOTE: The {@code purposes} parameter has currently no effect on asymmetric
-         *        key pairs.</b>
-         *
          *        <p>See {@link KeyProperties}.{@code PURPOSE} flags.
          */
         public Builder(@NonNull String keystoreAlias, @KeyProperties.PurposeEnum int purposes) {
@@ -556,8 +553,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * @see #setKeyValidityEnd(Date)
          */
         @NonNull
@@ -570,8 +565,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * Sets the time instant after which the key is no longer valid.
          *
          * <p>By default, the key is valid at any instant.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -589,8 +582,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
         @NonNull
@@ -604,8 +595,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * verification.
          *
          * <p>By default, the key is valid at any instant.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
@@ -624,8 +613,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * keys, the set of digests defaults to the digest associated with the key algorithm (e.g.,
          * {@code SHA-256} for key algorithm {@code HmacSHA256}
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * @see KeyProperties.Digest
          */
         @NonNull
@@ -641,8 +628,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * <p>See {@link KeyProperties}.{@code ENCRYPTION_PADDING} constants.
          */
@@ -660,8 +645,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * <p>See {@link KeyProperties}.{@code SIGNATURE_PADDING} constants.
          */
         @NonNull
@@ -677,8 +660,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * modes will be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * <p>See {@link KeyProperties}.{@code BLOCK_MODE} constants.
          */
@@ -723,8 +704,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * <li>If you are using RSA encryption without padding, consider switching to encryption
          * padding schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
          * </ul>
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          */
         @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
@@ -748,8 +727,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
-         *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
         @NonNull
@@ -763,8 +740,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * successfully authenticated. This has effect only if user authentication is required.
          *
          * <p>By default, the user needs to authenticate for every use of the key.
-         *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
