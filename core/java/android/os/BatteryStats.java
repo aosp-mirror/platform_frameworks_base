@@ -3541,8 +3541,15 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 printmAh(pw, bs.totalPowerMah);
 
-                if (bs.drainType == BatterySipper.DrainType.APP) {
+                if (bs.usagePowerMah != bs.totalPowerMah) {
+                    // If the usage (generic power) isn't the whole amount, we list out
+                    // what components are involved in the calculation.
+
                     pw.print(" (");
+                    if (bs.usagePowerMah != 0) {
+                        pw.print(" usage=");
+                        printmAh(pw, bs.usagePowerMah);
+                    }
                     if (bs.cpuPowerMah != 0) {
                         pw.print(" cpu=");
                         printmAh(pw, bs.cpuPowerMah);
