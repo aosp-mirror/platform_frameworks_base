@@ -35,6 +35,7 @@ public class AssistContent {
     private Intent mIntent;
     private ClipData mClipData;
     private Uri mUri;
+    private final Bundle mExtras;
 
     /**
      * @hide
@@ -53,6 +54,7 @@ public class AssistContent {
     }
 
     public AssistContent() {
+        mExtras = new Bundle();
     }
 
     /**
@@ -143,6 +145,13 @@ public class AssistContent {
         return mUri;
     }
 
+    /**
+     * Return Bundle for extra vendor-specific data that can be modified and examined.
+     */
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     /** @hide */
     public AssistContent(Parcel in) {
         if (in.readInt() != 0) {
@@ -155,6 +164,7 @@ public class AssistContent {
             mUri = Uri.CREATOR.createFromParcel(in);
         }
         mIsAppProvidedIntent = in.readInt() == 1;
+        mExtras = in.readBundle();
     }
 
     /** @hide */
@@ -178,5 +188,6 @@ public class AssistContent {
             dest.writeInt(0);
         }
         dest.writeInt(mIsAppProvidedIntent ? 1 : 0);
+        dest.writeBundle(mExtras);
     }
 }

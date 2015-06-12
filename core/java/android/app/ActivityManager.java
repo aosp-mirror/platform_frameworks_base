@@ -2812,7 +2812,9 @@ public class ActivityManager {
      * continues running even if the process is killed and restarted.  To remove the watch,
      * use {@link #clearWatchHeapLimit()}.
      *
-     * <p>This API only work if running on a debuggable (userdebug or eng) build.</p>
+     * <p>This API only work if the calling process has been marked as
+     * {@link ApplicationInfo#FLAG_DEBUGGABLE} or this is running on a debuggable
+     * (userdebug or eng) build.</p>
      *
      * <p>Callers can optionally implement {@link #ACTION_REPORT_HEAP_LIMIT} to directly
      * handle heap limit reports themselves.</p>

@@ -663,6 +663,10 @@ public final class ViewRootImpl implements ViewParent,
         return mWindowAttributes.flags;
     }
 
+    public int getDisplayId() {
+        return mDisplay.getDisplayId();
+    }
+
     public CharSequence getTitle() {
         return mWindowAttributes.getTitle();
     }
