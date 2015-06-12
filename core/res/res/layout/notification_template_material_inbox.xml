@@ -62,6 +62,7 @@
                 android:layout_marginStart="4dp"
                 android:scaleType="fitCenter"
                 android:visibility="gone"
+                android:contentDescription="@string/notification_work_profile_content_description"
                 />
         </LinearLayout>
         <TextView android:id="@+id/inbox_text1"
