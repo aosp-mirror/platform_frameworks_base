@@ -277,6 +277,11 @@ public class KeySetManagerService {
         return mKeySets.get(keySetId);
     }
 
+    /* Checks if an identifier refers to a known keyset */
+    public boolean isIdValidKeySetId(long id) {
+        return mKeySets.get(id) != null;
+    }
+
     /**
      * Fetches the {@link PublicKey public keys} which belong to the specified
      * KeySet id.
