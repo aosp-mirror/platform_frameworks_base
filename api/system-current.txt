@@ -27990,6 +27990,7 @@ package android.provider {
     field public static final java.lang.String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
     field public static final java.lang.String EXTRA_INFO = "info";
     field public static final java.lang.String EXTRA_LOADING = "loading";
+    field public static final java.lang.String EXTRA_PROMPT = "android.provider.extra.PROMPT";
     field public static final java.lang.String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";
   }
 
