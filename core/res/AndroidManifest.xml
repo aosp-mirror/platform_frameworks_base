@@ -913,13 +913,13 @@
     <permission android:name="android.permission.BLUETOOTH"
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- Allows applications to discover and pair bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows applications to pair bluetooth devices without user interaction, and to
          allow or disallow phonebook access or message access.
