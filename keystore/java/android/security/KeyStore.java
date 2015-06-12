@@ -108,15 +108,10 @@ public class KeyStore {
     }
 
     public static Context getApplicationContext() {
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread == null) {
-            throw new IllegalStateException(
-                    "Failed to obtain application Context: no ActivityThread");
-        }
-        Application application = activityThread.getApplication();
+        Application application = ActivityThread.currentApplication();
         if (application == null) {
             throw new IllegalStateException(
-                    "Failed to obtain application Context: no Application");
+                    "Failed to obtain application Context from ActivityThread");
         }
         return application;
     }
@@ -698,16 +693,13 @@ public class KeyStore {
     }
 
     private long getFingerprintOnlySid() {
-        FingerprintManager fingerprintManager =
-                mContext.getSystemService(FingerprintManager.class);
+        FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
         if (fingerprintManager == null) {
             return 0;
         }
 
-        if (!fingerprintManager.isHardwareDetected()) {
-            return 0;
-        }
-
+        // TODO: Restore USE_FINGERPRINT permission check in
+        // FingerprintManager.getAuthenticatorId once the ID is no longer needed here.
         return fingerprintManager.getAuthenticatorId();
     }
 
