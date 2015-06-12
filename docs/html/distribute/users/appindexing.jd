@@ -1,6 +1,7 @@
 page.title=Drive installs from Google Search
 page.metaDescription=Surface the content of your apps in Google Search and link it to app installs.
 meta.tags="getusers", "search", "appindexing"
+page.tags="app indexing", "search", "get users"
 page.image=images/cards/google-search_2x.png
 @jd:body
 
