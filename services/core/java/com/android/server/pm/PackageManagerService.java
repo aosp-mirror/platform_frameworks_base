@@ -6155,7 +6155,24 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             pkg.applicationInfo.uid = pkgSetting.appId;
             pkg.mExtras = pkgSetting;
-            if (!pkgSetting.keySetData.isUsingUpgradeKeySets() || pkgSetting.sharedUser != null) {
+            if (shouldCheckUpgradeKeySetLP(pkgSetting, scanFlags)) {
+                if (checkUpgradeKeySetLP(pkgSetting, pkg)) {
+                    // We just determined the app is signed correctly, so bring
+                    // over the latest parsed certs.
+                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                } else {
+                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                        throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                "Package " + pkg.packageName + " upgrade keys do not match the "
+                                + "previously installed version");
+                    } else {
+                        pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                        String msg = "System package " + pkg.packageName
+                            + " signature changed; retaining data.";
+                        reportSettingsProblem(Log.WARN, msg);
+                    }
+                }
+            } else {
                 try {
                     verifySignaturesLP(pkgSetting, pkg);
                     // We just determined the app is signed correctly, so bring
@@ -6186,23 +6203,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     String msg = "System package " + pkg.packageName
                         + " signature changed; retaining data.";
                     reportSettingsProblem(Log.WARN, msg);
-                }
-            } else {
-                if (!checkUpgradeKeySetLP(pkgSetting, pkg)) {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                "Package " + pkg.packageName + " upgrade keys do not match the "
-                                + "previously installed version");
-                    } else {
-                        pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                        String msg = "System package " + pkg.packageName
-                            + " signature changed; retaining data.";
-                        reportSettingsProblem(Log.WARN, msg);
-                    }
-                } else {
-                    // We just determined the app is signed correctly, so bring
-                    // over the latest parsed certs.
-                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 }
             }
             // Verify that this new package doesn't have any content providers
@@ -11159,6 +11159,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private boolean shouldCheckUpgradeKeySetLP(PackageSetting oldPs, int scanFlags) {
+        // Can't rotate keys during boot or if sharedUser.
+        if (oldPs == null || (scanFlags&SCAN_BOOTING) != 0 || oldPs.sharedUser != null
+                || !oldPs.keySetData.isUsingUpgradeKeySets()) {
+            return false;
+        }
+        // app is using upgradeKeySets; make sure all are valid
+        KeySetManagerService ksms = mSettings.mKeySetManagerService;
+        long[] upgradeKeySets = oldPs.keySetData.getUpgradeKeySets();
+        for (int i = 0; i < upgradeKeySets.length; i++) {
+            if (!ksms.isIdValidKeySetId(upgradeKeySets[i])) {
+                Slog.wtf(TAG, "Package "
+                         + (oldPs.name != null ? oldPs.name : "<null>")
+                         + " contains upgrade-key-set reference to unknown key-set: "
+                         + upgradeKeySets[i]
+                         + " reverting to signatures check.");
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean checkUpgradeKeySetLP(PackageSetting oldPS, PackageParser.Package newPkg) {
         // Upgrade keysets are being used.  Determine if new package has a superset of the
         // required keys.
@@ -11187,19 +11209,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             oldPackage = mPackages.get(pkgName);
             if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
-            if (ps == null || !ps.keySetData.isUsingUpgradeKeySets() || ps.sharedUser != null) {
+            if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
+                if(!checkUpgradeKeySetLP(ps, pkg)) {
+                    res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                            "New package not signed by keys specified by upgrade-keysets: "
+                            + pkgName);
+                    return;
+                }
+            } else {
                 // default to original signature matching
                 if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
                     res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "New package has a different signature: " + pkgName);
-                    return;
-                }
-            } else {
-                if(!checkUpgradeKeySetLP(ps, pkg)) {
-                    res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                            "New package not signed by keys specified by upgrade-keysets: "
-                            + pkgName);
                     return;
                 }
             }
@@ -11631,18 +11653,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Quick sanity check that we're signed correctly if updating;
                 // we'll check this again later when scanning, but we want to
                 // bail early here before tripping over redefined permissions.
-                if (!ps.keySetData.isUsingUpgradeKeySets() || ps.sharedUser != null) {
-                    try {
-                        verifySignaturesLP(ps, pkg);
-                    } catch (PackageManagerException e) {
-                        res.setError(e.error, e.getMessage());
-                        return;
-                    }
-                } else {
+                if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
                     if (!checkUpgradeKeySetLP(ps, pkg)) {
                         res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
                                 + pkg.packageName + " upgrade keys do not match the "
                                 + "previously installed version");
+                        return;
+                    }
+                } else {
+                    try {
+                        verifySignaturesLP(ps, pkg);
+                    } catch (PackageManagerException e) {
+                        res.setError(e.error, e.getMessage());
                         return;
                     }
                 }
@@ -11665,14 +11687,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // also includes the "updating the same package" case, of course.
                     // "updating same package" could also involve key-rotation.
                     final boolean sigsOk;
-                    if (!bp.sourcePackage.equals(pkg.packageName)
-                            || !(bp.packageSetting instanceof PackageSetting)
-                            || !bp.packageSetting.keySetData.isUsingUpgradeKeySets()
-                            || ((PackageSetting) bp.packageSetting).sharedUser != null) {
+                    if (bp.sourcePackage.equals(pkg.packageName)
+                            && (bp.packageSetting instanceof PackageSetting)
+                            && (shouldCheckUpgradeKeySetLP((PackageSetting) bp.packageSetting,
+                                    scanFlags))) {
+                        sigsOk = checkUpgradeKeySetLP((PackageSetting) bp.packageSetting, pkg);
+                    } else {
                         sigsOk = compareSignatures(bp.packageSetting.signatures.mSignatures,
                                 pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
-                    } else {
-                        sigsOk = checkUpgradeKeySetLP((PackageSetting) bp.packageSetting, pkg);
                     }
                     if (!sigsOk) {
                         // If the owning package is the system itself, we log but allow
