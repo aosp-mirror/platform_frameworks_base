@@ -22,6 +22,7 @@ import java.util.List;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -36,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.graphics.Bitmap;
@@ -58,6 +60,7 @@ public class ActivityTestMain extends Activity {
     static final String KEY_CONFIGURATION = "configuration";
 
     ActivityManager mAm;
+    AlarmManager mAlarm;
     Configuration mOverrideConfig;
     int mSecondUser;
 
@@ -66,6 +69,7 @@ public class ActivityTestMain extends Activity {
     ServiceConnection mIsolatedConnection;
 
     static final int MSG_SPAM = 1;
+    static final int MSG_SPAM_ALARM = 2;
 
     final Handler mHandler = new Handler() {
         @Override
@@ -81,6 +85,15 @@ public class ActivityTestMain extends Activity {
                     }
                     startActivity(intent, options);
                     scheduleSpam(!fg);
+                } break;
+                case MSG_SPAM_ALARM: {
+                    long when = SystemClock.elapsedRealtime();
+                    Intent intent = new Intent(ActivityTestMain.this, AlarmSpamReceiver.class);
+                    intent.setAction("com.example.SPAM_ALARM=" + when);
+                    PendingIntent pi = PendingIntent.getBroadcast(ActivityTestMain.this,
+                            0, intent, 0);
+                    mAlarm.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME, when+(30*1000), pi);
+                    scheduleSpamAlarm(30*1000);
                 } break;
             }
             super.handleMessage(msg);
@@ -146,6 +159,7 @@ public class ActivityTestMain extends Activity {
         Log.i(TAG, "Referrer: " + getReferrer());
 
         mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+        mAlarm = (AlarmManager)getSystemService(ALARM_SERVICE);
         if (savedInstanceState != null) {
             mOverrideConfig = savedInstanceState.getParcelable(KEY_CONFIGURATION);
             if (mOverrideConfig != null) {
@@ -436,6 +450,13 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Spam idle alarm").setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                scheduleSpamAlarm(0);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -467,6 +488,7 @@ public class ActivityTestMain extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        mHandler.removeMessages(MSG_SPAM_ALARM);
         for (ServiceConnection conn : mConnections) {
             unbindService(conn);
         }
@@ -534,6 +556,12 @@ public class ActivityTestMain extends Activity {
         mHandler.removeMessages(MSG_SPAM);
         Message msg = mHandler.obtainMessage(MSG_SPAM, fg ? 1 : 0, 0);
         mHandler.sendMessageDelayed(msg, 500);
+    }
+
+    void scheduleSpamAlarm(long delay) {
+        mHandler.removeMessages(MSG_SPAM_ALARM);
+        Message msg = mHandler.obtainMessage(MSG_SPAM_ALARM);
+        mHandler.sendMessageDelayed(msg, delay);
     }
 
     private View scrollWrap(View view) {

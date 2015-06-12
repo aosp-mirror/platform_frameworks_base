@@ -246,41 +246,65 @@ public class TimeUtils {
     public static final long NANOS_PER_MS = 1000000;
 
     private static final Object sFormatSync = new Object();
-    private static char[] sFormatStr = new char[HUNDRED_DAY_FIELD_LEN+5];
-
-    private static final long LARGEST_DURATION = (1000 * DateUtils.DAY_IN_MILLIS) - 1;
+    private static char[] sFormatStr = new char[HUNDRED_DAY_FIELD_LEN+10];
+    private static char[] sTmpFormatStr = new char[HUNDRED_DAY_FIELD_LEN+10];
 
     static private int accumField(int amt, int suffix, boolean always, int zeropad) {
-        if (amt > 99 || (always && zeropad >= 3)) {
-            return 3+suffix;
-        }
-        if (amt > 9 || (always && zeropad >= 2)) {
-            return 2+suffix;
-        }
-        if (always || amt > 0) {
-            return 1+suffix;
+        if (amt > 999) {
+            int num = 0;
+            while (amt != 0) {
+                num++;
+                amt /= 10;
+            }
+            return num + suffix;
+        } else {
+            if (amt > 99 || (always && zeropad >= 3)) {
+                return 3+suffix;
+            }
+            if (amt > 9 || (always && zeropad >= 2)) {
+                return 2+suffix;
+            }
+            if (always || amt > 0) {
+                return 1+suffix;
+            }
         }
         return 0;
     }
 
-    static private int printField(char[] formatStr, int amt, char suffix, int pos,
+    static private int printFieldLocked(char[] formatStr, int amt, char suffix, int pos,
             boolean always, int zeropad) {
         if (always || amt > 0) {
             final int startPos = pos;
-            if ((always && zeropad >= 3) || amt > 99) {
-                int dig = amt/100;
-                formatStr[pos] = (char)(dig + '0');
+            if (amt > 999) {
+                int tmp = 0;
+                while (amt != 0 && tmp < sTmpFormatStr.length) {
+                    int dig = amt % 10;
+                    sTmpFormatStr[tmp] = (char)(dig + '0');
+                    tmp++;
+                    amt /= 10;
+                }
+                tmp--;
+                while (tmp >= 0) {
+                    formatStr[pos] = sTmpFormatStr[tmp];
+                    pos++;
+                    tmp--;
+                }
+            } else {
+                if ((always && zeropad >= 3) || amt > 99) {
+                    int dig = amt/100;
+                    formatStr[pos] = (char)(dig + '0');
+                    pos++;
+                    amt -= (dig*100);
+                }
+                if ((always && zeropad >= 2) || amt > 9 || startPos != pos) {
+                    int dig = amt/10;
+                    formatStr[pos] = (char)(dig + '0');
+                    pos++;
+                    amt -= (dig*10);
+                }
+                formatStr[pos] = (char)(amt + '0');
                 pos++;
-                amt -= (dig*100);
             }
-            if ((always && zeropad >= 2) || amt > 9 || startPos != pos) {
-                int dig = amt/10;
-                formatStr[pos] = (char)(dig + '0');
-                pos++;
-                amt -= (dig*10);
-            }
-            formatStr[pos] = (char)(amt + '0');
-            pos++;
             formatStr[pos] = suffix;
             pos++;
         }
@@ -310,10 +334,6 @@ public class TimeUtils {
         } else {
             prefix = '-';
             duration = -duration;
-        }
-
-        if (duration > LARGEST_DURATION) {
-            duration = LARGEST_DURATION;
         }
 
         int millis = (int)(duration%1000);
@@ -353,11 +373,11 @@ public class TimeUtils {
 
         int start = pos;
         boolean zeropad = fieldLen != 0;
-        pos = printField(formatStr, days, 'd', pos, false, 0);
-        pos = printField(formatStr, hours, 'h', pos, pos != start, zeropad ? 2 : 0);
-        pos = printField(formatStr, minutes, 'm', pos, pos != start, zeropad ? 2 : 0);
-        pos = printField(formatStr, seconds, 's', pos, pos != start, zeropad ? 2 : 0);
-        pos = printField(formatStr, millis, 'm', pos, true, (zeropad && pos != start) ? 3 : 0);
+        pos = printFieldLocked(formatStr, days, 'd', pos, false, 0);
+        pos = printFieldLocked(formatStr, hours, 'h', pos, pos != start, zeropad ? 2 : 0);
+        pos = printFieldLocked(formatStr, minutes, 'm', pos, pos != start, zeropad ? 2 : 0);
+        pos = printFieldLocked(formatStr, seconds, 's', pos, pos != start, zeropad ? 2 : 0);
+        pos = printFieldLocked(formatStr, millis, 'm', pos, true, (zeropad && pos != start) ? 3 : 0);
         formatStr[pos] = 's';
         return pos + 1;
     }
