@@ -890,7 +890,10 @@ class MountService extends IMountService.Stub
             }
             case VoldResponseCode.DISK_DESTROYED: {
                 if (cooked.length != 2) break;
-                mDisks.remove(cooked[1]);
+                final DiskInfo disk = mDisks.remove(cooked[1]);
+                if (disk != null) {
+                    mCallbacks.notifyDiskDestroyed(disk);
+                }
                 break;
             }
 
@@ -2965,6 +2968,7 @@ class MountService extends IMountService.Stub
         private static final int MSG_VOLUME_RECORD_CHANGED = 3;
         private static final int MSG_VOLUME_FORGOTTEN = 4;
         private static final int MSG_DISK_SCANNED = 5;
+        private static final int MSG_DISK_DESTROYED = 6;
 
         private final RemoteCallbackList<IMountServiceListener>
                 mCallbacks = new RemoteCallbackList<>();
@@ -3020,6 +3024,10 @@ class MountService extends IMountService.Stub
                     callback.onDiskScanned((DiskInfo) args.arg1, args.argi2);
                     break;
                 }
+                case MSG_DISK_DESTROYED: {
+                    callback.onDiskDestroyed((DiskInfo) args.arg1);
+                    break;
+                }
             }
         }
 
@@ -3056,6 +3064,12 @@ class MountService extends IMountService.Stub
             args.arg1 = disk.clone();
             args.argi2 = volumeCount;
             obtainMessage(MSG_DISK_SCANNED, args).sendToTarget();
+        }
+
+        private void notifyDiskDestroyed(DiskInfo disk) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = disk.clone();
+            obtainMessage(MSG_DISK_DESTROYED, args).sendToTarget();
         }
     }
 

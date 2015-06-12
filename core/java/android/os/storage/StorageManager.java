@@ -101,6 +101,7 @@ public class StorageManager {
         private static final int MSG_VOLUME_RECORD_CHANGED = 3;
         private static final int MSG_VOLUME_FORGOTTEN = 4;
         private static final int MSG_DISK_SCANNED = 5;
+        private static final int MSG_DISK_DESTROYED = 6;
 
         final StorageEventListener mCallback;
         final Handler mHandler;
@@ -133,6 +134,10 @@ public class StorageManager {
                     return true;
                 case MSG_DISK_SCANNED:
                     mCallback.onDiskScanned((DiskInfo) args.arg1, args.argi2);
+                    args.recycle();
+                    return true;
+                case MSG_DISK_DESTROYED:
+                    mCallback.onDiskDestroyed((DiskInfo) args.arg1);
                     args.recycle();
                     return true;
             }
@@ -183,6 +188,13 @@ public class StorageManager {
             args.arg1 = disk;
             args.argi2 = volumeCount;
             mHandler.obtainMessage(MSG_DISK_SCANNED, args).sendToTarget();
+        }
+
+        @Override
+        public void onDiskDestroyed(DiskInfo disk) throws RemoteException {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = disk;
+            mHandler.obtainMessage(MSG_DISK_DESTROYED, args).sendToTarget();
         }
     }
 
