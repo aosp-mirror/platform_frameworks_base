@@ -392,11 +392,27 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
         }
-        LOG_ALWAYS_FATAL_IF(!isLayer && properties().getHasOverlappingRendering());
-        renderer.scaleAlpha(properties().getAlpha());
+        if (CC_LIKELY(isLayer || !properties().getHasOverlappingRendering())) {
+            // simply scale rendering content's alpha
+            renderer.scaleAlpha(properties().getAlpha());
+        } else {
+            // savelayer needed to create an offscreen buffer
+            Rect layerBounds(0, 0, getWidth(), getHeight());
+            if (clipFlags) {
+                properties().getClippingRectForFlags(clipFlags, &layerBounds);
+                clipFlags = 0; // all clipping done by savelayer
+            }
+            SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
+                    layerBounds.left, layerBounds.top,
+                    layerBounds.right, layerBounds.bottom,
+                    (int) (properties().getAlpha() * 255),
+                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
+            handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+        }
 
         if (CC_UNLIKELY(ATRACE_ENABLED() && properties().promotedToLayer())) {
-            // pretend to cause savelayer to warn about performance problem affecting old versions
+            // pretend alpha always causes savelayer to warn about
+            // performance problem affecting old versions
             ATRACE_FORMAT("%s alpha caused saveLayer %dx%d", getName(),
                     static_cast<int>(getWidth()),
                     static_cast<int>(getHeight()));
