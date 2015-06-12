@@ -703,6 +703,36 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             }
             case KeymasterDefs.KM_ALGORITHM_RSA:
             {
+                // Check whether this key is authorized for PKCS#1 signature padding.
+                // We use Bouncy Castle to generate self-signed RSA certificates. Bouncy Castle
+                // only supports RSA certificates signed using PKCS#1 padding scheme. The key needs
+                // to be authorized for PKCS#1 padding or padding NONE which means any padding.
+                boolean pkcs1SignaturePaddingSupported = false;
+                for (int keymasterPadding : KeyProperties.SignaturePadding.allToKeymaster(
+                        spec.getSignaturePaddings())) {
+                    if ((keymasterPadding == KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN)
+                            || (keymasterPadding == KeymasterDefs.KM_PAD_NONE)) {
+                        pkcs1SignaturePaddingSupported = true;
+                        break;
+                    }
+                }
+                if (!pkcs1SignaturePaddingSupported) {
+                    // Keymaster doesn't distinguish between encryption padding NONE and signature
+                    // padding NONE. In the Android Keystore API only encryption padding NONE is
+                    // exposed.
+                    for (int keymasterPadding : KeyProperties.EncryptionPadding.allToKeymaster(
+                            spec.getEncryptionPaddings())) {
+                        if (keymasterPadding == KeymasterDefs.KM_PAD_NONE) {
+                            pkcs1SignaturePaddingSupported = true;
+                            break;
+                        }
+                    }
+                }
+                if (!pkcs1SignaturePaddingSupported) {
+                    // Key not authorized for PKCS#1 signature padding -- can't sign
+                    return null;
+                }
+
                 Set<Integer> availableKeymasterDigests = getAvailableKeymasterSignatureDigests(
                         spec.getDigests(),
                         AndroidKeyStoreBCWorkaroundProvider.getSupportedEcdsaSignatureDigests());
