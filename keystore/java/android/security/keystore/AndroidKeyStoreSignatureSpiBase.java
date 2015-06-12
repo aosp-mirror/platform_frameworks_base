@@ -198,15 +198,14 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
 
         KeymasterArguments keymasterInputArgs = new KeymasterArguments();
         addAlgorithmSpecificParametersToBegin(keymasterInputArgs);
-        byte[] additionalEntropy = KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
-                appRandom, getAdditionalEntropyAmountForBegin());
 
         OperationResult opResult = mKeyStore.begin(
                 mKey.getAlias(),
                 mSigning ? KeymasterDefs.KM_PURPOSE_SIGN : KeymasterDefs.KM_PURPOSE_VERIFY,
                 true, // permit aborting this operation if keystore runs out of resources
                 keymasterInputArgs,
-                additionalEntropy);
+                null // no additional entropy for begin -- only finish might need some
+                );
         if (opResult == null) {
             throw new KeyStoreConnectException();
         }
@@ -311,7 +310,11 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
         byte[] signature;
         try {
             ensureKeystoreOperationInitialized();
-            signature = mMessageStreamer.doFinal(EmptyArray.BYTE, 0, 0);
+
+            byte[] additionalEntropy =
+                    KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
+                            appRandom, getAdditionalEntropyAmountForSign());
+            signature = mMessageStreamer.doFinal(EmptyArray.BYTE, 0, 0, additionalEntropy);
         } catch (InvalidKeyException | KeyStoreException e) {
             throw new SignatureException(e);
         }
@@ -388,15 +391,14 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
 
     /**
      * Returns the amount of additional entropy (in bytes) to be provided to the KeyStore's
-     * {@code begin} operation.
+     * {@code finish} operation when generating a signature.
      *
-     * <p>For signature verification, this should be {@code 0} because verification should not be
-     * consuming any entropy. For signature generation, this value should match (or exceed) the
-     * amount of Shannon entropy of the produced signature assuming the key and the message are
-     * known. For example, for ECDSA signature this should be the size of {@code R}, whereas for the
-     * RSA signature with PKCS#1 padding this should be {@code 0}.
+     * <p>This value should match (or exceed) the amount of Shannon entropy of the produced
+     * signature assuming the key and the message are known. For example, for ECDSA signature this
+     * should be the size of {@code R}, whereas for the RSA signature with PKCS#1 padding this
+     * should be {@code 0}.
      */
-    protected abstract int getAdditionalEntropyAmountForBegin();
+    protected abstract int getAdditionalEntropyAmountForSign();
 
     /**
      * Invoked to add algorithm-specific parameters for the KeyStore's {@code begin} operation.
