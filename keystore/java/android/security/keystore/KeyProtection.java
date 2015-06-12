@@ -374,6 +374,12 @@ public final class KeyProtection implements ProtectionParameter {
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          *
+         * <p>For RSA private keys used by TLS/SSL servers to authenticate themselves to clients it
+         * is usually necessary to authorize the use of no/any padding
+         * ({@link KeyProperties#ENCRYPTION_PADDING_NONE}). This is because RSA decryption is
+         * required by some cipher suites, and some stacks request decryption using no padding
+         * whereas others request PKCS#1 padding.
+         *
          * <p>See {@link KeyProperties}.{@code ENCRYPTION_PADDING} constants.
          */
         @NonNull
@@ -407,6 +413,11 @@ public final class KeyProtection implements ProtectionParameter {
          * <p>For HMAC keys, the default is the digest algorithm specified in
          * {@link Key#getAlgorithm()}. For asymmetric signing keys the set of digest algorithms
          * must be specified.
+         *
+         * <p>For private keys used for TLS/SSL client or server authentication it is usually
+         * necessary to authorize the use of no digest ({@link KeyProperties#DIGEST_NONE}). This is
+         * because TLS/SSL stacks typically generate the necessary digest(s) themselves and then use
+         * a private key to sign it.
          *
          * <p>See {@link KeyProperties}.{@code DIGEST} constants.
          */

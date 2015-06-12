@@ -611,9 +611,14 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for keys which are used for signing/verification. For HMAC
          * keys, the set of digests defaults to the digest associated with the key algorithm (e.g.,
-         * {@code SHA-256} for key algorithm {@code HmacSHA256}
+         * {@code SHA-256} for key algorithm {@code HmacSHA256}).
          *
-         * @see KeyProperties.Digest
+         * <p>For private keys used for TLS/SSL client or server authentication it is usually
+         * necessary to authorize the use of no digest ({@link KeyProperties#DIGEST_NONE}). This is
+         * because TLS/SSL stacks typically generate the necessary digest(s) themselves and then use
+         * a private key to sign it.
+         *
+         * <p>See {@link KeyProperties}.{@code DIGEST} constants.
          */
         @NonNull
         public Builder setDigests(@KeyProperties.DigestEnum String... digests) {
@@ -628,6 +633,12 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
+         *
+         * <p>For RSA private keys used by TLS/SSL servers to authenticate themselves to clients it
+         * is usually necessary to authorize the use of no/any padding
+         * ({@link KeyProperties#ENCRYPTION_PADDING_NONE}). This is because RSA decryption is
+         * required by some cipher suites, and some stacks request decryption using no padding
+         * whereas others request PKCS#1 padding.
          *
          * <p>See {@link KeyProperties}.{@code ENCRYPTION_PADDING} constants.
          */

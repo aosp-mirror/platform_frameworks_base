@@ -368,6 +368,9 @@ public abstract class KeyProperties {
 
     /**
      * No encryption padding.
+     *
+     * <p><b>NOTE</b>: If a key is authorized to be used with no padding, then it can be used with
+     * any padding scheme.
      */
     public static final String ENCRYPTION_PADDING_NONE = "NoPadding";
 
@@ -514,6 +517,9 @@ public abstract class KeyProperties {
 
     /**
      * No digest: sign/authenticate the raw message.
+     *
+     * <p><b>NOTE</b>: If a key is authorized to be used with no digest, then it can be used with
+     * any digest.
      */
     public static final String DIGEST_NONE = "NONE";
 
