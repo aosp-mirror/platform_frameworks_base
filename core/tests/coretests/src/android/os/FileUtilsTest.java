@@ -232,6 +232,18 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("foo_bar__baz", FileUtils.buildValidFatFilename("foo?bar**baz"));
     }
 
+    public void testTrimFilename() throws Exception {
+        assertEquals("short.txt", FileUtils.trimFilename("short.txt", 16));
+        assertEquals("extrem...eme.txt", FileUtils.trimFilename("extremelylongfilename.txt", 16));
+
+        final String unicode = "a\u03C0\u03C0\u03C0\u03C0z";
+        assertEquals("a\u03C0\u03C0\u03C0\u03C0z", FileUtils.trimFilename(unicode, 10));
+        assertEquals("a\u03C0...\u03C0z", FileUtils.trimFilename(unicode, 9));
+        assertEquals("a...\u03C0z", FileUtils.trimFilename(unicode, 8));
+        assertEquals("a...\u03C0z", FileUtils.trimFilename(unicode, 7));
+        assertEquals("a...z", FileUtils.trimFilename(unicode, 6));
+    }
+
     public void testBuildUniqueFile_normal() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test"));
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
