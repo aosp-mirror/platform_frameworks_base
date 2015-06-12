@@ -56,6 +56,8 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -95,6 +97,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Checkable;
+import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import static android.os.Build.VERSION_CODES.*;
@@ -4274,23 +4277,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             PROVIDER_BACKGROUND));
                     break;
                 case R.styleable.View_foreground:
-                    setForeground(a.getDrawable(attr));
+                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                        setForeground(a.getDrawable(attr));
+                    }
                     break;
                 case R.styleable.View_foregroundGravity:
-                    setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
+                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                        setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
+                    }
                     break;
                 case R.styleable.View_foregroundTintMode:
-                    setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
+                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                        setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
+                    }
                     break;
                 case R.styleable.View_foregroundTint:
-                    setForegroundTintList(a.getColorStateList(attr));
+                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                        setForegroundTintList(a.getColorStateList(attr));
+                    }
                     break;
                 case R.styleable.View_foregroundInsidePadding:
-                    if (mForegroundInfo == null) {
-                        mForegroundInfo = new ForegroundInfo();
+                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                        if (mForegroundInfo == null) {
+                            mForegroundInfo = new ForegroundInfo();
+                        }
+                        mForegroundInfo.mInsidePadding = a.getBoolean(attr,
+                                mForegroundInfo.mInsidePadding);
                     }
-                    mForegroundInfo.mInsidePadding = a.getBoolean(attr,
-                            mForegroundInfo.mInsidePadding);
                     break;
                 case R.styleable.View_scrollIndicators:
                     final int scrollIndicators =
