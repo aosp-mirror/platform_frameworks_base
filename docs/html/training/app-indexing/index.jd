@@ -1,6 +1,7 @@
 page.title=Making Your App Content Searchable by Google
-page.tags="app indexing"
-
+page.tags="app indexing", "search"
+meta.tags="getusers", "search","appindexing"
+page.image=images/cards/google-search_2x.png
 trainingnavtop=true
 startpage=true
 
@@ -59,8 +60,8 @@ in your app by adding intent filters in your app manifest.</li>
 </li>
 </ol>
 
-<p>This class shows how to enable deep linking and indexing of your application
-content so that users can open this content directly from mobile search
+<p itemprop="description">This class shows how to enable deep linking and indexing of
+your application content so that users can open this content directly from mobile search
 results.</p>
 
 <h2>Lessons</h2>
