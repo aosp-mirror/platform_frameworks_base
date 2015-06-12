@@ -991,23 +991,24 @@ class MountService extends IMountService.Stub
     }
 
     private void onDiskScannedLocked(DiskInfo disk) {
-        final Intent intent = new Intent(DiskInfo.ACTION_DISK_SCANNED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.id);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                android.Manifest.permission.WRITE_MEDIA_STORAGE);
-
-        final CountDownLatch latch = mDiskScanLatches.remove(disk.id);
-        if (latch != null) {
-            latch.countDown();
-        }
-
         int volumeCount = 0;
         for (int i = 0; i < mVolumes.size(); i++) {
             final VolumeInfo vol = mVolumes.valueAt(i);
             if (Objects.equals(disk.id, vol.getDiskId())) {
                 volumeCount++;
             }
+        }
+
+        final Intent intent = new Intent(DiskInfo.ACTION_DISK_SCANNED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.id);
+        intent.putExtra(DiskInfo.EXTRA_VOLUME_COUNT, volumeCount);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                android.Manifest.permission.WRITE_MEDIA_STORAGE);
+
+        final CountDownLatch latch = mDiskScanLatches.remove(disk.id);
+        if (latch != null) {
+            latch.countDown();
         }
 
         disk.volumeCount = volumeCount;
@@ -1061,6 +1062,7 @@ class MountService extends IMountService.Stub
 
     private boolean isBroadcastWorthy(VolumeInfo vol) {
         switch (vol.getType()) {
+            case VolumeInfo.TYPE_PRIVATE:
             case VolumeInfo.TYPE_PUBLIC:
             case VolumeInfo.TYPE_EMULATED:
                 break;
@@ -1073,6 +1075,7 @@ class MountService extends IMountService.Stub
             case VolumeInfo.STATE_MOUNTED_READ_ONLY:
             case VolumeInfo.STATE_EJECTING:
             case VolumeInfo.STATE_UNMOUNTED:
+            case VolumeInfo.STATE_UNMOUNTABLE:
                 break;
             default:
                 return false;
@@ -1099,6 +1102,8 @@ class MountService extends IMountService.Stub
 
         if (isBroadcastWorthy(vol)) {
             final Intent intent = new Intent(VolumeInfo.ACTION_VOLUME_STATE_CHANGED);
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_STATE, newState);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                     android.Manifest.permission.WRITE_MEDIA_STORAGE);
