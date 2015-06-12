@@ -453,6 +453,63 @@
         android:description="@string/permdesc_readCellBroadcasts"
         android:protectionLevel="dangerous" />
 
+    <!-- ====================================================================== -->
+    <!-- Permissions for accessing external storage                             -->
+    <!-- ====================================================================== -->
+    <eat-comment />
+
+    <!-- Used for runtime permissions related to the shared external storage. -->
+    <permission-group android:name="android.permission-group.STORAGE"
+        android:icon="@drawable/perm_group_storage"
+        android:label="@string/permgrouplab_storage"
+        android:description="@string/permgroupdesc_storage"
+        android:priority="900" />
+
+    <!-- Allows an application to read from external storage.
+     <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
+     granted this permission.</p>
+     <p>This permission is enforced starting in API level 19.  Before API level 19, this
+     permission is not enforced and all apps still have access to read from external storage.
+     You can test your app with the permission enforced by enabling <em>Protect USB
+     storage</em> under Developer options in the Settings app on a device running Android 4.1 or
+     higher.</p>
+     <p>Also starting in API level 19, this permission is <em>not</em> required to
+     read/write files in your application-specific directories returned by
+     {@link android.content.Context#getExternalFilesDir} and
+     {@link android.content.Context#getExternalCacheDir}.
+     <p class="note"><strong>Note:</strong> If <em>both</em> your <a
+     href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+     minSdkVersion}</a> and <a
+     href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+     targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
+     grants your app this permission. If you don't need this permission, be sure your <a
+     href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+     targetSdkVersion}</a> is 4 or higher.-->
+    <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_sdcardRead"
+        android:description="@string/permdesc_sdcardRead"
+        android:protectionLevel="normal" />
+
+    <!-- Allows an application to write to external storage.
+         <p class="note"><strong>Note:</strong> If <em>both</em> your <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+         minSdkVersion}</a> and <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+         targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
+         grants your app this permission. If you don't need this permission, be sure your <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+         targetSdkVersion}</a> is 4 or higher.
+         <p>Starting in API level 19, this permission is <em>not</em> required to
+         read/write files in your application-specific directories returned by
+         {@link android.content.Context#getExternalFilesDir} and
+         {@link android.content.Context#getExternalCacheDir}. -->
+    <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_sdcardWrite"
+        android:description="@string/permdesc_sdcardWrite"
+        android:protectionLevel="dangerous" />
+
     <!-- =============================================================== -->
     <!-- Permissions for accessing social info                           -->
     <!-- =============================================================== -->
@@ -1206,49 +1263,6 @@
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->
     <eat-comment />
-
-    <!-- Allows an application to read from external storage.
-         <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
-         granted this permission.</p>
-         <p>This permission is enforced starting in API level 19.  Before API level 19, this
-         permission is not enforced and all apps still have access to read from external storage.
-         You can test your app with the permission enforced by enabling <em>Protect USB
-         storage</em> under Developer options in the Settings app on a device running Android 4.1 or
-         higher.</p>
-         <p>Also starting in API level 19, this permission is <em>not</em> required to
-         read/write files in your application-specific directories returned by
-         {@link android.content.Context#getExternalFilesDir} and
-         {@link android.content.Context#getExternalCacheDir}.
-         <p class="note"><strong>Note:</strong> If <em>both</em> your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-         minSdkVersion}</a> and <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
-         grants your app this permission. If you don't need this permission, be sure your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> is 4 or higher.-->
-    <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:label="@string/permlab_sdcardRead"
-        android:description="@string/permdesc_sdcardRead"
-        android:protectionLevel="normal" />
-
-    <!-- Allows an application to write to external storage.
-         <p class="note"><strong>Note:</strong> If <em>both</em> your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-         minSdkVersion}</a> and <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
-         grants your app this permission. If you don't need this permission, be sure your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> is 4 or higher.
-         <p>Starting in API level 19, this permission is <em>not</em> required to
-         read/write files in your application-specific directories returned by
-         {@link android.content.Context#getExternalFilesDir} and
-         {@link android.content.Context#getExternalCacheDir}. -->
-    <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:label="@string/permlab_sdcardWrite"
-        android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows an application to write to internal media storage
          @hide  -->
