@@ -85,7 +85,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static final int GRALLOC_USAGE_HW_RENDER = 0x00000200;
     private static final int GRALLOC_USAGE_HW_VIDEO_ENCODER = 0x00010000;
 
-    public static final int MAX_DIMEN_FOR_ROUNDING = 1080; // maximum allowed width for rounding
+    public static final int MAX_DIMEN_FOR_ROUNDING = 1920; // maximum allowed width for rounding
 
     // Keep up to date with values in system/core/include/system/window.h
     public static final int NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW = 1;
