@@ -188,8 +188,18 @@ public class RequestThreadManager {
     private final Camera.ErrorCallback mErrorCallback = new Camera.ErrorCallback() {
         @Override
         public void onError(int i, Camera camera) {
-            Log.e(TAG, "Received error " + i + " from the Camera1 ErrorCallback");
-            mDeviceState.setError(CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+            switch(i) {
+                case Camera.CAMERA_ERROR_EVICTED: {
+                    flush();
+                    mDeviceState.setError(
+                            CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DISCONNECTED);
+                } break;
+                default:  {
+                    Log.e(TAG, "Received error " + i + " from the Camera1 ErrorCallback");
+                    mDeviceState.setError(
+                            CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                } break;
+            }
         }
     };
 
