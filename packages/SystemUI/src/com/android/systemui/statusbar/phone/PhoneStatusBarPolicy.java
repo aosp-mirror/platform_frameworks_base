@@ -168,7 +168,8 @@ public class PhoneStatusBarPolicy {
         mHotspot.addCallback(mHotspotCallback);
 
         // managed profile
-        mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0, null);
+        mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0,
+                mContext.getString(R.string.accessibility_managed_profile));
         mService.setIconVisibility(SLOT_MANAGED_PROFILE, false);
     }
 

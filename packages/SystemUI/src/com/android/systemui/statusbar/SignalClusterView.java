@@ -80,6 +80,7 @@ public class SignalClusterView
     private float mDarkIntensity;
 
     ViewGroup mEthernetGroup, mWifiGroup;
+    View mNoSimsCombo;
     ImageView mVpn, mEthernet, mWifi, mAirplane, mNoSims, mEthernetDark, mWifiDark, mNoSimsDark;
     View mWifiAirplaneSpacer;
     View mWifiSignalSpacer;
@@ -162,6 +163,7 @@ public class SignalClusterView
         mAirplane       = (ImageView) findViewById(R.id.airplane);
         mNoSims         = (ImageView) findViewById(R.id.no_sims);
         mNoSimsDark     = (ImageView) findViewById(R.id.no_sims_dark);
+        mNoSimsCombo    =             findViewById(R.id.no_sims_combo);
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
         mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
         mMobileSignalGroup = (LinearLayout) findViewById(R.id.mobile_signal_group);
@@ -416,8 +418,7 @@ public class SignalClusterView
             mWifiSignalSpacer.setVisibility(View.GONE);
         }
 
-        mNoSims.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
-        mNoSimsDark.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
+        mNoSimsCombo.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
 
         boolean anythingVisible = mNoSimsVisible || mWifiVisible || mIsAirplaneMode
                 || anyMobileVisible || mVpnVisible || mEthernetVisible;
