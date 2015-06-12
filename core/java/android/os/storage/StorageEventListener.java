@@ -49,4 +49,7 @@ public class StorageEventListener {
 
     public void onDiskScanned(DiskInfo disk, int volumeCount) {
     }
+
+    public void onDiskDestroyed(DiskInfo disk) {
+    }
 }
