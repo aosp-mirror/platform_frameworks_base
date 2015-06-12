@@ -1331,11 +1331,14 @@ public class Notification implements Parcelable
     public Notification(Context context, int icon, CharSequence tickerText, long when,
             CharSequence contentTitle, CharSequence contentText, Intent contentIntent)
     {
-        this.when = when;
-        this.icon = icon;
-        this.tickerText = tickerText;
-        setLatestEventInfo(context, contentTitle, contentText,
-                PendingIntent.getActivity(context, 0, contentIntent, 0));
+        new Builder(context)
+                .setWhen(when)
+                .setSmallIcon(icon)
+                .setTicker(tickerText)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setContentIntent(PendingIntent.getActivity(context, 0, contentIntent, 0))
+                .buildInto(this);
     }
 
     /**

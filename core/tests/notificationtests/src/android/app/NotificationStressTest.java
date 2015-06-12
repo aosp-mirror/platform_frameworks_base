@@ -77,15 +77,20 @@ public class NotificationStressTest extends InstrumentationTestCase {
     }
 
     private void sendNotification(int id, CharSequence text) {
-        // Create "typical" notification with random icon
-        Notification notification = new Notification(ICONS[mRandom.nextInt(ICONS.length)], text,
-                System.currentTimeMillis());
         // Fill in arbitrary content
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"));
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
         CharSequence title = text + " " + id;
         CharSequence subtitle = String.valueOf(System.currentTimeMillis());
-        notification.setLatestEventInfo(mContext, title, subtitle, pendingIntent);
+        // Create "typical" notification with random icon
+        Notification notification = new Notification.Builder(mContext)
+                .setSmallIcon(ICONS[mRandom.nextInt(ICONS.length)])
+                .setTicker(text)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(title)
+                .setContentText(subtitle)
+                .setContentIntent(pendingIntent)
+                .build();
         mNotificationManager.notify(id, notification);
         SystemClock.sleep(10);
     }
