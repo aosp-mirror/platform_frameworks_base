@@ -48,7 +48,7 @@ class IntervalStats {
             usageStats.mPackageName = getCachedStringRef(packageName);
             usageStats.mBeginTimeStamp = beginTime;
             usageStats.mEndTimeStamp = endTime;
-            usageStats.mBeginIdleTime = endTime;
+            usageStats.mBeginIdleTime = 0;
             packageStats.put(usageStats.mPackageName, usageStats);
         }
         return usageStats;
