@@ -120,7 +120,10 @@ void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
     LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
 
-    prepareTreeImpl(info);
+    // Functors don't correctly handle stencil usage of overdraw debugging - shove 'em in a layer.
+    bool functorsNeedLayer = Properties::debugOverdraw;
+
+    prepareTreeImpl(info, functorsNeedLayer);
 }
 
 void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
@@ -219,7 +222,15 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     }
 }
 
-void RenderNode::prepareTreeImpl(TreeInfo& info) {
+/**
+ * Traverse down the the draw tree to prepare for a frame.
+ *
+ * MODE_FULL = UI Thread-driven (thus properties must be synced), otherwise RT driven
+ *
+ * While traversing down the tree, functorsNeedLayer flag is set to true if anything that uses the
+ * stencil buffer may be needed. Views that use a functor to draw will be forced onto a layer.
+ */
+void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
     info.damageAccumulator->pushTransform(this);
 
     if (info.mode == TreeInfo::MODE_FULL) {
@@ -229,11 +240,17 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     if (CC_LIKELY(info.runAnimations)) {
         animatorDirtyMask = mAnimatorManager.animate(info);
     }
+
+    bool willHaveFunctor = info.mode == TreeInfo::MODE_FULL && mStagingDisplayListData
+            ? !mStagingDisplayListData->functors.isEmpty() : !mDisplayListData->functors.isEmpty();
+    bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
+            willHaveFunctor, functorsNeedLayer);
+
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);
     }
-    prepareSubTree(info, mDisplayListData);
+    prepareSubTree(info, childFunctorsNeedLayer, mDisplayListData);
     pushLayerUpdate(info);
 
     info.damageAccumulator->popTransform();
@@ -313,7 +330,7 @@ void RenderNode::deleteDisplayListData() {
     mDisplayListData = nullptr;
 }
 
-void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
+void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
         info.out.hasFunctors |= subtree->functors.size();
@@ -324,7 +341,10 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
             DrawRenderNodeOp* op = subtree->children()[i];
             RenderNode* childNode = op->mRenderNode;
             info.damageAccumulator->pushTransform(&op->mTransformFromParent);
-            childNode->prepareTreeImpl(info);
+            bool childFunctorsNeedLayer = functorsNeedLayer
+                    // Recorded with non-rect clip, or canvas-rotated by parent
+                    || op->mRecordedWithPotentialStencilClip;
+            childNode->prepareTreeImpl(info, childFunctorsNeedLayer);
             info.damageAccumulator->popTransform();
         }
     }
