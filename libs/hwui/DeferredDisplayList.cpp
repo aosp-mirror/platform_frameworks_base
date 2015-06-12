@@ -494,7 +494,9 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     // complex clip has a complex set of expectations on the renderer state - for now, avoid taking
     // the merge path in those cases
     deferInfo.mergeable &= !recordingComplexClip();
-    deferInfo.opaqueOverBounds &= !recordingComplexClip() && mSaveStack.isEmpty();
+    deferInfo.opaqueOverBounds &= !recordingComplexClip()
+            && mSaveStack.isEmpty()
+            && !state->mRoundRectClipState;
 
     if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
             state->mClipSideFlags != kClipSide_ConservativeFull &&
