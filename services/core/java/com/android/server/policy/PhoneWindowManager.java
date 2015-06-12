@@ -243,7 +243,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
-    static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
+    static final int WAITING_FOR_DRAWN_TIMEOUT = 500;
 
     /**
      * Lock protecting internal state.  Must not call out into window
@@ -836,13 +836,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // If sensor is turned off or nonexistent for some reason
             return;
         }
-        //Could have been invoked due to screen turning on or off or
-        //change of the currently visible window's orientation
+        // Could have been invoked due to screen turning on or off or
+        // change of the currently visible window's orientation.
         if (localLOGV) Slog.v(TAG, "mScreenOnEarly=" + mScreenOnEarly
                 + ", mAwake=" + mAwake + ", mCurrentAppOrientation=" + mCurrentAppOrientation
-                + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled);
+                + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
+                + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
+                + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
         boolean disable = true;
-        if (mScreenOnEarly && mAwake) {
+        // Note: We postpone the rotating of the screen until the keyguard as well as the
+        // window manager have reported a draw complete.
+        if (mScreenOnEarly && mAwake &&
+                mKeyguardDrawComplete && mWindowManagerDrawComplete) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
@@ -5369,7 +5374,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void finishKeyguardDrawn() {
         synchronized (mLock) {
             if (!mAwake || mKeyguardDrawComplete) {
-                return; // spurious
+                return; // We are not awake yet or we have already informed of this event.
             }
 
             mKeyguardDrawComplete = true;
@@ -5407,18 +5412,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenOnFully = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = screenOnListener;
-            updateOrientationListenerLp();
         }
 
         mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback,
                 WAITING_FOR_DRAWN_TIMEOUT);
-        // ... eventually calls finishWindowsDrawn
+        // ... eventually calls finishWindowsDrawn which will finalize our screen turn on
+        // as well as enabling the orientation change logic/sensor.
     }
 
     private void finishWindowsDrawn() {
         synchronized (mLock) {
             if (!mScreenOnEarly || mWindowManagerDrawComplete) {
-                return; // spurious
+                return; // Screen is not turned on or we did already handle this case earlier.
             }
 
             mWindowManagerDrawComplete = true;
@@ -5428,6 +5433,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void finishScreenTurningOn() {
+        synchronized (mLock) {
+            // We have just finished drawing screen content. Since the orientation listener
+            // gets only installed when all windows are drawn, we try to install it again.
+            updateOrientationListenerLp();
+        }
         final ScreenOnListener listener;
         final boolean enableScreen;
         synchronized (mLock) {
