@@ -149,6 +149,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * </ul>
      *
      * <p> When device owner provisioning has completed, an intent of the type
@@ -163,14 +164,19 @@ public class DevicePolicyManager {
         = "android.app.action.PROVISION_MANAGED_DEVICE";
 
     /**
-     * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that allows
-     * a mobile device management application that starts managed profile provisioning to pass data
-     * to itself on the managed profile when provisioning completes. The mobile device management
-     * application sends this extra in an intent with the action
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE} and receives it in
+     * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
+     * allows a mobile device management application which starts managed provisioning to pass data
+     * to itself.
+     * <p>
+     * If used with {@link #ACTION_PROVISION_MANAGED_PROFILE} it can be used by the application that
+     * sends the intent to pass data to itself on the newly created profile.
+     * If used with {@link #ACTION_PROVISION_MANAGED_DEVICE} it allows passing data to the same
+     * instance of the app on the primary user.
+     * <p>
+     * In both cases the application receives the data in
      * {@link DeviceAdminReceiver#onProfileProvisioningComplete} via an intent with the action
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}. The bundle is not changed
-     * during the managed profile provisioning.
+     * during the managed provisioning.
      */
     public static final String EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE =
             "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE";
