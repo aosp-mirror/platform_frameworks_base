@@ -5551,13 +5551,6 @@ public final class Settings {
         public static final String SLEEP_TIMEOUT = "sleep_timeout";
 
         /**
-         * Duration in milliseconds that an app should be inactive before it is considered idle.
-         * <p/>Type: Long
-         * @hide
-         */
-        public static final String APP_IDLE_DURATION = "app_idle_duration";
-
-        /**
          * Controls whether double tap to wake is enabled.
          * @hide
          */
@@ -7115,6 +7108,28 @@ public final class Settings {
          * @see com.android.server.DeviceIdleController.Constants
          */
         public static final String DEVICE_IDLE_CONSTANTS = "device_idle_constants";
+
+        /**
+         * App standby (app idle) specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "idle_duration=5000,parole_interval=4500"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * idle_duration        (long)
+         * wallclock_threshold  (long)
+         * parole_interval      (long)
+         * parole_duration      (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.usage.UsageStatsService.SettingsObserver
+         */
+        public static final String APP_IDLE_CONSTANTS = "app_idle_constants";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.
