@@ -5963,12 +5963,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size... find out how big it should
                 // be
-                resultSize = size;
+                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             } else if (childDimension == LayoutParams.WRAP_CONTENT) {
                 // Child wants to determine its own size.... find out how
                 // big it should be
-                resultSize = size;
+                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             }
             break;

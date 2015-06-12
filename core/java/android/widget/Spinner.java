@@ -812,9 +812,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         View itemView = null;
         int itemType = 0;
         final int widthMeasureSpec =
-            MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.UNSPECIFIED);
+            MeasureSpec.makeSafeMeasureSpec(getMeasuredWidth(), MeasureSpec.UNSPECIFIED);
         final int heightMeasureSpec =
-            MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.UNSPECIFIED);
+            MeasureSpec.makeSafeMeasureSpec(getMeasuredHeight(), MeasureSpec.UNSPECIFIED);
 
         // Make sure the number of items we'll measure is capped. If it's a huge data set
         // with wildly varying sizes, oh well.
