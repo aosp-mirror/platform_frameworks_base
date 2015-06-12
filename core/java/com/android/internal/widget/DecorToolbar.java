@@ -17,6 +17,7 @@
 
 package com.android.internal.widget;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
@@ -87,6 +88,7 @@ public interface DecorToolbar {
     void setCustomView(View view);
     View getCustomView();
     void animateToVisibility(int visibility);
+    Animator setupAnimatorToVisibility(int visibility, long duration);
     void setNavigationIcon(Drawable icon);
     void setNavigationIcon(int resId);
     void setNavigationContentDescription(CharSequence description);
