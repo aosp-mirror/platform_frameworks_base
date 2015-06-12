@@ -24,6 +24,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.webkit.MimeTypeMap;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -456,6 +459,7 @@ public class FileUtils {
                 res.append('_');
             }
         }
+        trimFilename(res, 255);
         return res.toString();
     }
 
@@ -504,7 +508,29 @@ public class FileUtils {
                 res.append('_');
             }
         }
+        // Even though vfat allows 255 UCS-2 chars, we might eventually write to
+        // ext4 through a FUSE layer, so use that limit.
+        trimFilename(res, 255);
         return res.toString();
+    }
+
+    @VisibleForTesting
+    public static String trimFilename(String str, int maxBytes) {
+        final StringBuilder res = new StringBuilder(str);
+        trimFilename(res, maxBytes);
+        return res.toString();
+    }
+
+    private static void trimFilename(StringBuilder res, int maxBytes) {
+        byte[] raw = res.toString().getBytes(StandardCharsets.UTF_8);
+        if (raw.length > maxBytes) {
+            maxBytes -= 3;
+            while (raw.length > maxBytes) {
+                res.deleteCharAt(res.length() / 2);
+                raw = res.toString().getBytes(StandardCharsets.UTF_8);
+            }
+            res.insert(res.length() / 2, "...");
+        }
     }
 
     public static String rewriteAfterRename(File beforeDir, File afterDir, String path) {
