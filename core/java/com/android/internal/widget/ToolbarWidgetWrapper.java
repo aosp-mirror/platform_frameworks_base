@@ -19,6 +19,7 @@ package com.android.internal.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -59,6 +60,8 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     private static final int AFFECTS_LOGO_MASK =
             ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_USE_LOGO;
+    // Default fade duration for fading in/out tool bar.
+    private static final long DEFAULT_FADE_DURATION_MS = 200;
 
     private Toolbar mToolbar;
 
@@ -571,9 +574,19 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     @Override
     public void animateToVisibility(int visibility) {
+        Animator anim = setupAnimatorToVisibility(visibility, DEFAULT_FADE_DURATION_MS);
+        if (anim != null) {
+            anim.start();
+        }
+    }
+
+    @Override
+    public Animator setupAnimatorToVisibility(int visibility, long duration) {
+
         if (visibility == View.GONE) {
-            mToolbar.animate().alpha(0)
-                    .setListener(new AnimatorListenerAdapter() {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mToolbar, View.ALPHA, 1, 0);
+            anim.setDuration(duration);
+            anim.addListener(new AnimatorListenerAdapter() {
                         private boolean mCanceled = false;
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -587,15 +600,19 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                             mCanceled = true;
                         }
                     });
+            return anim;
         } else if (visibility == View.VISIBLE) {
-            mToolbar.animate().alpha(1)
-                    .setListener(new AnimatorListenerAdapter() {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mToolbar, View.ALPHA, 0, 1);
+            anim.setDuration(duration);
+            anim.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationStart(Animator animation) {
                             mToolbar.setVisibility(View.VISIBLE);
                         }
                     });
+            return anim;
         }
+        return null;
     }
 
     @Override

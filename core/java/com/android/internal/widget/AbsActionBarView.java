@@ -136,10 +136,11 @@ public abstract class AbsActionBarView extends ViewGroup {
         return getVisibility();
     }
 
-    public void animateToVisibility(int visibility) {
+    public Animator setupAnimatorToVisibility(int visibility, long duration) {
         if (mVisibilityAnim != null) {
             mVisibilityAnim.cancel();
         }
+
         if (visibility == VISIBLE) {
             if (getVisibility() != VISIBLE) {
                 setAlpha(0);
@@ -147,36 +148,41 @@ public abstract class AbsActionBarView extends ViewGroup {
                     mMenuView.setAlpha(0);
                 }
             }
-            ObjectAnimator anim = ObjectAnimator.ofFloat(this, "alpha", 1);
-            anim.setDuration(FADE_DURATION);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(this, View.ALPHA, 1);
+            anim.setDuration(duration);
             anim.setInterpolator(sAlphaInterpolator);
             if (mSplitView != null && mMenuView != null) {
                 AnimatorSet set = new AnimatorSet();
-                ObjectAnimator splitAnim = ObjectAnimator.ofFloat(mMenuView, "alpha", 1);
-                splitAnim.setDuration(FADE_DURATION);
+                ObjectAnimator splitAnim = ObjectAnimator.ofFloat(mMenuView, View.ALPHA, 1);
+                splitAnim.setDuration(duration);
                 set.addListener(mVisAnimListener.withFinalVisibility(visibility));
                 set.play(anim).with(splitAnim);
-                set.start();
+                return set;
             } else {
                 anim.addListener(mVisAnimListener.withFinalVisibility(visibility));
-                anim.start();
+                return anim;
             }
         } else {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(this, "alpha", 0);
-            anim.setDuration(FADE_DURATION);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(this, View.ALPHA, 0);
+            anim.setDuration(duration);
             anim.setInterpolator(sAlphaInterpolator);
             if (mSplitView != null && mMenuView != null) {
                 AnimatorSet set = new AnimatorSet();
-                ObjectAnimator splitAnim = ObjectAnimator.ofFloat(mMenuView, "alpha", 0);
-                splitAnim.setDuration(FADE_DURATION);
+                ObjectAnimator splitAnim = ObjectAnimator.ofFloat(mMenuView, View.ALPHA, 0);
+                splitAnim.setDuration(duration);
                 set.addListener(mVisAnimListener.withFinalVisibility(visibility));
                 set.play(anim).with(splitAnim);
-                set.start();
+                return set;
             } else {
                 anim.addListener(mVisAnimListener.withFinalVisibility(visibility));
-                anim.start();
+                return anim;
             }
         }
+    }
+
+    public void animateToVisibility(int visibility) {
+        Animator anim = setupAnimatorToVisibility(visibility, FADE_DURATION);
+        anim.start();
     }
 
     @Override
