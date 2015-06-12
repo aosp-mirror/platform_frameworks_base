@@ -310,7 +310,11 @@
        <item>@drawable/fastscroll_label_right_material</item>
        <item>@drawable/fastscroll_thumb_material</item>
        <item>@drawable/fastscroll_track_material</item>
+       <item>@drawable/floating_popup_background_dark</item>
+       <item>@drawable/floating_popup_background_light</item>
        <item>@drawable/ic_ab_back_material</item>
+       <item>@drawable/ic_ab_back_material_dark</item>
+       <item>@drawable/ic_ab_back_material_light</item>
        <item>@drawable/ic_clear_material</item>
        <item>@drawable/ic_commit_search_api_material</item>
        <item>@drawable/ic_dialog_alert_material</item>
@@ -330,7 +334,11 @@
        <item>@drawable/ic_search_api_material</item>
        <item>@drawable/ic_voice_search_api_material</item>
        <item>@drawable/item_background_borderless_material</item>
+       <item>@drawable/item_background_borderless_material_dark</item>
+       <item>@drawable/item_background_borderless_material_light</item>
        <item>@drawable/item_background_material</item>
+       <item>@drawable/item_background_material_dark</item>
+       <item>@drawable/item_background_material_light</item>
        <item>@drawable/list_divider_material</item>
        <item>@drawable/list_section_divider_material</item>
        <item>@drawable/notification_material_action_background</item>

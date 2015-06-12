@@ -32,5 +32,5 @@
         android:paddingEnd="@dimen/floating_toolbar_menu_button_side_padding"
         android:paddingBottom="@dimen/floating_toolbar_menu_image_button_vertical_padding"
         android:scaleType="centerInside"
-        android:background="?attr/selectableItemBackground" />
+        android:background="?attr/floatingToolbarItemBackgroundDrawable" />
 </LinearLayout>
