@@ -99,6 +99,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         }
 
         @Override
+        protected final int getAdditionalEntropyAmountForFinish() {
+            return 0;
+        }
+
+        @Override
         @NonNull
         protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
                 KeyStore keyStore, IBinder operationToken) {
@@ -142,7 +147,8 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             }
 
             @Override
-            public byte[] doFinal(byte[] input, int inputOffset, int inputLength)
+            public byte[] doFinal(byte[] input, int inputOffset, int inputLength,
+                    byte[] additionalEntropy)
                     throws KeyStoreException {
                 if (inputLength > 0) {
                     mInputBuffer.write(input, inputOffset, inputLength);
@@ -165,7 +171,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                             "Message size (" + bufferedInput.length + " bytes) must be smaller than"
                             + " modulus (" + mModulusSizeBytes + " bytes)");
                 }
-                return mDelegate.doFinal(paddedInput, 0, paddedInput.length);
+                return mDelegate.doFinal(paddedInput, 0, paddedInput.length, additionalEntropy);
             }
         }
     }
@@ -207,6 +213,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
         @Override
         protected final int getAdditionalEntropyAmountForBegin() {
+            return 0;
+        }
+
+        @Override
+        protected final int getAdditionalEntropyAmountForFinish() {
             return (isEncrypting()) ? getModulusSizeBytes() : 0;
         }
     }
@@ -361,6 +372,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
         @Override
         protected final int getAdditionalEntropyAmountForBegin() {
+            return 0;
+        }
+
+        @Override
+        protected final int getAdditionalEntropyAmountForFinish() {
             return (isEncrypting()) ? mDigestOutputSizeBytes : 0;
         }
     }

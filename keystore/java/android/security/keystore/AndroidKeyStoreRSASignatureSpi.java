@@ -36,7 +36,7 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         }
 
         @Override
-        protected final int getAdditionalEntropyAmountForBegin() {
+        protected final int getAdditionalEntropyAmountForSign() {
             // No entropy required for this deterministic signature scheme.
             return 0;
         }
@@ -92,8 +92,8 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         }
 
         @Override
-        protected final int getAdditionalEntropyAmountForBegin() {
-            return (isSigning()) ? SALT_LENGTH_BYTES : 0;
+        protected final int getAdditionalEntropyAmountForSign() {
+            return SALT_LENGTH_BYTES;
         }
     }
 
