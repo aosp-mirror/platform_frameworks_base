@@ -380,7 +380,7 @@ public final class Call {
                 builder.append(" PROPERTY_HIGH_DEF_AUDIO");
             }
             if (hasProperty(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
-                builder.append(" EMERGENCY_CALLBACK_MODE");
+                builder.append(" PROPERTY_EMERGENCY_CALLBACK_MODE");
             }
             builder.append("]");
             return builder.toString();
