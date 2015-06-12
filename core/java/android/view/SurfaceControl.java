@@ -453,6 +453,19 @@ public class SurfaceControl {
         }
     }
 
+    /**
+     * Sets the security of the surface.  Setting the flag is equivalent to creating the
+     * Surface with the {@link #SECURE} flag.
+     */
+    public void setSecure(boolean isSecure) {
+        checkNotReleased();
+        if (isSecure) {
+            nativeSetFlags(mNativeObject, SECURE, SECURE);
+        } else {
+            nativeSetFlags(mNativeObject, 0, SECURE);
+        }
+    }
+
     /*
      * set display parameters.
      * needs to be inside open/closeTransaction block
