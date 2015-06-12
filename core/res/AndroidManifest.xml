@@ -1593,7 +1593,7 @@
     <!-- Allows an application to clear the caches of all installed
          applications on the device.  -->
     <permission android:name="android.permission.CLEAR_APP_CACHE"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- @SystemApi Allows an application to use any media decoder when decoding for playback
          @hide -->
