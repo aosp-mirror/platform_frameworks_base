@@ -29,8 +29,9 @@
 #include <GLES2/gl2.h>
 #include <SkPaint.h>
 
-namespace android {
-namespace uirenderer {
+#define DEBUG_GLOP_BUILDER 0
+
+#if DEBUG_GLOP_BUILDER
 
 #define TRIGGER_STAGE(stageFlag) \
     LOG_ALWAYS_FATAL_IF((stageFlag) & mStageFlags, "Stage %d cannot be run twice", (stageFlag)); \
@@ -39,6 +40,16 @@ namespace uirenderer {
 #define REQUIRE_STAGES(requiredFlags) \
     LOG_ALWAYS_FATAL_IF((mStageFlags & (requiredFlags)) != (requiredFlags), \
             "not prepared for current stage")
+
+#else
+
+#define TRIGGER_STAGE(stageFlag) ((void)0)
+#define REQUIRE_STAGES(requiredFlags) ((void)0)
+
+#endif
+
+namespace android {
+namespace uirenderer {
 
 static void setUnitQuadTextureCoords(Rect uvs, TextureVertex* quadVertex) {
     quadVertex[0] = {0, 0, uvs.left, uvs.top};
@@ -301,7 +312,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
 GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
         const int textureFillFlags, const SkPaint* paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     GLenum filter = (textureFillFlags & TextureFillFlags::ForceFilter)
             ? GL_LINEAR : PaintUtils::getFilter(paint);
@@ -345,7 +356,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
 
 GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
@@ -359,7 +370,7 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale) {
 GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
         const SkPaint& paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     //specify invalid filter/clamp, since these are always static for PathTextures
     mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
@@ -376,7 +387,7 @@ GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
 GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int shadowColor,
         const SkPaint& paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     //specify invalid filter/clamp, since these are always static for ShadowTextures
     mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
@@ -399,7 +410,7 @@ GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int 
 
 GlopBuilder& GlopBuilder::setFillBlack() {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     setFill(SK_ColorBLACK, 1.0f, SkXfermode::kSrcOver_Mode, Blend::ModeOrderSwap::NoSwap,
@@ -409,7 +420,7 @@ GlopBuilder& GlopBuilder::setFillBlack() {
 
 GlopBuilder& GlopBuilder::setFillClear() {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     setFill(SK_ColorBLACK, 1.0f, SkXfermode::kClear_Mode, Blend::ModeOrderSwap::NoSwap,
@@ -420,7 +431,7 @@ GlopBuilder& GlopBuilder::setFillClear() {
 GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
         float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage) {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { &texture,
             GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
@@ -434,7 +445,7 @@ GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* co
 
 GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
     TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage);
+    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { &(layer.getTexture()),
             layer.getRenderTarget(), GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
