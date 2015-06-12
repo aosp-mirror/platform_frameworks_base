@@ -2852,6 +2852,49 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    void setBtScoDeviceConnectionState(BluetoothDevice btDevice, int state) {
+        if (btDevice == null) {
+            return;
+        }
+
+        String address = btDevice.getAddress();
+        BluetoothClass btClass = btDevice.getBluetoothClass();
+        int outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
+        int inDevice = AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET;
+        if (btClass != null) {
+            switch (btClass.getDeviceClass()) {
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+                outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                break;
+            case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                break;
+            }
+        }
+
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            address = "";
+        }
+
+        boolean connected = (state == BluetoothProfile.STATE_CONNECTED);
+
+        String btDeviceName =  btDevice.getName();
+        boolean success =
+            handleDeviceConnection(connected, outDevice, address, btDeviceName) &&
+            handleDeviceConnection(connected, inDevice, address, btDeviceName);
+        if (success) {
+            synchronized (mScoClients) {
+                if (connected) {
+                    mBluetoothHeadsetDevice = btDevice;
+                } else {
+                    mBluetoothHeadsetDevice = null;
+                    resetBluetoothSco();
+                }
+            }
+        }
+    }
+
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
@@ -3002,6 +3045,10 @@ public class AudioService extends IAudioService.Stub {
 
             case BluetoothProfile.HEADSET:
                 synchronized (mScoClients) {
+                    if (mBluetoothHeadsetDevice != null) {
+                        setBtScoDeviceConnectionState(mBluetoothHeadsetDevice,
+                                BluetoothProfile.STATE_DISCONNECTED);
+                    }
                     mBluetoothHeadset = null;
                 }
                 break;
@@ -4894,49 +4941,9 @@ public class AudioService extends IAudioService.Stub {
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
-                outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
-                inDevice = AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET;
-                String address = null;
-
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (btDevice == null) {
-                    return;
-                }
 
-                address = btDevice.getAddress();
-                BluetoothClass btClass = btDevice.getBluetoothClass();
-                if (btClass != null) {
-                    switch (btClass.getDeviceClass()) {
-                    case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-                    case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-                        outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
-                        break;
-                    case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-                        outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
-                        break;
-                    }
-                }
-
-                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-                    address = "";
-                }
-
-                boolean connected = (state == BluetoothProfile.STATE_CONNECTED);
-
-                String btDeviceName =  btDevice.getName();
-                boolean success =
-                    handleDeviceConnection(connected, outDevice, address, btDeviceName) &&
-                    handleDeviceConnection(connected, inDevice, address, btDeviceName);
-                if (success) {
-                    synchronized (mScoClients) {
-                        if (connected) {
-                            mBluetoothHeadsetDevice = btDevice;
-                        } else {
-                            mBluetoothHeadsetDevice = null;
-                            resetBluetoothSco();
-                        }
-                    }
-                }
+                setBtScoDeviceConnectionState(btDevice, state);
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
                 int scoAudioState = AudioManager.SCO_AUDIO_STATE_ERROR;
