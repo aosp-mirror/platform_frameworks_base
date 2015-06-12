@@ -145,6 +145,36 @@ page.type=about
         </div>  <!-- end .wrap -->
       </div> <!-- end .landing-section -->
 
+      <div class="landing-section" style="background-color:#f5f5f5" id="tv-games-channels">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Develop Games and Channels</div>
+          </div>
+
+          <div class="landing-body">
+            <div class="cols">
+              <div class="col-8">
+                <div class="landing-h3">Play Games on TV</div>
+                <p class="landing-small" style="padding-left:0px; padding-top:15px;">
+                  Build apps that let users experience high-performance gaming in leanback mode.
+                  Users can discover your apps easily through the Games row in the Android TV
+                  Launcher.<br>
+                <a href="{@docRoot}training/tv/games/index.html">Learn how to build games for TV</a>
+                </p>
+              </div>
+              <div class="col-8">
+                <div class="landing-h3">Keep Users Engaged with Channels</div>
+                <p class="landing-small" style="padding-left:0px; padding-top:15px;">
+                  Create apps that serve video and music content in a linear, channel-like
+                  fashion to users. Users see your channels alongside traditional TV channels in the
+                  programming guide.<br>
+                <a href="{@docRoot}training/tv/tif/index.html">Learn how to build channels</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
 
       <div class="landing-section landing-red-background">
         <div class="wrap">

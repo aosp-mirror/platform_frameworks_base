@@ -1,4 +1,4 @@
-page.title=Building Live TV Apps
+page.title=Building TV Channels
 page.tags=tv, tif
 helpoutsWidget=true
 startpage=true
@@ -25,12 +25,17 @@ startpage=true
 </div>
 
 <p>
-  Watching live television shows and other continuous, channel-based content is a big part of the
-  TV experience. Android supports receiving and playback of live video content through the TV Input
-  Framework in Android 5.0 (API level 21).
-  This framework provides a unified method for receiving audio and video channel content
-  from hardware sources, such as HDMI ports and built-in-tuners, and software sources, such as
-  video streamed over the internet.
+Watching live TV shows and other continuous, channel-based content is a big part of the TV
+experience. Users are accustomed to selecting and watching shows on TV by channel browsing.
+To provide your users a similar experience, use the TV Input Framework to create channels for
+publishing video or music content so that your media appears alongside traditional TV channels in
+the programming guide.
+</p>
+<p>
+Android supports receiving and playback of live video content through the TV Input Framework in
+Android 5.0 (API level 21). This framework provides a unified method for receiving audio and video
+channel content from hardware sources, such as HDMI ports and built-in-tuners, and software
+sources, such as video streamed over the internet.
 </p>
 <p>
   The framework enables developers to define live TV input sources by implementing a TV input

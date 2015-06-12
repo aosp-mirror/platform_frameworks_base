@@ -1023,8 +1023,8 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/tv/tif/index.html"
-           description="How to build Live TV apps.">
-           Building Live TV Apps</a>
+           description="How to build channels for TV.">
+           Building TV Channels</a>
         </div>
         <ul>
           <li>
