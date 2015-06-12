@@ -1072,7 +1072,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *     This must not be {@code null}.
      * @return The URI for the newly inserted item.
      */
-    public abstract @Nullable Uri insert(@NonNull Uri uri, @NonNull ContentValues values);
+    public abstract @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values);
 
     /**
      * Override this to handle requests to insert a set of new rows, or the
@@ -1137,7 +1137,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
-    public abstract int update(@NonNull Uri uri, @NonNull ContentValues values,
+    public abstract int update(@NonNull Uri uri, @Nullable ContentValues values,
             @Nullable String selection, @Nullable String[] selectionArgs);
 
     /**
