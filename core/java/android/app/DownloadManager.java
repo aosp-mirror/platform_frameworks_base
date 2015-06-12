@@ -418,7 +418,7 @@ public class DownloadManager {
         private int mNotificationVisibility = VISIBILITY_VISIBLE;
 
         /**
-         * @param uri the HTTP URI to download.
+         * @param uri the HTTP or HTTPS URI to download.
          */
         public Request(Uri uri) {
             if (uri == null) {
