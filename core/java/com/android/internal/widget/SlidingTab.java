@@ -403,10 +403,10 @@ public class SlidingTab extends ViewGroup {
         public void measure(int widthMeasureSpec, int heightMeasureSpec) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             int height = MeasureSpec.getSize(heightMeasureSpec);
-            tab.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED));
-            text.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED));
+            tab.measure(View.MeasureSpec.makeSafeMeasureSpec(width, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeSafeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED));
+            text.measure(View.MeasureSpec.makeSafeMeasureSpec(width, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeSafeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED));
         }
 
         /**
