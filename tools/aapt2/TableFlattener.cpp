@@ -79,7 +79,7 @@ public:
 
         // Write the key.
         if (!Res_INTERNALID(key.id.id) && !key.id.isValid()) {
-            assert(key.name.isValid());
+            assert(!key.name.entry.empty());
             mSymbols->push_back(std::make_pair(ResourceNameRef(key.name),
                     mOut->size() - sizeof(*outMapEntry)));
         }
@@ -283,13 +283,6 @@ bool TableFlattener::flattenValue(BigBuffer* out, const FlatEntry& flatEntry,
 
 bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
     const size_t beginning = out->size();
-
-    if (table.getPackage().size() == 0) {
-        Logger::error()
-                << "ResourceTable has no package name."
-                << std::endl;
-        return false;
-    }
 
     if (table.getPackageId() == ResourceTable::kUnsetPackageId) {
         Logger::error()

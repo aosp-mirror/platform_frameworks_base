@@ -45,6 +45,7 @@ public:
     BinaryResourceParser(const std::shared_ptr<ResourceTable>& table,
                          const std::shared_ptr<IResolver>& resolver,
                          const Source& source,
+                         const std::u16string& defaultPackage,
                          const void* data, size_t len);
 
     BinaryResourceParser(const BinaryResourceParser&) = delete; // No copy.
@@ -97,11 +98,11 @@ private:
 
     const Source mSource;
 
+    // The package name of the resource table.
+    std::u16string mDefaultPackage;
+
     const void* mData;
     const size_t mDataLen;
-
-    // The package name of the resource table.
-    std::u16string mPackage;
 
     // The array of symbol entries. Each element points to an offset
     // in the table and an index into the symbol table string pool.

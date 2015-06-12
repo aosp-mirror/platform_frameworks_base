@@ -48,7 +48,7 @@ $(info PRIVATE_INTERMEDIATE_TABLES = $(PRIVATE_INTERMEDIATE_TABLES))
 # returns: out/values-v4.apk: res/values-v4/styles.xml res/values-v4/colors.xml
 define make-collect-rule
 $(LOCAL_OUT)/$1.apk: $(filter $(LOCAL_RESOURCE_DIR)/$1/%,$(PRIVATE_RESOURCES))
-	$(AAPT) compile --package $(LOCAL_PACKAGE) -o $$@ $$^
+	$(AAPT) compile -o $$@ $$^
 endef
 
 # Collect: out/values-v4.apk <- res/values-v4/styles.xml res/values-v4/colors.xml
