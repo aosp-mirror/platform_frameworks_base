@@ -14,47 +14,50 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:divider="?android:attr/dividerHorizontal"
-              android:showDividers="middle">
-    <!-- Optional volume slider section. -->
-    <LinearLayout android:id="@+id/media_route_volume_layout"
-                  android:layout_width="match_parent"
-                  android:layout_height="64dp"
-                  android:gravity="center_vertical"
-                  android:padding="8dp"
-                  android:visibility="gone">
-        <ImageView android:layout_width="48dp"
-                   android:layout_height="48dp"
-                   android:src="@drawable/ic_audio_vol"
-                   android:gravity="center"
-                   android:scaleType="center" />
-        <SeekBar android:id="@+id/media_route_volume_slider"
-                 android:layout_width="0dp"
-                 android:layout_height="wrap_content"
-                 android:layout_weight="1"
-                 android:layout_marginLeft="8dp"
-                 android:layout_marginRight="8dp" />
-    </LinearLayout>
-
-    <!-- Optional content view section. -->
-    <FrameLayout android:id="@+id/media_route_control_frame"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:visibility="gone" />
-
-    <!-- Disconnect button. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  style="?attr/buttonBarStyle">
-        <Button android:id="@+id/media_route_disconnect_button"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                style="?attr/buttonBarButtonStyle"
-                android:gravity="center"
-                android:text="@string/media_route_controller_disconnect" />
+                  android:orientation="vertical"
+                  android:divider="?android:attr/dividerHorizontal"
+                  android:showDividers="middle">
+        <!-- Optional volume slider section. -->
+        <LinearLayout android:id="@+id/media_route_volume_layout"
+                      android:layout_width="match_parent"
+                      android:layout_height="64dp"
+                      android:gravity="center_vertical"
+                      android:padding="8dp"
+                      android:visibility="gone">
+            <ImageView android:layout_width="48dp"
+                       android:layout_height="48dp"
+                       android:src="@drawable/ic_audio_vol"
+                       android:gravity="center"
+                       android:scaleType="center" />
+            <SeekBar android:id="@+id/media_route_volume_slider"
+                     android:layout_width="0dp"
+                     android:layout_height="wrap_content"
+                     android:layout_weight="1"
+                     android:layout_marginLeft="8dp"
+                     android:layout_marginRight="8dp" />
+        </LinearLayout>
+
+        <!-- Optional content view section. -->
+        <FrameLayout android:id="@+id/media_route_control_frame"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:visibility="gone" />
+
+        <!-- Disconnect button. -->
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      style="?attr/buttonBarStyle">
+            <Button android:id="@+id/media_route_disconnect_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="?attr/buttonBarButtonStyle"
+                    android:gravity="center"
+                    android:text="@string/media_route_controller_disconnect" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>
