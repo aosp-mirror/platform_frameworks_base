@@ -587,6 +587,7 @@ public final class BatteryStatsHelper {
             bs.add(wbs);
         }
         bs.computeMobilemspp();
+        bs.sumPower();
     }
 
     private void addIdleUsage() {
@@ -612,9 +613,8 @@ public final class BatteryStatsHelper {
     private void addWiFiUsage() {
         BatterySipper bs = new BatterySipper(DrainType.WIFI, null, 0);
         mWifiPowerCalculator.calculateRemaining(bs, mStats, mRawRealtime, mRawUptime, mStatsType);
-        bs.sumPower();
-        if (bs.totalPowerMah > 0 || !mWifiSippers.isEmpty()) {
-            aggregateSippers(bs, mWifiSippers, "WIFI");
+        aggregateSippers(bs, mWifiSippers, "WIFI");
+        if (bs.totalPowerMah > 0) {
             mUsageList.add(bs);
         }
     }
@@ -627,8 +627,8 @@ public final class BatteryStatsHelper {
         BatterySipper bs = new BatterySipper(BatterySipper.DrainType.BLUETOOTH, null, 0);
         mBluetoothPowerCalculator.calculateRemaining(bs, mStats, mRawRealtime, mRawUptime,
                 mStatsType);
-        if (bs.sumPower() > 0) {
-            aggregateSippers(bs, mBluetoothSippers, "Bluetooth");
+        aggregateSippers(bs, mBluetoothSippers, "Bluetooth");
+        if (bs.totalPowerMah > 0) {
             mUsageList.add(bs);
         }
     }
@@ -639,7 +639,6 @@ public final class BatteryStatsHelper {
             BatterySipper bs = new BatterySipper(DrainType.USER, null, 0);
             bs.userId = userId;
             aggregateSippers(bs, mUserSippers.valueAt(i), "User");
-            bs.sumPower();
             mUsageList.add(bs);
         }
     }
