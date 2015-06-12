@@ -434,9 +434,12 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Informs the application that the video is now available for watching. This is primarily
-         * used to signal the application to unblock the screen. The TV input service must call this
-         * method as soon as the content rendered onto its surface gets ready for viewing.
+         * Informs the application that the video is now available for watching. Video is blocked
+         * until this method is called.
+         *
+         * <p>The TV input service must call this method as soon as the content rendered onto its
+         * surface is ready for viewing. This method must be called each time {@link #onTune(Uri)}
+         * is called.
          *
          * @see #notifyVideoUnavailable
          */
@@ -761,9 +764,11 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(float volume);
 
         /**
-         * Tunes to a given channel. When the video is available, {@link #notifyVideoAvailable()}
-         * should be called. Also, {@link #notifyVideoUnavailable(int)} should be called when the TV
-         * input cannot continue playing the given channel.
+         * Tunes to a given channel.
+         *
+         * <p>No video will be displayed until {@link #notifyVideoAvailable()} is called.
+         * Also, {@link #notifyVideoUnavailable(int)} should be called when the TV input cannot
+         * continue playing the given channel.
          *
          * @param channelUri The URI of the channel.
          * @return {@code true} if the tuning was successful, {@code false} otherwise.
