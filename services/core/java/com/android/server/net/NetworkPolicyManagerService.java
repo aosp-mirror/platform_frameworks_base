@@ -376,14 +376,31 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
 
     void updatePowerSaveTempWhitelistLocked() {
         try {
+            // Clear the states of the current whitelist
+            final int N = mPowerSaveTempWhitelistAppIds.size();
+            for (int i = 0; i < N; i++) {
+                mPowerSaveTempWhitelistAppIds.setValueAt(i, false);
+            }
+            // Update the states with the new whitelist
             final int[] whitelist = mDeviceIdleController.getAppIdTempWhitelist();
-            mPowerSaveTempWhitelistAppIds.clear();
             if (whitelist != null) {
                 for (int uid : whitelist) {
                     mPowerSaveTempWhitelistAppIds.put(uid, true);
                 }
             }
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Remove unnecessary entries in the temp whitelist
+     */
+    void purgePowerSaveTempWhitelistLocked() {
+        final int N = mPowerSaveTempWhitelistAppIds.size();
+        for (int i = N - 1; i >= 0; i--) {
+            if (mPowerSaveTempWhitelistAppIds.valueAt(i) == false) {
+                mPowerSaveTempWhitelistAppIds.removeAt(i);
+            }
         }
     }
 
@@ -521,6 +538,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                 } else {
                     updatePowerSaveTempWhitelistLocked();
                     updateRulesForTempWhitelistChangeLocked();
+                    purgePowerSaveTempWhitelistLocked();
                 }
             }
         }
