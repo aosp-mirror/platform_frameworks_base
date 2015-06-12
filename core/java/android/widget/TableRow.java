@@ -303,7 +303,7 @@ public class TableRow extends LinearLayout {
                             spec = getChildMeasureSpec(widthMeasureSpec, 0, LayoutParams.WRAP_CONTENT);
                             break;
                         case LayoutParams.MATCH_PARENT:
-                            spec = MeasureSpec.makeMeasureSpec(
+                            spec = MeasureSpec.makeSafeMeasureSpec(
                                     MeasureSpec.getSize(heightMeasureSpec),
                                     MeasureSpec.UNSPECIFIED);
                             break;
