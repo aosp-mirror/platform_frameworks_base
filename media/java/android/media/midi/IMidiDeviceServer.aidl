@@ -31,4 +31,5 @@ interface IMidiDeviceServer
     void connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
 
     MidiDeviceInfo getDeviceInfo();
+    void setDeviceInfo(in MidiDeviceInfo deviceInfo);
 }
