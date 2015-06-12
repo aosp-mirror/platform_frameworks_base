@@ -687,7 +687,8 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://developers.google.com/app-indexing/",
       "https://developers.google.com/app-indexing/webmasters/details",
-      "distribute/engage/deep-linking.html"
+      "distribute/engage/deep-linking.html",
+      "training/app-indexing/index.html"
     ]
   },
   "distribute/users/otas": {
@@ -953,7 +954,8 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/engage/intents.html",
       "distribute/engage/deep-linking.html",
-      "distribute/users/appindexing.html"
+      "distribute/users/appindexing.html",
+      "training/app-indexing/index.html"
     ]
   },
   "distribute/engage/intents": {

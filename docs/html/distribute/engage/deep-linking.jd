@@ -1,7 +1,7 @@
 page.title=Increase Usage with Search
 page.metaDescription=Use search to bring your existing users back into your app.
 page.image=images/cards/google-search_2x.png
-page.tags=engagement, appindexing, search
+page.tags="engagement", "app indexing", "search", "deep linking"
 @jd:body
 
 <p>
@@ -69,7 +69,7 @@ can re-engage your users via structured data markup delivered in email notificat
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/engage/appindexing"
   data-sortOrder="-timestamp"
-  data-cardSizes="6x2"
-  data-maxResults="3"></div>
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
 
 
