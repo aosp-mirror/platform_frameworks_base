@@ -3701,8 +3701,9 @@ public class AudioManager {
      * The message sent to apps when the contents of the device list changes if they provide
      * a {#link Handler} object to addOnAudioDeviceConnectionListener().
      */
-    private final static int MSG_DEVICES_DEVICES_ADDED = 0;
-    private final static int MSG_DEVICES_DEVICES_REMOVED = 1;
+    private final static int MSG_DEVICES_CALLBACK_REGISTERED = 0;
+    private final static int MSG_DEVICES_DEVICES_ADDED = 1;
+    private final static int MSG_DEVICES_DEVICES_REMOVED = 2;
 
     /**
      * The list of {@link AudioDeviceCallback} objects to receive add/remove notifications.
@@ -3848,8 +3849,10 @@ public class AudioManager {
             android.os.Handler handler) {
         if (callback != null && !mDeviceCallbacks.containsKey(callback)) {
             synchronized (mDeviceCallbacks) {
-                mDeviceCallbacks.put(
-                        callback, new NativeEventHandlerDelegate(callback, handler));
+                NativeEventHandlerDelegate delegate =
+                        new NativeEventHandlerDelegate(callback, handler);
+                mDeviceCallbacks.put(callback, delegate);
+                broadcastDeviceListChange(delegate.getHandler());
             }
         }
     }
@@ -3868,49 +3871,60 @@ public class AudioManager {
         }
     }
 
+    // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
+    // (unpredictable) last time updateAudioPortCache() was called by someone, keep a list
+    // of the ports that exist at the time of the last notification.
+    private ArrayList<AudioDevicePort> mPreviousPorts = new ArrayList<AudioDevicePort>();
+
     /**
      * Internal method to compute and generate add/remove messages and then send to any
      * registered callbacks.
      */
-    private void broadcastDeviceListChange() {
+    private void broadcastDeviceListChange(Handler handler) {
         int status;
 
-        ArrayList<AudioDevicePort> previous_ports = new ArrayList<AudioDevicePort>();
-        status = AudioManager.listPreviousAudioDevicePorts(previous_ports);
-        if (status != AudioManager.SUCCESS) {
-            return;
-        }
-
+        // Get the new current set of ports
         ArrayList<AudioDevicePort> current_ports = new ArrayList<AudioDevicePort>();
         status = AudioManager.listAudioDevicePorts(current_ports);
         if (status != AudioManager.SUCCESS) {
             return;
         }
 
-        AudioDeviceInfo[] added_devices =
-                calcListDeltas(previous_ports, current_ports, GET_DEVICES_ALL);
-        AudioDeviceInfo[] removed_devices =
-                calcListDeltas(current_ports, previous_ports, GET_DEVICES_ALL);
+        if (handler != null) {
+            // This is the callback for the registration, so send the current list
+            AudioDeviceInfo[] deviceList =
+                    infoListFromPortList(current_ports, GET_DEVICES_ALL);
+            handler.sendMessage(
+                    Message.obtain(handler, MSG_DEVICES_CALLBACK_REGISTERED, deviceList));
+        } else {
+            AudioDeviceInfo[] added_devices =
+                    calcListDeltas(mPreviousPorts, current_ports, GET_DEVICES_ALL);
+            AudioDeviceInfo[] removed_devices =
+                    calcListDeltas(current_ports, mPreviousPorts, GET_DEVICES_ALL);
 
-        if (added_devices.length != 0 || removed_devices.length != 0) {
-            Collection<NativeEventHandlerDelegate> values;
-            synchronized (mDeviceCallbacks) {
-                values = mDeviceCallbacks.values();
-            }
-            for (NativeEventHandlerDelegate delegate : values) {
-                Handler handler = delegate.getHandler();
-                if (handler != null) {
-                    if (added_devices.length != 0) {
-                        handler.sendMessage(
-                            Message.obtain(handler,MSG_DEVICES_DEVICES_ADDED, added_devices));
-                    }
-                    if (removed_devices.length != 0) {
-                        handler.sendMessage(
-                            Message.obtain(handler,MSG_DEVICES_DEVICES_REMOVED, removed_devices));
+            if (added_devices.length != 0 || removed_devices.length != 0) {
+                Collection<NativeEventHandlerDelegate> values;
+                synchronized (mDeviceCallbacks) {
+                    values = mDeviceCallbacks.values();
+                }
+                for (NativeEventHandlerDelegate delegate : values) {
+                    handler = delegate.getHandler();
+                    if (handler != null) {
+                        if (added_devices.length != 0) {
+                            handler.sendMessage(
+                                Message.obtain(handler,MSG_DEVICES_DEVICES_ADDED, added_devices));
+                        }
+                        if (removed_devices.length != 0) {
+                            handler.sendMessage(
+                                Message.obtain(handler,MSG_DEVICES_DEVICES_REMOVED,
+                                               removed_devices));
+                        }
                     }
                 }
             }
         }
+
+        mPreviousPorts = current_ports;
     }
 
     /**
@@ -3919,7 +3933,7 @@ public class AudioManager {
     private class OnAmPortUpdateListener implements AudioManager.OnAudioPortUpdateListener {
         static final String TAG = "OnAmPortUpdateListener";
         public void onAudioPortListUpdate(AudioPort[] portList) {
-            broadcastDeviceListChange();
+            broadcastDeviceListChange(null);
         }
 
         /**
@@ -3933,7 +3947,7 @@ public class AudioManager {
          * Callback method called when the mediaserver dies
          */
         public void onServiceDied() {
-            broadcastDeviceListChange();
+            broadcastDeviceListChange(null);
         }
     }
 
@@ -3965,8 +3979,8 @@ public class AudioManager {
                     @Override
                     public void handleMessage(Message msg) {
                         switch(msg.what) {
+                        case MSG_DEVICES_CALLBACK_REGISTERED:
                         case MSG_DEVICES_DEVICES_ADDED:
-                            // call the OnAudioDeviceConnectionListener
                             if (callback != null) {
                                 callback.onAudioDevicesAdded((AudioDeviceInfo[])msg.obj);
                             }
