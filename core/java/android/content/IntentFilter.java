@@ -254,12 +254,14 @@ public class IntentFilter implements Parcelable {
      * HTTP scheme.
      *
      * @see #addDataScheme(String)
+     * @hide
      */
     public static final String SCHEME_HTTP = "http";
     /**
      * HTTPS scheme.
      *
      * @see #addDataScheme(String)
+     * @hide
      */
     public static final String SCHEME_HTTPS = "https";
 

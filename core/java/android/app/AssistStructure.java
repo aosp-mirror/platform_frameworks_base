@@ -131,6 +131,7 @@ public class AssistStructure {
         final int mWidth;
         final int mHeight;
         final CharSequence mTitle;
+        final int mDisplayId;
         final ViewNode mRoot;
 
         WindowNode(AssistStructure assist, ViewRootImpl root) {
@@ -142,6 +143,7 @@ public class AssistStructure {
             mWidth = rect.width();
             mHeight = rect.height();
             mTitle = root.getTitle();
+            mDisplayId = root.getDisplayId();
             mRoot = new ViewNode();
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags()&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
@@ -160,6 +162,7 @@ public class AssistStructure {
             mWidth = in.readInt();
             mHeight = in.readInt();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            mDisplayId = in.readInt();
             mRoot = new ViewNode(in, preader);
         }
 
@@ -169,29 +172,58 @@ public class AssistStructure {
             out.writeInt(mWidth);
             out.writeInt(mHeight);
             TextUtils.writeToParcel(mTitle, out, 0);
+            out.writeInt(mDisplayId);
             mRoot.writeToParcel(out, pwriter);
         }
 
+        /**
+         * Returns the left edge of the window, in pixels, relative to the left
+         * edge of the screen.
+         */
         public int getLeft() {
             return mX;
         }
 
+        /**
+         * Returns the top edge of the window, in pixels, relative to the top
+         * edge of the screen.
+         */
         public int getTop() {
             return mY;
         }
 
+        /**
+         * Returns the total width of the window in pixels.
+         */
         public int getWidth() {
             return mWidth;
         }
 
+        /**
+         * Returns the total height of the window in pixels.
+         */
         public int getHeight() {
             return mHeight;
         }
 
+        /**
+         * Returns the title associated with the window, if it has one.
+         */
         public CharSequence getTitle() {
             return mTitle;
         }
 
+        /**
+         * Returns the ID of the display this window is on, for use with
+         * {@link android.hardware.display.DisplayManager#getDisplay DisplayManager.getDisplay()}.
+         */
+        public int getDisplayId() {
+            return mDisplayId;
+        }
+
+        /**
+         * Returns the {@link ViewNode} containing the root content of the window.
+         */
         public ViewNode getRootViewNode() {
             return mRoot;
         }
@@ -325,146 +357,288 @@ public class AssistStructure {
             }
         }
 
+        /**
+         * Returns the ID associated with this view, as per {@link View#getId() View.getId()}.
+         */
         public int getId() {
             return mId;
         }
 
+        /**
+         * If {@link #getId()} is a resource identifier, this is the package name of that
+         * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
+         * for more information.
+         */
         public String getIdPackage() {
             return mIdPackage;
         }
 
+        /**
+         * If {@link #getId()} is a resource identifier, this is the type name of that
+         * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
+         * for more information.
+         */
         public String getIdType() {
             return mIdType;
         }
 
+        /**
+         * If {@link #getId()} is a resource identifier, this is the entry name of that
+         * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
+         * for more information.
+         */
         public String getIdEntry() {
             return mIdEntry;
         }
 
+        /**
+         * Returns the left edge of this view, in pixels, relative to the left edge of its parent.
+         */
         public int getLeft() {
             return mX;
         }
 
+        /**
+         * Returns the top edge of this view, in pixels, relative to the top edge of its parent.
+         */
         public int getTop() {
             return mY;
         }
 
+        /**
+         * Returns the current X scroll offset of this view, as per
+         * {@link android.view.View#getScrollX() View.getScrollX()}.
+         */
         public int getScrollX() {
             return mScrollX;
         }
 
+        /**
+         * Returns the current Y scroll offset of this view, as per
+         * {@link android.view.View#getScrollX() View.getScrollY()}.
+         */
         public int getScrollY() {
             return mScrollY;
         }
 
+        /**
+         * Returns the width of this view, in pixels.
+         */
         public int getWidth() {
             return mWidth;
         }
 
+        /**
+         * Returns the height of this view, in pixels.
+         */
         public int getHeight() {
             return mHeight;
         }
 
+        /**
+         * Returns the visibility mode of this view, as per
+         * {@link android.view.View#getVisibility() View.getVisibility()}.
+         */
         public int getVisibility() {
             return mFlags&ViewNode.FLAGS_VISIBILITY_MASK;
         }
 
+        /**
+         * Returns true if assist data has been blocked starting at this node in the hierarchy.
+         */
         public boolean isAssistBlocked() {
             return (mFlags&ViewNode.FLAGS_ASSIST_BLOCKED) == 0;
         }
 
+        /**
+         * Returns true if this node is in an enabled state.
+         */
         public boolean isEnabled() {
             return (mFlags&ViewNode.FLAGS_DISABLED) == 0;
         }
 
+        /**
+         * Returns true if this node is clickable by the user.
+         */
         public boolean isClickable() {
             return (mFlags&ViewNode.FLAGS_CLICKABLE) != 0;
         }
 
+        /**
+         * Returns true if this node can take input focus.
+         */
         public boolean isFocusable() {
             return (mFlags&ViewNode.FLAGS_FOCUSABLE) != 0;
         }
 
+        /**
+         * Returns true if this node currently had input focus at the time that the
+         * structure was collected.
+         */
         public boolean isFocused() {
             return (mFlags&ViewNode.FLAGS_FOCUSED) != 0;
         }
 
+        /**
+         * Returns true if this node currently had accessibility focus at the time that the
+         * structure was collected.
+         */
         public boolean isAccessibilityFocused() {
             return (mFlags&ViewNode.FLAGS_ACCESSIBILITY_FOCUSED) != 0;
         }
 
+        /**
+         * Returns true if this node represents something that is checkable by the user.
+         */
         public boolean isCheckable() {
             return (mFlags&ViewNode.FLAGS_CHECKABLE) != 0;
         }
 
+        /**
+         * Returns true if this node is currently in a checked state.
+         */
         public boolean isChecked() {
             return (mFlags&ViewNode.FLAGS_CHECKED) != 0;
         }
 
+        /**
+         * Returns true if this node has currently been selected by the user.
+         */
         public boolean isSelected() {
             return (mFlags&ViewNode.FLAGS_SELECTED) != 0;
         }
 
+        /**
+         * Returns true if this node has currently been activated by the user.
+         */
         public boolean isActivated() {
             return (mFlags&ViewNode.FLAGS_ACTIVATED) != 0;
         }
 
+        /**
+         * Returns true if this node is something the user can perform a long click/press on.
+         */
         public boolean isLongClickable() {
             return (mFlags&ViewNode.FLAGS_LONG_CLICKABLE) != 0;
         }
 
+        /**
+         * Returns true if this node is something the user can perform a context click on.
+         */
         public boolean isContextClickable() {
             return (mFlags&ViewNode.FLAGS_CONTEXT_CLICKABLE) != 0;
         }
 
+        /**
+         * Returns the class name of the node's implementation, indicating its behavior.
+         * For example, a button will report "android.widget.Button" meaning it behaves
+         * like a {@link android.widget.Button}.
+         */
         public String getClassName() {
             return mClassName;
         }
 
+        /**
+         * Returns any content description associated with the node, which semantically describes
+         * its purpose for accessibility and other uses.
+         */
         public CharSequence getContentDescription() {
             return mContentDescription;
         }
 
+        /**
+         * Returns any text associated with the node that is displayed to the user, or null
+         * if there is none.
+         */
         public CharSequence getText() {
             return mText != null ? mText.mText : null;
         }
 
+        /**
+         * If {@link #getText()} is non-null, this is where the current selection starts.
+         */
         public int getTextSelectionStart() {
             return mText != null ? mText.mTextSelectionStart : -1;
         }
 
+        /**
+         * If {@link #getText()} is non-null, this is where the current selection starts.
+         * If there is no selection, returns the same value as {@link #getTextSelectionStart()},
+         * indicating the cursor position.
+         */
         public int getTextSelectionEnd() {
             return mText != null ? mText.mTextSelectionEnd : -1;
         }
 
+        /**
+         * If {@link #getText()} is non-null, this is the main text color associated with it.
+         * If there is no text color, {@link #TEXT_COLOR_UNDEFINED} is returned.
+         * Note that the text may also contain style spans that modify the color of specific
+         * parts of the text.
+         */
         public int getTextColor() {
             return mText != null ? mText.mTextColor : TEXT_COLOR_UNDEFINED;
         }
 
+        /**
+         * If {@link #getText()} is non-null, this is the main text background color associated
+         * with it.
+         * If there is no text background color, {@link #TEXT_COLOR_UNDEFINED} is returned.
+         * Note that the text may also contain style spans that modify the color of specific
+         * parts of the text.
+         */
         public int getTextBackgroundColor() {
             return mText != null ? mText.mTextBackgroundColor : TEXT_COLOR_UNDEFINED;
         }
 
+        /**
+         * If {@link #getText()} is non-null, this is the main text size (in pixels) associated
+         * with it.
+         * Note that the text may also contain style spans that modify the size of specific
+         * parts of the text.
+         */
         public float getTextSize() {
             return mText != null ? mText.mTextSize : 0;
         }
 
+        /**
+         * If {@link #getText()} is non-null, this is the main text style associated
+         * with it, containing a bit mask of {@link #TEXT_STYLE_BOLD},
+         * {@link #TEXT_STYLE_BOLD}, {@link #TEXT_STYLE_STRIKE_THRU}, and/or
+         * {@link #TEXT_STYLE_UNDERLINE}.
+         * Note that the text may also contain style spans that modify the style of specific
+         * parts of the text.
+         */
         public int getTextStyle() {
             return mText != null ? mText.mTextStyle : 0;
         }
 
+        /**
+         * Return additional hint text associated with the node; this is typically used with
+         * a node that takes user input, describing to the user what the input means.
+         */
         public String getHint() {
             return mText != null ? mText.mHint : null;
         }
 
+        /**
+         * Return a Bundle containing optional vendor-specific extension information.
+         */
         public Bundle getExtras() {
             return mExtras;
         }
 
+        /**
+         * Return the number of children this node has.
+         */
         public int getChildCount() {
             return mChildren != null ? mChildren.length : 0;
         }
 
+        /**
+         * Return a child of this node, given an index value from 0 to
+         * {@link #getChildCount()}-1.
+         */
         public ViewNode getChildAt(int index) {
             return mChildren[index];
         }
@@ -663,6 +837,19 @@ public class AssistStructure {
         }
 
         @Override
+        public int addChildCount(int num) {
+            if (mNode.mChildren == null) {
+                setChildCount(num);
+                return 0;
+            }
+            final int start = mNode.mChildren.length;
+            ViewNode[] newArray = new ViewNode[start + num];
+            System.arraycopy(mNode.mChildren, 0, newArray, 0, start);
+            mNode.mChildren = newArray;
+            return start;
+        }
+
+        @Override
         public int getChildCount() {
             return mNode.mChildren != null ? mNode.mChildren.length : 0;
         }
@@ -801,6 +988,9 @@ public class AssistStructure {
         return assistBundle.getParcelable(ASSIST_KEY);
     }
 
+    /**
+     * Return the activity this AssistStructure came from.
+     */
     public ComponentName getActivityComponent() {
         ensureData();
         return mActivityComponent;

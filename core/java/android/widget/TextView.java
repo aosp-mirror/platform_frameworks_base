@@ -8790,7 +8790,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onProvideStructure(ViewStructure structure) {
         super.onProvideStructure(structure);
-        final boolean isPassword = hasPasswordTransformationMethod();
+        final boolean isPassword = hasPasswordTransformationMethod()
+                || isPasswordInputType(getInputType());
         if (!isPassword) {
             structure.setText(getText(), getSelectionStart(), getSelectionEnd());
 
@@ -9294,25 +9295,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * If provided, this ActionMode.Callback will be used to create the ActionMode when text
      * insertion is initiated in this View.
-     *
      * The standard implementation populates the menu with a subset of Select All,
      * Paste and Replace actions, depending on what this View supports.
      *
-     * A custom implementation can add new entries in the default menu in its
-     * {@link android.view.ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The
-     * default actions can also be removed from the menu using
+     * <p>A custom implementation can add new entries in the default menu in its
+     * {@link android.view.ActionMode.Callback#onPrepareActionMode(android.view.ActionMode,
+     * android.view.Menu)} method. The default actions can also be removed from the menu using
      * {@link android.view.Menu#removeItem(int)} and passing {@link android.R.id#selectAll},
-     * {@link android.R.id#paste} or {@link android.R.id#replaceText} ids as parameters.
+     * {@link android.R.id#paste} or {@link android.R.id#replaceText} ids as parameters.</p>
      *
-     * Returning false from
-     * {@link android.view.ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will prevent
-     * the action mode from being started.
+     * <p>Returning false from
+     * {@link android.view.ActionMode.Callback#onCreateActionMode(android.view.ActionMode,
+     * android.view.Menu)} will prevent the action mode from being started.</p>
      *
-     * Action click events should be handled by the custom implementation of
-     * {@link android.view.ActionMode.Callback#onActionItemClicked(ActionMode, MenuItem)}.
+     * <p>Action click events should be handled by the custom implementation of
+     * {@link android.view.ActionMode.Callback#onActionItemClicked(android.view.ActionMode,
+     * android.view.MenuItem)}.</p>
      *
-     * Note that text insertion mode is not started when a TextView receives focus and the
-     * {@link android.R.attr#selectAllOnFocus} flag has been set.
+     * <p>Note that text insertion mode is not started when a TextView receives focus and the
+     * {@link android.R.attr#selectAllOnFocus} flag has been set.</p>
      */
     public void setCustomInsertionActionModeCallback(ActionMode.Callback actionModeCallback) {
         createEditorIfNeeded();

@@ -878,7 +878,10 @@ public final class PowerManager {
      * off network access to apps.  You can monitor for changes to this state with
      * {@link #ACTION_DEVICE_IDLE_MODE_CHANGED}.
      *
-     * @return Returns true if currently in low power mode, else false.
+     * @return Returns true if currently in active device idle mode, else false.  This is
+     * when idle mode restrictions are being actively applied; it will return false if the
+     * device is in a long-term idle mode but currently running a maintenance window where
+     * restrictions have been lifted.
      */
     public boolean isDeviceIdleMode() {
         try {
