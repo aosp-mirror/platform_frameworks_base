@@ -41,7 +41,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -61,8 +60,10 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
@@ -101,16 +102,11 @@ public class UsageStatsService extends SystemService implements
     private static final long FLUSH_INTERVAL = COMPRESS_TIME ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
-    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = COMPRESS_TIME ? ONE_MINUTE * 4
-            : 12 * 60 * ONE_MINUTE; // 12 hours of screen-on time sans dream-time
-    static final long DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS = COMPRESS_TIME ? ONE_MINUTE * 8
-            : 2L * 24 * 60 * ONE_MINUTE; // 2 days
-    static final long DEFAULT_CHECK_IDLE_INTERVAL = COMPRESS_TIME ? ONE_MINUTE
-            : 8 * 60 * ONE_MINUTE; // 8 hours
-    static final long DEFAULT_PAROLE_INTERVAL = COMPRESS_TIME ? ONE_MINUTE * 10
-            : 24 * 60 * ONE_MINUTE; // 24 hours between paroles
-    static final long DEFAULT_PAROLE_DURATION = COMPRESS_TIME ? ONE_MINUTE
-            : 10 * ONE_MINUTE; // 10 minutes
+    long mAppIdleDurationMillis;
+    long mCheckIdleIntervalMillis;
+    long mAppIdleWallclockThresholdMillis;
+    long mAppIdleParoleIntervalMillis;
+    long mAppIdleParoleDurationMillis;
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -140,8 +136,7 @@ public class UsageStatsService extends SystemService implements
     boolean mAppIdleParoled;
     private boolean mScreenOn;
     private long mLastAppIdleParoledTime;
-    long mAppIdleDurationMillis;
-    long mCheckIdleIntervalMillis = DEFAULT_CHECK_IDLE_INTERVAL;
+
     long mScreenOnTime;
     long mScreenOnSystemTimeSnapshot;
 
@@ -185,11 +180,7 @@ public class UsageStatsService extends SystemService implements
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
-        // Look at primary user's secure setting for this. TODO: Maybe apply different
-        // thresholds for different users.
-        mAppIdleDurationMillis = Settings.Secure.getLongForUser(getContext().getContentResolver(),
-                Settings.Secure.APP_IDLE_DURATION, DEFAULT_APP_IDLE_THRESHOLD_MILLIS,
-                UserHandle.USER_OWNER);
+
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
@@ -199,7 +190,10 @@ public class UsageStatsService extends SystemService implements
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             // Observe changes to the threshold
-            new SettingsObserver(mHandler).registerObserver();
+            SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+            settingsObserver.registerObserver();
+            settingsObserver.updateSettings();
+
             mAppWidgetManager = getContext().getSystemService(AppWidgetManager.class);
             mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
                     ServiceManager.getService(DeviceIdleController.SERVICE_NAME));
@@ -323,7 +317,7 @@ public class UsageStatsService extends SystemService implements
         // Compute when the next parole needs to happen. We check more frequently than necessary
         // since the message handler delays are based on elapsedRealTime and not wallclock time.
         // The comparison is done in wallclock time.
-        long timeLeft = (mLastAppIdleParoledTime + DEFAULT_PAROLE_INTERVAL)
+        long timeLeft = (mLastAppIdleParoledTime + mAppIdleParoleIntervalMillis)
                 - checkAndGetTimeLocked();
         if (timeLeft < 0) {
             timeLeft = 0;
@@ -334,7 +328,7 @@ public class UsageStatsService extends SystemService implements
     private void postParoleEndTimeout() {
         if (DEBUG) Slog.d(TAG, "Posting MSG_PAROLE_END_TIMEOUT");
         mHandler.removeMessages(MSG_PAROLE_END_TIMEOUT);
-        mHandler.sendEmptyMessageDelayed(MSG_PAROLE_END_TIMEOUT, DEFAULT_PAROLE_DURATION);
+        mHandler.sendEmptyMessageDelayed(MSG_PAROLE_END_TIMEOUT, mAppIdleParoleDurationMillis);
     }
 
     void postCheckIdleStates(int userId) {
@@ -386,7 +380,7 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLock) {
             if (!mAppIdleParoled) {
                 final long timeSinceLastParole = checkAndGetTimeLocked() - mLastAppIdleParoledTime;
-                if (timeSinceLastParole > DEFAULT_PAROLE_INTERVAL) {
+                if (timeSinceLastParole > mAppIdleParoleIntervalMillis) {
                     if (DEBUG) Slog.d(TAG, "Crossed default parole interval");
                     setAppIdleParoled(true);
                     // Make sure it ends at some point
@@ -475,7 +469,7 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLock) {
             final long timeSinceLastParole = checkAndGetTimeLocked() - mLastAppIdleParoledTime;
             if (!deviceIdle
-                    && timeSinceLastParole >= DEFAULT_PAROLE_INTERVAL) {
+                    && timeSinceLastParole >= mAppIdleParoleIntervalMillis) {
                 if (DEBUG) Slog.i(TAG, "Bringing idle apps out of inactive state due to deviceIdleMode=false");
                 postNextParoleTimeout();
                 setAppIdleParoled(true);
@@ -608,7 +602,7 @@ public class UsageStatsService extends SystemService implements
                     lastUsedTime, screenOnTime, timeNow);
             service.setBeginIdleTime(packageName, deviceUsageTime);
             service.setSystemLastUsedTime(packageName,
-                    timeNow - (idle ? DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS : 0) - 5000);
+                    timeNow - (idle ? mAppIdleWallclockThresholdMillis : 0) - 5000);
             // Inform listeners if necessary
             if (previouslyIdle != idle) {
                 // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
@@ -711,7 +705,7 @@ public class UsageStatsService extends SystemService implements
     boolean hasPassedIdleTimeoutLocked(long beginIdleTime, long lastUsedTime,
             long screenOnTime, long currentTime) {
         return (beginIdleTime <= screenOnTime - mAppIdleDurationMillis)
-                && (lastUsedTime <= currentTime - DEFAULT_WALLCLOCK_APP_IDLE_THRESHOLD_MILLIS);
+                && (lastUsedTime <= currentTime - mAppIdleWallclockThresholdMillis);
     }
 
     void addListener(AppIdleStateChangeListener listener) {
@@ -854,7 +848,30 @@ public class UsageStatsService extends SystemService implements
                 }
                 idpw.decreaseIndent();
             }
-            pw.write("Screen On Timebase:" + mScreenOnTime + "\n");
+            pw.println("Screen On Timebase:" + mScreenOnTime);
+
+            pw.println();
+            pw.println("Settings:");
+
+            pw.print("  mAppIdleDurationMillis=");
+            TimeUtils.formatDuration(mAppIdleDurationMillis, pw);
+            pw.println();
+
+            pw.print("  mAppIdleWallclockThresholdMillis=");
+            TimeUtils.formatDuration(mAppIdleWallclockThresholdMillis, pw);
+            pw.println();
+
+            pw.print("  mCheckIdleIntervalMillis=");
+            TimeUtils.formatDuration(mCheckIdleIntervalMillis, pw);
+            pw.println();
+
+            pw.print("  mAppIdleParoleIntervalMillis=");
+            TimeUtils.formatDuration(mAppIdleParoleIntervalMillis, pw);
+            pw.println();
+
+            pw.print("  mAppIdleParoleDurationMillis=");
+            TimeUtils.formatDuration(mAppIdleParoleDurationMillis, pw);
+            pw.println();
         }
     }
 
@@ -907,27 +924,60 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
-     * Observe settings changes for Settings.Secure.APP_IDLE_DURATION.
+     * Observe settings changes for {@link Settings.Global#APP_IDLE_CONSTANTS}.
      */
     private class SettingsObserver extends ContentObserver {
+        private static final String KEY_IDLE_DURATION = "idle_duration";
+        private static final String KEY_WALLCLOCK_THRESHOLD = "wallclock_threshold";
+        private static final String KEY_PAROLE_INTERVAL = "parole_interval";
+        private static final String KEY_PAROLE_DURATION = "parole_duration";
+
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
 
         SettingsObserver(Handler handler) {
             super(handler);
         }
 
         void registerObserver() {
-            getContext().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.APP_IDLE_DURATION), false, this, UserHandle.USER_OWNER);
+            getContext().getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.APP_IDLE_CONSTANTS), false, this);
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            mAppIdleDurationMillis = Settings.Secure.getLongForUser(getContext().getContentResolver(),
-                    Settings.Secure.APP_IDLE_DURATION, DEFAULT_APP_IDLE_THRESHOLD_MILLIS,
-                    UserHandle.USER_OWNER);
-            mCheckIdleIntervalMillis = Math.min(DEFAULT_CHECK_IDLE_INTERVAL,
-                    mAppIdleDurationMillis / 4);
+        public void onChange(boolean selfChange) {
+            updateSettings();
             postCheckIdleStates(UserHandle.USER_ALL);
+        }
+
+        void updateSettings() {
+            synchronized (mLock) {
+                // Look at global settings for this.
+                // TODO: Maybe apply different thresholds for different users.
+                try {
+                    mParser.setString(Settings.Global.getString(getContext().getContentResolver(),
+                            Settings.Global.APP_IDLE_CONSTANTS));
+                } catch (IllegalArgumentException e) {
+                    Slog.e(TAG, "Bad value for app idle settings: " + e.getMessage());
+                    // fallthrough, mParser is empty and all defaults will be returned.
+                }
+
+                // Default: 12 hours of screen-on time sans dream-time
+                mAppIdleDurationMillis = mParser.getLong(KEY_IDLE_DURATION,
+                       COMPRESS_TIME ? ONE_MINUTE * 4 : 12 * 60 * ONE_MINUTE);
+
+                mAppIdleWallclockThresholdMillis = mParser.getLong(KEY_WALLCLOCK_THRESHOLD,
+                        COMPRESS_TIME ? ONE_MINUTE * 8 : 2L * 24 * 60 * ONE_MINUTE); // 2 days
+
+                mCheckIdleIntervalMillis = Math.min(mAppIdleDurationMillis / 4,
+                        COMPRESS_TIME ? ONE_MINUTE : 8 * 60 * ONE_MINUTE); // 8 hours
+
+                // Default: 24 hours between paroles
+                mAppIdleParoleIntervalMillis = mParser.getLong(KEY_PAROLE_INTERVAL,
+                        COMPRESS_TIME ? ONE_MINUTE * 10 : 24 * 60 * ONE_MINUTE);
+
+                mAppIdleParoleDurationMillis = mParser.getLong(KEY_PAROLE_DURATION,
+                        COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE); // 10 minutes
+            }
         }
     }
 
