@@ -953,7 +953,7 @@ public final class SystemServer {
 
                 try {
                     Slog.i(TAG, "BackgroundDexOptService");
-                    BackgroundDexOptService.schedule(context);
+                    BackgroundDexOptService.schedule(context, 0);
                 } catch (Throwable e) {
                     reportWtf("starting BackgroundDexOptService", e);
                 }
