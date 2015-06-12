@@ -932,7 +932,7 @@
     <permission android:name="android.permission.CHANGE_WIFI_STATE"
         android:description="@string/permdesc_changeWifiState"
         android:label="@string/permlab_changeWifiState"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- @SystemApi @hide Allows applications to read Wi-Fi credential.
          <p>Not for use by third-party applications. -->
@@ -962,7 +962,7 @@
     <permission android:name="android.permission.CHANGE_WIMAX_STATE"
         android:description="@string/permdesc_changeWimaxState"
         android:label="@string/permlab_changeWimaxState"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!--@SystemApi Allows applications to the the local WiFi and Bluetooth MAC address.
         @hide
@@ -1067,7 +1067,7 @@
     <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
         android:description="@string/permdesc_changeWifiMulticastState"
         android:label="@string/permlab_changeWifiMulticastState"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- Allows access to the vibrator -->
     <permission android:name="android.permission.VIBRATE"
