@@ -4168,6 +4168,9 @@
     <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
     <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
 
+    <!-- Content description of the work profile icon in the notification. -->
+    <string name="notification_work_profile_content_description">Work profile</string>
+
     <!-- User visible name for USB MIDI Peripheral port -->
     <string name="usb_midi_peripheral_name">Android USB Peripheral Port</string>
     <!-- Manufacturer name for USB MIDI Peripheral port -->
