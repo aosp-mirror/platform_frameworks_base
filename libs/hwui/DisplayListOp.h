@@ -1398,9 +1398,10 @@ class DrawRenderNodeOp : public DrawBoundedOp {
     friend class RenderNode; // grant RenderNode access to info of child
     friend class DisplayListData; // grant DisplayListData access to info of child
 public:
-    DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent)
+    DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent, bool clipIsSimple)
             : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
             , mRenderNode(renderNode)
+            , mRecordedWithPotentialStencilClip(!clipIsSimple || !transformFromParent.isSimple())
             , mTransformFromParent(transformFromParent)
             , mSkipInOrderDraw(false) {}
 
@@ -1435,6 +1436,20 @@ public:
 
 private:
     RenderNode* mRenderNode;
+
+    /**
+     * This RenderNode was drawn into a DisplayList with the canvas in a state that will likely
+     * require rendering with stencil clipping. Either:
+     *
+     * 1) A path clip or rotated rect clip was in effect on the canvas at record time
+     * 2) The RenderNode was recorded with a non-simple canvas transform (e.g. rotation)
+     *
+     * Note: even if this is false, non-rect clipping may still be applied applied either due to
+     * property-driven rotation (either in this RenderNode, or any ancestor), or record time
+     * clipping in an ancestor. These are handled in RenderNode::prepareTreeImpl since they are
+     * dynamic (relative to a static DisplayList of a parent), and don't affect this flag.
+     */
+    bool mRecordedWithPotentialStencilClip;
 
     ///////////////////////////
     // Properties below are used by RenderNode::computeOrderingImpl() and issueOperations()

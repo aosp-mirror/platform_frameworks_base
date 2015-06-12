@@ -158,6 +158,32 @@ public:
         }
     }
 
+    /**
+     * Set internal layer state based on whether this layer
+     *
+     * Additionally, returns true if child RenderNodes with functors will need to use a layer
+     * to support clipping.
+     */
+    bool prepareForFunctorPresence(bool willHaveFunctor, bool ancestorDictatesFunctorsNeedLayer) {
+        // parent may have already dictated that a descendant layer is needed
+        bool functorsNeedLayer = ancestorDictatesFunctorsNeedLayer
+
+                // Round rect clipping forces layer for functors
+                || CC_UNLIKELY(getOutline().willClip())
+                || CC_UNLIKELY(getRevealClip().willClip())
+
+                // Complex matrices forces layer, due to stencil clipping
+                || CC_UNLIKELY(getTransformMatrix() && !getTransformMatrix()->isScaleTranslate())
+                || CC_UNLIKELY(getAnimationMatrix() && !getAnimationMatrix()->isScaleTranslate())
+                || CC_UNLIKELY(getStaticMatrix() && !getStaticMatrix()->isScaleTranslate());
+
+        mComputedFields.mNeedLayerForFunctors = (willHaveFunctor && functorsNeedLayer);
+
+        // If on a layer, will have consumed the need for isolating functors from stencil.
+        // Thus, it's safe to reset the flag until some descendent sets it.
+        return CC_LIKELY(effectiveLayerType() == LayerType::None) && functorsNeedLayer;
+    }
+
     RenderProperties& operator=(const RenderProperties& other);
 
     bool setClipToBounds(bool clipToBounds) {
@@ -580,15 +606,16 @@ public:
     bool promotedToLayer() const {
         const int maxTextureSize = Caches::getInstance().maxTextureSize;
         return mLayerProperties.mType == LayerType::None
-                && !MathUtils::isZero(mPrimitiveFields.mAlpha)
-                && mPrimitiveFields.mAlpha < 1
-                && mPrimitiveFields.mHasOverlappingRendering
                 && mPrimitiveFields.mWidth <= maxTextureSize
-                && mPrimitiveFields.mHeight <= maxTextureSize;
+                && mPrimitiveFields.mHeight <= maxTextureSize
+                && (mComputedFields.mNeedLayerForFunctors
+                        || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
+                                && mPrimitiveFields.mAlpha < 1
+                                && mPrimitiveFields.mHasOverlappingRendering));
     }
 
     LayerType effectiveLayerType() const {
-        return promotedToLayer() ? LayerType::RenderLayer : mLayerProperties.mType;
+        return CC_UNLIKELY(promotedToLayer()) ? LayerType::RenderLayer : mLayerProperties.mType;
     }
 
 private:
@@ -636,6 +663,9 @@ private:
         SkMatrix* mTransformMatrix;
 
         Sk3DView mTransformCamera;
+
+        // Force layer on for functors to enable render features they don't yet support (clipping)
+        bool mNeedLayerForFunctors = false;
     } mComputedFields;
 };
 

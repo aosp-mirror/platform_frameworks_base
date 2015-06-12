@@ -235,10 +235,10 @@ private:
         const char* mText;
     };
 
-    void prepareTreeImpl(TreeInfo& info);
+    void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
-    void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
+    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree);
     void applyLayerPropertiesToLayer(TreeInfo& info);
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
