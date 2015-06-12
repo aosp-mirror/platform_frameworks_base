@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
@@ -30,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
@@ -109,14 +112,19 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
-    public Cursor query(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) throws RemoteException {
+    public @Nullable Cursor query(@NonNull Uri url, @Nullable String[] projection,
+            @Nullable String selection, @Nullable String[] selectionArgs,
+            @Nullable String sortOrder) throws RemoteException {
         return query(url, projection, selection,  selectionArgs, sortOrder, null);
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
-    public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder, CancellationSignal cancellationSignal) throws RemoteException {
+    public @Nullable Cursor query(@NonNull Uri url, @Nullable String[] projection,
+            @Nullable String selection, @Nullable String[] selectionArgs,
+            @Nullable String sortOrder, @Nullable CancellationSignal cancellationSignal)
+                    throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             ICancellationSignal remoteCancellationSignal = null;
@@ -138,7 +146,9 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#getType ContentProvider.getType} */
-    public String getType(Uri url) throws RemoteException {
+    public @Nullable String getType(@NonNull Uri url) throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             return mContentProvider.getType(url);
@@ -153,7 +163,11 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#getStreamTypes ContentProvider.getStreamTypes} */
-    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+    public @Nullable String[] getStreamTypes(@NonNull Uri url, @NonNull String mimeTypeFilter)
+            throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
+
         beforeRemote();
         try {
             return mContentProvider.getStreamTypes(url, mimeTypeFilter);
@@ -168,7 +182,9 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#canonicalize} */
-    public final Uri canonicalize(Uri url) throws RemoteException {
+    public final @Nullable Uri canonicalize(@NonNull Uri url) throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             return mContentProvider.canonicalize(mPackageName, url);
@@ -183,7 +199,9 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#uncanonicalize} */
-    public final Uri uncanonicalize(Uri url) throws RemoteException {
+    public final @Nullable Uri uncanonicalize(@NonNull Uri url) throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             return mContentProvider.uncanonicalize(mPackageName, url);
@@ -198,7 +216,10 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#insert ContentProvider.insert} */
-    public Uri insert(Uri url, ContentValues initialValues) throws RemoteException {
+    public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues)
+            throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             return mContentProvider.insert(mPackageName, url, initialValues);
@@ -213,7 +234,11 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#bulkInsert ContentProvider.bulkInsert} */
-    public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException {
+    public int bulkInsert(@NonNull Uri url, @NonNull ContentValues[] initialValues)
+            throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+        Preconditions.checkNotNull(initialValues, "initialValues");
+
         beforeRemote();
         try {
             return mContentProvider.bulkInsert(mPackageName, url, initialValues);
@@ -228,8 +253,10 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#delete ContentProvider.delete} */
-    public int delete(Uri url, String selection, String[] selectionArgs)
-            throws RemoteException {
+    public int delete(@NonNull Uri url, @Nullable String selection,
+            @Nullable String[] selectionArgs) throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             return mContentProvider.delete(mPackageName, url, selection, selectionArgs);
@@ -244,8 +271,10 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#update ContentProvider.update} */
-    public int update(Uri url, ContentValues values, String selection,
-            String[] selectionArgs) throws RemoteException {
+    public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable String selection,
+            @Nullable String[] selectionArgs) throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
         beforeRemote();
         try {
             return mContentProvider.update(mPackageName, url, values, selection, selectionArgs);
@@ -266,7 +295,7 @@ public class ContentProviderClient {
      * you use the {@link ContentResolver#openFileDescriptor
      * ContentResolver.openFileDescriptor} API instead.
      */
-    public ParcelFileDescriptor openFile(Uri url, String mode)
+    public @Nullable ParcelFileDescriptor openFile(@NonNull Uri url, @NonNull String mode)
             throws RemoteException, FileNotFoundException {
         return openFile(url, mode, null);
     }
@@ -278,8 +307,11 @@ public class ContentProviderClient {
      * you use the {@link ContentResolver#openFileDescriptor
      * ContentResolver.openFileDescriptor} API instead.
      */
-    public ParcelFileDescriptor openFile(Uri url, String mode, CancellationSignal signal)
-            throws RemoteException, FileNotFoundException {
+    public @Nullable ParcelFileDescriptor openFile(@NonNull Uri url, @NonNull String mode,
+            @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
+        Preconditions.checkNotNull(url, "url");
+        Preconditions.checkNotNull(mode, "mode");
+
         beforeRemote();
         try {
             ICancellationSignal remoteSignal = null;
@@ -306,7 +338,7 @@ public class ContentProviderClient {
      * you use the {@link ContentResolver#openAssetFileDescriptor
      * ContentResolver.openAssetFileDescriptor} API instead.
      */
-    public AssetFileDescriptor openAssetFile(Uri url, String mode)
+    public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri url, @NonNull String mode)
             throws RemoteException, FileNotFoundException {
         return openAssetFile(url, mode, null);
     }
@@ -318,8 +350,11 @@ public class ContentProviderClient {
      * you use the {@link ContentResolver#openAssetFileDescriptor
      * ContentResolver.openAssetFileDescriptor} API instead.
      */
-    public AssetFileDescriptor openAssetFile(Uri url, String mode, CancellationSignal signal)
-            throws RemoteException, FileNotFoundException {
+    public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri url, @NonNull String mode,
+            @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
+        Preconditions.checkNotNull(url, "url");
+        Preconditions.checkNotNull(mode, "mode");
+
         beforeRemote();
         try {
             ICancellationSignal remoteSignal = null;
@@ -340,15 +375,19 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#openTypedAssetFile ContentProvider.openTypedAssetFile} */
-    public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
-            String mimeType, Bundle opts) throws RemoteException, FileNotFoundException {
+    public final @Nullable AssetFileDescriptor openTypedAssetFileDescriptor(@NonNull Uri uri,
+            @NonNull String mimeType, @Nullable Bundle opts)
+                    throws RemoteException, FileNotFoundException {
         return openTypedAssetFileDescriptor(uri, mimeType, opts, null);
     }
 
     /** See {@link ContentProvider#openTypedAssetFile ContentProvider.openTypedAssetFile} */
-    public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
-            String mimeType, Bundle opts, CancellationSignal signal)
-            throws RemoteException, FileNotFoundException {
+    public final @Nullable AssetFileDescriptor openTypedAssetFileDescriptor(@NonNull Uri uri,
+            @NonNull String mimeType, @Nullable Bundle opts, @Nullable CancellationSignal signal)
+                    throws RemoteException, FileNotFoundException {
+        Preconditions.checkNotNull(uri, "uri");
+        Preconditions.checkNotNull(mimeType, "mimeType");
+
         beforeRemote();
         try {
             ICancellationSignal remoteSignal = null;
@@ -370,8 +409,11 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#applyBatch ContentProvider.applyBatch} */
-    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
-            throws RemoteException, OperationApplicationException {
+    public @NonNull ContentProviderResult[] applyBatch(
+            @NonNull ArrayList<ContentProviderOperation> operations)
+                    throws RemoteException, OperationApplicationException {
+        Preconditions.checkNotNull(operations, "operations");
+
         beforeRemote();
         try {
             return mContentProvider.applyBatch(mPackageName, operations);
@@ -386,7 +428,10 @@ public class ContentProviderClient {
     }
 
     /** See {@link ContentProvider#call(String, String, Bundle)} */
-    public Bundle call(String method, String arg, Bundle extras) throws RemoteException {
+    public @Nullable Bundle call(@NonNull String method, @Nullable String arg,
+            @Nullable Bundle extras) throws RemoteException {
+        Preconditions.checkNotNull(method, "method");
+
         beforeRemote();
         try {
             return mContentProvider.call(mPackageName, method, arg, extras);
@@ -436,7 +481,7 @@ public class ContentProviderClient {
      * @return If the associated {@link ContentProvider} is local, returns it.
      * Otherwise returns null.
      */
-    public ContentProvider getLocalContentProvider() {
+    public @Nullable ContentProvider getLocalContentProvider() {
         return ContentProvider.coerceToLocalContentProvider(mContentProvider);
     }
 
