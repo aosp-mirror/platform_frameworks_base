@@ -210,6 +210,11 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
     }
 
     @Override
+    protected final int getAdditionalEntropyAmountForFinish() {
+        return 0;
+    }
+
+    @Override
     protected final void addAlgorithmSpecificParametersToBegin(
             @NonNull KeymasterArguments keymasterArgs) {
         if ((isEncrypting()) && (mIvRequired) && (mIvHasBeenUsed)) {
