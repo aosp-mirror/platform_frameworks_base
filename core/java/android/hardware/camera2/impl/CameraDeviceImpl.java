@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,7 +80,7 @@ public class CameraDeviceImpl extends CameraDevice {
     private volatile StateCallbackKK mSessionStateCallback;
     private final Handler mDeviceHandler;
 
-    private volatile boolean mClosing = false;
+    private final AtomicBoolean mClosing = new AtomicBoolean();
     private boolean mInError = false;
     private boolean mIdle = true;
 
@@ -906,6 +907,10 @@ public class CameraDeviceImpl extends CameraDevice {
     @Override
     public void close() {
         synchronized (mInterfaceLock) {
+            if (mClosing.getAndSet(true)) {
+                return;
+            }
+
             try {
                 if (mRemoteDevice != null) {
                     mRemoteDevice.disconnect();
@@ -1917,7 +1922,7 @@ public class CameraDeviceImpl extends CameraDevice {
 
     /** Whether the camera device has started to close (may not yet have finished) */
     private boolean isClosed() {
-        return mClosing;
+        return mClosing.get();
     }
 
     private CameraCharacteristics getCharacteristics() {
