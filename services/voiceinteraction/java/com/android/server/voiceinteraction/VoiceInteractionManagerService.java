@@ -839,7 +839,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 super(handler);
                 ContentResolver resolver = mContext.getContentResolver();
                 resolver.registerContentObserver(Settings.Secure.getUriFor(
-                        Settings.Secure.VOICE_INTERACTION_SERVICE), false, this);
+                        Settings.Secure.VOICE_INTERACTION_SERVICE), false, this,
+                        UserHandle.USER_ALL);
             }
 
             @Override public void onChange(boolean selfChange) {
