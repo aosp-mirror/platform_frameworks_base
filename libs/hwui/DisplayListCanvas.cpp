@@ -203,10 +203,10 @@ bool DisplayListCanvas::clipRegion(const SkRegion* region, SkRegion::Op op) {
 
 void DisplayListCanvas::drawRenderNode(RenderNode* renderNode) {
     LOG_ALWAYS_FATAL_IF(!renderNode, "missing rendernode");
-
-    // dirty is an out parameter and should not be recorded,
-    // it matters only when replaying the display list
-    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, *mState.currentTransform());
+    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(
+            renderNode,
+            *mState.currentTransform(),
+            mState.clipIsSimple());
     addRenderNodeOp(op);
 }
 
