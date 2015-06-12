@@ -1177,8 +1177,13 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_ALARM = 0x000e;
         // Record that we have decided we need to collect new stats data.
         public static final int EVENT_COLLECT_EXTERNAL_STATS = 0x000f;
+        // Event for a package becoming inactive due to being unused for a period of time.
+        public static final int EVENT_PACKAGE_INACTIVE = 0x0010;
+        // Event for a package becoming active due to an interaction.
+        public static final int EVENT_PACKAGE_ACTIVE = 0x0011;
+
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0010;
+        public static final int EVENT_COUNT = 0x0012;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1835,12 +1840,12 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "motion", "active", "pkginst", "pkgunin", "alarm", "stats"
+            "motion", "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Esm", "Eac", "Epi", "Epu", "Eal", "Est"
+            "Esm", "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa"
     };
 
     /**
