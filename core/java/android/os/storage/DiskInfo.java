@@ -40,6 +40,8 @@ public class DiskInfo implements Parcelable {
             "android.os.storage.action.DISK_SCANNED";
     public static final String EXTRA_DISK_ID =
             "android.os.storage.extra.DISK_ID";
+    public static final String EXTRA_VOLUME_COUNT =
+            "android.os.storage.extra.VOLUME_COUNT";
 
     public static final int FLAG_ADOPTABLE = 1 << 0;
     public static final int FLAG_DEFAULT_PRIMARY = 1 << 1;
