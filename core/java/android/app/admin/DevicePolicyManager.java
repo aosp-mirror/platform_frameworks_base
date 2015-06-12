@@ -400,7 +400,7 @@ public class DevicePolicyManager {
      * A String extra holding the URL-safe base64 encoded SHA-1 checksum of the file at download
      * location specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM} should be
+     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM} should be
      * present. The provided checksum should match the checksum of the file at the download
      * location. If the checksum doesn't match an error will be shown to the user and the user will
      * be asked to factory reset the device.
@@ -412,24 +412,24 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of any certificate of the
+     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of any signature of the
      * android package archive at the download location specified in {@link
      * #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>The certificates of an android package archive can be obtained using
+     * <p>The signatures of an android package archive can be obtained using
      * {@link android.content.pm.PackageManager#getPackageArchiveInfo} with flag
      * {@link android.content.pm.PackageManager#GET_SIGNATURES}.
      *
      * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM} should be
-     * present. The provided checksum should match the checksum of any certificate of the file at
+     * present. The provided checksum should match the checksum of any signature of the file at
      * the download location. If the checksum does not match an error will be shown to the user and
      * the user will be asked to factory reset the device.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an NFC bump.
      */
-    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM
-        = "android.app.extra.PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM";
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM
+        = "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM";
 
     /**
      * Broadcast Action: This broadcast is sent to indicate that provisioning of a managed profile
@@ -508,7 +508,7 @@ public class DevicePolicyManager {
      * location specified in
      * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_CERTIFICATE_CHECKSUM}
+     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM}
      * should be present. The provided checksum should match the checksum of the file at the
      * download location. If the checksum doesn't match an error will be shown to the user and the
      * user will be asked to factory reset the device.
@@ -520,24 +520,24 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of any certificate of the
+     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of any signature of the
      * android package archive at the download location specified in {@link
      * #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>The certificates of an android package archive can be obtained using
+     * <p>The signatures of an android package archive can be obtained using
      * {@link android.content.pm.PackageManager#getPackageArchiveInfo} with flag
      * {@link android.content.pm.PackageManager#GET_SIGNATURES}.
      *
      * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM}
-     * should be present. The provided checksum should match the checksum of any certificate of the
+     * should be present. The provided checksum should match the checksum of any signature of the
      * file at the download location. If the checksum doesn't match an error will be shown to the
      * user and the user will be asked to factory reset the device.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_CERTIFICATE_CHECKSUM
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_CERTIFICATE_CHECKSUM";
+    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM
+        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM";
 
     /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
