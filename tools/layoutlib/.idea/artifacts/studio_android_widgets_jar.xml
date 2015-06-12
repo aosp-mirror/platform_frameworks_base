@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="studio-android-widgets:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/studio_android_widgets_jar</output-path>
+    <root id="archive" name="studio-android-widgets.jar">
+      <element id="module-output" name="studio-android-widgets" />
+    </root>
+  </artifact>
+</component>
