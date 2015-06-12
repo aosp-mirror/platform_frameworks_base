@@ -399,14 +399,16 @@ public class WifiManager {
     public static final int CHANGE_REASON_CONFIG_CHANGE = 2;
     /**
      * An access point scan has completed, and results are available from the supplicant.
-     * Call {@link #getScanResults()} to obtain the results.
+     * Call {@link #getScanResults()} to obtain the results. {@link #EXTRA_RESULTS_UPDATED}
+     * indicates if the scan was completed successfully.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
 
     /**
-     * The result of previous scan, reported with {@link #SCAN_RESULTS_AVAILABLE_ACTION}.
-     * @return true scan was successful, results updated
+     * Lookup key for a {@code boolean} representing the result of previous {@link #startScan}
+     * operation, reported with {@link #SCAN_RESULTS_AVAILABLE_ACTION}.
+     * @return true scan was successful, results are updated
      * @return false scan was not successful, results haven't been updated since previous scan
      */
     public static final String EXTRA_RESULTS_UPDATED = "resultsUpdated";
