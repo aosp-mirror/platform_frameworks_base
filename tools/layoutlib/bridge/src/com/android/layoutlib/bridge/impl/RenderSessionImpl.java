@@ -44,6 +44,7 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
+import com.android.layoutlib.bridge.android.support.DesignLibUtil;
 import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.BridgeActionBar;
@@ -147,7 +148,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private int mNavigationBarOrientation = LinearLayout.HORIZONTAL;
     private int mTitleBarSize;
     private int mActionBarSize;
-
 
     // information being returned through the API
     private BufferedImage mImage;
@@ -424,6 +424,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // post-inflate process. For now this supports TabHost/TabWidget
             postInflateProcess(view, params.getLayoutlibCallback(), isPreference ? view : null);
 
+            setActiveToolbar(view, context, params);
+
             // get the background drawable
             if (mWindowBackground != null) {
                 Drawable d = ResourceHelper.getDrawable(mWindowBackground, context);
@@ -543,6 +545,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             // now do the layout.
             mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+
+            handleScrolling(mViewRoot);
 
             if (params.isLayoutOnly()) {
                 // delete the canvas and image to reset them on the next full rendering
@@ -1346,6 +1350,99 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 View child = group.getChildAt(c);
                 postInflateProcess(child, layoutlibCallback, skip);
             }
+        }
+    }
+
+    /**
+     * If the root layout is a CoordinatorLayout with an AppBar:
+     * Set the title of the AppBar to the title of the activity context.
+     */
+    private void setActiveToolbar(View view, BridgeContext context, SessionParams params) {
+        View coordinatorLayout = findChildView(view, DesignLibUtil.CN_COORDINATOR_LAYOUT);
+        if (coordinatorLayout == null) {
+            return;
+        }
+        View appBar = findChildView(coordinatorLayout, DesignLibUtil.CN_APPBAR_LAYOUT);
+        if (appBar == null) {
+            return;
+        }
+        ViewGroup collapsingToolbar =
+                (ViewGroup) findChildView(appBar, DesignLibUtil.CN_COLLAPSING_TOOLBAR_LAYOUT);
+        if (collapsingToolbar == null) {
+            return;
+        }
+        if (!hasToolbar(collapsingToolbar)) {
+            return;
+        }
+        RenderResources res = context.getRenderResources();
+        String title = params.getAppLabel();
+        ResourceValue titleValue = res.findResValue(title, false);
+        if (titleValue != null && titleValue.getValue() != null) {
+            title = titleValue.getValue();
+        }
+        DesignLibUtil.setTitle(collapsingToolbar, title);
+    }
+
+    private View findChildView(View view, String className) {
+        if (!(view instanceof ViewGroup)) {
+            return null;
+        }
+        ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount(); i++) {
+            if (isInstanceOf(group.getChildAt(i), className)) {
+                return group.getChildAt(i);
+            }
+        }
+        return null;
+    }
+
+    private boolean hasToolbar(View collapsingToolbar) {
+        if (!(collapsingToolbar instanceof ViewGroup)) {
+            return false;
+        }
+        ViewGroup group = (ViewGroup) collapsingToolbar;
+        for (int i = 0; i < group.getChildCount(); i++) {
+            if (isInstanceOf(group.getChildAt(i), DesignLibUtil.CN_TOOLBAR)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Set the vertical scroll position on all the components with the "scrollY" attribute. If the
+     * component supports nested scrolling attempt that first, then use the unconsumed scroll part
+     * to scroll the content in the component.
+     */
+    private void handleScrolling(View view) {
+        BridgeContext context = getContext();
+        int scrollPos = context.getScrollYPos(view);
+        if (scrollPos != 0) {
+            if (view.isNestedScrollingEnabled()) {
+                int[] consumed = new int[2];
+                if (view.startNestedScroll(DesignLibUtil.SCROLL_AXIS_VERTICAL)) {
+                    view.dispatchNestedPreScroll(0, scrollPos, consumed, null);
+                    view.dispatchNestedScroll(consumed[0], consumed[1], 0, scrollPos, null);
+                    view.stopNestedScroll();
+                    scrollPos -= consumed[1];
+                }
+            }
+            if (scrollPos != 0) {
+                view.scrollBy(0, scrollPos);
+            } else {
+                view.scrollBy(0, scrollPos);
+            }
+        } else {
+            view.scrollBy(0, scrollPos);
+        }
+
+        if (!(view instanceof ViewGroup)) {
+            return;
+        }
+        ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View child = group.getChildAt(i);
+            handleScrolling(child);
         }
     }
 
