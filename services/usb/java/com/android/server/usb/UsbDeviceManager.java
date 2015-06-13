@@ -352,7 +352,7 @@ public class UsbDeviceManager {
                         SystemProperties.get(UsbManager.ADB_PERSISTENT_PROPERTY, "adb"),
                         UsbManager.USB_FUNCTION_ADB);
 
-                mCurrentFunctions = mAdbEnabled ? "adb" : UsbManager.USB_FUNCTION_MTP;
+                mCurrentFunctions = getDefaultFunctions();
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
 
@@ -474,7 +474,7 @@ public class UsbDeviceManager {
             if (DEBUG) Slog.d(TAG, "setEnabledFunctions " + functions);
 
             if (functions == null) {
-                functions = "none";
+                functions = getDefaultFunctions();
             }
 
             if (mAdbEnabled) {
@@ -795,7 +795,7 @@ public class UsbDeviceManager {
         }
 
         private String getDefaultFunctions() {
-            return UsbManager.USB_FUNCTION_MTP;
+            return mAdbEnabled ? UsbManager.USB_FUNCTION_ADB : UsbManager.USB_FUNCTION_MTP;
         }
 
         public void dump(FileDescriptor fd, PrintWriter pw) {
