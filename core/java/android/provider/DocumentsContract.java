@@ -92,6 +92,9 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
+    /** {@hide} */
+    public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
+
     /**
      * Set this in a DocumentsUI intent to cause a package's own roots to be
      * excluded from the roots list.
@@ -317,6 +320,17 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_RENAME = 1 << 6;
 
         /**
+         * Flag indicating that a document can be copied to another location
+         * within the same document provider.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#copyDocument(ContentProviderClient, Uri,
+         *      String)
+         * @see DocumentsProvider#copyDocument(String, String, String)
+         */
+        public static final int FLAG_SUPPORTS_COPY = 1 << 7;
+
+        /**
          * Flag indicating that document titles should be hidden when viewing
          * this directory in a larger format grid. For example, a directory
          * containing only images may want the image thumbnails to speak for
@@ -537,6 +551,8 @@ public final class DocumentsContract {
     public static final String METHOD_RENAME_DOCUMENT = "android:renameDocument";
     /** {@hide} */
     public static final String METHOD_DELETE_DOCUMENT = "android:deleteDocument";
+    /** {@hide} */
+    public static final String METHOD_COPY_DOCUMENT = "android:copyDocument";
 
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
@@ -1013,6 +1029,40 @@ public final class DocumentsContract {
         in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
 
         client.call(METHOD_DELETE_DOCUMENT, null, in);
+    }
+
+    /**
+     * Copies the given document.
+     *
+     * @param sourceDocumentUri document with {@link Document#FLAG_SUPPORTS_COPY}
+     * @param targetParentDocumentUri document which will become a parent of the source
+     *         document's copy.
+     * @return the copied document, or {@code null} if failed.
+     * @hide
+     */
+    public static Uri copyDocument(ContentResolver resolver, Uri sourceDocumentUri,
+            Uri targetParentDocumentUri) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                sourceDocumentUri.getAuthority());
+        try {
+            return copyDocument(client, sourceDocumentUri, targetParentDocumentUri);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to copy document", e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static Uri copyDocument(ContentProviderClient client, Uri sourceDocumentUri,
+            Uri targetParentDocumentUri) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, sourceDocumentUri);
+        in.putParcelable(DocumentsContract.EXTRA_TARGET_URI, targetParentDocumentUri);
+
+        final Bundle out = client.call(METHOD_COPY_DOCUMENT, null, in);
+        return out.getParcelable(DocumentsContract.EXTRA_URI);
     }
 
     /**

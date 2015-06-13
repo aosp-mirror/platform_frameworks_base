@@ -19,6 +19,7 @@ package android.provider;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_RENAME_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
 import static android.provider.DocumentsContract.buildDocumentUri;
 import static android.provider.DocumentsContract.buildDocumentUriMaybeUsingTree;
 import static android.provider.DocumentsContract.buildTreeDocumentUri;
@@ -256,6 +257,24 @@ public abstract class DocumentsProvider extends ContentProvider {
     @SuppressWarnings("unused")
     public void deleteDocument(String documentId) throws FileNotFoundException {
         throw new UnsupportedOperationException("Delete not supported");
+    }
+
+    /**
+     * Copy the requested document or a document tree.
+     * <p>
+     * Copies a document including all child documents to another location within
+     * the same document provider. Upon completion returns the document id of
+     * the copied document at the target destination. {@code null} must never
+     * be returned.
+     *
+     * @param sourceDocumentId the document to copy.
+     * @param targetParentDocumentId the target document to be copied into as a child.
+     * @hide
+     */
+    @SuppressWarnings("unused")
+    public String copyDocument(String sourceDocumentId, String targetParentDocumentId)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Copy not supported");
     }
 
     /**
@@ -683,6 +702,28 @@ public abstract class DocumentsProvider extends ContentProvider {
 
                 // Document no longer exists, clean up any grants
                 revokeDocumentPermission(documentId);
+
+            } else if (METHOD_COPY_DOCUMENT.equals(method)) {
+                final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
+                final String targetId = DocumentsContract.getDocumentId(targetUri);
+
+                enforceReadPermissionInner(documentUri, null);
+                enforceWritePermissionInner(targetUri, null);
+
+                final String newDocumentId = copyDocument(documentId, targetId);
+
+                if (newDocumentId != null) {
+                    final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
+                            newDocumentId);
+
+                    if (!isTreeUri(newDocumentUri)) {
+                        final int modeFlags = getCallingOrSelfUriPermissionModeFlags(context,
+                                documentUri);
+                        context.grantUriPermission(getCallingPackage(), newDocumentUri, modeFlags);
+                    }
+
+                    out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
+                }
 
             } else {
                 throw new UnsupportedOperationException("Method not supported " + method);
