@@ -223,16 +223,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 Cursor cursor = ContentProvider.this.query(uri, projection, selection,
                         selectionArgs, sortOrder, CancellationSignal.fromTransport(
                                 cancellationSignal));
-
-                // Create a projection for all columns.
-                final int columnCount = cursor.getCount();
-                String[] allColumns = new String[columnCount];
-                for (int i = 0; i < columnCount; i++) {
-                    allColumns[i] = cursor.getColumnName(i);
+                if (cursor == null) {
+                    return null;
                 }
 
                 // Return an empty cursor for all columns.
-                return new MatrixCursor(allColumns, 0);
+                return new MatrixCursor(cursor.getColumnNames(), 0);
             }
             final String original = setCallingPackage(callingPkg);
             try {
