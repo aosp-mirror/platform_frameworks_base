@@ -311,9 +311,9 @@ public class NotificationContentView extends FrameLayout {
         }
         int visibleType = calculateVisibleType();
         if (visibleType != mVisibleType || force) {
-            if (animate && (visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
+            if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
                     || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
-                    || visibleType == VISIBLE_TYPE_CONTRACTED) {
+                    || visibleType == VISIBLE_TYPE_CONTRACTED)) {
                 runSwitchAnimation(visibleType);
             } else {
                 updateViewVisibilities(visibleType);
