@@ -113,6 +113,13 @@ public interface IMountServiceListener extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_onDiskDestroyed: {
+                    data.enforceInterface(DESCRIPTOR);
+                    final DiskInfo disk = (DiskInfo) data.readParcelable(null);
+                    onDiskDestroyed(disk);
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -246,6 +253,22 @@ public interface IMountServiceListener extends IInterface {
                     _data.recycle();
                 }
             }
+
+            @Override
+            public void onDiskDestroyed(DiskInfo disk) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeParcelable(disk, 0);
+                    mRemote.transact(Stub.TRANSACTION_onDiskDestroyed, _data, _reply,
+                            android.os.IBinder.FLAG_ONEWAY);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
         }
 
         static final int TRANSACTION_onUsbMassStorageConnectionChanged = (IBinder.FIRST_CALL_TRANSACTION + 0);
@@ -254,6 +277,7 @@ public interface IMountServiceListener extends IInterface {
         static final int TRANSACTION_onVolumeRecordChanged = (IBinder.FIRST_CALL_TRANSACTION + 3);
         static final int TRANSACTION_onVolumeForgotten = (IBinder.FIRST_CALL_TRANSACTION + 4);
         static final int TRANSACTION_onDiskScanned = (IBinder.FIRST_CALL_TRANSACTION + 5);
+        static final int TRANSACTION_onDiskDestroyed = (IBinder.FIRST_CALL_TRANSACTION + 6);
     }
 
     /**
@@ -280,4 +304,6 @@ public interface IMountServiceListener extends IInterface {
     public void onVolumeForgotten(String fsUuid) throws RemoteException;
 
     public void onDiskScanned(DiskInfo disk, int volumeCount) throws RemoteException;
+
+    public void onDiskDestroyed(DiskInfo disk) throws RemoteException;
 }
