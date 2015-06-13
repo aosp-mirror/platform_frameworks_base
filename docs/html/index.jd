@@ -71,7 +71,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
        data-maxResults="3"></div>
 </div></section>
 
-<div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
+<div class="dac-hero-carousel" data-carousel-query="collection:index/secondary/carousel">
 </div>
 
 <section class="dac-section dac-gray"><div class="wrap">

@@ -2914,7 +2914,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "image":"http://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
     "lang":"en",
-    "type":"about"
+    "type":"youtube"
   },
   {
     "title":"App Configurations, Testing and Launchers",
@@ -2926,7 +2926,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "image":"http://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
     "lang":"en",
-    "type":"about"
+    "type":"youtube"
   },
   {
     "title":"Building an enterprise ready app",
@@ -2938,7 +2938,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "image":"http://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
     "lang":"en",
-    "type":"develop"
+    "type":"youtube"
   },
   {
     "title":"Android for Work: Single Use Devices",
@@ -2950,7 +2950,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "image":"http://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
     "lang":"en",
-    "type":"about"
+    "type":"youtube"
   },
   {
     "title":"Discover YouTube cards",
@@ -3301,6 +3301,41 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "image": "distribute/images/advertising.jpg",
     "type": "distribute"
+  },
+  {
+    "url":"https://www.youtube.com/watch?v=QDM52bblwlg",
+    "image": "images/distribute/hero-family-discovery.jpg",
+    "title": "Introducing the new family discovery experience on Google Play",
+    "summary": "Help families create little moments on Google Play. Opt-in your apps now.",
+    "tags":["families","googleplay"],
+    "type":"youtube"
+  },
+  {
+    "url":"https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "image": "http://i1.ytimg.com/vi/wcjqBSei3a0/maxresdefault.jpg",
+    "title": "Developers connecting the world through Google Play",
+    "summary": "The mobile ecosystem is empowering developers to make good on the dream of connecting the world through technology to improve people's lives.",
+    "tags":["io15","googleplay"],
+    "keywords":["Google I/O 2015","io"],
+    "type":"youtube"
+  },
+  {
+    "url":"https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "image": "http://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
+    "title": "Store Listing Experiments for Google Play",
+    "summary": "Learn how to use Google Play’s new store listing optimization feature to get more installs of your app, and how to test different graphics and text to find out which options perform the best. ",
+    "tags":["io15","googleplay","store listing"],
+    "tags":["google i/o","google play","store listing"],
+    "type":"youtube"
+  },
+  {
+    "url":"https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "image": "http://i1.ytimg.com/vi/jyO3-rF4Mu0/maxresdefault.jpg",
+    "title": "Growing games with Google",
+    "summary": "The games industry has never been more promising and full of opportunities. This talk covers how Google is helping developers across a broad range of existing and emerging platforms.",
+    "tags":["io15","android", "googleplay","games"],
+    "keywords":["Google I/O","google play","games"],
+    "type":"youtube"
   }
 ]);
 
@@ -3310,41 +3345,85 @@ var CAROUSEL_OVERRIDE = {
     "heroColor": "#263238",
     "heroInvert": true,
     "title": "Android 5.0 Lollipop",
-    "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new Material design interface, and much more."
-  },
-  "distribute/googleplay/families/about.html": {
-    "image": "images/distribute/hero-family.jpg",
-    "title": "Designed for Families",
-    "summary": "Introducing a new Google Play section to promote family friendly apps. Your apps in the program can benefit from enhanced discoverability in addition to maintaining their existing categories, rankings, and reviews elsewhere on the Google Play store."
+    "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
   },
   "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
     "url":"http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-jelly-button.jpg",
     "title": "How Jelly Button Games are growing globally through data",
-    "summary": "To really understand their users, Jelly Button Games analyzes over 3 billion events each month using Google Analytics and Google BigQuery."
+    "summary": "To really understand their users, Jelly Button Games analyzes over 3 billion events each month using Google Analytics and Google BigQuery.",
   },
   "http://www.youtube.com/watch?v=700gYRkhkLM": {
     "url":"http://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-outfit7.jpg",
     "title": "Outfit7 — Building an entertainment company with Google",
-    "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories...."
+    "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories....",
   },
   "http://www.youtube.com/watch?v=MPnH7h12h0U": {
     "url":"http://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-haystack.jpg",
-    "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen."
+    "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen.",
   },
   "http://www.youtube.com/watch?v=ekxABqJeRBc": {
     "url":"http://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-ginlemon.jpg",
     "title": "How GinLemon is breaking through with Google Play",
-    "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy."
+    "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy.",
   },
   "distribute/googleplay/guide.html": {
     "heroColor": "#fcb94e",
     "image": "images/distribute/hero-g-play-guidebooks_2x.png",
-    "title": "Finding Success on Google Play",
+    "title": "Finding success on Google Play",
     "summary": "We’ve created a downloadable guide to help you find success with your app or game business on Google Play. In it, you’ll find features, tips, and best practices to help you build an effective strategy.",
-    "tags": []
+  },
+  "http://www.youtube.com/watch?v=0r36OJaeMo4": {
+    "url":"http://www.youtube.com/watch?v=0r36OJaeMo4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-shifty-jelly.jpg",
+    "title": "Shifty Jelly — building a number 1 podcast app",
+    "summary": "Shifty Jelly is an Adelaide based mobile development company that has seen great success building Pocket Casts, a premium podcast manager app.",
+  },
+  "http://www.youtube.com/watch?v=1Iw7Tg_afKk": {
+    "image": "images/distribute/hero-wooga.jpg",
+    "url":"http://www.youtube.com/watch?v=1Iw7Tg_afKk&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "title": "Wooga’s fast iterations on Google Play",
+    "summary": "The speed at which Wooga is able to iterate its live and under development games with the Android and Google Play tools has been key to delivering hits such as Diamond Dash, Jelly Splash, and Agent Alice.",
+  },
+  "http://www.youtube.com/watch?v=TieksFvD-7o": {
+    "url":"http://www.youtube.com/watch?v=TieksFvD-7o&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-trello.jpg",
+    "title": "Trello lifts engagement by double digits with material design",
+    "summary": "Trello recently redesigned their collaborative planning app using the material design guidelines, and their efforts paid off.",
+  },
+  "http://www.youtube.com/watch?v=MCoh4Pxs_ok": {
+    "url":"http://www.youtube.com/watch?v=MCoh4Pxs_ok&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-the-hunt.jpg",
+    "title": "The Hunt — growing engagement with material design and Google Play",
+    "summary": "Material design has helped The Hunt to enhance engagement in their style advice and product discovery app. ",
+  },
+  "https://www.youtube.com/watch?v=QDM52bblwlg": {
+    "url":"distribute/googleplay/families/about.html",
+    "image": "images/distribute/hero-family-discovery.jpg",
+    "title": "Designed for families",
+    "summary": "Introducing the new family discovery experience in Google Play. Your apps can benefit from enhanced discoverability and maintain their existing categories, rankings, and reviews elsewhere in the store. Opt-in your apps today.",
+    "type":"distribute",
+  },
+  "https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS": {
+    "url":"https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "image": "images/distribute/hero-IO15-google-play.jpg",
+    "title": "Connecting the world through Google Play",
+    "tags":["io15"],
+    "summary": "In this this Google I/O talk, hear how the mobile ecosystem is empowering developers to connect the world through technology and improve people's lives.",
+  },
+  "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS": {
+    "image": "images/distribute/hero-store-listing-experience.jpg",
+    "title": "Using Google Play store listing experiments",
+    "tags":["io15"],
+    "summary": "Learn how to use Google Play store listing experiments to get more installs in this Google I/O talk. Test different graphics and text to find out which options perform the best. ",
+  },
+  "https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS": {
+    "image": "images/distribute/hero-IO15-growing-games.jpg",
+    "title": "Growing games with Google",
+    "tags":["io15"],
+    "summary": "The games industry has never been more promising and full of opportunities. This talk from Google I/O 2015 covers how Google is helping developers across a broad range of existing and emerging platforms.",
   }
 };
