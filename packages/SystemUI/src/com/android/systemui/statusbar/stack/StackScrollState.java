@@ -149,15 +149,15 @@ public class StackScrollState {
         // apply dimming
         view.setDimmed(state.dimmed, false /* animate */);
 
-        // apply dark
-        view.setDark(state.dark, false /* animate */, 0 /* delay */);
-
         // apply hiding sensitive
         view.setHideSensitive(
                 state.hideSensitive, false /* animated */, 0 /* delay */, 0 /* duration */);
 
         // apply speed bump state
         view.setBelowSpeedBump(state.belowSpeedBump);
+
+        // apply dark
+        view.setDark(state.dark, false /* animate */, 0 /* delay */);
 
         // apply clipping
         float oldClipTopAmount = view.getClipTopAmount();
