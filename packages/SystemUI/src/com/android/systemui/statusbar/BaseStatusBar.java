@@ -1381,7 +1381,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     R.layout.notification_public_default,
                     contentContainerPublic, false);
             publicViewLocal.setIsRootNamespace(true);
-            contentContainerPublic.setContractedChild(publicViewLocal);
 
             final TextView title = (TextView) publicViewLocal.findViewById(R.id.title);
             try {
@@ -1447,6 +1446,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mContext.getResources().getConfiguration().fontScale);
             title.setPadding(0, topPadding, 0, 0);
 
+            contentContainerPublic.setContractedChild(publicViewLocal);
             entry.autoRedacted = true;
         }
 
