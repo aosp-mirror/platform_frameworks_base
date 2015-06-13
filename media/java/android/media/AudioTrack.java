@@ -661,9 +661,10 @@ public class AudioTrack
         /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
-         * @return a new {@link AudioTrack} instance.
+         * @return a new successfully initialized {@link AudioTrack} instance.
          * @throws UnsupportedOperationException if the parameters set on the <code>Builder</code>
-         *     were incompatible, or if they are not supported by the device.
+         *     were incompatible, or if they are not supported by the device,
+         *     or if the device was not available.
          */
         public @NonNull AudioTrack build() throws UnsupportedOperationException {
             if (mAttributes == null) {
@@ -686,7 +687,13 @@ public class AudioTrack
                     mBufferSizeInBytes = mFormat.getChannelCount()
                             * mFormat.getBytesPerSample(mFormat.getEncoding());
                 }
-                return new AudioTrack(mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId);
+                final AudioTrack track = new AudioTrack(
+                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId);
+                if (track.getState() == STATE_UNINITIALIZED) {
+                    // release is not necessary
+                    throw new UnsupportedOperationException("Cannot create AudioTrack");
+                }
+                return track;
             } catch (IllegalArgumentException e) {
                 throw new UnsupportedOperationException(e.getMessage());
             }
