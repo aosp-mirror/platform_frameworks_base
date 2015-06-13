@@ -400,10 +400,10 @@ class AlarmManagerService extends SystemService {
         public int compare(Batch b1, Batch b2) {
             long when1 = b1.start;
             long when2 = b2.start;
-            if (when1 - when2 > 0) {
+            if (when1 > when2) {
                 return 1;
             }
-            if (when1 - when2 < 0) {
+            if (when1 < when2) {
                 return -1;
             }
             return 0;
@@ -1806,10 +1806,10 @@ class AlarmManagerService extends SystemService {
         public int compare(Alarm a1, Alarm a2) {
             long when1 = a1.whenElapsed;
             long when2 = a2.whenElapsed;
-            if (when1 - when2 > 0) {
+            if (when1 > when2) {
                 return 1;
             }
-            if (when1 - when2 < 0) {
+            if (when1 < when2) {
                 return -1;
             }
             return 0;
