@@ -731,6 +731,10 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             if (filter.getAutoVerify()) {
                 if (localVerificationLOGV || debug) {
                     Slog.v(TAG, "  Filter verified: " + isFilterVerified(filter));
+                    int authorities = filter.countDataAuthorities();
+                    for (int z = 0; z < authorities; z++) {
+                        Slog.v(TAG, "   " + filter.getDataAuthority(z).getHost());
+                    }
                 }
             }
 
