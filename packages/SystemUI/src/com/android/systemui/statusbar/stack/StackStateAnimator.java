@@ -243,15 +243,15 @@ public class StackStateAnimator {
         // start dimmed animation
         child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed);
 
-        // start dark animation
-        child.setDark(viewState.dark, mAnimationFilter.animateDark, delay);
-
         // apply speed bump state
         child.setBelowSpeedBump(viewState.belowSpeedBump);
 
         // start hiding sensitive animation
         child.setHideSensitive(viewState.hideSensitive, mAnimationFilter.animateHideSensitive,
                 delay, duration);
+
+        // start dark animation
+        child.setDark(viewState.dark, mAnimationFilter.animateDark, delay);
 
         if (wasAdded) {
             child.performAddAnimation(delay, mCurrentLength);
