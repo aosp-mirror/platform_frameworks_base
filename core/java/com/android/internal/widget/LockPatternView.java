@@ -16,31 +16,42 @@
 
 package com.android.internal.widget;
 
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.media.AudioManager;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.IntArray;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -80,6 +91,9 @@ public class LockPatternView extends View {
      * It didn't seem to have much impact on the devices tested, so currently set to 0.
      */
     private static final float DRAG_THRESHHOLD = 0.0f;
+    public static final int VIRTUAL_BASE_VIEW_ID = 1;
+    public static final boolean DEBUG_A11Y = true;
+    private static final String TAG = "LockPatternView";
 
     private OnPatternListener mOnPatternListener;
     private final ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
@@ -124,6 +138,8 @@ public class LockPatternView extends View {
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
+    private PatternExploreByTouchHelper mExploreByTouchHelper;
+    private AudioManager mAudioManager;
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -305,6 +321,9 @@ public class LockPatternView extends View {
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        mExploreByTouchHelper = new PatternExploreByTouchHelper(this);
+        setAccessibilityDelegate(mExploreByTouchHelper);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
     public CellState[][] getCellStates() {
@@ -394,10 +413,13 @@ public class LockPatternView extends View {
     }
 
     private void notifyCellAdded() {
-        sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
+        // sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
         if (mOnPatternListener != null) {
             mOnPatternListener.onPatternCellAdded(mPattern);
         }
+        // Disable used cells for accessibility as they get added
+        if (DEBUG_A11Y) Log.v(TAG, "ivnalidating root because cell was added.");
+        mExploreByTouchHelper.invalidateRoot();
     }
 
     private void notifyPatternStarted() {
@@ -426,6 +448,13 @@ public class LockPatternView extends View {
      */
     public void clearPattern() {
         resetPattern();
+    }
+
+    @Override
+    protected boolean dispatchHoverEvent(MotionEvent event) {
+        // Give TouchHelper first right of refusal
+        boolean handled = mExploreByTouchHelper.dispatchHoverEvent(event);
+        return super.dispatchHoverEvent(event) || handled;
     }
 
     /**
@@ -469,8 +498,10 @@ public class LockPatternView extends View {
         final int width = w - mPaddingLeft - mPaddingRight;
         mSquareWidth = width / 3.0f;
 
+        if (DEBUG_A11Y) Log.v(TAG, "onSizeChanged(" + w + "," + h + ")");
         final int height = h - mPaddingTop - mPaddingBottom;
         mSquareHeight = height / 3.0f;
+        mExploreByTouchHelper.invalidateRoot();
     }
 
     private int resolveMeasured(int measureSpec, int desired)
@@ -1122,15 +1153,191 @@ public class LockPatternView extends View {
         @SuppressWarnings({ "unused", "hiding" }) // Found using reflection
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
 
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    private final class PatternExploreByTouchHelper extends ExploreByTouchHelper {
+        private Rect mTempRect = new Rect();
+        private HashMap<Integer, VirtualViewContainer> mItems = new HashMap<Integer,
+                VirtualViewContainer>();
+
+        class VirtualViewContainer {
+            public VirtualViewContainer(CharSequence description) {
+                this.description = description;
+            }
+            CharSequence description;
+        };
+
+        public PatternExploreByTouchHelper(View forView) {
+            super(forView);
+        }
+
+        @Override
+        protected int getVirtualViewAt(float x, float y) {
+            // This must use the same hit logic for the screen to ensure consistency whether
+            // accessibility is on or off.
+            int id = getVirtualViewIdForHit(x, y);
+            return id;
+        }
+
+        @Override
+        protected void getVisibleVirtualViews(IntArray virtualViewIds) {
+            if (DEBUG_A11Y) Log.v(TAG, "getVisibleVirtualViews(len=" + virtualViewIds.size() + ")");
+            for (int i = VIRTUAL_BASE_VIEW_ID; i < VIRTUAL_BASE_VIEW_ID + 9; i++) {
+                if (!mItems.containsKey(i)) {
+                    VirtualViewContainer item = new VirtualViewContainer(getTextForVirtualView(i));
+                    mItems.put(i, item);
+                }
+                // Add all views. As views are added to the pattern, we remove them
+                // from notification by making them non-clickable below.
+                virtualViewIds.add(i);
+            }
+        }
+
+        @Override
+        protected void onPopulateEventForVirtualView(int virtualViewId, AccessibilityEvent event) {
+            if (DEBUG_A11Y) Log.v(TAG, "onPopulateEventForVirtualView(" + virtualViewId + ")");
+            // Announce this view
+            if (mItems.containsKey(virtualViewId)) {
+                CharSequence contentDescription = mItems.get(virtualViewId).description;
+                event.getText().add(contentDescription);
+            }
+        }
+
+        @Override
+        protected void onPopulateNodeForVirtualView(int virtualViewId, AccessibilityNodeInfo node) {
+            if (DEBUG_A11Y) Log.v(TAG, "onPopulateNodeForVirtualView(view=" + virtualViewId + ")");
+
+            // Node and event text and content descriptions are usually
+            // identical, so we'll use the exact same string as before.
+            node.setText(getTextForVirtualView(virtualViewId));
+            node.setContentDescription(getTextForVirtualView(virtualViewId));
+
+            if (isClickable(virtualViewId)) {
+                // Mark this node of interest by making it clickable.
+                node.addAction(AccessibilityAction.ACTION_CLICK);
+                node.setClickable(isClickable(virtualViewId));
+            }
+
+            // Compute bounds for this object
+            final Rect bounds = getBoundsForVirtualView(virtualViewId);
+            if (DEBUG_A11Y) Log.v(TAG, "bounds:" + bounds.toString());
+            node.setBoundsInParent(bounds);
+        }
+
+        private boolean isClickable(int virtualViewId) {
+            // Dots are clickable if they're not part of the current pattern.
+            if (virtualViewId != ExploreByTouchHelper.INVALID_ID) {
+                int row = (virtualViewId - VIRTUAL_BASE_VIEW_ID) / 3;
+                int col = (virtualViewId - VIRTUAL_BASE_VIEW_ID) % 3;
+                return !mPatternDrawLookup[row][col];
+            }
+            return false;
+        }
+
+        @Override
+        protected boolean onPerformActionForVirtualView(int virtualViewId, int action,
+                Bundle arguments) {
+            if (DEBUG_A11Y) Log.v(TAG, "onPerformActionForVirtualView(id=" + virtualViewId
+                    + ", action=" + action);
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_CLICK:
+                    // Click handling should be consistent with
+                    // onTouchEvent(). This ensures that the view works the
+                    // same whether accessibility is turned on or off.
+                    return onItemClicked(virtualViewId);
+                default:
+                    if (DEBUG_A11Y) Log.v(TAG, "*** action not handled in "
+                            + "onPerformActionForVirtualView(viewId="
+                            + virtualViewId + "action=" + action + ")");
+            }
+            return false;
+        }
+
+        boolean onItemClicked(int index) {
+            if (DEBUG_A11Y) Log.v(TAG, "onItemClicked(" + index + ")");
+
+            // Since the item's checked state is exposed to accessibility
+            // services through its AccessibilityNodeInfo, we need to invalidate
+            // the item's virtual view. At some point in the future, the
+            // framework will obtain an updated version of the virtual view.
+            invalidateVirtualView(index);
+
+            // We need to let the framework know what type of event
+            // happened. Accessibility services may use this event to provide
+            // appropriate feedback to the user.
+            sendEventForVirtualView(index, AccessibilityEvent.TYPE_VIEW_CLICKED);
+
+            return true;
+        }
+
+        private Rect getBoundsForVirtualView(int virtualViewId) {
+            int ordinal = virtualViewId - VIRTUAL_BASE_VIEW_ID;
+            final Rect bounds = mTempRect;
+            final int row = ordinal / 3;
+            final int col = ordinal % 3;
+            final CellState cell = mCellStates[row][col];
+            float centerX = getCenterXForColumn(col);
+            float centerY = getCenterYForRow(row);
+            float cellheight = mSquareHeight * mHitFactor * 0.5f;
+            float cellwidth = mSquareWidth * mHitFactor * 0.5f;
+            float translationY = cell.translateY;
+            bounds.left = (int) (centerX - cellwidth);
+            bounds.right = (int) (centerX + cellwidth);
+            bounds.top = (int) (centerY - cellheight);
+            bounds.bottom = (int) (centerY + cellheight);
+            return bounds;
+        }
+
+        private boolean shouldSpeakPassword() {
+            final boolean speakPassword = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) != 0;
+            final boolean hasHeadphones = mAudioManager != null ?
+                    (mAudioManager.isWiredHeadsetOn() || mAudioManager.isBluetoothA2dpOn())
+                    : false;
+            return speakPassword || hasHeadphones;
+        }
+
+        private CharSequence getTextForVirtualView(int virtualViewId) {
+            final Resources res = getResources();
+            return shouldSpeakPassword() ? res.getString(
+                R.string.lockscreen_access_pattern_cell_added_verbose, virtualViewId)
+                : res.getString(R.string.lockscreen_access_pattern_cell_added);
+        }
+
+        /**
+         * Helper method to find which cell a point maps to
+         *
+         * if there's no hit.
+         * @param x touch position x
+         * @param y touch position y
+         * @return VIRTUAL_BASE_VIEW_ID+id or 0 if no view was hit
+         */
+        private int getVirtualViewIdForHit(float x, float y) {
+            final int rowHit = getRowHit(y);
+            if (rowHit < 0) {
+                return ExploreByTouchHelper.INVALID_ID;
+            }
+            final int columnHit = getColumnHit(x);
+            if (columnHit < 0) {
+                return ExploreByTouchHelper.INVALID_ID;
+            }
+            boolean dotAvailable = mPatternDrawLookup[rowHit][columnHit];
+            int dotId = (rowHit * 3 + columnHit) + VIRTUAL_BASE_VIEW_ID;
+            int view = dotAvailable ? dotId : ExploreByTouchHelper.INVALID_ID;
+            if (DEBUG_A11Y) Log.v(TAG, "getVirtualViewIdForHit(" + x + "," + y + ") => "
+                    + view + "avail =" + dotAvailable);
+            return view;
+        }
     }
 }
