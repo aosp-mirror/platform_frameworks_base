@@ -3986,12 +3986,32 @@ package android.app {
     field public static final int MODE_ERRORED = 2; // 0x2
     field public static final int MODE_IGNORED = 1; // 0x1
     field public static final java.lang.String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
+    field public static final java.lang.String OPSTR_ADD_VOICEMAIL = "android:add_voicemail";
+    field public static final java.lang.String OPSTR_BODY_SENSORS = "android:body_sensors";
+    field public static final java.lang.String OPSTR_CALL_PHONE = "android:call_phone";
+    field public static final java.lang.String OPSTR_CAMERA = "android:camera";
     field public static final java.lang.String OPSTR_COARSE_LOCATION = "android:coarse_location";
     field public static final java.lang.String OPSTR_FINE_LOCATION = "android:fine_location";
     field public static final java.lang.String OPSTR_GET_USAGE_STATS = "android:get_usage_stats";
     field public static final java.lang.String OPSTR_MOCK_LOCATION = "android:mock_location";
     field public static final java.lang.String OPSTR_MONITOR_HIGH_POWER_LOCATION = "android:monitor_location_high_power";
     field public static final java.lang.String OPSTR_MONITOR_LOCATION = "android:monitor_location";
+    field public static final java.lang.String OPSTR_READ_CALENDAR = "android:read_calendar";
+    field public static final java.lang.String OPSTR_READ_CALL_LOG = "android:read_call_log";
+    field public static final java.lang.String OPSTR_READ_CELL_BROADCASTS = "android:read_cell_broadcasts";
+    field public static final java.lang.String OPSTR_READ_CONTACTS = "android:read_contacts";
+    field public static final java.lang.String OPSTR_READ_PHONE_STATE = "android:read_phone_state";
+    field public static final java.lang.String OPSTR_READ_SMS = "android:read_sms";
+    field public static final java.lang.String OPSTR_RECEIVE_MMS = "android:receive_mms";
+    field public static final java.lang.String OPSTR_RECEIVE_SMS = "android:receive_sms";
+    field public static final java.lang.String OPSTR_RECEIVE_WAP_PUSH = "android:receive_wap_push";
+    field public static final java.lang.String OPSTR_RECORD_AUDIO = "android:record_audio";
+    field public static final java.lang.String OPSTR_SEND_SMS = "android:send_sms";
+    field public static final java.lang.String OPSTR_USE_FINGERPRINT = "android:use_fingerprint";
+    field public static final java.lang.String OPSTR_USE_SIP = "android:use_sip";
+    field public static final java.lang.String OPSTR_WRITE_CALENDAR = "android:write_calendar";
+    field public static final java.lang.String OPSTR_WRITE_CALL_LOG = "android:write_call_log";
+    field public static final java.lang.String OPSTR_WRITE_CONTACTS = "android:write_contacts";
   }
 
   public static abstract interface AppOpsManager.OnOpChangedListener {
