@@ -375,11 +375,11 @@ determining the density of the current device screen.</li>
       <li>{@link android.Manifest.permission#INSTALL_LOCATION_PROVIDER INSTALL_LOCATION_PROVIDER}: 
           Allows an application to install a location provider into the Location Manager.
       </li>
-      <li>{@link android.Manifest.permission#READ_HISTORY_BOOKMARKS READ_HISTORY_BOOKMARKS}: 
-          Allows an application to read (but not write) the user's browsing history 
+      <li>READ_HISTORY_BOOKMARKS:
+          Allows an application to read (but not write) the user's browsing history
           and bookmarks.
       </li>
-      <li>{@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS WRITE_HISTORY_BOOKMARKS}: 
+      <li>WRITE_HISTORY_BOOKMARKS:
           Allows an application to write (but not read) the user's browsing history 
           and bookmarks.
       </li>

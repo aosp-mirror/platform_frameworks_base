@@ -809,36 +809,6 @@
         android:protectionLevel="normal"/>
 
     <!-- =============================================================== -->
-    <!-- Permissions for accessing the user bookmarks                    -->
-    <!-- =============================================================== -->
-    <eat-comment />
-
-    <!-- Used for permissions that provide access to the user
-         bookmarks and browser history.-->
-    <permission-group android:name="android.permission-group.BOOKMARKS"
-        android:label="@string/permgrouplab_bookmarks"
-        android:icon="@drawable/perm_group_bookmarks"
-        android:description="@string/permgroupdesc_bookmarks"
-        android:permissionGroupFlags="personalInfo"
-        android:priority="1200" />
-
-    <!-- Allows an application to read (but not write) the user's
-        browsing history and bookmarks. -->
-    <permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"
-        android:permissionGroup="android.permission-group.BOOKMARKS"
-        android:label="@string/permlab_readHistoryBookmarks"
-        android:description="@string/permdesc_readHistoryBookmarks"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an application to write (but not read) the user's
-        browsing history and bookmarks. -->
-    <permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"
-        android:permissionGroup="android.permission-group.BOOKMARKS"
-        android:label="@string/permlab_writeHistoryBookmarks"
-        android:description="@string/permdesc_writeHistoryBookmarks"
-        android:protectionLevel="dangerous" />
-
-    <!-- =============================================================== -->
     <!-- Permissions for setting the device alarm                        -->
     <!-- =============================================================== -->
     <eat-comment />
