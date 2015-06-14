@@ -149,7 +149,6 @@ package android {
     field public static final java.lang.String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final java.lang.String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     field public static final java.lang.String READ_FRAME_BUFFER = "android.permission.READ_FRAME_BUFFER";
-    field public static final java.lang.String READ_HISTORY_BOOKMARKS = "com.android.browser.permission.READ_HISTORY_BOOKMARKS";
     field public static final deprecated java.lang.String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final java.lang.String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
     field public static final java.lang.String READ_LOGS = "android.permission.READ_LOGS";
@@ -227,7 +226,6 @@ package android {
     field public static final java.lang.String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
     field public static final java.lang.String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
-    field public static final java.lang.String WRITE_HISTORY_BOOKMARKS = "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS";
     field public static final java.lang.String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final deprecated java.lang.String WRITE_PROFILE = "android.permission.WRITE_PROFILE";
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
@@ -241,7 +239,6 @@ package android {
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
-    field public static final java.lang.String BOOKMARKS = "android.permission-group.BOOKMARKS";
     field public static final java.lang.String CALENDAR = "android.permission-group.CALENDAR";
     field public static final java.lang.String CAMERA = "android.permission-group.CAMERA";
     field public static final java.lang.String CONTACTS = "android.permission-group.CONTACTS";
@@ -26468,57 +26465,11 @@ package android.provider {
 
   public class Browser {
     ctor public Browser();
-    method public static final void addSearchUrl(android.content.ContentResolver, java.lang.String);
-    method public static final boolean canClearHistory(android.content.ContentResolver);
-    method public static final void clearHistory(android.content.ContentResolver);
-    method public static final void clearSearches(android.content.ContentResolver);
-    method public static final void deleteFromHistory(android.content.ContentResolver, java.lang.String);
-    method public static final void deleteHistoryTimeFrame(android.content.ContentResolver, long, long);
-    method public static final android.database.Cursor getAllBookmarks(android.content.ContentResolver) throws java.lang.IllegalStateException;
-    method public static final android.database.Cursor getAllVisitedUrls(android.content.ContentResolver) throws java.lang.IllegalStateException;
-    method public static final void requestAllIcons(android.content.ContentResolver, java.lang.String, android.webkit.WebIconDatabase.IconListener);
-    method public static final void saveBookmark(android.content.Context, java.lang.String, java.lang.String);
     method public static final void sendString(android.content.Context, java.lang.String);
-    method public static final void truncateHistory(android.content.ContentResolver);
-    method public static final void updateVisitedHistory(android.content.ContentResolver, java.lang.String, boolean);
-    field public static final android.net.Uri BOOKMARKS_URI;
     field public static final java.lang.String EXTRA_APPLICATION_ID = "com.android.browser.application_id";
     field public static final java.lang.String EXTRA_CREATE_NEW_TAB = "create_new_tab";
     field public static final java.lang.String EXTRA_HEADERS = "com.android.browser.headers";
-    field public static final java.lang.String[] HISTORY_PROJECTION;
-    field public static final int HISTORY_PROJECTION_BOOKMARK_INDEX = 4; // 0x4
-    field public static final int HISTORY_PROJECTION_DATE_INDEX = 3; // 0x3
-    field public static final int HISTORY_PROJECTION_FAVICON_INDEX = 6; // 0x6
-    field public static final int HISTORY_PROJECTION_ID_INDEX = 0; // 0x0
-    field public static final int HISTORY_PROJECTION_TITLE_INDEX = 5; // 0x5
-    field public static final int HISTORY_PROJECTION_URL_INDEX = 1; // 0x1
-    field public static final int HISTORY_PROJECTION_VISITS_INDEX = 2; // 0x2
     field public static final java.lang.String INITIAL_ZOOM_LEVEL = "browser.initialZoomLevel";
-    field public static final java.lang.String[] SEARCHES_PROJECTION;
-    field public static final int SEARCHES_PROJECTION_DATE_INDEX = 2; // 0x2
-    field public static final int SEARCHES_PROJECTION_SEARCH_INDEX = 1; // 0x1
-    field public static final android.net.Uri SEARCHES_URI;
-    field public static final java.lang.String[] TRUNCATE_HISTORY_PROJECTION;
-    field public static final int TRUNCATE_HISTORY_PROJECTION_ID_INDEX = 0; // 0x0
-    field public static final int TRUNCATE_N_OLDEST = 5; // 0x5
-  }
-
-  public static class Browser.BookmarkColumns implements android.provider.BaseColumns {
-    ctor public Browser.BookmarkColumns();
-    field public static final java.lang.String BOOKMARK = "bookmark";
-    field public static final java.lang.String CREATED = "created";
-    field public static final java.lang.String DATE = "date";
-    field public static final java.lang.String FAVICON = "favicon";
-    field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String URL = "url";
-    field public static final java.lang.String VISITS = "visits";
-  }
-
-  public static class Browser.SearchColumns implements android.provider.BaseColumns {
-    ctor public Browser.SearchColumns();
-    field public static final java.lang.String DATE = "date";
-    field public static final java.lang.String SEARCH = "search";
-    field public static final deprecated java.lang.String URL = "url";
   }
 
   public final class CalendarContract {
