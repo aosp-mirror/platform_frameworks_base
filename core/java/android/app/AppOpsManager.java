@@ -250,64 +250,64 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_ACTIVATE_VPN
             = "android:activate_vpn";
-    /** @hide Allows an application to read the user's contacts data. */
+    /** Allows an application to read the user's contacts data. */
     public static final String OPSTR_READ_CONTACTS
             = "android:read_contacts";
-    /** @hide Allows an application to write to the user's contacts data. */
+    /** Allows an application to write to the user's contacts data. */
     public static final String OPSTR_WRITE_CONTACTS
             = "android:write_contacts";
-    /** @hide Allows an application to read the user's call log. */
+    /** Allows an application to read the user's call log. */
     public static final String OPSTR_READ_CALL_LOG
             = "android:read_call_log";
-    /** @hide Allows an application to write to the user's call log. */
+    /** Allows an application to write to the user's call log. */
     public static final String OPSTR_WRITE_CALL_LOG
             = "android:write_call_log";
-    /** @hide Allows an application to read the user's calendar data. */
+    /** Allows an application to read the user's calendar data. */
     public static final String OPSTR_READ_CALENDAR
             = "android:read_calendar";
-    /** @hide Allows an application to write to the user's calendar data. */
+    /** Allows an application to write to the user's calendar data. */
     public static final String OPSTR_WRITE_CALENDAR
             = "android:write_calendar";
-    /** @hide Allows an application to initiate a phone call. */
+    /** Allows an application to initiate a phone call. */
     public static final String OPSTR_CALL_PHONE
             = "android:call_phone";
-    /** @hide Allows an application to read SMS messages. */
+    /** Allows an application to read SMS messages. */
     public static final String OPSTR_READ_SMS
             = "android:read_sms";
-    /** @hide Allows an application to receive SMS messages. */
+    /** Allows an application to receive SMS messages. */
     public static final String OPSTR_RECEIVE_SMS
             = "android:receive_sms";
-    /** @hide Allows an application to receive MMS messages. */
+    /** Allows an application to receive MMS messages. */
     public static final String OPSTR_RECEIVE_MMS
             = "android:receive_mms";
-    /** @hide Allows an application to receive WAP push messages. */
+    /** Allows an application to receive WAP push messages. */
     public static final String OPSTR_RECEIVE_WAP_PUSH
             = "android:receive_wap_push";
-    /** @hide Allows an application to send SMS messages. */
+    /** Allows an application to send SMS messages. */
     public static final String OPSTR_SEND_SMS
             = "android:send_sms";
-    /** @hide Required to be able to access the camera device. */
+    /** Required to be able to access the camera device. */
     public static final String OPSTR_CAMERA
             = "android:camera";
-    /** @hide Required to be able to access the microphone device. */
+    /** Required to be able to access the microphone device. */
     public static final String OPSTR_RECORD_AUDIO
             = "android:record_audio";
-    /** @hide Required to access phone state related information. */
+    /** Required to access phone state related information. */
     public static final String OPSTR_READ_PHONE_STATE
             = "android:read_phone_state";
-    /** @hide Required to access phone state related information. */
+    /** Required to access phone state related information. */
     public static final String OPSTR_ADD_VOICEMAIL
             = "android:add_voicemail";
-    /** @hide Access APIs for SIP calling over VOIP or WiFi */
+    /** Access APIs for SIP calling over VOIP or WiFi */
     public static final String OPSTR_USE_SIP
             = "android:use_sip";
-    /** @hide Use the fingerprint API. */
+    /** Use the fingerprint API. */
     public static final String OPSTR_USE_FINGERPRINT
             = "android:use_fingerprint";
-    /** @hide Access to body sensors such as heart rate, etc. */
+    /** Access to body sensors such as heart rate, etc. */
     public static final String OPSTR_BODY_SENSORS
             = "android:body_sensors";
-    /** @hide Read previously received cell broadcast messages. */
+    /** Read previously received cell broadcast messages. */
     public static final String OPSTR_READ_CELL_BROADCASTS
             = "android:read_cell_broadcasts";
     /** Inject mock location into the system. */
@@ -1217,10 +1217,7 @@ public class AppOpsManager {
      *
      * @param permission The permission.
      * @return The app op associated with the permission or null.
-     *
-     * @hide
      */
-    @SystemApi
     public static String permissionToOp(String permission) {
         final Integer opCode = sPermToOp.get(permission);
         if (opCode == null) {
