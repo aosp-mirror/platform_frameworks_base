@@ -145,7 +145,6 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -12659,10 +12658,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg = ps.pkg;
                 }
             }
-        }
 
-        if (pkg == null) {
-            Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
+            if (pkg == null) {
+                Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
+                return false;
+            }
+
+            PackageSetting ps = (PackageSetting) pkg.mExtras;
+            PermissionsState permissionsState = ps.getPermissionsState();
+            revokeRuntimePermissionsAndClearUserSetFlagsLocked(permissionsState, userId);
         }
 
         // Always delete data directories for package, even if we found no other
@@ -12674,19 +12678,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
 
-        if (pkg == null) {
-            return false;
-        }
-
-        if (pkg != null && pkg.applicationInfo != null) {
-            final int appId = pkg.applicationInfo.uid;
-            removeKeystoreDataIfNeeded(userId, appId);
-        }
+        final int appId = pkg.applicationInfo.uid;
+        removeKeystoreDataIfNeeded(userId, appId);
 
         // Create a native library symlink only if we have native libraries
         // and if the native libraries are 32 bit libraries. We do not provide
         // this symlink for 64 bit libraries.
-        if (pkg != null && pkg.applicationInfo.primaryCpuAbi != null &&
+        if (pkg.applicationInfo.primaryCpuAbi != null &&
                 !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
             final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
             if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
@@ -12697,6 +12695,36 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return true;
+    }
+
+
+    /**
+     * Revokes granted runtime permissions and clears resettable flags
+     * which are flags that can be set by a user interaction.
+     *
+     * @param permissionsState The permission state to reset.
+     * @param userId The device user for which to do a reset.
+     */
+    private void revokeRuntimePermissionsAndClearUserSetFlagsLocked(
+            PermissionsState permissionsState, int userId) {
+        final int userSetFlags = PackageManager.FLAG_PERMISSION_USER_SET
+                | PackageManager.FLAG_PERMISSION_USER_FIXED
+                | PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+
+        boolean needsWrite = false;
+
+        for (PermissionState state : permissionsState.getRuntimePermissionStates(userId)) {
+            BasePermission bp = mSettings.mPermissions.get(state.getName());
+            if (bp != null) {
+                permissionsState.revokeRuntimePermission(bp, userId);
+                permissionsState.updatePermissionFlags(bp, userId, userSetFlags, 0);
+                needsWrite = true;
+            }
+        }
+
+        if (needsWrite) {
+            mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+        }
     }
 
     /**
