@@ -228,6 +228,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private static class MockNetworkFactory extends NetworkFactory {
+        final ConditionVariable mNetworkStartedCV = new ConditionVariable();
+        final ConditionVariable mNetworkStoppedCV = new ConditionVariable();
+        final ConditionVariable mNetworkRequestedCV = new ConditionVariable();
+        final ConditionVariable mNetworkReleasedCV = new ConditionVariable();
         final AtomicBoolean mNetworkStarted = new AtomicBoolean(false);
 
         public MockNetworkFactory(Looper looper, Context context, String logTag,
@@ -241,14 +245,50 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         protected void startNetwork() {
             mNetworkStarted.set(true);
+            mNetworkStartedCV.open();
         }
 
         protected void stopNetwork() {
             mNetworkStarted.set(false);
+            mNetworkStoppedCV.open();
         }
 
         public boolean getMyStartRequested() {
             return mNetworkStarted.get();
+        }
+
+        public ConditionVariable getNetworkStartedCV() {
+            mNetworkStartedCV.close();
+            return mNetworkStartedCV;
+        }
+
+        public ConditionVariable getNetworkStoppedCV() {
+            mNetworkStoppedCV.close();
+            return mNetworkStoppedCV;
+        }
+
+        protected void needNetworkFor(NetworkRequest networkRequest, int score) {
+            super.needNetworkFor(networkRequest, score);
+            mNetworkRequestedCV.open();
+        }
+
+        protected void releaseNetworkFor(NetworkRequest networkRequest) {
+            super.releaseNetworkFor(networkRequest);
+            mNetworkReleasedCV.open();
+        }
+
+        public ConditionVariable getNetworkRequestedCV() {
+            mNetworkRequestedCV.close();
+            return mNetworkRequestedCV;
+        }
+
+        public ConditionVariable getNetworkReleasedCV() {
+            mNetworkReleasedCV.close();
+            return mNetworkReleasedCV;
+        }
+
+        public void waitForNetworkRequests(final int count) {
+            waitFor(new Criteria() { public boolean get() { return count == getRequestCount(); } });
         }
     }
 
@@ -283,6 +323,21 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
                 return netId;
             }
+        }
+    }
+
+    private interface Criteria {
+        public boolean get();
+    }
+
+    static private void waitFor(Criteria criteria) {
+        int delays = 0;
+        while (!criteria.get()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+            }
+            if (++delays == 5) fail();
         }
     }
 
@@ -396,7 +451,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Test cellular linger timeout.
         try {
             Thread.sleep(6000);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
         }
         verifyActiveNetwork(TRANSPORT_WIFI);
         assertEquals(1, mCm.getAllNetworks().length);
@@ -421,14 +476,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCellNetworkAgent.connect(false);
         try {
             Thread.sleep(1000);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
         }
         verifyActiveNetwork(TRANSPORT_WIFI);
         // Test cellular disconnect.
         mCellNetworkAgent.disconnect();
         try {
             Thread.sleep(1000);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
         }
         verifyActiveNetwork(TRANSPORT_WIFI);
         // Test bringing up validated cellular
@@ -481,26 +536,26 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         filter.addCapability(NET_CAPABILITY_INTERNET);
         final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
         handlerThread.start();
-        MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
+        final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
                 mServiceContext, "testFactory", filter);
         testFactory.setScoreFilter(40);
+        ConditionVariable cv = testFactory.getNetworkStartedCV();
         testFactory.register();
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {}
+        cv.block();
         assertEquals(1, testFactory.getMyRequestCount());
         assertEquals(true, testFactory.getMyStartRequested());
 
         // now bring in a higher scored network
         MockNetworkAgent testAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
-        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        cv = waitForConnectivityBroadcasts(1);
+        ConditionVariable cvRelease = testFactory.getNetworkStoppedCV();
         testAgent.connect(true);
         cv.block();
         // part of the bringup makes another network request and then releases it
         // wait for the release
-        try { Thread.sleep(500); } catch (Exception e) {}
-        assertEquals(1, testFactory.getMyRequestCount());
+        cvRelease.block();
         assertEquals(false, testFactory.getMyStartRequested());
+        testFactory.waitForNetworkRequests(1);
 
         // bring in a bunch of requests..
         ConnectivityManager.NetworkCallback[] networkCallbacks =
@@ -511,21 +566,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
             mCm.requestNetwork(builder.build(), networkCallbacks[i]);
         }
-
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {}
-        assertEquals(11, testFactory.getMyRequestCount());
+        testFactory.waitForNetworkRequests(11);
         assertEquals(false, testFactory.getMyStartRequested());
 
         // remove the requests
         for (int i = 0; i < networkCallbacks.length; i++) {
             mCm.unregisterNetworkCallback(networkCallbacks[i]);
         }
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {}
-        assertEquals(1, testFactory.getMyRequestCount());
+        testFactory.waitForNetworkRequests(1);
         assertEquals(false, testFactory.getMyStartRequested());
 
         // drop the higher scored network
