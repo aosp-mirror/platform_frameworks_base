@@ -154,6 +154,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-карта отсутствует."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим полета."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Сменить сеть"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -323,6 +325,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведите от значка"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Аудиоподсказки: проведите от значка"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Камера: проведите от значка"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Полная тишина"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Только важные"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Только будильник"</string>
@@ -348,7 +352,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Начать заново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Да, продолжить"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Пользователь \"Гость\""</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Удалите аккаунт гостя, чтобы стереть все приложения и данные."</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"УДАЛИТЬ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Добавить пользователя?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"После создания профиля его необходимо настроить.\n\nОбновлять приложения для всех аккаунтов может любой пользователь устройства."</string>
@@ -370,19 +375,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Отключить VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Этим устройством управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения. За дополнительной информацией обратитесь к администратору."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Вы разрешили приложению подключаться к сети VPN.\n\nОно может отслеживать ваши действия на устройстве и в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Этим устройством управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения.\n\nВы подключены к сети VPN, поэтому возможно отслеживание ваших действий в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами.\n\nЗа дополнительной информацией обратитесь к администратору."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Вашим корпоративным профилем управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nЗа подробностями обратитесь к нему.\n\nУстройство также подключено к сети VPN, в которой возможно отслеживание ваших действий."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"Сеть VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Запущено приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\", которое может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Запущено приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\", которое может отслеживать ваши действия в Интернете (выполняемые в личном профиле), включая работу с электронной почтой, приложениями и веб-сайтами."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Вашим рабочим профилем управляет \"<xliff:g id="ORGANIZATION">%1$s</xliff:g>\". Приложение \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nЗа дополнительной информацией обратитесь к своему администратору."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Вашим рабочим профилем управляет \"<xliff:g id="ORGANIZATION">%1$s</xliff:g>\". Приложение \"<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>\" может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nПриложение \"<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>\" может отслеживать ваши действия в Интернете, выполняемые в личном профиле."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Вашим корпоративным профилем управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения.\n\nПриложение <xliff:g id="APPLICATION">%2$s</xliff:g> также может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nЗа подробностями обратитесь к своему администратору."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Устройство необходимо будет разблокировать вручную"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Быстрый доступ к уведомлениям"</string>
@@ -408,19 +408,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Нет"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показывать уровень заряда батареи в процентах"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Когда устройство работает в автономном режиме, процент заряда батареи показан в строке состояния"</string>
     <string name="quick_settings" msgid="10042998191725428">"Быстрые настройки"</string>
     <string name="status_bar" msgid="4877645476959324760">"Строка состояния"</string>
-    <!-- no translation found for demo_mode (2389163018533514619) -->
-    <skip />
-    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
-    <skip />
-    <!-- no translation found for show_demo_mode (2018336697782464029) -->
-    <skip />
+    <string name="demo_mode" msgid="2389163018533514619">"Демонстрация"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Включить демонстрационный режим"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Перейти в демонстрационный режим"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Будильник"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Рабочий профиль"</string>
@@ -431,8 +428,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Следующий будильник: <xliff:g id="WHEN">%1$s</xliff:g>. Звук отключен."</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Быстрые настройки, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка доступа"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

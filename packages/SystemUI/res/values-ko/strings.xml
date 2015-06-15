@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM이 없습니다."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"블루투스 테더링입니다."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"비행기 모드입니다."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"이동통신사 네트워크가 변경됩니다."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"배터리 <xliff:g id="NUMBER">%d</xliff:g>퍼센트"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"시스템 설정"</string>
@@ -319,6 +321,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"전화 기능을 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="voice_hint" msgid="8939888732119726665">"음성 지원을 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="camera_hint" msgid="7939688436797157483">"카메라를 사용하려면 아이콘에서 스와이프하세요."</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"모두 차단"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"중요 알림만"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"알람만 수신"</string>
@@ -344,7 +348,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"다시 시작"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"예, 계속합니다."</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"게스트 사용자"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"게스트를 삭제하여 앱 및 데이터 삭제"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"게스트 삭제"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"새 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
@@ -366,19 +371,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN 사용 중지"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN 연결 해제"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"이 기기는 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 설정, 기업 액세스, 앱, 기기와 관련된 데이터, 기기의 위치 정보를 모니터링하고 관리할 수 있습니다. 자세한 내용은 관리자에게 문의하세요."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN 연결을 설정할 수 있는 권한을 앱에 부여했습니다.\n\n이 앱에서 이메일, 앱, 웹사이트와 같은 내 네트워크 활동 및 기기를 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"이 기기는 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 설정, 기업 액세스, 앱, 기기와 관련된 데이터, 기기의 위치 정보를 모니터링하고 관리할 수 있습니다.\n\nVPN에 연결되어 있으므로 VPN 업체에서 이메일, 앱, 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 이메일, 앱, 웹사이트와 같은 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요.\n\n또한 VPN에 연결되어 있으며 여기에서 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이는 <xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이는 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n또한 <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>에 연결되어 있으며, 여기에서 내 개인 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 기기를 관리합니다.\n\n관리자는 설정, 기업 액세스, 앱, 기기와 연결된 데이터, 기기의 위치 정보를 모니터링하고 관리할 수 있습니다.\n\n<xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
@@ -404,7 +404,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"거부"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"시스템 UI 튜너"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"내장형 배터리 잔량 비율 표시"</string>
@@ -424,8 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
     <string name="alarm_template" msgid="3980063409350522735">"시간: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"일시: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"빠른 설정하기, <xliff:g id="TITLE">%s</xliff:g>"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"핫스팟"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

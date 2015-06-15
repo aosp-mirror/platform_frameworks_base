@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoratge de Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"S\'està canviant la xarxa de l\'operador de telefonia mòbil."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -321,6 +323,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Llisca des de la icona per obrir el telèfon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Llisca des de la icona per obrir l\'assistent de veu"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Llisca des de la icona per obrir la càmera"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Silenci total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Només amb prioritat"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Només alarmes"</string>
@@ -346,7 +350,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Torna a començar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sí, continua"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuari convidat"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Suprimeix el convidat per suprimir les aplicacions i les dades"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"SUPRIMEIX EL CONVIDAT"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
@@ -368,19 +373,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Desactiva la VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconnecta la VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Administrador del dispositiu: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'administrador pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions i les dades associades amb aquest dispositiu, inclosa la informació d\'ubicació. Per obtenir més informació, contacta amb l\'administrador."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Has donat permís a una aplicació per configurar una connexió VPN.\n\nAquesta aplicació pot supervisar el dispositiu i l\'activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Administrador del dispositiu: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'administrador pot supervisar i gestionar el següent: configuració, accés corporatiu, aplicacions i dades associades amb aquest dispositiu, inclosa la seva informació d\'ubicació.\n\nEstàs connectat a una VPN, que pot supervisar l\'activitat de la xarxa, com ara els correus, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el perfil de Work.\n\nL\'administrador pot supervisar l\'activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador.\n\nA més, estàs connectat a una VPN, que pot supervisar l\'activitat a la xarxa."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. Aquest perfil està connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar la teva activitat professional a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. Aquest perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat professional a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nA més, estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que també pot supervisar la teva activitat personal a la xarxa."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el dispositiu.\n\nL\'administrador pot supervisar i gestionar el següent: configuració, accés corporatiu, aplicacions i dades associades amb el dispositiu, inclosa la informació d\'ubicació.\n\nEstàs connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar l\'activitat a la xarxa, com ara els correus, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositiu continuarà bloquejat fins que no el desbloquegis manualment."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Obtén notificacions més ràpidament"</string>
@@ -406,7 +406,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Denega"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> és el diàleg de volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca per restaurar l\'original."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Configurador de la IU del sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra el percentatge de la bateria inserit"</string>
@@ -426,8 +426,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g> no sentiràs la pròxima alarma"</string>
     <string name="alarm_template" msgid="3980063409350522735">"Hora: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"Dia: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuració ràpida, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

@@ -153,6 +153,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nav SIM kartes."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth piesaiste."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lidmašīnas režīms."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobilo sakaru operatora tīkla mainīšana."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumulators: <xliff:g id="NUMBER">%d</xliff:g> procenti"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistēmas iestatījumi"</string>
@@ -320,6 +322,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Lai lietotu tālruni, velciet no ikonas"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Lai lietotu balss palīgu, velciet no ikonas"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Lai lietotu kameru, velciet no ikonas"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Pilnīgs klusums"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Tikai prioritārie"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Tikai signāli"</string>
@@ -345,7 +349,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Sākt no sākuma"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Jā, turpināt"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Vieslietotājs"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Lai dzēstu lietotnes un datus, noņemiet viesi."</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"NOŅEMT VIESI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vai pievienot jaunu lietotāju?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido savs profils.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
@@ -367,19 +372,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Atspējot VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Atvienot VPN tīklu"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas ir saistīti ar šo ierīci, kā arī informāciju par jūsu ierīces atrašanās vietu. Lai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Jūs piešķīrāt lietotnei atļauju izveidot savienojumu ar VPN tīklu.\n\nŠī lietotne var pārraudzīt jūsu ierīcē un tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas ir saistīti ar šo ierīci, kā arī informāciju par jūsu ierīces atrašanās vietu.\n\nIerīcē ir izveidots savienojums ar VPN tīklu, kurā var tikt pārraudzītas jūsu tīklā veiktās darbības, tostarp e-pasts, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru.\n\nIerīcē ir arī izveidots savienojums ar VPN tīklu, kurā var tikt pārraudzītas jūsu tīklā veiktās darbības."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Ir izveidots savienojums ar lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Ir izveidots savienojums ar lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās privātās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Tas ir saistīts ar lietojumprogrammu <xliff:g id="APPLICATION">%2$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Tas ir saistīts ar lietojumprogrammu <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nIr piesaistīta arī lietojumprogramma <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas ir saistīti ar šo ierīci, kā arī informāciju par jūsu ierīces atrašanās vietu.\n\nIr piesaistīta lietojumprogramma <xliff:g id="APPLICATION">%2$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Ierīce būs bloķēta, līdz to manuāli atbloķēsiet."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Saņemiet paziņojumus ātrāk"</string>
@@ -405,7 +405,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Neatļaut"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ir skaļuma dialoglodziņš"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Pieskarieties, lai atjaunotu sākotnējo."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sistēmas saskarnes regulators"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rādīt akumulatora uzlādes līmeni procentos"</string>
@@ -425,8 +425,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots."</string>
     <string name="alarm_template" msgid="3980063409350522735">"plkst. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Ātrie iestatījumi: <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Tīklājs"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>
