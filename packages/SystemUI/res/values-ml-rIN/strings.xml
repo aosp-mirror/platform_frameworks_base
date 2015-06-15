@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"സിം ഇല്ല."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM കാർഡൊന്നുമില്ല."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
@@ -319,6 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"ഫോൺ ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="voice_hint" msgid="8939888732119726665">"വോയ്‌സ് അസിസ്റ്റിനായുള്ള ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ക്യാമറ ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"പൂർണ്ണ നിശബ്ദത. സ്ക്രീൻ റീഡറുകളെയും ഇത് നിശബ്ദമാക്കും."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"പൂർണ്ണ നിശബ്‌ദത"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"മുൻഗണന മാത്രം"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"അലാറങ്ങൾ മാത്രം"</string>
@@ -328,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ചാർജ്ജുചെയ്യുന്നു (പൂർണ്ണമാകുന്നതിന്, <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ഉപയോക്താവിനെ മാറ്റുക, <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> എന്നയാളാണ് നിലവിലുള്ള ഉപയോക്താവ്"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"പ്രൊഫൈൽ കാണിക്കുക"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ഉപയോക്താവിനെ ചേര്‍ക്കുക"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"പുതിയ ഉപയോക്താവ്"</string>
@@ -344,7 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"പുനരാംരംഭിക്കുക"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"അതെ, തുടരുക"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"അതിഥി ഉപയോക്താവ്"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"അപ്ലിക്കേഷനുകളും വിവരവും ഇല്ലാതാക്കാൻ അതിഥിയെ നീക്കംചെയ്യുക"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"ആപ്സും വിവരങ്ങളും ഇല്ലാതാക്കാൻ അതിഥി ഉപയോക്താവിനെ നീക്കുക"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"അതിഥിയെ നീക്കംചെയ്യുക"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
@@ -366,19 +367,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN വിച്‌ഛേദിക്കുക"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"നിങ്ങളുടെ ഉപകരണം നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്.\n\nനിങ്ങളുടെ അഡ്‌മിനിസ്ട്രേറ്റർക്ക്, ഉപകരണവുമായി ബന്ധപ്പെട്ട ക്രമീകരണവും കോർപ്പറേറ്റ് ആക്സസ്സും അപ്ലിക്കേഷനുകളും വിവരവും ഒപ്പം ഉപകരണത്തിന്റെ ലൊക്കേഷൻ വിവരവും നിരീക്ഷിച്ച് നിയന്ത്രിക്കാനാകും. കൂടുതൽ വിവരങ്ങൾക്ക്, അഡ്‌മിനിസ്ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN കണക്ഷൻ സജ്ജീകരിക്കാൻ നിങ്ങൾ ഒരു ആപ്പിന് അനുമതി നൽകി.\n\nഈ ആപ്പിന് നിങ്ങളുടെ ഇമെയിലുകളും ആപ്സും വെബ്‌സൈറ്റുകളും ഉൾപ്പെടെ, ഉപകരണവും നെറ്റ്‌വർക്ക് പ്രവർത്തനവും നിരീക്ഷിക്കാൻ കഴിയും."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"നിങ്ങളുടെ ഉപകരണം നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്.\n\nനിങ്ങളുടെ അഡ്‌മിനിസ്ട്രേറ്റർക്ക്, ഉപകരണവുമായി ബന്ധപ്പെട്ട ക്രമീകരണവും കോർപ്പറേറ്റ് ആക്സസ്സും അപ്ലിക്കേഷനുകളും വിവരവും ഒപ്പം ഉപകരണത്തിന്റെ ലൊക്കേഷൻ വിവരവും നിരീക്ഷിച്ച് നിയന്ത്രിക്കാനാകും.\n\nഇമെയിലുകളും അപ്ലിക്കേഷനുകളും വെബ്‌സൈറ്റുകളും ഉൾപ്പെടെയുള്ള നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകുന്ന ഒരു VPN-ലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്തിരിക്കുന്നു.\n\nകൂടുതൽ വിവരങ്ങൾക്ക്, അഡ്‌മിനിസ്ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്.\n\nനിങ്ങളുടെ അഡ്‌മിനിസ്ട്രേറ്റർക്ക് ഇമെയിലുകളും അപ്ലിക്കേഷനുകളും സുരക്ഷിത വെബ്‌സൈറ്റുകളും ഉൾപ്പെടെയുള്ള നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാൻ കഴിയും.\n\nകൂടുതൽ വിവരങ്ങൾക്ക്, അഡ്‌മിനിസ്ട്രേറ്ററെ ബന്ധപ്പെടുക.\n\nനിങ്ങളുടെ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകുന്ന ഒരു VPN-ലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്തിരിക്കുന്നു."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ സ്വകാര്യ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്. നിങ്ങൾ <xliff:g id="APPLICATION">%2$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും.\n\nകൂടുതൽ വിവരങ്ങൾക്ക്, നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്. നിങ്ങൾ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും.\n\nനിങ്ങൾ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> എന്നതിലേക്കും കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് നിങ്ങളുടെ സ്വകാര്യ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"നിങ്ങളുടെ ഉപകരണം നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്.\n\nനിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർക്ക്, ഉപകരണവുമായി ബന്ധപ്പെട്ട ക്രമീകരണവും കോർപ്പറേറ്റ് ആക്‌സസ്സും അപ്ലിക്കേഷനുകളും വിവരവും ഒപ്പം ഉപകരണത്തിന്റെ ലൊക്കേഷൻ വിവരവും നിരീക്ഷിച്ച് നിയന്ത്രിക്കാനാകും.\n\nഇമെയിലുകളും അപ്ലിക്കേഷനുകളും വെബ്‌സൈറ്റുകളും ഉൾപ്പെടെയുള്ള നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകുന്ന ഒരു <xliff:g id="APPLICATION">%2$s</xliff:g> എന്നതിലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്തിരിക്കുന്നു.\n\nകൂടുതൽ വിവരങ്ങൾക്ക്, അഡ്‌മിനിസ്ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"നിങ്ങൾ സ്വമേധയാ അൺലോക്കുചെയ്യുന്നതുവരെ ഉപകരണം ലോക്കുചെയ്‌തതായി തുടരും"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"അറിയിപ്പുകൾ വേഗത്തിൽ സ്വീകരിക്കുക"</string>
@@ -404,19 +400,15 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"നിരസിക്കുക"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>, വോളിയം ഡയലോഗാണ്"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ആദ്യത്തേത് പുനഃസ്ഥാപിക്കാൻ സ്‌പർശിക്കുക."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ട്യൂണർ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"എംബഡ് ചെയ്‌ത ബാറ്ററി ശതമാനം കാണിക്കുക"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ചാർജ്ജുചെയ്യാതിരിക്കുമ്പോൾ സ്റ്റാറ്റസ് ബാർ ഐക്കണിൽ ബാറ്ററി ലെവൽ ശതമാനം കാണിക്കുക"</string>
     <string name="quick_settings" msgid="10042998191725428">"ദ്രുത ക്രമീകരണം"</string>
     <string name="status_bar" msgid="4877645476959324760">"സ്റ്റാറ്റസ് ബാർ"</string>
-    <!-- no translation found for demo_mode (2389163018533514619) -->
-    <skip />
-    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
-    <skip />
-    <!-- no translation found for show_demo_mode (2018336697782464029) -->
-    <skip />
+    <string name="demo_mode" msgid="2389163018533514619">"ഡെമോ മോഡ്"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"ഡെമോ മോഡ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"ഡെമോ മോഡ് കാണിക്കുക"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"ഇതർനെറ്റ്"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"അലാറം"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
@@ -427,8 +419,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g>-നുള്ള നിങ്ങളുടെ അടുത്ത അലാറം കേൾക്കില്ല"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>-ന്"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>-ന്"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ദ്രുത ക്രമീകരണം, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ഹോട്ട്‌സ്‌പോട്ട്"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
 </resources>

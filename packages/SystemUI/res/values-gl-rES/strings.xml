@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Sen SIM"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoraxe de Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Non hai tarxeta SIM"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambio de rede do operador."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -321,6 +322,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Pasa o dedo desde a icona para acceder ao asistente de voz"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Pasa o dedo desde a icona para acceder á cámara"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Silencio total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Só prioridade"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Só alarmas"</string>
@@ -346,7 +349,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Comezar de novo"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Si, continuar"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuario convidado"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Quita o convidado para eliminar aplicacións e datos"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"QUITAR CONVIDADO"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Engadir un usuario novo?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Cando engadas un usuario novo, este deberá configurar o seu espazo\n\nCalquera usuario pode actualizar as aplicacións para todos os demais usuarios."</string>
@@ -368,19 +372,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Desactivar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información de localización do teu dispositivo. Para obter máis información, ponte en contacto co teu administrador."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Outorgaches permiso a unha aplicación para configurar unha conexión VPN.\n\nEsta aplicación pode supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información de localización do teu dispositivo.\n\nEstás conectado a unha VPN, que pode supervisar a túa actividade de rede, incluídos os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"O teu perfil de traballo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador é capaz de supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, ponte en contacto co teu administrador.\n\nTamén estás conectado a unha VPN, que pode supervisar a túa actividade na rede."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Estás conectado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Estás conectado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode supervisar a túa actividade persoal na rede, incluídos os correos electrónicos, as aplicacións e os sitios web."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"O teu perfil de traballo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Está conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pode supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"O teu perfil de traballo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pode supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web.\n\nTamén estás conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pode supervisar a túa actividade persoal na rede."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"O dispositivo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co dispositivo e a información de localización do dispositivo.\n\nEstás conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pode supervisar a túa actividade na rede: os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, contacta co teu administrador."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado ata que o desbloquees manualmente"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibir notificacións máis rápido"</string>
@@ -406,8 +405,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Denegar"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é o cadro de diálogo de volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar o orixinal."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando o perfil de traballo"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sintonizador da interface de usuario do sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaxe de batería inserida"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar porcentaxe do nivel de batería na icona da barra de estado cando non está en carga"</string>
@@ -426,8 +424,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"ás <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"o <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuración rápida: <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona wifi"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de traballo"</string>
 </resources>

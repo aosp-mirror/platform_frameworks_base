@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM छैन।"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लुटुथ टेदर गर्दै।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाइजहाज मोड।"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM कार्ड छैन।"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क परिवर्तन हुँदै।"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ब्याट्रि <xliff:g id="NUMBER">%d</xliff:g> प्रतिशत"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"प्रणाली सेटिङहरू"</string>
@@ -319,6 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"फोनको लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
     <string name="voice_hint" msgid="8939888732119726665">"आवाज सहायताका लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
     <string name="camera_hint" msgid="7939688436797157483">"क्यामेराको लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"एकदम चुप। यसले पनि स्क्रीन बाचकलाई मौन गर्नेछ।"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"पूरै शान्त"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"प्राथमिकता मात्र"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"अलार्महरू मात्र"</string>
@@ -328,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हुँदै (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण भएसम्म)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"प्रयोगकर्ता, हालको प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> मा स्विच गर्नुहोस्"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"वर्तमान प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"प्रोफाइल देखाउनुहोस्"</string>
     <string name="user_add_user" msgid="5110251524486079492">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"नयाँ प्रयोगकर्ता"</string>
@@ -344,7 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"सुरु गर्नुहोस्"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"हो, जारी राख्नुहोस्"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"अतिथि प्रयोगकर्ता"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"अनुप्रयोगहरू र डेटा मेटाउन अतिथिलाई निकाल्नुहोस्"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"अनुप्रयोगहरू र डेटा मेटाउन, अतिथि प्रयोगकर्ता हटाउनुहोस्"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"अतिथिलाई हटाउनुहोस्"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्नुहुन्छ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
@@ -366,19 +367,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"विच्छेद VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङहरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ। थप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईँका यन्त्र र इमेलहरू, अनुप्रयोगहरू र वेबसाइटहरू लगायतका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङ्हरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ।\n\nतपाईँ VPN सँग जडित हुनुहुन्छ, जसले तपाईँको इमेल, अनुप्रयोगहरू, र वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्छ। \n\nथप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g>द्वारा व्यवस्थापन गरिन्छ।.\n\nतपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्षम छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।\n\nतपाईँ VPN सँग पनि जडित हुनुहुन्छ, जसले तपाईँको नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग सम्पर्कमा हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँका नेटवर्क गतिविधिको अनुगमन गर्न सक्छन्।"</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग सम्पर्कमा हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छन्।"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्तापन गरिन्छ। यो <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्तापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"तपाईंको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थित गरिन्छ।\n\nतपाईंको प्रशासकले तपाईँको यन्त्र र त्यसको स्थान जानकारीमार्फत सेटिङहरू,  कर्पोरेट पहुँच, अनुप्रयोगहरू, तपाईँको यन्त्रसँग सम्बद्ध डेटा  र तपाईँको यन्त्रको स्थान जानकारीको अनुगमन र व्यवस्थापन गर्न सक्छ।\n\nतपाईं <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जडित हुनुहुन्छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि तपाईको प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"अस्वीकार गर्नुहोस्"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद हो"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल पुनर्स्थापना गर्न छुनुहोस्।"</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"तपाईँले कार्य प्रोफाइल प्रयोग गर्दै हुनुहुन्छ"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"प्रणाली UI ट्युनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"इम्बेड गरिएको ब्याट्री प्रतिशत देखाउनुहोस्"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज नगरेको बेला वस्तुस्थिति पट्टी आइकन भित्र ब्याट्री प्रतिशत स्तर देखाउनुहोस्"</string>
@@ -424,8 +419,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"तपाईँले आफ्नो अर्को अलार्म <xliff:g id="WHEN">%1$s</xliff:g> सुन्नुहुने छैन"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"द्रुत सेटिङ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"कार्य प्रोफाइल"</string>
 </resources>
