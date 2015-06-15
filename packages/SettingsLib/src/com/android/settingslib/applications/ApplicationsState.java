@@ -281,7 +281,9 @@ public class ApplicationsState {
                         return null;
                     }
                 }
-                entry = getEntryLocked(info);
+                if (info != null) {
+                    entry = getEntryLocked(info);
+                }
             }
             if (DEBUG_LOCKING) Log.v(TAG, "...getEntry releasing lock");
             return entry;
