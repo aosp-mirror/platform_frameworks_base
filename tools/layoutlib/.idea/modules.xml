@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/bridge/bridge.iml" filepath="$PROJECT_DIR$/bridge/bridge.iml" />
       <module fileurl="file://$PROJECT_DIR$/create/create.iml" filepath="$PROJECT_DIR$/create/create.iml" />
+      <module fileurl="file://$PROJECT_DIR$/studio-custom-widgets/studio-android-widgets.iml" filepath="$PROJECT_DIR$/studio-custom-widgets/studio-android-widgets.iml" />
     </modules>
   </component>
 </project>
-
