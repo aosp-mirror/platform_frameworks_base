@@ -36,6 +36,7 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -66,6 +67,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected TelephonyManager mMockTm;
     protected Config mConfig;
     protected CallbackHandler mCallbackHandler;
+    protected SubscriptionDefaults mMockSubDefaults;
 
     protected int mSubId;
 
@@ -79,6 +81,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
         mMockCm = mock(ConnectivityManager.class);
+        mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
         when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
@@ -92,25 +95,39 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mCallbackHandler = mock(CallbackHandler.class);
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class));
+                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class),
+                mMockSubDefaults);
         setupNetworkController();
+
+        // Trigger blank callbacks to always get the current state (some tests don't trigger
+        // changes from default state).
+        mNetworkController.addSignalCallback(null);
+        mNetworkController.addEmergencyListener(null);
     }
 
     protected void setupNetworkController() {
         // For now just pretend to be the data sim, so we can test that too.
         mSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-        SubscriptionInfo subscription = mock(SubscriptionInfo.class);
-        List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
-        when(subscription.getSubscriptionId()).thenReturn(mSubId);
-        subs.add(subscription);
-        mNetworkController.setCurrentSubscriptions(subs);
+        setDefaultSubId(mSubId);
+        setSubscriptions(mSubId);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
-        mMobileSignalController.getState().dataSim = true;
         mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
+    }
 
-        // Trigger blank callbacks to always get the current state (some tests don't trigger
-        // changes from default state).
-        mNetworkController.addSignalCallback(null);
+    protected void setDefaultSubId(int subId) {
+        when(mMockSubDefaults.getDefaultDataSubId()).thenReturn(subId);
+        when(mMockSubDefaults.getDefaultVoiceSubId()).thenReturn(subId);
+    }
+
+    protected void setSubscriptions(int... subIds) {
+        List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
+        for (int subId : subIds) {
+            SubscriptionInfo subscription = mock(SubscriptionInfo.class);
+            when(subscription.getSubscriptionId()).thenReturn(subId);
+            subs.add(subscription);
+        }
+        when(mMockSm.getActiveSubscriptionInfoList()).thenReturn(subs);
+        mNetworkController.doUpdateMobileControllers();
     }
 
     protected NetworkControllerImpl setUpNoMobileData() {
@@ -119,7 +136,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
               = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                         mConfig, Looper.getMainLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
-                        mock(MobileDataControllerImpl.class));
+                        mock(MobileDataControllerImpl.class), mMockSubDefaults);
 
       setupNetworkController();
 

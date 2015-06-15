@@ -77,7 +77,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 Mockito.mock(AccessPointControllerImpl.class),
-                Mockito.mock(MobileDataControllerImpl.class));
+                Mockito.mock(MobileDataControllerImpl.class), mMockSubDefaults);
         setupNetworkController();
 
         setupDefaultSignal();
