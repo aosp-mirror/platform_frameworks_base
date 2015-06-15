@@ -36,6 +36,8 @@ import java.util.List;
 
     private static final long DO_NOT_CACHE_RESULT = 0L;
     private static final int HTTP_CONNECTION_TIMEOUT_MILLIS = 5000;
+    private static final int HTTP_CONNECTION_BACKOFF_MILLIS = 3000;
+    private static final int HTTP_CONNECTION_RETRY = 3;
     private static final long HTTP_CONTENT_SIZE_LIMIT_IN_BYTES = 1024 * 1024;
     private static final int MAX_INCLUDE_LEVEL = 1;
     private static final String WELL_KNOWN_STATEMENT_PATH = "/.well-known/assetlinks.json";
@@ -151,9 +153,10 @@ import java.util.List;
                     && !url.getProtocol().toLowerCase().equals("https")) {
                 return Result.create(statements, DO_NOT_CACHE_RESULT);
             }
-            webContent = mUrlFetcher.getWebContentFromUrl(url,
-                    HTTP_CONTENT_SIZE_LIMIT_IN_BYTES, HTTP_CONNECTION_TIMEOUT_MILLIS);
-        } catch (IOException e) {
+            webContent = mUrlFetcher.getWebContentFromUrlWithRetry(url,
+                    HTTP_CONTENT_SIZE_LIMIT_IN_BYTES, HTTP_CONNECTION_TIMEOUT_MILLIS,
+                    HTTP_CONNECTION_BACKOFF_MILLIS, HTTP_CONNECTION_RETRY);
+        } catch (IOException | InterruptedException e) {
             return Result.create(statements, DO_NOT_CACHE_RESULT);
         }
 
