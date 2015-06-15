@@ -49,6 +49,40 @@ public class URLFetcher {
     /**
      * Fetches the specified url and returns the content and ttl.
      *
+     * <p>
+     * Retry {@code retry} times if the connection failed or timed out for any reason.
+     * HTTP error code (e.g. 404/500) won't be retried.
+     *
+     * @throws IOException if it can't retrieve the content due to a network problem.
+     * @throws AssociationServiceException if the URL scheme is not http or https or the content
+     * length exceeds {code fileSizeLimit}.
+     */
+    public WebContent getWebContentFromUrlWithRetry(URL url, long fileSizeLimit,
+            int connectionTimeoutMillis, int backoffMillis, int retry)
+                    throws AssociationServiceException, IOException, InterruptedException {
+        if (retry <= 0) {
+            throw new IllegalArgumentException("retry should be a postive inetger.");
+        }
+        while (retry > 0) {
+            try {
+                return getWebContentFromUrl(url, fileSizeLimit, connectionTimeoutMillis);
+            } catch (IOException e) {
+                retry--;
+                if (retry == 0) {
+                    throw e;
+                }
+            }
+
+            Thread.sleep(backoffMillis);
+        }
+
+        // Should never reach here.
+        return null;
+    }
+
+    /**
+     * Fetches the specified url and returns the content and ttl.
+     *
      * @throws IOException if it can't retrieve the content due to a network problem.
      * @throws AssociationServiceException if the URL scheme is not http or https or the content
      * length exceeds {code fileSizeLimit}.
