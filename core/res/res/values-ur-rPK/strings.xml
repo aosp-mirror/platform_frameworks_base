@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"دفتری پروفائل حذف کر دیا گیا"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"گمشدہ منتظم ایپ کی وجہ سے دفتری پروفائل حذف کر دیا گیا۔"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"دفتری پروفائل کی منتظم ایپ یا تو غائب ہے یا خراب ہے۔ اس کی وجہ سے، آپ کا دفتری پروفائل اور متعلقہ ڈیٹا حذف کر دیے گئے ہیں۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"آپ کا دفتری پروفائل اس آلہ پر مزید دستیاب نہیں ہے۔"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"منتظم کی ایپ میں گمشدہ اجزاء ہیں یا وہ خراب ہے اور اسے استعمال نہیں کیا جا سکتا ہے۔ آپ کے آلہ کو اب صاف کر دیا جائے گا۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"رنگر آف ہے"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"رنگر مرتعش کریں"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"رنگر آن ہے"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"‏Android سسٹم اپ ڈیٹ"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"اپ ڈیٹ کرنے کی تیاری ہو رہی ہے…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"اپ ڈیٹ پیکج پر کاروائی کی جارہی ہے…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"دوبارہ شروع ہو رہا ہے…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"فیکٹری ڈیٹا کی دوبارہ ترتیب"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"دوبارہ شروع ہو رہا ہے…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"بند ہو رہا ہے…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"آپ کا ٹیبلیٹ بند ہو جائے گا۔"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"‏آپ کا TV بند ہو جائے گا۔"</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"رابطے"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"اپنے رابطوں تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"مقام"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"اس آلہ کے مقام تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"آپ کی سوشل معلومات"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"اپنے رابطوں اور سوشل کنکشنز کے بارے میں معلومات تک براہ راست رسائی۔"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"کیلنڈر"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"اپنے کیلنڈر تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"‏SMS پیغامات دیکھیں اور ان کا نظم کریں"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"اسٹوریج"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"اپنے آلہ پر تصاویر، میڈیا اور فائلوں تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"صارف کی لغت"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"صارف کی لغت میں الفاظ پڑھیں یا لکھیں۔"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"بُک مارکس اور سرگزشت"</string>
@@ -255,14 +249,14 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"فون"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"فون کالز کریں اور ان کا نظم کریں"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"سینسرز"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"سینسرز اور ویئرایبل آلات سے ڈیٹا تک رسائی حاصل کریں"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد کی بازیافت کریں"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"اپنی علاماتِ حیات اور جسمانی سرگرمی بارے معلومات تک رسائی حاصل کریں"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد بازیافت کرنے کی"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسے ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کریں"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ٹچ کیے ہوئے آئٹمز کو زور سے بولا جائے گا اور اشاروں کا استعمال کرکے اسکرین کو دریافت کیا جا سکتا ہے۔"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"‏بہتر ویب accessibility کو آن کریں"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ایپ کا مواد مزید قابل رسائی بنانے کیلئے اسکرپٹس کو انسٹال کیا جا سکتا ہے۔"</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"اپنے ٹائپ کردہ متن کا مشاہدہ کریں"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"آپکے ٹائپ کردہ متن کا مشاہدہ کرنے کی"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"کریڈٹ کارڈ نمبرز اور پاس ورڈز جیسے ذاتی ڈیٹا پر مشتمل ہوتا ہے۔"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ایپ کو ٹیبلٹ کو معلوم اکاؤنٹس کی فہرست حاصل کرنے کی اجازت دیتا ہے۔ اس میں آپ کی انسٹال کردہ ایپلیکیشنز کے ذریعہ بنائے گئے کوئی بھی اکاؤنٹس شامل ہوسکتے ہیں۔"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"‏ایپ کو TV کو معلوم اکاؤنٹس کی فہرست حاصل کرنے کی اجازت دیتا ہے۔ اس میں آپ کی انسٹال کردہ ایپلیکیشنز کے بنائے ہوئے کوئی بھی اکاؤنٹس شامل ہو سکتے ہیں۔"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ایپ کو فون کو معلوم اکاؤنٹس کی فہرست حاصل کرنے کی اجازت دیتا ہے۔ اس میں آپ کی انسٹال کردہ ایپلیکیشنز کے ذریعہ بنائے گئے کوئی بھی اکاؤنٹس شامل ہوسکتے ہیں۔"</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"اکاؤنٹس بنائیں اور پاس ورڈز سیٹ کریں"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"‏اکاؤنٹس بنانے اور ان کے پاس ورڈز حاصل کرنے اور انہیں ترتیب دینے سمیت ایپ کو AccountManager کی اکاؤنٹ کے توثیق کار کی اہلیتیں استعمال کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"اکاؤنٹس شامل کریں یا ہٹائیں"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"ایپ کو اکاؤنٹس شامل کرنے اور ہٹانے، اور ان کے پاس ورڈ حذف کرنے جیسی کارروائیاں انجام دینے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"آلے پر موجود اکاؤنٹس استعمال کریں"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"ایپ کو توثیقی ٹوکنز کی درخواست کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"نیٹ ورک کنکشنز دیکھیں"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ایپ کو نیٹ ورک کنکشنز کے بارے میں معلومات دیکھنے کی اجازت دیتا ہے جیسے کون سے نیٹ ورکس موجود اور مربوط ہیں۔"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"پورے نیٹ ورک تک رسائی"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات میں ترمیم کرنے کی اجازت دیتا ہے۔ مثلا، کسی اکاؤنٹ کے ساتھ People ایپ کی مطابقت پذیری فعال کرنے کیلئے اسے استعمال کیا جاسکتا ہے۔"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"مطابقت پذیری کے اعداد و شمار پڑھیں"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کے اعداد و شمار، بشمول مطابقت پذیری کے ایونٹس اور جس قدر ڈیٹا مطابقت پذیر ہے اس کی سرگزشت کو پڑھنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"سبسکرائب کردہ فیڈز لکھیں"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے آپ کے فیڈز میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس مطابقت پذیر کیے ہوئے آپ کے فیڈز کو تبدیل کر سکتی ہیں۔"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"لغت میں اپنے ذریعہ شامل کردہ اصطلاحات کو پڑھیں"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ایپ کو وہ سبھی الفاظ، نام اور فقرے پڑھنے کی اجازت دیتا ہے جو صارف نے صارف کی لغت میں محفوظ کیے ہو سکتے ہیں۔"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"صارف کے ذریعہ متعین کردہ لغت میں الفاظ شامل کریں"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"مطالبہ کریں کہ اسٹور کردہ ایپ کا ڈیٹا مرموز کیا جائے۔"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"کیمروں کو غیر فعال کریں"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"سبھی آلے کے کیمروں کا استعمال روکیں۔"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"اسکرین لاک کی خصوصیات غیر فعال کریں"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"اسکرین لاک کی کچھ خصوصیات کے استعمال سے روکیں۔"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"کچھ سکرین قفل خصوصیات غیر فعال کریں"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"اسکرین قفل کی کچھ خصوصیات کے استعمال کو روکیں۔"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"گھر"</item>
     <item msgid="869923650527136615">"موبائل"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"پیٹرن شروع ہو گیا"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"پیٹرن صاف کر دیا گیا"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"سیل شامل کر دیا گیا"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"پیٹرن مکمل ہو گیا"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"‏%1$s۔ ویجیٹ ‎%2$d از ‎%3$d۔"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ویجیٹ شامل کریں"</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"نیٹ ورک میں سائن ان کریں"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"‏Wi-Fi کی انٹرنیٹ تک رسائی نہیں ہے"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"اختیارات کیلئے ٹچ کریں"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏Wi-Fi سے مربوط نہیں ہو سکا"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" اس میں ایک کمزور انٹرنیٹ کنکشن ہے۔"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"کنکشن کی اجازت دیں؟"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"خرابیوں کیلئے چیک کیا جا رہا ہے"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"نئے <xliff:g id="NAME">%s</xliff:g> کا پتا چلا"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"تصاویر اور میڈیا منتقل کرنے کیلئے"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> خراب ہے"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> خراب ہے؛ اسے دوبارہ فارمیٹ کرنے کی کوشش کریں"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"خراب شدہ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> خراب ہے۔ ٹھیک کرنے کیلئے ٹچ کریں۔"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"غیر تعاون یافتہ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"یہ آلہ <xliff:g id="NAME">%s</xliff:g> کی اعانت نہیں کرتا۔ ایک تعاون یافتہ فارمیٹ میں سیٹ اپ کرنے کیلئے ٹچ کریں۔"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> غیر متوقع طور پر ہٹا دیا گیا"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ڈیٹا ضائع ہونے سے بچانے کیلئے ہٹانے سے پہلے <xliff:g id="NAME">%s</xliff:g> کو اَن ماؤنٹ کریں"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> کو ہٹا دیا گیا"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> کو ہٹا دیا گیا؛ ایک نیا داخل کریں"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ابھی بھی <xliff:g id="NAME">%s</xliff:g> کو خارج کر رہا ہے…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"نہ ہٹائیں"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"ترتیب دیں"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"سیٹ اپ کریں"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"خارج کریں"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"دریافت کریں"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> غائب ہے"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"ڈیٹا کو <xliff:g id="NAME">%s</xliff:g> پر منتقل کر دیا گیا"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ڈیٹا منتقل نہیں کیا جا سکا"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ڈیٹا اصل جگہ پر باقی ہے"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"ہٹا دیا گیا"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"اخراج شدہ"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"چیک کیا جا رہا ہے…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"تیار"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"صرف پڑھنے کیلئے"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"غیر محفوظ طریقے سے ہٹا لی گئی"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"خراب شدہ"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"غیر تعاون یافتہ"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"اخراج کیا جا رہا ہے…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"فارمیٹ کیا جا رہا ہے…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"دلچسپی نہیں ہے"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"کوئی مماثل سرگرمیاں نہیں ملیں۔"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"میڈیا آؤٹ پٹ کی سمت طے کریں"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"کسی ایپلیکیشن کو دوسرے خارجی آلات تک میڈیا آؤٹ پٹ کا راستہ بنانے کی اجازت دیتا ہے۔"</string>
@@ -1537,9 +1540,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"‏SS درخواست میں ترمیم کر کے DIAL درخواست بنا دی گئی ہے۔"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏SS درخواست میں ترمیم کر کے USSD درخواست بنا دی گئی ہے۔"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏SS درخواست میں ترمیم کر کے نئی SS درخواست بنا دی گئی ہے۔"</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏Android USB پیرفرل پورٹ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏USB پیرفرل پورٹ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"مزید اختیارات"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"اوورفلو بند کریں"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

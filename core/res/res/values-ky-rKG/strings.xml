@@ -255,8 +255,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Жумуш профили жок кылынды"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Администратордун колдонмосу жок болгондуктан, жумуш профили жок кылынды."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жумуш профилинин администратор колдонмосу жок же бузулгандыктан, жумуш профилиңиз жана ага байланыштуу дайындар жок кылынган. Жардам алуу үчүн администраторуңузга кайрылыңыз."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жумуш профилиңиз бул түзмөктө жеткиликтүү болбой калды."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Түзмөгүңүз тазаланат"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Администратор колдонмосунун курамдары жок же бузулгандыктан, аны колдонуу мүмкүн эмес. Түзмөгүңүз азыр тазаланат. Жардам алуу үчүн администраторуңузга кайрылыңыз."</string>
     <!-- no translation found for me (6545696007631404292) -->
@@ -279,18 +278,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Коңгуроо өчүк"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Чалганда титирөө"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Коңгуроо жандырылган"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android тутум жаңыртуусу"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Жаңыртууга даярдалууда…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Жаңыртуу топтому иштелүүдө…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Өчүрүлүп күйгүзүлүүдө…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Баштапкы абалга кайтаруу"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Өчүрүлүп күйгүзүлүүдө…"</string>
     <!-- no translation found for shutdown_progress (2281079257329981203) -->
     <skip />
     <!-- no translation found for shutdown_confirm (3385745179555731470) -->
@@ -344,14 +337,16 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Байланыштар"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"байланыштарыңызга уруксат"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Жайгашкан жер"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"бул түзмөктүн жайгашкан жерине кирүү"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Сиздин социалдык маалыматыңыз"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Сиздин байланыштарыңыз жана социалдык байланыштарыңыз тууралуу маалыматтарга түз жетки алуу."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнбарак"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS билдирүүлөрдү көрүү жана башкаруу"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
+    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
+    <skip />
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"түзмөгүңүздөгү сүрөттөр, медиа жана файлдарга кирүү"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Колдонуучунун сөздүгү"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Колдонуучунун сөздүгүндөгү сөздөрдү окуу же жазуу"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Бүктөмөлөр жана тарых"</string>
@@ -363,7 +358,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлор"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"сенсорлордон жана тагынма түзмөктөрдөн дайындарды алуу"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"олуттуу белгилериңиз жана физикалык аракетиңиз тууралуу маалыматка кирүү"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмунун алуу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сиз иштеп жаткан терезенин мазмунун изилдөө."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Сыйпалап изилдөөнү жандыруу"</string>
@@ -526,12 +521,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Колдонмого планшетке белгилүү эсептердин тизмегин алуу уруксатын берет. Буларга сиз орноткон колдонмолор аркылуу түзүлгөн эсептер кириши мүмкүн."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Колдонмого сыналгыга белгилүү каттоо эсептеринин тизмесин алуу мүмкүнчүлүгүн берет. Анда орнотулган колдонмолор түзгөн каттоо эсептеринин бардыгы камтылышы мүмкүн."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Колдонмого телефонго белгилүү эсептердин тизмегин алуу уруксатын берет. Буларга сиз орноткон колдонмолор аркылуу түзүлгөн эсептер кириши мүмкүн."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"эсептерди түзүү жана сырсөздөрдү орнотуу"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Колдонмого AccountManager\'дин каттоо эсебинин аныктыгын текшерүү, каттоо эсептерин түзүү жана алардын сырсөздөрүн алуу жана түзүү жөндөмдөрүн колдонуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"эсептерди кошуу жана алып салуу"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Колдонмого каттоо эсептерин кошуу жана алып салуу, алардын сырсөзүн жок кылуу сыяктуу аракеттерди аткаруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"түзмөктөгү эсептерди колдонуу"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Колдонмого аныктыкты текшерүү энбелгилерин суроо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"түйүн туташууларын көрүү"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Колдонмого желелердин бардыгы жана байланыштар сыяктуу желе маалыматтарын көргөнгө уруксат берет."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"желеге толук жетки алуу"</string>
@@ -597,9 +586,6 @@
     <!-- no translation found for permlab_readSyncStats (7396577451360202448) -->
     <skip />
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Колдонмого эсептин статистикасын, синхрондоштуруу тарыхын, анын ичинде, канча берилиштер синхрондошкондугун окуганга уруксат берет."</string>
-    <!-- no translation found for permlab_subscribedFeedsWrite (9015246325408209296) -->
-    <skip />
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Колдонмого учурда шайкештештирилген каналдарыңызды өзгөртүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор шайкештештирилген каналдарыңызды өзгөртүп салышы мүмкүн."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"сөздүккө кошкон терминдериңизди окуу"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Колдонмого колдонуучу сөздүгүндө сакталган бардык сөздөрдү, аттарды жана фразаларды окуганга уруксат берет."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"колдонуучунун сөздүгүнө сөздөрдү кошуу"</string>
@@ -659,8 +645,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"байланыш операторунун кызматтарына туташуу"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Колдонмо байланыш операторлорунун кызматтарына туташа алат. Бул мүмкүнчүлүктү кадимки колдонмолор пайдалана алышпайт."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"Тынчымды алба\" режимине мүмкүнчүлүк алуу"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Колдонмо \"Тынчымды алба\" режимине окуу жана жазуу мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"Тынчымды алба\" режимин пайдалануу мүмкүнчүлүгүнө ээ болуу"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Колдонмого \"Тынчымды алба\" режиминин конфигурациясын окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
@@ -697,8 +683,8 @@
     <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
     <skip />
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Түзмөктүн бардык камераларын колдонууга тыюу салуу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Экран кулпснн өзгчлктрн өчүрүү"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Экран кулпусунун айрым өзгөчөлүктөрүн колдонуунун алдын алуу."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экрн клпснн айрм өзгчлктрн өчр"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экран кулпусунун айрым өзгөчөлүктөрүн колдонуунун алдын алуу."</string>
     <!-- no translation found for phoneTypes:0 (8901098336658710359) -->
     <!-- no translation found for phoneTypes:1 (869923650527136615) -->
     <!-- no translation found for phoneTypes:2 (7897544654242874543) -->
@@ -968,6 +954,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Үлгү башталды"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Үлгү тазаланды"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Уяча кошулду"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Үлгү аягына чыкты"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d ичинен %2$d виджет."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Виджет кошуу."</string>
@@ -1322,6 +1310,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Тармакка кирүү"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi тармагынын Интернетке мүмкүнчүлүгү жок"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Параметрлер үчүн тийип коюңуз"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi менен туташуу түзүлбөдү"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" хотспотунун интернет байланышы начар."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Туташууга уруксатпы?"</string>
@@ -1442,15 +1432,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Каталар текшерилүүдө"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Жаңы <xliff:g id="NAME">%s</xliff:g> аныкталды"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Сүрөттөрдү жана медиа өткөрүү үчүн"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> бүлүнгөн"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> бүлүнгөн; аны кайра форматтап көрүңүз"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> бузулган"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> бузулган. Оңдоо үчүн тийип коюңуз."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> колдоого алынбайт"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Бул түзмөктө бул <xliff:g id="NAME">%s</xliff:g> колдоого алынбайт. Колдоого алынуучу форматта орнотуу үчүн тийип коюңуз."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> күтүүсүздөн алынып салынды"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Дайындарды жоготуунун алдын алуу үчүн чыгаруудан мурун <xliff:g id="NAME">%s</xliff:g> түзмөгүн бошотуңуз"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> алынды"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> алынды; жаңысын салыңыз"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> дагы эле чыгарылууда…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Чыгарба"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Орнотуу"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Орнотуу"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Чыгаруу"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Изилдөө"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> табылбай жатат"</string>
@@ -1461,6 +1453,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Дайындар <xliff:g id="NAME">%s</xliff:g> сактагычына ооштурулду"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Дайындар ооштурулбай калды"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Дайындар баштапкы ордунда калды"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Алынып салынган"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Чыгарылган"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Текшерилүүдө…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Даяр"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Окуу үчүн гана"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Коопсуз алынган жок"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Бузулган"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Колдоого алынбайт"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Чыгарылууда…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Форматталууда…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Салынган жок"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
@@ -1953,9 +1956,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS сурамы DIAL сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сурамы USSD сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сурамы жаңы SS сурамына өзгөртүлдү."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Жумуш профили"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Сырткы оюкча"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Сырткы оюкча"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Дагы параметрлер"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Ашып-ташууну жабуу"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

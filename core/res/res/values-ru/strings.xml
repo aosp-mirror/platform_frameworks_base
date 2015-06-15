@@ -174,8 +174,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Рабочий профиль удален"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Рабочий профиль удален из-за отсутствия приложения Admin."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Приложение Admin в рабочем профиле отсутствует или повреждено. Из-за этого рабочий профиль и связанные с ним данные были удалены. Если у вас возникли вопросы, обратитесь к администратору."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Ваш рабочий профиль больше не доступен на этом устройстве."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Все данные с устройства будут удалены"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Приложение Admin нельзя использовать, так как оно отсутствует или повреждено. С устройства будут удалены все данные. Если у вас возникли вопросы, обратитесь к администратору."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -190,18 +189,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Звонок отключен"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибросигнал"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звонок включен"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Обновление системы Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Подготовка обновлений…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Обработка обновлений…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Перезагрузка…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Сброс настроек"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Перезагрузка…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Телевизор будет выключен."</string>
@@ -238,14 +231,17 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакты"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"доступ к контактам"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Местоположение"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"доступ к данным о местоположении устройства"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Информация о моих контактах"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Прямой доступ к информации о моих контактах и социальных связях."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"просмотр SMS-сообщений и управление ими"</string>
+    <!-- no translation found for permgroupdesc_sms (4656988620100940350) -->
+    <skip />
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
+    <!-- no translation found for permgroupdesc_storage (637758554581589203) -->
+    <skip />
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Пользовательский словарь"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Чтение слов в пользовательском словаре или их запись."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Закладки и история"</string>
@@ -257,7 +253,8 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществление телефонных звонков и управление ими"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Датчики"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"доступ к данным с датчиков и носимых устройств"</string>
+    <!-- no translation found for permgroupdesc_sensors (2280821510554029577) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки"</string>
@@ -402,12 +399,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Приложение сможет получить список всех используемых на устройстве аккаунтов, в том числе созданных установленными приложениями."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Доступ к списку аккаунтов на телевизоре, в том числе тем, которые созданы установленными приложениями."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Приложение сможет получить список всех используемых на устройстве аккаунтов, в том числе созданных установленными приложениями."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"Создание аккаунтов и установка паролей"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Приложение сможет использовать возможности аутентификации диспетчера аккаунтов, в том числе создавать аккаунты, получать и устанавливать пароли для них."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"Добавление/удаление аккаунтов"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Приложение сможет добавлять и удалять аккаунты, а также стирать их пароли."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"Использование аккаунтов на устройстве"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Приложение сможет запрашивать токены аутентификации."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"Просмотр сетевых подключений"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Приложение сможет просматривать информацию о сетевых подключениях, например о том, какие сети доступны и к каким из них вы подключены."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"Неограниченный доступ в Интернет"</string>
@@ -468,8 +459,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Приложение сможет изменять настройки синхронизации аккаунта. Например, с помощью этого разрешения можно включить в аккаунте синхронизацию контактов."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Просмотр статистики синхронизации"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Приложение сможет просматривать статистику синхронизации аккаунта, в том числе историю событий и объем синхронизированных данных."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"Изменение данных о фидах пользователя"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Приложение сможет изменять фиды, синхронизируемые в настоящее время. Вредоносные программы смогут изменять синхронизированные фиды."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"Просмотр добавленных в словарь слов"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Приложение получит доступ ко всем словам и фразам, которые хранятся в пользовательском словаре."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Добавление слов в словарь пользователя"</string>
@@ -557,8 +546,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Шифровать данные приложений в хранилище."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Отключить камеры"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Запретить использование камер на устройстве."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Отключить функции блокировки экрана"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Запретить использование некоторых функций блокировки экрана."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Отключение функций"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Запретить использовать некоторые функции блокировки экрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашний"</item>
     <item msgid="869923650527136615">"Мобильный"</item>
@@ -744,6 +733,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ввод графического ключа"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Графический ключ сброшен"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ячейка добавлена"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Графический ключ введен"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виджет %2$d из %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Добавить виджет"</string>
@@ -1009,6 +1000,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Регистрация в сети"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Сеть Wi-Fi не подключена к Интернету"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Ещё варианты"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не удалось подключиться к сети Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" – плохое интернет-соединение."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Разрешить подключение?"</string>
@@ -1105,15 +1098,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Поиск ошибок"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Обнаружена новая карта \"<xliff:g id="NAME">%s</xliff:g>\""</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Для переноса фотографий и других файлов"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Карта \"<xliff:g id="NAME">%s</xliff:g>\" повреждена"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Попробуйте отформатировать карту \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> не работает"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Устройство \"<xliff:g id="NAME">%s</xliff:g>\" повреждено. Нажмите, чтобы это исправить."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> не поддерживается"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"<xliff:g id="NAME">%s</xliff:g> не поддерживается. Нажмите, чтобы выбрать совместимый с вашим устройством формат."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Карта \"<xliff:g id="NAME">%s</xliff:g>\" извлечена неправильно"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Перед тем как извлечь карту \"<xliff:g id="NAME">%s</xliff:g>\", отключите ее, чтобы избежать потери данных."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Карта \"<xliff:g id="NAME">%s</xliff:g>\" извлечена"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Карта \"<xliff:g id="NAME">%s</xliff:g>\" извлечена. Вставьте другую."</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Извлечение карты \"<xliff:g id="NAME">%s</xliff:g>\"…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Не извлекать"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Настроить"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Настроить"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Извлечь"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Обзор"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> не найден"</string>
@@ -1124,6 +1119,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Перенос данных сюда: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Не удалось перенести данные"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Данные остались там же, где были"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Удалено"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Извлечено"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Проверка…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Готово"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Только чтение"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Удалено небезопасно"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Повреждено"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Не поддерживается"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Извлечение…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Форматирование…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Отсутствует"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Подходящих действий не найдено."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Перенаправление мультимедийных данных"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Приложение сможет направлять поток мультимедиа на другие внешние устройства."</string>
@@ -1571,9 +1577,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-запрос преобразован в DIAL-запрос."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-запрос преобразован в USSD-запрос."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-запрос преобразован в новый SS-запрос."</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Внешний USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Внешний USB-порт"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Ещё"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Закрыть дополнительное меню"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

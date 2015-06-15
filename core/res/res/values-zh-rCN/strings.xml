@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"工作资料已删除"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"由于缺少管理应用，工作资料已被删除。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"工作资料管理应用缺失或损坏，因此系统已删除您的工作资料及相关数据。请与您的管理员联系以寻求帮助。"</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"您的工作资料已不在此设备上。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"系统将清空您的设备"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"由于缺少组件或软件包已损坏，无法使用此管理应用。系统现在将清空您的设备。请与您的管理员联系以寻求帮助。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"振铃器关闭"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"振铃器振动"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"振铃器开启"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android 系统更新"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"正在准备更新…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"正在处理更新文件包…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"正在重新启动…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"恢复出厂设置"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"正在重新启动…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的电视即将关闭。"</string>
@@ -236,14 +229,17 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通讯录"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"使用您的通讯录"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"使用此设备的位置信息"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交信息"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接访问与您的联系人和社交人脉相关的信息。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"短信"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"查看和管理短信"</string>
+    <!-- no translation found for permgroupdesc_sms (4656988620100940350) -->
+    <skip />
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"存储空间"</string>
+    <!-- no translation found for permgroupdesc_storage (637758554581589203) -->
+    <skip />
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"用户字典"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"读取用户字典中的字词或写入新字词。"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
@@ -255,7 +251,8 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"电话"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"拨打电话和管理通话"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"传感器"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"访问传感器和穿戴式设备的数据"</string>
+    <!-- no translation found for permgroupdesc_sensors (2280821510554029577) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
@@ -400,12 +397,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"允许该应用获取平板电脑已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"允许应用获取电视已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"允许该应用获取手机已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"创建帐户并设置密码"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"允许应用使用 AccountManager 的帐户身份验证程序功能，包括创建帐户以及获取和设置其密码。"</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"添加或移除帐户"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"允许应用执行添加帐户、移除帐户、删除帐户密码等操作。"</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"使用设备上的帐户"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"允许应用请求身份验证令牌。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"查看网络连接"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"允许该应用查看网络连接的相关信息，例如存在和连接的网络。"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"完全的网络访问权限"</string>
@@ -466,8 +457,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许该应用修改某个帐户的同步设置。例如，此权限可用于在“联系人”应用与某个帐户之间启用同步。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"读取同步统计信息"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许该应用读取某个帐户的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"写入订阅的供稿"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允许应用修改您当前同步的 Feed。恶意应用可能会更改您的同步 Feed。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到字典的字词"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户字典中存储的所有字词、名称和词组。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的字典添加字词"</string>
@@ -524,10 +513,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"绑定到运营商服务"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允许应用绑定到运营商服务。普通应用绝不需要此权限。"</string>
-    <!-- no translation found for permlab_access_notification_policy (4247510821662059671) -->
-    <skip />
-    <!-- no translation found for permdesc_access_notification_policy (3296832375218749580) -->
-    <skip />
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"“勿扰”模式使用权限"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -557,8 +544,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"要求对存储的应用数据进行加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相机"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有设备摄像头。"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"停用锁屏功能"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"禁止使用锁屏的部分功能。"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"停用屏幕锁定的部分功能"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"禁止使用屏幕锁定的部分功能。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
@@ -744,6 +731,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"开始绘制图案"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"图案已清除"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已添加单元格"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
@@ -997,6 +986,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"登录到网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"此 WLAN 网络无法访问互联网"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"触摸即可查看选项"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到WLAN"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 互联网连接状况不佳。"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"要允许连接吗？"</string>
@@ -1093,15 +1084,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"检查是否有错误"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"检测到新的<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"可用于传输照片和媒体文件"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g>已损坏"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g>已损坏，请尝试重新格式化"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>已损坏"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g>已损坏。触摸即可修复。"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>不受支持"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"此设备不支持该<xliff:g id="NAME">%s</xliff:g>。触摸即可设置为支持的格式。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>已意外移除"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"请先卸载<xliff:g id="NAME">%s</xliff:g>，再将其移除，以防数据丢失。"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"已移除<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g>已移除，请插入新的外部媒体"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"仍然弹出<xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"请勿移除"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"设置"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"设置"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"弹出"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"浏览"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"缺少<xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1112,6 +1105,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"数据已移到<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"无法移动数据"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"数据仍保存在原来的位置"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"已移除"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"已弹出"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"正在检查…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"就绪"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"只读"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"未安全移除"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"已损坏"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"不支持"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"正在弹出…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"正在格式化…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"未插入"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"未找到匹配的活动。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
@@ -1539,9 +1543,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS 请求已修改为 DIAL 请求。"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 请求已修改为 USSD 请求。"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 请求已修改为新的 SS 请求。"</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 外设端口"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 外设端口"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"更多选项"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"关闭工具栏溢出"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

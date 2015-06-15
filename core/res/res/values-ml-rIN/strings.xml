@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതിനാൽ ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണ്. അക്കാരണത്താൽ നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരവും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനിസ്‌ട്രേറ്ററുമായി ബന്ധപ്പെടുക."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ, ഘടകഭാഗങ്ങൾ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണെങ്കിൽ ഉപയോഗിക്കാനാവില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ ഇല്ലാതാക്കും. സഹായത്തിന് നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="me" msgid="6545696007631404292">"ഞാന്‍"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"റിംഗർ ഓഫുചെയ്യുക"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"റിംഗർ വൈബ്രേറ്റുചെയ്യുക"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"റിംഗർ ഓൺചെയ്യുക"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android സിസ്റ്റം അപ്ഡേറ്റ്"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"അപ്ഡേറ്റുചെയ്യാൻ തയ്യാറെടുക്കുന്നു…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"അപ്ഡേറ്റ് പാക്കേജ് പ്രോസസ്സുചെയ്യുന്നു..."</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"പുനരാരംഭിക്കുന്നു…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"പുനരാരംഭിക്കുന്നു…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"ഷട്ട്‌ഡൗൺ ചെയ്യുന്നു..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"നിങ്ങളുടെ ടാബ്‌ലെറ്റ് ഷട്ട്‌ഡൗൺ ചെയ്യും."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"നിങ്ങളുടെ ടിവി ഷട്ട്ഡൗൺ ചെയ്യും."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"നിങ്ങളുടെ സോഷ്യൽ വിവരം"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"നിങ്ങളുടെ കോൺടാക്റ്റുകളേയും സോഷ്യൽ കണക്ഷനുകളേയും സംബന്ധിച്ച വിവരങ്ങളിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"കലണ്ടർ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS സന്ദേശങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"സംഭരണം"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഫോട്ടോകളും മീഡിയയും ഫയലുകളും ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ഉപയോക്തൃ നിഘണ്ടു"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ഉപയോക്തൃ നിഘണ്ടുവിലെ പദങ്ങൾ വായിക്കുകയോ എഴുതുകയോ ചെയ്യുക."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ബുക്ക്‌മാർക്കുകളും ചരിത്രവും"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"സെൻസറുകൾ"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"സെൻസറുകളിൽ നിന്നും ധരിക്കാനാവുന്ന ഉപകരണങ്ങളിൽ നിന്നും വിവരം ആക്‌സസ്സ് ചെയ്യുക"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെയും ശാരീരിക പ്രവർത്തനത്തെയും കുറിച്ചുള്ള വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ടാബ്‌ലെറ്റ് തിരിച്ചറിയുന്ന അക്കൗണ്ടുകളുടെ ലിസ്റ്റ് നേടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇതിൽ നിങ്ങൾ ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ സൃഷ്‌ടിച്ച എല്ലാ അക്കൗണ്ടുകളും ഉൾപ്പെടാം."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"ടിവിയ്‌ക്ക് പരിചയമുള്ള അക്കൗണ്ടുകളുടെ ലിസ്‌റ്റ് സ്വീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് നിങ്ങൾ ഇൻസ്റ്റാളുചെയ്‌തിരിക്കുന്ന അപ്ലിക്കേഷനുകൾ സൃഷ്‌ടിച്ച ഏത് അക്കൗണ്ടുകളെയും ഉൾപ്പെടുത്തിയേക്കാം."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ഫോൺ തിരിച്ചറിയുന്ന അക്കൗണ്ടുകളുടെ ലിസ്റ്റ് നേടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇതിൽ നിങ്ങൾ ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ സൃഷ്‌ടിച്ച എല്ലാ അക്കൗണ്ടുകളും ഉൾപ്പെടാം."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"അക്കൗണ്ടുകൾ സൃഷ്‌ടിച്ച് പാസ്‌വേഡുകൾ സജ്ജമാക്കുക"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"അക്കൗണ്ടുകൾ സൃഷ്‌ടിക്കുകയും അവയുടെ പാസ്‌വേഡുകൾ നേടുകയും ക്രമീകരിക്കുകയും ചെയ്യുന്നതുൾപ്പെടെ, അക്കൗണ്ട് മാനേജരുടെ അക്കൗണ്ട് ഓതന്റിക്കേറ്റർ ശേഷി ഉപയോഗിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"അക്കൗണ്ടുകൾ ചേർക്കുക അല്ലെങ്കിൽ നീക്കംചെയ്യുക"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"അക്കൗണ്ടുകൾ ചേർക്കുന്നതും നീക്കംചെയ്യുന്നതും ഒപ്പം അവയുടെ പാസ്‌വേഡ് ഇല്ലാതാക്കുന്നതും പോലുള്ള പ്രവർത്തനങ്ങൾ നിർവഹിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"ഉപകരണത്തിലെ അക്കൗണ്ടുകൾ ഉപയോഗിക്കുക"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"പ്രാമാണീകരണ ടോക്കണുകൾ അഭ്യർത്ഥിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"നെറ്റ്‌വർക്ക് കണക്ഷനുകൾ കാണുക"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ഏതെല്ലാം നെറ്റ്‌വർക്കുകൾ നിലവിലുണ്ടെന്നതും കണക്റ്റുചെയ്‌തിട്ടുണ്ടെന്നതും പോലുള്ള നെറ്റ്‌വർക്ക് കണക്ഷനുകളെക്കുറിച്ചുള്ള വിവരം കാണാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"പൂർണ്ണ നെറ്റ്‌വർക്ക് ആക്‌സസ്സ്"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിക്കുന്നത് പ്രവർത്തനക്ഷമമാക്കാൻ ഇത് ഉപയോഗിക്കാം."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"സമന്വയ സ്ഥിതിവിവരണക്കണക്കുകൾ വായിക്കുക"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"സമന്വയ ഇവന്റുകളുടെ ചരിത്രവും ഡാറ്റ എത്രത്തോളം സമന്വയിപ്പിച്ചുവെന്നതും ഉൾപ്പെടെ, ഒരു അക്കൗണ്ടിനായി സമന്വയ സ്ഥിതിവിവരക്കണക്കുകൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"സബ്‌സ്ക്രൈബ് ചെയ്‌ത ഫീഡുകൾ എഴുതുക"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"നിലവിൽ സമന്വയിപ്പിച്ച ഫീഡുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ നേടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ, നിങ്ങളുടെ സമന്വയിപ്പിച്ച ഫീഡുകളെ മാറ്റിയേക്കാം."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"നിഘണ്ടുവിൽ നിങ്ങൾ ചേർത്ത പദങ്ങൾ വായിക്കുക"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ഉപയോക്തൃ നിഘണ്ടുവിൽ ഉപയോക്താവ് സംഭരിച്ചിരിക്കാനിടയുള്ള എല്ലാ പദങ്ങളും പേരുകളും വാക്യങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ഉപയോക്തൃ നിർവചിത നിഘണ്ടുവിൽ പദങ്ങൾ ചേർക്കുക"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"സംഭരിച്ച അപ്ലിക്കേഷൻ ഡാറ്റ എൻക്രിപ്റ്റുചെയ്യേണ്ടതുണ്ട്."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ക്യാമറകൾ പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"എല്ലാ ഉപകരണ ക്യാമറകളുടേയും ഉപയോഗം തടയുക."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"സ്‌ക്രീൻ ലോക്കിന്റെ ഫീച്ചറുകൾ പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"സ്‌ക്രീൻ ലോക്കിലെ ചില ഫീച്ചറുകളുടെ ഉപയോഗം തടയുക."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ലോക്ക് ഫീച്ചർ അപ്രാപ്തമാക്കൂ"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ചില സ്‌ക്രീൻ ലോക്ക് ഫീച്ചറുകളുടെ ഉപയോഗം തടയുക."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"വീട്ടിലെ ഫോൺ"</item>
     <item msgid="869923650527136615">"മൊബൈൽ"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"പാറ്റേൺ ആരംഭിച്ചു"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"പാറ്റേൺ മായ്‌ച്ചു"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"സെൽ ചേർത്തു"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"പാറ്റേൺ പൂർത്തിയാക്കി"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. വിജറ്റ് %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"വിജറ്റ് ചേർക്കുക."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi-യിൽ ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല."</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"ഓപ്‌ഷനുകൾക്കായി സ്‌പർശിക്കുക"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-ലേക്ക് കണക്‌റ്റുചെയ്യാൻ കഴിഞ്ഞില്ല"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" മോശം ഇന്റർനെറ്റ് കണക്ഷനാണുള്ളത്."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"കണക്ഷൻ അനുവദിക്കണോ?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"പിശകുകളുണ്ടോയെന്നു പരിശോധിക്കുന്നു"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"പുതിയ <xliff:g id="NAME">%s</xliff:g> എന്നതിനെ തിരിച്ചറിഞ്ഞു"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> കേടായി"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> കേടായി; അത് വീണ്ടും ഫോർമാറ്റുചെയ്യുന്നതിന് ശ്രമിക്കുക"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"കേടായ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> കേടായിരിക്കുന്നു. പരിഹരിക്കാൻ സ്‌പർശിക്കുക."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"ഈ <xliff:g id="NAME">%s</xliff:g> എന്നതിനെ ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് സ്പർശിക്കുക."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"വിവരങ്ങൾ നഷ്‌ടപ്പെടുന്നത് ഒഴിവാക്കാൻ നീക്കംചെയ്യുന്നതിനുമുമ്പ് <xliff:g id="NAME">%s</xliff:g> അൺ‌മൗണ്ടുചെയ്യുക"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> നീക്കംചെയ്‌തു; പുതിയതൊന്ന് ചേർക്കുക"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ഇപ്പോഴും <xliff:g id="NAME">%s</xliff:g> ഒഴിവാക്കപ്പെടുന്നു…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"നീക്കംചെയ്യരുത്"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"സജ്ജമാക്കുക"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"സജ്ജമാക്കുക"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"നിരസിക്കുക"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"അടുത്തറിയുക"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> കാണുന്നില്ല"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> എന്നതിലേക്ക് വിവരം നീക്കി"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"വിവരം നീക്കാനായില്ല"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"യഥാർത്ഥ ലൊക്കേഷനിൽ വിവരം ശേഷിക്കുന്നു"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"നീക്കംചെയ്‌തു"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ഇജക്റ്റുചെയ്തു"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"പരിശോധിക്കുന്നു…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"തയ്യാറാണ്"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"വായിക്കാൻ മാത്രമുള്ളത്"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"സുരക്ഷിതമല്ലാതെ നീക്കംചെയ്തു"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"കേടായി"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"പിന്തുണയില്ല"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ഇജക്റ്റുചെയ്യുന്നു…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"ഫോർമാറ്റുചെയ്യുന്നു…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"ഇട്ടിട്ടില്ല"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"പൊരുത്തമുള്ള പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"മീഡിയ ഔട്ട്പുട്ട് റൂട്ടുചെയ്യുക"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"മീഡിയ ഔട്ട്‌പുട്ടിനെ മറ്റ് ബാഹ്യ ഉപകരണങ്ങളിലേക്ക് റൂട്ടുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -1537,9 +1540,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS അഭ്യർത്ഥന, DIAL അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS അഭ്യർത്ഥന, USSD അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS അഭ്യർത്ഥന, പുതിയ SS അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB പെരിഫറൽ പോർട്ട്"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB പെരിഫറൽ പോർട്ട്"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതല്‍ ഓപ്ഷനുകള്‍"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

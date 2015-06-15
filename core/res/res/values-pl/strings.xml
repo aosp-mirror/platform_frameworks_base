@@ -174,8 +174,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Usunięto profil do pracy"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil do pracy został usunięty z powodu braku aplikacji administracyjnej."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Brakuje aplikacji administracyjnej profilu do pracy lub jest ona uszkodzona. Z tego powodu Twój profil do pracy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Twój profil do pracy nie jest już dostępny na tym urządzeniu."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Twoje urządzenie zostanie wyczyszczone"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacja administracyjna nie ma wszystkich składników lub jest uszkodzona i nie można jej użyć. Twoje urządzenie zostanie teraz wyczyszczone. Skontaktuj się ze swoim administratorem, aby uzyskać pomoc."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -190,18 +189,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Dzwonek wyłączony"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Dzwonek z wibracjami"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Dzwonek włączony"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Aktualizacja systemu Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Przygotowuję do aktualizacji…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Przetwarzam pakiet aktualizacji…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Uruchamiam ponownie…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Przywracanie danych fabrycznych"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Uruchamiam ponownie…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet zostanie wyłączony."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Telewizor zostanie wyłączony."</string>
@@ -238,14 +231,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostęp do kontaktów"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokalizacja"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do lokalizacji tego urządzenia"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Twoje informacje społecznościowe"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Bezpośredni dostęp do informacji o Twoich kontaktach i powiązaniach społecznościowych."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"przeglądanie SMS-ów i zarządzanie nimi"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłać i wyświetlać SMS-y"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"uzyskiwać dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Słownik użytkownika"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Odczytywanie lub zapisywanie słów w słowniku użytkownika."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Zakładki i historia"</string>
@@ -257,7 +251,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"nawiązywanie połączeń telefonicznych i zarządzanie nimi"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Czujniki"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"dostęp do danych z czujników i urządzeń do noszenia"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"uzyskiwać dostęp do informacji o podstawowych funkcjach Twojego organizmu i Twojej aktywności fizycznej"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobieranie zawartości okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włączenie czytania dotykiem"</string>
@@ -402,12 +396,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Pozwala aplikacji na uzyskanie listy kont zapisanych w tablecie. Może ona obejmować wszystkie konta utworzone przez zainstalowane aplikacje."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Pozwala aplikacji odczytywać listę kont zapisanych na telewizorze, która może zawierać konta utworzone przez zainstalowane aplikacje."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Pozwala aplikacji na uzyskanie listy kont zapisanych w telefonie. Może ona obejmować wszystkie konta utworzone przez zainstalowane aplikacje."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"tworzenie kont i ustawianie haseł"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Pozwala aplikacji na korzystanie z funkcji modułu uwierzytelniania konta usługi AccountManager, w tym funkcji tworzenia kont oraz pobierania i ustawiania ich haseł."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"dodawanie i usuwanie kont"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Pozwala aplikacji na wykonywanie takich operacji, jak dodawanie i usuwanie kont, a także usuwanie ich haseł."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"używanie kont na urządzeniu"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Pozwala aplikacji na żądanie tokenów uwierzytelniania."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"wyświetlanie połączeń sieciowych"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Pozwala aplikacji na dostęp do informacji o połączeniach sieciowych – np. o dostępnych i połączonych sieciach."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"pełny dostęp do sieci"</string>
@@ -468,8 +456,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pozwala aplikacji na modyfikowanie ustawień synchronizacji z kontem. Tego uprawnienia można użyć np. do włączenia synchronizacji z kontem aplikacji Ludzie."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"czytanie statystyk dotyczących synchronizowania"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pozwala aplikacji na czytanie statystyk synchronizacji konta, w tym historii zdarzeń synchronizacji oraz ilości zsynchronizowanych danych."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"zapisywanie subskrybowanych źródeł"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Pozwala aplikacji na zmianę obecnie zsynchronizowanych kanałów. Złośliwe aplikacje mogą zmienić zsynchronizowane kanały."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"odczytywanie terminów dodanych do słownika"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Pozwala aplikacji na odczytywanie wszelkich słów, nazw i wyrażeń zapisanych w słowniku użytkownika."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"dodawanie wyrazów do słownika zdefiniowanego przez użytkownika"</string>
@@ -557,8 +543,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Wyłącz funkcje blokady ekranu"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. niektórych funkcji bl. ekr."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Dom"</item>
     <item msgid="869923650527136615">"Komórka"</item>
@@ -744,6 +730,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Wzór rozpoczęty"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Wzór wyczyszczony"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Dodano komórkę."</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Wzór ukończony"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widżet %2$d z %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Dodaj widżet."</string>
@@ -1009,6 +997,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Zaloguj się do sieci"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Sieć Wi-Fi nie ma dostępu do internetu"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Kliknij, by zobaczyć opcje"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nie można połączyć się z siecią Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ma powolne połączenie internetowe."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Zezwolić na połączenie?"</string>
@@ -1105,15 +1095,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sprawdzanie w poszukiwaniu błędów"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Wykryto nowy nośnik: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Do przenoszenia zdjęć i multimediów"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Uszkodzony nośnik: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Nośnik <xliff:g id="NAME">%s</xliff:g> jest uszkodzony. Spróbuj go ponownie sformatować"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Nośnik <xliff:g id="NAME">%s</xliff:g> uszkodzony"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Nośnik <xliff:g id="NAME">%s</xliff:g> jest uszkodzony. Kliknij, by go naprawić."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Nośnik <xliff:g id="NAME">%s</xliff:g> nieobsługiwany"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"To urządzenie nie obsługuje tego nośnika <xliff:g id="NAME">%s</xliff:g>. Kliknij, by skonfigurować go w obsługiwanym formacie."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>: nieoczekiwane wyjęcie"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Odłącz nośnik <xliff:g id="NAME">%s</xliff:g> przed jego wyjęciem, by uniknąć utraty danych"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Wyjęto: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Wyjęto nośnik <xliff:g id="NAME">%s</xliff:g>. Włóż nowy"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Nadal wysuwam: <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Nie wyjmuj"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Skonfiguruj"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Skonfiguruj"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odłącz"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Przeglądaj"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Brak: <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1124,6 +1116,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dane przeniesione na: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nie udało się przenieść danych"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dane pozostały w oryginalnej lokalizacji"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Usunięto"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Odłączone"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Sprawdzam…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Gotowe"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Tylko do odczytu"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Usunięto nieprawidłowo"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Uszkodzone"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Nieobsługiwane"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Odłączam…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatuję…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Nie podłączono"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nie znaleziono pasujących działań."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Kierowanie wyjścia multimediów"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Pozwala aplikacji na kierowanie wyjściowych danych multimedialnych do innych urządzeń zewnętrznych."</string>
@@ -1571,9 +1574,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Żądanie SS zostało zmienione na żądanie DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Żądanie SS zostało zmienione na żądanie USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Żądanie SS zostało zmienione na nowe żądanie SS."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil do pracy"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port peryferyjny USB na urządzeniu z Androidem"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port peryferyjny USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Więcej opcji"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zamknij rozszerzony pasek"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>
