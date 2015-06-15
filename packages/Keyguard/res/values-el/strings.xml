@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Καμία υπηρεσία."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Κουμπί εναλλαγής μεθόδου εισόδου"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Λειτουργία πτήσης"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Απαιτείται μοτίβο κατά την επανεκκίνηση της συσκευής."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Απαιτείται PIN κατά την επανεκκίνηση της συσκευής."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Απαιτείται κωδικός πρόσβασης κατά την επανεκκίνηση της συσκευής."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Απαιτείται μοτίβο κατά την εναλλαγή προφίλ."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Απαιτείται PIN κατά την εναλλαγή προφίλ."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Απαιτείται κωδικός πρόσβασης κατά την εναλλαγή προφίλ."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε το μοτίβο.</item>
+      <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε το μοτίβο.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε τον αριθμό PIN.</item>
+      <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον αριθμό PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαίωση κωδικού πρόσβασης.</item>
+      <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαίωση κωδικού πρόσβασης.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Δεν αναγνωρίστηκε"</string>
 </resources>

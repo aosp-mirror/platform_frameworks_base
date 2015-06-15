@@ -108,5 +108,20 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"సేవ లేదు."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ఇన్‌పుట్ పద్ధతి మార్చే బటన్."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ఎయిర్‌ప్లైన్ మోడ్"</string>
+    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
+    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
+    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"గుర్తించలేదు"</string>
 </resources>
