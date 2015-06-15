@@ -73,8 +73,8 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                 : mController.isRotationLocked();
         final boolean userInitiated = arg != null ? ((UserBoolean) arg).userInitiated : false;
         state.visible = mController.isRotationLockAffordanceVisible();
-        if (state.value == rotationLocked) {
-            // No change, no need to update all the values.
+        if (state.value == rotationLocked && state.contentDescription != null) {
+            // No change and initialized, no need to update all the values.
             return;
         }
         state.value = rotationLocked;
