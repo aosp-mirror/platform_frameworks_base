@@ -28,7 +28,6 @@ import android.transition.TransitionSet;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -1005,13 +1004,20 @@ final class BackStackRecord extends FragmentTransaction implements
                 outFragment.getExitTransition());
     }
 
-    private static Transition getSharedElementTransition(Fragment inFragment, Fragment outFragment,
-            boolean isBack) {
+    private static TransitionSet getSharedElementTransition(Fragment inFragment,
+            Fragment outFragment, boolean isBack) {
         if (inFragment == null || outFragment == null) {
             return null;
         }
-        return cloneTransition(isBack ? outFragment.getSharedElementReturnTransition() :
-                inFragment.getSharedElementEnterTransition());
+        Transition transition = cloneTransition(isBack
+                ? outFragment.getSharedElementReturnTransition()
+                : inFragment.getSharedElementEnterTransition());
+        if (transition == null) {
+            return null;
+        }
+        TransitionSet transitionSet = new TransitionSet();
+        transitionSet.addTransition(transition);
+        return transitionSet;
     }
 
     private static ArrayList<View> captureExitingViews(Transition exitTransition,
@@ -1070,7 +1076,7 @@ final class BackStackRecord extends FragmentTransaction implements
      * capturing the final state of the Transition.</p>
      */
     private ArrayList<View> addTransitionTargets(final TransitionState state,
-            final Transition enterTransition, final Transition sharedElementTransition,
+            final Transition enterTransition, final TransitionSet sharedElementTransition,
             final Transition overallTransition, final View container,
             final Fragment inFragment, final Fragment outFragment,
             final ArrayList<View> hiddenFragmentViews, final boolean isBack,
@@ -1094,11 +1100,8 @@ final class BackStackRecord extends FragmentTransaction implements
                         if (sharedElementTransition != null) {
                             namedViews = mapSharedElementsIn(state, isBack, inFragment);
                             removeTargets(sharedElementTransition, sharedElementTargets);
-                            sharedElementTargets.clear();
-                            sharedElementTargets.add(state.nonExistentView);
-                            sharedElementTargets.addAll(namedViews.values());
-
-                            addTargets(sharedElementTransition, sharedElementTargets);
+                            setSharedElementTargets(sharedElementTransition,
+                                    state.nonExistentView, namedViews, sharedElementTargets);
 
                             setEpicenterIn(namedViews, state);
 
@@ -1241,8 +1244,8 @@ final class BackStackRecord extends FragmentTransaction implements
             Fragment outFragment = firstOutFragments.get(containerId);
 
             Transition enterTransition = getEnterTransition(inFragment, isBack);
-            Transition sharedElementTransition = getSharedElementTransition(inFragment, outFragment,
-                    isBack);
+            TransitionSet sharedElementTransition =
+                    getSharedElementTransition(inFragment, outFragment, isBack);
             Transition exitTransition = getExitTransition(outFragment, isBack);
 
             if (enterTransition == null && sharedElementTransition == null &&
@@ -1256,9 +1259,8 @@ final class BackStackRecord extends FragmentTransaction implements
             ArrayList<View> sharedElementTargets = new ArrayList<View>();
             if (sharedElementTransition != null) {
                 namedViews = remapSharedElements(state, outFragment, isBack);
-                sharedElementTargets.add(state.nonExistentView);
-                sharedElementTargets.addAll(namedViews.values());
-                addTargets(sharedElementTransition, sharedElementTargets);
+                setSharedElementTargets(sharedElementTransition,
+                        state.nonExistentView, namedViews, sharedElementTargets);
 
                 // Notify the start of the transition.
                 SharedElementCallback callback = isBack ?
@@ -1294,8 +1296,8 @@ final class BackStackRecord extends FragmentTransaction implements
             if (transition != null) {
                 ArrayList<View> hiddenFragments = new ArrayList<View>();
                 ArrayList<View> enteringViews = addTransitionTargets(state, enterTransition,
-                        sharedElementTransition, transition, sceneRoot, inFragment, outFragment,
-                        hiddenFragments, isBack, sharedElementTargets);
+                        sharedElementTransition, transition, sceneRoot, inFragment,
+                        outFragment, hiddenFragments, isBack, sharedElementTargets);
 
                 transition.setNameOverrides(state.nameOverrides);
                 // We want to exclude hidden views later, so we need a non-null list in the
@@ -1307,9 +1309,71 @@ final class BackStackRecord extends FragmentTransaction implements
                 // Remove the view targeting after the transition starts
                 removeTargetedViewsFromTransitions(sceneRoot, state.nonExistentView,
                         enterTransition, enteringViews, exitTransition, exitingViews,
-                        sharedElementTransition, sharedElementTargets, transition, hiddenFragments);
+                        sharedElementTransition, sharedElementTargets, transition,
+                        hiddenFragments);
             }
         }
+    }
+
+    /**
+     * Finds all children of the shared elements and sets the wrapping TransitionSet
+     * targets to point to those. It also limits transitions that have no targets to the
+     * specific shared elements. This allows developers to target child views of the
+     * shared elements specifically, but this doesn't happen by default.
+     */
+    private static void setSharedElementTargets(TransitionSet transition,
+            View nonExistentView, ArrayMap<String, View> namedViews,
+            ArrayList<View> sharedElementTargets) {
+        sharedElementTargets.clear();
+        sharedElementTargets.addAll(namedViews.values());
+
+        final List<View> views = transition.getTargets();
+        views.clear();
+        final int count = sharedElementTargets.size();
+        for (int i = 0; i < count; i++) {
+            final View view = sharedElementTargets.get(i);
+            bfsAddViewChildren(views, view);
+        }
+        sharedElementTargets.add(nonExistentView);
+        addTargets(transition, sharedElementTargets);
+    }
+
+    /**
+     * Uses a breadth-first scheme to add startView and all of its children to views.
+     * It won't add a child if it is already in views.
+     */
+    private static void bfsAddViewChildren(final List<View> views, final View startView) {
+        final int startIndex = views.size();
+        if (containedBeforeIndex(views, startView, startIndex)) {
+            return; // This child is already in the list, so all its children are also.
+        }
+        views.add(startView);
+        for (int index = startIndex; index < views.size(); index++) {
+            final View view = views.get(index);
+            if (view instanceof ViewGroup) {
+                ViewGroup viewGroup = (ViewGroup) view;
+                final int childCount =  viewGroup.getChildCount();
+                for (int childIndex = 0; childIndex < childCount; childIndex++) {
+                    final View child = viewGroup.getChildAt(childIndex);
+                    if (!containedBeforeIndex(views, child, startIndex)) {
+                        views.add(child);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Does a linear search through views for view, limited to maxIndex.
+     */
+    private static boolean containedBeforeIndex(final List<View> views, final View view,
+            final int maxIndex) {
+        for (int i = 0; i < maxIndex; i++) {
+            if (views.get(i) == view) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
