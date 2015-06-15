@@ -2053,8 +2053,10 @@ public class CameraDeviceImpl extends CameraDevice {
                 requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
 
         // Overwrite the capture intent to make sure a good value is set.
-        Surface[] surfaces = (Surface[])outputSurfaces.toArray();
-        if (outputSurfaces.size() == 1 && SurfaceUtils.isSurfaceForHwVideoEncoder(surfaces[0])) {
+        Iterator<Surface> iterator = outputSurfaces.iterator();
+        Surface firstSurface = iterator.next();
+        Surface secondSurface = null;
+        if (outputSurfaces.size() == 1 && SurfaceUtils.isSurfaceForHwVideoEncoder(firstSurface)) {
             singleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
                     CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
         } else {
@@ -2071,19 +2073,20 @@ public class CameraDeviceImpl extends CameraDevice {
                     requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
             doubleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
                     CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
-            doubleTargetRequestBuilder.addTarget(surfaces[0]);
-            doubleTargetRequestBuilder.addTarget(surfaces[1]);
+            doubleTargetRequestBuilder.addTarget(firstSurface);
+            secondSurface = iterator.next();
+            doubleTargetRequestBuilder.addTarget(secondSurface);
             doubleTargetRequestBuilder.setPartOfCHSRequestList(/*partOfCHSList*/true);
             // Make sure singleTargetRequestBuilder contains only recording surface for
             // preview + recording case.
-            Surface recordingSurface = surfaces[0];
+            Surface recordingSurface = firstSurface;
             if (!SurfaceUtils.isSurfaceForHwVideoEncoder(recordingSurface)) {
-                recordingSurface = surfaces[1];
+                recordingSurface = secondSurface;
             }
             singleTargetRequestBuilder.addTarget(recordingSurface);
         } else {
             // Single output case: either recording or preview.
-            singleTargetRequestBuilder.addTarget(surfaces[0]);
+            singleTargetRequestBuilder.addTarget(firstSurface);
         }
 
         // Generate the final request list.
