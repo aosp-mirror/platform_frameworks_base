@@ -165,7 +165,7 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * The text associated with this span is a series of characters that have to
-     * be read verbatim. The engine will attempt to ready out any character like
+     * be read verbatim. The engine will attempt to read out any character like
      * punctuation but excluding whitespace. {@link #ARG_VERBATIM} is required.
      * Also accepts the arguments {@link #ARG_GENDER},
      * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
