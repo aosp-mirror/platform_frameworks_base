@@ -239,8 +239,8 @@ public class QSDetailItems extends FrameLayout {
     public static class Item {
         public int icon;
         public Drawable overlay;
-        public String line1;
-        public String line2;
+        public CharSequence line1;
+        public CharSequence line2;
         public Object tag;
         public boolean canDisconnect;
     }
