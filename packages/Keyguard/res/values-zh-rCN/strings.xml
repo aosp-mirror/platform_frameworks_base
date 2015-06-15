@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"输入密码以解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"输入PIN码进行解锁"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN码有误。"</string>
-    <string name="keyguard_charged" msgid="3272223906073492454">"充电完成"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"已充满"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"正在充电"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"请连接充电器。"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"按“菜单”键解锁。"</string>
@@ -76,8 +76,8 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您已经<xliff:g id="NUMBER_0">%d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%d</xliff:g>秒后重试。"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地输入了密码。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，平板电脑将会被重置，这会删除其中的所有数据。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，手机将会被重置，这会删除其中的所有数据。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。平板电脑将会被重置，这会删除其中的所有数据。"</string>
@@ -90,8 +90,8 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM卡PIN码不正确，您现在必须联系运营商为您解锁设备。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM 卡 PIN 码不正确，您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
@@ -108,5 +108,20 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"无服务。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"输入法切换按钮。"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"飞行模式"</string>
+    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
+    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
+    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"无法识别"</string>
 </resources>

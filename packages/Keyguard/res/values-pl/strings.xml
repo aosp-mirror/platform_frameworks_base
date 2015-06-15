@@ -75,9 +75,9 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponownie podaj poprawny kod PUK. Nieudane próby spowodują trwałe wyłączenie karty SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kody PIN nie pasują"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Zbyt wiele prób narysowania wzoru"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowy PIN. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Wpisałeś nieprawidłowy kod PIN <xliff:g id="NUMBER_0">%d</xliff:g> razy. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowe hasło. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> razy narysowałeś nieprawidłowy wzór odblokowania. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Narysowałeś nieprawidłowy wzór odblokowania <xliff:g id="NUMBER_0">%d</xliff:g> razy. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Próbowałeś <xliff:g id="NUMBER_0">%d</xliff:g> razy nieprawidłowo odblokować tablet. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach tablet zostanie zresetowany, co spowoduje skasowanie z niego wszystkich danych."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Próbowałeś <xliff:g id="NUMBER_0">%d</xliff:g> razy nieprawidłowo odblokować telefon. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon zostanie zresetowany, co spowoduje skasowanie z niego wszystkich danych."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Próbowałeś <xliff:g id="NUMBER">%d</xliff:g> razy nieprawidłowo odblokować tablet. Zostanie on zresetowany, co spowoduje skasowanie z niego wszystkich danych."</string>
@@ -112,5 +112,29 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Brak usługi."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Przycisk przełączania metody wprowadzania."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Tryb samolotowy"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Po ponownym uruchomieniu urządzenia wymagany jest wzór."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Po ponownym uruchomieniu urządzenia wymagany jest kod PIN."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Po ponownym uruchomieniu urządzenia wymagane jest hasło."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po przełączeniu profili wymagany jest wzór."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po przełączeniu profili wymagany jest kod PIN."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po przełączeniu profili wymagane jest hasło."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="few">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź wzór.</item>
+      <item quantity="many">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź wzór.</item>
+      <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź wzór.</item>
+      <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź wzór.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="few">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź kod PIN.</item>
+      <item quantity="many">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź kod PIN.</item>
+      <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź kod PIN.</item>
+      <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź kod PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="few">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź hasło.</item>
+      <item quantity="many">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź hasło.</item>
+      <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź hasło.</item>
+      <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź hasło.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nie rozpoznano"</string>
 </resources>

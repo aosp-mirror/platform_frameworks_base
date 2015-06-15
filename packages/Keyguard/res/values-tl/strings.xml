@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Walang serbisyo."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ilipat ang button na pamamaraan ng pag-input."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Airplane mode"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Kinakailangan ang pattern kapag ni-restart mo ang device."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Kinakailangan ang PIN kapag ni-restart mo ang device."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Kinakailangan ang password kapag ni-restart mo ang device."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Kinakailangan ang pattern kapag lumipat ka ng mga profile."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Kinakailangan ang PIN kapag lumipat ka ng mga profile."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Kinakailangan ang password kapag lumipat ka ng mga profile."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> oras.. Kumpirmahin ang pattern.</item>
+      <item quantity="other">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na oras. Kumpirmahin ang pattern.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> oras. Kumpirmahin ang PIN.</item>
+      <item quantity="other">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na oras. Kumpirmahin ang PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> oras. Kumpirmahin ang password.</item>
+      <item quantity="other">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na oras. Kumpirmahin ang password.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Hindi nakilala"</string>
 </resources>

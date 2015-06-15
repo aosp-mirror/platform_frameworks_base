@@ -75,8 +75,8 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kod PIN tidak sepadan"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Anda telah salah membuka kunci tablet sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang gagal, tablet ini akan ditetapkan semula sekali gus memadam semua data."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Anda telah salah membuka kunci telefon sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang gagal, telefon ini akan ditetapkan semula sekali gus memadam semua data."</string>
@@ -108,5 +108,20 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Tiada perkhidmatan."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Butang tukar kaedah input."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Mod Pesawat"</string>
+    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
+    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
+    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Tidak dicam"</string>
 </resources>

@@ -110,5 +110,26 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Fără serviciu."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Buton pentru comutarea metodei de introducere."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Mod Avion"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Când reporniți dispozitivul este necesar să introduceți modelul."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Când reporniți dispozitivul este necesar să introduceți codul PIN."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Când reporniți dispozitivul este necesar să introduceți parola."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Când comutați între profiluri este necesar să introduceți modelul."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Când comutați între profiluri este necesar să introduceți codul PIN."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Când comutați între profiluri este necesar să introduceți parola."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați modelul.</item>
+      <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați modelul.</item>
+      <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați modelul.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați codul PIN.</item>
+      <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați codul PIN.</item>
+      <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați codul PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați parola.</item>
+      <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați parola.</item>
+      <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați parola.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nu este recunoscută"</string>
 </resources>

@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"සේවාව නැත."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ආදාන ක්‍රමය මාරු කිරීමේ බොත්තම."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ගුවන්යානා ප්‍රකාරය"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ඔබ උපාංගය නැවත ආරම්භ කරන විට රටාව අවශ්‍යයි."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ඔබ උපාංගය නැවත ආරම්භ කරන විට PIN අංකය අවශ්‍යයි."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ඔබ උපාංගය නැවත ආරම්භ කරන විට මුරපදය අවශ්‍යයි."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ඔබ පැතිකඩවල් මාරු කරන විට රටාව අවශ්‍යයි."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ඔබ පැතිකඩවල් මාරු කරන විට PIN අංකය අවශ්‍යයි."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ඔබ පැතිකඩවල් මාරු කරන විට මුරපදය අවශ්‍යයි."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. රටාව තහවුරු කරන්න.</item>
+      <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. රටාව තහවුරු කරන්න.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. PIN අංකය තහවුරු කරන්න.</item>
+      <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. PIN අංකය තහවුරු කරන්න.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
+      <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"අඳුනාගත නොහැක"</string>
 </resources>
