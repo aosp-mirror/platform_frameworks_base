@@ -1109,13 +1109,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The correction coefficients to correct for this camera device's
      * radial and tangential lens distortion.</p>
-     * <p>Three radial distortion coefficients <code>[kappa_1, kappa_2,
+     * <p>Four radial distortion coefficients <code>[kappa_0, kappa_1, kappa_2,
      * kappa_3]</code> and two tangential distortion coefficients
      * <code>[kappa_4, kappa_5]</code> that can be used to correct the
      * lens's geometric distortion with the mapping equations:</p>
-     * <pre><code> x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+     * <pre><code> x_c = x_i * ( kappa_0 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
      *        kappa_4 * (2 * x_i * y_i) + kappa_5 * ( r^2 + 2 * x_i^2 )
-     *  y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+     *  y_c = y_i * ( kappa_0 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
      *        kappa_5 * (2 * x_i * y_i) + kappa_4 * ( r^2 + 2 * y_i^2 )
      * </code></pre>
      * <p>Here, <code>[x_c, y_c]</code> are the coordinates to sample in the
