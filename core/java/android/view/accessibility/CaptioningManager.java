@@ -52,11 +52,9 @@ public class CaptioningManager {
     /** Default scaling value for caption fonts. */
     private static final float DEFAULT_FONT_SCALE = 1;
 
-    private final ArrayList<CaptioningChangeListener>
-            mListeners = new ArrayList<CaptioningChangeListener>();
-    private final Handler mHandler = new Handler();
-
+    private final ArrayList<CaptioningChangeListener> mListeners = new ArrayList<>();
     private final ContentResolver mContentResolver;
+    private final ContentObserver mContentObserver;
 
     /**
      * Creates a new captioning manager for the specified context.
@@ -65,6 +63,9 @@ public class CaptioningManager {
      */
     public CaptioningManager(Context context) {
         mContentResolver = context.getContentResolver();
+
+        final Handler handler = new Handler(context.getMainLooper());
+        mContentObserver = new MyContentObserver(handler);
     }
 
     /**
@@ -220,7 +221,15 @@ public class CaptioningManager {
         }
     }
 
-    private final ContentObserver mContentObserver = new ContentObserver(mHandler) {
+    private class MyContentObserver extends ContentObserver {
+        private final Handler mHandler;
+
+        public MyContentObserver(Handler handler) {
+            super(handler);
+
+            mHandler = handler;
+        }
+
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             final String uriPath = uri.getPath();
