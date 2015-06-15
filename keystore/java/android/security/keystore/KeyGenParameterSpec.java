@@ -59,6 +59,14 @@ import javax.security.auth.x500.X500Principal;
  * of the certificate can be customized in this spec. The self-signed certificate may be replaced at
  * a later time by a certificate signed by a Certificate Authority (CA).
  *
+ * <p>NOTE: If a private key is not authorized to sign the self-signed certificate, then the
+ * certificate will be created with an invalid signature which will not verify. Such a certificate
+ * is still useful because it provides access to the public key. To generate a valid
+ * signature for the certificate the key needs to be authorized for
+ * {@link KeyProperties#PURPOSE_SIGN}, a suitable digest or {@link KeyProperties#DIGEST_NONE}, and
+ * {@link KeyProperties#SIGNATURE_PADDING_RSA_PKCS1} or
+ * {@link KeyProperties#ENCRYPTION_PADDING_NONE}.
+ *
  * <p>NOTE: The key material of the generated symmetric and private keys is not accessible. The key
  * material of the public keys is accessible.
  *
