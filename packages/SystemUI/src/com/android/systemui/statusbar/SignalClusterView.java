@@ -114,14 +114,21 @@ public class SignalClusterView
             return;
         }
         ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
-        mBlockAirplane = blockList.contains(SLOT_AIRPLANE);
-        mBlockMobile = blockList.contains(SLOT_MOBILE);
-        mBlockWifi = blockList.contains(SLOT_WIFI);
-        mBlockEthernet = blockList.contains(SLOT_ETHERNET);
+        boolean blockAirplane = blockList.contains(SLOT_AIRPLANE);
+        boolean blockMobile = blockList.contains(SLOT_MOBILE);
+        boolean blockWifi = blockList.contains(SLOT_WIFI);
+        boolean blockEthernet = blockList.contains(SLOT_ETHERNET);
 
-        // Re-register to get new callbacks.
-        mNC.removeSignalCallback(SignalClusterView.this);
-        mNC.addSignalCallback(SignalClusterView.this);
+        if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
+                || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi) {
+            mBlockAirplane = blockAirplane;
+            mBlockMobile = blockMobile;
+            mBlockEthernet = blockEthernet;
+            mBlockWifi = blockWifi;
+            // Re-register to get new callbacks.
+            mNC.removeSignalCallback(this);
+            mNC.addSignalCallback(this);
+        }
     }
 
     public void setNetworkController(NetworkControllerImpl nc) {
