@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nincs SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth megosztása."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Repülőgép üzemmód."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Szolgáltatói hálózat váltása."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akkumulátor <xliff:g id="NUMBER">%d</xliff:g> százalék."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Rendszerbeállítások"</string>
@@ -319,6 +321,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"A telefonhoz csúsztasson az ikonról"</string>
     <string name="voice_hint" msgid="8939888732119726665">"A hangsegéd eléréséhez csúsztassa ujját az ikonról"</string>
     <string name="camera_hint" msgid="7939688436797157483">"A fényképezőhöz csúsztasson az ikonról"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Teljes némítás"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Csak prioritásos"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Csak riasztások"</string>
@@ -344,7 +348,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Újrakezdés"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Igen, folytatom"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Vendég felhasználó"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Vendég eltávolítása az alkalmazások és adatok törléséhez"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"VENDÉG ELTÁVOLÍTÁSA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Új felhasználó hozzáadása?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Ha új felhasználót ad hozzá, az illetőnek be kell állítania saját tárterületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára."</string>
@@ -366,19 +371,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN letiltása"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-kapcsolat bontása"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Az eszközt a következő felügyeli:<xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nRendszergazdája ellenőrizheti és módosíthatja a beállításokat, vállalati hozzáféréseket, alkalmazásokat, az eszközéhez társított adatokat és eszköze helyadatait. További tájékoztatásért forduljon rendszergazdájához."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Engedélyezte egy alkalmazásnak, hogy VPN-kapcsolatot létesítsen.\n\nEz az alkalmazás (az e-mailekre, alkalmazásokra és a webhelyekre is kiterjedően) figyelemmel kísérheti az Ön eszközét és hálózati tevékenységét."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nRendszergazdája figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\n Ön egy VPN-hez is kapcsolódik, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi tájékoztatásért forduljon rendszergazdájához."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Munkaprofilját a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda (az e-mailekre, alkalmazásokra és a webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához.\n\nÖn egy VPN-hez is csatlakozik, amely szintén figyelemmel kísérheti hálózati tevékenységét."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Csatlakoztatta a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, amely figyelheti hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Csatlakoztatta a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, amely figyelheti személyes hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> felügyeli. Csatlakoztatva van hozzá a(z) <xliff:g id="APPLICATION">%2$s</xliff:g> alkalmazás, amely figyelheti az Ön hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket.\n\nTovábbi információért forduljon a rendszergazdájához."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> felügyeli. Csatlakoztatva van hozzá a(z) <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> alkalmazás, amely figyelheti az Ön hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket.\n\nCsatlakoztatta továbbá a(z) <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> alkalmazást, amely szintén figyelemmel kísérheti személyes hálózati tevékenységét."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\nÖn a következőhöz csatlakozik: <xliff:g id="APPLICATION">%2$s</xliff:g>, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Az eszköz addig zárolva marad, amíg kézileg fel nem oldja"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Gyorsabban megkaphatja az értesítéseket"</string>
@@ -404,7 +404,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Elutasítás"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás kezeli a hangerőt"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Érintse meg az eredeti érték visszaállításához."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Kezelőfelület-hangoló"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"A beépített akkumulátor töltöttségi szintjének megjelenítése"</string>
@@ -424,8 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Nem fogja hallani az ébresztést ekkor: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"ekkor: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"ezen a napon: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Gyorsbeállítások – <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

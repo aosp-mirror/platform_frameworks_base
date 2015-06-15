@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Tidak ada SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Penambatan bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode pesawat."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Tidak ada kartu SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Jaringan operator berubah."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterai <xliff:g id="NUMBER">%d</xliff:g> persen."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Setelan sistem."</string>
@@ -319,6 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Gesek dari ikon untuk telepon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Gesek dari ikon untuk mengaktifkan bantuan suara"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Gesek dari ikon untuk kamera"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Senyap total. Tindakan ini juga akan mensenyapkan pembaca layar."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Senyap total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Hanya untuk prioritas"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Hanya alarm"</string>
@@ -328,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Mengisi daya (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hingga penuh)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Beralih pengguna"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Ganti pengguna, pengguna saat ini <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Pengguna saat ini <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Tampilkan profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Tambahkan pengguna"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Pengguna baru"</string>
@@ -344,7 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Mulai"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ya, lanjutkan"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Pengguna tamu"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Hapus tamu untuk menghilangkan aplikasi dan data"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"Untuk menghapus aplikasi dan data, hapus pengguna tamu"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"HAPUS TAMU"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\n1Pengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
@@ -366,19 +367,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Nonaktifkan VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Putuskan sambungan VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Perangkat dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau dan mengelola setelan, akses perusahaan, aplikasi, data terkait perangkat, dan informasi lokasi perangkat. Untuk informasi selengkapnya, hubungi administrator."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Anda memberikan izin kepada aplikasi untuk menyiapkan sambungan VPN.\n\nAplikasi ini ini dapat memantau aktivitas perangkat dan jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Perangkat dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau dan mengelola setelan, akses perusahaan, aplikasi, data terkait perangkat, dan informasi lokasi perangkat.\n\nAnda tersambung ke VPN yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi administrator."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Profil kerja dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi administrator.\n\nAnda juga tersambung ke VPN yang dapat memantau aktivitas jaringan."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Anda tersambung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Anda tersambung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi, termasuk email, aplikasi, dan situs web."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Profil kerja dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g> dan tersambung ke <xliff:g id="APPLICATION">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan kerja, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi administrator."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Profil kerja dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g> dan tersambung ke <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan kerja, termasuk email, aplikasi, dan situs web.\n\nAnda juga tersambung ke <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Perangkat dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau dan mengelola setelan, akses perusahaan, aplikasi, data terkait perangkat, dan informasi lokasi perangkat.\n\nAnda tersambung ke <xliff:g id="APPLICATION">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi administrator."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Perangkat akan tetap terkunci hingga Anda membukanya secara manual"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Dapatkan pemberitahuan lebih cepat"</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tolak"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> adalah dialog volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Sentuh untuk memulihkan aslinya."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Anda menggunakan profil kerja"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Penyetel Antarmuka Sistem"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Tampilkan persentase baterai yang tersemat"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Tampilkan persentase tingkat baterai dalam ikon bilah status saat tidak mengisi daya"</string>
@@ -424,8 +419,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Anda tidak akan mendengar alarm berikutnya <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"pukul <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"pada <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Setelan Cepat, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil kerja"</string>
 </resources>

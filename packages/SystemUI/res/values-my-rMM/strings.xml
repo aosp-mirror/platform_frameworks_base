@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ဆင်းကဒ်မရှိပါ။"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ဝန်ဆောင်မှုဌာန ကွန်ယက် ပြောင်းလဲနေစဉ်။"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ဘတ္တရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"စနစ်အပြင်အဆင်များ"</string>
@@ -319,6 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"ဖုန်းအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"အသံအကူအညီအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ကင်မရာအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"အသံ လုံးဝ တိတ်ထားပါ။ ဤနည်းဖြင့် ဖန်မျက်နှာပြင်ဖတ်ရှုဆော့ဖ်ဝဲ အသံတိတ်သွားမည်။"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"လုံးဝ တိတ်ဆိတ်ခြင်း"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ဦးစားပေးများသာ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"နှိုးစက်များသာ"</string>
@@ -328,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> အပြည့် အထိ) အားသွင်းနေ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"အသုံးပြုသူကို ပြောင်းရန်၊ လက်ရှိ အသုံးပြုသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"လတ်တလော သုံးစွဲသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ပရိုဖိုင်ကို ပြရန်"</string>
     <string name="user_add_user" msgid="5110251524486079492">"သုံးသူ ထပ်ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"အသုံးပြုသူ အသစ်"</string>
@@ -344,7 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"အစမှ ပြန်စပါ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ဟုတ်ကဲ့၊ ဆက်လုပ်ပါ"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"ဧည့်သည် အသုံးပြုသူ"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"အပ်များနှင့် ဒေတာများဖျက်ရန် ဧည့်သည်များကို ဖယ်ရှားမည်"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"App များနှင့် ဒေတာအား ဖျက်ရန်၊ တခဏသုံးစွဲသူအား ဖယ်ရှားပါ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ဧည့်သည်ကို ဖယ်ထုတ်မည်"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူ အသစ်ကို ထည့်ရမလား?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် appများကို မွမ်းမံပေးနိုင်သည်။"</string>
@@ -366,19 +367,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ကို ပိတ်ထားရန်"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ကို အဆက်ဖြတ်ရန်"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"သင့်စက်ကိရိယာကို<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nမှစီမံခန့်ခွဲထားပါသည်။သင့်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊စုပေါင်းဝင်ရောက်ခွင့်၊အက်ပလီကေးရှင်းများ၊သင့်စက်ကိရိယာနှင့်ဆက်နွယ်နေသောအချက်အလက်နှင့်သင့်စက်ကိရိယာ ရဲ့နေရာအချက်အလက်များကိုကြီးကြပ်စောင့်ကြည့်နိုင်ပါသည်။အသေးစိတ်သိရှိလိုပါကသင်၏စီမံခန့်ခွဲသူကိုဆက်သွယ်ပါ။"</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN ချိတ်ဆက်မှုပြုလုပ်ရန် အပ်ဖ်ကို သင်ခွင့်ပြုလိုက်သည်။ \n\n ဤအပ်ဖ်သည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"သင့်စက်ကိရိယာကို<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n \n မှစီမံခန့်ခွဲထားပါသည်။သင့်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊စုပေါင်းဝင်ရောက်ခွင့်၊အက်ပလီကေးရှင်းများ၊သင့်စက်ကိရိယာနှင့်ဆက်နွယ်နေသောအချက်အလက်နှင့်သင့်စက်ကိရိယာ ရဲ့နေရာအချက်အလက်များကိုကြီးကြပ်စောင့်ကြည့်နိုင်ပါသည်။ \n\n အီးမေးလ်များ၊အက်ပလီကေးရှင်းများနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင်သင့်ကွန်ယက်လုပ်ဆောင်ချက်ကိုစောင့်ကြည့်နိုင်သည့် VPN ကိုချိတ်ဆက်ထားပြီဖြစ် သည်။\n\n အသေးစိတ်သိရှိလိုပါကသင်၏စီမံခန့်ခွဲသူကိုဆက်သွယ်ပါ။"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"သင့်အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g>မှ စီမံခန့်ခွဲပါသည်။ \n\nသင့်စီမံခန့်ခွဲသူသည် အီးမေးလ်များ၊ အပ်ဖ်များ၊ နှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\nပိုမိုသော သတင်းအချက်အလက်အတွက်၊ သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။ \n\nသင်သည် VPN သို့လည်းဆက်သွယ်ထားပြီး၊ ၎င်းသည် သင့်ကွန်ရက်လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်ပါသည်။"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးများ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လှုပ်ရှားမှုများကို စောင့်ကြည့်နိုင်သည်။"</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"သင့်အလုပ် ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\nနောက်ထပ်အချက်အလက်များအတွက်၊ သင့်ကြီးကြပ်သူကို ဆက်သွယ်ပါ။"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"သင့်အလုပ် ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\n သင်သည်<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ကိုလည်းချိတ်ဆက်ထားသည်၊ ၎င်းသည် သင့်ကိုယ်ရေးကိုယ်တာ ကွန်ရက် လှုပ်ရှားမှုများကို စောင့်ကြည့်နိုင်သည်။"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"သင့်စက်ကိရိယာကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲပါသည်။ \n\n သင်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊ စုပေါင်းဝင်ရောက်ခွင့်၊ အပ်ဖ်များ၊ သင့်ကိရိယာနှင့် သက်ဆိုင်သော ဒေတာ၊ နှင့် သင့်ကိရိယာ၏ တည်နေရာအချိက်အလက်များကို စောင့်ကြည့်ပြီး စီမံခန့်ခွဲနိုင်သည်။ \n\nသင်သည် <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်းများ၊ အပ်ဖ်များ၊ နှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\nပိုမိုသော သတင်းအချက်အလက်အတွက်၊ သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ငြင်းပယ်သည်"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အသံဒိုင်ယာလော့ခ်ဖြစ်သည်"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"မူရင်းအားပြန်လည်သိမ်းဆည်းရန် ထိပါ။"</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"သင်သည် အလုပ်ပရိုဖိုင်းအား သုံးနေသည်"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"မြုတ်ထားသည့် ဘတ်ထရီ ရာခိုင်နှုန်းကို ပြပါ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"အားမသွင်းနေစဉ်တွင် ဘတ်ထရီအဆင့် ရာခိုင်နှုန်းကို အခြေနေပြဘား အိုင်ကွန်တွင် ပြပါ"</string>
@@ -424,8 +419,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g> ၌သင့်နောက်ထပ် နှိုးစက်ကို ကြားမည်မဟုတ်ပါ"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> ၌"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"အမြန်ချိန်ညှိခြင်း၊ <xliff:g id="TITLE">%s</xliff:g>။"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ဟော့စပေါ့"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"အလုပ် ပရိုဖိုင်"</string>
 </resources>
