@@ -28319,30 +28319,6 @@ package android.sax {
 
 package android.security {
 
-  public class EcIesParameterSpec implements java.security.spec.AlgorithmParameterSpec {
-    method public int getDemCipherKeySize();
-    method public java.lang.String getDemCipherTransformation();
-    method public java.lang.String getDemMacAlgorithm();
-    method public int getDemMacKeySize();
-    method public java.lang.String getKemKdfAlgorithm();
-    method public int getKemPointFormat();
-    field public static final android.security.EcIesParameterSpec DEFAULT;
-    field public static final int POINT_FORMAT_COMPRESSED = 1; // 0x1
-    field public static final int POINT_FORMAT_UNCOMPRESSED = 0; // 0x0
-    field public static final int POINT_FORMAT_UNSPECIFIED = -1; // 0xffffffff
-  }
-
-  public static class EcIesParameterSpec.Builder {
-    ctor public EcIesParameterSpec.Builder();
-    method public android.security.EcIesParameterSpec build();
-    method public android.security.EcIesParameterSpec.Builder setDemCipherKeySize(int);
-    method public android.security.EcIesParameterSpec.Builder setDemCipherTransformation(java.lang.String);
-    method public android.security.EcIesParameterSpec.Builder setDemMacAlgorithm(java.lang.String);
-    method public android.security.EcIesParameterSpec.Builder setDemMacKeySize(int);
-    method public android.security.EcIesParameterSpec.Builder setKemKdfAlgorithm(java.lang.String);
-    method public android.security.EcIesParameterSpec.Builder setKemPointFormat(int);
-  }
-
   public final class KeyChain {
     ctor public KeyChain();
     method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String);
