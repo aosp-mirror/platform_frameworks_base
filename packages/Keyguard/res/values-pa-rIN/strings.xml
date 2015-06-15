@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ਕੋਈ ਸੇਵਾ ਨਹੀਂ।"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ਇਨਪੁਟ ਵਿਧੀ ਬਟਨ ਸਵਿਚ ਕਰੋ।"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ਏਅਰਪਲੇਨ ਮੋਡ"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ਜਦੋਂ ਤੁਸੀਂ ਡਿਵਾਈਸ ਨੂੰ ਰੀਸਟਾਰਟ ਕਰਦੇ ਹੋ ਤਾਂ ਪੈਟਰਨ ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ਜਦੋਂ ਤੁਸੀਂ ਡਿਵਾਈਸ ਨੂੰ ਰੀਸਟਾਰਟ ਕਰਦੇ ਹੋ ਤਾਂ PIN  ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ਜਦੋਂ ਤੁਸੀਂ ਡਿਵਾਈਸ ਨੂੰ ਰੀਸਟਾਰਟ ਕਰਦੇ ਹੋ ਤਾਂ ਪਾਸਵਰਡ ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ਜਦੋਂ ਤੁਸੀਂ ਪ੍ਰੋਫਾਈਲਾਂ ਸਵਿਚ ਕਰਦੇ ਹੋ ਤਾਂ ਪੈਟਰਨ ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ਜਦੋਂ ਤੁਸੀਂ ਪ੍ਰੋਫਾਈਲਾਂ ਸਵਿਚ ਕਰਦੇ ਹੋ ਤਾਂ PIN ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ਜਦੋਂ ਤੁਸੀਂ ਪ੍ਰੋਫਾਈਲਾਂ ਸਵਿਚ ਕਰਦੇ ਹੋ ਤਾਂ ਪਾਸਵਰਡ ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪੈਟਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
+      <item quantity="other">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪੈਟਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। PIN ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
+      <item quantity="other">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। PIN ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</item>
+      <item quantity="other">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
 </resources>

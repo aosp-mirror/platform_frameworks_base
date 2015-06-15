@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sem serviço."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alternar botão de método de introdução."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo de avião"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"É necessária a sequência quando reinicia o dispositivo."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"É necessário o PIN quando reinicia o dispositivo."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"É necessária a palavra-passe quando reinicia o dispositivo."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"É necessária a sequência quando muda de perfil."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"É necessário o PIN quando muda de perfil."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"É necessária a palavra-passe quando muda de perfil."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme a sequência.</item>
+      <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme a sequência.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme o PIN.</item>
+      <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme o PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme a palavra-passe.</item>
+      <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme a palavra-passe.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Não reconhecido"</string>
 </resources>

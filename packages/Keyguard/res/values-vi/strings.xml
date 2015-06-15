@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Không có dịch vụ."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Nút chuyển phương thức nhập."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Chế độ trên máy bay"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Yêu cầu hình khi bạn khởi động lại thiết bị."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Yêu cầu mã PIN khi bạn khởi động lại thiết bị."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Yêu cầu mật khẩu khi bạn khởi động lại thiết bị."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Yêu cầu hình khi bạn chuyển đổi hồ sơ."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Yêu cầu mã PIN khi bạn chuyển đổi hồ sơ."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Yêu cầu mật khẩu khi bạn chuyển đổi hồ sơ."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận hình.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận hình.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mã PIN.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mã PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Không nhận dạng được"</string>
 </resources>

@@ -112,5 +112,29 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Brak usługi."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Przycisk przełączania metody wprowadzania."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Tryb samolotowy"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Po ponownym uruchomieniu urządzenia wymagany jest wzór."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Po ponownym uruchomieniu urządzenia wymagany jest kod PIN."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Po ponownym uruchomieniu urządzenia wymagane jest hasło."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po przełączeniu profili wymagany jest wzór."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po przełączeniu profili wymagany jest kod PIN."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po przełączeniu profili wymagane jest hasło."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="few">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź wzór.</item>
+      <item quantity="many">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź wzór.</item>
+      <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź wzór.</item>
+      <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź wzór.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="few">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź kod PIN.</item>
+      <item quantity="many">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź kod PIN.</item>
+      <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź kod PIN.</item>
+      <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź kod PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="few">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź hasło.</item>
+      <item quantity="many">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godzin. Potwierdź hasło.</item>
+      <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź hasło.</item>
+      <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź hasło.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nie rozpoznano"</string>
 </resources>

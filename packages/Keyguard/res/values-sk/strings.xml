@@ -112,5 +112,29 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Žiadny signál"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačidlo prepnutia metódy vstupu."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Režim v lietadle"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Pri reštartovaní zariadenia sa vyžaduje bezpečnostný vzor."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Pri reštartovaní zariadenia sa vyžaduje kód PIN."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Pri reštartovaní zariadenia sa vyžaduje heslo."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po prepnutí profilov sa vyžaduje bezpečnostný vzor."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po prepnutí profilov sa vyžaduje kód PIN."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po prepnutí profilov sa vyžaduje heslo."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte vzor.</item>
+      <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte vzor.</item>
+      <item quantity="other">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodín. Potvrďte vzor.</item>
+      <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte vzor.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte kód PIN.</item>
+      <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte kód PIN.</item>
+      <item quantity="other">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodín. Potvrďte kód PIN.</item>
+      <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte kód PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte heslo.</item>
+      <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte heslo.</item>
+      <item quantity="other">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodín. Potvrďte heslo.</item>
+      <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte heslo.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nebol rozpoznaný"</string>
 </resources>
