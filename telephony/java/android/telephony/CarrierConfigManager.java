@@ -84,7 +84,7 @@ public class CarrierConfigManager {
      * from config.xml under apps/Contacts.
      */
     public static final String
-            KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL = "key_enable_dialer_vibration_bool";
+            KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL = "enable_dialer_vibration_bool";
 
     /** Flag indicating if dtmf tone type is enabled */
     public static final String KEY_DTMF_TYPE_ENABLED_BOOL = "dtmf_type_enabled_bool";
@@ -190,6 +190,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_VOLTE_AVAILABLE_BOOL = "carrier_volte_available_bool";
 
+    /**
+     * Flag specifying whether WFC over IMS should be available for carrier: independent of
+     * carrier provisioning. If false: hard disabled. If true: then depends on carrier
+     * provisioning, availability etc.
+     */
+    public static final String KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL = "carrier_wfc_ims_available_bool";
+
     /** Flag specifying whether VoLTE availability is based on provisioning. */
     public static final String KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
@@ -204,6 +211,13 @@ public class CarrierConfigManager {
      * assumption for phone type (GSM) should be used.
      */
     public static final String KEY_VOLTE_REPLACEMENT_RAT_INT = "volte_replacement_rat_int";
+
+    /**
+     * The default sim call manager to use when the default dialer doesn't implement one. A sim call
+     * manager can control and route outgoing and incoming phone calls, even if they're placed
+     * using another connection service (PSTN, for example).
+     */
+    public static final String KEY_DEFAULT_SIM_CALL_MANAGER_STRING = "default_sim_call_manager_string";
 
     /* The following 3 fields are related to carrier visual voicemail. */
 
@@ -283,6 +297,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_AUTO_RETRY_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
@@ -305,6 +320,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_BOOL, false);
         sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
+        sDefaults.putString(KEY_DEFAULT_SIM_CALL_MANAGER_STRING, "");
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
         sDefaults.putInt(KEY_VVM_PORT_NUMBER_INT, 0);
         sDefaults.putString(KEY_VVM_TYPE_STRING, "");
