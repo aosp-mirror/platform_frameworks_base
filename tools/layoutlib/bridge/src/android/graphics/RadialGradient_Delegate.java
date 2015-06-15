@@ -23,6 +23,8 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
+import java.awt.image.ColorModel;
+
 /**
  * Delegate implementing the native methods of android.graphics.RadialGradient
  *
@@ -146,7 +148,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                     java.awt.image.ColorModel colorModel) {
                 mCanvasMatrix = canvasMatrix;
                 mLocalMatrix = localMatrix;
-                mColorModel = colorModel;
+                mColorModel = colorModel.hasAlpha() ? colorModel : ColorModel.getRGBdefault();
             }
 
             @Override
