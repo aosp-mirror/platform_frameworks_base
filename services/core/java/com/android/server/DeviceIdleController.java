@@ -95,8 +95,6 @@ public class DeviceIdleController extends SystemService
 
     private static final boolean COMPRESS_TIME = false;
 
-    public static final String SERVICE_NAME = "deviceidle";
-
     private static final String ACTION_STEP_IDLE_STATE =
             "com.android.server.device_idle.STEP_IDLE_STATE";
 
@@ -636,7 +634,7 @@ public class DeviceIdleController extends SystemService
             mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
         }
 
-        publishBinderService(SERVICE_NAME, new BinderService());
+        publishBinderService(Context.DEVICE_IDLE_CONTROLLER, new BinderService());
     }
 
     @Override

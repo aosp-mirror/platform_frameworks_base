@@ -32,15 +32,18 @@ import android.content.ContentProviderClient;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.graphics.Bitmap;
+import android.provider.Settings;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -60,6 +63,7 @@ public class ActivityTestMain extends Activity {
     static final String KEY_CONFIGURATION = "configuration";
 
     ActivityManager mAm;
+    PowerManager mPower;
     AlarmManager mAlarm;
     Configuration mOverrideConfig;
     int mSecondUser;
@@ -158,8 +162,9 @@ public class ActivityTestMain extends Activity {
 
         Log.i(TAG, "Referrer: " + getReferrer());
 
-        mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
-        mAlarm = (AlarmManager)getSystemService(ALARM_SERVICE);
+        mAm = getSystemService(ActivityManager.class);
+        mPower = getSystemService(PowerManager.class);
+        mAlarm = getSystemService(AlarmManager.class);
         if (savedInstanceState != null) {
             mOverrideConfig = savedInstanceState.getParcelable(KEY_CONFIGURATION);
             if (mOverrideConfig != null) {
@@ -445,7 +450,7 @@ public class ActivityTestMain extends Activity {
                 new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.putExtra("gulp", new int[1024*1024]);
+                intent.putExtra("gulp", new int[1024 * 1024]);
                 startActivity(intent);
                 return true;
             }
@@ -454,6 +459,17 @@ public class ActivityTestMain extends Activity {
                 new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 scheduleSpamAlarm(0);
+                return true;
+            }
+        });
+        menu.add("Ignore battery optimizations").setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                if (!mPower.isIgnoringBatteryOptimizations(getPackageName())) {
+                    intent.setData(Uri.fromParts("package", getPackageName(), null));
+                }
+                startActivity(intent);
                 return true;
             }
         });

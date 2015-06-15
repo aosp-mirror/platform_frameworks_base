@@ -392,6 +392,8 @@ public final class PowerManager {
     final IPowerManager mService;
     final Handler mHandler;
 
+    IDeviceIdleController mIDeviceIdleController;
+
     /**
      * {@hide}
      */
@@ -886,6 +888,25 @@ public final class PowerManager {
     public boolean isDeviceIdleMode() {
         try {
             return mService.isDeviceIdleMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return whether the given application package name is on the device's power whitelist.
+     * Apps can be placed on the whitelist through the settings UI invoked by
+     * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
+     */
+    public boolean isIgnoringBatteryOptimizations(String packageName) {
+        synchronized (this) {
+            if (mIDeviceIdleController == null) {
+                mIDeviceIdleController = IDeviceIdleController.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+            }
+        }
+        try {
+            return mIDeviceIdleController.isPowerSaveWhitelistApp(packageName);
         } catch (RemoteException e) {
             return false;
         }
