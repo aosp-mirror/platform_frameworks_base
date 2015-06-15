@@ -16,7 +16,11 @@
 
 package com.android.settingslib.wifi;
 
+import android.app.AppGlobals;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -30,17 +34,15 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.TtsSpan;
 import android.util.Log;
 import android.util.LruCache;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
-import android.os.UserHandle;
-import android.os.RemoteException;
-import android.app.AppGlobals;
 
 import com.android.settingslib.R;
 
@@ -280,8 +282,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
     }
 
-    public String getSsid() {
+    public String getSsidStr() {
         return ssid;
+    }
+
+    public CharSequence getSsid() {
+        SpannableString str = new SpannableString(ssid);
+        str.setSpan(new TtsSpan.VerbatimBuilder(ssid).build(), 0, ssid.length(),
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        return str;
     }
 
     public String getConfigName() {
