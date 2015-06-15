@@ -569,8 +569,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         private String getDefaultScheme() {
-            // TODO: replace SCHEME_HTTP with SCHEME_HTTPS
-            return IntentFilter.SCHEME_HTTP;
+            return IntentFilter.SCHEME_HTTPS;
         }
 
         @Override
