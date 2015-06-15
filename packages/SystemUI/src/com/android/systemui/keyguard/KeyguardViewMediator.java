@@ -371,7 +371,6 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void onDeviceProvisioned() {
             sendUserPresentBroadcast();
-            updateInputRestricted();
         }
 
         @Override
@@ -947,7 +946,7 @@ public class KeyguardViewMediator extends SystemUI {
      * was suppressed by an app that disabled the keyguard or we haven't been provisioned yet.
      */
     public boolean isInputRestricted() {
-        return mShowing || mNeedToReshowWhenReenabled || shouldWaitForProvisioning();
+        return mShowing || mNeedToReshowWhenReenabled;
     }
 
     private void updateInputRestricted() {
