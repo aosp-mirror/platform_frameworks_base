@@ -352,6 +352,11 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
+    public boolean isFilterBitmap() {
+        return mBitmapState.mPaint.isFilterBitmap();
+    }
+
+    @Override
     public void setDither(boolean dither) {
         mBitmapState.mPaint.setDither(dither);
         invalidateSelf();
