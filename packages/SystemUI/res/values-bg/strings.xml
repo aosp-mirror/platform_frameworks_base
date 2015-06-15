@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM карта."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Тетъринг през Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Самолетен режим."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Промяна на мрежата на оператора."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> процента батерия."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Системни настройки."</string>
@@ -319,6 +321,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Плъзнете с пръст от иконата, за да използвате телефона"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Прекарайте пръст от иконата, за да получите гласова помощ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Плъзнете с пръст от иконата, за да включите камерата"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Пълна тишина. Това ще заглуши и екранните четци."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Пълна тишина"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Само с приоритет"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Само будилници"</string>
@@ -328,8 +331,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарежда се (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Превключване на потребителя – текущият е <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Текущ потребител – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Показване на потребителския профил"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Добавяне на потребител"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Нов потребител"</string>
@@ -344,7 +346,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Започване отначало"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Да, продължавам"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Гост"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Премахване на госта с цел изтриване на приложения и данни"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"Премахнете госта, за да се изтрият приложенията и данните"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ПРЕМАХВАНЕ НА ГОСТА"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Да се добави ли нов потреб.?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
@@ -366,19 +368,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Деактивиране на VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Прекратяване на връзката с VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Устройството ви се управлява от <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистраторът ви може да наблюдава и управлява настройките, корпоративния достъп, приложенията и данните, свързани с устройството ви, включително информацията за местоположението му. За още подробности се свържете с администратора си."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Разрешихте на приложение да настрои връзка с виртуална частна мрежа (VPN).\n\nТова приложение може да наблюдава активността ви на устройството и в мрежата, включително имейли, приложения и уебсайтове."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Устройството ви се управлява от <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистраторът ви може да наблюдава и управлява настройките, корпоративния достъп, приложенията и данните, свързани с устройството ви, включително информацията за местоположението му.\n\nСвързани сте с виртуална частна мрежа (VPN) и активността ви в нея може да се наблюдава, включително имейли, приложения и уебсайтове.\n\nЗа още информация се свържете с администратора си."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Служебният ви потребителски профил се управлява от <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистраторът ви може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове.\n\nЗа още информация се свържете с администратора си.\n\nСъщо така е установена връзка с виртуална частна мрежа (VPN) и активността ви в нея може да се наблюдава."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Установена е връзка с приложението <xliff:g id="APPLICATION">%1$s</xliff:g>, което може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Установена е връзка с приложението <xliff:g id="APPLICATION">%1$s</xliff:g>, което може да наблюдава личната ви активност в мрежата, включително имейли, приложения и уебсайтове."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Служебният ви потребителски профил се управлява от <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Той е свързан с приложението <xliff:g id="APPLICATION">%2$s</xliff:g>, което може да наблюдава служебната ви активност в мрежата, включително имейли, приложения и уебсайтове.\n\nЗа още информация се свържете с администратора си."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Служебният ви потребителски профил се управлява от <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Той е свързан с приложението <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, което може да наблюдава служебната ви активност в мрежата, включително имейли, приложения и уебсайтове.\n\nУстановена е връзка и с приложението <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, което може да наблюдава личната ви активност в мрежата."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Устройството ви се управлява от <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистраторът ви може да наблюдава и управлява настройките, корпоративния достъп, приложенията и данните, свързани с устройството ви, включително информацията за местоположението му.\n\nУстановена е връзка с приложението <xliff:g id="APPLICATION">%2$s</xliff:g>, което може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове.\n\nЗа още информация се свържете с администратора си."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Устройството ще остане заключено, докато не го отключите ръчно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Получавайте известия по-бързо"</string>
@@ -404,7 +401,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Отказване"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> изпълнява ролята на диалоговия прозорец за силата на звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Докоснете, за да възстановите оригинала."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Тунер на системния ПИ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показване на процента на вградената батерия"</string>
@@ -424,8 +421,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Няма да чуете следващия си будилник в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"в/ъв <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Бързи настройки (<xliff:g id="TITLE">%s</xliff:g>)."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка за достъп"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

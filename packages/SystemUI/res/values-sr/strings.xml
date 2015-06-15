@@ -153,6 +153,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема SIM картице."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth привезивање."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим рада у авиону."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема SIM картице."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Промена мреже мобилног оператера."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерија је на <xliff:g id="NUMBER">%d</xliff:g> посто."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Системска подешавања."</string>
@@ -320,6 +321,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Превуците од иконе за телефон"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Превуците од иконе за гласовну помоћ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Превуците од иконе за камеру"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Потпуна тишина"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Само приоритетни прекиди"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Само аларми"</string>
@@ -345,7 +348,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Почни из почетка"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Да, настави"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Гост"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Уклоните госта да бисте избрисали апликације и податке"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"УКЛОНИ ГОСТА"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Додајете новог корисника?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Када додате новог корисника, та особа треба да подеси сопствени простор.\n\nСваки корисник може да ажурира апликације за све остале кориснике."</string>
@@ -367,19 +371,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Онемогући VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Прекини везу са VPN-ом"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Уређајем управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима. Више информација потражите од администратора."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Дали сте дозволу апликацији да подешава VPN везу.\n\nТа апликација може да надгледа активности на уређају и мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Уређајем управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nПовезани сте на VPN, који може да надгледа активности на мрежи, укључујући имејлове, апликације и безбедне веб-сајтове.\n\nВише информација потражите од администратора."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора.\n\nПовезани сте и на VPN, који може да надгледа активности на личној мрежи."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Повезани сте са апликацијом <xliff:g id="APPLICATION">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Повезани сте са апликацијом <xliff:g id="APPLICATION">%1$s</xliff:g>, која може да надгледа активности на личној мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nПовезани сте и са апликацијом <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, која може да надгледа активности на личној мрежи."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Уређајем управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nПовезани сте са апликацијом <xliff:g id="APPLICATION">%2$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Уређај ће остати закључан док га не откључате ручно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Брже добијајте обавештења"</string>
@@ -405,8 +404,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Одбиј"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> је дијалог за јачину звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Додирните да бисте вратили оригинал."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Користите профил за Work"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Тјунер за кориснички интерфејс система"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Приказуј уграђени проценат батерије"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Приказивање нивоа напуњености батерије у процентима унутар иконе на статусној траци када се батерија не пуни"</string>
@@ -425,8 +423,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Брза подешавања, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Хотспот"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Профил за Work"</string>
 </resources>

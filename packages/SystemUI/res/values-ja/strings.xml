@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIMがありません。"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothテザリング。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"機内モード。"</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"携帯通信会社のネットワークを変更します。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -321,6 +323,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"右にスワイプして通話"</string>
     <string name="voice_hint" msgid="8939888732119726665">"アイコンからスワイプして音声アシストを起動"</string>
     <string name="camera_hint" msgid="7939688436797157483">"左にスワイプしてカメラを起動"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"サイレント"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"優先する通知のみ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"アラームのみ"</string>
@@ -346,7 +350,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"最初から開始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"続行"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"ゲストユーザー"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"アプリとデータを削除するにはゲストを削除します"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ゲストを削除"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新しいユーザーを追加しますか？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。\n\nすべてのユーザーは他のユーザーに代わってアプリを更新できます。"</string>
@@ -368,19 +373,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPNを無効にする"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNを切断"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"この端末は<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n管理者は設定、コーポレートアクセス、アプリ、端末に関連付けられたデータ、端末の位置情報を監視、管理できます。詳しくは管理者にお問い合わせください。"</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"アプリにVPN接続の設定を許可しました。\n\nこのアプリはあなたの端末やネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"この端末は<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n管理者は設定、コーポレートアクセス、アプリ、端末に関連付けられたデータ、端末の位置情報を監視、管理できます。\n\nVPNに接続しているため、VPNもネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n管理者はあなたのネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。\n\nVPNにも接続しているため、VPNもネットワークアクティビティを監視できます。"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g>に接続しています。このアプリはあなたのネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g>に接続しています。このアプリはあなたの個人のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION">%2$s</xliff:g>に接続しています。このアプリはあなたの仕事のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>に接続しています。このアプリはあなたの仕事のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>にも接続しているため、個人のネットワークアクティビティも監視できます。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"この端末は<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n管理者は設定、コーポレートアクセス、アプリ、端末に関連付けられたデータ、端末の位置情報を監視、管理できます。\n\n<xliff:g id="APPLICATION">%2$s</xliff:g>に接続しているため、このアプリもネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"手動でロックを解除するまでロックされたままとなります"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"通知をすばやく確認できます"</string>
@@ -406,19 +406,16 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"許可しない"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>を音量ダイアログとして使用"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"タップすると元の音量ダイアログが復元されます。"</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"内蔵電池の残量の割合を表示する"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
     <string name="quick_settings" msgid="10042998191725428">"クイック設定"</string>
     <string name="status_bar" msgid="4877645476959324760">"ステータスバー"</string>
-    <!-- no translation found for demo_mode (2389163018533514619) -->
-    <skip />
-    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
-    <skip />
-    <!-- no translation found for show_demo_mode (2018336697782464029) -->
-    <skip />
+    <string name="demo_mode" msgid="2389163018533514619">"デモモード"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"デモモードを有効にする"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"デモモードを表示"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"イーサネット"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"アラーム"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"仕事用プロファイル"</string>
@@ -429,8 +426,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"次回のアラーム（<xliff:g id="WHEN">%1$s</xliff:g>）は鳴りません"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"クイック設定、<xliff:g id="TITLE">%s</xliff:g>。"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"アクセスポイント"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

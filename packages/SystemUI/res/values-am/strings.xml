@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ምንም SIM የለም።"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"ምንም SIM ካርድ የለም።"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"የአገልግሎት አቅራቢ አውታረ መረብን በመቀየር ላይ።"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"የስርዓት ቅንብሮች"</string>
@@ -319,6 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"ለስልክ ከአዶ ላይ ጠረግ ያድርጉ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"ለድምጽ ረዳት ከአዶ ጠረግ ያድርጉ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ለካሜራ ከአዶ ላይ ጠረግ ያድርጉ"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"አጠቃላይ ጸጥታ። ይህ በተጨማሪ ማያ ገጽ አንባቢን ፀጥ ያደርጋል።"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"ሙሉ ለሙሉ ጸጥታ"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ቅድሚያ የሚሰጠው ብቻ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"ማንቂያዎች ብቻ"</string>
@@ -328,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ሃይል በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> እስከሚሞላ ድረስ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ተጠቃሚ ቀይር"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ተጠቃሚ ይለውጡ፣ የአሁን ተጠቃሚ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"የአሁን ተጠቃሚ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"መገለጫ አሳይ"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ተጠቃሚ አክል"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"አዲስ ተጠቃሚ"</string>
@@ -344,7 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"እንደገና ጀምር"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"አዎ፣ ቀጥል"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"የእንግዳ ተጠቃሚ"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"መተግበሪያዎችን እና ውሂብን ለመሰረዝ እንግዳን ያስወግዱ"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"መተግበሪያዎችና ውሂብ ለመሰረዝ እንግዳ ተጣቀሚን ያስወግዱ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"እንግዳን አስወግድ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"አዲስ ተጠቃሚ ይታከል?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
@@ -366,19 +367,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN አሰናክል"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"የVPN ግንኙነት አቋርጥ"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"የእርስዎ መሣሪያ የሚቀናበረው በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው።\n\nየእርስዎ አስተዳዳሪ ቅንብሮችን፣ የኮርፖሬት መዳረሻ፣ መተግበሪያዎችን፣ ከመሣሪያዎ ጋር የተጎዳኘ ውሂብን፣ እና የመሣሪያዎ የአካባቢ መረጃን መከታተል እና ማቀናበር ይችላሉ። ተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"አንድ መተግበሪያ የVPN ግንኙነት እንዲያዋቅር ፍቃድ ሰጥተውታል።\n\nይህ መተግበሪያ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የመሣሪያዎን እና የአውታረ መረብ እንቅስቃሴዎን መከታተል ይችላል።"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"የእርስዎ መሣሪያ የሚቀናበረው በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው።\n\nየእርስዎ አስተዳዳሪ ቅንብሮችን፣ የኮርፖሬት መዳረሻ፣ መተግበሪያዎችን፣ ከመሣሪያዎ ጋር የተጎዳኘ ውሂብን  እና የመሣሪያዎን የአካባቢ መረጃ መከታተል እና ማቀናበር ይችላል።\n\nከአንድ VPN ጋር ተገናኝተዋል፣ ይሄ ደግሞ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የአውታረ መረብዎን እንቅስቃሴ መከታተል ይችላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"የስራ መገለጫዎ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚተዳደረው።\n\nየእርስዎ አስተዳዳሪ ቅንብሮችን፣ የኮርፖሬት መዳረሻን፣ መተግበሪያዎችን፣ ከመሣሪያዎ ጋር የተጎዳኘ ውሂብን እና የመሣሪያዎ የአካባቢ መረጃን መከታተል እና ማቀናበር ይችላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።\n\nእንዲሁም የአውታረ መረብ ግንኙነትዎን መከታተል ከሚችል አንድ VPN ጋር ተገናኝተዋል።"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"የስራ መገለጫዎ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው እየተዳደረ ያለው። ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝተዋል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"የስራ መገለጫዎ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው እየተዳደረ ያለው። ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ጋር ተገናኝተዋል።\n\nእንዲሁም የግል አውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ጋርም ተገናኝተዋል።"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚተዳደረው።\n\nየእርስዎ አስተዳዳሪ ቅንብሮችን፣ የኮርፖሬት መዳረሻን፣ መተግበሪያዎችን፣ ከመሣሪያዎ ጋር የተጎዳኘ ውሂብን እና የመሣሪያዎ የአካባቢ መረጃን መከታተል እና ማቀናበር ይችላል።\n\nእርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችን  ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝተዋል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"እራስዎ እስኪከፍቱት ድረስ መሣሪያ እንደተቆለፈ ይቆያል"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ማሳወቂያዎችን ፈጥነው ያግኙ"</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ከልክል"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> የድምጽ መጠን መገናኛው ነው"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"የመጀመሪያውን ወደነበረበት ለመመለስ ይንኩ።"</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"የስራ መገለጫዎን እየተጠቀሙ ነው"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"የስርዓት በይነገጽ መቃኛ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"የተቀላቀለ የባትሪ አጠቃቀም መቶኛ አሳይ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ኃይል በማይሞላበት ጊዜ በሁነታ አሞሌ አዶ ውስጥ የባትሪ ደረጃ መቶኛን አሳይ"</string>
@@ -424,8 +419,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"የእርስዎን ቀጣይ ማንቂያ <xliff:g id="WHEN">%1$s</xliff:g> አይሰሙም"</string>
     <string name="alarm_template" msgid="3980063409350522735">"በ<xliff:g id="WHEN">%1$s</xliff:g> ላይ"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"በ<xliff:g id="WHEN">%1$s</xliff:g> ላይ"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ፈጣን ቅንብሮች፣ <xliff:g id="TITLE">%s</xliff:g>።"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"መገናኛ ነጥብ"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"የስራ መገለጫ"</string>
 </resources>

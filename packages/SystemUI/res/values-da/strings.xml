@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Intet SIM-kort."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-netdeling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flytilstand."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Der er ikke noget SIM-kort."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobilnetværket skiftes."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
@@ -319,6 +320,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Stryg fra ikonet for voice assist"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Stryg fra kameraikonet"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stilhed"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Kun prioritet"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Kun Alarmer"</string>
@@ -344,7 +347,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Start forfra"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, fortsæt"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gæstebruger"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Fjern gæsten for at slette apps og data"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"FJERN GÆST"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vil du tilføje den nye bruger?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
@@ -366,19 +370,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Afbryd VPN-forbindelse"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til din enhed, og din enheds placeringsoplysninger. Kontakt din administrator, hvis du vil have flere oplysninger."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Du gav en app tilladelse til at konfigurere en VPN-forbindelse.\n\nDenne app kan overvåge din enhed og netværksaktivitet, bl.a. e-mails, apps og websites."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til din enhed, og din enheds placeringsoplysninger.\n\nDu har forbindelse til et VPN, som kan overvåge din netværksaktivitet, herunder e-mails, apps og websites.\n\nKontakt din administrator, hvis du vil have flere oplysninger."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger.\n\nDu er også forbundet til en VPN-forbindelse, som kan overvåge din netværksaktivitet."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din private netværksaktivitet, bl.a. e-mails, apps og websites."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er forbundet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåge din arbejdsrelaterede netværksaktivitet, bl.a. e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er forbundet til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåge din arbejdsrelaterede netværksaktivitet, bl.a. e-mails, apps og websites.\n\nDu er også forbundet til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåge din private netværksaktivitet."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedens adgang, data tilknyttet din enhed og enhedens placeringsoplysninger.\n\nDu er forbundet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheden vil forblive låst, indtil du manuelt låser den op"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Modtag underretninger hurtigere"</string>
@@ -404,16 +403,15 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Afvis"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er dialogboksen for lydstyrke"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryk for at gendanne originalen."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruger din arbejdsprofil"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis procent for det indbyggede batteri"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis procenttallet for batteriniveauet i ikonet for statusbjælken, når der ikke oplades"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtige indstillinger"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusbjælke"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Demotilstand"</string>
-    <string name="enable_demo_mode" msgid="4844205668718636518">"Aktivér demotilstand"</string>
-    <string name="show_demo_mode" msgid="2018336697782464029">"Vis demotilstand"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Aktivér Demotilstand"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Vis Demotilstand"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Arbejdsprofil"</string>
@@ -424,8 +422,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtigindstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Arbejdsprofil"</string>
 </resources>

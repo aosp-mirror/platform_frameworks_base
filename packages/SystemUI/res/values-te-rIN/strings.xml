@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"సిమ్ లేదు."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"బ్లూటూత్ టెథెరింగ్."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ఎయిర్‌ప్లేన్ మోడ్."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"క్యారియర్ నెట్‌వర్క్ మారుస్తుంది."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"సిస్టమ్ సెట్టింగ్‌లు."</string>
@@ -319,6 +321,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="voice_hint" msgid="8939888732119726665">"వాయిస్ సహాయకం చిహ్నం నుండి స్వైప్"</string>
     <string name="camera_hint" msgid="7939688436797157483">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"మొత్తం నిశ్శబ్దం"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"అలారాలు మాత్రమే"</string>
@@ -344,7 +348,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"అవును, కొనసాగించు"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"అతిథి వినియోగదారు"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"అనువర్తనాలు మరియు డేటాను తొలగించడానికి అతిథిని తీసివేయండి"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"అతిథిని తీసివేయి"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"కొత్త వినియోగదారుని జోడించాలా?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
@@ -366,19 +371,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPNని నిలిపివేయి"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNను డిస్‌కనెక్ట్ చేయి"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"మీ పరికరం <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకుడు సెట్టింగ్‌లు, కార్పొరేట్ ప్రాప్యత, అనువర్తనాలు, మీ పరికరంతో అనుబంధించబడిన డేటా మరియు మీ పరికరం స్థాన సమాచారాన్ని పర్యవేక్షించగలరు మరియు నిర్వహించగలరు. మరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"మీరు VPN కనెక్షన్ సెటప్ చేయడానికి ఒక అనువర్తనానికి అనుమతి ఇచ్చారు.\n\nఈ అనువర్తనం ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ పరికరం మరియు నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"మీ పరికరం <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకుడు సెట్టింగ్‌లు, కార్పొరేట్ ప్రాప్యత, అనువర్తనాలు, మీ పరికరంతో అనుబంధించబడిన డేటా మరియు పరికరం స్థాన సమాచారాన్ని పర్యవేక్షించగలరు మరియు నిర్వహించగలరు.\n\nమీరు VPNకి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"మీ కార్యాలయ ప్రొఫైల్‌ను <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహిస్తోంది.\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ చేయబడ్డారు, ఇది మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌‍సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"మీ కార్యాలయ ప్రొఫైల్‌ను <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహిస్తోంది. అలాగే, మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="APPLICATION">%2$s</xliff:g>కి కనెక్ట్ చేయబడింది, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"మీ కార్యాలయ ప్రొఫైల్‌ను <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహిస్తోంది. అలాగే, మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>కి కనెక్ట్ చేయబడింది, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు.\n\nమీరు <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>కి కూడా కనెక్ట్ చేయబడ్డారు, ఇది మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"మీ పరికరాన్ని <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహిస్తోంది.\n\nమీ నిర్వాహకుడు సెట్టింగ్‌లను, కార్పొరేట్ ప్రాప్యతను, అనువర్తనాలను, మీ పరికరంతో అనుబంధించిన డేటాను మరియు మీ పరికర స్థాన సమాచారాన్ని పర్యవేక్షించగలరు మరియు నిర్వహించగలరు.\n\nమీరు <xliff:g id="APPLICATION">%2$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"మీరు మాన్యువల్‌గా అన్‌లాక్ చేస్తే మినహా పరికరం లాక్ చేయబడి ఉంటుంది"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"నోటిఫికేషన్‌లను వేగంగా పొందండి"</string>
@@ -404,7 +404,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"తిరస్కరించు"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"పొందుపరిచిన బ్యాటరీ శాతం చూపు"</string>
@@ -424,8 +424,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తదుపరి అలారం మీకు వినిపించదు"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"శీఘ్ర సెట్టింగ్‌లు, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"హాట్‌స్పాట్"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

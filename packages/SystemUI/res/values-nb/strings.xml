@@ -152,6 +152,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Uten SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-internettdeling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flymodus."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Bytting av operatørnettverk."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeminnstillinger."</string>
@@ -319,6 +321,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Sveip ikonet for å åpne telefon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Sveip fra ikonet for å åpne talehjelp"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Sveip ikonet for å åpne kamera"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Total stillhet. Dette demper også skjermlesere."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stillhet"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bare prioritet"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Bare alarmer"</string>
@@ -328,8 +331,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Lader (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Bytt bruker"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Bytt bruker, gjeldende bruker er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Gjeldende bruker: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Vis profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Legg til brukere"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Ny bruker"</string>
@@ -344,7 +346,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Start på nytt"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, fortsett"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gjestebruker"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Fjern gjesten for å slette appene og dataene"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"Fjern gjesten for å slette appene og dataene"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"FJERN GJEST"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
@@ -366,19 +368,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Koble fra VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Enheten din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data tilknyttet enheten din og enhetens posisjonsinformasjon. Hvis du vil har mer informasjon, kan du ta kontakt med administratoren."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Du ga en app tillatelse til å konfigurere en VPN-tilkobling.\n\nDenne appen kan overvåke enheten og nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Enheten din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nAdministratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data tilknyttet enheten din og enhetens posisjonsinformasjon.\n\nDu er koblet til et VPN, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder.\n\nHvis du vil ha mer informasjon, kan du ta kontakt med administratoren."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Work-profilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratoren din kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder.\n\nFor mer informasjon, ta kontakt med administratoren.\n\nDu er også koblet til et VPN, som kan overvåke nettverksaktiviteten din."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Enheten er koblet til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Enheten er koblet til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåke den personlige nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Work-profilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er koblet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din på jobben, inkludert e-post, apper og nettsteder.\n\nFor å få mer informasjon, ta kontakt med administratoren."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Work-profilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er koblet til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din på jobben, inkludert e-post, apper og nettsteder.\n\nDu er også koblet til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåke den personlige nettverksaktiviteten din."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Enheten din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data tilknyttet enheten din og enhetens posisjonsinformasjon.\n\nDu er koblet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder.\n\nFor mer informasjon, ta kontakt med administratoren."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten forblir låst til du låser den opp manuelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Motta varsler raskere"</string>
@@ -404,7 +401,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ikke tillat"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er volumdialogen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>
@@ -424,8 +421,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtiginnstillinger, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Wi-Fi-sone"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>

@@ -152,6 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ਕੋਈ SIM ਨਹੀਂ।"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ਟੀਥਰਿੰਗ।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ਏਅਰਪਲੇਨ ਮੋਡ।"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"ਕੋਈ SIM ਕਾਰਡ ਨਹੀਂ।"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ਕੈਰੀਅਰ ਨੈੱਟਵਰਕ ਪਰਿਵਰਤਨ।"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ਬੈਟਰੀ <xliff:g id="NUMBER">%d</xliff:g> ਪ੍ਰਤੀਸ਼ਤ ਹੈ।"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ।"</string>
@@ -319,6 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"ਫ਼ੋਨ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"ਵੌਇਸ ਅਸਿਸਟ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ਕੈਮਰੇ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"ਕੁੱਲ ਸਾਈਲੈਂਟ। ਇਹ ਸਕ੍ਰੀਨ ਰੀਡਰਾਂ ਨੂੰ ਵੀ ਸਾਈਲੈਂਸ ਕਰ ਦੇਵੇਗਾ।"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"ਕੁਲ ਚੁੱਪੀ"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ਕੇਵਲ ਤਰਜੀਹੀ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"ਕੇਵਲ ਅਲਾਰਮ"</string>
@@ -328,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ਚਾਰਜਿੰਗ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰਾ ਹੋਣ ਤੱਕ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ਉਪਭੋਗਤਾ, ਵਰਤਮਾਨ ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ਪ੍ਰੋਫਾਈਲ ਦਿਖਾਓ"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ਉਪਭੋਗਤਾ ਜੋੜੋ"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ਨਵਾਂ ਉਪਭੋਗਤਾ"</string>
@@ -344,7 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ਹਾਂ, ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"ਮਹਿਮਾਨ ਉਪਭੋਗਤਾ"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"ਐਪਸ ਅਤੇ ਡੇਟਾ ਨੂੰ ਮਿਟਾਉਣ ਲਈ ਮਹਿਮਾਨ ਨੂੰ ਹਟਾਓ"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"ਐਪਸ ਅਤੇ ਡਾਟਾ ਮਿਟਾਉਣ ਲਈ, ਮਹਿਮਾਨ ਉਪਭੋਗਤਾ ਹਟਾਓ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ਮਹਿਮਾਨ ਨੂੰ ਹਟਾਓ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣਾ ਸਪੇਸ ਸੈਟ ਅਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਉਪਭੋਗਤਾ ਹੋਰ ਸਾਰੇ ਉਪਭੋਗਤਾਵਾਂ ਦੇ ਐਪਸ ਨੂੰ ਅਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
@@ -366,19 +367,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"ਤੁਸੀਂ ਇੱਕ ਐਪ ਨੂੰ ਇੱਕ VPN ਕਨੈਕਸ਼ਨ ਸੈਟ ਅਪ ਕਰਨ ਦੀ ਅਨੁਮਤੀ ਦਿੱਤੀ ਹੈ।\n\nਇਹ ਐਪ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਅਤੇ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ, ਈਮੇਲਾਂ, ਐਪਸ ਅਤੇ ਸੁਰੱਖਿਅਤ ਵੈਬਸਾਈਟਾਂ ਸਮੇਤ।"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g>ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਕੀਤਾ ਹੈ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ, ਈਮੇਲਾਂ, ਐਪਸ ਅਤੇ ਵੈਬਸਾਈਟਾਂ ਸਮੇਤ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਈਮੇਲ, ਐਪਸ, ਅਤੇ ਵੈੱਬਪੰਨੇ ਸੰਤੇ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰਨ ਦੇ ਸਮਰੱਥ ਹੈ।\n\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।\n\nਤੁਸੀਂ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਇਹ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਇਹ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।\n\nਤੁਸੀਂ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ਡਿਵਾਈਸ ਲੌਕ ਰਹੇਗੀ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਮੈਨੂਅਲੀ ਅਨਲੌਕ ਨਹੀਂ ਕਰਦੇ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ਤੇਜ਼ੀ ਨਾਲ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੋਲਯੂਮ ਡਾਇਲੌਗ ਹੈ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ਅਸਲੀ ਨੂੰ ਰੀਸਟੋਰ ਕਰਨ ਲਈ ਛੋਹਵੋ।"</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ਤੁਸੀਂ ਆਪਣੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਵਰਤ ਰਹੇ ਹੋ"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI ਟਿਊਨਰ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਬਾਰ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
@@ -424,8 +419,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"ਤੁਸੀਂ <xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ ਆਪਣਾ ਅਗਲਾ ਅਲਾਰਮ ਨਹੀਂ ਸੁਣੋਗੇ"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ਹੌਟਸਪੌਟ"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ"</string>
 </resources>

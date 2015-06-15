@@ -154,6 +154,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nėra SIM kortelės."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"„Bluetooth“ įrenginio kaip modemo naudojimas."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lėktuvo režimas."</string>
+    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
+    <skip />
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Keičiamas operatoriaus tinklas."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumuliatorius: <xliff:g id="NUMBER">%d</xliff:g> proc."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistemos nustatymai"</string>
@@ -321,6 +323,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Perbraukite iš telefono piktogramos"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Perbraukite iš „Voice Assist“ piktogramos"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Perbraukite iš fotoaparato piktogramos"</string>
+    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Visiška tyla"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Tik prioritetiniai"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Tik signalai"</string>
@@ -346,7 +350,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Pradėti iš naujo"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Taip, tęsti"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Naudotojas svečias"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Pašalinkite svečią, kad ištrintumėte programas ir duomenis"</string>
+    <!-- no translation found for guest_notification_text (335747957734796689) -->
+    <skip />
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"PAŠALINTI SVEČIĄ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Pridėti naują naudotoją?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
@@ -368,19 +373,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Išjungti VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Atjungti VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Jūsų įrenginį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti ir tvarkyti nustatymus, įmonės informacijos pasiekiamumo nustatymus, programas, su įrenginiu susietus duomenis ir įrenginio vietovės informaciją. Daugiau informacijos galite gauti susisiekę su administratoriumi."</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Suteikėte programai leidimą nustatyti VPN ryšį.\n\nŠi programa gali stebėti įrenginio ir tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Jūsų įrenginį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti ir tvarkyti nustatymus, įmonės informacijos pasiekiamumo nustatymus, programas, su įrenginiu susietus duomenis ir įrenginio vietos informaciją.\n\nEsate prisijungę prie VPN, kuris gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nDaugiau informacijos galite gauti susisiekę su administratoriumi."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Jūsų darbo profilį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nDaugiau informacijos galite gauti susisiekę su administratoriumi.\n\nBe to, esate prisijungę prie VPN, kuris gali stebėti tinklo veiklą."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (6259179342284742878) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (484599052118316268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (1754325860918060897) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (4946600443852045903) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Esate prisijungę prie programos „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Esate prisijungę prie programos „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kuri gali stebėti asmeninio profilio tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Darbo profilį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“. Jis susietas su programa „<xliff:g id="APPLICATION">%2$s</xliff:g>“, kuri gali stebėti darbo profilio tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nDaugiau informacijos galite gauti susisiekę su administratoriumi."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Darbo profilį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“. Jis susietas su programa „<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>“, kuri gali stebėti darbo profilio tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nTaip pat esate prisijungę prie programos „<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>“, kuri gali stebėti asmeninio profilio tinklo veiklą."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Jūsų įrenginį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti ir tvarkyti nustatymus, įmonės informacijos pasiekiamumo nustatymus, programas, su įrenginiu susietus duomenis ir įrenginio vietovės informaciją.\n\nEsate prisijungę prie programos „<xliff:g id="APPLICATION">%2$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nDaugiau informacijos galite gauti susisiekę su administratoriumi."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Įrenginys liks užrakintas, kol neatrakinsite jo neautomatiniu būdu"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Greičiau gaukite pranešimus"</string>
@@ -406,7 +406,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Atmesti"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ yra garsumo valdymo dialogo langas"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Palieskite, kad atkurtumėte originalą."</string>
-    <!-- no translation found for managed_profile_foreground_toast (7217745983533732405) -->
+    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <string name="system_ui_tuner" msgid="3442596010150119600">"Sistemos naudotojo sąsajos derinimo priemonė"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rodyti įterptą akumuliat. įkrovos procentinę vertę"</string>
@@ -426,8 +426,8 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Negirdėsite kito signalo <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Spartieji nustatymai, „<xliff:g id="TITLE">%s</xliff:g>“."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Viešosios interneto prieigos taškas"</string>
+    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
     <skip />
 </resources>
