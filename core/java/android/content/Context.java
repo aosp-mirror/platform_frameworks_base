@@ -2251,6 +2251,7 @@ public abstract class Context {
             //@hide: VOICE_INTERACTION_MANAGER_SERVICE,
             //@hide: BACKUP_SERVICE,
             DROPBOX_SERVICE,
+            //@hide: DEVICE_IDLE_CONTROLLER,
             DEVICE_POLICY_SERVICE,
             UI_MODE_SERVICE,
             DOWNLOAD_SERVICE,
@@ -2875,6 +2876,13 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String DROPBOX_SERVICE = "dropbox";
+
+    /**
+     * System service name for the DeviceIdleController.  There is no Java API for this.
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
