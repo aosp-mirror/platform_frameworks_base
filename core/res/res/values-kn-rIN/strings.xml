@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ತಪ್ಪಿಹೋಗಿರುವ ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದಾಗಿ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸಲಾಗಿದೆ."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್ ಕಳೆದು ಹೋಗಿದೆ ಅಥವಾ ಹಾಳಾಗಿದೆ. ಇದರ ಪರಿಣಾಮವಾಗಿ ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗಿದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ನಿಮ್ಮ ಕಾರ್ಯ ಪ್ರೊಫೈಲ್ ಈ ಸಾಧನದಲ್ಲಿ ಇನ್ನು ಮುಂದೆ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್‌ನ ಅಂಶಗಳು ಕಾಣೆಯಾಗಿವೆ ಅಥವಾ ದೋಷಪೂರಿತವಾಗಿದೆ ಮತ್ತು ಬಳಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಮ್ಮ ಸಾಧನವನ್ನು ಇದೀಗ ಅಳಿಸಲಾಗುತ್ತದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="me" msgid="6545696007631404292">"ನಾನು"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ರಿಂಗರ್ ಆಫ್"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ರಿಂಗರ್ ವೈಬ್ರೇಷನ್‌"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ರಿಂಗರ್ ಆನ್"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"ಅಪ್‌ಡೇಟೇ ಮಾಡಲು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"ಅಪ್‌ಡೇಟ್ ಪ್ಯಾಕೇಜ್ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"ಮರುಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ಮರುಹೊಂದಿಕೆ"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"ಮರುಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತಿದೆ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ನಿಮ್ಮ ಟಿವಿಯನ್ನು ಮುಚ್ಚಲಾಗುತ್ತದೆ."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ನಿಮ್ಮ ಸಾಮಾಜಿಕ ಮಾಹಿತಿ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಸಾಮಾಜಿಕ ಸಂಪರ್ಕಗಳ ಕುರಿತ ಮಾಹಿತಿಗೆ ನೇರ ಪ್ರವೇಶ."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS ಸಂದೇಶಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"ಸಂಗ್ರಹಣೆ"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ಬಳಕೆದಾರರ ನಿಘಂಟು"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ಬಳಕೆದಾರರ ನಿಘಂಟಿನಲ್ಲಿನ ಪದಗಳನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ಬುಕ್‍ಮಾರ್ಕ್‌ಗಳು ಮತ್ತು ಇತಿಹಾಸ"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"ಸಂವೇದಕಗಳು"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ಸೆನ್ಸಾರ್‌ಗಳು ಹಾಗೂ ಧರಿಸುವಂತಹ ಸಾಧನಗಳಿಂದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ನಿಮ್ಮ ಮಹತ್ವಪೂರ್ಣ ಚಿಹ್ನೆಗಳು ಮತ್ತು ದೈಹಿಕ ಚಟುವಟಿಕೆ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಸಂವಹನ ನಡೆಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯವನ್ನು ಪರೀಕ್ಷಿಸಿ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶಿಸುವ ಮೂಲಕ ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡಿ"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ಟ್ಯಾಬ್ಲೆಟ್ ಮೂಲಕ ತಿಳಿದಿರುವ ಖಾತೆಗಳ ಪಟ್ಟಿಯನ್ನು ಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ನೀವು ಸ್ಥಾಪಿಸಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಮೂಲಕ ರಚಿಸಲಾದ ಯಾವುದೇ ಖಾತೆಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"ಟಿವಿಗೆ ತಿಳಿದಿರುವ ಖಾತೆಗಳ ಪಟ್ಟಿಯನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ನೀವು ಸ್ಥಾಪಿಸಿರುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಂದ ರಚಿಸಲಾದ ಯಾವುದೇ ಖಾತೆಗಳನ್ನು ಇದು ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ಫೋನ್‌ನ ಮೂಲಕ ತಿಳಿದಿರುವ ಖಾತೆಗಳ ಪಟ್ಟಿಯನ್ನು ಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ನೀವು ಸ್ಥಾಪಿಸಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಮೂಲಕ ರಚಿಸಲಾದ ಯಾವುದೇ ಖಾತೆಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"ಖಾತೆಗಳನ್ನು ರಚಿಸಿ ಮತ್ತು ಪಾಸ್‍‍ವರ್ಡ್‌ಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"ಖಾತೆಗಳನ್ನು ರಚಿಸುವುದು ಮತ್ತು ಪಡೆದುಕೊಳ್ಳುವುದು ಹಾಗೂ ಅವುಗಳ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಹೊಂದಿಕೆಯನ್ನು ಸೇರಿದಂತೆ ಖಾತೆ ನಿರ್ವಾಹಕ ಖಾತೆ ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"ಖಾತೆಗಳನ್ನು ಸೇರಿಸಿ ಅಥವಾ ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"ಖಾತೆಗಳನ್ನು ಸೇರಿಸುವ ಮತ್ತು ತೆಗೆದುಹಾಕುವ, ಹಾಗೂ ಅವುಗಳ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಅಳಿಸಿಹಾಕುವಂತಹ ಕಾರ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"ಸಾಧನದಲ್ಲಿನ ಖಾತೆಗಳನ್ನು ಬಳಸಿ"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"ದೃಢೀಕರಣ ಟೋಕನ್‌ಗಳನ್ನು ವಿನಂತಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ನೆಟ್‍ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಮತ್ತು ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಂಪರ್ಕಗಳಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸಂಪರ್ಕಗಳ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ಪೂರ್ಣ ನೆಟ್‍ವರ್ಕ್ ಪ್ರವೇಶ"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ಖಾತೆಗೆ ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಖಾತೆಯನ್ನು ಹೊಂದಿರುವ ವ್ಯಕ್ತಿಗಳ ಸಿಂಕ್ ಸಕ್ರಿಯಗೊಳಿಸಲು ಇದನ್ನು ಬಳಸಬಹುದಾಗಿದೆ."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ಸಿಂಕ್ ಅಂಕಿಅಂಶಗಳನ್ನು ಓದಿರಿ"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ಸಿಂಕ್ ಈವೆಂಟ್‍‍ಗಳ ಇತಿಹಾಸ ಮತ್ತು ಎಷ್ಟು ಪ್ರಮಾಣದ ಡೇಟಾವನ್ನು ಸಿಂಕ್‍ ಮಾಡಲಾಗಿದೆ ಎಂಬುದು ಸೇರಿದಂತೆ, ಒಂದು ಖಾತೆಗಾಗಿ ಸಿಂಕ್ ಅಂಕಿಅಂಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"ಚಂದಾದಾರ ಫೀಡ್‌ಗಳನ್ನು ಬರೆಯಿರಿ"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ನಿಮ್ಮ ಪ್ರಸ್ತುತವಾಗಿ ಸಿಂಕ್‌ ಮಾಡಲಾದ ಫಿಡ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನಿಮ್ಮ ಸಿಂಕ್‌ ಮಾಡಲಾದ ಫೀಡ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಬಹುದು."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"ನೀವು ನಿಘಂಟಿಗೆ ಸೇರಿಸಿದ ಪದಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ಬಳಕೆದಾರರು ಬಳಕೆದಾರ ನಿಘಂಟಿನಲ್ಲಿ ಸಂಗ್ರಹಿಸಿರಬಹುದಾದ ಎಲ್ಲಾ ಪದಗಳು, ಹೆಸರುಗಳು ಮತ್ತು ನುಡಿಗಟ್ಟುಗಳನ್ನು ರೀಡ್ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ಬಳಕೆದಾರ-ನಿರ್ಧರಿತ ನಿಘಂಟಿಗೆ ಪದಗಳನ್ನು ಸೇರಿಸಿ"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ಸಂಗ್ರಹಿಸಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಬೇಕಾದ ಅಗತ್ಯವಿದೆ."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ಕ್ಯಾಮರಾಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ಎಲ್ಲಾ ಸಾಧನ ಕ್ಯಾಮರಾಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"ಪರದೆ ಲಾಕ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"ಪರದೆ ಲಾಕ್‌ನ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ಕೆಲವು ಪರದೆ ಲಾಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ಕೆಲವು ಪರದೆ ಲಾಕ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ನಿವಾಸ"</item>
     <item msgid="869923650527136615">"ಮೊಬೈಲ್"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"ಪ್ಯಾಟರ್ನ್ ಪ್ರಾರಂಭವಾಗಿದೆ"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"ಪ್ಯಾಟರ್ನ್ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"ಸೆಲ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"ಪ್ಯಾಟರ್ನ್ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s.%3$d ರಲ್ಲಿ %2$d ವಿಜೆಟ್."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ವಿಜೆಟ್ ಸೇರಿಸು."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"ವೈ-ಫೈ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"ಆಯ್ಕೆಗಳಿಗೆ ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ಕಳಪೆ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿದೆ."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ಸಂಪರ್ಕವನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ದೋಷಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ಹೊಸ <xliff:g id="NAME">%s</xliff:g> ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ಫೋಟೋಗಳು ಮತ್ತು ಮಾಧ್ಯಮವನ್ನು ವರ್ಗಾಯಿಸಲು"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> ಹಾನಿಯಾಗಿದೆ"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> ಹಾನಿಯಾಗಿದೆ; ಅದನ್ನು ಮರುಫಾರ್ಮ್ಯಾಟ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> ದೋಷಪೂರಿತವಾಗಿದೆ"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> ದೋಷಪೂರಿತವಾಗಿದೆ. ಸರಿಪಡಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ಬೆಂಬಲಿಸದಿರುವ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"ಈ ಸಾಧನವು <xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ಬೆಂಬಲಿತ ಫಾರ್ಮೆಟ್‌ನಲ್ಲಿ ಹೊಂದಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ಅನಿರೀಕ್ಷಿತವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ಡೇಟಾ ನಷ್ಟವನ್ನು ತಪ್ಪಿಸಲು ತೆಗೆದುಹಾಕುವುದಕ್ಕೂ ಮುನ್ನ <xliff:g id="NAME">%s</xliff:g> ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ; ಹೊಸದನ್ನು ಸೇರಿಸಿ"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"ಸೆಟಪ್"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"ಹೊಂದಿಸು"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಎಜೆಕ್ಟ್ ಮಾಡು"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ಎಕ್ಸ್‌ಪ್ಲೋರ್‌‌"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ಕಾಣೆಯಾಗಿದೆ"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> ಗೆ ಡೇಟಾ ಸರಿಸಲಾಗಿದೆ"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ಡೇಟಾ ಸರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ಮೂಲ ಸ್ಥಳದಲ್ಲಿ ಡೇಟಾ ಉಳಿದಿದೆ"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"ಸಿದ್ಧವಾಗಿದೆ"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"ಓದಲು ಮಾತ್ರ"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"ಅಪಾಯಕರವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"ದೋಷಪೂರಿತವಾಗಿದೆ"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"ಬೆಂಬಲಿತವಾಗಿಲ್ಲ"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"ಸ್ವರೂಪಗೊಳಿಸುವಿಕೆ..."</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"ಸೇರಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಯ ಚಟುವಟಿಕೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"ಮೀಡಿಯಾ ಔಟ್‍ಪುಟ್ ಅನ್ನು ರೂಟ್ ಮಾಡಿ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ಇತರ ಬಾಹ್ಯ ಸಾಧನಗಳಿಗೆ ಮೀಡಿಯಾ ಔಟ್‍‍ಪುಟ್ ಅನ್ನು ರೂಟ್ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
@@ -1537,9 +1540,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS ವಿನಂತಿಯನ್ನು DIAL ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ವಿನಂತಿಯನ್ನು ಹೊಸ SS ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ಓವರ್‌ಫ್ಲೋ ಮುಚ್ಚು"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

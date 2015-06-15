@@ -173,8 +173,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Radni je profil izbrisan"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Radni je profil izbrisan jer nedostaje administratorska aplikacija."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vaš poslovni profil više nije dostupan na ovom uređaju."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će se izbrisati"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Nije moguće upotrijebiti administratorsku aplikaciju jer joj nedostaju komponente ili je oštećena. Vaš će se uređaj sada izbrisati. Za pomoć se obratite svom administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -189,18 +188,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Zvono isključeno"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibracija zvona"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvono uključeno"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Ažuriranje sustava Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Priprema za ažuriranje…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Obrada paketa za ažuriranje…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Ponovno pokretanje…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Vraćanje na tvorničko stanje"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Ponovno pokretanje…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Isključivanje..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Vaš tabletni uređaj će se isključiti."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizor će se isključiti."</string>
@@ -237,14 +230,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pristupati vašim kontaktima"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupiti lokaciji ovog uređaja"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informacije o vašoj društvenoj aktivnosti"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Izravan pristup informacijama o kontaktima i društvenim vezama."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupati kalendaru"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"pregledavati SMS poruke i upravljati njima"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"slati i pregledavati SMS poruke"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za pohranu"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupiti fotografijama, medijima i datotekama na vašem uređaju"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Korisnički rječnik"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Čitanje ili pisanje riječi u korisničkom rječniku."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Oznake i povijest"</string>
@@ -256,7 +250,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"uspostavljati telefonske pozive i upravljati njima"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzori"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"pristupati podacima senzora i nosivih uređaja"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"pristupiti informacijama o vašim vitalnim znakovima i fizičkoj aktivnosti"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Dohvaćati sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Istražite sadržaj prozora koji upotrebljavate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Uključiti značajku Istraži dodirom"</string>
@@ -401,12 +395,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Aplikaciji omogućuje dobivanje popisa računa koje tabletno računalo poznaje. Uključeni mogu biti svi računi koje izrade aplikacije koje ste instalirali."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Aplikaciji omogućuje dohvaćanje popisa računa poznatih televizoru. To može uključivati sve račune koje su izradile instalirane aplikacije."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Aplikaciji omogućuje dobivanje popisa računa koje telefon poznaje. Uključeni mogu biti svi računi koje izrade aplikacije koje ste instalirali."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"stvaranje računa i postavljenje zaporki"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Aplikaciji omogućuje upotrebu mogućnosti AccountManagera za autentifikaciju računa, uključujući stvaranje računa te dobivanje i postavljanje njihovih zaporki."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"dodavanje ili uklanjanje računa"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Aplikaciji omogućuje obavljanje operacija kao što su dodavanje i uklanjanje računa i brisanje zaporke."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"upotreba računa na uređaju"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Aplikaciji omogućuje traženje oznaka za autentifikaciju."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"prikaz mrežnih veza"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Aplikaciji omogućuje pregled informacija o mrežnim vezama, primjerice koje mreže postoje i koje su spojene."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"puni mrežni pristup"</string>
@@ -467,8 +455,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Aplikaciji omogućuje izmjenu postavki sinkronizacije za račun. Na primjer, to se može upotrijebiti za omogućavanje sinkronizacije aplikacije Osobe s računom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čitanje statistike o sinkronizaciji"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Aplikaciji omogućuje čitanje statistika sinkronizacije za račun, uključujući povijest sinkronizacije te količinu sinkroniziranih podataka."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"pisanje pretplaćenih feedova"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Omogućuje aplikaciji promjenu vaših trenutačno sinkroniziranih feedova. Zlonamjerne aplikacije mogu promijeniti vaše sinkronizirane feedove."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"čitanje pojmova koje ste dodali u rječnik"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Aplikaciji omogućuje čitanje svih riječi, imena i fraza koje je korisnik pohranio u korisničkom rječniku."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"dodavanje riječi u rječnik koji je izradio korisnik"</string>
@@ -556,8 +542,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zahtijevajte da pohranjeni podaci aplikacije budu šifrirani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogući fotoaparate"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Spriječite upotrebu svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Onemogući znač. zaklj. zaslona"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Sprječava upotrebu nekih značajki zaključavanja zaslona."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogući dio značajki zaklj. zaslona"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Sprječava upotrebu nekih značajki zaključavanja zaslona."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Početna"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
@@ -743,6 +729,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Uzorak se pokrenuo"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Uzorak je obrisan"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Dodan je mobitel"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Uzorak je dovršen"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d od %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Dodavanje widgeta."</string>
@@ -1002,6 +990,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup internetu"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Dodirnite za opcije"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ne može se spojiti na Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ima lošu internetsku vezu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Dopustiti povezivanje?"</string>
@@ -1098,15 +1088,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Traženje pogrešaka"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Otkriven je novi uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Za prijenos fotografija i medija"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Oštećen uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Uređaj <xliff:g id="NAME">%s</xliff:g> oštećen je; pokušajte ga ponovo formatirati"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Oštećeni medij za pohranu <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Medij za pohranu <xliff:g id="NAME">%s</xliff:g> oštećen je. Dodirnite za popravak."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Nepodržani medij za pohranu <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Uređaj ne podržava medij za pohranu <xliff:g id="NAME">%s</xliff:g>. Dodirnite za postavljanje u podržanom formatu."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Uređaj <xliff:g id="NAME">%s</xliff:g> iznenada je uklonjen"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Isključite uređaj <xliff:g id="NAME">%s</xliff:g> prije uklanjanja da ne biste izgubili podatke"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Uklonjen je uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Uklonjen je uređaj <xliff:g id="NAME">%s</xliff:g>; umetnite novi"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"I dalje se izbacuje <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ne uklanjajte"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Postavljanje"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Postavljanje"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izbaci"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Istraži"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> nedostaje"</string>
@@ -1117,6 +1109,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Podaci su premješteni u pohranu <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Podaci nisu premješteni"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Podaci su ostali na izvornoj lokaciji"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Uklonjen"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Izbačen"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Provjeravanje…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Spreman"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Samo za čitanje"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Uklonjeno na nesiguran način"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Oštećen"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Nije podržan"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Izbacivanje..."</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatiranje…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Nije umetnut"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nisu pronađene podudarne radnje."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Usmjeravanje medijskog izlaza"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogućuje usmjeravanje medijskog izlaza na druge vanjske uređaje."</string>
@@ -1554,9 +1557,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS zahtjev izmijenjen je u DIAL zahtjev."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS zahtjev izmijenjen je u USSD zahtjev."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS zahtjev izmijenjen je u novi SS zahtjev."</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Androidov USB priključak za periferne uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB priključak za periferne uređaje"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Više opcija"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zatvori dodatni izbornik"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>
