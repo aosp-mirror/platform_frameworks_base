@@ -71,12 +71,13 @@ public class AudioPort {
     private final String mName;
     private final int[] mSamplingRates;
     private final int[] mChannelMasks;
+    private final int[] mChannelIndexMasks;
     private final int[] mFormats;
     private final AudioGain[] mGains;
     private AudioPortConfig mActiveConfig;
 
     AudioPort(AudioHandle handle, int role, String name,
-            int[] samplingRates, int[] channelMasks,
+            int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains) {
 
         mHandle = handle;
@@ -84,6 +85,7 @@ public class AudioPort {
         mName = name;
         mSamplingRates = samplingRates;
         mChannelMasks = channelMasks;
+        mChannelIndexMasks = channelIndexMasks;
         mFormats = formats;
         mGains = gains;
     }
@@ -130,6 +132,15 @@ public class AudioPort {
      */
     public int[] channelMasks() {
         return mChannelMasks;
+    }
+
+    /**
+     * Get the list of supported channel index mask configurations
+     * (e.g 0x0003 means 2 channel, 0x000F means 4 channel....)
+     * Empty array if channel index mask is not relevant for this audio port
+     */
+    public int[] channelIndexMasks() {
+        return mChannelIndexMasks;
     }
 
     /**

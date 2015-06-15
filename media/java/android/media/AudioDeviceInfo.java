@@ -173,8 +173,7 @@ public final class AudioDeviceInfo {
      * @see AudioFormat
      */
     public @NonNull int[] getChannelIndexMasks() {
-        // TODO: implement
-        return new int[0];
+        return mPort.channelIndexMasks();
     }
 
     /**
