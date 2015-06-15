@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.Looper;
-import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -30,6 +29,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -43,7 +43,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class));
+                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class),
+                mMockSubDefaults);
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, 0, 0);
@@ -57,13 +58,33 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyHasNoSims(true);
     }
 
+    public void testEmergencyOnly() {
+        setupDefaultSignal();
+        mNetworkController.recalculateEmergency();
+        verifyEmergencyOnly(false);
+
+        mMobileSignalController.getState().isEmergency = true;
+        mNetworkController.recalculateEmergency();
+        verifyEmergencyOnly(true);
+    }
+
+    public void testEmergencyOnlyNoSubscriptions() {
+        setupDefaultSignal();
+        mNetworkController.recalculateEmergency();
+        verifyEmergencyOnly(false);
+
+        setSubscriptions();
+        verifyEmergencyOnly(true);
+    }
+
     public void testNoSimlessIconWithoutMobile() {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class));
+                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class),
+                mMockSubDefaults);
         setupNetworkController();
 
         // No Subscriptions.
@@ -417,5 +438,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
       verifyLastMobileDataIndicators(true /* visible */,
               TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
               DEFAULT_ICON /* typeIcon */);
+    }
+
+    private void verifyEmergencyOnly(boolean isEmergencyOnly) {
+        ArgumentCaptor<Boolean> emergencyOnly = ArgumentCaptor.forClass(Boolean.class);
+        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setEmergencyCallsOnly(
+                emergencyOnly.capture());
+        assertEquals(isEmergencyOnly, (boolean) emergencyOnly.getValue());
     }
 }
