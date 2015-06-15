@@ -124,6 +124,16 @@ public class TelecomManager {
             "android.telecom.action.CHANGE_DEFAULT_DIALER";
 
     /**
+     * Broadcast intent action indicating that the current default dialer has changed.
+     * The string extra {@link #EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME} will contain the
+     * name of the package that the default dialer was changed to.
+     *
+     * @see #EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME
+     */
+    public static final String ACTION_DEFAULT_DIALER_CHANGED =
+            "android.telecom.action.DEFAULT_DIALER_CHANGED";
+
+    /**
      * Extra value used to provide the package name for {@link #ACTION_CHANGE_DEFAULT_DIALER}.
      */
     public static final String EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME =
@@ -771,6 +781,31 @@ public class TelecomManager {
             Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);
         }
         return null;
+    }
+
+    /**
+     * Used to set the default dialer package.
+     *
+     * @param packageName to set the default dialer to..
+     *
+     * @result {@code true} if the default dialer was successfully changed, {@code false} if
+     *         the specified package does not correspond to an installed dialer, or is already
+     *         the default dialer.
+     *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * Requires permission: {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
+     *
+     * @hide
+     */
+    public boolean setDefaultDialer(String packageName) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().setDefaultDialer(packageName);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to set the default dialer.", e);
+        }
+        return false;
     }
 
     /**
