@@ -232,6 +232,34 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_VVM_PACKAGE_NAME_STRING = "carrier_vvm_package_name_string";
 
+    /**
+     * Flag specifying whether an additional (client initiated) intent needs to be sent on System
+     * update
+     * @hide
+     */
+    public static final String KEY_CI_ACTION_ON_SYS_UPDATE_BOOL = "ci_action_on_sys_update_bool";
+
+    /**
+     * Intent to be sent for the additional action on System update
+     * @hide
+     */
+    public static final String KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING =
+            "ci_action_on_sys_update_intent_string";
+
+    /**
+     * Extra to be included in the intent sent for additional action on System update
+     * @hide
+     */
+    public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING =
+            "ci_action_on_sys_update_extra_string";
+
+    /**
+     * Value of extra included in intent sent for additional action on System update
+     * @hide
+     */
+    public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING =
+            "ci_action_on_sys_update_extra_val_string";
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
@@ -330,6 +358,10 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_VIDEO_CALLS, false);
         sDefaults.putBoolean(BOOL_ALLOW_VIDEO_PAUSE, true);
+        sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
+        sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
+        sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
+        sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
