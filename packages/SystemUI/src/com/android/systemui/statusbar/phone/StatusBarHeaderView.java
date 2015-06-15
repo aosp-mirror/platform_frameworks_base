@@ -45,6 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyListener;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
@@ -54,7 +55,8 @@ import java.text.NumberFormat;
  * The view to manage the header area in the expanded status bar.
  */
 public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener,
-        BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback {
+        BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
+        EmergencyListener {
 
     private boolean mExpanded;
     private boolean mListening;
@@ -527,7 +529,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         return true;
     }
 
-    public void setShowEmergencyCallsOnly(boolean show) {
+    @Override
+    public void setEmergencyCallsOnly(boolean show) {
         boolean changed = show != mShowEmergencyCallsOnly;
         if (changed) {
             mShowEmergencyCallsOnly = show;

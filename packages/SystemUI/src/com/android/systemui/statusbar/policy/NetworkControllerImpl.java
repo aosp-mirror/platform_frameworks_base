@@ -71,6 +71,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final ConnectivityManager mConnectivityManager;
     private final SubscriptionManager mSubscriptionManager;
     private final boolean mHasMobileDataFeature;
+    private final SubscriptionDefaults mSubDefaults;
     private Config mConfig;
 
     // Subcontrollers.
@@ -124,7 +125,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
                 new CallbackHandler(),
                 new AccessPointControllerImpl(context, bgLooper),
-                new MobileDataControllerImpl(context));
+                new MobileDataControllerImpl(context),
+                new SubscriptionDefaults());
         mReceiverHandler.post(mRegisterListeners);
     }
 
@@ -134,13 +136,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
             SubscriptionManager subManager, Config config, Looper bgLooper,
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
-            MobileDataControllerImpl mobileDataController) {
+            MobileDataControllerImpl mobileDataController,
+            SubscriptionDefaults defaultsHandler) {
         mContext = context;
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
         mCallbackHandler = callbackHandler;
 
         mSubscriptionManager = subManager;
+        mSubDefaults = defaultsHandler;
         mConnectivityManager = connectivityManager;
         mHasMobileDataFeature =
                 mConnectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
@@ -233,7 +237,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private MobileSignalController getDataController() {
-        int dataSubId = SubscriptionManager.getDefaultDataSubId();
+        int dataSubId = mSubDefaults.getDefaultDataSubId();
         if (!SubscriptionManager.isValidSubscriptionId(dataSubId)) {
             if (DEBUG) Log.e(TAG, "No data sim selected");
             return mDefaultSignalController;
@@ -251,17 +255,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     public boolean isEmergencyOnly() {
-        int voiceSubId = SubscriptionManager.getDefaultVoiceSubId();
+        int voiceSubId = mSubDefaults.getDefaultVoiceSubId();
         if (!SubscriptionManager.isValidSubscriptionId(voiceSubId)) {
             for (MobileSignalController mobileSignalController :
                                             mMobileSignalControllers.values()) {
-                if (!mobileSignalController.isEmergencyOnly()) {
+                if (!mobileSignalController.getState().isEmergency) {
+                    if (DEBUG) Log.d(TAG, "Found emergency " + mobileSignalController.mTag);
                     return false;
                 }
             }
         }
         if (mMobileSignalControllers.containsKey(voiceSubId)) {
-            return mMobileSignalControllers.get(voiceSubId).isEmergencyOnly();
+            if (DEBUG) Log.d(TAG, "Getting emergency from " + voiceSubId);
+            return mMobileSignalControllers.get(voiceSubId).getState().isEmergency;
         }
         if (DEBUG) Log.e(TAG, "Cannot find controller for voice sub: " + voiceSubId);
         // Something is wrong, better assume we can't make calls...
@@ -375,6 +381,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (!mListening) {
             return;
         }
+        doUpdateMobileControllers();
+    }
+
+    @VisibleForTesting
+    void doUpdateMobileControllers() {
         List<SubscriptionInfo> subscriptions = mSubscriptionManager.getActiveSubscriptionInfoList();
         if (subscriptions == null) {
             subscriptions = Collections.emptyList();
@@ -389,6 +400,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
         setCurrentSubscriptions(subscriptions);
         updateNoSims();
+        recalculateEmergency();
     }
 
     @VisibleForTesting
@@ -425,7 +437,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             } else {
                 MobileSignalController controller = new MobileSignalController(mContext, mConfig,
                         mHasMobileDataFeature, mPhone, mCallbackHandler,
-                        this, subscriptions.get(i), mReceiverHandler.getLooper());
+                        this, subscriptions.get(i), mSubDefaults, mReceiverHandler.getLooper());
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
                     mDefaultSignalController = controller;
@@ -708,7 +720,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 null, 0, 0, "");
         mMobileSignalControllers.put(id, new MobileSignalController(mContext,
                 mConfig, mHasMobileDataFeature, mPhone, mCallbackHandler, this, info,
-                mReceiverHandler.getLooper()));
+                mSubDefaults, mReceiverHandler.getLooper()));
         return info;
     }
 
@@ -733,6 +745,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     public interface EmergencyListener {
         void setEmergencyCallsOnly(boolean emergencyOnly);
+    }
+
+    public static class SubscriptionDefaults {
+        public int getDefaultVoiceSubId() {
+            return SubscriptionManager.getDefaultVoiceSubId();
+        }
+
+        public int getDefaultDataSubId() {
+            return SubscriptionManager.getDefaultDataSubId();
+        }
     }
 
     @VisibleForTesting

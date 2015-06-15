@@ -812,12 +812,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         signalClusterQs.setNetworkController(mNetworkController);
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
-            mNetworkController.addEmergencyListener(new NetworkControllerImpl.EmergencyListener() {
-                @Override
-                public void setEmergencyCallsOnly(boolean emergencyOnly) {
-                    mHeader.setShowEmergencyCallsOnly(emergencyOnly);
-                }
-            });
+            mNetworkController.addEmergencyListener(mHeader);
         }
 
         mFlashlightController = new FlashlightController(mContext);

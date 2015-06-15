@@ -34,6 +34,7 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
@@ -43,6 +44,7 @@ import java.util.Objects;
 public class MobileSignalController extends SignalController<
         MobileSignalController.MobileState, MobileSignalController.MobileIconGroup> {
     private final TelephonyManager mPhone;
+    private final SubscriptionDefaults mDefaults;
     private final String mNetworkNameDefault;
     private final String mNetworkNameSeparator;
     @VisibleForTesting
@@ -67,13 +69,15 @@ public class MobileSignalController extends SignalController<
     // need listener lists anymore.
     public MobileSignalController(Context context, Config config, boolean hasMobileData,
             TelephonyManager phone, CallbackHandler callbackHandler,
-            NetworkControllerImpl networkController, SubscriptionInfo info, Looper receiverLooper) {
+            NetworkControllerImpl networkController, SubscriptionInfo info,
+            SubscriptionDefaults defaults, Looper receiverLooper) {
         super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
                 NetworkCapabilities.TRANSPORT_CELLULAR, callbackHandler,
                 networkController);
         mNetworkToIconLookup = new SparseArray<>();
         mConfig = config;
         mPhone = phone;
+        mDefaults = defaults;
         mSubscriptionInfo = info;
         mPhoneStateListener = new MobilePhoneStateListener(info.getSubscriptionId(),
                 receiverLooper);
@@ -290,7 +294,7 @@ public class MobileSignalController extends SignalController<
     }
 
     private void updateDataSim() {
-        int defaultDataSub = SubscriptionManager.getDefaultDataSubId();
+        int defaultDataSub = mDefaults.getDefaultDataSubId();
         if (SubscriptionManager.isValidSubscriptionId(defaultDataSub)) {
             mCurrentState.dataSim = defaultDataSub == mSubscriptionInfo.getSubscriptionId();
         } else {
