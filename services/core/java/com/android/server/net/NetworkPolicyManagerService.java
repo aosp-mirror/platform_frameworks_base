@@ -338,7 +338,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
         mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
-                DeviceIdleController.SERVICE_NAME));
+                Context.DEVICE_IDLE_CONTROLLER));
         mTime = checkNotNull(time, "missing TrustedTime");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
