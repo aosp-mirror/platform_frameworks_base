@@ -6,10 +6,10 @@ page.article=true
 
 @jd:body
 
-<img src="{@docRoot}images/enterprise/work-launcher.png"
-  width="300"
-  style="float:right;margin:0 0 20px 20px"
-  alt="Android for Work apps in a managed profile">
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/jQWB_-o1kz4?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
 
 <p>
   The Android framework provides features to support the security, data separation, and
@@ -32,7 +32,6 @@ page.article=true
   the enterprise environment or build enterprise-specific solutions.
 </p>
 
-
 <h2 id="apps">App Development for Enterprises</h2>
 
 <p>
@@ -44,7 +43,7 @@ page.article=true
 <div class="dynamic-grid">
   <div class="resource-widget resource-flow-layout landing col-12"
     data-query="collection:training/work/apps"
-    data-cardSizes="9x3"
+    data-cardSizes="6x6"
     data-maxResults="6">
   </div>
 </div>
@@ -60,7 +59,7 @@ page.article=true
 <div class="dynamic-grid">
   <div class="resource-widget resource-flow-layout landing col-12"
     data-query="collection:training/work/admin"
-    data-cardSizes="9x3"
+    data-cardSizes="6x6"
     data-maxResults="4">
   </div>
 </div>
