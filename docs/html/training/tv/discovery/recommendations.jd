@@ -10,6 +10,7 @@ trainingnavtop=true
 <div id="tb">
   <h2>This lesson teaches you to</h2>
   <ol>
+    <li><a href="#best-practices">Best Practices for Recommendations</a></li>
     <li><a href="#service">Create a Recommendations Service</a></li>
     <li><a href="#build">Build Recommendations</a></li>
     <li><a href="#run-service">Run Recommendations Service</a></li>
@@ -46,6 +47,46 @@ trainingnavtop=true
   the <a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
   Leanback sample app</a>.
 </p>
+
+<h2 id="best-practices">Best Practices for Recommendations</h2>
+
+<p>Recommendations help users quickly find the content and apps they enjoy. Creating
+recommendations that are high-quality and relevant to users is an important factor in creating a
+great user experience with your TV app. For this reason, you should carefully consider what
+recommendations you present to the user and manage them closely.</p>
+
+<h3 id="types">Types of Recommendations</h3>
+
+<p>When you create recommendations, you should link users back to incomplete viewing activities or
+suggest activities that extend that to related content. Here are some specific type of
+recommendations you should consider:</p>
+
+<ul>
+<li><strong>Continuation content</strong> recommendations for the next episode for users to resume
+watching a series.</li>
+<li><strong>New content</strong> recommendations, such as for a new first-run episode, if the user
+finished watching another series.
+<li><strong>Related content</strong> recommendations based on the users historic viewing behavior.
+</ul>
+
+<p>For more information on how to design recommendation cards for the best user experience, see
+<a href="https://www.google.com/design/spec-tv/system-overview/recommendation-row.html#recommendation-row-types-of-recommendations"
+class="external-link">Recommendation Row</a> in the Android TV Design Spec.</p>
+
+<h3 id="refreshing">Refreshing Recommendations</h3>
+
+<p>When refreshing recommendations, don't just remove and repost them, because doing so causes
+the recommendations to appear at the end of the recommendations row. Once a content item, such as a
+movie, has been played, <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Removing">
+remove it</a> from the recommendations.</p>
+
+<h3 id="customization">Customizing Recommendations</h3>
+
+<p>You can customize recommendation cards to convey branding information, by setting user interface
+elements such as the card's foreground and background image, color, app icon, title, and subtitle.
+To learn more, see
+<a href="https://www.google.com/design/spec-tv/system-overview/recommendation-row.html#recommendation-row-card-customization"
+class="external-link">Recommendation Row</a> in the Android TV Design Spec.</p>
 
 
 <h2 id="service">Create a Recommendations Service</h2>
@@ -116,8 +157,8 @@ public class UpdateRecommendationsService extends IntentService {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(DetailsActivity.class);
         stackBuilder.addNextIntent(detailsIntent);
-        // Ensure a unique PendingIntents, otherwise all recommendations end up with the same
-        // PendingIntent
+        // Ensure a unique PendingIntents, otherwise all
+        // recommendations end up with the same PendingIntent
         detailsIntent.setAction(Long.toString(movie.getId()));
 
         PendingIntent intent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -142,19 +183,6 @@ public class UpdateRecommendationsService extends IntentService {
   &lt;/application&gt;
 &lt;/manifest&gt;
 </pre>
-
-<h3 id="refreshing">Refreshing Recommendations</h3>
-
-<p>Base your recommendations on user behavior and data such as play lists, wish lists, and associated
-content. When refreshing recommendations, don't just remove and repost them, because doing so causes
-the recommendations to appear at the end of the recommendations row. Once a content item, such as a
-movie, has been played, <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Removing">
-remove it</a> from the recommendations.</p>
-
-<p>The order of an app's recommendations is preserved according to the order in which the app
-provides them. The framework interleaves app recommendations based on recommendation quality,
-as measured by user behavior. Better recommendations make an app's recommendations more likely
-to appear near the front of the list.</p>
 
 <h2 id="build">Build Recommendations</h2>
 
