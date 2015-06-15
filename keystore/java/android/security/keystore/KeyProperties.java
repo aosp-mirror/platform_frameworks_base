@@ -370,7 +370,7 @@ public abstract class KeyProperties {
      * No encryption padding.
      *
      * <p><b>NOTE</b>: If a key is authorized to be used with no padding, then it can be used with
-     * any padding scheme.
+     * any padding scheme, both for encryption and signing.
      */
     public static final String ENCRYPTION_PADDING_NONE = "NoPadding";
 
