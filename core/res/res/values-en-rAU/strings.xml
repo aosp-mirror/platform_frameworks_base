@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Work profile deleted"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work profile deleted due to missing admin app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"The work profile admin app is either missing or corrupted. As a result, your work profile and related data have been deleted. Contact your administrator for assistance."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Your work profile is no longer available on this device."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Your device will be erased"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"The admin app is missing components or corrupted, and can\'t be used. Your device will now be erased. Contact your administrator for assistance."</string>
     <string name="me" msgid="6545696007631404292">"Me"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringer off"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringer vibrate"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringer on"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android system update"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Preparing to update…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Processing the update package…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Restarting…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Factory data reset"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Restarting…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Shutting down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Your TV will shut down."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"access your contacts"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Location"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"access this device\'s location"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Your social information"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direct access to information about your contacts and social connections."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"access your calendar"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"view and manage SMS messages"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"send and view SMS messages"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Storage"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"access photos, media and files on your device"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"User Dictionary"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Read or write words in user dictionary."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmarks and History"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telephone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"make and manage phone calls"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensors"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"access data from sensors and wearable devices"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"access information about your vital signs and physical activity"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Retrieve window content"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspect the content of a window that you\'re interacting with."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Turn on Explore by Touch"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Allows the app to get the list of accounts known by the tablet. This may include any accounts created by applications that you have installed."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Allows the app to get the list of accounts known by the TV. This may include any accounts created by applications that you have installed."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Allows the app to get the list of accounts known by the phone. This may include any accounts created by applications that you have installed."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"create accounts and set passwords"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Allows the app to use the account authenticator capabilities of the Account Manager, including creating accounts and getting and setting their passwords."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"add or remove accounts"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Allows the app to perform operations like adding and removing accounts, and deleting their password."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"use accounts on the device"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Allows the app to request authentication tokens."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"view network connections"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Allows the app to view information about network connections such as which networks exist and are connected."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"full network access"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Allows an app to modify the sync settings for an account. For example, this can be used to enable syncing of the People app with an account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"read sync statistics"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"Write subscribed feeds"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Allows the app to modify your currently synced feeds. Malicious apps may change your synced feeds."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"read terms you added to the dictionary"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Allows the app to read all words, names and phrases that the user may have stored in the user dictionary."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"add words to user-defined dictionary"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Require that stored app data be encrypted."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Disable cameras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prevent use of all device cameras."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Disable features of screen lock"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Prevent use of some features of screen lock."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Disable some screen lock features"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Prevent use of some screen lock features."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Pattern started"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Pattern cleared"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cell added"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Pattern completed"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d of %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Add widget"</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Sign in to network"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi has no Internet access"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Touch for options"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Couldn\'t connect to Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" has a poor Internet connection."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Allow connection?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Checking for errors"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"New <xliff:g id="NAME">%s</xliff:g> detected"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"For transferring photos and media"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Damaged <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> is damaged; try reformatting it"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Corrupted <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> is corrupt. Touch to fix."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Unsupported <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"This device doesn’t support this <xliff:g id="NAME">%s</xliff:g>. Touch to set up in a supported format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> unexpectedly removed"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Unmount <xliff:g id="NAME">%s</xliff:g> before removing to avoid data loss"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Removed <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> removed; insert a new one"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Still ejecting <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Don\'t remove"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Set up"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Set-up"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Eject"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explore"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> missing"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data moved to <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Couldn\'t move data"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Data left at original location"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Removed"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Ejected"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Checking…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Ready"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Read-only"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Removed unsafely"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Corrupted"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Unsupported"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Ejecting…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatting…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Not inserted"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"No matching activities found."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Route media output"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Allows an application to route media output to other external devices."</string>
@@ -1538,9 +1541,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS request is modified to DIAL request."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS request is modified to USSD request."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS request is modified to new SS request."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Work profile"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Peripheral Port"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"More options"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Close overflow"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

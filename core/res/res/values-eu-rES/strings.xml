@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Laneko profila ezabatu egin da"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Laneko profila ezabatu egin da hura administratzeko aplikazioa falta delako."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Laneko profila administratzeko aplikazioa falta da edo hondatuta dago. Ondorioz, laneko profila eta horrekin erlazionatutako datuak ezabatu egin dira. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Work profila ez dago erabilgarri gailu honetan."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administrazio-aplikazioaren osagai batzuk falta dira edo aplikazioa hondatuta dago eta ezin da erabili. Gailuko datuak ezabatu egingo dira. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="me" msgid="6545696007631404292">"Ni"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Tonu-jotzailea desaktibatuta"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Tonu-jotzailea dardaran"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Tonu-jotzailea aktibatuta"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android sistemaren eguneratzea"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Eguneratzeko prestatzen…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Eguneratzeen paketea prozesatzen…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Berrabiarazten…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Berrezarri jatorrizko datuak"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Berrabiarazten…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Itzaltzen…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tableta itzali egingo da."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Telebista itzali egingo da."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"Atzitu kontaktuak"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Kokapena"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"Atzitu gailuaren kokapena"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sare sozialetako zure informazioa"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Zure kontaktuei eta konexio sozialei buruzko informaziorako sarbide zuzena."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Atzitu egutegia"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS mezuak"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"Ikusi eta kudeatu SMS mezuak"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"Bidali eta ikusi SMS mezuak"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"Atzitu gailuko argazkiak, multimedia-elementuak eta fitxategiak"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Erabiltzailearen hiztegia"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Irakurri edo idatzi hitzak erabiltzaileek hiztegian."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Laster-markak eta historia"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"Egin eta kudeatu telefono-deiak"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sentsoreak"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"Atzitu sentsoreen eta gailu eramangarrien datuak"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"Atzitu zure bizi-konstanteei eta ariketa fisikoari buruzko informazioa"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu ukipen bidez arakatzeko eginbidea"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barne."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Telebistak ezagutzen dituen kontuen zerrenda lortzea baimentzen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak sar daitezke."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barne."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"kontuak sortzea eta pasahitzak ezartzea"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Kontuen kudeatzaileak kontuak autentifikatzeko dituen gaitasunak erabiltzea baimentzen die aplikazioei; besteak beste, kontuak sortzea eta euren pasahitzak lortzea eta ezartzea."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"kontuak gehitzea edo kentzea"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Kontuak gehitzea edo kentzea eta hainbat eragiketa gauzatzea (adibidez, euren pasahitzak ezabatzea) baimentzen die aplikazioei."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"gailuko kontuak erabiltzea"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Autentifikazio-tokenak eskatzea baimentzen die aplikazioei."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"sare-konexioak ikustea"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Sare-konexioei buruzko informazioa ikusteko baimena ematen die aplikazioei; adibidez, zer sare dauden eta zeintzuk dauden konektatuta."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"sare osorako sarbidea"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Kontu baten sinkronizazio-ezarpenak aldatzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa kontu batekin sinkronizatzeko erabil daiteke."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"irakurri sinkronizazio-estatistikak"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"idatzi harpidetutako jarioak"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Unean sinkronizatutako jarioak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek sinkronizatutako jarioak alda ditzakete."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"hiztegian gehitutako terminoak irakurtzea"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Erabiltzaile-hiztegian erabiltzaileak gordetako hitzak, izenak eta esaldiak irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"erabiltzaileak definitutako hiztegian hitzak gehitzea"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Eskatu gordetako aplikazioen datuak enkriptatzea."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desgaitu kamerak"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Eragotzi gailuaren kamerak erabiltzea."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Desgaitu blokeoko eginbideak"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Eragotzi pantailaren blokeoko eginbide batzuk erabiltzea."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desgaitu pantailaren blokeoko eginbide batzuk"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Eragotzi pantailaren blokeoko eginbide batzuk erabiltzea."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Etxekoa"</item>
     <item msgid="869923650527136615">"Mugikorra"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Eredua marrazten hasi zara"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Eredua garbitu da"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Gelaxka gehitu da"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Eredua osatu da"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d/%3$d widgeta."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Gehitu widgeta."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi konexioa ezin da Internetera konektatu"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Aukerak ikusteko, ukitu hau"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ezin izan da Wi-Fi sarera konektatu"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Interneteko konexio txarra du."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Konektatzea baimendu nahi diozu?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Errorerik dagoen egiaztatzen"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> berria hauteman da"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Argazkiak eta multimedia-fitxategiak transferitzeko"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> hondatuta dago"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> hondatuta dago. Saiatu berriro formateatzen"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> hondatuta dago"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Hondatuta dago <xliff:g id="NAME">%s</xliff:g>. Konpontzeko, ukitu hau."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Ez da onartzen <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Onartutako formatu batean konfiguratzeko, ukitu hau."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ustekabean kendu da"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Daturik ez galtzeko, desmuntatu <xliff:g id="NAME">%s</xliff:g> memoria kendu aurretik"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ez dago"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> kendu da. Sartu beste bat"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ateratzen oraindik…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ez kendu"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Konfigurazioa"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Konfiguratu"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Atera"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Arakatu"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Ez dago <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Mugitu dira datuak <xliff:g id="NAME">%s</xliff:g> gailura"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Ezin izan dira mugitu datuak"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Jatorrizko tokian utzi dira datuak"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Kendu egin da"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Kanporatu egin da"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Egiaztatzen…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Prest dago"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Irakurtzeko soilik"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Ez da segurtasunez kendu"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Hondatuta dago"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Ez da onartzen"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Kanporatzen…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formateatzen…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Ez dago sartuta"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Ez da bat datorren jarduerarik aurkitu."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Multimedia-irteera bideratzea"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Multimedia elementuak kanpoko gailuetara bideratzeko baimena ematen die aplikazioei."</string>
@@ -1538,9 +1541,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS eskaera DIAL eskaerara aldatu da."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS eskaera USSD eskaerara aldatu da."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS eskaera SS eskaera berrira aldatu da."</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ataka periferikoa"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ataka periferikoa"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Aukera gehiago"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Itxi gainfluxua"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

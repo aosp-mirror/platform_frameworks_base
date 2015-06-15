@@ -176,8 +176,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"تم حذف الملف الشخصي للعمل."</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"تم حذف الملف الشخصي للعمل نتيجة فقد تطبيق المشرف."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"تطبيق المشرف فاقد لمكونات أو تالف ويتعذر استخدامه. سيتم محو بيانات جهازك الآن. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="me" msgid="6545696007631404292">"أنا"</string>
@@ -192,18 +191,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"‏تحديث نظام Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"جارٍ الإعداد للتحديث…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"جارٍ معالجة حزمة التحديث…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"جارٍ إعادة التشغيل…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"إعادة الضبط بحسب بيانات المصنع"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"جارٍ إعادة التشغيل…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"سيتم إيقاف التلفزيون."</string>
@@ -240,14 +233,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"المعلومات الاجتماعية"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"الدخول المباشر إلى معلومات عن جهات الاتصال والاتصالات الاجتماعية."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"الوصول تقويمك"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"‏عرض الرسائل القصيرة SMS وإدارتها"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"التخزين"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"قاموس المستخدم"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"قراءة الكلمات وكتابتها في قاموس المستخدم."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"الإشارات المرجعية والسجل"</string>
@@ -259,7 +253,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"أجهزة الاستشعار"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"الوصول إلى البيانات من مستشعرات وأجهزة قابلة للارتداء"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"الوصول إلى المعلومات عن علاماتك الحيوية ونشاطك البدني"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
@@ -404,12 +398,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الجهاز اللوحي. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"يتيح للتطبيق الحصول على قائمة بالحسابات المعروفة في التلفزيون. وقد يتضمن هذا أية حسابات أنشأتها التطبيقات التي ثبتها."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الهاتف. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"إنشاء حسابات وتعيين كلمات مرور"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"‏للسماح للتطبيق باستخدام إمكانيات مصدِّق الحساب لـ AccountManager، بما في ذلك إنشاء حسابات والحصول على كلمات مرورها وتعينها."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"إضافة حسابات أو إزالتها"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"للسماح للتطبيق بإجراء عمليات مثل إضافة حسابات وإزالتها وحذف كلمات مرورها."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"استخدام الحسابات على الجهاز"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"للسماح للتطبيق بطلب الرموز المميزة للمصادقة."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"عرض اتصالات الشبكة"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"للسماح للتطبيق بعرض معلومات حول اتصالات الشبكة كعرض معلومات عن الشبكات المتوفرة والشبكات المتصلة."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"إمكانية دخول كاملة إلى الشبكة"</string>
@@ -470,8 +458,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتمكين مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"قراءة إحصاءات المزامنة"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"كتابة الخلاصات المشتركة"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"للسماح للتطبيق بتعديل خلاصاتك المتزامنة في الوقت الحالي. قد تغيّر التطبيقات الضارة خلاصاتك المتزامنة."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"قراءة المصطلحات التي أضفتها إلى القاموس"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"للسماح للتطبيق بقراءة جميع الكلمات والأسماء والعبارات التي ربما يكون المستخدم قد خزنها في قاموس المستخدم."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"إضافة كلمات إلى القاموس المعرّف بواسطة المستخدم"</string>
@@ -559,8 +545,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"تعطيل الكاميرات"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"تعطيل ميزات قفل الشاشة"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"لمنع استخدام بعض ميزات قفل الشاشة."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"تعطيل بعض ميزات قفل الشاشة"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"المنزل"</item>
     <item msgid="869923650527136615">"الجوال"</item>
@@ -746,6 +732,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"بدأ النمط"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"تم محو النمط"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"تمت إضافة الخلية"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"اكتمل النمط"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"‏%1$s. الأداة %2$d من %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"إضافة أداة."</string>
@@ -1023,6 +1011,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"المس لعرض الخيارات"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏تعذر الاتصال بـ Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" لديها اتصال إنترنت رديء."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"هل تريد السماح بالاتصال؟"</string>
@@ -1119,15 +1109,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"جارٍ التحقق من الأخطاء"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"تم اكتشاف <xliff:g id="NAME">%s</xliff:g> جديدة"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"لنقل الصور والوسائط"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> تالفة"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"إن <xliff:g id="NAME">%s</xliff:g> تالفة؛ حاول"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"أصاب <xliff:g id="NAME">%s</xliff:g> التلف"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> تالف. المس لإصلاحه."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> غير متوافق"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"هذا الجهاز غير متوافق مع <xliff:g id="NAME">%s</xliff:g> هذه. المس للإعداد بتنسيق متوافق."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"تمت إزالة <xliff:g id="NAME">%s</xliff:g> بشكل غير متوقع"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"إلغاء تحميل <xliff:g id="NAME">%s</xliff:g> قبل الإزالة لتجنب فقد البيانات"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"تمت إزالة <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"تمت إزالة <xliff:g id="NAME">%s</xliff:g>؛ أدخل واحدة جديدة"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"لا يزال إخراج <xliff:g id="NAME">%s</xliff:g> جاريًا…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"لا تزِلها"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"الإعداد"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"إعداد"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"إلغاء"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"استكشاف"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> مفقود"</string>
@@ -1138,6 +1130,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"تم نقل البيانات إلى <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"تعذر نقل البيانات"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"تم ترك البيانات في الموقع الأصلي"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"تم الإخراج"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"تم إنهاء التحميل"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"جارٍ التحقق…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"جاهز"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"للقراءة فقط"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"تم الإخراج بشكل غير آمن"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"تالف"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"غير متوافق"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"جارٍ إنهاء التحميل…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"جارٍ التهيئة…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"لم يتم الإدخال"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"لم يتم العثور على أي أنشطة متطابقة."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"توجيه إخراج الوسائط"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"للسماح للتطبيق بتوجيه إخراج الوسائط إلى أجهزة خارجية أخرى."</string>
@@ -1606,9 +1609,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"‏يتم تعديل الطلب SS لطلب الاتصال."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏يتم تعديل طلب SS إلى طلب USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏يتم تعديل طلب SS إلى طلب SS الجديد."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"الملف الشخصي للعمل"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"إغلاق التجاوز"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

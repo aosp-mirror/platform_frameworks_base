@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Werkprofiel is uitgevee"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Werkprofiel is uitgevee weens ontbrekende administrasieprogram."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Die werkprofiel se administrasieprogram ontbreek of is korrup. Gevolglik is jou werkprofiel en verwante data uitgevee. Kontak jou administrateur vir bystand."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Jou werkprofiel is nie meer op hierdie toestel beskikbaar nie."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jou toestel sal uitgevee word"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Die administrasieprogram kort komponente of is korrup en kan nie gebruik word nie. Jou toestel sal nou uitgevee word. Kontak jou administrateur vir bystand."</string>
     <string name="me" msgid="6545696007631404292">"Ek"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Luitoestel af"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Luitoestel vibreer"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Luitoestel aan"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android-stelselopdatering"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Maak tans gereed om op te dateer …"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Verwerk tans die opdateringpakket …"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Herbegin tans …"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Fabrieksterugstelling"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Herbegin tans …"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Sit tans af…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Jou tablet gaan nou afskakel."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Jou TV sal afskakel."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"gaan by jou kontakte in"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ligging"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"verkry toegang tot hierdie toestel se ligging"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Jou sosiale inligting"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte toegang tot inligting oor jou kontakte en sosiale verbindings."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"gaan by jou kalender in"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"bekyk en bestuur SMS-boodskappe"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"stuur en bekyk SMS-boodskappe"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Stoor"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"verkry toegang tot foto\'s, media en lêers op jou toestel"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Gebruikerwoordeboek"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lees of skryf woorde in gebruikerswoordeboek."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Boekmerke en geskiedenis"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Foon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"maak en bestuur foonoproepe"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensors"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"gaan in by data vanaf sensors en drabare toestelle"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"toeganginligting oor jou lewenstekens en fisieke aktiwiteit"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Haal venster-inhoud op"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Skakel Verken deur raak aan"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Laat die program toe om die lys van rekeninge wat aan die tablet bekend is, te kry. Dit kan moontlik enige rekeninge wat geskep is deur programme wat jy geïnstalleer het, insluit."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Laat die program toe om die lys van rekeninge wat die TV ken te kry. Dit kan enige rekeninge insluit wat geskep is deur programme wat jy geïnstalleer het."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Laat die program toe om die lys van rekeninge wat aan die foon bekend is, te kry. Dit kan moontlik enige rekeninge wat geskep is deur programme wat jy geïnstalleer het, insluit."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"skep rekeninge en stel wagwoorde"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Laat die program toe om die rekeningmagtiger-vermoëns van die AccountManager te gebruik, insluitend om rekeninge te skep en hulle wagwoorde te kry en in te stel."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"voeg by of verwyder rekeninge"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Laat die program toe om handelinge uit te voer soos om rekeninge by te voeg of te verwyder, en hul wagwoorde uit te vee."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"gebruik rekeninge op die toestel"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Laat die program toe om magtigingtokens te versoek."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"bekyk netwerkverbindings"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Laat die program toe om inligting oor netwerkverbindings, soos watter netwerke bestaan en gekoppel is, te sien."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"volle netwerktoegang"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Laat \'n program toe om die sinkroniseringinstellings van \'n rekening te verander. Byvoorbeeld, dit kan gebruik word om sinkronisasie van die People-program met \'n ander rekening te aktiveer."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lees sinkroniseerstatistiek"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Laat \'n program toe om die sinkroniseringstatistieke van \'n rekening te lees, insluitend die geskiedenis van sinkroniseringgebeure en hoeveel data gesinkroniseer is."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"skryf ingetekende strome"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Laat die program toe om jou huidig gesinkroniseerde strome te verander. Kwaadwillige programme kan dalk jou gesinkroniseerde strome verander."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lees terme wat jy by die woordeboek gevoeg het"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Laat ’n program toe om alle woorde, name en frases wat die gebruiker moontlik in die gebruikerwoordeboek gestoor het, te lees."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"voeg woorde by gebruiker-gedefinieerde woordeboek"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vereis dat gestoorde programdata geënkripteer word."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiveer kameras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Voorkom die gebruik van alle toestelkameras."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Deaktiveer skermslotkenmerke"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Voorkom die gebruik van sommige kenmerke van skermslot."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktiveer sommige skermslotkenmerke"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Voorkom dat sommige skermslotkenmerke gebruik word"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Tuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Patroon begin"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Patroon uitgevee"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Sel bygevoeg"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Patroon klaar"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Legstuk %2$d van %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Voeg legstuk by."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Meld by netwerk aan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi het geen internettoegang nie"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Raak vir opsies"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kon nie aan Wi-Fikoppel nie"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" het \'n swak internetverbinding."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Laat verbinding toe?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Kyk tans vir foute"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nuwe <xliff:g id="NAME">%s</xliff:g> bespeur"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Om foto\'s en media oor te dra"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Beskadigde <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> is beskadig; probeer dit herformateer"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Gekorrupteerde <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> is korrup. Raak om reg te maak."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Niegesteunde <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Hierdie toestel steun nie hierdie <xliff:g id="NAME">%s</xliff:g> nie. Raak om in \'n gesteunde formaat op te stel."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> is onverwags verwyder"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Demonteer <xliff:g id="NAME">%s</xliff:g> voordat dit verwyder word om dataverlies te voorkom"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Het <xliff:g id="NAME">%s</xliff:g> verwyder"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> is verwyder; sit \'n nuwe een in"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Demonteer <xliff:g id="NAME">%s</xliff:g> tans nog …"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Moenie verwyder nie"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Stel op"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Stel op"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Haal uit"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Verken"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ontbreek"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data na <xliff:g id="NAME">%s</xliff:g> geskuif"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Kon nie data skuif nie"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Data oor op oorspronklike ligging"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Verwyderd"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Uitgegooi"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Kontroleer tans …"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Gereed"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Leesalleen"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Onveilig verwyder"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Gekorrupteer"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Niegesteunde"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Gooi tans uit …"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formateer tans …"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Nie ingevoeg nie"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Geen passende aktiwiteite gevind nie."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Roeteer media-uitvoer"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Laat \'n program toe om media-uitvoere na ander eksterne toestelle te roeteer."</string>
@@ -1538,9 +1541,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-versoek is gewysig tot DIAL-versoek."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-versoek is gewysig tot USSD-versoek."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-versoek is gewysig tot nuwe SS-versoek."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Werkprofiel"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android-USB-randpoort"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-randpoort"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Nog opsies"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Maak oorloop toe"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Tööprofiil on kustutatud"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Tööprofiil on kustutatud puuduva administraatori rakenduse tõttu."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Tööprofiili administraatori rakendus puudub või on rikutud. Seetõttu on teie tööprofiil ja seotud andmed kustutatud. Abi saamiseks võtke ühendust administraatoriga."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Teie tööprofiil pole selles seadmes enam saadaval."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seade kustutatakse"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administraatori rakendusel on puuduvaid osi või on see rikutud ja seda ei saa kasutada. Seade kustutatakse. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="me" msgid="6545696007631404292">"Mina"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Helin on väljas"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibreeriv helin"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Helin on sees"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Androidi süsteemivärskendus"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Värskendamise ettevalmistamine …"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Värskenduspaketi töötlemine …"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Taaskäivitamine ..."</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Tehase andmetele lähtestamine"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Taaskäivitamine ..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Väljalülitamine ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Teie tahvelarvuti lülitub välja."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Teler suletakse."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktid"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"juurdepääs kontaktidele"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Asukoht"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"pääseda juurde selle seadme asukohale"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Teie sotsiaalne teave"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Otsene juurdepääs teie kontaktide teabele ja sotsiaalsetele sidemetele."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS-sõnumite vaatamine ja haldamine"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"saata ja vaadata SMS-sõnumeid"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Mäluruum"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"juurde pääseda seadmesse salvestatud fotodele, meediale ja failidele"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Kasutaja sõnaraamat"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Kasutaja sõnaraamatus sõnade lugemine ja nende sinna kirjutamine."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Järjehoidjad ja ajalugu"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"helistamine ja telefonikõnede haldamine"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Andurid"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"juurdepääs andmetele andurite ja aksessuaaride kaudu"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"juurde pääseda teabele eluliste näitajate ja füüsiliste tegevuste kohta"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Akna sisu toomine"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tutvuge kasutatava akna sisuga."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Puudutusega sirvimise sisselülitamine"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Võimaldab rakendusel hankida tahvelarvutile teadaolevaid kontoloendeid. See võib hõlmata mis tahes kontosid, mille on loonud teie installitud rakendused."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Lubab rakendusel hankida telerile teadaolevate kontode loendi. See võib sisaldada kõiki installitud rakenduste loodud kontosid."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Võimaldab rakendusel hankida telefonile teadaolevaid kontoloendeid. See võib hõlmata mis tahes kontosid, mille on loonud teie installitud rakendused."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"looge kontod ja määrake paroolid"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Võimaldab rakendusel kasutada kontohalduri konto autentija võimalusi, sh luua kontosid ning hankida ja määrata paroole."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"lisage või eemaldage kontosid"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Võimaldab rakendusel teha toiminguid, nagu kontode lisamine ja eemaldamine ning nende paroolide kustutamine."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"kasutage seadmes olevaid kontosid"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Võimaldab rakendusel taotleda autentimise lubasid."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"vaadake võrguühendusi"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lubab rakendusel vaadata teavet võrguühenduste kohta, näiteks seda, millised võrgud on olemas ja ühendatud."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"täielik juurdepääs võrgule"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Võimaldab rakendusel muuta konto sünkroonimisseadeid. Näiteks saab seda kasutada, et lubada rakenduse Inimesed sünkroonimine kontoga."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"loe sünkroonimisstatistikat"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Võimaldab rakendusel lugeda konto sünkroonimisstatistikat, sh sünkroonimissündmuste ajalugu ja sünkroonitud andmete hulka."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"kirjuta tellitud kanaleid"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Võimaldab rakendusel muuta teie praegu sünkroonitud vooge. Pahatahtlikud rakendused võivad muuta teie sünkroonitud vooge."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lugege termineid, mis te sõnastikku lisasite"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Võimaldab rakendusel lugeda kõiki sõnu, nimesid ja fraase, mille kasutaja on kasutaja sõnaraamatusse salvestanud."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"sõnade lisamine kasutaja määratletud sõnastikku"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Nõua salvestatud rakenduse andmete krüpteerimist."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Keela kaamerad"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Vältige seadme kõigi kaamerate kasutamist."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Ekraaniluku funkts. keelamine"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Takistatakse ekraaniluku mõne funktsiooni kasutamist."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Ekraaniluku mõne funktsiooni keelamine"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Takistatakse ekraaniluku mõne funktsiooni kasutamist."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Kodu"</item>
     <item msgid="869923650527136615">"Mobiil"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Mustri koostamisega on alustatud"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Muster on kustutatud"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Lahter on lisatud"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Muster on valmis"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Vidin %2$d/%3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Vidina lisamine."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Võrku sisselogimine"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"WiFi-l pole juurdepääsu Internetile"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Puudutage valikute nägemiseks"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" on halb Interneti-ühendus."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Kas lubada ühendus?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Vigade kontrollimine"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Tuvastati uus üksus <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotode ja meedia ülekandmiseks"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Üksus <xliff:g id="NAME">%s</xliff:g> on kahjustatud"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Üksus <xliff:g id="NAME">%s</xliff:g> on kahjustatud; proovige see uuesti vormindada"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Rikutud <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Üksus <xliff:g id="NAME">%s</xliff:g> on rikutud. Parandamiseks puudutage."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Toetamata <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"See seade ei toeta üksust <xliff:g id="NAME">%s</xliff:g>. Puudutage toetatud vormingus seadistamiseks."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Üksus <xliff:g id="NAME">%s</xliff:g> eemaldati ootamatult"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Andmekao vältimiseks lahutage üksus <xliff:g id="NAME">%s</xliff:g> enne eemaldamist"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Üksus <xliff:g id="NAME">%s</xliff:g> on eemaldatud"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Üksus <xliff:g id="NAME">%s</xliff:g> eemaldati; sisestage uus"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Üksust <xliff:g id="NAME">%s</xliff:g> ikka eemaldatakse …"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ärge eemaldage"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Seadistamine"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Seadistus"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Eemaldamine"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Avastamine"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Üksust <xliff:g id="NAME">%s</xliff:g> pole"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Andmed teisaldati üksusesse <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Andmeid ei saanud teisaldada"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Andmed on algses asukohas alles"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Eemaldatud"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Väljutatud"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Kontrollimine ..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Valmis"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Kirjutuskaitstud"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Eemaldamine polnud turvaline"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Rikutud"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Ei toetata"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Väljutamine …"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Vormindamine ..."</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Pole sisestatud"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Sobivat tegevust ei leitud"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Meediaväljundi teekonna koostamine"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Võimaldab rakendusel koostada teekonna meediaväljundist teistesse välistesse seadmetesse."</string>
@@ -1538,9 +1541,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-päring muudeti DIAL-päringuks."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-päring muudeti USSD-päringuks."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-päring muudeti uueks SS-päringuks."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Tööprofiil"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Androidi väline USB-port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Väline USB-port"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Rohkem valikuid"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Ületäite sulgemine"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>
