@@ -116,5 +116,35 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"لا تتوفر خدمة"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"زر تبديل طريقة الإدخال."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"وضع الطائرة"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"يجب رسم النقش عند إعادة تشغيل الجهاز."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"يجب إدخال رقم التعريف الشخصي عند إعادة تشغيل الجهاز."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"يجب إدخال كلمة المرور عند إعادة تشغيل الجهاز."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"يجب رسم النقش عند تبديل الملفات الشخصية."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"يجب إدخال رقم التعريف الشخصي عند تبديل الملفات الشخصية."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"يجب إدخال كلمة المرور عند تبديل الملفات الشخصية."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد النقش.</item>
+      <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد النقش.</item>
+      <item quantity="few">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد النقش.</item>
+      <item quantity="many">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
+      <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد النقش.</item>
+      <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد النقش.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="few">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="many">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد كلمة المرور.</item>
+      <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد كلمة المرور.</item>
+      <item quantity="few">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد كلمة المرور.</item>
+      <item quantity="many">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
+      <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد كلمة المرور.</item>
+      <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"لم يتم التعرف عليها"</string>
 </resources>

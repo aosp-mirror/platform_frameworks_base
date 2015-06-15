@@ -75,13 +75,13 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Geef de juiste PUK-code opnieuw op. Bij herhaalde pogingen wordt de simkaart permanent uitgeschakeld."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pincodes komen niet overeen"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogingen"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"U heeft uw pincode <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"U heeft uw wachtwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt deze tablet opnieuw ingesteld, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt deze telefoon opnieuw ingesteld, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"U heeft <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Deze tablet wordt opnieuw ingesteld, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"U heeft <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Deze telefoon wordt opnieuw ingesteld, waardoor alle gegevens worden verwijderd."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"U heeft uw pincode <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%d</xliff:g> seconden."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"U heeft uw wachtwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%d</xliff:g> seconden."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%d</xliff:g> seconden."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt deze tablet gereset, waardoor alle gegevens worden verwijderd."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt deze telefoon gereset, waardoor alle gegevens worden verwijderd."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"U heeft <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Deze tablet wordt gereset, waardoor alle gegevens worden verwijderd."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"U heeft <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Deze telefoon wordt gereset, waardoor alle gegevens worden verwijderd."</string>
     <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt deze gebruiker verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
     <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt deze gebruiker verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"U heeft <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Deze gebruiker wordt verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Geen service"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knop voor wijzigen invoermethode."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Vliegtuigmodus"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Patroon is vereist wanneer u het apparaat opnieuw opstart."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Pincode is vereist wanneer u het apparaat opnieuw opstart."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Wachtwoord is vereist wanneer u het apparaat opnieuw opstart."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Patroon is vereist wanneer u schakelt tussen profielen."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Pincode is vereist wanneer u schakelt tussen profielen."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Wachtwoord is vereist wanneer u schakelt tussen profielen."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Apparaat is al <xliff:g id="NUMBER_1">%d</xliff:g> uur niet ontgrendeld. Bevestig het patroon.</item>
+      <item quantity="one">Apparaat is al <xliff:g id="NUMBER_0">%d</xliff:g> uur niet ontgrendeld. Bevestig het patroon.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Apparaat is al <xliff:g id="NUMBER_1">%d</xliff:g> uur niet ontgrendeld. Bevestig de pincode.</item>
+      <item quantity="one">Apparaat is al <xliff:g id="NUMBER_0">%d</xliff:g> uur niet ontgrendeld. Bevestig de pincode.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Apparaat is al <xliff:g id="NUMBER_1">%d</xliff:g> uur niet ontgrendeld. Bevestig het wachtwoord.</item>
+      <item quantity="one">Apparaat is al <xliff:g id="NUMBER_0">%d</xliff:g> uur niet ontgrendeld. Bevestig het wachtwoord.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Niet herkend"</string>
 </resources>

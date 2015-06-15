@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chizmali parolni chizing"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM karta PIN kodini kiriting"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM kartaning PIN kodini kiriting"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"“<xliff:g id="CARRIER">%1$s</xliff:g>” SIM kartasi uchun PIN kodni kiriting"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN kodni tering"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Parol kiriting"</string>
@@ -73,7 +73,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kod kamida 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodlar bir xil emas"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Chizmali parolni ochishga juda ko‘p urinildi"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Siz PIN-kodni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Siz parolni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
@@ -108,5 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Aloqa yo‘q."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Kiritish uslubi tugmasini almashtirish."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Parvoz rejimi"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Qurilmani o‘chirib yoqishda chizmali kalit talab qilinadi."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Qurilmani o‘chirib yoqishda PIN-kod talab qilinadi."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Qurilmani o‘chirib yoqishda parol talab qilinadi."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profilni amlashtirishda chizmali kalit talab qilinadi."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profilni amlashtirishda PIN-kod talab qilinadi."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profilni amlashtirishda parol talab qilinadi."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni yana bir marta kiriting.</item>
+      <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni yana bir marta kiriting.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. PIN-kodni yana bir marta kiriting.</item>
+      <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. PIN-kodni yana bir marta kiriting.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni yana bir marta kiriting.</item>
+      <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni yana bir marta kiriting.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Aniqlanmadi"</string>
 </resources>

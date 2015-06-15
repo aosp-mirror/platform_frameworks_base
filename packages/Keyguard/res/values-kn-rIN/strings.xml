@@ -44,15 +44,15 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಅನ್ನು PUK-ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ನಮೂನೆ ಅನ್‌ಲಾಕ್."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ಪ್ಯಾಟರ್ನ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ಪಿನ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ಪಾಸ್‌ವರ್ಡ್ ಅನ್‌ಲಾಕ್."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ನಮೂನೆ ಪ್ರದೇಶ."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ಪ್ಯಾಟರ್ನ್ ಪ್ರದೇಶ."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ಸ್ಲೈಡ್ ಪ್ರದೇಶ."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"ಪಿನ್ ಪ್ರದೇಶ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"ಸಿಮ್ ಪಿನ್ ಪ್ರದೇಶ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"ಸಿಮ್ PUK ಪ್ರದೇಶ"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"<xliff:g id="ALARM">%1$s</xliff:g> ಗೆ ಮುಂದಿನ ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"<xliff:g id="ALARM">%1$s</xliff:g> ಗೆ ಮುಂದಿನ ಅಲಾರಂ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ಅಳಿಸು"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"ನಮೂದಿಸು"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಮರೆತಿರುವಿರಿ"</string>
@@ -108,5 +108,20 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ಯಾವುದೇ ಸೇವೆಯಿಲ್ಲ."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ಇನ್‌ಪುಟ್ ವಿಧಾನ ಬದಲಿಸು ಬಟನ್."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
+    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
+    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
+    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
 </resources>

@@ -76,7 +76,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg PIN kódját. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal rosszul rajzolta le feloldási mintát. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. <xliff:g id="NUMBER_1">%d</xliff:g> további sikertelen kísérlet után a rendszer visszaállítja a táblagépet a gyári állapotba; ekkor az összes adat törlődik róla."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. <xliff:g id="NUMBER_1">%d</xliff:g> további sikertelen kísérlet után a rendszer visszaállítja a telefont a gyári állapotba; ekkor az összes adat törlődik róla."</string>
@@ -108,5 +108,20 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nincs szolgáltatás."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Beviteli mód váltása gomb."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Repülős üzemmód"</string>
+    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
+    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
+    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nem sikerült felismerni"</string>
 </resources>

@@ -112,5 +112,29 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"אין קליטה."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"מצב טיסה"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"יש להזין את קו ביטול הנעילה לאחר אתחול המכשיר."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"‏יש להזין את ה-PIN לאחר אתחול המכשיר."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"יש להזין את הסיסמה לאחר אתחול המכשיר."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"יש להזין את קו ביטול הנעילה בעת מעבר בין פרופילים."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"‏יש להזין את ה-PIN בעת מעבר בין פרופילים."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"יש להזין את הסיסמה בעת מעבר בין פרופילים."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="two">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את קו ביטול הנעילה.</item>
+      <item quantity="many">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את קו ביטול הנעילה.</item>
+      <item quantity="other">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את קו ביטול הנעילה.</item>
+      <item quantity="one">נעילת המכשיר לא בוטלה במשך שעה <xliff:g id="NUMBER_0">%d</xliff:g>. אשר את קו ביטול הנעילה.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="two">‏נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את ה-PIN.</item>
+      <item quantity="many">‏נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את ה-PIN.</item>
+      <item quantity="other">‏נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את ה-PIN.</item>
+      <item quantity="one">‏נעילת המכשיר לא בוטלה במשך שעה <xliff:g id="NUMBER_0">%d</xliff:g>. אשר את ה-PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="two">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את הסיסמה.</item>
+      <item quantity="many">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את הסיסמה.</item>
+      <item quantity="other">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את הסיסמה.</item>
+      <item quantity="one">נעילת המכשיר לא בוטלה במשך שעה <xliff:g id="NUMBER_0">%d</xliff:g>. אשר את הסיסמה.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"לא זוהתה"</string>
 </resources>
