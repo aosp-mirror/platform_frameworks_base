@@ -399,6 +399,14 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
+    public boolean isFilterBitmap() {
+        if (mPaint == null) {
+            return false;
+        }
+        return getPaint().isFilterBitmap();
+    }
+
+    @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
