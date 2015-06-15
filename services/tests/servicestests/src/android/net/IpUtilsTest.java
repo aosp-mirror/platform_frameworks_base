@@ -107,6 +107,12 @@ public class IpUtilsTest extends TestCase {
         packet.put(sumOffset, (byte) 0);
         packet.put(sumOffset + 1, (byte) 0);
         assertChecksumEquals(sum, IpUtils.tcpChecksum(packet, 0, IPV6_HEADER_LENGTH, transportLen));
+
+        // Check that writing the checksum back into the packet results in a valid packet.
+        packet.putShort(
+            sumOffset,
+            IpUtils.tcpChecksum(packet, 0, IPV6_HEADER_LENGTH, transportLen));
+        assertEquals(0, IpUtils.tcpChecksum(packet, 0, IPV6_HEADER_LENGTH, transportLen));
     }
 
     @SmallTest
@@ -146,5 +152,11 @@ public class IpUtilsTest extends TestCase {
         packet.put(udpSumOffset, (byte) 0);
         packet.put(udpSumOffset + 1, (byte) 0);
         assertChecksumEquals(udpSum, IpUtils.udpChecksum(packet, 0, IPV4_HEADER_LENGTH));
+
+        // Check that writing the checksums back into the packet results in a valid packet.
+        packet.putShort(ipSumOffset, IpUtils.ipChecksum(packet, 0));
+        packet.putShort(udpSumOffset, IpUtils.udpChecksum(packet, 0, IPV4_HEADER_LENGTH));
+        assertEquals(0, IpUtils.ipChecksum(packet, 0));
+        assertEquals((short) 0xffff, IpUtils.udpChecksum(packet, 0, IPV4_HEADER_LENGTH));
     }
 }

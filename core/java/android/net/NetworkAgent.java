@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
+import android.net.ConnectivityManager.PacketKeepalive;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -143,10 +144,45 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int CMD_SAVE_ACCEPT_UNVALIDATED = BASE + 9;
 
-    /** Sent by ConnectivityService to the NetworkAgent to inform the agent to pull
+    /**
+     * Sent by ConnectivityService to the NetworkAgent to inform the agent to pull
      * the underlying network connection for updated bandwidth information.
      */
     public static final int CMD_REQUEST_BANDWIDTH_UPDATE = BASE + 10;
+
+    /**
+     * Sent by ConnectivityService to the NetworkAgent to request that the specified packet be sent
+     * periodically on the given interval.
+     *
+     *   arg1 = the slot number of the keepalive to start
+     *   arg2 = interval in seconds
+     *   obj = KeepalivePacketData object describing the data to be sent
+     *
+     * Also used internally by ConnectivityService / KeepaliveTracker, with different semantics.
+     */
+    public static final int CMD_START_PACKET_KEEPALIVE = BASE + 11;
+
+    /**
+     * Requests that the specified keepalive packet be stopped.
+     *
+     * arg1 = slot number of the keepalive to stop.
+     *
+     * Also used internally by ConnectivityService / KeepaliveTracker, with different semantics.
+     */
+    public static final int CMD_STOP_PACKET_KEEPALIVE = BASE + 12;
+
+    /**
+     * Sent by the NetworkAgent to ConnectivityService to provide status on a packet keepalive
+     * request. This may either be the reply to a CMD_START_PACKET_KEEPALIVE, or an asynchronous
+     * error notification.
+     *
+     * This is also sent by KeepaliveTracker to the app's ConnectivityManager.PacketKeepalive to
+     * so that the app's PacketKeepaliveCallback methods can be called.
+     *
+     * arg1 = slot number of the keepalive
+     * arg2 = error code
+     */
+    public static final int EVENT_PACKET_KEEPALIVE = BASE + 13;
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
@@ -240,18 +276,41 @@ public abstract class NetworkAgent extends Handler {
             }
             case CMD_SAVE_ACCEPT_UNVALIDATED: {
                 saveAcceptUnvalidated(msg.arg1 != 0);
+                break;
+            }
+            case CMD_START_PACKET_KEEPALIVE: {
+                startPacketKeepalive(msg);
+                break;
+            }
+            case CMD_STOP_PACKET_KEEPALIVE: {
+                stopPacketKeepalive(msg);
+                break;
             }
         }
     }
 
     private void queueOrSendMessage(int what, Object obj) {
+        queueOrSendMessage(what, 0, 0, obj);
+    }
+
+    private void queueOrSendMessage(int what, int arg1, int arg2) {
+        queueOrSendMessage(what, arg1, arg2, null);
+    }
+
+    private void queueOrSendMessage(int what, int arg1, int arg2, Object obj) {
+        Message msg = Message.obtain();
+        msg.what = what;
+        msg.arg1 = arg1;
+        msg.arg2 = arg2;
+        msg.obj = obj;
+        queueOrSendMessage(msg);
+    }
+
+    private void queueOrSendMessage(Message msg) {
         synchronized (mPreConnectedQueue) {
             if (mAsyncChannel != null) {
-                mAsyncChannel.sendMessage(what, obj);
+                mAsyncChannel.sendMessage(msg);
             } else {
-                Message msg = Message.obtain();
-                msg.what = what;
-                msg.obj = obj;
                 mPreConnectedQueue.add(msg);
             }
         }
@@ -363,6 +422,27 @@ public abstract class NetworkAgent extends Handler {
      * {@code acceptUnvalidated} set to {@code false}.
      */
     protected void saveAcceptUnvalidated(boolean accept) {
+    }
+
+    /**
+     * Requests that the network hardware send the specified packet at the specified interval.
+     */
+    protected void startPacketKeepalive(Message msg) {
+        onPacketKeepaliveEvent(msg.arg1, PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+    }
+
+    /**
+     * Requests that the network hardware send the specified packet at the specified interval.
+     */
+    protected void stopPacketKeepalive(Message msg) {
+        onPacketKeepaliveEvent(msg.arg1, PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+    }
+
+    /**
+     * Called by the network when a packet keepalive event occurs.
+     */
+    public void onPacketKeepaliveEvent(int slot, int reason) {
+        queueOrSendMessage(EVENT_PACKET_KEEPALIVE, slot, reason);
     }
 
     protected void log(String s) {

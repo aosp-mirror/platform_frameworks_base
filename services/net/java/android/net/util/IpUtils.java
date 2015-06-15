@@ -16,6 +16,8 @@
 
 package android.net.util;
 
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -135,5 +137,15 @@ public class IpUtils {
     public static short tcpChecksum(ByteBuffer buf, int ipOffset, int transportOffset,
             int transportLen) {
         return transportChecksum(buf, IPPROTO_TCP, ipOffset, transportOffset, transportLen);
+    }
+
+    public static String addressAndPortToString(InetAddress address, int port) {
+        return String.format(
+                (address instanceof Inet6Address) ? "[%s]:%d" : "%s:%d",
+                address.getHostAddress(), port);
+    }
+
+    public static boolean isValidUdpOrTcpPort(int port) {
+        return port > 0 && port < 65536;
     }
 }
