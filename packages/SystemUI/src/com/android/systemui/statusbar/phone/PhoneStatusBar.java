@@ -2692,6 +2692,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mNextAlarmController != null) {
             mNextAlarmController.dump(fd, pw, args);
         }
+        if (mAssistManager != null) {
+            mAssistManager.dump(fd, pw, args);
+        }
         if (mSecurityController != null) {
             mSecurityController.dump(fd, pw, args);
         }
