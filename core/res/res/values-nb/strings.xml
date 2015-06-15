@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Arbeidsprofilen er slettet"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeidsprofilen er slettet på grunn av manglende admin-app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler eller er ødelagt. Dette har ført til at arbeidsprofilen og alle data knyttet til den er blitt slettet. Kontakt administratoren for å få hjelp."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Arbeidsprofilen din er ikke lenger tilgjengelig på denne enheten."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Admin-appen mangler komponenter eller er ødelagt, og kan ikke brukes. Enheten din blir nå slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringelyd av"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibreringsmodus"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringelyd på"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Systemoppdatering for Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Forbereder oppdateringen …"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Behandler oppdateringspakken …"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Starter på nytt …"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Fabrikkinnstillinger"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Starter på nytt …"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutter…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Nettbrettet slås av."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV-en slår seg av."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tilgang til kontaktene dine"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posisjon"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"tilgang til enhetens plassering"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Den sosiale informasjonen din"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte tilgang til informasjon om kontaktene og de sosiale forbindelsene dine."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenderen"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"få tilgang til kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"se og administrer SMS-meldinger"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"få tilgang til bilder, media og filer på enheten din"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Brukerordlisten"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Les eller skriv inn ord i brukerordlisten."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bokmerkene og loggen"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorer"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"få tilgang til data fra sensorer og enheter du har på deg"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"få tilgang til informasjon om livstegnene dine og den fysiske aktiviteten din"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente innhold i vinduer"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Den kontrollerer innholdet i vinduer du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"slå på berøringsutforsking"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Appen kan hente listen over kontoene nettbrettet kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Gjør at appen får listen over kontoer TV-en kjenner til. Dette kan omfatte alle kontoer som er opprettet av appene du har installert."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Appen kan hente listen over kontoene telefonen kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"opprette kontoer og angi passord"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Lar appen bruke kontoadministratoren sine rettigheter til kontoautentisering, herunder oppretting av kontoer samt innhenting og angivelse av passord."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"legge til eller fjerne kontoer"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Lar appen utføre handlinger som å legge til og fjerne kontoer samt slette passord."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"bruke kontoer på enheten"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Appen kan be om autentiseringstokener."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"se nettverkstilkoblinger"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Appen kan se informasjon om nettverkstilkoblinger, slik som hvilke nettverk som finnes og er tilkoblet."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"full nettverkstilgang"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Lar appen endre synkroniseringsinnstillingene for en konto. For eksempel kan dette brukes til å synkronisere Personer-appen med en konto."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lese synkroniseringsstatistikk"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Lar appen lese synkroniseringsstatistikk for en konto, inkludert loggen over synkroniseringsaktiviteter og hvor mye data som er synkronisert."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"endre abonnement på nyhetskilder"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Lar appen endre strømmer som er synkronisert for øyeblikket. Ondsinnede apper kan endre de synkroniserte strømmene dine."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lese ord du har lagt til i ordboken"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Lar appen lese alle ord, navn og uttrykk som brukeren har lagret i brukerordlisten."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"legge til ord i brukerdefinert ordliste"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krev at lagrede appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Hindre bruk av alle kameraer på enheten."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Deaktiver skjermlåsfunksjoner"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Forhindrer bruk av enkelte skjermlåsfunksjoner."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktiver enkelte skjermlåsfunksjoner"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Forhindrer bruk av enkelte skjermlåsfunksjoner."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Mønsteret er påbegynt"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Mønsteret er slettet"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celle er lagt til"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Mønsteret er fullført"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %2$d av %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Legg til modul."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logg på nettverk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi har ikke Internett-tilgang"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Trykk for å se alternativene"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dårlig Internett-tilkobling."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillat tilkoblingen?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sjekker for feil"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> ble oppdaget"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"For overføring av bilder og medier"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Skadet <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> er skadet – prøv formatering"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Skadet <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> er skadet. Trykk for å fikse."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> som ikke støttes"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Denne enheten støtter ikke <xliff:g id="NAME">%s</xliff:g>. Trykk for å konfigurere i et støttet format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ble uventet fjernet"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Løs ut <xliff:g id="NAME">%s</xliff:g> før du fjerner den for å unngå tap av data"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ble fjernet."</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ble fjernet – sett inn et nytt et"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Løser ut <xliff:g id="NAME">%s</xliff:g> fremdeles …"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ikke fjern"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Konfigurering"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Konfigurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Løs ut"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Utforsk"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> mangler"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dataene er flyttet til <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Kunne ikke flytte dataene"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dataene er fremdeles på det opprinnelige stedet"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Fjernet"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Løst ut"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Kontrollerer …"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Klar"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Skrivebeskyttet"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Fjernet på en utrygg måte"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Skadet"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Støttes ikke"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Løser ut …"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatering …"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Ikke satt inn"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Finner ingen samsvarende aktiviteter."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Videresending av medieutdata"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lar en app videresende medieutdata til andre eksterne enheter."</string>
@@ -1538,9 +1541,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-forespørselen er endret til en RINGE-forespørsel."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-forespørselen er endret til en USSD-forespørsel."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-forespørselen er endret til en ny SS-forespørsel."</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port for USB-tilleggsutstyr for Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port for USB-tilleggsutstyr"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Flere alternativer"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Lukk overflytsmenyen"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

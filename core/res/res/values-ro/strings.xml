@@ -173,8 +173,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Profilul de serviciu a fost șters"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profilul de serviciu a fost șters, deoarece aplicația de administrare lipsește."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplicația de administrare a profilului de serviciu lipsește sau este deteriorată. Prin urmare, profilul de serviciu și datele asociate au fost șterse. Pentru asistență, contactați administratorul."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profilul de serviciu nu mai este disponibil pe acest dispozitiv."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Datele de pe dispozitiv vor fi șterse"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplicația de administrare nu poate fi utilizată, deoarece este deteriorată sau îi lipsesc componente. Datele de pe dispozitiv vor fi șterse. Pentru asistență, contactați administratorul."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
@@ -189,18 +188,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Sonerie dezactivată"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrare sonerie"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Sonerie activată"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Actualizare a sistemului Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Se pregătește actualizarea…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Se procesează pachetul de actualizare…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Se repornește…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Revenire la setările din fabrică"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Se repornește…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Se închide..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Computerul dvs. tablet PC se va închide."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizorul se va închide."</string>
@@ -237,14 +230,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Persoane de contact"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accesează persoanele de contact"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locație"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"accesează locația acestui dispozitiv"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informaţiile dvs. sociale"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acces direct la informaţii despre persoanele de contact și conexiunile dvs. sociale."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accesează calendarul"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"vede și gestionează mesajele SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"trimite și vede mesajele SMS"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"accesează fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Dicţionarul utilizatorului"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Citește sau scrie cuvinte în dicționarul utilizatorului."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcajele și Istoricul"</string>
@@ -256,7 +250,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițiază și gestionează apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzori"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"accesează datele de la senzori și dispozitivele portabile"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"accesează informații despre semnele vitale și activitatea fizică"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activează funcția Explorați prin atingere"</string>
@@ -401,12 +395,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Permite aplicației să obţină lista de conturi cunoscute de tabletă. Aceasta poate include conturile create de aplicațiile pe care le-aţi instalat."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Permite aplicației să obțină lista de conturi cunoscute de televizor. Aceasta poate include conturile create de aplicațiile pe care le-ați instalat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Permite aplicației să obţină lista de conturi cunoscute de telefon. Aceasta poate include conturile create de aplicațiile pe care le-aţi instalat."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"creează conturi și setează parole"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Permite aplicației să utilizeze capacităţile de autentificator de cont ale AccountManager, incluzând crearea conturilor și obţinerea și setarea parolelor."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"adaugă sau elimină conturi"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Permite aplicației să efectueze operaţii cum ar fi adăugarea și eliminarea conturilor și ştergerea parolelor."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"utilizează conturile de pe dispozitiv"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permite aplicației să solicite indicative de autentificare."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"vizualizează conexiunile la reţea"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Permite aplicației să vadă informaţiile despre conexiunile la reţea, cum ar fi reţelele existente și cele care sunt conectate."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acces deplin la reţea"</string>
@@ -467,8 +455,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permite unei aplicații să modifice setările de sincronizare ale unui cont. De exemplu, cu această permisiune aplicația poate activa sincronizarea aplicației Persoane cu un anumit cont."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"citire statistici privind sincronizarea"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permite unei aplicații să citească statisticile de sincronizare ale unui cont, inclusiv istoricul evenimentelor de sincronizare și volumul datelor sincronizate."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"scriere feeduri abonat"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Permite aplicației să modifice fluxurile sincronizate curent. Aplicaţiile rău intenţionate pot să modifice fluxurile sincronizate."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"citeşte termenii adăugaţi în dicţionar"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite aplicației să citească toate cuvintele, numele și expresiile stocate în dicţionarul utilizatorului."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"adaugă cuvinte în dicţionarul definit de utilizator"</string>
@@ -556,8 +542,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicației stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivaţi camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicaţi utilizarea camerelor foto de pe dispozitiv."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Opriți funcții blocare ecran"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Împiedicați utilizarea unor funcții ale blocării ecranului."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Opriți funcții de blocare ecran"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Împiedicați folosirea unor funcții de blocare a ecranului."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -743,6 +729,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Desenarea modelului a început"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Modelul a fost şters"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celulă adăugată"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Modelul a fost desenat"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d din %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Adăugaţi un widget."</string>
@@ -1002,6 +990,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Rețeaua Wi-Fi nu are acces la internet"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Atingeți pentru opțiuni"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nu se poate conecta la Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" are o conexiune la internet slabă."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Permiteți conectarea?"</string>
@@ -1098,15 +1088,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Se verifică dacă există erori"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"A fost detectat un nou <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pentru a transfera fotografii și fișiere media"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> deteriorat"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> este deteriorat; încercați să îl formatați"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> este deteriorat"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> este deteriorat. Atingeți pentru remediere."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> necompatibil"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Acest dispozitiv nu este compatibil cu acest <xliff:g id="NAME">%s</xliff:g>. Atingeți pentru configurare într-un format compatibil."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> scos pe neașteptate"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Demontați <xliff:g id="NAME">%s</xliff:g> înainte de a-l scoate pentru a nu pierde datele"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> scos"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> scos; introduceți unul nou"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Se scoate <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Nu scoateți"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Configurați"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Configurați"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Scoateți"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorați"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> lipsește"</string>
@@ -1117,6 +1109,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Date mutate pe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nu s-au putut muta datele"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Au rămas date în locația inițială"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Eliminat"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Scos"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Se verifică..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Pregătit"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Numai în citire"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Eliminat nesigur"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Deteriorat"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Necompatibil"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Se scoate…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Se formatează…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Nu este introdus"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nu s-a găsit nicio activitate potrivită."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Direcţionează rezultatele media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicații să direcţioneze rezultate media către alte dispozitive externe."</string>
@@ -1555,9 +1558,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Solicitarea SS este modificată într-o solicitare DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Solicitarea SS este modificată într-o solicitare USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Solicitarea SS este modificată într-o nouă solicitare SS."</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB Android periferic"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB periferic"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Mai multe opțiuni"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Închideți meniul suplimentar"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"仕事用プロファイルが削除されました"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"管理アプリがないため仕事用プロファイルが削除されました。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"お使いの仕事用プロファイルはこの端末で使用できなくなりました"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"端末のデータが消去されます"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理アプリの構成要素が不足しているか、アプリが破損しているため、ご利用になれません。端末のデータはこれから消去されます。管理者にサポートをご依頼ください。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"着信音オフ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"バイブレーション着信"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"着信音オン"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Androidシステムアップデート"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"更新を準備しています..."</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"更新パッケージを処理しています…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"再起動しています…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"データの初期化"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"再起動しています…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"テレビの電源をOFFにします。"</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置情報"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"この端末の位置情報にアクセス"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ソーシャル情報"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"連絡先とソーシャルコネクションに関する情報に直接アクセスします。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"カレンダー"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"カレンダーへのアクセス"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMSメッセージの表示と管理"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMSメッセージの送信と表示"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"端末上の写真、メディア、ファイルへのアクセス"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"単語リスト"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"単語リストの語句の読み取りまたは書き込みを行います"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ブックマークと履歴"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"通話の発信と管理"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"センサー"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"センサーやウェアラブル端末のデータへのアクセス"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"バイタルサインや身体活動に関する情報へのアクセス"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"タブレットで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"テレビで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"携帯端末で認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"アカウントの作成とパスワードの設定"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"アカウントの作成、パスワードの取得や設定など、AccountManagerのアカウント認証機能を使用することをアプリに許可します。"</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"アカウントの追加と削除"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"アカウントの追加や削除、パスワードの削除などの操作の実行をアプリに許可します。"</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"この端末上のアカウントの使用"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"認証トークンのリクエストをアプリに許可します。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ネットワーク接続の表示"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"存在するネットワークや接続しているネットワークなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ネットワークへのフルアクセス"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"アカウントの同期設定の変更をアプリに許可します。たとえば、連絡帳アプリとアカウントの同期を有効にするために使用できます。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"同期統計の読み取り"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"アカウントの同期ステータス（同期イベントの履歴、同期されたデータの量など）の読み取りをアプリに許可します。"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"登録したフィードの書き込み"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"現在同期されているフィードの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、同期されたフィードが変更される恐れがあります。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"辞書に追加された語句の読み取り"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"単語リストに登録されているすべての語句や名前を読み取ることをアプリに許可します。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"単語リストへの語句の追加"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"保存したアプリデータが暗号化されるようにします。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"カメラを無効にする"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"すべての端末カメラを使用できないようにします。"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"画面ロック機能の無効化"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"画面ロックの一部の機能の使用を禁止します。"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"画面ロックの一部の機能を無効化"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"画面ロックの一部の機能の使用を禁止します。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"パターンの描画を開始しました"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"パターンを消去しました"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"セルを追加しました"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"パターンの描画が完了しました"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。ウィジェット%2$d/%3$d。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ウィジェットを追加します。"</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ネットワークにログインしてください"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fiはインターネットに接続していません"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"タップするとオプションが表示されます"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiに接続できませんでした"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" はインターネット接続に問題があります。"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"接続を許可しますか？"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"エラーを確認中"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"新しい<xliff:g id="NAME">%s</xliff:g>が検出されました"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"写真などのメディアを転送するため"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g>が破損しています"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g>は破損しています。再フォーマットを試みてください。"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>は破損しています"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g>は破損しています。タップして解決してください。"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"この端末はこの<xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"データの喪失を防ぐため<xliff:g id="NAME">%s</xliff:g>を取り外す前にマウントを解除してください。"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g>が取り外されました"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g>が取り外されました。新しいものを挿入してください。"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"まだ<xliff:g id="NAME">%s</xliff:g>を取り外し中です…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"取り外さないでください"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"セットアップ"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"セットアップ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"取り外し"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"外部メディア"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g>が見つかりません"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"データを<xliff:g id="NAME">%s</xliff:g>に移動しました"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"データを移動できませんでした"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"データは元の場所にあります"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"取り外しました"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"取り外しました"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"確認しています…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"準備完了"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"読み取り専用"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"安全でない状態で取り外されました"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"破損しています"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"対応していません"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"取り外しています…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"フォーマットしています…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"挿入されていません"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"一致するアクティビティが見つかりません。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"メディア出力のルーティング"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
@@ -1538,9 +1541,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SSリクエストはDIALリクエストに変更されました。"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SSリクエストはUSSDリクエストに変更されました。"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SSリクエストは新しいSSリクエストに変更されました。"</string>
+    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB周辺機器ポート"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB周辺機器ポート"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"その他のオプション"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"オーバーフローを閉じる"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

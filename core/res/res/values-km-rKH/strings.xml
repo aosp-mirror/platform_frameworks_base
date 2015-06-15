@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"ប្រវត្តិរូបការងារត្រូវបានលុប"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ប្រវត្តិរូបការងារត្រូវបានលុបដោយសារបាត់បង់កម្មវិធីគ្រប់គ្រង។"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ប្រវត្តិរូបការងាររបស់អ្នកអាចបាត់បង់ ឬមានបញ្ហា។ ជាលទ្ធផល ប្រវត្តិរូបការងាររបស់អ្នក និងទិន្នន័យដែលពាក់ព័ន្ធត្រូវបានលុប។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ប្រវត្តិរូបការងាររបស់អ្នកមិនមាននៅលើឧបករណ៍នេះទៀតទេ។"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"កម្មវិធីគ្រប់គ្រងបាត់បង់សមាសធាតុ ឬមានបញ្ហា ហើយមិនអាចប្រើបានទេ។ ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុបឥឡូវនេះ។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"បិទ​កម្ម​វិធី​រោទ៍"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"កម្មវិធី​រោទ៍​ញ័រ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"បើក​កម្មវិធី​រោទ៍"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"បច្ចុប្បន្នភាពប្រព័ន្ធ Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"កំពុងរៀបចំធ្វើបច្ចុប្បន្នភាព…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"កំពុងដំណើរការកញ្ចប់បច្ចុប្បន្នភាព…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"កំពុងចាប់ផ្ដើមឡើងវិញ…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"កំណត់ទិន្នន័យដូចចេញពីរោងចក្រ"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"កំពុងចាប់ផ្ដើមឡើងវិញ…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"កំពុង​បិទ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​នឹង​បិទ។"</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ទូរទស្សន៍របស់អ្នកបិទ។"</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ទីតាំង"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ចូលដំណើរការទីតាំងរបស់ឧបករណ៍នេះ"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ព័ត៌មាន​សង្គម​របស់​អ្នក"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​ទំនាក់ទំនង និង​ការ​ភ្ជាប់​សង្គម​របស់​អ្នក។"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ប្រតិទិន"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"សារ SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"មើល និងគ្រប់គ្រប់សារ SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"ផ្ញើ និងមើលសារ SMS"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"ការ​ផ្ទុក"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ចូលដំណើការរូបភាព មេឌៀ និងឯកសារនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"វចនានុក្រម​អ្នក​ប្រើ"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"អាន ឬសរសេរនៅក្នុងវចនានុក្រមអ្នកប្រើ។"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ចំណាំ​ និង​ប្រវត្តិ"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ទូរស័ព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"ឧបករណ៍ចាប់សញ្ញា"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ចូលប្រើទិន្នន័យពីឧបករណ៍ចាប់សញ្ញា និងឧបករណ៍សម្រាប់ពាក់"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ចូលដំណើរការព័ត៌មានអំពីស្ថានភាពសុខភាព និងសកម្មភាពរាងកាយរបស់អ្នក"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទៅ​យក​មាតិកា​បង្អួច"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​មាតិកា​បង្អួច​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ឲ្យ​កម្មវិធី​ទទួល​បញ្ជី​គណនី​ដែល​បាន​ស្គាល់​ដោយ​កុំព្យូទ័រ​បន្ទះ។ វា​អាច​រួម​មាន​គណនី​ណាមួយ​ដែល​បាន​បង្កើត​ដោយ​កម្មវិធី​ដែល​អ្នក​បាន​ដំឡើង។"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"អនុញ្ញាតឲ្យកម្មវិធីទទួលយកបញ្ជីគណនីដែលទូរទស្សន៍បានស្គាល់។ វាអាចរាប់បញ្ចូលទាំងគណនីទាំងឡាយដែលបានបង្កើតដោយកម្មវិធីដែលអ្នកបានដំឡើង។"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ឲ្យ​កម្មវិធី​ទទួល​បញ្ជី​គណនី​ដែល​ទូរស័ព្ទ​​បាន​ស្គាល់​។ វា​អាច​មាន​គណនី​ដែល​បាន​បង្កើត​ដោយ​កម្មវិធី​ដែល​អ្នក​បាន​ដំឡើង។"</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"បង្កើត​គណនី និង​កំណត់​ពាក្យ​សម្ងាត់"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"ឲ្យ​កម្មវិធី​ប្រើ​សមត្ថភាព​កម្មវិធី​ផ្ទៀងផ្ទាត់​គណនី​នៃ​កម្មវិធី​គ្រប់គ្រង​គណនី រួមមាន​បង្កើត​គណនី និង​ទទួល ព្រម​ទាំង​កំណត់​ពាក្យ​សម្ងាត់​។"</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"បន្ថែម​ ឬ​លុប​​គណនី"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"ឲ្យ​កម្មវិធី​​អនុវត្ត​ប្រតិបត្តិការ​ដូចជា បន្ថែម និង​លុប​គណនី ព្រម​ទាំង​លុប​ពាក្យ​សម្ងាត់។"</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"ប្រើ​គណនី​​​លើ​ឧបករណ៍"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"ឲ្យ​កម្មវិធី​ស្នើ​និមិត្តសញ្ញា​ផ្ទៀងផ្ទាត់។"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"មើល​ការ​តភ្ជាប់​បណ្ដាញ"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ឲ្យ​កម្មវិធី​មើល​ព័ត៌មាន​អំពី​ការ​តភ្ជាប់​បណ្ដាញ​ដូចជា​​មាន​បណ្ដាញ​ណាមួយ​ និង​បណ្ដាញ​ត្រូវ​បាន​ភ្ជាប់។"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ចូល​ដំណើរការ​បណ្ដាញ​ពេញ​លេញ"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី។ ឧទាហរណ៍ វា​អាច​ត្រូវ​បាន​ប្រើ​ដើម្បី​បើក​ការ​ធ្វើ​សម​កាល​កម្ម​កម្មវិធី​របស់​មនុស្ស​ជា​មួយ​គណនី។"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"អាន​ស្ថិតិ​ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ឲ្យ​កម្មវិធី​អាន​ស្ថានភាព​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី រួមមាន​ព្រឹត្តិការណ៍​ប្រវត្តិ​ធ្វើ​សម​កាល​កម្ម ​និង​ទំហំ​ទិន្នន័យ​បាន​ធ្វើ​សម​កាល​កម្ម។"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"សរសេរ​​អត្ថបទ​ព័ត៌មាន​ដែល​​បាន​ជាវ"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ឲ្យ​កម្មវិធី​កែ​អត្ថបទ​ព័ត៌មាន​បាន​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្ន​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​ប្ដូរ​អត្ថបទ​បាន​ធ្វើ​សម​កាល​កម្ម​របស់​អ្នក។"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"អាន​ពាក្យ​ដែល​អ្នក​បាន​បន្ថែម​ទៅ​វចនានុក្រម"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ឲ្យ​កម្មវិធី​អាន​ពាក្យ ឈ្មោះ និង​ឃ្លា​ទាំងអស់​ដែល​អ្នកប្រើ​អាច​​រក្សាទុក​ក្នុង​វចនានុក្រម​​អ្នកប្រើ។"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"បន្ថែម​ពាក្យ​ទៅ​វចនានុក្រម​កំណត់​ដោយ​អ្នកប្រើ"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"តម្រូវ​ឲ្យ​ដាក់​លេខ​កូដ​ទិន្នន័យ​កម្មវិធី​បាន​រក្សាទុក។"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"បិទ​ម៉ាស៊ីន​ថត"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ការពារ​ការ​ប្រើ​ម៉ាស៊ីន​ថត​ឧបករណ៍​ទាំងអស់។"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"បិទលក្ខណៈពិសេសចាក់សោអេក្រង់"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"រារាំងអ្នកប្រើពីការប្រើលក្ខណៈពិសេសនៃការចាក់សោអេក្រង់មួយចំនួន។"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"បិទលក្ខណៈពិសេសចាក់សោអេក្រង់មួយចំនួន"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"រារាំងការប្រើលក្ខណៈពិសេសនៃការចាក់សោអេក្រង់មួយចំនួន។"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ផ្ទះ"</item>
     <item msgid="869923650527136615">"​ចល័ត"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"បាន​ចាប់​ផ្ដើម​លំនាំ"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"បាន​សម្អាត​លំនាំ"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"បាន​បន្ថែម​ក្រឡា"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"បាន​បញ្ចប់​លំនាំ"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. ធាតុ​ក្រាហ្វិក %2$d នៃ %3$d ។"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"បន្ថែម​ធាតុ​ក្រាហ្វិក​។"</string>
@@ -997,6 +985,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi មិនមានអ៊ិនធឺណិតនោះទេ"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"ប៉ះដើម្បីទទួលបានជម្រើស"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"មិន​​អាច​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត​មិន​ល្អ។"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"អនុញ្ញាត​ភ្ជាប់?"</string>
@@ -1093,15 +1083,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"កំពុងពិនិត្យរកកំហុស"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"បានរកឃើញ <xliff:g id="NAME">%s</xliff:g> ថ្មី"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"សម្រាប់ផ្ទេររូបភាព និងមេឌៀ"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> មានការខូចខាត"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> មានការខូចខាត សូមព្យាយាមសម្អាតវាម្តងទៀត"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> ខូច"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> ខូចហើយ សូមប៉ះដើម្បីដោះស្រាយ។"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> មិនគាំទ្រ"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"ឧបករណ៍នេះមិនគាំទ្រ <xliff:g id="NAME">%s</xliff:g> នេះទេ។ សូមប៉ះដើម្បីដំឡើងទម្រង់ដែលគាំទ្រ។"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញដោយមិនបានរំពឹងទុក"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ផ្តាច់ <xliff:g id="NAME">%s</xliff:g> មុនពេលដកចេញដើម្បីជៀងវាងការបាត់បង់ទិន្នន័យ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញ"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញ សូមដោតចូលថ្មីមួយទៀត"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"នៅកំពុងដក <xliff:g id="NAME">%s</xliff:g> ចេញ…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"កុំដកចេញ"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"ដំឡើង"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"ដំឡើង"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ដកចេញ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"រុករក"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"បាត់ <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1112,6 +1104,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"ទិន្នន័យបានផ្លាស់ទីទៅ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"មិនអាចផ្លាស់ទីទិន្នន័យបានទេ"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ទិន្នន័យនៅក្នុងទីតាំងដើមដដែល"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"បានយកចេញ"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"បានដកចេញ"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"កំពុងពិនិត្យមើល..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"រួចរាល់"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"បានតែអានប៉ុណ្ណោះ"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"បានយកចេញដោយគ្មានសុវត្ថិភាព"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"ខូច"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"មិនគាំទ្រ"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"កំពុងដកចេញ…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"កំពុងសម្អាត…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"មិនបានដាក់ចូលទេ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"រក​មិន​ឃើញ​សកម្មភាព​ផ្គូផ្គង។"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
@@ -1540,9 +1543,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរការហៅទូរស័ព្ទ។"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ USSD។"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ SS ថ្មី។"</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ប្រវត្តិរូបការងារ"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"ឧបករណ៍រន្ធ USB Android បន្ថែម"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"ឧបករណ៍រន្ធ USB បន្ថែម"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ជម្រើសច្រើនទៀត"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"បិទលើសចំណុះ"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>

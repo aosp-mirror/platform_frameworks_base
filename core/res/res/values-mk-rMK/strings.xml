@@ -172,8 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Работниот профил е избришан"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Работниот профил е избришан заради отсуството на апликација на администратор."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Апликацијата на администраторот за работниот профил недостасува или е оштетена. Како резултат на тоа, работниот профил и поврзаните податоци ќе се избришат. Контактирајте со администраторот за помош."</string>
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Работниот профил веќе не е достапен на уредов."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уредот ќе се избрише"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"На апликацијата на администраторот ѝ недостасуваат компоненти или е оштетена, па не може да се користи. Уредот ќе се избрише сега. Контактирајте со администраторот за помош."</string>
     <string name="me" msgid="6545696007631404292">"Јас"</string>
@@ -188,18 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Исклучено ѕвонење"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ѕвонење на вибрации"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Вклучено ѕвонење"</string>
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Системско ажурирање на Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Се подготвува ажурирањето…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Пакетот за ажурирање се обработува..."</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Се престартува…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Ресетирање фабрички податоци"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Се престартува…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Се исклучува..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Вашиот таблет ќе се исклучи."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Вашиот телевизор ќе се исклучи."</string>
@@ -236,14 +229,15 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"пристапи до контактите"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"да пристапува до локацијата на овој уред"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Тво социјални информации"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Директен пристап до информации за вашите контакти и социјални врски."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"пристапи до календарот"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"СМС"</string>
-    <string name="permgroupdesc_sms" msgid="3714409903876407981">"прегледај и управувај со СМС пораки"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"испраќа и прикажува СМС-пораки"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Меморија"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"пристапува до фотографии, медиуми и датотеки на уредот"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Кориснички речник"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Читајте или пишувајте зборови во корисничкиот речник."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Обележувачи и историја"</string>
@@ -255,7 +249,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"повикувај и управувај со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сензори"</string>
-    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"пристапи до податоци од сензори и уреди за носење"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"пристапува до информации за виталните знаци и физичката активност"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Врати содржина на прозорец"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Провери ја содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>
@@ -400,12 +394,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Овозможува апликацијата да го добие списокот со сметки познати на таблетот. Ова може да опфати кои било сметки што ги создале апликациите што сте ги инсталирале."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Дозволува апликацијата да ја добие листата со сметки која му е позната на телевизорот. Ова може да вклучува кои било сметки создадени од апликациите кои сте ги инсталирале."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Овозможува апликацијата да го добие списокот со сметки познати на телефонот. Ова може да опфати кои било сметки што ги создале апликациите што сте ги инсталирале."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"создај сметки и постави лозинки"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Дозволува апликацијата да ги користи способностите за автентикација на сметка на Управникот со сметка, вклучувајќи правење сметки и добивање и поставување лозинки."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"додај или отстрани сметки"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Дозволува апликацијата да врши операции како додавање или отстранување сметки, како и бришење на нивните лозинки."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"употреби сметки на уредот"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Дозволува апликацијата да бара токени за автентикација."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"прикажи мрежни врски"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Овозможува апликацијата да ги види информациите за мрежните конекции, како на пр., кои мрежи постојат и се поврзани."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"целосен пристап на мрежа"</string>
@@ -466,8 +454,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Овозможува апликацијата да ги менува подесувањата за синхронизирање на сметка. На пример, ова може да се употреби да овозможи синхронизација на апликацијата „Луѓе“ со сметка."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"читај статистика за синхронизација"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Овозможува апликацијата да ја чита статистиката за синхронизација на сметка, вклучувајќи ја и историјата на синхронизирани настани и колку податоци се синхронизирани."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"пишувај претплатени навестувања на содржина"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Дозволува апликацијата да ги изменува тековно синхронизираните навестувања. Злонамерните апликации може да ги променат вашите синхронизирани навестувања."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"прочитај ги термините кои ги додаде во речникот"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Овозможува апликацијата да ги чита сите зборови, имиња и фрази кои корисникот можеби ги зачувал во речникот на корисникот."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"додај зборови во речник дефиниран од корисникот"</string>
@@ -555,8 +541,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Барај зачуваните податоци за апликација да се шифрирани."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Оневозможи фотоапарати"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Спречи употреба на сите камери на уредот."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Исклучи функции на закл. екран"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Спречи употреба на некои функции од заклучување на екранот."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Онев. функции од заклуч. екран"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Спречете користење на некои функции од заклучување на екранот."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Дома"</item>
     <item msgid="869923650527136615">"Мобилен"</item>
@@ -742,6 +728,8 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Шемата е започната"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Шемата е исчистена"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Додадена е ќелија"</string>
+    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
+    <skip />
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Шемата е целосна"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виџет %2$d од %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Додај виџет."</string>
@@ -995,6 +983,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Најавете се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi нема пристап на интернет"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Допри за опции"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можеше да се поврзе со Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" има слаба конекција на интернет."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дозволете поврзување?"</string>
@@ -1091,15 +1081,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Се проверува за грешки"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Откриена е нова <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"За пренесување фотографии и медиуми"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Оштетена <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> е оштетена; обидете се да ја форматирате повторно"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Оштетена <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> е оштетена. Допрете за да поправите."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Неподдржана <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Уредов не ја поддржува <xliff:g id="NAME">%s</xliff:g>. Допрете за да поставите во поддржан формат."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> неочекувано е отстранета"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Откачете ја <xliff:g id="NAME">%s</xliff:g> пред да ја отстраните за да избегнете губење на податоците"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Отстранета <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> е отстранета; вметнете нова"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Сѐ уште се вади <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Не отстранувај"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"Поставување"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Постави"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Извади"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Истражувај"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> недостасува"</string>
@@ -1110,6 +1102,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Податоците се преместени во <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Не може да се прем. податоците"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Податоците се оставени на провобитната локација"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Отстрането"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Исфрлено"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Се проверува..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Подготвено"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Само за читање"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Отстранет небезбедно"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Оштетено"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Неподдржано"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Се исфрла…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Се форматира..."</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Не е внесено"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Не се пронајдени соодветни активности."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Насочи излез за медиуми"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Овозможува апликацијата да насочува излез за медиуми кон други надворешни уреди."</string>
@@ -1540,9 +1543,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Барањето SS е изменето во барање DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Барањето SS е изменето во барање USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Барањето SS е изменето во ново барање SS."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Надворешна порта на УСБ за Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Надворешна порта на УСБ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Повеќе опции"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Затвори прелевање"</string>
+    <!-- no translation found for selected_count (7187339492915744615) -->
 </resources>
