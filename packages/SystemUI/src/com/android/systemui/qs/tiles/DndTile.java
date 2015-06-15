@@ -38,6 +38,7 @@ import com.android.systemui.volume.ZenModePanel;
 
 /** Quick settings tile: Do not disturb **/
 public class DndTile extends QSTile<QSTile.BooleanState> {
+
     private static final Intent ZEN_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 
@@ -46,6 +47,14 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
     private static final String EXTRA_VISIBLE = "visible";
+
+    private static final QSTile.Icon TOTAL_SILENCE =
+            ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
+
+    private final AnimationIcon mDisable =
+            new AnimationIcon(R.drawable.ic_dnd_disable_animation);
+    private final AnimationIcon mDisableTotalSilence =
+            new AnimationIcon(R.drawable.ic_dnd_total_silence_disable_animation);
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
@@ -89,6 +98,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void handleClick() {
+        mDisable.setAllowAnimation(true);
+        mDisableTotalSilence.setAllowAnimation(true);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
@@ -114,7 +125,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                         R.string.accessibility_quick_settings_dnd_priority_on);
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
+                state.icon = TOTAL_SILENCE;
                 state.label = mContext.getString(R.string.quick_settings_dnd_none_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_none_on);
@@ -126,7 +137,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                         R.string.accessibility_quick_settings_dnd_alarms_on);
                 break;
             default:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_off);
+                state.icon = TOTAL_SILENCE.equals(state.icon) ? mDisableTotalSilence : mDisable;
                 state.label = mContext.getString(R.string.quick_settings_dnd_label);
                 state.contentDescription =  mContext.getString(
                         R.string.accessibility_quick_settings_dnd_off);
