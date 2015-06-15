@@ -29,7 +29,8 @@
     <string name="menu_save" msgid="2394743337684426338">"Saqlash"</string>
     <string name="menu_share" msgid="3075149983979628146">"Ulashish"</string>
     <string name="menu_delete" msgid="8138799623850614177">"O‘chirish"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Barchasini tanlash"</string>
+    <!-- no translation found for menu_select_all (8323579667348729928) -->
+    <skip />
     <string name="menu_copy" msgid="3612326052677229148">"Nusxalash…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ichki xotirani ko‘rsatish"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD kartani ko‘rsatish"</string>
@@ -39,7 +40,6 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayl hajmini berkitish"</string>
     <string name="button_select" msgid="527196987259139214">"Tanlash"</string>
     <string name="button_copy" msgid="8706475544635021302">"Nusxalash"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ta tanlandi"</string>
     <string name="sort_name" msgid="9183560467917256779">"Nomi bo‘yicha"</string>
     <string name="sort_date" msgid="586080032956151448">"Tahrir sanasi bo‘yicha"</string>
     <string name="sort_size" msgid="3350681319735474741">"Hajmi bo‘yicha"</string>
