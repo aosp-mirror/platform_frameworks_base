@@ -289,6 +289,8 @@
     <protected-broadcast android:name="android.location.GPS_FIX_CHANGE" />
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
+    <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
+
     <protected-broadcast
         android:name="com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION" />
 
