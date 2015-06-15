@@ -196,7 +196,7 @@ public class UsageStatsService extends SystemService implements
 
             mAppWidgetManager = getContext().getSystemService(AppWidgetManager.class);
             mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                    ServiceManager.getService(DeviceIdleController.SERVICE_NAME));
+                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
             mBatteryStats = IBatteryStats.Stub.asInterface(
                     ServiceManager.getService(BatteryStats.SERVICE_NAME));
             mDisplayManager = (DisplayManager) getContext().getSystemService(
