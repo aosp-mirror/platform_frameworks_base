@@ -1592,6 +1592,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/enterprise/app-compatibility.html",
       "training/enterprise/app-restrictions.html",
+      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
       "samples/AppRestrictionSchema/index.html",
       "samples/AppRestrictionEnforcer/index.html"
     ]
