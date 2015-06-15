@@ -853,7 +853,38 @@ public class VoiceInteractionManagerService extends SystemService {
         PackageMonitor mPackageMonitor = new PackageMonitor() {
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
-                return super.onHandleForceStop(intent, packages, uid, doit);
+                if (DEBUG) Slog.d(TAG, "onHandleForceStop uid=" + uid + " doit=" + doit);
+
+                int userHandle = UserHandle.getUserId(uid);
+                ComponentName curInteractor = getCurInteractor(userHandle);
+                ComponentName curRecognizer = getCurRecognizer(userHandle);
+                boolean hit = false;
+                for (String pkg : packages) {
+                    if (curInteractor != null && pkg.equals(curInteractor.getPackageName())) {
+                        hit = true;
+                        break;
+                    } else if (curRecognizer != null
+                            && pkg.equals(curRecognizer.getPackageName())) {
+                        hit = true;
+                        break;
+                    }
+                }
+                if (hit && doit) {
+                    // The user is force stopping our current interactor/recognizer.
+                    // Clear the current settings and restore default state.
+                    synchronized (VoiceInteractionManagerService.this) {
+                        mSoundTriggerHelper.stopAllRecognitions();
+                        if (mImpl != null) {
+                            mImpl.shutdownLocked();
+                            mImpl = null;
+                        }
+                        setCurInteractor(null, userHandle);
+                        setCurRecognizer(null, userHandle);
+                        initForUser(userHandle);
+                        switchImplementationIfNeededLocked(true);
+                    }
+                }
+                return hit;
             }
 
             @Override
@@ -865,51 +896,53 @@ public class VoiceInteractionManagerService extends SystemService {
                 int userHandle = getChangingUserId();
                 if (DEBUG) Slog.d(TAG, "onSomePackagesChanged user=" + userHandle);
 
-                ComponentName curInteractor = getCurInteractor(userHandle);
-                ComponentName curRecognizer = getCurRecognizer(userHandle);
-                if (curRecognizer == null) {
-                    // Could a new recognizer appear when we don't have one pre-installed?
-                    if (anyPackagesAppearing()) {
-                        curRecognizer = findAvailRecognizer(null, userHandle);
-                        if (curRecognizer != null) {
-                            setCurRecognizer(curRecognizer, userHandle);
+                synchronized (VoiceInteractionManagerService.this) {
+                    ComponentName curInteractor = getCurInteractor(userHandle);
+                    ComponentName curRecognizer = getCurRecognizer(userHandle);
+                    if (curRecognizer == null) {
+                        // Could a new recognizer appear when we don't have one pre-installed?
+                        if (anyPackagesAppearing()) {
+                            curRecognizer = findAvailRecognizer(null, userHandle);
+                            if (curRecognizer != null) {
+                                setCurRecognizer(curRecognizer, userHandle);
+                            }
                         }
-                    }
-                    return;
-                }
-
-                if (curInteractor != null) {
-                    int change = isPackageDisappearing(curInteractor.getPackageName());
-                    if (change == PACKAGE_PERMANENT_CHANGE) {
-                        // The currently set interactor is permanently gone; fall back to
-                        // the default config.
-                        setCurInteractor(null, userHandle);
-                        setCurRecognizer(null, userHandle);
-                        initForUser(userHandle);
                         return;
                     }
 
-                    change = isPackageAppearing(curInteractor.getPackageName());
-                    if (change != PACKAGE_UNCHANGED) {
-                        // If current interactor is now appearing, for any reason, then
-                        // restart our connection with it.
-                        if (mImpl != null && curInteractor.getPackageName().equals(
-                                mImpl.mComponent.getPackageName())) {
-                            switchImplementationIfNeededLocked(true);
+                    if (curInteractor != null) {
+                        int change = isPackageDisappearing(curInteractor.getPackageName());
+                        if (change == PACKAGE_PERMANENT_CHANGE) {
+                            // The currently set interactor is permanently gone; fall back to
+                            // the default config.
+                            setCurInteractor(null, userHandle);
+                            setCurRecognizer(null, userHandle);
+                            initForUser(userHandle);
+                            return;
                         }
+
+                        change = isPackageAppearing(curInteractor.getPackageName());
+                        if (change != PACKAGE_UNCHANGED) {
+                            // If current interactor is now appearing, for any reason, then
+                            // restart our connection with it.
+                            if (mImpl != null && curInteractor.getPackageName().equals(
+                                    mImpl.mComponent.getPackageName())) {
+                                switchImplementationIfNeededLocked(true);
+                            }
+                        }
+                        return;
                     }
-                    return;
-                }
 
-                // There is no interactor, so just deal with a simple recognizer.
-                int change = isPackageDisappearing(curRecognizer.getPackageName());
-                if (change == PACKAGE_PERMANENT_CHANGE
-                        || change == PACKAGE_TEMPORARY_CHANGE) {
-                    setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
+                    // There is no interactor, so just deal with a simple recognizer.
+                    int change = isPackageDisappearing(curRecognizer.getPackageName());
+                    if (change == PACKAGE_PERMANENT_CHANGE
+                            || change == PACKAGE_TEMPORARY_CHANGE) {
+                        setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
 
-                } else if (isPackageModified(curRecognizer.getPackageName())) {
-                    setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
-                            userHandle), userHandle);
+                    } else if (isPackageModified(curRecognizer.getPackageName())) {
+                        setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
+                                userHandle), userHandle);
+                    }
                 }
             }
         };
