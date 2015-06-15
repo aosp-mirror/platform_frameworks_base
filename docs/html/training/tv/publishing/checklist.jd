@@ -67,12 +67,12 @@ page.article=true
 
 <li>
   Eliminate requirements for unsupported hardware in your app.
-  <p>See <a href="training/tv/start/hardware.html#declare-hardware-requirements">Declaring hardware requirements for TV</a>.</p>
+  <p>See <a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">Declaring hardware requirements for TV</a>.</p>
 </li>
 
 <li>
   Ensure permissions do not imply hardware requirements
-  <p>See <a href="training/tv/start/hardware.html#hardware-permissions">Declaring permissions that imply hardware features</a>.</p>
+  <p>See <a href="{@docRoot}training/tv/start/hardware.html#hardware-permissions">Declaring permissions that imply hardware features</a>.</p>
 </li>
 
 </ol>
