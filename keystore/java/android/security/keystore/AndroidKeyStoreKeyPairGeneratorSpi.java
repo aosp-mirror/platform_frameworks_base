@@ -624,7 +624,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             int keySizeBits,
             KeyGenParameterSpec spec) {
         // Constraints:
-        // 1. Key must be authorized for signing.
+        // 1. Key must be authorized for signing without user authentication.
         // 2. Signature digest must be one of key's authorized digests.
         // 3. For RSA keys, the digest output size must not exceed modulus size minus space needed
         //    for RSA PKCS#1 signature padding (about 29 bytes: minimum 10 bytes of padding + 15--19
@@ -634,6 +634,10 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         if ((spec.getPurposes() & KeyProperties.PURPOSE_SIGN) == 0) {
             // Key not authorized for signing
+            return null;
+        }
+        if (spec.isUserAuthenticationRequired()) {
+            // Key not authorized for use without user authentication
             return null;
         }
         if (!spec.isDigestsSpecified()) {
