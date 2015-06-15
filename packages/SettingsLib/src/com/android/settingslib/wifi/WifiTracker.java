@@ -273,7 +273,7 @@ public class WifiTracker {
                         accessPoints.add(accessPoint);
 
                     if (config.isPasspoint() == false) {
-                        apMap.put(accessPoint.getSsid(), accessPoint);
+                        apMap.put(accessPoint.getSsidStr(), accessPoint);
                     }
                 } else {
                     // If we aren't using saved networks, drop them into the cache so that
@@ -321,7 +321,7 @@ public class WifiTracker {
                     }
 
                     accessPoints.add(accessPoint);
-                    apMap.put(accessPoint.getSsid(), accessPoint);
+                    apMap.put(accessPoint.getSsidStr(), accessPoint);
                 }
             }
         }
