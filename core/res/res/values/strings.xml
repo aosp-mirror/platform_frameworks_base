@@ -4196,6 +4196,7 @@
 
     <!-- Label describing the number of selected items [CHAR LIMIT=48] -->
     <plurals name="selected_count">
+        <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
         <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
     </plurals>
 </resources>
