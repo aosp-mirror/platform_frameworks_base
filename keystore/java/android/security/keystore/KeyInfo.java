@@ -33,6 +33,8 @@ import javax.crypto.SecretKey;
  * is authorized for (e.g., only in {@code CBC} mode, or signing only), whether the key should be
  * encrypted at rest, the key's and validity start and end dates.
  *
+ * <p>Instances of this class are immutable.
+ *
  * <p><h3>Example: Symmetric Key</h3>
  * The following example illustrates how to obtain a {@code KeyInfo} describing the provided Android
  * Keystore {@link SecretKey}.
@@ -102,9 +104,9 @@ public class KeyInfo implements KeySpec {
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
         mKeySize = keySize;
-        mKeyValidityStart = keyValidityStart;
-        mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
-        mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
+        mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
+        mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
+        mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
         mPurposes = purposes;
         mEncryptionPaddings =
                 ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
@@ -155,7 +157,7 @@ public class KeyInfo implements KeySpec {
      */
     @Nullable
     public Date getKeyValidityStart() {
-        return mKeyValidityStart;
+        return Utils.cloneIfNotNull(mKeyValidityStart);
     }
 
     /**
@@ -165,7 +167,7 @@ public class KeyInfo implements KeySpec {
      */
     @Nullable
     public Date getKeyValidityForConsumptionEnd() {
-        return mKeyValidityForConsumptionEnd;
+        return Utils.cloneIfNotNull(mKeyValidityForConsumptionEnd);
     }
 
     /**
@@ -175,7 +177,7 @@ public class KeyInfo implements KeySpec {
      */
     @Nullable
     public Date getKeyValidityForOriginationEnd() {
-        return mKeyValidityForOriginationEnd;
+        return Utils.cloneIfNotNull(mKeyValidityForOriginationEnd);
     }
 
     /**
