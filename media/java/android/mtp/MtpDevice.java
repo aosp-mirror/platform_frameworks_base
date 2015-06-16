@@ -132,7 +132,8 @@ public final class MtpDevice {
      *
      * @param storageId the storage unit to query
      * @param format the format of the object to return, or zero for all formats
-     * @param objectHandle the parent object to query, or zero for the storage root
+     * @param objectHandle the parent object to query, -1 for the storage root,
+     *     or zero for all objects
      * @return the object handles
      */
     public int[] getObjectHandles(int storageId, int format, int objectHandle) {
