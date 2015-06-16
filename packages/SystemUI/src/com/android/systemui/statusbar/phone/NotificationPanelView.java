@@ -1180,7 +1180,9 @@ public class NotificationPanelView extends PanelView implements
         } else if (statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.animate().cancel();
-            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            if (!mDozing) {
+                mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            }
             mKeyguardBottomArea.setAlpha(1f);
         } else {
             mKeyguardBottomArea.animate().cancel();
@@ -1717,7 +1719,8 @@ public class NotificationPanelView extends PanelView implements
         float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
         mKeyguardStatusBar.setAlpha(Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                 * mKeyguardStatusBarAnimateAlpha);
-        mKeyguardStatusBar.setVisibility(mKeyguardStatusBar.getAlpha() != 0f ? VISIBLE : INVISIBLE);
+        mKeyguardStatusBar.setVisibility(mKeyguardStatusBar.getAlpha() != 0f
+                && !mDozing ? VISIBLE : INVISIBLE);
         setQsTranslation(mQsExpansionHeight);
     }
 
