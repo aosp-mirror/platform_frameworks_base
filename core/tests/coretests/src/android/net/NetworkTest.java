@@ -16,11 +16,14 @@
 
 package android.net;
 
+import static android.test.MoreAsserts.assertNotEqual;
+
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.Network;
 import android.test.suitebuilder.annotation.SmallTest;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -29,6 +32,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Inet6Address;
 import java.net.SocketException;
+
 import junit.framework.TestCase;
 
 public class NetworkTest extends TestCase {
@@ -92,5 +96,51 @@ public class NetworkTest extends TestCase {
             mNetwork.bindSocket(mLocalClient.getFileDescriptor());
             fail("SocketException not thrown");
         } catch (SocketException expected) {}
+    }
+
+    @SmallTest
+    public void testZeroIsObviousForDebugging() {
+        Network zero = new Network(0);
+        assertEquals(0, zero.hashCode());
+        assertEquals(0, zero.getNetworkHandle());
+        assertEquals("0", zero.toString());
+    }
+
+    @SmallTest
+    public void testGetNetworkHandle() {
+        Network one = new Network(1);
+        Network two = new Network(2);
+        Network three = new Network(3);
+
+        // None of the hashcodes are zero.
+        assertNotEqual(0, one.hashCode());
+        assertNotEqual(0, two.hashCode());
+        assertNotEqual(0, three.hashCode());
+
+        // All the hashcodes are distinct.
+        assertNotEqual(one.hashCode(), two.hashCode());
+        assertNotEqual(one.hashCode(), three.hashCode());
+        assertNotEqual(two.hashCode(), three.hashCode());
+
+        // None of the handles are zero.
+        assertNotEqual(0, one.getNetworkHandle());
+        assertNotEqual(0, two.getNetworkHandle());
+        assertNotEqual(0, three.getNetworkHandle());
+
+        // All the handles are distinct.
+        assertNotEqual(one.getNetworkHandle(), two.getNetworkHandle());
+        assertNotEqual(one.getNetworkHandle(), three.getNetworkHandle());
+        assertNotEqual(two.getNetworkHandle(), three.getNetworkHandle());
+
+        // The handles are not equal to the hashcodes.
+        assertNotEqual(one.hashCode(), one.getNetworkHandle());
+        assertNotEqual(two.hashCode(), two.getNetworkHandle());
+        assertNotEqual(three.hashCode(), three.getNetworkHandle());
+
+        // Adjust as necessary to test an implementation's specific constants.
+        // When running with runtest, "adb logcat -s TestRunner" can be useful.
+        assertEquals(4311403230L, one.getNetworkHandle());
+        assertEquals(8606370526L, two.getNetworkHandle());
+        assertEquals(12901337822L, three.getNetworkHandle());
     }
 }
