@@ -39,22 +39,22 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     /**
      * @hide
      */
-    public int mControllerTxTimeMs;
+    public long mControllerTxTimeMs;
 
     /**
      * @hide
      */
-    public int mControllerRxTimeMs;
+    public long mControllerRxTimeMs;
 
     /**
      * @hide
      */
-    public int mControllerIdleTimeMs;
+    public long mControllerIdleTimeMs;
 
     /**
      * @hide
      */
-    public int mControllerEnergyUsed;
+    public long mControllerEnergyUsed;
 
     public static final int STACK_STATE_INVALID = 0;
     public static final int STACK_STATE_STATE_ACTIVE = 1;
@@ -62,7 +62,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     public static final int STACK_STATE_STATE_IDLE = 3;
 
     public WifiActivityEnergyInfo(long timestamp, int stackState,
-                                  int txTime, int rxTime, int idleTime, int energyUsed) {
+                                  long txTime, long rxTime, long idleTime, long energyUsed) {
         mTimestamp = timestamp;
         mStackState = stackState;
         mControllerTxTimeMs = txTime;
@@ -88,10 +88,10 @@ public final class WifiActivityEnergyInfo implements Parcelable {
         public WifiActivityEnergyInfo createFromParcel(Parcel in) {
             long timestamp = in.readLong();
             int stackState = in.readInt();
-            int txTime = in.readInt();
-            int rxTime = in.readInt();
-            int idleTime = in.readInt();
-            int energyUsed = in.readInt();
+            long txTime = in.readLong();
+            long rxTime = in.readLong();
+            long idleTime = in.readLong();
+            long energyUsed = in.readLong();
             return new WifiActivityEnergyInfo(timestamp, stackState,
                     txTime, rxTime, idleTime, energyUsed);
         }
@@ -103,10 +103,10 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mTimestamp);
         out.writeInt(mStackState);
-        out.writeInt(mControllerTxTimeMs);
-        out.writeInt(mControllerRxTimeMs);
-        out.writeInt(mControllerIdleTimeMs);
-        out.writeInt(mControllerEnergyUsed);
+        out.writeLong(mControllerTxTimeMs);
+        out.writeLong(mControllerRxTimeMs);
+        out.writeLong(mControllerIdleTimeMs);
+        out.writeLong(mControllerEnergyUsed);
     }
 
     public int describeContents() {
@@ -123,30 +123,29 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     /**
      * @return tx time in ms
      */
-    public int getControllerTxTimeMillis() {
-        return (int)mControllerTxTimeMs;
+    public long getControllerTxTimeMillis() {
+        return mControllerTxTimeMs;
     }
 
     /**
      * @return rx time in ms
      */
-    public int getControllerRxTimeMillis() {
-        return (int)mControllerRxTimeMs;
+    public long getControllerRxTimeMillis() {
+        return mControllerRxTimeMs;
     }
 
     /**
      * @return idle time in ms
      */
-    public int getControllerIdleTimeMillis() {
-        return (int)mControllerIdleTimeMs;
+    public long getControllerIdleTimeMillis() {
+        return mControllerIdleTimeMs;
     }
-
 
     /**
      * product of current(mA), voltage(V) and time(ms)
      * @return energy used
      */
-    public int getControllerEnergyUsed() {
+    public long getControllerEnergyUsed() {
         return mControllerEnergyUsed;
     }
     /**
@@ -160,8 +159,8 @@ public final class WifiActivityEnergyInfo implements Parcelable {
      * @return if the record is valid
      */
     public boolean isValid() {
-        return ((getControllerTxTimeMillis() !=0) ||
-                (getControllerRxTimeMillis() !=0) ||
-                (getControllerIdleTimeMillis() !=0));
+        return ((mControllerTxTimeMs !=0) ||
+                (mControllerRxTimeMs !=0) ||
+                (mControllerIdleTimeMs !=0));
     }
 }

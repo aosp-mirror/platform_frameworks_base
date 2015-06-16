@@ -1167,6 +1167,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             BluetoothActivityEnergyInfo info = adapter.getControllerActivityEnergyInfo(
                     BluetoothAdapter.ACTIVITY_ENERGY_INFO_REFRESHED);
             if (info != null && info.isValid()) {
+                if (info.getControllerEnergyUsed() < 0 || info.getControllerIdleTimeMillis() < 0 ||
+                        info.getControllerRxTimeMillis() < 0 || info.getControllerTxTimeMillis() < 0) {
+                    Slog.wtf(TAG, "Bluetooth energy data is invalid: " + info);
+                }
                 return info;
             }
         }
