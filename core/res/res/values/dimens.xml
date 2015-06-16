@@ -399,6 +399,7 @@
      <dimen name="floating_toolbar_maximum_overflow_height">192dp</dimen>
      <dimen name="floating_toolbar_horizontal_margin">16dp</dimen>
      <dimen name="floating_toolbar_vertical_margin">8dp</dimen>
+     <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
 
      <dimen name="chooser_grid_padding">0dp</dimen>
 </resources>

@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.FloatingToolbar;
@@ -44,6 +45,7 @@ public class FloatingActionMode extends ActionMode {
     private final Rect mViewRect;
     private final Rect mScreenRect;
     private final View mOriginatingView;
+    private final int mBottomAllowance;
 
     private final Runnable mMovingOff = new Runnable() {
         public void run() {
@@ -77,6 +79,10 @@ public class FloatingActionMode extends ActionMode {
         mScreenRect = new Rect();
         mOriginatingView = Preconditions.checkNotNull(originatingView);
         mOriginatingView.getLocationInWindow(mViewPosition);
+        // Allow the content rect to overshoot a little bit beyond the
+        // bottom view bound if necessary.
+        mBottomAllowance = context.getResources()
+                .getDimensionPixelSize(R.dimen.content_rect_bottom_clip_allowance);
     }
 
     public void setFloatingToolbar(FloatingToolbar floatingToolbar) {
@@ -141,7 +147,7 @@ public class FloatingActionMode extends ActionMode {
                     Math.max(mContentRectOnWindow.left, mViewRect.left),
                     Math.max(mContentRectOnWindow.top, mViewRect.top),
                     Math.min(mContentRectOnWindow.right, mViewRect.right),
-                    Math.min(mContentRectOnWindow.bottom, mViewRect.bottom));
+                    Math.min(mContentRectOnWindow.bottom, mViewRect.bottom + mBottomAllowance));
 
             if (!mContentRectOnWindow.equals(mPreviousContentRectOnWindow)) {
                 // Content rect is moving.
