@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 public class ValidateNotificationPeople implements NotificationSignalExtractor {
     // Using a shorter log tag since setprop has a limit of 32chars on variable name.
     private static final String TAG = "ValidateNoPeople";
-    private static final boolean INFO = true;
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);;
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final boolean ENABLE_PEOPLE_VALIDATOR = true;
@@ -100,7 +100,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 public void onChange(boolean selfChange, Uri uri, int userId) {
                     super.onChange(selfChange, uri, userId);
                     if (DEBUG || mEvictionCount % 100 == 0) {
-                        if (INFO) Slog.i(TAG, "mEvictionCount: " + mEvictionCount);
+                        if (VERBOSE) Slog.i(TAG, "mEvictionCount: " + mEvictionCount);
                     }
                     mPeopleCache.evictAll();
                     mEvictionCount++;
@@ -113,20 +113,20 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
     public RankingReconsideration process(NotificationRecord record) {
         if (!mEnabled) {
-            if (INFO) Slog.i(TAG, "disabled");
+            if (VERBOSE) Slog.i(TAG, "disabled");
             return null;
         }
         if (record == null || record.getNotification() == null) {
-            if (INFO) Slog.i(TAG, "skipping empty notification");
+            if (VERBOSE) Slog.i(TAG, "skipping empty notification");
             return null;
         }
         if (record.getUserId() == UserHandle.USER_ALL) {
-            if (INFO) Slog.i(TAG, "skipping global notification");
+            if (VERBOSE) Slog.i(TAG, "skipping global notification");
             return null;
         }
         Context context = getContextAsUser(record.getUser());
         if (context == null) {
-            if (INFO) Slog.i(TAG, "skipping notification that lacks a context");
+            if (VERBOSE) Slog.i(TAG, "skipping notification that lacks a context");
             return null;
         }
         return validatePeople(context, record);
@@ -220,7 +220,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return null;
         }
 
-        if (INFO) Slog.i(TAG, "Validating: " + key + " for " + context.getUserId());
+        if (VERBOSE) Slog.i(TAG, "Validating: " + key + " for " + context.getUserId());
         final LinkedList<String> pendingLookups = new LinkedList<String>();
         for (int personIdx = 0; personIdx < people.length && personIdx < MAX_PEOPLE; personIdx++) {
             final String handle = people[personIdx];
@@ -244,7 +244,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         affinityOut[0] = affinity;
 
         if (pendingLookups.isEmpty()) {
-            if (INFO) Slog.i(TAG, "final affinity: " + affinity);
+            if (VERBOSE) Slog.i(TAG, "final affinity: " + affinity);
             if (affinity != NONE) MetricsLogger.count(mBaseContext, "note_with_people", 1);
             return null;
         }
@@ -422,7 +422,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         @Override
         public void work() {
-            if (INFO) Slog.i(TAG, "Executing: validation for: " + mKey);
+            if (VERBOSE) Slog.i(TAG, "Executing: validation for: " + mKey);
             long timeStartMs = System.currentTimeMillis();
             for (final String handle: mPendingLookups) {
                 LookupResult lookupResult = null;
@@ -463,7 +463,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         public void applyChangesLocked(NotificationRecord operand) {
             float affinityBound = operand.getContactAffinity();
             operand.setContactAffinity(Math.max(mContactAffinity, affinityBound));
-            if (INFO) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
+            if (VERBOSE) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
         }
 
         public float getContactAffinity() {
