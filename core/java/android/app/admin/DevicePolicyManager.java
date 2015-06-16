@@ -924,7 +924,7 @@ public class DevicePolicyManager {
 
     /**
      * Constant for {@link #setPasswordQuality}: the policy requires some kind
-     * of password, but doesn't care what it is.  Note that quality constants
+     * of password or pattern, but doesn't care what it is. Note that quality constants
      * are ordered so that higher values are more restrictive.
      */
     public static final int PASSWORD_QUALITY_SOMETHING = 0x10000;
