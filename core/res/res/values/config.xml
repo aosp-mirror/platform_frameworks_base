@@ -1271,11 +1271,6 @@
          an mcc/mnc specific config.xml -->
     <string name="mobile_provisioning_url" translatable="false"></string>
 
-    <!-- This url is used as the default url when redirection is detected. Any
-         should work as all url's get redirected. But maybe overridden by
-         if needed. -->
-    <string name="mobile_redirected_provisioning_url" translatable="false">http://google.com</string>
-
     <!-- The default character set for GsmAlphabet -->
     <!-- Empty string means MBCS is not considered -->
     <string name="gsm_alphabet_default_charset" translatable="false"></string>
