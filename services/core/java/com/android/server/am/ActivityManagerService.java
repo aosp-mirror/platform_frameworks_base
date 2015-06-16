@@ -5268,7 +5268,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         int callerUid = Binder.getCallingUid();
         // Only the system server can kill an application
-        if (callerUid == Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(callerUid) == Process.SYSTEM_UID) {
             // Post an aysnc message to kill the application
             Message msg = mHandler.obtainMessage(KILL_APPLICATION_MSG);
             msg.arg1 = appid;
