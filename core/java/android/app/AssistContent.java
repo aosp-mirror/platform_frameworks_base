@@ -33,6 +33,7 @@ import android.os.Parcelable;
 public class AssistContent {
     private boolean mIsAppProvidedIntent = false;
     private Intent mIntent;
+    private String mStructuredData;
     private ClipData mClipData;
     private Uri mUri;
     private final Bundle mExtras;
@@ -125,6 +126,22 @@ public class AssistContent {
     }
 
     /**
+     * Sets optional structured data regarding the content being viewed. The provided data
+     * must be a string represented with <a href="http://json-ld.org/">JSON-LD</a> using the
+     * <a href="http://schema.org/">schema.org</a> vocabulary.
+     */
+    public void setStructuredData(String structuredData) {
+        mStructuredData = structuredData;
+    }
+
+    /**
+     * Returns the current {@link #setStructuredData}.
+     */
+    public String getStructuredData() {
+        return mStructuredData;
+    }
+
+    /**
      * Set a web URI associated with the current data being shown to the user.
      * This URI could be opened in a web browser, or in the app as an
      * {@link Intent#ACTION_VIEW} Intent, to show the same data that is currently
@@ -163,6 +180,9 @@ public class AssistContent {
         if (in.readInt() != 0) {
             mUri = Uri.CREATOR.createFromParcel(in);
         }
+        if (in.readInt() != 0) {
+            mStructuredData = in.readString();
+        }
         mIsAppProvidedIntent = in.readInt() == 1;
         mExtras = in.readBundle();
     }
@@ -184,6 +204,12 @@ public class AssistContent {
         if (mUri != null) {
             dest.writeInt(1);
             mUri.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mStructuredData != null) {
+            dest.writeInt(1);
+            dest.writeString(mStructuredData);
         } else {
             dest.writeInt(0);
         }
