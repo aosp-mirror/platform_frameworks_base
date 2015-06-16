@@ -23,6 +23,7 @@ import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
@@ -1993,18 +1994,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
                     final int netId = msg.arg2;
-                    if (msg.arg1 == 0) {
+                    final boolean visible = (msg.arg1 != 0);
+                    final NetworkAgentInfo nai;
+                    synchronized (mNetworkForNetId) {
+                        nai = mNetworkForNetId.get(netId);
+                    }
+                    // If captive portal status has changed, update capabilities.
+                    if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
+                        nai.lastCaptivePortalDetected = visible;
+                        nai.everCaptivePortalDetected |= visible;
+                        updateCapabilities(nai, nai.networkCapabilities);
+                    }
+                    if (!visible) {
                         setProvNotificationVisibleIntent(false, netId, null, 0, null, null);
                     } else {
-                        final NetworkAgentInfo nai;
-                        synchronized (mNetworkForNetId) {
-                            nai = mNetworkForNetId.get(netId);
-                        }
                         if (nai == null) {
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
-                        nai.captivePortalDetected = true;
                         setProvNotificationVisibleIntent(true, netId, NotificationType.SIGN_IN,
                                 nai.networkInfo.getType(),nai.networkInfo.getExtraInfo(),
                                 (PendingIntent)msg.obj);
@@ -2426,7 +2433,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Only prompt if the network is unvalidated and was explicitly selected by the user, and if
         // we haven't already been told to switch to it regardless of whether it validated or not.
         // Also don't prompt on captive portals because we're already prompting the user to sign in.
-        if (nai == null || nai.everValidated || nai.captivePortalDetected ||
+        if (nai == null || nai.everValidated || nai.everCaptivePortalDetected ||
                 !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated) {
             return;
         }
@@ -4046,16 +4053,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNumDnsEntries = last;
     }
 
+    /**
+     * Update the NetworkCapabilities for {@code networkAgent} to {@code networkCapabilities}
+     * augmented with any stateful capabilities implied from {@code networkAgent}
+     * (e.g., validated status and captive portal status).
+     *
+     * @param networkAgent the network having its capabilities updated.
+     * @param networkCapabilities the new network capabilities.
+     */
     private void updateCapabilities(NetworkAgentInfo networkAgent,
             NetworkCapabilities networkCapabilities) {
+        // Don't modify caller's NetworkCapabilities.
+        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+        if (networkAgent.lastValidated) {
+            networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
+        } else {
+            networkCapabilities.removeCapability(NET_CAPABILITY_VALIDATED);
+        }
+        if (networkAgent.lastCaptivePortalDetected) {
+            networkCapabilities.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        } else {
+            networkCapabilities.removeCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        }
         if (!Objects.equals(networkAgent.networkCapabilities, networkCapabilities)) {
             synchronized (networkAgent) {
                 networkAgent.networkCapabilities = networkCapabilities;
-            }
-            if (networkAgent.lastValidated) {
-                networkAgent.networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
-                // There's no need to remove the capability if we think the network is unvalidated,
-                // because NetworkAgents don't set the validated capability.
             }
             rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore());
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
