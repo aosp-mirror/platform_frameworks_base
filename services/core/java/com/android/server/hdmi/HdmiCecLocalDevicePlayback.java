@@ -26,8 +26,13 @@ import android.os.SystemProperties;
 import android.provider.Settings.Global;
 import android.util.Slog;
 
+import com.android.internal.app.LocalePicker;
+import com.android.internal.app.LocalePicker.LocaleInfo;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * Represent a logical device of type Playback residing in Android system.
@@ -304,6 +309,35 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         maySendActiveSource(message.getSource());
         return true;  // Broadcast message.
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleSetMenuLanguage(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        try {
+            String iso3Language = new String(message.getParams(), 0, 3, "US-ASCII");
+
+            // Don't use Locale.getAvailableLocales() since it returns a locale
+            // which is not available on Settings.
+            final List<LocaleInfo> localeInfos = LocalePicker.getAllAssetLocales(
+                    mService.getContext(), false);
+            for (LocaleInfo localeInfo : localeInfos) {
+                if (localeInfo.getLocale().getISO3Language().equals(iso3Language)) {
+                    // WARNING: CEC adopts ISO/FDIS-2 for language code, while Android requires
+                    // additional country variant to pinpoint the locale. This keeps the right
+                    // locale from being chosen. 'eng' in the CEC command, for instance,
+                    // will always be mapped to en-AU among other variants like en-US, en-GB,
+                    // an en-IN, which may not be the expected one.
+                    LocalePicker.updateLocale(localeInfo.getLocale());
+                    return true;
+                }
+            }
+            Slog.w(TAG, "Can't handle <Set Menu Language> of " + iso3Language);
+            return false;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
     }
 
     @Override
