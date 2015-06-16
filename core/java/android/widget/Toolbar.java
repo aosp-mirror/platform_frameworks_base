@@ -271,6 +271,24 @@ public class Toolbar extends ViewGroup {
         if (!TextUtils.isEmpty(navDesc)) {
             setNavigationContentDescription(navDesc);
         }
+
+        final Drawable logo = a.getDrawable(R.styleable.Toolbar_logo);
+        if (logo != null) {
+            setLogo(logo);
+        }
+
+        final CharSequence logoDesc = a.getText(R.styleable.Toolbar_logoDescription);
+        if (!TextUtils.isEmpty(logoDesc)) {
+            setLogoDescription(logoDesc);
+        }
+
+        if (a.hasValue(R.styleable.Toolbar_titleTextColor)) {
+            setTitleTextColor(a.getColor(R.styleable.Toolbar_titleTextColor, 0xffffffff));
+        }
+
+        if (a.hasValue(R.styleable.Toolbar_subtitleTextColor)) {
+            setSubtitleTextColor(a.getColor(R.styleable.Toolbar_subtitleTextColor, 0xffffffff));
+        }
         a.recycle();
     }
 
