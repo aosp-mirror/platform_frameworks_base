@@ -403,8 +403,9 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of the file at download
-     * location specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
+     * A String extra holding the URL-safe base64 encoded SHA-256 or SHA-1 hash (see notes below) of
+     * the file at download location specified in
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
      * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM} should be
      * present. The provided checksum should match the checksum of the file at the download
@@ -413,12 +414,17 @@ public class DevicePolicyManager {
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an NFC bump.
+     *
+     * <p><strong>Note:</strong> for devices running {@link android.os.Build.VERSION_CODES#LOLLIPOP}
+     * and {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} only SHA-1 hash is supported.
+     * Starting from {@link android.os.Build.VERSION_CODES#MNC}, this parameter accepts SHA-256 in
+     * addition to SHA-1. Support for SHA-1 is likely to be removed in future OS releases.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of any signature of the
+     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
      * android package archive at the download location specified in {@link
      * #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
@@ -510,7 +516,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of the file at download
+     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of the file at download
      * location specified in
      * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
      *
@@ -526,7 +532,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of any signature of the
+     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
      * android package archive at the download location specified in {@link
      * #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
      *
