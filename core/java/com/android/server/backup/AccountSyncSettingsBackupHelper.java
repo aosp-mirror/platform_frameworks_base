@@ -28,8 +28,6 @@ import android.app.backup.BackupHelper;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncAdapterType;
-import android.content.SyncStatusObserver;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -47,8 +45,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Helper for backing up account sync settings (whether or not a service should be synced). The
@@ -270,6 +266,10 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
                     // yet won't be restored.
                     if (currentAccounts.contains(account)) {
                         restoreExistingAccountSyncSettingsFromJSON(accountJSON);
+                    } else {
+                        // TODO:
+                        // Stash the data to a file that the SyncManager can read from to restore
+                        // settings at a later date.
                     }
                 }
             } finally {
@@ -300,6 +300,31 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
     /**
      * Restore account sync settings using the given JSON. This function won't work if the account
      * doesn't exist yet.
+     * This function will only be called during Setup Wizard, where we are guaranteed that there
+     * are no active syncs.
+     * There are 2 pieces of data to restore -
+     *      isSyncable (corresponds to {@link ContentResolver#getIsSyncable(Account, String)}
+     *      syncEnabled (corresponds to {@link ContentResolver#getSyncAutomatically(Account, String)}
+     * <strong>The restore favours adapters that were enabled on the old device, and doesn't care
+     * about adapters that were disabled.</strong>
+     *
+     * syncEnabled=true in restore data.
+     * syncEnabled will be true on this device. isSyncable will be left as the default in order to
+     * give the enabled adapter the chance to run an initialization sync.
+     *
+     * syncEnabled=false in restore data.
+     * syncEnabled will be false on this device. isSyncable will be set to 2, unless it was 0 on the
+     * old device in which case it will be set to 0 on this device. This is because isSyncable=0 is
+     * a rare state and was probably set to 0 for good reason (historically isSyncable is a way by
+     * which adapters control their own sync state independently of sync settings which is
+     * toggleable by the user).
+     * isSyncable=2 is a new isSyncable state we introduced specifically to allow adapters that are
+     * disabled after a restore to run initialization logic when the adapter is later enabled.
+     * See com.android.server.content.SyncStorageEngine#setSyncAutomatically
+     *
+     * The end result is that an adapter that the user had on will be turned on and get an
+     * initialization sync, while an adapter that the user had off will be off until the user
+     * enables it on this device at which point it will get an initialization sync.
      */
     private void restoreExistingAccountSyncSettingsFromJSON(JSONObject accountJSON)
             throws JSONException {
@@ -307,70 +332,25 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
         JSONArray authorities = accountJSON.getJSONArray(KEY_ACCOUNT_AUTHORITIES);
         String accountName = accountJSON.getString(KEY_ACCOUNT_NAME);
         String accountType = accountJSON.getString(KEY_ACCOUNT_TYPE);
+
         final Account account = new Account(accountName, accountType);
         for (int i = 0; i < authorities.length(); i++) {
             JSONObject authority = (JSONObject) authorities.get(i);
             final String authorityName = authority.getString(KEY_AUTHORITY_NAME);
-            boolean syncEnabled = authority.getBoolean(KEY_AUTHORITY_SYNC_ENABLED);
+            boolean wasSyncEnabled = authority.getBoolean(KEY_AUTHORITY_SYNC_ENABLED);
+            int wasSyncable = authority.getInt(KEY_AUTHORITY_SYNC_STATE);
 
-            // Cancel any active syncs.
-            if (ContentResolver.isSyncActive(account, authorityName)) {
-                ContentResolver.cancelSync(account, authorityName);
-            }
+            ContentResolver.setSyncAutomaticallyAsUser(
+                    account, authorityName, wasSyncEnabled, 0 /* user Id */);
 
-            boolean overwriteSync = true;
-            Bundle initializationExtras = createSyncInitializationBundle();
-            int currentSyncState = ContentResolver.getIsSyncable(account, authorityName);
-            if (currentSyncState < 0) {
-                // Requesting a sync is an asynchronous operation, so we setup a countdown latch to
-                // wait for it to finish. Initialization syncs are generally very brief and
-                // shouldn't take too much time to finish.
-                final CountDownLatch latch = new CountDownLatch(1);
-                Object syncStatusObserverHandle = ContentResolver.addStatusChangeListener(
-                        ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE, new SyncStatusObserver() {
-                            @Override
-                            public void onStatusChanged(int which) {
-                                if (!ContentResolver.isSyncActive(account, authorityName)) {
-                                    latch.countDown();
-                                }
-                            }
-                        });
-
-                // If we set sync settings for a sync that hasn't been initialized yet, we run the
-                // risk of having our changes overwritten later on when the sync gets initialized.
-                // To prevent this from happening we will manually initiate the sync adapter. We
-                // also explicitly pass in a Bundle with SYNC_EXTRAS_INITIALIZE to prevent a data
-                // sync from running after the initialization sync. Two syncs will be scheduled, but
-                // the second one (data sync) will override the first one (initialization sync) and
-                // still behave as an initialization sync because of the Bundle.
-                ContentResolver.requestSync(account, authorityName, initializationExtras);
-
-                boolean done = false;
-                try {
-                    done = latch.await(SYNC_REQUEST_LATCH_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "CountDownLatch interrupted\n" + e);
-                    done = false;
-                }
-                if (!done) {
-                    overwriteSync = false;
-                    Log.i(TAG, "CountDownLatch timed out, skipping '" + authorityName
-                            + "' authority.");
-                }
-                ContentResolver.removeStatusChangeListener(syncStatusObserverHandle);
-            }
-
-            if (overwriteSync) {
-                ContentResolver.setSyncAutomatically(account, authorityName, syncEnabled);
-                Log.i(TAG, "Set sync automatically for '" + authorityName + "': " + syncEnabled);
+            if (!wasSyncEnabled) {
+                ContentResolver.setIsSyncable(
+                        account,
+                        authorityName,
+                        wasSyncable == 0 ?
+                                0 /* not syncable */ : 2 /* syncable but needs initialization */);
             }
         }
-    }
-
-    private Bundle createSyncInitializationBundle() {
-        Bundle extras = new Bundle();
-        extras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-        return extras;
     }
 
     @Override
