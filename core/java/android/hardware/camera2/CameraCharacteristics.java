@@ -1093,14 +1093,28 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>so <code>[x_s, y_s]</code> is the pixel coordinates of the world
      * point, <code>z_s = 1</code>, and <code>w_s</code> is a measurement of disparity
      * (depth) in pixel coordinates.</p>
+     * <p>Note that the coordinate system for this transform is the
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} system,
+     * where <code>(0,0)</code> is the top-left of the
+     * preCorrectionActiveArraySize rectangle. Once the pose and
+     * intrinsic calibration transforms have been applied to a
+     * world point, then the android.lens.radialDistortion
+     * transform needs to be applied, and the result adjusted to
+     * be in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
+     * system (where <code>(0, 0)</code> is the top-left of the
+     * activeArraySize rectangle), to determine the final pixel
+     * coordinate of the world point for processed (non-RAW)
+     * output buffers.</p>
      * <p><b>Units</b>:
-     * Pixels in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
-     * system.</p>
+     * Pixels in the
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}
+     * coordinate system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     public static final Key<float[]> LENS_INTRINSIC_CALIBRATION =
@@ -2006,19 +2020,19 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}:</p>
      * <ol>
      * <li>Choose a pixel (x', y') within the active array region of the raw buffer given in
-     * android.sensor.info.preCorrectedActiveArraySize, otherwise this pixel is considered
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}, otherwise this pixel is considered
      * to be outside of the FOV, and will not be shown in the processed output image.</li>
      * <li>Apply geometric distortion correction to get the post-distortion pixel coordinate,
      * (x_i, y_i). When applying geometric correction metadata, note that metadata for raw
      * buffers is defined relative to the top, left of the
-     * android.sensor.info.preCorrectedActiveArraySize rectangle.</li>
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} rectangle.</li>
      * <li>If the resulting corrected pixel coordinate is within the region given in
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}, then the position of this pixel in the
      * processed output image buffer is <code>(x_i - activeArray.left, y_i - activeArray.top)</code>,
      * when the top, left coordinate of that buffer is treated as (0, 0).</li>
      * </ol>
      * <p>Thus, for pixel x',y' = (25, 25) on a sensor where {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}
-     * is (100,100), android.sensor.info.preCorrectedActiveArraySize is (10, 10, 100, 100),
+     * is (100,100), {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} is (10, 10, 100, 100),
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} is (20, 20, 80, 80), and the geometric distortion
      * correction doesn't change the pixel coordinate, the resulting pixel selected in
      * pixel coordinates would be x,y = (25, 25) relative to the top,left of the raw buffer
@@ -2042,6 +2056,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     public static final Key<android.graphics.Rect> SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE =
