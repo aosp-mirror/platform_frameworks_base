@@ -1263,7 +1263,7 @@ public class NotificationPanelView extends PanelView implements
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
-            if (mLastAnnouncementWasQuickSettings && !mTracking) {
+            if (mLastAnnouncementWasQuickSettings && !mTracking && !isCollapsing()) {
                 announceForAccessibility(getKeyguardOrLockScreenString());
                 mLastAnnouncementWasQuickSettings = false;
             }
