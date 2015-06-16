@@ -28,10 +28,10 @@ import android.os.Parcelable;
 public final class BluetoothActivityEnergyInfo implements Parcelable {
     private final long mTimestamp;
     private final int mBluetoothStackState;
-    private final int mControllerTxTimeMs;
-    private final int mControllerRxTimeMs;
-    private final int mControllerIdleTimeMs;
-    private final int mControllerEnergyUsed;
+    private final long mControllerTxTimeMs;
+    private final long mControllerRxTimeMs;
+    private final long mControllerIdleTimeMs;
+    private final long mControllerEnergyUsed;
 
     public static final int BT_STACK_STATE_INVALID = 0;
     public static final int BT_STACK_STATE_STATE_ACTIVE = 1;
@@ -39,7 +39,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     public static final int BT_STACK_STATE_STATE_IDLE = 3;
 
     public BluetoothActivityEnergyInfo(long timestamp, int stackState,
-                                       int txTime, int rxTime, int idleTime, int energyUsed) {
+                                       long txTime, long rxTime, long idleTime, long energyUsed) {
         mTimestamp = timestamp;
         mBluetoothStackState = stackState;
         mControllerTxTimeMs = txTime;
@@ -65,10 +65,10 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         public BluetoothActivityEnergyInfo createFromParcel(Parcel in) {
             long timestamp = in.readLong();
             int stackState = in.readInt();
-            int txTime = in.readInt();
-            int rxTime = in.readInt();
-            int idleTime = in.readInt();
-            int energyUsed = in.readInt();
+            long txTime = in.readLong();
+            long rxTime = in.readLong();
+            long idleTime = in.readLong();
+            long energyUsed = in.readLong();
             return new BluetoothActivityEnergyInfo(timestamp, stackState,
                     txTime, rxTime, idleTime, energyUsed);
         }
@@ -80,10 +80,10 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mTimestamp);
         out.writeInt(mBluetoothStackState);
-        out.writeInt(mControllerTxTimeMs);
-        out.writeInt(mControllerRxTimeMs);
-        out.writeInt(mControllerIdleTimeMs);
-        out.writeInt(mControllerEnergyUsed);
+        out.writeLong(mControllerTxTimeMs);
+        out.writeLong(mControllerRxTimeMs);
+        out.writeLong(mControllerIdleTimeMs);
+        out.writeLong(mControllerEnergyUsed);
     }
 
     public int describeContents() {
@@ -100,21 +100,21 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     /**
      * @return tx time in ms
      */
-    public int getControllerTxTimeMillis() {
+    public long getControllerTxTimeMillis() {
         return mControllerTxTimeMs;
     }
 
     /**
      * @return rx time in ms
      */
-    public int getControllerRxTimeMillis() {
+    public long getControllerRxTimeMillis() {
         return mControllerRxTimeMs;
     }
 
     /**
      * @return idle time in ms
      */
-    public int getControllerIdleTimeMillis() {
+    public long getControllerIdleTimeMillis() {
         return mControllerIdleTimeMs;
     }
 
@@ -122,7 +122,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
      * product of current(mA), voltage(V) and time(ms)
      * @return energy used
      */
-    public int getControllerEnergyUsed() {
+    public long getControllerEnergyUsed() {
         return mControllerEnergyUsed;
     }
 
@@ -137,8 +137,8 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
      * @return if the record is valid
      */
     public boolean isValid() {
-        return ((getControllerTxTimeMillis() !=0) ||
-                (getControllerRxTimeMillis() !=0) ||
-                (getControllerIdleTimeMillis() !=0));
+        return ((mControllerTxTimeMs !=0) ||
+                (mControllerRxTimeMs !=0) ||
+                (mControllerIdleTimeMs !=0));
     }
 }
