@@ -2125,6 +2125,9 @@
   <java-symbol type="string" name="fingerprint_error_lockout" />
   <java-symbol type="string" name="fingerprint_name_template" />
 
+  <!-- Fingerprint config -->
+  <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
+
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />
