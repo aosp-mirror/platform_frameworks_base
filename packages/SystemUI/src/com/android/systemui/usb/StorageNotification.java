@@ -53,6 +53,7 @@ public class StorageNotification extends SystemUI {
     private static final int MOVE_ID = 0x534d4f56; // SMOV
 
     private static final String ACTION_SNOOZE_VOLUME = "com.android.systemui.action.SNOOZE_VOLUME";
+    private static final String ACTION_FINISH_WIZARD = "com.android.systemui.action.FINISH_WIZARD";
 
     // TODO: delay some notifications to avoid bumpy fast operations
 
@@ -107,6 +108,15 @@ public class StorageNotification extends SystemUI {
         }
     };
 
+    private final BroadcastReceiver mFinishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // When finishing the adoption wizard, clean up any notifications
+            // for moving primary storage
+            mNotificationManager.cancelAsUser(null, MOVE_ID, UserHandle.ALL);
+        }
+    };
+
     private final MoveCallback mMoveCallback = new MoveCallback() {
         @Override
         public void onCreated(int moveId, Bundle extras) {
@@ -145,6 +155,8 @@ public class StorageNotification extends SystemUI {
         mStorageManager.registerListener(mListener);
 
         mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+        mContext.registerReceiver(mFinishReceiver, new IntentFilter(ACTION_FINISH_WIZARD),
                 android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
 
         // Kick current state into place
