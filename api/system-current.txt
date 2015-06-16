@@ -28600,7 +28600,6 @@ package android.provider {
     field public static final java.lang.String DEBUG_APP = "debug_app";
     field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
     field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
-    field public static final java.lang.String HIDE_CARRIER_NETWORK_SETTINGS = "hide_carrier_network_settings";
     field public static final java.lang.String HTTP_PROXY = "http_proxy";
     field public static final deprecated java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field public static final java.lang.String MODE_RINGER = "mode_ringer";
