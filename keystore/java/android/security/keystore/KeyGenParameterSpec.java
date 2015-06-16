@@ -19,16 +19,20 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.KeyguardManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
 import java.security.KeyPairGenerator;
+import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Date;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.security.auth.x500.X500Principal;
 
 /**
@@ -62,10 +66,15 @@ import javax.security.auth.x500.X500Principal;
  * <p>NOTE: If a private key is not authorized to sign the self-signed certificate, then the
  * certificate will be created with an invalid signature which will not verify. Such a certificate
  * is still useful because it provides access to the public key. To generate a valid
- * signature for the certificate the key needs to be authorized for
- * {@link KeyProperties#PURPOSE_SIGN}, a suitable digest or {@link KeyProperties#DIGEST_NONE}, and
- * {@link KeyProperties#SIGNATURE_PADDING_RSA_PKCS1} or
- * {@link KeyProperties#ENCRYPTION_PADDING_NONE}.
+ * signature for the certificate the key needs to be authorized for all of the following:
+ * <ul>
+ * <li>{@link KeyProperties#PURPOSE_SIGN},</li>
+ * <li>operation without requiring the user to be authenticated (see
+ * {@link Builder#setUserAuthenticationRequired(boolean)}),</li>
+ * <li>suitable digest or {@link KeyProperties#DIGEST_NONE},</li>
+ * <li>(RSA keys only) padding scheme {@link KeyProperties#SIGNATURE_PADDING_RSA_PKCS1} or
+ * {@link KeyProperties#ENCRYPTION_PADDING_NONE}.</li>
+ * </ul>
  *
  * <p>NOTE: The key material of the generated symmetric and private keys is not accessible. The key
  * material of the public keys is accessible.
@@ -393,28 +402,32 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns {@code true} if user authentication is required for this key to be used.
+     * Returns {@code true} if the key is authorized to be used only if the user has been
+     * authenticated.
      *
-     * <p>This restriction applies only to private key operations. Public key operations are not
-     * restricted.
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
      *
      * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setUserAuthenticationRequired(boolean)
      */
     public boolean isUserAuthenticationRequired() {
         return mUserAuthenticationRequired;
     }
 
     /**
-     * Gets the duration of time (seconds) for which this key can be used after the user is
-     * successfully authenticated. This has effect only if user authentication is required.
+     * Gets the duration of time (seconds) for which this key is authorized to be used after the
+     * user is successfully authenticated. This has effect only if user authentication is required
+     * (see {@link #isUserAuthenticationRequired()}).
      *
-     * <p>This restriction applies only to private key operations. Public key operations are not
-     * restricted.
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
      *
      * @return duration in seconds or {@code -1} if authentication is required for every use of the
-     * key.
+     *         key.
      *
      * @see #isUserAuthenticationRequired()
+     * @see Builder#setUserAuthenticationValidityDurationSeconds(int)
      */
     public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
@@ -738,22 +751,38 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets whether user authentication is required to use this key.
+         * Sets whether this key is authorized to be used only if the user has been authenticated.
          *
-         * <p>By default, the key can be used without user authentication.
+         * <p>By default, the key is authorized to be used regardless of whether the user has been
+         * authenticated.
          *
-         * <p>When user authentication is required, the user authorizes the use of the key by
-         * authenticating to this Android device using a subset of their secure lock screen
-         * credentials. Different authentication methods are used depending on whether the every
-         * use of the key must be authenticated (as specified by
-         * {@link #setUserAuthenticationValidityDurationSeconds(int)}).
+         * <p>When user authentication is required:
+         * <ul>
+         * <li>The key can only be generated if secure lock screen is set up (see
+         * {@link KeyguardManager#isDeviceSecure()}). Additionally, if the key requires that user
+         * authentication takes place for every use of the key (see
+         * {@link #setUserAuthenticationValidityDurationSeconds(int)}), at least one fingerprint
+         * must be enrolled (see {@link FingerprintManager#hasEnrolledFingerprints()}).</li>
+         * <li>The use of the key must be authorized by the user by authenticating to this Android
+         * device using a subset of their secure lock screen credentials such as
+         * password/PIN/pattern or fingerprint.
          * <a href="{@docRoot}training/articles/keystore.html#UserAuthentication">More
          * information</a>.
+         * <li>The key will become <em>irreversibly invalidated</em> once the secure lock screen is
+         * disabled (reconfigured to None, Swipe or other mode which does not authenticate the user)
+         * or when the secure lock screen is forcibly reset (e.g., by a Device Administrator).
+         * Additionally, if the key requires that user authentication takes place for every use of
+         * the key, it is also irreversibly invalidated once a new fingerprint is enrolled or once\
+         * no more fingerprints are enrolled. Attempts to initialize cryptographic operations using
+         * such keys will throw {@link KeyPermanentlyInvalidatedException}.</li>
+         * </ul>
          *
-         * <p>This restriction applies only to private key operations. Public key operations are not
-         * restricted.
+         * <p>This authorization applies only to secret key and private key operations. Public key
+         * operations are not restricted.
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
+         * @see KeyguardManager#isDeviceSecure()
+         * @see FingerprintManager#hasEnrolledFingerprints()
          */
         @NonNull
         public Builder setUserAuthenticationRequired(boolean required) {
@@ -762,15 +791,39 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the duration of time (seconds) for which this key can be used after the user is
-         * successfully authenticated. This has effect only if user authentication is required.
+         * Sets the duration of time (seconds) for which this key is authorized to be used after the
+         * user is successfully authenticated. This has effect if the key requires user
+         * authentication for its use (see {@link #setUserAuthenticationRequired(boolean)}).
          *
-         * <p>By default, the user needs to authenticate for every use of the key.
+         * <p>By default, if user authentication is required, it must take place for every use of
+         * the key.
          *
-         * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
-         *        every use of the key.
+         * <p>Cryptographic operations involving keys which require user authentication to take
+         * place for every operation can only use fingerprint authentication. This is achieved by
+         * initializing a cryptographic operation ({@link Signature}, {@link Cipher}, {@link Mac})
+         * with the key, wrapping it into a {@link FingerprintManager.CryptoObject}, invoking
+         * {@code FingerprintManager.authenticate} with {@code CryptoObject}, and proceeding with
+         * the cryptographic operation only if the authentication flow succeeds.
+         *
+         * <p>Cryptographic operations involving keys which are authorized to be used for a duration
+         * of time after a successful user authentication event can only use secure lock screen
+         * authentication. These cryptographic operations will throw
+         * {@link UserNotAuthenticatedException} during initialization if the user needs to be
+         * authenticated to proceed. This situation can be resolved by the user unlocking the secure
+         * lock screen of the Android or by going through the confirm credential flow initiated by
+         * {@link KeyguardManager#createConfirmDeviceCredentialIntent(CharSequence, CharSequence)}.
+         * Once resolved, initializing a new cryptographic operation using this key (or any other
+         * key which is authorized to be used for a fixed duration of time after user
+         * authentication) should succeed provided the user authentication flow completed
+         * successfully.
+         *
+         * @param seconds duration in seconds or {@code -1} if user authentication must take place
+         *        for every use of the key.
          *
          * @see #setUserAuthenticationRequired(boolean)
+         * @see FingerprintManager
+         * @see FingerprintManager.CryptoObject
+         * @see KeyguardManager
          */
         @NonNull
         public Builder setUserAuthenticationValidityDurationSeconds(
