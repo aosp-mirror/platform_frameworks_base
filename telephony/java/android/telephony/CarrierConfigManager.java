@@ -178,6 +178,34 @@ public class CarrierConfigManager {
     public static final String
             KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL = "disable_cdma_activation_code_bool";
 
+   /**
+     * Override the platform's notion of a network operator being considered roaming.
+     * Value is string array of MCCMNCs to be considered roaming for 3GPP RATs.
+     */
+    public static final String
+            KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY = "gsm_roaming_networks_string_array";
+
+    /**
+     * Override the platform's notion of a network operator being considered not roaming.
+     * Value is string array of MCCMNCs to be considered not roaming for 3GPP RATs.
+     */
+    public static final String
+            KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY = "gsm_nonroaming_networks_string_array";
+
+    /**
+     * Override the platform's notion of a network operator being considered roaming.
+     * Value is string array of SIDs to be considered roaming for 3GPP2 RATs.
+     */
+    public static final String
+            KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY = "cdma_roaming_networks_string_array";
+
+    /**
+     * Override the platform's notion of a network operator being considered non roaming.
+     * Value is string array of SIDs to be considered not roaming for 3GPP2 RATs.
+     */
+    public static final String
+            KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY = "cdma_nonroaming_networks_string_array";
+
     /**
      * Flag specifying whether VoLTE should be available for carrier, independent of carrier
      * provisioning. If false: hard disabled. If true: then depends on carrier provisioning,
@@ -352,6 +380,11 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
+
+        sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
