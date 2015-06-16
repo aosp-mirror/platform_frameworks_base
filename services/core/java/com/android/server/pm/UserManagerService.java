@@ -967,6 +967,7 @@ public class UserManagerService extends IUserManager.Stub {
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_OUTGOING_CALLS);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_SMS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_FUN);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CREATE_WINDOWS);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_OUTGOING_BEAM);
@@ -1097,6 +1098,7 @@ public class UserManagerService extends IUserManager.Stub {
         readBoolean(parser, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
         readBoolean(parser, restrictions, UserManager.DISALLOW_OUTGOING_CALLS);
         readBoolean(parser, restrictions, UserManager.DISALLOW_SMS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_FUN);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CREATE_WINDOWS);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
         readBoolean(parser, restrictions, UserManager.DISALLOW_OUTGOING_BEAM);
