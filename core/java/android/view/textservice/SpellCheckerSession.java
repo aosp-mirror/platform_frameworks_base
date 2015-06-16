@@ -28,9 +28,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.textservice.SpellCheckerInfo;
-import android.view.textservice.SuggestionsInfo;
-import android.view.textservice.TextInfo;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -226,17 +223,44 @@ public class SpellCheckerSession {
         private static final int TASK_GET_SUGGESTIONS_MULTIPLE = 2;
         private static final int TASK_CLOSE = 3;
         private static final int TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE = 4;
-        private final Queue<SpellCheckerParams> mPendingTasks =
-                new LinkedList<SpellCheckerParams>();
+        private static String taskToString(int task) {
+            switch (task) {
+                case TASK_CANCEL:
+                    return "STATE_WAIT_CONNECTION";
+                case TASK_GET_SUGGESTIONS_MULTIPLE:
+                    return "TASK_GET_SUGGESTIONS_MULTIPLE";
+                case TASK_CLOSE:
+                    return "TASK_CLOSE";
+                case TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE:
+                    return "TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE";
+                default:
+                    return "Unexpected task=" + task;
+            }
+        }
+
+        private final Queue<SpellCheckerParams> mPendingTasks = new LinkedList<>();
         private Handler mHandler;
 
-        private boolean mOpened;
+        private static final int STATE_WAIT_CONNECTION = 0;
+        private static final int STATE_CONNECTED = 1;
+        private static final int STATE_CLOSED_AFTER_CONNECTION = 2;
+        private static final int STATE_CLOSED_BEFORE_CONNECTION = 3;
+        private static String stateToString(int state) {
+            switch (state) {
+                case STATE_WAIT_CONNECTION: return "STATE_WAIT_CONNECTION";
+                case STATE_CONNECTED: return "STATE_CONNECTED";
+                case STATE_CLOSED_AFTER_CONNECTION: return "STATE_CLOSED_AFTER_CONNECTION";
+                case STATE_CLOSED_BEFORE_CONNECTION: return "STATE_CLOSED_BEFORE_CONNECTION";
+                default: return "Unexpected state=" + state;
+            }
+        }
+        private int mState = STATE_WAIT_CONNECTION;
+
         private ISpellCheckerSession mISpellCheckerSession;
         private HandlerThread mThread;
         private Handler mAsyncHandler;
 
         public SpellCheckerSessionListenerImpl(Handler handler) {
-            mOpened = false;
             mHandler = handler;
         }
 
@@ -257,12 +281,18 @@ public class SpellCheckerSession {
 
         private void processTask(ISpellCheckerSession session, SpellCheckerParams scp,
                 boolean async) {
+            if (DBG) {
+                synchronized (this) {
+                    Log.d(TAG, "entering processTask:"
+                            + " session.hashCode()=#" + Integer.toHexString(session.hashCode())
+                            + " scp.mWhat=" + taskToString(scp.mWhat) + " async=" + async
+                            + " mAsyncHandler=" + mAsyncHandler
+                            + " mState=" + stateToString(mState));
+                }
+            }
             if (async || mAsyncHandler == null) {
                 switch (scp.mWhat) {
                     case TASK_CANCEL:
-                        if (DBG) {
-                            Log.w(TAG, "Cancel spell checker tasks.");
-                        }
                         try {
                             session.onCancel();
                         } catch (RemoteException e) {
@@ -270,9 +300,6 @@ public class SpellCheckerSession {
                         }
                         break;
                     case TASK_GET_SUGGESTIONS_MULTIPLE:
-                        if (DBG) {
-                            Log.w(TAG, "Get suggestions from the spell checker.");
-                        }
                         try {
                             session.onGetSuggestionsMultiple(scp.mTextInfos,
                                     scp.mSuggestionsLimit, scp.mSequentialWords);
@@ -281,9 +308,6 @@ public class SpellCheckerSession {
                         }
                         break;
                     case TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE:
-                        if (DBG) {
-                            Log.w(TAG, "Get sentence suggestions from the spell checker.");
-                        }
                         try {
                             session.onGetSentenceSuggestionsMultiple(
                                     scp.mTextInfos, scp.mSuggestionsLimit);
@@ -292,9 +316,6 @@ public class SpellCheckerSession {
                         }
                         break;
                     case TASK_CLOSE:
-                        if (DBG) {
-                            Log.w(TAG, "Close spell checker tasks.");
-                        }
                         try {
                             session.onClose();
                         } catch (RemoteException e) {
@@ -313,21 +334,62 @@ public class SpellCheckerSession {
                 // If we are closing, we want to clean up our state now even
                 // if it is pending as an async operation.
                 synchronized (this) {
-                    mISpellCheckerSession = null;
-                    mHandler = null;
-                    if (mThread != null) {
-                        mThread.quit();
-                    }
-                    mThread = null;
-                    mAsyncHandler = null;
+                    processCloseLocked();
                 }
+            }
+        }
+
+        private void processCloseLocked() {
+            if (DBG) Log.d(TAG, "entering processCloseLocked:"
+                    + " session" + (mISpellCheckerSession != null ? ".hashCode()=#"
+                            + Integer.toHexString(mISpellCheckerSession.hashCode()) : "=null")
+                    + " mState=" + stateToString(mState));
+            mISpellCheckerSession = null;
+            if (mThread != null) {
+                mThread.quit();
+            }
+            mHandler = null;
+            mPendingTasks.clear();
+            mThread = null;
+            mAsyncHandler = null;
+            switch (mState) {
+                case STATE_WAIT_CONNECTION:
+                    mState = STATE_CLOSED_BEFORE_CONNECTION;
+                    break;
+                case STATE_CONNECTED:
+                    mState = STATE_CLOSED_AFTER_CONNECTION;
+                    break;
+                default:
+                    Log.e(TAG, "processCloseLocked is called unexpectedly. mState=" +
+                            stateToString(mState));
+                    break;
             }
         }
 
         public synchronized void onServiceConnected(ISpellCheckerSession session) {
             synchronized (this) {
+                switch (mState) {
+                    case STATE_WAIT_CONNECTION:
+                        // OK, go ahead.
+                        break;
+                    case STATE_CLOSED_BEFORE_CONNECTION:
+                        // This is possible, and not an error.  The client no longer is interested
+                        // in this connection. OK to ignore.
+                        if (DBG) Log.i(TAG, "ignoring onServiceConnected since the session is"
+                                + " already closed.");
+                        return;
+                    default:
+                        Log.e(TAG, "ignoring onServiceConnected due to unexpected mState="
+                                + stateToString(mState));
+                        return;
+                }
+                if (session == null) {
+                    Log.e(TAG, "ignoring onServiceConnected due to session=null");
+                    return;
+                }
                 mISpellCheckerSession = session;
                 if (session.asBinder() instanceof Binder && mThread == null) {
+                    if (DBG) Log.d(TAG, "starting HandlerThread in onServiceConnected.");
                     // If this is a local object, we need to do our own threading
                     // to make sure we handle it asynchronously.
                     mThread = new HandlerThread("SpellCheckerSession",
@@ -340,62 +402,65 @@ public class SpellCheckerSession {
                         }
                     };
                 }
-                mOpened = true;
+                mState = STATE_CONNECTED;
+                if (DBG) {
+                    Log.d(TAG, "processed onServiceConnected: mISpellCheckerSession.hashCode()=#"
+                            + Integer.toHexString(mISpellCheckerSession.hashCode())
+                            + " mPendingTasks.size()=" + mPendingTasks.size());
+                }
             }
-            if (DBG)
-                Log.d(TAG, "onServiceConnected - Success");
             while (!mPendingTasks.isEmpty()) {
                 processTask(session, mPendingTasks.poll(), false);
             }
         }
 
         public void cancel() {
-            if (DBG) {
-                Log.w(TAG, "cancel");
-            }
             processOrEnqueueTask(new SpellCheckerParams(TASK_CANCEL, null, 0, false));
         }
 
         public void getSuggestionsMultiple(
                 TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
-            if (DBG) {
-                Log.w(TAG, "getSuggestionsMultiple");
-            }
             processOrEnqueueTask(
                     new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE, textInfos,
                             suggestionsLimit, sequentialWords));
         }
 
         public void getSentenceSuggestionsMultiple(TextInfo[] textInfos, int suggestionsLimit) {
-            if (DBG) {
-                Log.w(TAG, "getSentenceSuggestionsMultiple");
-            }
             processOrEnqueueTask(
                     new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE,
                             textInfos, suggestionsLimit, false));
         }
 
         public void close() {
-            if (DBG) {
-                Log.w(TAG, "close");
-            }
             processOrEnqueueTask(new SpellCheckerParams(TASK_CLOSE, null, 0, false));
         }
 
         public boolean isDisconnected() {
-            return mOpened && mISpellCheckerSession == null;
+            synchronized (this) {
+                return mState != STATE_CONNECTED;
+            }
         }
 
         private void processOrEnqueueTask(SpellCheckerParams scp) {
-            if (DBG) {
-                Log.d(TAG, "process or enqueue task: " + mISpellCheckerSession);
-            }
             ISpellCheckerSession session;
             synchronized (this) {
-                session = mISpellCheckerSession;
-                if (session == null) {
+                if (mState != STATE_WAIT_CONNECTION && mState != STATE_CONNECTED) {
+                    Log.e(TAG, "ignoring processOrEnqueueTask due to unexpected mState="
+                            + taskToString(scp.mWhat)
+                            + " scp.mWhat=" + taskToString(scp.mWhat));
+                    return;
+                }
+
+                if (mState == STATE_WAIT_CONNECTION) {
+                    // If we are still waiting for the connection. Need to pay special attention.
+                    if (scp.mWhat == TASK_CLOSE) {
+                        processCloseLocked();
+                        return;
+                    }
+                    // Enqueue the task to task queue.
                     SpellCheckerParams closeTask = null;
                     if (scp.mWhat == TASK_CANCEL) {
+                        if (DBG) Log.d(TAG, "canceling pending tasks in processOrEnqueueTask.");
                         while (!mPendingTasks.isEmpty()) {
                             final SpellCheckerParams tmp = mPendingTasks.poll();
                             if (tmp.mWhat == TASK_CLOSE) {
@@ -409,9 +474,15 @@ public class SpellCheckerSession {
                     if (closeTask != null) {
                         mPendingTasks.offer(closeTask);
                     }
+                    if (DBG) Log.d(TAG, "queueing tasks in processOrEnqueueTask since the"
+                            + " connection is not established."
+                            + " mPendingTasks.size()=" + mPendingTasks.size());
                     return;
                 }
+
+                session = mISpellCheckerSession;
             }
+            // session must never be null here.
             processTask(session, scp, false);
         }
 
@@ -467,9 +538,6 @@ public class SpellCheckerSession {
 
         @Override
         public void onServiceConnected(ISpellCheckerSession session) {
-            if (DBG) {
-                Log.w(TAG, "SpellCheckerSession connected.");
-            }
             mParentSpellCheckerSessionListenerImpl.onServiceConnected(session);
         }
     }
