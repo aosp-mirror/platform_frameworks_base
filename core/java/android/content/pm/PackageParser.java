@@ -4024,7 +4024,7 @@ public class PackageParser {
 
     public static final PublicKey parsePublicKey(final String encodedPublicKey) {
         if (encodedPublicKey == null) {
-            Slog.i(TAG, "Could not parse null public key");
+            Slog.w(TAG, "Could not parse null public key");
             return null;
         }
 
@@ -4033,7 +4033,7 @@ public class PackageParser {
             final byte[] encoded = Base64.decode(encodedPublicKey, Base64.DEFAULT);
             keySpec = new X509EncodedKeySpec(encoded);
         } catch (IllegalArgumentException e) {
-            Slog.i(TAG, "Could not parse verifier public key; invalid Base64");
+            Slog.w(TAG, "Could not parse verifier public key; invalid Base64");
             return null;
         }
 
@@ -4042,10 +4042,19 @@ public class PackageParser {
             final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            Log.wtf(TAG, "Could not parse public key because RSA isn't included in build");
-            return null;
+            Slog.wtf(TAG, "Could not parse public key: RSA KeyFactory not included in build");
         } catch (InvalidKeySpecException e) {
             // Not a RSA public key.
+        }
+
+        /* Now try it as a ECDSA key. */
+        try {
+            final KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            return keyFactory.generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException e) {
+            Slog.wtf(TAG, "Could not parse public key: EC KeyFactory not included in build");
+        } catch (InvalidKeySpecException e) {
+            // Not a ECDSA public key.
         }
 
         /* Now try it as a DSA key. */
@@ -4053,12 +4062,12 @@ public class PackageParser {
             final KeyFactory keyFactory = KeyFactory.getInstance("DSA");
             return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            Log.wtf(TAG, "Could not parse public key because DSA isn't included in build");
-            return null;
+            Slog.wtf(TAG, "Could not parse public key: DSA KeyFactory not included in build");
         } catch (InvalidKeySpecException e) {
             // Not a DSA public key.
         }
 
+        /* Not a supported key type */
         return null;
     }
 
