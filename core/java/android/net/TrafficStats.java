@@ -53,6 +53,8 @@ public class TrafficStats {
     public static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
     /** @hide */
     public static final long TB_IN_BYTES = GB_IN_BYTES * 1024;
+    /** @hide */
+    public static final long PB_IN_BYTES = TB_IN_BYTES * 1024;
 
     /**
      * Special UID value used when collecting {@link NetworkStatsHistory} for
