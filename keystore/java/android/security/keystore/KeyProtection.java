@@ -47,6 +47,8 @@ import javax.crypto.Cipher;
  *
  * <p>NOTE: The key material of keys stored in the Android KeyStore is not accessible.
  *
+ * <p>Instances of this class are immutable.
+ *
  * <p><h3>Example: Symmetric Key</h3>
  * The following example illustrates how to import an AES key into the Android KeyStore under alias
  * {@code key1} authorized to be used only for encryption/decryption in CBC mode with PKCS#7
@@ -122,15 +124,9 @@ public final class KeyProtection implements ProtectionParameter {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds) {
-        if ((userAuthenticationValidityDurationSeconds < 0)
-                && (userAuthenticationValidityDurationSeconds != -1)) {
-            throw new IllegalArgumentException(
-                    "userAuthenticationValidityDurationSeconds must not be negative");
-        }
-
-        mKeyValidityStart = keyValidityStart;
-        mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
-        mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
+        mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
+        mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
+        mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
         mPurposes = purposes;
         mEncryptionPaddings =
                 ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
@@ -150,7 +146,7 @@ public final class KeyProtection implements ProtectionParameter {
      */
     @Nullable
     public Date getKeyValidityStart() {
-        return mKeyValidityStart;
+        return Utils.cloneIfNotNull(mKeyValidityStart);
     }
 
     /**
@@ -160,7 +156,7 @@ public final class KeyProtection implements ProtectionParameter {
      */
     @Nullable
     public Date getKeyValidityForConsumptionEnd() {
-        return mKeyValidityForConsumptionEnd;
+        return Utils.cloneIfNotNull(mKeyValidityForConsumptionEnd);
     }
 
     /**
@@ -170,7 +166,7 @@ public final class KeyProtection implements ProtectionParameter {
      */
     @Nullable
     public Date getKeyValidityForOriginationEnd() {
-        return mKeyValidityForOriginationEnd;
+        return Utils.cloneIfNotNull(mKeyValidityForOriginationEnd);
     }
 
     /**
@@ -320,7 +316,7 @@ public final class KeyProtection implements ProtectionParameter {
          */
         @NonNull
         public Builder setKeyValidityStart(Date startDate) {
-            mKeyValidityStart = startDate;
+            mKeyValidityStart = Utils.cloneIfNotNull(startDate);
             return this;
         }
 
@@ -349,7 +345,7 @@ public final class KeyProtection implements ProtectionParameter {
          */
         @NonNull
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
-            mKeyValidityForOriginationEnd = endDate;
+            mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(endDate);
             return this;
         }
 
@@ -363,7 +359,7 @@ public final class KeyProtection implements ProtectionParameter {
          */
         @NonNull
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
-            mKeyValidityForConsumptionEnd = endDate;
+            mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(endDate);
             return this;
         }
 
@@ -517,6 +513,9 @@ public final class KeyProtection implements ProtectionParameter {
         @NonNull
         public Builder setUserAuthenticationValidityDurationSeconds(
                 @IntRange(from = -1) int seconds) {
+            if (seconds < -1) {
+                throw new IllegalArgumentException("seconds must be -1 or larger");
+            }
             mUserAuthenticationValidityDurationSeconds = seconds;
             return this;
         }

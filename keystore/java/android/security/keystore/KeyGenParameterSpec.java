@@ -103,7 +103,8 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p><h3>Example: Symmetric key</h3>
  * The following example illustrates how to generate an AES key in the Android KeyStore system under
- * alias {@code key2} authorized to be used only for encryption/decryption in CBC mode.
+ * alias {@code key2} authorized to be used only for encryption/decryption in CBC mode with PKCS#7
+ * padding.
  * <pre> {@code
  * KeyGenerator keyGenerator = KeyGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_AES,
@@ -112,7 +113,7 @@ import javax.security.auth.x500.X500Principal;
  *         new KeyGenParameterSpec.Builder("key2",
  *                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
  *                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
- *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+ *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
  *                 .build());
  * SecretKey key = keyGenerator.generateKey();
  *
