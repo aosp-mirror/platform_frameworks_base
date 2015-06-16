@@ -90,7 +90,7 @@ more important columns are described below.</p>
    <td>The production year of your content <strong>(required)</strong></td>
 </tr><tr>
    <td>{@code SUGGEST_COLUMN_DURATION}</td>
-   <td>The duration in milliseconds of your media</td>
+   <td>The duration in milliseconds of your media <strong>(required)</strong></td>
 </tr>
 </table>
 
@@ -99,6 +99,7 @@ more important columns are described below.</p>
   <li>{@link android.app.SearchManager#SUGGEST_COLUMN_TEXT_1}</li>
   <li>{@link android.app.SearchManager#SUGGEST_COLUMN_CONTENT_TYPE}</li>
   <li>{@link android.app.SearchManager#SUGGEST_COLUMN_PRODUCTION_YEAR}</li>
+  <li>{@link android.app.SearchManager#SUGGEST_COLUMN_DURATION}</li>
 </ul>
 
 <p>When the values of these columns for your content match the values for the same content from other
