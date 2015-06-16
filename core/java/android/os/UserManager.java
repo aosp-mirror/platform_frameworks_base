@@ -362,6 +362,18 @@ public class UserManager {
     public static final String DISALLOW_SMS = "no_sms";
 
     /**
+     * Specifies if the user is not allowed to have fun. In some cases, the
+     * device owner may wish to prevent the user from experiencing amusement or
+     * joy while using the device. The default value is <code>false</code>.
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_FUN = "no_fun";
+
+    /**
      * Specifies that windows besides app windows should not be
      * created. This will block the creation of the following types of windows.
      * <li>{@link LayoutParams#TYPE_TOAST}</li>
