@@ -11496,7 +11496,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<ris.size(); i++) {
                 ActivityInfo ai = ris.get(i).activityInfo;
                 ComponentName comp = new ComponentName(ai.packageName, ai.name);
-                if (false && lastDoneReceivers.contains(comp)) {
+                if (lastDoneReceivers.contains(comp)) {
                     // We already did the pre boot receiver for this app with the current
                     // platform version, so don't do it again...
                     ris.remove(i);
