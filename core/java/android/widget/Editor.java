@@ -244,15 +244,6 @@ public class Editor {
 
     final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
 
-    private final Runnable mHideFloatingToolbar = new Runnable() {
-        @Override
-        public void run() {
-            if (mTextActionMode != null) {
-                mTextActionMode.hide(ActionMode.DEFAULT_HIDE_DURATION);
-            }
-        }
-    };
-
     private final Runnable mShowFloatingToolbar = new Runnable() {
         @Override
         public void run() {
@@ -389,7 +380,6 @@ public class Editor {
             mTextView.removeCallbacks(mInsertionActionModeRunnable);
         }
 
-        mTextView.removeCallbacks(mHideFloatingToolbar);
         mTextView.removeCallbacks(mShowFloatingToolbar);
 
         destroyDisplayListsData();
@@ -1248,14 +1238,12 @@ public class Editor {
     private void hideFloatingToolbar() {
         if (mTextActionMode != null) {
             mTextView.removeCallbacks(mShowFloatingToolbar);
-            // Delay the "hide" a little bit just in case a "show" will happen almost immediately.
-            mTextView.postDelayed(mHideFloatingToolbar, 100);
+            mTextActionMode.hide(ActionMode.DEFAULT_HIDE_DURATION);
         }
     }
 
     private void showFloatingToolbar() {
         if (mTextActionMode != null) {
-            mTextView.removeCallbacks(mHideFloatingToolbar);
             // Delay "show" so it doesn't interfere with click confirmations
             // or double-clicks that could "dismiss" the floating toolbar.
             int delay = ViewConfiguration.getDoubleTapTimeout();
