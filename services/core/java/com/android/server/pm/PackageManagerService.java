@@ -266,6 +266,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final boolean DEBUG_SETTINGS = false;
     static final boolean DEBUG_PREFERRED = false;
     static final boolean DEBUG_UPGRADE = false;
+    static final boolean DEBUG_DOMAIN_VERIFICATION = false;
     private static final boolean DEBUG_BACKUP = true;
     private static final boolean DEBUG_INSTALL = false;
     private static final boolean DEBUG_REMOVE = false;
@@ -277,7 +278,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_VERIFY = false;
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
-    private static final boolean DEBUG_DOMAIN_VERIFICATION = false;
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -11816,50 +11816,45 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int verificationId = mIntentFilterVerificationToken++;
         int count = 0;
         final String packageName = pkg.packageName;
-        ArrayList<String> allHosts = new ArrayList<>();
+        boolean needToVerify = false;
 
         synchronized (mPackages) {
+            // If any filters need to be verified, then all need to be.
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
-                    boolean needsFilterVerification = filter.needsVerification();
-                    if (needsFilterVerification && needsNetworkVerificationLPr(filter)) {
-                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                                "Verification needed for IntentFilter:" + filter.toString());
-                        mIntentFilterVerifier.addOneIntentFilterVerification(
-                                verifierUid, userId, verificationId, filter, packageName);
-                        count++;
-                    } else if (!needsFilterVerification) {
-                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                                "No verification needed for IntentFilter:" + filter.toString());
-                        if (hasValidDomains(filter)) {
-                            ArrayList<String> hosts = filter.getHostsList();
-                            if (hosts.size() > 0) {
-                                allHosts.addAll(hosts);
-                            } else {
-                                if (allHosts.isEmpty()) {
-                                    allHosts.add("*");
-                                }
-                            }
+                    if (filter.needsVerification() && needsNetworkVerificationLPr(filter)) {
+                        if (DEBUG_DOMAIN_VERIFICATION) {
+                            Slog.d(TAG, "Intent filter needs verification, so processing all filters");
                         }
-                    } else {
-                        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                                "Verification already done for IntentFilter:" + filter.toString());
+                        needToVerify = true;
+                        break;
+                    }
+                }
+            }
+            if (needToVerify) {
+                for (PackageParser.Activity a : pkg.activities) {
+                    for (ActivityIntentInfo filter : a.intents) {
+                        boolean needsFilterVerification = filter.hasWebDataURI();
+                        if (needsFilterVerification && needsNetworkVerificationLPr(filter)) {
+                            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                                    "Verification needed for IntentFilter:" + filter.toString());
+                            mIntentFilterVerifier.addOneIntentFilterVerification(
+                                    verifierUid, userId, verificationId, filter, packageName);
+                            count++;
+                        }
                     }
                 }
             }
         }
 
         if (count > 0) {
-            mIntentFilterVerifier.startVerifications(userId);
-            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Started " + count
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Starting " + count
                     + " IntentFilter verification" + (count > 1 ? "s" : "")
-                    +  " for userId:" + userId + "!");
+                    +  " for userId:" + userId);
+            mIntentFilterVerifier.startVerifications(userId);
         } else {
-            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                    "No need to start any IntentFilter verification!");
-            if (allHosts.size() > 0 && mSettings.createIntentFilterVerificationIfNeededLPw(
-                    packageName, allHosts) != null) {
-                scheduleWriteSettingsLocked();
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, "No filters or not all autoVerify for " + packageName);
             }
         }
     }
