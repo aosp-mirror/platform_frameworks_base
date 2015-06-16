@@ -4021,10 +4021,12 @@ package android.app {
     ctor public AssistContent();
     method public android.content.ClipData getClipData();
     method public android.os.Bundle getExtras();
+    method public java.lang.String getStructuredData();
     method public android.net.Uri getWebUri();
     method public boolean isAppProvidedIntent();
     method public void setClipData(android.content.ClipData);
     method public void setIntent(android.content.Intent);
+    method public void setStructuredData(java.lang.String);
     method public void setWebUri(android.net.Uri);
   }
 
