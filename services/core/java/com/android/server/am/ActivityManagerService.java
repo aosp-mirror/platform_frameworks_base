@@ -31,7 +31,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -10339,11 +10338,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     void startRunningVoiceLocked(IVoiceInteractionSession session, int targetUid) {
         mVoiceWakeLock.setWorkSource(new WorkSource(targetUid));
         if (mRunningVoice == null || mRunningVoice.asBinder() != session.asBinder()) {
-            if (mRunningVoice == null) {
+            boolean wasRunningVoice = mRunningVoice != null;
+            mRunningVoice = session;
+            if (!wasRunningVoice) {
                 mVoiceWakeLock.acquire();
                 updateSleepIfNeededLocked();
             }
-            mRunningVoice = session;
         }
     }
 
@@ -18609,29 +18609,24 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
         boolean isInteraction;
-        if (!mSleeping) {
-            isInteraction = app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+        // To avoid some abuse patterns, we are going to be careful about what we consider
+        // to be an app interaction.  Being the top activity doesn't count while the display
+        // is sleeping, nor do short foreground services.
+        if (app.curProcState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+            isInteraction = true;
             app.fgInteractionTime = 0;
-        } else {
-            // If the display is off, we are going to be more restrictive about what we consider
-            // to be an app interaction.  Being the top activity doesn't count, nor do generally
-            // foreground services.
-            if (app.curProcState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-                isInteraction = true;
-                app.fgInteractionTime = 0;
-            } else if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
-                final long now = SystemClock.elapsedRealtime();
-                if (app.fgInteractionTime == 0) {
-                    app.fgInteractionTime = now;
-                    isInteraction = false;
-                } else {
-                    isInteraction = now > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
-                }
+        } else if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+            final long now = SystemClock.elapsedRealtime();
+            if (app.fgInteractionTime == 0) {
+                app.fgInteractionTime = now;
+                isInteraction = false;
             } else {
-                isInteraction = app.curProcState
-                        <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
-                app.fgInteractionTime = 0;
+                isInteraction = now > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
             }
+        } else {
+            isInteraction = app.curProcState
+                    <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            app.fgInteractionTime = 0;
         }
         if (isInteraction && !app.reportedInteraction) {
             String[] packages = app.getPackageList();
