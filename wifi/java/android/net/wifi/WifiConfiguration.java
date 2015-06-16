@@ -636,6 +636,18 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * For debug: date at which the config was last updated
+     */
+    public String updateTime;
+
+    /**
+     * @hide
+     * For debug: date at which the config was last updated
+     */
+    public String creationTime;
+
+    /**
+     * @hide
      * The WiFi configuration is considered to have no internet access for purpose of autojoining
      * if there has been a report of it having no internet access, and, it never have had
      * internet access in the past.
@@ -932,6 +944,12 @@ public class WifiConfiguration implements Parcelable {
         if (this.numNoInternetAccessReports > 0) {
             sbuf.append(" numNoInternetAccessReports ");
             sbuf.append(this.numNoInternetAccessReports).append("\n");
+        }
+        if (this.updateTime != null) {
+            sbuf.append("creation=").append(this.updateTime).append("\n");
+        }
+        if (this.creationTime != null) {
+            sbuf.append("update=").append(this.creationTime).append("\n");
         }
         if (this.didSelfAdd) sbuf.append(" didSelfAdd");
         if (this.selfAdded) sbuf.append(" selfAdded");
@@ -1412,6 +1430,8 @@ public class WifiConfiguration implements Parcelable {
             autoJoinBailedDueToLowRssi = source.autoJoinBailedDueToLowRssi;
             dirty = source.dirty;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
+            creationTime = source.creationTime;
+            updateTime = source.updateTime;
         }
     }
 
