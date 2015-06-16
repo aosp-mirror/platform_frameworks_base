@@ -2655,14 +2655,28 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>so <code>[x_s, y_s]</code> is the pixel coordinates of the world
      * point, <code>z_s = 1</code>, and <code>w_s</code> is a measurement of disparity
      * (depth) in pixel coordinates.</p>
+     * <p>Note that the coordinate system for this transform is the
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} system,
+     * where <code>(0,0)</code> is the top-left of the
+     * preCorrectionActiveArraySize rectangle. Once the pose and
+     * intrinsic calibration transforms have been applied to a
+     * world point, then the android.lens.radialDistortion
+     * transform needs to be applied, and the result adjusted to
+     * be in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
+     * system (where <code>(0, 0)</code> is the top-left of the
+     * activeArraySize rectangle), to determine the final pixel
+     * coordinate of the world point for processed (non-RAW)
+     * output buffers.</p>
      * <p><b>Units</b>:
-     * Pixels in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
-     * system.</p>
+     * Pixels in the
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}
+     * coordinate system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     public static final Key<float[]> LENS_INTRINSIC_CALIBRATION =
