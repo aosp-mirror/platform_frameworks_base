@@ -7232,13 +7232,6 @@ public final class Settings {
                 "preferred_network_mode";
 
         /**
-         * Setting to 1 will hide carrier network settings.
-         * Default is 0.
-         */
-        public static final String HIDE_CARRIER_NETWORK_SETTINGS =
-                "hide_carrier_network_settings";
-
-        /**
          * Name of an application package to be debugged.
          */
         public static final String DEBUG_APP = "debug_app";
