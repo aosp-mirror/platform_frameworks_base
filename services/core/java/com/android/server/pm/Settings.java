@@ -27,6 +27,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
+import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -977,7 +978,9 @@ final class Settings {
     IntentFilterVerificationInfo getIntentFilterVerificationLPr(String packageName) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
-            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
+            }
             return null;
         }
         return ps.getIntentFilterVerificationInfo();
@@ -988,20 +991,26 @@ final class Settings {
             ArrayList<String> domains) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
-            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
+            }
             return null;
         }
         IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
         if (ivi == null) {
             ivi = new IntentFilterVerificationInfo(packageName, domains);
             ps.setIntentFilterVerificationInfo(ivi);
-            Slog.d(PackageManagerService.TAG,
-                    "Creating new IntentFilterVerificationInfo for packageName: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(PackageManagerService.TAG,
+                        "Creating new IntentFilterVerificationInfo for pkg: " + packageName);
+            }
         } else {
             ivi.setDomains(domains);
-            Slog.d(PackageManagerService.TAG,
-                    "Setting domains to existing IntentFilterVerificationInfo for packageName: " +
-                            packageName + " and with domains: " + ivi.getDomainsString());
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(PackageManagerService.TAG,
+                        "Setting domains to existing IntentFilterVerificationInfo for pkg: " +
+                                packageName + " and with domains: " + ivi.getDomainsString());
+            }
         }
         return ivi;
     }
@@ -1009,7 +1018,9 @@ final class Settings {
     int getIntentFilterVerificationStatusLPr(String packageName, int userId) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
-            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
+            }
             return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         }
         int status = ps.getDomainVerificationStatusForUser(userId);
@@ -1025,14 +1036,18 @@ final class Settings {
         // Update the status for the current package
         PackageSetting current = mPackages.get(packageName);
         if (current == null) {
-            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
+            }
             return false;
         }
         current.setDomainVerificationStatusForUser(status, userId);
 
         if (current.getIntentFilterVerificationInfo() == null) {
-            Slog.w(PackageManagerService.TAG,
-                    "No IntentFilterVerificationInfo known for name: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.w(PackageManagerService.TAG,
+                        "No IntentFilterVerificationInfo known: " + packageName);
+            }
             return false;
         }
 
@@ -1080,7 +1095,9 @@ final class Settings {
     boolean removeIntentFilterVerificationLPw(String packageName, int userId) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
-            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
+            }
             return false;
         }
         ps.clearDomainVerificationStatusForUser(userId);
@@ -1549,8 +1566,10 @@ final class Settings {
         if (verificationInfo != null && verificationInfo.getPackageName() != null) {
             serializer.startTag(null, TAG_DOMAIN_VERIFICATION);
             verificationInfo.writeToXml(serializer);
-            Log.d(TAG, "Wrote domain verification for package: "
-                    + verificationInfo.getPackageName());
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, "Wrote domain verification for package: "
+                        + verificationInfo.getPackageName());
+            }
             serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
         }
     }
