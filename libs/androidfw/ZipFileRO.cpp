@@ -96,8 +96,9 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
  * Returns "false" if the offsets to the fields or the contents of the fields
  * appear to be bogus.
  */
-bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
-    size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32) const
+bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
+    uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
+    uint32_t* pModWhen, uint32_t* pCrc32) const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const ZipEntry& ze = zipEntry->entry;
@@ -165,7 +166,7 @@ void ZipFileRO::releaseEntry(ZipEntryRO entry) const
 /*
  * Copy the entry's filename to the buffer.
  */
-int ZipFileRO::getEntryFileName(ZipEntryRO entry, char* buffer, int bufLen)
+int ZipFileRO::getEntryFileName(ZipEntryRO entry, char* buffer, size_t bufLen)
     const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);

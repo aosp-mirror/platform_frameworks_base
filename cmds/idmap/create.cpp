@@ -23,7 +23,7 @@ namespace {
         if (entry == NULL) {
             return -1;
         }
-        if (!zip->getEntryInfo(entry, NULL, NULL, NULL, NULL, NULL, reinterpret_cast<long*>(crc))) {
+        if (!zip->getEntryInfo(entry, NULL, NULL, NULL, NULL, NULL, crc)) {
             return -1;
         }
         zip->releaseEntry(entry);
