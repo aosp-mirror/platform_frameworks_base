@@ -801,7 +801,7 @@ public class SyncManager {
             for (String authority : syncableAuthorities) {
                 int isSyncable = getIsSyncable(account.account, account.userId,
                         authority);
-                if (isSyncable == 0) {
+                if (isSyncable == AuthorityInfo.NOT_SYNCABLE) {
                     continue;
                 }
                 final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo;
@@ -813,8 +813,9 @@ public class SyncManager {
                 final boolean allowParallelSyncs = syncAdapterInfo.type.allowParallelSyncs();
                 final boolean isAlwaysSyncable = syncAdapterInfo.type.isAlwaysSyncable();
                 if (isSyncable < 0 && isAlwaysSyncable) {
-                    mSyncStorageEngine.setIsSyncable(account.account, account.userId, authority, 1);
-                    isSyncable = 1;
+                    mSyncStorageEngine.setIsSyncable(
+                            account.account, account.userId, authority, AuthorityInfo.SYNCABLE);
+                    isSyncable = AuthorityInfo.SYNCABLE;
                 }
                 if (onlyThoseWithUnkownSyncableState && isSyncable >= 0) {
                     continue;

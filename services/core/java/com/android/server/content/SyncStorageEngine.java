@@ -301,6 +301,30 @@ public class SyncStorageEngine extends Handler {
     }
 
     public static class AuthorityInfo {
+        // Legal values of getIsSyncable
+        /**
+         * Default state for a newly installed adapter. An uninitialized adapter will receive an
+         * initialization sync which are governed by a different set of rules to that of regular
+         * syncs.
+         */
+        public static final int NOT_INITIALIZED = -1;
+        /**
+         * The adapter will not receive any syncs. This is behaviourally equivalent to
+         * setSyncAutomatically -> false. However setSyncAutomatically is surfaced to the user
+         * while this is generally meant to be controlled by the developer.
+         */
+        public static final int NOT_SYNCABLE = 0;
+        /**
+         * The adapter is initialized and functioning. This is the normal state for an adapter.
+         */
+        public static final int SYNCABLE = 1;
+        /**
+         * The adapter is syncable but still requires an initialization sync. For example an adapter
+         * than has been restored from a previous device will be in this state. Not meant for
+         * external use.
+         */
+        public static final int SYNCABLE_NOT_INITIALIZED = 2;
+
         final EndPoint target;
         final int ident;
         boolean enabled;
@@ -349,12 +373,11 @@ public class SyncStorageEngine extends Handler {
         }
 
         private void defaultInitialisation() {
-            syncable = -1; // default to "unknown"
+            syncable = NOT_INITIALIZED; // default to "unknown"
             backoffTime = -1; // if < 0 then we aren't in backoff mode
             backoffDelay = -1; // if < 0 then we aren't in backoff mode
             PeriodicSync defaultSync;
-            // Old version is one sync a day. Empty bundle gets replaced by any addPeriodicSync()
-            // call.
+            // Old version is one sync a day.
             if (target.target_provider) {
                 defaultSync =
                         new PeriodicSync(target.account, target.provider,
@@ -663,6 +686,12 @@ public class SyncStorageEngine extends Handler {
                 }
                 return;
             }
+            // If the adapter was syncable but missing its initialization sync, set it to
+            // uninitialized now. This is to give it a chance to run any one-time initialization
+            // logic.
+            if (sync && authority.syncable == AuthorityInfo.SYNCABLE_NOT_INITIALIZED) {
+                authority.syncable = AuthorityInfo.NOT_INITIALIZED;
+            }
             authority.enabled = sync;
             writeAccountInfoLocked();
         }
@@ -682,7 +711,7 @@ public class SyncStorageEngine extends Handler {
                         new EndPoint(account, providerName, userId),
                         "get authority syncable");
                 if (authority == null) {
-                    return -1;
+                    return AuthorityInfo.NOT_INITIALIZED;
                 }
                 return authority.syncable;
             }
@@ -696,7 +725,7 @@ public class SyncStorageEngine extends Handler {
                     return authorityInfo.syncable;
                 }
             }
-            return -1;
+            return AuthorityInfo.NOT_INITIALIZED;
         }
     }
 
@@ -720,7 +749,8 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void setIsTargetServiceActive(ComponentName cname, int userId, boolean active) {
-        setSyncableStateForEndPoint(new EndPoint(cname, userId), active ? 1 : 0);
+        setSyncableStateForEndPoint(new EndPoint(cname, userId), active ?
+                AuthorityInfo.SYNCABLE : AuthorityInfo.NOT_SYNCABLE);
     }
 
     /**
@@ -733,10 +763,8 @@ public class SyncStorageEngine extends Handler {
         AuthorityInfo aInfo;
         synchronized (mAuthorities) {
             aInfo = getOrCreateAuthorityLocked(target, -1, false);
-            if (syncable > 1) {
-                syncable = 1;
-            } else if (syncable < -1) {
-                syncable = -1;
+            if (syncable < AuthorityInfo.NOT_INITIALIZED) {
+                syncable = AuthorityInfo.NOT_INITIALIZED;
             }
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.d(TAG, "setIsSyncable: " + aInfo.toString() + " -> " + syncable);
@@ -750,7 +778,7 @@ public class SyncStorageEngine extends Handler {
             aInfo.syncable = syncable;
             writeAccountInfoLocked();
         }
-        if (syncable > 0) {
+        if (syncable == AuthorityInfo.SYNCABLE) {
             requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
@@ -2012,7 +2040,7 @@ public class SyncStorageEngine extends Handler {
             int userId = user == null ? 0 : Integer.parseInt(user);
             if (accountType == null && packageName == null) {
                 accountType = "com.google";
-                syncable = "unknown";
+                syncable = String.valueOf(AuthorityInfo.NOT_INITIALIZED);
             }
             authority = mAuthorities.get(id);
             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
@@ -2052,11 +2080,19 @@ public class SyncStorageEngine extends Handler {
             }
             if (authority != null) {
                 authority.enabled = enabled == null || Boolean.parseBoolean(enabled);
-                if ("unknown".equals(syncable)) {
-                    authority.syncable = -1;
-                } else {
-                    authority.syncable =
-                            (syncable == null || Boolean.parseBoolean(syncable)) ? 1 : 0;
+                try {
+                    authority.syncable = (syncable == null) ?
+                            AuthorityInfo.NOT_INITIALIZED : Integer.parseInt(syncable);
+                } catch (NumberFormatException e) {
+                    // On L we stored this as {"unknown", "true", "false"} so fall back to this
+                    // format.
+                    if ("unknown".equals(syncable)) {
+                        authority.syncable = AuthorityInfo.NOT_INITIALIZED;
+                    } else {
+                        authority.syncable = Boolean.parseBoolean(syncable) ?
+                                AuthorityInfo.SYNCABLE : AuthorityInfo.NOT_SYNCABLE;
+                    }
+
                 }
             } else {
                 Log.w(TAG, "Failure adding authority: account="
@@ -2190,11 +2226,7 @@ public class SyncStorageEngine extends Handler {
                     out.attribute(null, "package", info.service.getPackageName());
                     out.attribute(null, "class", info.service.getClassName());
                 }
-                if (authority.syncable < 0) {
-                    out.attribute(null, "syncable", "unknown");
-                } else {
-                    out.attribute(null, "syncable", Boolean.toString(authority.syncable != 0));
-                }
+                out.attribute(null, "syncable", Integer.toString(authority.syncable));
                 for (PeriodicSync periodicSync : authority.periodicSyncs) {
                     out.startTag(null, "periodicSync");
                     out.attribute(null, "period", Long.toString(periodicSync.period));
