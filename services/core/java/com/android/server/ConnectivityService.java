@@ -960,44 +960,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai != null ? nai.network : null;
     }
 
-    /**
-     * Find the first Provisioning network.
-     *
-     * @return NetworkInfo or null if none.
-     */
-    private NetworkInfo getProvisioningNetworkInfo() {
-        enforceAccessPermission();
-
-        // Find the first Provisioning Network
-        NetworkInfo provNi = null;
-        for (NetworkInfo ni : getAllNetworkInfo()) {
-            if (ni.isConnectedToProvisioningNetwork()) {
-                provNi = ni;
-                break;
-            }
-        }
-        if (DBG) log("getProvisioningNetworkInfo: X provNi=" + provNi);
-        return provNi;
-    }
-
-    /**
-     * Find the first Provisioning network or the ActiveDefaultNetwork
-     * if there is no Provisioning network
-     *
-     * @return NetworkInfo or null if none.
-     */
-    @Override
-    public NetworkInfo getProvisioningOrActiveNetworkInfo() {
-        enforceAccessPermission();
-
-        NetworkInfo provNi = getProvisioningNetworkInfo();
-        if (provNi == null) {
-            provNi = getActiveNetworkInfo();
-        }
-        if (DBG) log("getProvisioningOrActiveNetworkInfo: X provNi=" + provNi);
-        return provNi;
-    }
-
     public NetworkInfo getActiveNetworkInfoUnfiltered() {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
@@ -1566,14 +1528,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     };
-
-    /** @hide */
-    @Override
-    public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
-        enforceConnectivityInternalPermission();
-        if (DBG) log("captivePortalCheckCompleted: ni=" + info + " captive=" + isCaptivePortal);
-//        mNetTrackers[info.getType()].captivePortalCheckCompleted(isCaptivePortal);
-    }
 
     /**
      * Setup data activity tracking for the given network.
@@ -3357,7 +3311,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * <?xml version="1.0" encoding="utf-8"?>
      *  <provisioningUrls>
      *   <provisioningUrl mcc="310" mnc="4">http://myserver.com/foo?mdn=%3$s&amp;iccid=%1$s&amp;imei=%2$s</provisioningUrl>
-     *   <redirectedUrl mcc="310" mnc="4">http://www.google.com</redirectedUrl>
      *  </provisioningUrls>
      */
     private static final String PROVISIONING_URL_PATH =
@@ -3368,33 +3321,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String TAG_PROVISIONING_URLS = "provisioningUrls";
     /** XML tag for individual url */
     private static final String TAG_PROVISIONING_URL = "provisioningUrl";
-    /** XML tag for redirected url */
-    private static final String TAG_REDIRECTED_URL = "redirectedUrl";
     /** XML attribute for mcc */
     private static final String ATTR_MCC = "mcc";
     /** XML attribute for mnc */
     private static final String ATTR_MNC = "mnc";
 
-    private static final int REDIRECTED_PROVISIONING = 1;
-    private static final int PROVISIONING = 2;
-
-    private String getProvisioningUrlBaseFromFile(int type) {
+    private String getProvisioningUrlBaseFromFile() {
         FileReader fileReader = null;
         XmlPullParser parser = null;
         Configuration config = mContext.getResources().getConfiguration();
-        String tagType;
-
-        switch (type) {
-            case PROVISIONING:
-                tagType = TAG_PROVISIONING_URL;
-                break;
-            case REDIRECTED_PROVISIONING:
-                tagType = TAG_REDIRECTED_URL;
-                break;
-            default:
-                throw new RuntimeException("getProvisioningUrlBaseFromFile: Unexpected parameter " +
-                        type);
-        }
 
         try {
             fileReader = new FileReader(mProvisioningUrlFile);
@@ -3408,7 +3343,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 String element = parser.getName();
                 if (element == null) break;
 
-                if (element.equals(tagType)) {
+                if (element.equals(TAG_PROVISIONING_URL)) {
                     String mcc = parser.getAttributeValue(null, ATTR_MCC);
                     try {
                         if (mcc != null && Integer.parseInt(mcc) == config.mcc) {
@@ -3443,19 +3378,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public String getMobileRedirectedProvisioningUrl() {
-        enforceConnectivityInternalPermission();
-        String url = getProvisioningUrlBaseFromFile(REDIRECTED_PROVISIONING);
-        if (TextUtils.isEmpty(url)) {
-            url = mContext.getResources().getString(R.string.mobile_redirected_provisioning_url);
-        }
-        return url;
-    }
-
-    @Override
     public String getMobileProvisioningUrl() {
         enforceConnectivityInternalPermission();
-        String url = getProvisioningUrlBaseFromFile(PROVISIONING);
+        String url = getProvisioningUrlBaseFromFile();
         if (TextUtils.isEmpty(url)) {
             url = mContext.getResources().getString(R.string.mobile_provisioning_url);
             log("getMobileProvisioningUrl: mobile_provisioining_url from resource =" + url);

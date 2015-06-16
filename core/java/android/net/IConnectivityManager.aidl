@@ -53,8 +53,6 @@ interface IConnectivityManager
     Network[] getAllNetworks();
     NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId);
 
-    NetworkInfo getProvisioningOrActiveNetworkInfo();
-
     boolean isNetworkSupported(int networkType);
 
     LinkProperties getActiveLinkProperties();
@@ -122,13 +120,9 @@ interface IConnectivityManager
 
     boolean updateLockdownVpn();
 
-    void captivePortalCheckCompleted(in NetworkInfo info, boolean isCaptivePortal);
-
     int checkMobileProvisioning(int suggestedTimeOutMs);
 
     String getMobileProvisioningUrl();
-
-    String getMobileRedirectedProvisioningUrl();
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 

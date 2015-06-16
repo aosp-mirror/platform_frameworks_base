@@ -801,28 +801,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Returns details about the Provisioning or currently active default data network. When
-     * connected, this network is the default route for outgoing connections.
-     * You should always check {@link NetworkInfo#isConnected()} before initiating
-     * network traffic. This may return {@code null} when there is no default
-     * network.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
-     *
-     * @return a {@link NetworkInfo} object for the current default network
-     *        or {@code null} if no default network is currently active
-     *
-     * {@hide}
-     */
-    public NetworkInfo getProvisioningOrActiveNetworkInfo() {
-        try {
-            return mService.getProvisioningOrActiveNetworkInfo();
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
      * Returns the IP information for the current default network.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
@@ -2007,24 +1985,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Signal that the captive portal check on the indicated network
-     * is complete and whether its a captive portal or not.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
-     *
-     * @param info the {@link NetworkInfo} object for the networkType
-     *        in question.
-     * @param isCaptivePortal true/false.
-     * {@hide}
-     */
-    public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
-        try {
-            mService.captivePortalCheckCompleted(info, isCaptivePortal);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * Check mobile provisioning.
      *
      * @param suggestedTimeOutMs, timeout in milliseconds
@@ -2050,18 +2010,6 @@ public class ConnectivityManager {
     public String getMobileProvisioningUrl() {
         try {
             return mService.getMobileProvisioningUrl();
-        } catch (RemoteException e) {
-        }
-        return null;
-    }
-
-    /**
-     * Get the mobile redirected provisioning url.
-     * {@hide}
-     */
-    public String getMobileRedirectedProvisioningUrl() {
-        try {
-            return mService.getMobileRedirectedProvisioningUrl();
         } catch (RemoteException e) {
         }
         return null;
