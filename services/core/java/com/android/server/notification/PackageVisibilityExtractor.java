@@ -24,7 +24,7 @@ public class PackageVisibilityExtractor implements NotificationSignalExtractor {
 
     private RankingConfig mConfig;
 
-    public void initialize(Context ctx) {
+    public void initialize(Context ctx, NotificationUsageStats usageStats) {
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
     }
 

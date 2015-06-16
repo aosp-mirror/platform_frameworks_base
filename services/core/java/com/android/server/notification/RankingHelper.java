@@ -68,7 +68,8 @@ public class RankingHelper implements RankingConfig {
     private final Context mContext;
     private final Handler mRankingHandler;
 
-    public RankingHelper(Context context, Handler rankingHandler, String[] extractorNames) {
+    public RankingHelper(Context context, Handler rankingHandler, NotificationUsageStats usageStats,
+            String[] extractorNames) {
         mContext = context;
         mRankingHandler = rankingHandler;
 
@@ -79,7 +80,7 @@ public class RankingHelper implements RankingConfig {
                 Class<?> extractorClass = mContext.getClassLoader().loadClass(extractorNames[i]);
                 NotificationSignalExtractor extractor =
                         (NotificationSignalExtractor) extractorClass.newInstance();
-                extractor.initialize(mContext);
+                extractor.initialize(mContext, usageStats);
                 extractor.setConfig(this);
                 mSignalExtractors[i] = extractor;
             } catch (ClassNotFoundException e) {

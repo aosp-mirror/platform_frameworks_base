@@ -26,7 +26,7 @@ import android.content.Context;
 public interface NotificationSignalExtractor {
 
     /** One-time initialization. */
-    public void initialize(Context context);
+    public void initialize(Context context, NotificationUsageStats usageStats);
 
     /**
      * Called once per notification that is posted or updated.
