@@ -115,4 +115,6 @@
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">380dp</dimen>
+
+    <dimen name="floating_toolbar_preferred_width">544dp</dimen>
 </resources>
