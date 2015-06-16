@@ -41,32 +41,8 @@ struct levels_t {
 };
 static levels_t levels;
 
-static int toLevel(const char* value)
-{
-    switch (value[0]) {
-        case 'V': return levels.verbose;
-        case 'D': return levels.debug;
-        case 'I': return levels.info;
-        case 'W': return levels.warn;
-        case 'E': return levels.error;
-        case 'A': return levels.assert;
-        case 'S': return -1; // SUPPRESS
-    }
-    return levels.info;
-}
-
 static jboolean isLoggable(const char* tag, jint level) {
-    String8 key;
-    key.append(LOG_NAMESPACE);
-    key.append(tag);
-
-    char buf[PROPERTY_VALUE_MAX];
-    if (property_get(key.string(), buf, "") <= 0) {
-        buf[0] = '\0';
-    }
-
-    int logLevel = toLevel(buf);
-    return logLevel >= 0 && level >= logLevel;
+    return __android_log_is_loggable(level, tag, ANDROID_LOG_INFO);
 }
 
 static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring tag, jint level)
