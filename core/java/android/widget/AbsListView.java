@@ -6575,13 +6575,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * @return A view from the ScrapViews collection. These are unordered.
          */
         View getScrapView(int position) {
+            final int whichScrap = mAdapter.getItemViewType(position);
+            if (whichScrap < 0) {
+                return null;
+            }
             if (mViewTypeCount == 1) {
                 return retrieveFromScrap(mCurrentScrap, position);
-            } else {
-                final int whichScrap = mAdapter.getItemViewType(position);
-                if (whichScrap >= 0 && whichScrap < mScrapViews.length) {
-                    return retrieveFromScrap(mScrapViews[whichScrap], position);
-                }
+            } else if (whichScrap < mScrapViews.length) {
+                return retrieveFromScrap(mScrapViews[whichScrap], position);
             }
             return null;
         }
