@@ -37,6 +37,7 @@ import android.util.Log;
 import android.util.Patterns;
 
 import com.google.android.collect.Lists;
+import libcore.io.Streams;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -191,20 +192,17 @@ public class BugreportReceiver extends BroadcastReceiver {
      * original in case of failure).
      */
     private static File zipBugreport(File bugreportFile) {
-        byte[] bytes = read(bugreportFile);
-        if (bytes == null) {
-            // Could not read bugreport, return original.
-            return bugreportFile;
-        }
         String bugreportPath = bugreportFile.getAbsolutePath();
         String zippedPath = bugreportPath.replace(".txt", ".zip");
         Log.v(TAG, "zipping " + bugreportPath + " as " + zippedPath);
         File bugreportZippedFile = new File(zippedPath);
-        try (ZipOutputStream zos = new ZipOutputStream(
+        try (InputStream is = new FileInputStream(bugreportFile);
+            ZipOutputStream zos = new ZipOutputStream(
                 new BufferedOutputStream(new FileOutputStream(bugreportZippedFile)))) {
             ZipEntry entry = new ZipEntry("bugreport.txt");
             zos.putNextEntry(entry);
-            zos.write(bytes);
+            int totalBytes = Streams.copy(is, zos);
+            Log.v(TAG, "size of original bugreport: " + totalBytes + " bytes");
             zos.closeEntry();
             // Delete old file;
             boolean deleted = bugreportFile.delete();
@@ -217,22 +215,6 @@ public class BugreportReceiver extends BroadcastReceiver {
         } catch (IOException e) {
           Log.e(TAG, "exception zipping file " + zippedPath, e);
           return bugreportFile;  // Return original.
-        }
-    }
-
-    /** Returns the content of file, or {@code null} in case of error. */
-    private static byte[] read(File file) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream();
-             InputStream input = new FileInputStream(file)) {
-            byte[] buffer = new byte[4096];
-            int read = 0;
-            while ((read = input.read(buffer)) != -1) {
-              output.write(buffer, 0, read);
-            }
-            return output.toByteArray();
-        } catch (IOException e) {
-            Log.e(TAG, "IOException reading " + file.getAbsolutePath(), e);
-            return null;
         }
     }
 
