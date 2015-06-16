@@ -27,6 +27,7 @@ import android.net.LocalSocket;
 import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -711,7 +712,6 @@ class ZygoteConnection {
     private void handleChildProc(Arguments parsedArgs,
             FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
             throws ZygoteInit.MethodAndArgsCaller {
-
         /**
          * By the time we get here, the native code has closed the two actual Zygote
          * socket connections, and substituted /dev/null in their place.  The LocalSocket
@@ -740,6 +740,8 @@ class ZygoteConnection {
             Process.setArgV0(parsedArgs.niceName);
         }
 
+        // End of the postFork event.
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         if (parsedArgs.invokeWith != null) {
             WrapperInit.execApplication(parsedArgs.invokeWith,
                     parsedArgs.niceName, parsedArgs.targetSdkVersion,

@@ -5375,6 +5375,7 @@ public final class ActivityThread {
     }
 
     public static void main(String[] args) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
         SamplingProfilerIntegration.start();
 
         // CloseGuard defaults to true and can be quite spammy.  We
@@ -5409,6 +5410,8 @@ public final class ActivityThread {
                     LogPrinter(Log.DEBUG, "ActivityThread"));
         }
 
+        // End of event ActivityThreadMain.
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         Looper.loop();
 
         throw new RuntimeException("Main thread loop unexpectedly exited");
