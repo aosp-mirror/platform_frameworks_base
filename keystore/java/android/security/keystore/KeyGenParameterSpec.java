@@ -70,6 +70,8 @@ import javax.security.auth.x500.X500Principal;
  * <p>NOTE: The key material of the generated symmetric and private keys is not accessible. The key
  * material of the public keys is accessible.
  *
+ * <p>Instances of this class are immutable.
+ *
  * <p><h3>Example: Asymmetric key pair</h3>
  * The following example illustrates how to generate an EC key pair in the Android KeyStore system
  * under alias {@code key1} authorized to be used only for signing using SHA-256, SHA-384,
@@ -79,11 +81,12 @@ import javax.security.auth.x500.X500Principal;
  *         KeyProperties.KEY_ALGORITHM_EC,
  *         "AndroidKeyStore");
  * keyPairGenerator.initialize(
- *         new KeyGenParameterSpec.Builder("key1",
+ *         new KeyGenParameterSpec.Builder(
+ *                 "key1",
  *                 KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
- *                 .setDigests(KeyProperties.DIGEST_SHA256
- *                         | KeyProperties.DIGEST_SHA384
- *                         | KeyProperties.DIGEST_SHA512)
+ *                 .setDigests(KeyProperties.DIGEST_SHA256,
+ *                         KeyProperties.DIGEST_SHA384,
+ *                         KeyProperties.DIGEST_SHA512)
  *                 // Only permit this key to be used if the user authenticated
  *                 // within the last five minutes.
  *                 .setUserAuthenticationRequired(true)
@@ -100,15 +103,15 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p><h3>Example: Symmetric key</h3>
  * The following example illustrates how to generate an AES key in the Android KeyStore system under
- * alias {@code key2} authorized to be used only for encryption/decryption in CTR mode.
+ * alias {@code key2} authorized to be used only for encryption/decryption in CBC mode.
  * <pre> {@code
  * KeyGenerator keyGenerator = KeyGenerator.getInstance(
- *         KeyProperties.KEY_ALGORITHM_HMAC_SHA256,
+ *         KeyProperties.KEY_ALGORITHM_AES,
  *         "AndroidKeyStore");
  * keyGenerator.initialize(
  *         new KeyGenParameterSpec.Builder("key2",
  *                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
- *                 .setBlockModes(KeyProperties.BLOCK_MODE_CTR)
+ *                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
  *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
  *                 .build());
  * SecretKey key = keyGenerator.generateKey();
@@ -169,10 +172,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             int userAuthenticationValidityDurationSeconds) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
-        } else if ((userAuthenticationValidityDurationSeconds < 0)
-                && (userAuthenticationValidityDurationSeconds != -1)) {
-            throw new IllegalArgumentException(
-                    "userAuthenticationValidityDurationSeconds must not be negative");
         }
 
         if (certificateSubject == null) {
@@ -197,11 +196,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mSpec = spec;
         mCertificateSubject = certificateSubject;
         mCertificateSerialNumber = certificateSerialNumber;
-        mCertificateNotBefore = certificateNotBefore;
-        mCertificateNotAfter = certificateNotAfter;
-        mKeyValidityStart = keyValidityStart;
-        mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
-        mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
+        mCertificateNotBefore = Utils.cloneIfNotNull(certificateNotBefore);
+        mCertificateNotAfter = Utils.cloneIfNotNull(certificateNotAfter);
+        mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
+        mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
+        mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
         mPurposes = purposes;
         mDigests = ArrayUtils.cloneIfNotEmpty(digests);
         mEncryptionPaddings =
@@ -217,6 +216,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      * Returns the alias that will be used in the {@code java.security.KeyStore}
      * in conjunction with the {@code AndroidKeyStore}.
      */
+    @NonNull
     public String getKeystoreAlias() {
         return mKeystoreAlias;
     }
@@ -231,10 +231,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns the {@link AlgorithmParameterSpec} that will be used for creation
-     * of the key pair.
+     * Returns the key algorithm-specific {@link AlgorithmParameterSpec} that will be used for
+     * creation of the key or {@code null} if algorithm-specific defaults should be used.
      */
-    @NonNull
+    @Nullable
     public AlgorithmParameterSpec getAlgorithmParameterSpec() {
         return mSpec;
     }
@@ -263,7 +263,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     @NonNull
     public Date getCertificateNotBefore() {
-        return mCertificateNotBefore;
+        return Utils.cloneIfNotNull(mCertificateNotBefore);
     }
 
     /**
@@ -272,7 +272,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     @NonNull
     public Date getCertificateNotAfter() {
-        return mCertificateNotAfter;
+        return Utils.cloneIfNotNull(mCertificateNotAfter);
     }
 
     /**
@@ -281,7 +281,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     @Nullable
     public Date getKeyValidityStart() {
-        return mKeyValidityStart;
+        return Utils.cloneIfNotNull(mKeyValidityStart);
     }
 
     /**
@@ -290,7 +290,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     @Nullable
     public Date getKeyValidityForConsumptionEnd() {
-        return mKeyValidityForConsumptionEnd;
+        return Utils.cloneIfNotNull(mKeyValidityForConsumptionEnd);
     }
 
     /**
@@ -299,7 +299,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     @Nullable
     public Date getKeyValidityForOriginationEnd() {
-        return mKeyValidityForOriginationEnd;
+        return Utils.cloneIfNotNull(mKeyValidityForOriginationEnd);
     }
 
     /**
@@ -411,7 +411,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      * restricted.
      *
      * @return duration in seconds or {@code -1} if authentication is required for every use of the
-     *         key.
+     * key.
      *
      * @see #isUserAuthenticationRequired()
      */
@@ -447,7 +447,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * Creates a new instance of the {@code Builder}.
          *
          * @param keystoreAlias alias of the entry in which the generated key will appear in
-         *        Android KeyStore.
+         *        Android KeyStore. Must not be empty.
          * @param purposes set of purposes (e.g., encrypt, decrypt, sign) for which the key can be
          *        used. Attempts to use the key for any other purpose will be rejected.
          *
@@ -462,6 +462,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         public Builder(@NonNull String keystoreAlias, @KeyProperties.PurposeEnum int purposes) {
             if (keystoreAlias == null) {
                 throw new NullPointerException("keystoreAlias == null");
+            } else if (keystoreAlias.isEmpty()) {
+                throw new IllegalArgumentException("keystoreAlias must not be empty");
             }
             mKeystoreAlias = keystoreAlias;
             mPurposes = purposes;
@@ -488,7 +490,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
 
         /**
          * Sets the algorithm-specific key generation parameters. For example, for RSA keys this may
-         * be an instance of {@link java.security.spec.RSAKeyGenParameterSpec}.
+         * be an instance of {@link java.security.spec.RSAKeyGenParameterSpec} whereas for EC keys
+         * this may be an instance of {@link java.security.spec.ECGenParameterSpec}.
+         *
+         * <p>These key generation parameters must match other explicitly set parameters (if any),
+         * such as key size.
          */
         public Builder setAlgorithmParameterSpec(@NonNull AlgorithmParameterSpec spec) {
             if (spec == null) {
@@ -537,7 +543,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             if (date == null) {
                 throw new NullPointerException("date == null");
             }
-            mCertificateNotBefore = date;
+            mCertificateNotBefore = Utils.cloneIfNotNull(date);
             return this;
         }
 
@@ -552,7 +558,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             if (date == null) {
                 throw new NullPointerException("date == null");
             }
-            mCertificateNotAfter = date;
+            mCertificateNotAfter = Utils.cloneIfNotNull(date);
             return this;
         }
 
@@ -565,7 +571,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          */
         @NonNull
         public Builder setKeyValidityStart(Date startDate) {
-            mKeyValidityStart = startDate;
+            mKeyValidityStart = Utils.cloneIfNotNull(startDate);
             return this;
         }
 
@@ -594,7 +600,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          */
         @NonNull
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
-            mKeyValidityForOriginationEnd = endDate;
+            mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(endDate);
             return this;
         }
 
@@ -608,7 +614,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          */
         @NonNull
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
-            mKeyValidityForConsumptionEnd = endDate;
+            mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(endDate);
             return this;
         }
 
@@ -768,14 +774,15 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         @NonNull
         public Builder setUserAuthenticationValidityDurationSeconds(
                 @IntRange(from = -1) int seconds) {
+            if (seconds < -1) {
+                throw new IllegalArgumentException("seconds must be -1 or larger");
+            }
             mUserAuthenticationValidityDurationSeconds = seconds;
             return this;
         }
 
         /**
          * Builds an instance of {@code KeyGenParameterSpec}.
-         *
-         * @throws IllegalArgumentException if a required field is missing
          */
         @NonNull
         public KeyGenParameterSpec build() {
