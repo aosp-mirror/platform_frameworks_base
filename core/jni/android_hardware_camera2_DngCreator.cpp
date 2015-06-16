@@ -371,8 +371,8 @@ ssize_t JniInputByteBuffer::read(uint8_t* buf, size_t offset, size_t count) {
         realCount = count;
     }
 
-    jobject chainingBuf = mEnv->CallObjectMethod(mInBuf, gInputByteBufferClassInfo.mGetMethod, mByteArray, 0,
-            realCount);
+    jobject chainingBuf = mEnv->CallObjectMethod(mInBuf, gInputByteBufferClassInfo.mGetMethod,
+            mByteArray, 0, realCount);
     mEnv->DeleteLocalRef(chainingBuf);
 
     if (mEnv->ExceptionCheck()) {
@@ -630,8 +630,10 @@ static bool validateDngHeader(JNIEnv* env, TiffWriter* writer, jint width, jint 
     bool hasThumbnail = writer->hasIfd(TIFF_IFD_SUB1);
 
     // TODO: handle lens shading map, etc. conversions for other raw buffer sizes.
-    uint32_t metadataWidth = *(writer->getEntry(TAG_IMAGEWIDTH, (hasThumbnail) ? TIFF_IFD_SUB1 : TIFF_IFD_0)->getData<uint32_t>());
-    uint32_t metadataHeight = *(writer->getEntry(TAG_IMAGELENGTH, (hasThumbnail) ? TIFF_IFD_SUB1 : TIFF_IFD_0)->getData<uint32_t>());
+    uint32_t metadataWidth = *(writer->getEntry(TAG_IMAGEWIDTH, (hasThumbnail) ? TIFF_IFD_SUB1 :
+            TIFF_IFD_0)->getData<uint32_t>());
+    uint32_t metadataHeight = *(writer->getEntry(TAG_IMAGELENGTH, (hasThumbnail) ? TIFF_IFD_SUB1 :
+            TIFF_IFD_0)->getData<uint32_t>());
 
     if (width < 0 || metadataWidth != static_cast<uint32_t>(width)) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
@@ -641,7 +643,8 @@ static bool validateDngHeader(JNIEnv* env, TiffWriter* writer, jint width, jint 
 
     if (height < 0 || metadataHeight != static_cast<uint32_t>(height)) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
-                        "Metadata height %d doesn't match image height %d", metadataHeight, height);
+                        "Metadata height %d doesn't match image height %d",
+                        metadataHeight, height);
         return false;
     }
 
@@ -1428,7 +1431,11 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
     }
 
     {
-        // Setup opcode List 2
+        // Set up opcode List 2
+        OpcodeListBuilder builder;
+        status_t err = OK;
+
+        // Set up lens shading map
         camera_metadata_entry entry1 =
                 characteristics.find(ANDROID_LENS_INFO_SHADING_MAP_SIZE);
 
@@ -1444,34 +1451,52 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
                 results.find(ANDROID_STATISTICS_LENS_SHADING_MAP);
 
         if (entry2.count > 0 && entry2.count == lsmWidth * lsmHeight * 4) {
-
-            OpcodeListBuilder builder;
-            status_t err = builder.addGainMapsForMetadata(lsmWidth,
-                                                          lsmHeight,
-                                                          0,
-                                                          0,
-                                                          imageHeight,
-                                                          imageWidth,
-                                                          opcodeCfaLayout,
-                                                          entry2.data.f);
-            if (err == OK) {
-                size_t listSize = builder.getSize();
-                uint8_t opcodeListBuf[listSize];
-                err = builder.buildOpList(opcodeListBuf);
-                if (err == OK) {
-                    BAIL_IF_INVALID(writer->addEntry(TAG_OPCODELIST2, listSize, opcodeListBuf,
-                            TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
-                } else {
-                    ALOGE("%s: Could not build Lens shading map opcode.", __FUNCTION__);
-                    jniThrowRuntimeException(env, "failed to construct lens shading map opcode.");
-                }
-            } else {
+            err = builder.addGainMapsForMetadata(lsmWidth,
+                                                 lsmHeight,
+                                                 0,
+                                                 0,
+                                                 imageHeight,
+                                                 imageWidth,
+                                                 opcodeCfaLayout,
+                                                 entry2.data.f);
+            if (err != OK) {
                 ALOGE("%s: Could not add Lens shading map.", __FUNCTION__);
                 jniThrowRuntimeException(env, "failed to add lens shading map.");
+                return;
             }
+        }
+
+        // Set up rectilinear distortion correction
+        camera_metadata_entry entry3 =
+                results.find(ANDROID_LENS_RADIAL_DISTORTION);
+        camera_metadata_entry entry4 =
+                results.find(ANDROID_LENS_INTRINSIC_CALIBRATION);
+
+        if (entry3.count == 6 && entry4.count == 5) {
+            float cx = entry4.data.f[/*c_x*/2];
+            float cy = entry4.data.f[/*c_y*/3];
+            err = builder.addWarpRectilinearForMetadata(entry3.data.f, imageWidth, imageHeight, cx,
+                    cy);
+            if (err != OK) {
+                ALOGE("%s: Could not add distortion correction.", __FUNCTION__);
+                jniThrowRuntimeException(env, "failed to add distortion correction.");
+                return;
+            }
+        }
+
+
+        size_t listSize = builder.getSize();
+        uint8_t opcodeListBuf[listSize];
+        err = builder.buildOpList(opcodeListBuf);
+        if (err == OK) {
+            BAIL_IF_INVALID(writer->addEntry(TAG_OPCODELIST2, listSize, opcodeListBuf,
+                    TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
         } else {
-            ALOGW("%s: No lens shading map found in result metadata. Image quality may be reduced.",
-                    __FUNCTION__);
+            ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
+                    "map.", __FUNCTION__);
+            jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
+                    " correction and lens shading map");
+            return;
         }
     }
 
