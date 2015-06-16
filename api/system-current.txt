@@ -13645,6 +13645,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Long> SENSOR_INFO_MAX_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.graphics.Rect> SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Range<java.lang.Integer>> SENSOR_INFO_SENSITIVITY_RANGE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_INFO_TIMESTAMP_SOURCE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_INFO_WHITE_LEVEL;
