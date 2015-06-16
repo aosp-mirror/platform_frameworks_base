@@ -242,19 +242,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
+            // Adjust the volume with a handler not to be blocked by other system service.
             if (useSuggested) {
                 if (AudioSystem.isStreamActive(stream, 0)) {
-                    mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
-                            flags, packageName, uid);
+                    postAdjustSuggestedStreamVolume(stream, direction, flags, packageName, uid);
                 } else {
                     flags |= previousFlagPlaySound;
-                    mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
-                            AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
-                            uid);
+                    postAdjustSuggestedStreamVolume(AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
+                            flags, packageName, uid);
                 }
             } else {
-                mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
-                        packageName, uid);
+                postAdjustStreamVolume(stream, direction, flags, packageName, uid);
             }
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
@@ -459,6 +457,28 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     @Override
     public String toString() {
         return mPackageName + "/" + mTag;
+    }
+
+    private void postAdjustSuggestedStreamVolume(final int streamType, final int direction,
+            final int flags, final String callingPackage, final int uid) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(streamType, direction,
+                        flags, callingPackage, uid);
+            }
+        });
+    }
+
+    private void postAdjustStreamVolume(final int streamType, final int direction, final int flags,
+            final String callingPackage, final int uid) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAudioManagerInternal.adjustStreamVolumeForUid(streamType, direction, flags,
+                        callingPackage, uid);
+            }
+        });
     }
 
     private String getShortMetadataString() {
