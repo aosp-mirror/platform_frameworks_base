@@ -48,12 +48,14 @@ public class FloatingActionMode extends ActionMode {
     private final Runnable mMovingOff = new Runnable() {
         public void run() {
             mFloatingToolbarVisibilityHelper.setMoving(false);
+            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
         }
     };
 
     private final Runnable mHideOff = new Runnable() {
         public void run() {
             mFloatingToolbarVisibilityHelper.setHideRequested(false);
+            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
         }
     };
 
@@ -87,6 +89,7 @@ public class FloatingActionMode extends ActionMode {
                     }
                 });
         mFloatingToolbarVisibilityHelper = new FloatingToolbarVisibilityHelper(mFloatingToolbar);
+        mFloatingToolbarVisibilityHelper.activate();
     }
 
     @Override
@@ -108,8 +111,7 @@ public class FloatingActionMode extends ActionMode {
     public void invalidate() {
         checkToolbarInitialized();
         mCallback.onPrepareActionMode(this, mMenu);
-        mFloatingToolbar.updateLayout();
-        invalidateContentRect();
+        invalidateContentRect();  // Will re-layout and show the toolbar if necessary.
     }
 
     @Override
@@ -131,44 +133,43 @@ public class FloatingActionMode extends ActionMode {
 
         mContentRectOnWindow.set(mContentRect);
         mContentRectOnWindow.offset(mViewPosition[0], mViewPosition[1]);
-        // Make sure that content rect is not out of the view's visible bounds.
-        mContentRectOnWindow.set(
-                Math.max(mContentRectOnWindow.left, mViewRect.left),
-                Math.max(mContentRectOnWindow.top, mViewRect.top),
-                Math.min(mContentRectOnWindow.right, mViewRect.right),
-                Math.min(mContentRectOnWindow.bottom, mViewRect.bottom));
-
-        if (!mContentRectOnWindow.equals(mPreviousContentRectOnWindow)) {
-            if (!mPreviousContentRectOnWindow.isEmpty()) {
-                notifyContentRectMoving();
-            }
-            mFloatingToolbar.setContentRect(mContentRectOnWindow);
-            mFloatingToolbar.updateLayout();
-        }
-        mPreviousContentRectOnWindow.set(mContentRectOnWindow);
 
         if (isContentRectWithinBounds()) {
             mFloatingToolbarVisibilityHelper.setOutOfBounds(false);
+            // Make sure that content rect is not out of the view's visible bounds.
+            mContentRectOnWindow.set(
+                    Math.max(mContentRectOnWindow.left, mViewRect.left),
+                    Math.max(mContentRectOnWindow.top, mViewRect.top),
+                    Math.min(mContentRectOnWindow.right, mViewRect.right),
+                    Math.min(mContentRectOnWindow.bottom, mViewRect.bottom));
+
+            if (!mContentRectOnWindow.equals(mPreviousContentRectOnWindow)) {
+                // Content rect is moving.
+                mOriginatingView.removeCallbacks(mMovingOff);
+                mFloatingToolbarVisibilityHelper.setMoving(true);
+                mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
+
+                mFloatingToolbar.setContentRect(mContentRectOnWindow);
+                mFloatingToolbar.updateLayout();
+            }
         } else {
             mFloatingToolbarVisibilityHelper.setOutOfBounds(true);
+            mContentRectOnWindow.setEmpty();
         }
+        mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+
+        mPreviousContentRectOnWindow.set(mContentRectOnWindow);
     }
 
     private boolean isContentRectWithinBounds() {
-       mScreenRect.set(
-           0,
-           0,
-           mContext.getResources().getDisplayMetrics().widthPixels,
-           mContext.getResources().getDisplayMetrics().heightPixels);
+        mScreenRect.set(
+            0,
+            0,
+            mContext.getResources().getDisplayMetrics().widthPixels,
+            mContext.getResources().getDisplayMetrics().heightPixels);
 
-       return Rect.intersects(mContentRectOnWindow, mScreenRect)
-           && Rect.intersects(mContentRectOnWindow, mViewRect);
-    }
-
-    private void notifyContentRectMoving() {
-        mOriginatingView.removeCallbacks(mMovingOff);
-        mFloatingToolbarVisibilityHelper.setMoving(true);
-        mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
+        return Rect.intersects(mContentRectOnWindow, mScreenRect)
+            && Rect.intersects(mContentRectOnWindow, mViewRect);
     }
 
     @Override
@@ -184,6 +185,7 @@ public class FloatingActionMode extends ActionMode {
             mHideOff.run();
         } else {
             mFloatingToolbarVisibilityHelper.setHideRequested(true);
+            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
             mOriginatingView.postDelayed(mHideOff, duration);
         }
     }
@@ -221,7 +223,7 @@ public class FloatingActionMode extends ActionMode {
     }
 
     /**
-     * @throws IlllegalStateException
+     * @throws IllegalStateException
      */
     private void checkToolbarInitialized() {
         Preconditions.checkState(mFloatingToolbar != null);
@@ -229,13 +231,14 @@ public class FloatingActionMode extends ActionMode {
     }
 
     private void reset() {
+        mFloatingToolbarVisibilityHelper.deactivate();
         mOriginatingView.removeCallbacks(mMovingOff);
         mOriginatingView.removeCallbacks(mHideOff);
     }
 
 
     /**
-     * A helper that shows/hides the floating toolbar depending on certain states.
+     * A helper for showing/hiding the floating toolbar depending on certain states.
      */
     private static final class FloatingToolbarVisibilityHelper {
 
@@ -245,29 +248,45 @@ public class FloatingActionMode extends ActionMode {
         private boolean mMoving;
         private boolean mOutOfBounds;
 
+        private boolean mActive;
+
         public FloatingToolbarVisibilityHelper(FloatingToolbar toolbar) {
             mToolbar = Preconditions.checkNotNull(toolbar);
         }
 
+        public void activate() {
+            mHideRequested = false;
+            mMoving = false;
+            mOutOfBounds = false;
+
+            mActive = true;
+        }
+
+        public void deactivate() {
+            mActive = false;
+            mToolbar.dismiss();
+        }
+
         public void setHideRequested(boolean hide) {
             mHideRequested = hide;
-            updateToolbarVisibility();
         }
 
         public void setMoving(boolean moving) {
             mMoving = moving;
-            updateToolbarVisibility();
         }
 
         public void setOutOfBounds(boolean outOfBounds) {
             mOutOfBounds = outOfBounds;
-            updateToolbarVisibility();
         }
 
-        private void updateToolbarVisibility() {
+        public void updateToolbarVisibility() {
+            if (!mActive) {
+                return;
+            }
+
             if (mHideRequested || mMoving || mOutOfBounds) {
                 mToolbar.hide();
-            } else if (mToolbar.isHidden()) {
+            } else {
                 mToolbar.show();
             }
         }
