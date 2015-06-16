@@ -242,6 +242,9 @@ public class QSPanel extends ViewGroup {
     }
 
     private void handleSetTileVisibility(View v, int visibility) {
+        if (visibility == VISIBLE && !mGridContentVisible) {
+            visibility = INVISIBLE;
+        }
         if (visibility == v.getVisibility()) return;
         v.setVisibility(visibility);
     }
