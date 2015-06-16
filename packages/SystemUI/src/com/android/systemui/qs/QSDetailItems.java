@@ -193,8 +193,6 @@ public class QSDetailItems extends FrameLayout {
         title.setMaxLines(twoLines ? 1 : 2);
         summary.setVisibility(twoLines ? VISIBLE : GONE);
         summary.setText(twoLines ? item.line2 : null);
-        view.setMinimumHeight(mContext.getResources() .getDimensionPixelSize(
-                twoLines ? R.dimen.qs_detail_item_height_twoline : R.dimen.qs_detail_item_height));
         view.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
