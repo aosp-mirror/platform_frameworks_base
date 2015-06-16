@@ -120,13 +120,20 @@ public class ExternalStorageProvider extends DocumentsProvider {
             if (!volume.isMountedReadable()) continue;
 
             final String rootId;
-            if (VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
+            final String title;
+            if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
+                // We currently only support a single emulated volume mounted at
+                // a time, and it's always considered the primary
                 rootId = ROOT_ID_PRIMARY_EMULATED;
-            } else if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
-                final VolumeInfo privateVol = mStorageManager.findPrivateForEmulated(volume);
-                rootId = privateVol.getFsUuid();
+                if (VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
+                    title = getContext().getString(R.string.root_internal_storage);
+                } else {
+                    final VolumeInfo privateVol = mStorageManager.findPrivateForEmulated(volume);
+                    title = mStorageManager.getBestVolumeDescription(privateVol);
+                }
             } else if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
                 rootId = volume.getFsUuid();
+                title = mStorageManager.getBestVolumeDescription(volume);
             } else {
                 // Unsupported volume; ignore
                 continue;
@@ -148,11 +155,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 root.rootId = rootId;
                 root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
                         | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
-                if (ROOT_ID_PRIMARY_EMULATED.equals(rootId)) {
-                    root.title = getContext().getString(R.string.root_internal_storage);
-                } else {
-                    root.title = mStorageManager.getBestVolumeDescription(volume);
-                }
+                root.title = title;
                 if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
                     root.flags |= Root.FLAG_HAS_SETTINGS;
                 }
