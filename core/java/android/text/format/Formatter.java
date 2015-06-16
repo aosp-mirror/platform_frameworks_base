@@ -17,7 +17,9 @@
 package android.text.format;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.NetworkUtils;
+import android.net.TrafficStats;
 
 /**
  * Utility class to aid in formatting common values that are not covered
@@ -25,63 +27,88 @@ import android.net.NetworkUtils;
  */
 public final class Formatter {
 
+    /** {@hide} */
+    public static final int FLAG_SHORTER = 1 << 0;
+    /** {@hide} */
+    public static final int FLAG_CALCULATE_ROUNDED = 1 << 1;
+
+    /** {@hide} */
+    public static class BytesResult {
+        public final String value;
+        public final String units;
+        public final long roundedBytes;
+
+        public BytesResult(String value, String units, long roundedBytes) {
+            this.value = value;
+            this.units = units;
+            this.roundedBytes = roundedBytes;
+        }
+    }
+
     /**
      * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc
      *
      * @param context Context to use to load the localized units
-     * @param number size value to be formatted
+     * @param sizeBytes size value to be formatted, in bytes
      * @return formatted string with the number
      */
-    public static String formatFileSize(Context context, long number) {
-        return formatFileSize(context, number, false);
+    public static String formatFileSize(Context context, long sizeBytes) {
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes, 0);
+        return context.getString(com.android.internal.R.string.fileSizeSuffix,
+                res.value, res.units);
     }
 
     /**
      * Like {@link #formatFileSize}, but trying to generate shorter numbers
      * (showing fewer digits of precision).
      */
-    public static String formatShortFileSize(Context context, long number) {
-        return formatFileSize(context, number, true);
+    public static String formatShortFileSize(Context context, long sizeBytes) {
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SHORTER);
+        return context.getString(com.android.internal.R.string.fileSizeSuffix,
+                res.value, res.units);
     }
 
-    private static String formatFileSize(Context context, long number, boolean shorter) {
-        if (context == null) {
-            return "";
-        }
-
-        float result = number;
+    /** {@hide} */
+    public static BytesResult formatBytes(Resources res, long sizeBytes, int flags) {
+        float result = sizeBytes;
         int suffix = com.android.internal.R.string.byteShort;
+        long mult = 1;
         if (result > 900) {
             suffix = com.android.internal.R.string.kilobyteShort;
+            mult = TrafficStats.KB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.megabyteShort;
+            mult = TrafficStats.MB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.gigabyteShort;
+            mult = TrafficStats.GB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.terabyteShort;
+            mult = TrafficStats.TB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.petabyteShort;
+            mult = TrafficStats.PB_IN_BYTES;
             result = result / 1024;
         }
         String value;
         if (result < 1) {
             value = String.format("%.2f", result);
         } else if (result < 10) {
-            if (shorter) {
+            if ((flags & FLAG_SHORTER) != 0) {
                 value = String.format("%.1f", result);
             } else {
                 value = String.format("%.2f", result);
             }
         } else if (result < 100) {
-            if (shorter) {
+            if ((flags & FLAG_SHORTER) != 0) {
                 value = String.format("%.0f", result);
             } else {
                 value = String.format("%.2f", result);
@@ -89,9 +116,14 @@ public final class Formatter {
         } else {
             value = String.format("%.0f", result);
         }
-        return context.getResources().
-            getString(com.android.internal.R.string.fileSizeSuffix,
-                      value, context.getString(suffix));
+        final String units = res.getString(suffix);
+        final long roundedBytes;
+        if ((flags & FLAG_CALCULATE_ROUNDED) != 0) {
+            roundedBytes = (long) (Double.parseDouble(value) * mult);
+        } else {
+            roundedBytes = 0;
+        }
+        return new BytesResult(value, units, roundedBytes);
     }
 
     /**
