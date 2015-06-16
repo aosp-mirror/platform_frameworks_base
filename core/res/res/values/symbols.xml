@@ -2311,5 +2311,6 @@
   <java-symbol type="string" name="ext_media_unsupported_notification_message" />
   <java-symbol type="string" name="ext_media_unsupported_notification_title" />
   <java-symbol type="plurals" name="selected_count" />
+  <java-symbol type="drawable" name="ic_dialog_alert_material" />
 
 </resources>
