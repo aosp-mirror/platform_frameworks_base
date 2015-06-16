@@ -5107,16 +5107,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 && !isCompatSignatureUpdateNeeded(pkg)
                 && !isRecoverSignatureUpdateNeeded(pkg)) {
             long mSigningKeySetId = ps.keySetData.getProperSigningKeySet();
+            KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            ArraySet<PublicKey> signingKs;
+            synchronized (mPackages) {
+                signingKs = ksms.getPublicKeysFromKeySetLPr(mSigningKeySetId);
+            }
             if (ps.signatures.mSignatures != null
                     && ps.signatures.mSignatures.length != 0
-                    && mSigningKeySetId != PackageKeySetData.KEYSET_UNASSIGNED) {
+                    && signingKs != null) {
                 // Optimization: reuse the existing cached certificates
                 // if the package appears to be unchanged.
                 pkg.mSignatures = ps.signatures.mSignatures;
-                KeySetManagerService ksms = mSettings.mKeySetManagerService;
-                synchronized (mPackages) {
-                    pkg.mSigningKeys = ksms.getPublicKeysFromKeySetLPr(mSigningKeySetId);
-                }
+                pkg.mSigningKeys = signingKs;
                 return;
             }
 
@@ -6588,6 +6590,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        // Make sure we're not adding any bogus keyset info
+        KeySetManagerService ksms = mSettings.mKeySetManagerService;
+        ksms.assertScannedPackageValid(pkg);
+
         // writer
         synchronized (mPackages) {
             // We don't expect installation to fail beyond this point
@@ -6624,20 +6630,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             // Add the package's KeySets to the global KeySetManagerService
-            KeySetManagerService ksms = mSettings.mKeySetManagerService;
-            try {
-                ksms.addSigningKeySetToPackageLPw(pkg.packageName, pkg.mSigningKeys);
-                if (pkg.mKeySetMapping != null) {
-                    ksms.addDefinedKeySetsToPackageLPw(pkg.packageName, pkg.mKeySetMapping);
-                    if (pkg.mUpgradeKeySets != null) {
-                        ksms.addUpgradeKeySetsToPackageLPw(pkg.packageName, pkg.mUpgradeKeySets);
-                    }
-                }
-            } catch (NullPointerException e) {
-                Slog.e(TAG, "Could not add KeySet to " + pkg.packageName, e);
-            } catch (IllegalArgumentException e) {
-                Slog.e(TAG, "Could not add KeySet to malformed package" + pkg.packageName, e);
-            }
+            ksms.addScannedPackageLPw(pkg);
 
             int N = pkg.providers.size();
             StringBuilder r = null;
@@ -11186,7 +11179,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         KeySetManagerService ksms = mSettings.mKeySetManagerService;
         for (int i = 0; i < upgradeKeySets.length; i++) {
             Set<PublicKey> upgradeSet = ksms.getPublicKeysFromKeySetLPr(upgradeKeySets[i]);
-            if (newPkg.mSigningKeys.containsAll(upgradeSet)) {
+            if (upgradeSet != null && newPkg.mSigningKeys.containsAll(upgradeSet)) {
                 return true;
             }
         }
