@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -28,11 +27,14 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Class to manage everything related to assist in SystemUI.
@@ -55,7 +57,7 @@ public class AssistManager {
     private final WindowManager mWindowManager;
     private AssistOrbContainer mView;
     private final PhoneStatusBar mBar;
-    private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
+    private final AssistUtils mAssistUtils;
 
     private ComponentName mAssistComponent;
 
@@ -92,8 +94,7 @@ public class AssistManager {
         mContext = context;
         mBar = bar;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mVoiceInteractionManagerService = IVoiceInteractionManagerService.Stub.asInterface(
-                ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        mAssistUtils = new AssistUtils(context);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT), false,
@@ -140,11 +141,7 @@ public class AssistManager {
     }
 
     public void hideAssist() {
-        try {
-            mVoiceInteractionManagerService.hideCurrentSession();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call hideCurrentSession", e);
-        }
+        mAssistUtils.hideCurrentSession();
     }
 
     private WindowManager.LayoutParams getLayoutParams() {
@@ -216,58 +213,27 @@ public class AssistManager {
     }
 
     private void startVoiceInteractor() {
-        try {
-            mVoiceInteractionManagerService.showSessionForActiveService(mShowCallback);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call showSessionForActiveService", e);
-        }
+        mAssistUtils.showSessionForActiveService(mShowCallback);
     }
 
     public void launchVoiceAssistFromKeyguard() {
-        try {
-            mVoiceInteractionManagerService.launchVoiceAssistFromKeyguard();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call launchVoiceAssistFromKeyguard", e);
-        }
+        mAssistUtils.launchVoiceAssistFromKeyguard();
     }
 
     private boolean getVoiceInteractorSupportsAssistGesture() {
-        try {
-            return mVoiceInteractionManagerService != null
-                    && mVoiceInteractionManagerService.activeServiceSupportsAssist();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call activeServiceSupportsAssistGesture", e);
-            return false;
-        }
+        return mAssistUtils.activeServiceSupportsAssistGesture();
     }
 
     public boolean canVoiceAssistBeLaunchedFromKeyguard() {
-        try {
-            return mVoiceInteractionManagerService != null
-                    && mVoiceInteractionManagerService.activeServiceSupportsLaunchFromKeyguard();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call activeServiceSupportsLaunchFromKeyguard", e);
-            return false;
-        }
+        return mAssistUtils.activeServiceSupportsLaunchFromKeyguard();
     }
 
     public ComponentName getVoiceInteractorComponentName() {
-        try {
-            return mVoiceInteractionManagerService.getActiveServiceComponentName();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call getActiveServiceComponentName", e);
-            return null;
-        }
+        return mAssistUtils.getActiveServiceComponentName();
     }
 
     private boolean isVoiceSessionRunning() {
-        try {
-            return mVoiceInteractionManagerService != null
-                    && mVoiceInteractionManagerService.isSessionRunning();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to call isSessionRunning", e);
-            return false;
-        }
+        return mAssistUtils.isSessionRunning();
     }
 
     public void destroy() {
@@ -324,26 +290,11 @@ public class AssistManager {
     }
 
     private void updateAssistInfo() {
-        final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
-        if (setting != null) {
-            mAssistComponent = ComponentName.unflattenFromString(setting);
-            return;
-        }
+        mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.USER_CURRENT);
+    }
 
-        // Fallback to keep backward compatible behavior when there is no user setting.
-        if (getVoiceInteractorSupportsAssistGesture()) {
-            mAssistComponent = getVoiceInteractorComponentName();
-            return;
-        }
-
-        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
-        if (intent != null) {
-            mAssistComponent = intent.getComponent();
-            return;
-        }
-
-        mAssistComponent = null;
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("AssistManager state:");
+        pw.print("  mAssistComponent="); pw.println(mAssistComponent);
     }
 }
