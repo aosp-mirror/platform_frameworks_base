@@ -209,6 +209,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_UNMUTE_MICROPHONE);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADJUST_VOLUME);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FUN);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SAFE_BOOT);
     }
 
