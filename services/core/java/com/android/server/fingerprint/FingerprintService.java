@@ -33,6 +33,7 @@ import android.os.MessageQueue;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -389,12 +390,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    public List<Fingerprint> getEnrolledFingerprints(int groupId) {
-        return mFingerprintUtils.getFingerprintsForUser(mContext, groupId);
+    public List<Fingerprint> getEnrolledFingerprints(int userId) {
+        return mFingerprintUtils.getFingerprintsForUser(mContext, userId);
     }
 
-    public boolean hasEnrolledFingerprints(int groupId) {
-        return mFingerprintUtils.getFingerprintsForUser(mContext, groupId).size() > 0;
+    public boolean hasEnrolledFingerprints(int userId) {
+        return mFingerprintUtils.getFingerprintsForUser(mContext, userId).size() > 0;
     }
 
     boolean hasPermission(String permission) {
@@ -598,6 +599,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void enroll(final IBinder token, final byte[] cryptoToken, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags) {
             checkPermission(MANAGE_FINGERPRINT);
+            final int limit =  mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser);
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final int enrolled = FingerprintService.this.getEnrolledFingerprints(userId).size();
+            if (enrolled >= limit) {
+                Slog.w(TAG, "Too many fingerprints registered");
+                return;
+            }
             final byte [] cryptoClone = Arrays.copyOf(cryptoToken, cryptoToken.length);
 
             final boolean restricted = isRestricted();
@@ -689,11 +699,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
 
         @Override // Binder call
-        public List<Fingerprint> getEnrolledFingerprints(int groupId, String opPackageName) {
+        public List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName) {
             if (!canUseFingerprint(opPackageName)) {
                 return Collections.emptyList();
             }
-            return FingerprintService.this.getEnrolledFingerprints(groupId);
+            return FingerprintService.this.getEnrolledFingerprints(userId);
         }
 
         @Override // Binder call
