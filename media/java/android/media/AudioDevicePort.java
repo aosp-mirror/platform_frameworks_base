@@ -37,12 +37,12 @@ public class AudioDevicePort extends AudioPort {
     private final String mAddress;
 
     AudioDevicePort(AudioHandle handle, String deviceName,
-            int[] samplingRates, int[] channelMasks,
+            int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains, int type, String address) {
         super(handle,
              (AudioManager.isInputDevice(type) == true)  ?
                         AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
-             deviceName, samplingRates, channelMasks, formats, gains);
+             deviceName, samplingRates, channelMasks, channelIndexMasks, formats, gains);
         mType = type;
         mAddress = address;
     }
