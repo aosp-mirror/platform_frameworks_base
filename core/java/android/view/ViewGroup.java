@@ -2939,11 +2939,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ViewGroup.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ViewGroup.class.getName();
     }
 
     @Override
