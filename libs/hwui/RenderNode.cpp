@@ -241,8 +241,12 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
         animatorDirtyMask = mAnimatorManager.animate(info);
     }
 
-    bool willHaveFunctor = info.mode == TreeInfo::MODE_FULL && mStagingDisplayListData
-            ? !mStagingDisplayListData->functors.isEmpty() : !mDisplayListData->functors.isEmpty();
+    bool willHaveFunctor = false;
+    if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayListData) {
+        willHaveFunctor = !mStagingDisplayListData->functors.isEmpty();
+    } else if (mDisplayListData) {
+        willHaveFunctor = !mDisplayListData->functors.isEmpty();
+    }
     bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
             willHaveFunctor, functorsNeedLayer);
 
