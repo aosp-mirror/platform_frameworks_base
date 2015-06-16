@@ -815,6 +815,9 @@ public class BitmapDrawable extends Drawable {
         if (tileModeY != TILE_MODE_UNDEFINED) {
             setTileModeY(parseTileMode(tileModeY));
         }
+
+        final int densityDpi = r.getDisplayMetrics().densityDpi;
+        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
 
     @Override
@@ -977,7 +980,8 @@ public class BitmapDrawable extends Drawable {
      */
     private void updateLocalState(Resources res) {
         if (res != null) {
-            mTargetDensity = res.getDisplayMetrics().densityDpi;
+            final int densityDpi = res.getDisplayMetrics().densityDpi;
+            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
         } else {
             mTargetDensity = mBitmapState.mTargetDensity;
         }

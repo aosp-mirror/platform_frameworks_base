@@ -482,6 +482,9 @@ public class NinePatchDrawable extends Drawable {
         if (tint != null) {
             state.mTint = tint;
         }
+
+        final int densityDpi = r.getDisplayMetrics().densityDpi;
+        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
 
     @Override
@@ -713,7 +716,8 @@ public class NinePatchDrawable extends Drawable {
         final NinePatchState state = mNinePatchState;
 
         if (res != null) {
-            mTargetDensity = res.getDisplayMetrics().densityDpi;
+            final int densityDpi = res.getDisplayMetrics().densityDpi;
+            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
         } else {
             mTargetDensity = state.mTargetDensity;
         }
