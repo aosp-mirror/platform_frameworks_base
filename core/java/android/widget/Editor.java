@@ -122,6 +122,7 @@ public class Editor {
     static final int BLINK = 500;
     private static final float[] TEMP_POSITION = new float[2];
     private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
+    private static final float LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS = 0.5f;
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
@@ -4072,16 +4073,23 @@ public class Editor {
 
         @Override
         public void updatePosition(float x, float y) {
-            final int selectionEnd = mTextView.getSelectionEnd();
             final Layout layout = mTextView.getLayout();
-            int initialOffset = mTextView.getOffsetForPosition(x, y);
-            int currLine = mTextView.getLineAtCoordinate(y);
+            if (layout == null) {
+                // HandleView will deal appropriately in positionAtCursorOffset when
+                // layout is null.
+                positionAtCursorOffset(mTextView.getOffsetForPosition(x, y), false);
+                return;
+            }
+
             boolean positionCursor = false;
+            final int selectionEnd = mTextView.getSelectionEnd();
+            int currLine = getCurrentLineAdjustedForSlop(layout, mPrevLine, y);
+            int initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
 
             if (initialOffset >= selectionEnd) {
                 // Handles have crossed, bound it to the last selected line and
                 // adjust by word / char as normal.
-                currLine = layout != null ? layout.getLineForOffset(selectionEnd) : mPrevLine;
+                currLine = layout.getLineForOffset(selectionEnd);
                 initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
             }
 
@@ -4199,16 +4207,23 @@ public class Editor {
 
         @Override
         public void updatePosition(float x, float y) {
-            final int selectionStart = mTextView.getSelectionStart();
             final Layout layout = mTextView.getLayout();
-            int initialOffset = mTextView.getOffsetForPosition(x, y);
-            int currLine = mTextView.getLineAtCoordinate(y);
+            if (layout == null) {
+                // HandleView will deal appropriately in positionAtCursorOffset when
+                // layout is null.
+                positionAtCursorOffset(mTextView.getOffsetForPosition(x, y), false);
+                return;
+            }
+
             boolean positionCursor = false;
+            final int selectionStart = mTextView.getSelectionStart();
+            int currLine = getCurrentLineAdjustedForSlop(layout, mPrevLine, y);
+            int initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
 
             if (initialOffset <= selectionStart) {
                 // Handles have crossed, bound it to the first selected line and
                 // adjust by word / char as normal.
-                currLine = layout != null ? layout.getLineForOffset(selectionStart) : mPrevLine;
+                currLine = layout.getLineForOffset(selectionStart);
                 initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
             }
 
@@ -4228,7 +4243,7 @@ public class Editor {
                         offset = mPreviousOffset;
                     }
                 }
-                if (layout != null && offset > initialOffset) {
+                if (offset > initialOffset) {
                     final float adjustedX = layout.getPrimaryHorizontal(offset);
                     mTouchWordDelta =
                             adjustedX - mTextView.convertToLocalHorizontalCoordinate(x);
@@ -4244,7 +4259,7 @@ public class Editor {
                     if (currLine < mPrevLine) {
                         // We're on a different line, so we'll snap to word boundaries.
                         offset = end;
-                        if (layout != null && offset > initialOffset) {
+                        if (offset > initialOffset) {
                             final float adjustedX = layout.getPrimaryHorizontal(offset);
                             mTouchWordDelta =
                                     adjustedX - mTextView.convertToLocalHorizontalCoordinate(x);
@@ -4283,6 +4298,37 @@ public class Editor {
             }
             return superResult;
         }
+    }
+
+    private int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
+        if (layout == null || prevLine > layout.getLineCount()
+                || layout.getLineCount() <= 0 || prevLine < 0) {
+            // Invalid parameters, just return whatever line is at y.
+            return mTextView.getLineAtCoordinate(y);
+        }
+
+        final float verticalOffset = mTextView.viewportToContentVerticalOffset();
+        final int lineCount = layout.getLineCount();
+        final float slop = mTextView.getLineHeight() * LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS;
+
+        final float firstLineTop = layout.getLineTop(0) + verticalOffset;
+        final float prevLineTop = layout.getLineTop(prevLine) + verticalOffset;
+        final float yTopBound = Math.max(prevLineTop - slop, firstLineTop + slop);
+
+        final float lastLineBottom = layout.getLineBottom(lineCount - 1) + verticalOffset;
+        final float prevLineBottom = layout.getLineBottom(prevLine) + verticalOffset;
+        final float yBottomBound = Math.min(prevLineBottom + slop, lastLineBottom - slop);
+
+        // Determine if we've moved lines based on y position and previous line.
+        int currLine;
+        if (y <= yTopBound) {
+            currLine = Math.max(prevLine - 1, 0);
+        } else if (y >= yBottomBound) {
+            currLine = Math.min(prevLine + 1, lineCount - 1);
+        } else {
+            currLine = prevLine;
+        }
+        return currLine;
     }
 
     /**
