@@ -9,6 +9,11 @@ page.title=Showing Information in Watch Faces
   <li><a href="#Experience">Create a Compelling Experience</a></li>
   <li><a href="#AddData">Add Data to Your Watch Face</a></li>
 </ol>
+<h2>Related Samples</h2>
+<ul>
+<li><a href="{@docRoot}samples/WatchFace/index.html">
+WatchFace</a></li>
+</ul>
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
@@ -77,10 +82,11 @@ weather.</p>
 <p class="img-caption"><strong>Figure 2.</strong> The calendar watch face.</p>
 </div>
 
-<p>The <em>WatchFace</em> sample in the Android SDK demonstrates how to obtain calendar data
-from the user’s profile in the <code>CalendarWatchFaceService</code> class and shows how many
-meetings there are in the following twenty-four hours. This sample is located in the
-<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory.</p>
+<p>The
+<a href="{@docRoot}samples/WatchFace/index.html">WatchFace</a>
+sample demonstrates how to obtain calendar data from the user’s profile in the
+<code>CalendarWatchFaceService</code> class and shows how many
+meetings there are in the following twenty-four hours.</p>
 
 <p>To implement a watch face that incorporates contextual data, follow these steps:</p>
 
@@ -95,9 +101,10 @@ meetings there are in the following twenty-four hours. This sample is located in
 
 <h3 id="Task">Provide a task to retrieve data</h3>
 
-<p>Create a class inside your <code>CanvasWatchFaceService.Engine</code> implementation that
-extends {@link android.os.AsyncTask} and add the code to retrieve the data you’re interested
-in.</p>
+<p>Create a class inside your
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html"><code>CanvasWatchFaceService.Engine</code></a>
+implementation that extends {@link android.os.AsyncTask} and add the code to retrieve the data
+you’re interested in.</p>
 
 <p>The <code>CalendarWatchFaceService</code> class obtains the number of meetings in the next
 day as follows:</p>
@@ -130,8 +137,10 @@ private class LoadMeetingsTask extends AsyncTask&lt;Void, Void, Integer> {
 }
 </pre>
 
-<p>The <code>WearableCalendarContract</code> class from the Wearable Support Library provides
-direct access to the user's calendar events from the companion device.</p>
+<p>The
+<a href="{@docRoot}reference/android/support/wearable/provider/WearableCalendarContract.html"><code>WearableCalendarContract</code></a>
+class from the Wearable Support Library provides direct access to the user's calendar events from
+the companion device.</p>
 
 <p>When the task finishes retrieving data, your code invokes a callback method. The following
 sections describe how to implement the callback method in detail.</p>
@@ -189,9 +198,12 @@ section.</p>
 
 <h3 id="Redraw">Redraw your watch face with the updated data</h3>
 
-<p>When the task that retrieves your data finishes, call the <code>invalidate()</code> method
-so the system redraws your watch face. Store your data inside member variables of the
-<code>Engine</code> class so you can access it inside the <code>onDraw()</code> method.</p>
+<p>When the task that retrieves your data finishes, call the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#invalidate()"><code>invalidate()</code></a>
+method so the system redraws your watch face. Store your data inside member variables of the
+<code>Engine</code> class so you can access it inside the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>onDraw()</code></a>
+method.</p>
 
 <p>The <code>CalendarWatchFaceService</code> class provides a callback method for the task to
 invoke when it finishes retrieving calendar data:</p>
