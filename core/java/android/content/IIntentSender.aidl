@@ -18,9 +18,10 @@ package android.content;
 
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.os.Bundle;
 
 /** @hide */
 interface IIntentSender {
     int send(int code, in Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver, String requiredPermission);
+            IIntentReceiver finishedReceiver, String requiredPermission, in Bundle options);
 }
