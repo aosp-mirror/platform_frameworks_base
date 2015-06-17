@@ -574,16 +574,16 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.CompoundButton" parent="Widget.CompoundButton"/>
 
     <style name="Widget.Material.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
     </style>
 
     <style name="Widget.Material.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
     </style>
 
     <style name="Widget.Material.CompoundButton.Star" parent="Widget.CompoundButton.Star">
         <item name="button">@drawable/btn_star_material</item>
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
     </style>
 
     <style name="Widget.Material.CompoundButton.Switch">
@@ -592,7 +592,7 @@ please see styles_device_defaults.xml.
         <item name="switchTextAppearance">@style/TextAppearance.Material.Widget.Switch</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
         <item name="showText">false</item>
     </style>
 
@@ -730,7 +730,7 @@ please see styles_device_defaults.xml.
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
         <item name="mirrorForRtl">true</item>
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_32dp_material</item>
     </style>
 
     <style name="Widget.Material.RatingBar" parent="Widget.RatingBar">
@@ -812,7 +812,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Material">
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
         <item name="minWidth">56dp</item>
         <item name="scaleType">center</item>
         <item name="paddingStart">@dimen/action_bar_navigation_padding_start_material</item>
@@ -869,7 +869,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.ActionButton.CloseMode">
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
         <!-- Should match Widget.Material.Toolbar.Button.Navigation minWidth. -->
         <item name="minWidth">56dp</item>
     </style>
@@ -967,7 +967,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.MediaRouteButton">
-        <item name="background">@drawable/control_background_material</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
         <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_material</item>
         <item name="minWidth">56dp</item>
         <item name="minHeight">48dp</item>
