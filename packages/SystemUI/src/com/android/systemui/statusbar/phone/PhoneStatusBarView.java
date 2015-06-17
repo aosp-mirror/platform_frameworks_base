@@ -42,6 +42,12 @@ public class PhoneStatusBarView extends PanelBar {
     private ScrimController mScrimController;
     private float mMinFraction;
     private float mPanelFraction;
+    private Runnable mHideExpandedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mBar.makeExpandedInvisible();
+        }
+    };
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -118,13 +124,12 @@ public class PhoneStatusBarView extends PanelBar {
                     + Log.getStackTraceString(new Throwable()));
         }
         // Close the status bar in the next frame so we can show the end of the animation.
-        postOnAnimation(new Runnable() {
-            @Override
-            public void run() {
-                mBar.makeExpandedInvisible();
-            }
-        });
+        postOnAnimation(mHideExpandedRunnable);
         mLastFullyOpenedPanel = null;
+    }
+
+    public void removePendingHideExpandedRunnables() {
+        removeCallbacks(mHideExpandedRunnable);
     }
 
     @Override
