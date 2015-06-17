@@ -46,6 +46,8 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 
+import org.lineageos.internal.util.LineageLockPatternUtils;
+
 import java.io.PrintWriter;
 
 /**
@@ -62,6 +64,7 @@ public class KeyguardBouncer {
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
     protected final LockPatternUtils mLockPatternUtils;
+    private final LineageLockPatternUtils mLineageLockPatternUtils;
     protected final ViewGroup mContainer;
     private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
@@ -92,6 +95,10 @@ public class KeyguardBouncer {
     private boolean mIsScrimmed;
     private ViewGroup mLockIconContainer;
 
+    public static final int UNLOCK_SEQUENCE_DEFAULT = 0;
+    public static final int UNLOCK_SEQUENCE_BOUNCER_FIRST = 1;
+    public static final int UNLOCK_SEQUENCE_FORCE_BOUNCER = 2;
+
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
@@ -107,6 +114,7 @@ public class KeyguardBouncer {
         mExpansionCallback = expansionCallback;
         mHandler = handler;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
+        mLineageLockPatternUtils = new LineageLockPatternUtils(mContext);
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -456,17 +464,31 @@ public class KeyguardBouncer {
         return mKeyguardView != null && mKeyguardView.handleBackKey();
     }
 
+    public int getUnlockSequence(boolean useCurrentSecurityMode) {
+        int unlockSequence = UNLOCK_SEQUENCE_DEFAULT;
+        if (mKeyguardView != null) {
+            SecurityMode mode = useCurrentSecurityMode ?
+                    mKeyguardView.getCurrentSecurityMode() : mKeyguardView.getSecurityMode();
+            if (mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk) {
+                unlockSequence = UNLOCK_SEQUENCE_FORCE_BOUNCER;
+            } else if ((mode == SecurityMode.Pattern || mode == SecurityMode.Password
+                    || mode == SecurityMode.PIN) && (mLockPatternUtils != null
+                    && mLineageLockPatternUtils.shouldPassToSecurityView(
+                            KeyguardUpdateMonitor.getCurrentUser()))) {
+                // "Bouncer first" mode is only available to some security methods
+                unlockSequence = UNLOCK_SEQUENCE_BOUNCER_FIRST;
+            }
+        }
+        return unlockSequence;
+    }
+
     /**
      * @return True if and only if the security method should be shown before showing the
      * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
         ensureView();
-        if (mKeyguardView != null) {
-            SecurityMode mode = mKeyguardView.getSecurityMode();
-            return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
-        }
-        return false;
+        return getUnlockSequence(false) == UNLOCK_SEQUENCE_FORCE_BOUNCER;
     }
 
     /**
@@ -474,11 +496,7 @@ public class KeyguardBouncer {
      * makes this method much faster.
      */
     public boolean isFullscreenBouncer() {
-        if (mKeyguardView != null) {
-            SecurityMode mode = mKeyguardView.getCurrentSecurityMode();
-            return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
-        }
-        return false;
+        return getUnlockSequence(true) == UNLOCK_SEQUENCE_FORCE_BOUNCER;
     }
 
     /**

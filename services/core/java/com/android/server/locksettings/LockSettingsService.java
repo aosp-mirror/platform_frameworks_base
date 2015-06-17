@@ -121,6 +121,8 @@ import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationTo
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.wm.WindowManagerInternal;
 
+import lineageos.providers.LineageSettings;
+
 import libcore.util.HexEncoding;
 
 import java.io.ByteArrayOutputStream;
@@ -2266,7 +2268,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             Secure.LOCK_PATTERN_ENABLED,
             Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
             Secure.LOCK_PATTERN_VISIBLE,
-            Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
+            Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+            LineageSettings.Secure.LOCK_PASS_TO_SECURITY_VIEW
     };
 
     // Reading these settings needs the contacts permission
