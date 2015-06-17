@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> 天"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> 天 <xliff:g id="HOURS">%2$d</xliff:g> 小時"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> 天 <xliff:g id="HOURS">%2$d</xliff:g> 小時"</string>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"已開始繪畫解鎖圖案"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"已清除解鎖圖案"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已加入一格"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"已加入 <xliff:g id="CELL_INDEX">%1$s</xliff:g> 點"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"已畫出解鎖圖案"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。第 %2$d 個小工具，共 %3$d 個。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"新增小工具。"</string>
@@ -1082,7 +1082,7 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"已偵測到新<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"用於轉移相片和媒體"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> 已受損"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> 受損，請輕觸以進行修正。"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> 受損，請輕觸以修正。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"不支援的 <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"這部裝置目前不支援此 <xliff:g id="NAME">%s</xliff:g> 。請輕觸以設定為支援的格式。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>被意外移除"</string>
@@ -1107,11 +1107,11 @@
     <string name="ext_media_status_checking" msgid="6193921557423194949">"正在檢查…"</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"準備就緒"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"唯讀"</string>
-    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"非安全地移除"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"已在非安全狀態下移除"</string>
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"已損毀"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"不支援"</string>
-    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"正在卸載..."</string>
-    <string name="ext_media_status_formatting" msgid="1085079556538644861">"正在格式化..."</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"正在卸載…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"正在格式化…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"未插入"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"找不到相符的活動。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"轉送媒體輸出"</string>
@@ -1547,5 +1547,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 外端連接埠"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"更多選項"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"關閉工具列溢位功能"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
+      <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
+    </plurals>
 </resources>

@@ -32,7 +32,8 @@
     <skip />
     <!-- no translation found for petabyteShort (5637816680144990219) -->
     <skip />
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> күн"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> с"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> с"</string>
@@ -683,8 +684,8 @@
     <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
     <skip />
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Түзмөктүн бардык камераларын колдонууга тыюу салуу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экрн клпснн айрм өзгчлктрн өчр"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экран кулпусунун айрым өзгөчөлүктөрүн колдонуунун алдын алуу."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экрн клпснн айрм функцялрн өчр"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экранды кулпулоо функцияларынын айрымдарын колдонууга тыюу салуу"</string>
     <!-- no translation found for phoneTypes:0 (8901098336658710359) -->
     <!-- no translation found for phoneTypes:1 (869923650527136615) -->
     <!-- no translation found for phoneTypes:2 (7897544654242874543) -->
@@ -954,8 +955,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Үлгү башталды"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Үлгү тазаланды"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Уяча кошулду"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> уячасы кошулду"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Үлгү аягына чыкты"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d ичинен %2$d виджет."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Виджет кошуу."</string>
@@ -1310,7 +1310,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Тармакка кирүү"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi тармагынын Интернетке мүмкүнчүлүгү жок"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi тармагы Интернетке туташпай турат"</string>
     <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Параметрлер үчүн тийип коюңуз"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi менен туташуу түзүлбөдү"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" хотспотунун интернет байланышы начар."</string>
@@ -1453,17 +1453,17 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Дайындар <xliff:g id="NAME">%s</xliff:g> сактагычына ооштурулду"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Дайындар ооштурулбай калды"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Дайындар баштапкы ордунда калды"</string>
-    <string name="ext_media_status_removed" msgid="6576172423185918739">"Алынып салынган"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Өчүрүлдү"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Чыгарылган"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Текшерилүүдө…"</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"Даяр"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Окуу үчүн гана"</string>
-    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Коопсуз алынган жок"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Коопсуз өчүрүлгөн жок"</string>
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"Бузулган"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Колдоого алынбайт"</string>
     <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Чыгарылууда…"</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Форматталууда…"</string>
-    <string name="ext_media_status_missing" msgid="5638633895221670766">"Салынган жок"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Сайылган жок"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
@@ -1963,5 +1963,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Сырткы оюкча"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Дагы параметрлер"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Ашып-ташууну жабуу"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> тандалды</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> тандалды</item>
+    </plurals>
 </resources>

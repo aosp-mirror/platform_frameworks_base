@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ஜி.பை."</string>
     <string name="terabyteShort" msgid="231613018159186962">"டெ.பை."</string>
     <string name="petabyteShort" msgid="5637816680144990219">"பெ.பை."</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> நாட்கள்"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> நாள் <xliff:g id="HOURS">%2$d</xliff:g> ம.நே."</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> நாள் <xliff:g id="HOURS">%2$d</xliff:g> ம.நே."</string>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"வடிவம் தொடங்கியது"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"வடிவம் அழிக்கப்பட்டது"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"கலம் சேர்க்கப்பட்டது"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"கலம் <xliff:g id="CELL_INDEX">%1$s</xliff:g> சேர்க்கப்பட்டது"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"வடிவம் நிறைவடைந்தது"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. விட்ஜெட் %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"விட்ஜெட்டைச் சேர்க்கவும்."</string>
@@ -983,7 +983,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"வைஃபையில் இணைய அணுகல் இல்லை"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"வைஃபை இணைய அணுகல் கொண்டிருக்கவில்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"விருப்பங்களுக்குத் தொடவும்"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"வைஃபை உடன் இணைக்க முடியவில்லை"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" இணைய இணைப்பு மோசமாக உள்ளது."</string>
@@ -1084,7 +1084,7 @@
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது"</string>
     <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தொடவும்."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"சாதனம் <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைத்தில் அமைக்க, தொடவும்."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"சாதனம் <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தொடவும்."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"தரவு இழப்பைத் தவிர்க்க, <xliff:g id="NAME">%s</xliff:g>ஐ அகற்றுவதற்கு முன் இணைப்பு நீக்கவும்"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
@@ -1547,5 +1547,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB பெரிபெரல் போர்ட்"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"கூடுதல் விருப்பங்கள்"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"மேல்தோன்றலை மூடு"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டன</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டது</item>
+    </plurals>
 </resources>
