@@ -537,12 +537,16 @@ public class CameraDeviceImpl extends CameraDevice {
             CameraAccessException pendingException = null;
             Surface input = null;
             try {
-                 // configure streams and then block until IDLE
+                // configure streams and then block until IDLE
                 configureSuccess = configureStreamsChecked(inputConfig, outputConfigurations,
                         isConstrainedHighSpeed);
-                if (inputConfig != null) {
+                if (configureSuccess == true && inputConfig != null) {
                     input = new Surface();
-                    mRemoteDevice.getInputSurface(/*out*/input);
+                    try {
+                        mRemoteDevice.getInputSurface(/*out*/input);
+                    } catch (CameraRuntimeException e) {
+                        e.asChecked();
+                    }
                 }
             } catch (CameraAccessException e) {
                 configureSuccess = false;
