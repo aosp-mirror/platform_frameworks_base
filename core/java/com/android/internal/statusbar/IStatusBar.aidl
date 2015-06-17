@@ -64,5 +64,7 @@ oneway interface IStatusBar
      *        bar caused by this app transition in millis
      */
     void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
+
+    void showAssistDisclosure();
 }
 
