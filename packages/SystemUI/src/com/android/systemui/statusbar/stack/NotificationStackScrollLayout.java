@@ -228,6 +228,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
     private NotificationOverflowContainer mOverflowContainer;
+    private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -1651,8 +1652,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @return Whether an animation was generated.
      */
     private boolean generateRemoveAnimation(View child) {
-        if (mAddedHeadsUpChildren.contains(child)) {
-            removeChildFromHeadsUpChangeAnimations(child);
+        if (removeRemovedChildFromHeadsUpChangeAnimations(child)) {
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
@@ -1671,15 +1671,27 @@ public class NotificationStackScrollLayout extends ViewGroup
         return false;
     }
 
-    private void removeChildFromHeadsUpChangeAnimations(View child) {
-        ArrayList<Pair<ExpandableNotificationRow, Boolean> > toRemove = new ArrayList<>();
+    /**
+     * Remove a removed child view from the heads up animations if it was just added there
+     *
+     * @return whether any child was removed from the list to animate
+     */
+    private boolean removeRemovedChildFromHeadsUpChangeAnimations(View child) {
+        boolean hasAddEvent = false;
         for (Pair<ExpandableNotificationRow, Boolean> eventPair : mHeadsUpChangeAnimations) {
             ExpandableNotificationRow row = eventPair.first;
+            boolean isHeadsUp = eventPair.second;
             if (child == row) {
-                toRemove.add(eventPair);
+                mTmpList.add(eventPair);
+                hasAddEvent |= isHeadsUp;
             }
         }
-        mHeadsUpChangeAnimations.removeAll(toRemove);
+        if (hasAddEvent) {
+            // This child was just added lets remove all events.
+            mHeadsUpChangeAnimations.removeAll(mTmpList);
+        }
+        mTmpList.clear();
+        return hasAddEvent;
     }
 
     /**
