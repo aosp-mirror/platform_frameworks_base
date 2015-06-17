@@ -251,6 +251,9 @@ public class SignalClusterView
 
     @Override
     public void setSubs(List<SubscriptionInfo> subs) {
+        if (hasCorrectSubs(subs)) {
+            return;
+        }
         // Clear out all old subIds.
         mPhoneStates.clear();
         if (mMobileSignalGroup != null) {
@@ -263,6 +266,19 @@ public class SignalClusterView
         if (isAttachedToWindow()) {
             applyIconTint();
         }
+    }
+
+    private boolean hasCorrectSubs(List<SubscriptionInfo> subs) {
+        final int N = subs.size();
+        if (N != mPhoneStates.size()) {
+            return false;
+        }
+        for (int i = 0; i < N; i++) {
+            if (mPhoneStates.get(i).mSubId != subs.get(i).getSubscriptionId()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private PhoneState getOrInflateState(int subId) {
