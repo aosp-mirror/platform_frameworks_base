@@ -19,7 +19,7 @@ package com.android.server.pm;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.util.ArraySet;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 
@@ -113,7 +113,7 @@ public class IntentFilterVerificationState {
             setState(state);
             return true;
         }
-        Log.d(TAG, "Cannot set verifier response with callerUid:" + callerUid + " and code:" +
+        Slog.d(TAG, "Cannot set verifier response with callerUid:" + callerUid + " and code:" +
                 code + " as required verifierUid is:" + mRequiredVerifierUid);
         return false;
     }

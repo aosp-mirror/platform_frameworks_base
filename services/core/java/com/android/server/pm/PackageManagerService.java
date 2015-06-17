@@ -212,6 +212,7 @@ import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
@@ -551,6 +552,22 @@ public class PackageManagerService extends IPackageManager.Stub {
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
             = new SparseArray<IntentFilterVerificationState>();
 
+    private static class IFVerificationParams {
+        PackageParser.Package pkg;
+        boolean replacing;
+        int userId;
+        int verifierUid;
+
+        public IFVerificationParams(PackageParser.Package _pkg, boolean _replacing,
+                int _userId, int _verifierUid) {
+            pkg = _pkg;
+            replacing = _replacing;
+            userId = _userId;
+            replacing = _replacing;
+            verifierUid = _verifierUid;
+        }
+    }
+
     private interface IntentFilterVerifier<T extends IntentFilter> {
         boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
                                                T filter, String packageName);
@@ -624,7 +641,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             UserHandle user = new UserHandle(userId);
             mContext.sendBroadcastAsUser(verificationIntent, user);
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                    "Sending IntenFilter verification broadcast");
+                    "Sending IntentFilter verification broadcast");
         }
 
         public void receiveVerificationResponse(int verificationId) {
@@ -634,6 +651,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             ArrayList<PackageParser.ActivityIntentInfo> filters = ivs.getFilters();
             final int count = filters.size();
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.i(TAG, "Received verification response " + verificationId
+                        + " for " + count + " filters, verified=" + verified);
+            }
             for (int n=0; n<count; n++) {
                 PackageParser.ActivityIntentInfo filter = filters.get(n);
                 filter.setVerified(verified);
@@ -708,30 +729,27 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        public boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
+        public boolean addOneIntentFilterVerification(int verifierUid, int userId, int verificationId,
                     ActivityIntentInfo filter, String packageName) {
-            if (!(filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
-                    filter.hasDataScheme(IntentFilter.SCHEME_HTTPS))) {
-                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                        "IntentFilter does not contain HTTP nor HTTPS data scheme");
+            if (!hasValidDomains(filter)) {
                 return false;
             }
             IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
             if (ivs == null) {
-                ivs = createDomainVerificationState(verifierId, userId, verificationId,
+                ivs = createDomainVerificationState(verifierUid, userId, verificationId,
                         packageName);
             }
-            if (!hasValidDomains(filter)) {
-                return false;
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, "Adding verification filter for " + packageName + " : " + filter);
             }
             ivs.addFilter(filter);
             return true;
         }
 
-        private IntentFilterVerificationState createDomainVerificationState(int verifierId,
+        private IntentFilterVerificationState createDomainVerificationState(int verifierUid,
                 int userId, int verificationId, String packageName) {
             IntentFilterVerificationState ivs = new IntentFilterVerificationState(
-                    verifierId, userId, packageName);
+                    verifierUid, userId, packageName);
             ivs.setPendingState();
             synchronized (mPackages) {
                 mIntentFilterVerificationStates.append(verificationId, ivs);
@@ -882,8 +900,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<PostInstallData>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
-    // backup/restore of preferred activity state
+    // XML tags for backup/restore of various bits of state
     private static final String TAG_PREFERRED_BACKUP = "pa";
+    private static final String TAG_DEFAULT_APPS = "da";
+    private static final String TAG_INTENT_FILTER_VERIFICATION = "iv";
 
     private final String mRequiredVerifierPackage;
 
@@ -1496,11 +1516,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     break;
                 }
                 case START_INTENT_FILTER_VERIFICATIONS: {
-                    int userId = msg.arg1;
-                    int verifierUid = msg.arg2;
-                    PackageParser.Package pkg = (PackageParser.Package)msg.obj;
-
-                    verifyIntentFiltersIfNeeded(userId, verifierUid, pkg);
+                    IFVerificationParams params = (IFVerificationParams) msg.obj;
+                    verifyIntentFiltersIfNeeded(params.userId, params.verifierUid,
+                            params.replacing, params.pkg);
                     break;
                 }
                 case INTENT_FILTER_VERIFIED: {
@@ -2343,8 +2361,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageName = getDefaultBrowserPackageName(myUserId);
         PackageInfo info = getPackageInfo(packageName, 0, myUserId);
         if (info == null) {
-            Slog.w(TAG, "Clearing default Browser as its package is no more installed: " +
-                    packageName);
+            Slog.w(TAG, "Default browser no longer installed: " + packageName);
             setDefaultBrowserPackageName(null, myUserId);
         }
     }
@@ -11757,7 +11774,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        startIntentFilterVerifications(args.user.getIdentifier(), pkg);
+        startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
 
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanFlags, args.user,
@@ -11774,7 +11791,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void startIntentFilterVerifications(int userId, PackageParser.Package pkg) {
+    private void startIntentFilterVerifications(int userId, boolean replacing,
+            PackageParser.Package pkg) {
         if (mIntentFilterVerifierComponent == null) {
             Slog.w(TAG, "No IntentFilter verification will not be done as "
                     + "there is no IntentFilterVerifier available!");
@@ -11787,14 +11805,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         mHandler.removeMessages(START_INTENT_FILTER_VERIFICATIONS);
         final Message msg = mHandler.obtainMessage(START_INTENT_FILTER_VERIFICATIONS);
-        msg.obj = pkg;
-        msg.arg1 = userId;
-        msg.arg2 = verifierUid;
-
+        msg.obj = new IFVerificationParams(pkg, replacing, userId, verifierUid);
         mHandler.sendMessage(msg);
     }
 
-    private void verifyIntentFiltersIfNeeded(int userId, int verifierUid,
+    private void verifyIntentFiltersIfNeeded(int userId, int verifierUid, boolean replacing,
             PackageParser.Package pkg) {
         int size = pkg.activities.size();
         if (size == 0) {
@@ -11814,13 +11829,26 @@ public class PackageManagerService extends IPackageManager.Stub {
                 + " if any IntentFilter from the " + size
                 + " Activities needs verification ...");
 
-        final int verificationId = mIntentFilterVerificationToken++;
         int count = 0;
         final String packageName = pkg.packageName;
-        boolean needToVerify = false;
 
         synchronized (mPackages) {
+            // If this is a new install and we see that we've already run verification for this
+            // package, we have nothing to do: it means the state was restored from backup.
+            if (!replacing) {
+                IntentFilterVerificationInfo ivi =
+                        mSettings.getIntentFilterVerificationLPr(packageName);
+                if (ivi != null) {
+                    if (DEBUG_DOMAIN_VERIFICATION) {
+                        Slog.i(TAG, "Package " + packageName+ " already verified: status="
+                                + ivi.getStatusString());
+                    }
+                    return;
+                }
+            }
+
             // If any filters need to be verified, then all need to be.
+            boolean needToVerify = false;
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
                     if (filter.needsVerification() && needsNetworkVerificationLPr(filter)) {
@@ -11832,7 +11860,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+
             if (needToVerify) {
+                final int verificationId = mIntentFilterVerificationToken++;
                 for (PackageParser.Activity a : pkg.activities) {
                     for (ActivityIntentInfo filter : a.intents) {
                         boolean needsFilterVerification = filter.hasWebDataURI();
@@ -13276,9 +13306,45 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
+     * Common machinery for picking apart a restored XML blob and passing
+     * it to a caller-supplied functor to be applied to the running system.
+     */
+    private void restoreFromXml(XmlPullParser parser, int userId,
+            String expectedStartTag, BlobXmlRestorer functor)
+            throws IOException, XmlPullParserException {
+        int type;
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
+        }
+        if (type != XmlPullParser.START_TAG) {
+            // oops didn't find a start tag?!
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Didn't find start tag during restore");
+            }
+            return;
+        }
+
+        // this is supposed to be TAG_PREFERRED_BACKUP
+        if (!expectedStartTag.equals(parser.getName())) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Found unexpected tag " + parser.getName());
+            }
+            return;
+        }
+
+        // skip interfering stuff, then we're aligned with the backing implementation
+        while ((type = parser.next()) == XmlPullParser.TEXT) { }
+        functor.apply(parser, userId);
+    }
+
+    private interface BlobXmlRestorer {
+        public void apply(XmlPullParser parser, int userId) throws IOException, XmlPullParserException;
+    }
+
+    /**
      * Non-Binder method, support for the backup/restore mechanism: write the
-     * full set of preferred activities in its canonical XML format.  Returns true
-     * on success; false otherwise.
+     * full set of preferred activities in its canonical XML format.  Returns the
+     * XML output as a byte array, or null if there is none.
      */
     @Override
     public byte[] getPreferredActivityBackup(int userId) {
@@ -13319,32 +13385,134 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             final XmlPullParser parser = Xml.newPullParser();
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
-
-            int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
+            restoreFromXml(parser, userId, TAG_PREFERRED_BACKUP,
+                    new BlobXmlRestorer() {
+                        @Override
+                        public void apply(XmlPullParser parser, int userId)
+                                throws XmlPullParserException, IOException {
+                            synchronized (mPackages) {
+                                mSettings.readPreferredActivitiesLPw(parser, userId);
+                            }
+                        }
+                    } );
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
             }
-            if (type != XmlPullParser.START_TAG) {
-                // oops didn't find a start tag?!
-                if (DEBUG_BACKUP) {
-                    Slog.e(TAG, "Didn't find start tag during restore");
-                }
-                return;
-            }
+        }
+    }
 
-            // this is supposed to be TAG_PREFERRED_BACKUP
-            if (!TAG_PREFERRED_BACKUP.equals(parser.getName())) {
-                if (DEBUG_BACKUP) {
-                    Slog.e(TAG, "Found unexpected tag " + parser.getName());
-                }
-                return;
-            }
+    /**
+     * Non-Binder method, support for the backup/restore mechanism: write the
+     * default browser (etc) settings in its canonical XML format.  Returns the default
+     * browser XML representation as a byte array, or null if there is none.
+     */
+    @Override
+    public byte[] getDefaultAppsBackup(int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call getDefaultAppsBackup()");
+        }
 
-            // skip interfering stuff, then we're aligned with the backing implementation
-            while ((type = parser.next()) == XmlPullParser.TEXT) { }
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        try {
+            final XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
+            serializer.startDocument(null, true);
+            serializer.startTag(null, TAG_DEFAULT_APPS);
+
             synchronized (mPackages) {
-                mSettings.readPreferredActivitiesLPw(parser, userId);
+                mSettings.writeDefaultAppsLPr(serializer, userId);
             }
+
+            serializer.endTag(null, TAG_DEFAULT_APPS);
+            serializer.endDocument();
+            serializer.flush();
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Unable to write default apps for backup", e);
+            }
+            return null;
+        }
+
+        return dataStream.toByteArray();
+    }
+
+    @Override
+    public void restoreDefaultApps(byte[] backup, int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call restoreDefaultApps()");
+        }
+
+        try {
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
+            restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
+                    new BlobXmlRestorer() {
+                        @Override
+                        public void apply(XmlPullParser parser, int userId)
+                                throws XmlPullParserException, IOException {
+                            synchronized (mPackages) {
+                                mSettings.readDefaultAppsLPw(parser, userId);
+                            }
+                        }
+                    } );
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Exception restoring default apps: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public byte[] getIntentFilterVerificationBackup(int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call getIntentFilterVerificationBackup()");
+        }
+
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        try {
+            final XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
+            serializer.startDocument(null, true);
+            serializer.startTag(null, TAG_INTENT_FILTER_VERIFICATION);
+
+            synchronized (mPackages) {
+                mSettings.writeAllDomainVerificationsLPr(serializer, userId);
+            }
+
+            serializer.endTag(null, TAG_INTENT_FILTER_VERIFICATION);
+            serializer.endDocument();
+            serializer.flush();
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Unable to write default apps for backup", e);
+            }
+            return null;
+        }
+
+        return dataStream.toByteArray();
+    }
+
+    @Override
+    public void restoreIntentFilterVerification(byte[] backup, int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call restorePreferredActivities()");
+        }
+
+        try {
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
+            restoreFromXml(parser, userId, TAG_INTENT_FILTER_VERIFICATION,
+                    new BlobXmlRestorer() {
+                        @Override
+                        public void apply(XmlPullParser parser, int userId)
+                                throws XmlPullParserException, IOException {
+                            synchronized (mPackages) {
+                                mSettings.readAllDomainVerificationsLPr(parser, userId);
+                                mSettings.writeLPr();
+                            }
+                        }
+                    } );
         } catch (Exception e) {
             if (DEBUG_BACKUP) {
                 Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
