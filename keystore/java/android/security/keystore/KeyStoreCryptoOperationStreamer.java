@@ -37,4 +37,6 @@ interface KeyStoreCryptoOperationStreamer {
     byte[] update(byte[] input, int inputOffset, int inputLength) throws KeyStoreException;
     byte[] doFinal(byte[] input, int inputOffset, int inputLength, byte[] additionalEntropy)
             throws KeyStoreException;
+    long getConsumedInputSizeBytes();
+    long getProducedOutputSizeBytes();
 }
