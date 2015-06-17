@@ -3854,7 +3854,7 @@ package android.app {
     method public void requestUsageTimeReport(android.app.PendingIntent);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
-    field public static final java.lang.String EXTRA_USAGE_TIME_REPORT = "android.usage_time";
+    field public static final java.lang.String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
     field public static final java.lang.String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
   }
 
@@ -4184,6 +4184,12 @@ package android.app {
     method public java.lang.CharSequence getTitle();
     method public int getTop();
     method public int getWidth();
+  }
+
+  public class BroadcastOptions {
+    method public static android.app.BroadcastOptions makeBasic();
+    method public void setTemporaryAppWhitelistDuration(long);
+    method public android.os.Bundle toBundle();
   }
 
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
@@ -5292,6 +5298,7 @@ package android.app {
     method public void send(int, android.app.PendingIntent.OnFinished, android.os.Handler) throws android.app.PendingIntent.CanceledException;
     method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler) throws android.app.PendingIntent.CanceledException;
     method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, java.lang.String) throws android.app.PendingIntent.CanceledException;
+    method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, java.lang.String, android.os.Bundle) throws android.app.PendingIntent.CanceledException;
     method public static void writePendingIntentOrNullToParcel(android.app.PendingIntent, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.PendingIntent> CREATOR;
@@ -7966,10 +7973,12 @@ package android.content {
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void sendBroadcast(android.content.Intent);
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String);
+    method public abstract void sendBroadcast(android.content.Intent, java.lang.String, android.os.Bundle);
     method public abstract void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public abstract void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract deprecated void sendStickyBroadcast(android.content.Intent);
     method public abstract deprecated void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
@@ -8143,10 +8152,12 @@ package android.content {
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
+    method public void sendBroadcast(android.content.Intent, java.lang.String, android.os.Bundle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public deprecated void sendStickyBroadcast(android.content.Intent);
     method public deprecated void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
@@ -34028,10 +34039,12 @@ package android.test.mock {
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
+    method public void sendBroadcast(android.content.Intent, java.lang.String, android.os.Bundle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendStickyBroadcast(android.content.Intent);
     method public void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);

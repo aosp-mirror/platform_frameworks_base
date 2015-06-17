@@ -1506,6 +1506,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public void sendBroadcast(Intent arg0, String arg1, Bundle arg2) {
+        // pass
+
+    }
+
+    @Override
     public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
         // pass
     }
@@ -1519,6 +1525,14 @@ public final class BridgeContext extends Context {
     @Override
     public void sendOrderedBroadcast(Intent arg0, String arg1,
             BroadcastReceiver arg2, Handler arg3, int arg4, String arg5,
+            Bundle arg6) {
+        // pass
+
+    }
+
+    @Override
+    public void sendOrderedBroadcast(Intent arg0, String arg1,
+            Bundle arg7, BroadcastReceiver arg2, Handler arg3, int arg4, String arg5,
             Bundle arg6) {
         // pass
 
