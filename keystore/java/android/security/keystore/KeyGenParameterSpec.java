@@ -112,7 +112,7 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p><h3>Example: Symmetric key</h3>
  * The following example illustrates how to generate an AES key in the Android KeyStore system under
- * alias {@code key2} authorized to be used only for encryption/decryption in CBC mode with PKCS#7
+ * alias {@code key2} authorized to be used only for encryption/decryption in GCM mode with no
  * padding.
  * <pre> {@code
  * KeyGenerator keyGenerator = KeyGenerator.getInstance(
@@ -121,8 +121,8 @@ import javax.security.auth.x500.X500Principal;
  * keyGenerator.initialize(
  *         new KeyGenParameterSpec.Builder("key2",
  *                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
- *                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
- *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+ *                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+ *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
  *                 .build());
  * SecretKey key = keyGenerator.generateKey();
  *
@@ -377,7 +377,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used
+     * Gets the set of block modes (e.g., {@code GCM}, {@code CBC}) with which the key can be used
      * when encrypting/decrypting. Attempts to use the key with any other block modes will be
      * rejected.
      *
@@ -694,11 +694,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}, {@code ECB}) with which the
-         * key can be used when encrypting/decrypting. Attempts to use the key with any other block
-         * modes will be rejected.
+         * Sets the set of block modes (e.g., {@code GCM}, {@code CBC}) with which the key can be
+         * used when encrypting/decrypting. Attempts to use the key with any other block modes will
+         * be rejected.
          *
-         * <p>This must be specified for encryption/decryption keys.
+         * <p>This must be specified for symmetric encryption/decryption keys.
          *
          * <p>See {@link KeyProperties}.{@code BLOCK_MODE} constants.
          */
@@ -724,7 +724,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * <li>encryption/decryption transformation which do not offer {@code IND-CPA}, such as
          * {@code ECB} with a symmetric encryption algorithm, or RSA encryption/decryption without
          * padding, are prohibited;</li>
-         * <li>in block modes which use an IV, such as {@code CBC}, {@code CTR}, and {@code GCM},
+         * <li>in block modes which use an IV, such as {@code GCM}, {@code CBC}, and {@code CTR},
          * caller-provided IVs are rejected when encrypting, to ensure that only random IVs are
          * used.</li>
          * </ul>
