@@ -2700,4 +2700,7 @@
   <public type="attr" name="scrollIndicators" />
   <public type="attr" name="hyphenationFrequency" />
   <public type="attr" name="fingerprintAuthDrawable" />
+  <public type="attr" name="logoDescription" />
+  <public type="attr" name="titleTextColor" />
+  <public type="attr" name="subtitleTextColor" />
 </resources>

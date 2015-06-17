@@ -902,6 +902,7 @@ package android {
     field public static final int listViewWhiteStyle = 16842869; // 0x1010075
     field public static final int lockTaskMode = 16844015; // 0x10104ef
     field public static final int logo = 16843454; // 0x10102be
+    field public static final int logoDescription = 16844026; // 0x10104fa
     field public static final int longClickable = 16842982; // 0x10100e6
     field public static final int loopViews = 16843527; // 0x1010307
     field public static final int manageSpaceActivity = 16842756; // 0x1010004
@@ -1258,6 +1259,7 @@ package android {
     field public static final int submitBackground = 16843912; // 0x1010488
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextAppearance = 16843823; // 0x101042f
+    field public static final int subtitleTextColor = 16844028; // 0x10104fc
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
     field public static final int subtypeExtraValue = 16843674; // 0x101039a
     field public static final int subtypeId = 16843713; // 0x10103c1
@@ -1388,6 +1390,7 @@ package android {
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
     field public static final int titleTextAppearance = 16843822; // 0x101042e
+    field public static final int titleTextColor = 16844027; // 0x10104fb
     field public static final int titleTextStyle = 16843512; // 0x10102f8
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
