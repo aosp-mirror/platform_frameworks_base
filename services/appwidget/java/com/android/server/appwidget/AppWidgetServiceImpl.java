@@ -37,6 +37,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -1281,7 +1282,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
+    public ParceledListSlice<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
             int profileId) {
         final int userId = UserHandle.getCallingUserId();
 
@@ -1321,7 +1322,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
 
-            return result;
+            return new ParceledListSlice<AppWidgetProviderInfo>(result);
         }
     }
 

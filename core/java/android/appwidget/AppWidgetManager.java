@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
@@ -753,16 +754,16 @@ public class AppWidgetManager {
         }
 
         try {
-            List<AppWidgetProviderInfo> providers = mService.getInstalledProvidersForProfile(
+            ParceledListSlice<AppWidgetProviderInfo> providers = mService.getInstalledProvidersForProfile(
                     categoryFilter, profile.getIdentifier());
             if (providers == null) {
                 return Collections.emptyList();
             }
-            for (AppWidgetProviderInfo info : providers) {
+            for (AppWidgetProviderInfo info : providers.getList()) {
                 // Converting complex to dp.
                 convertSizesToPixels(info);
             }
-            return providers;
+            return providers.getList();
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
