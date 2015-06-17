@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ਦਿਨ"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> ਦਿਨ <xliff:g id="HOURS">%2$d</xliff:g> ਘੰਟੇ"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> ਦਿਨ <xliff:g id="HOURS">%2$d</xliff:g> ਘੰਟਾ"</string>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"ਪੈਟਰਨ ਚਾਲੂ ਕੀਤਾ"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"ਪੈਟਰਨ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"ਸੈਲ ਜੋੜਿਆ ਗਿਆ"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"ਸੈਲ <xliff:g id="CELL_INDEX">%1$s</xliff:g> ਜੋੜਿਆ ਗਿਆ"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"ਪੈਟਰਨ ਪੂਰਾ ਕੀਤਾ"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s। %3$d ਦਾ ਵਿਜੇਟ %2$d।"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ਵਿਜੇਟ ਜੋੜੋ।"</string>
@@ -1547,5 +1547,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ਪੈਰੀਫੈਰਲ ਪੋਰਟ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ਹੋਰ ਚੋਣਾਂ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ਓਵਰਫਲੋ ਬੰਦ ਕਰੋ"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
+    </plurals>
 </resources>
