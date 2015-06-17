@@ -199,9 +199,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     }
 
     public int send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
-            String requiredPermission) throws TransactionTooLargeException {
+            String requiredPermission, Bundle options) throws TransactionTooLargeException {
         return sendInner(code, intent, resolvedType, finishedReceiver,
-                requiredPermission, null, null, 0, 0, 0, null, null);
+                requiredPermission, null, null, 0, 0, 0, options, null);
     }
 
     int sendInner(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
@@ -293,9 +293,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             // If a completion callback has been requested, require
                             // that the broadcast be delivered synchronously
                             int sent = owner.broadcastIntentInPackage(key.packageName, uid,
-                                    finalIntent, resolvedType,
-                                    finishedReceiver, code, null, null,
-                                requiredPermission, (finishedReceiver != null), false, userId);
+                                    finalIntent, resolvedType, finishedReceiver, code, null, null,
+                                    requiredPermission, options, (finishedReceiver != null),
+                                    false, userId);
                             if (sent == ActivityManager.BROADCAST_SUCCESS) {
                                 sendFinish = false;
                             }

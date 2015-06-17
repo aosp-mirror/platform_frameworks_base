@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -317,6 +318,13 @@ public class MockContext extends Context {
     }
 
     /** @hide */
+    @SystemApi
+    @Override
+    public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
     @Override
     public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
         throw new UnsupportedOperationException();
@@ -332,6 +340,15 @@ public class MockContext extends Context {
     public void sendOrderedBroadcast(Intent intent, String receiverPermission,
             BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData,
            Bundle initialExtras) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @SystemApi
+    @Override
+    public void sendOrderedBroadcast(Intent intent, String receiverPermission,
+            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
         throw new UnsupportedOperationException();
     }
 

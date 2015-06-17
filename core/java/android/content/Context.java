@@ -1520,6 +1520,38 @@ public abstract class Context {
             @Nullable String receiverPermission);
 
     /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an optional required permission to be enforced.  This
+     * call is asynchronous; it returns immediately, and you will continue
+     * executing while the receivers are run.  No results are propagated from
+     * receivers and receivers can not abort the broadcast. If you want
+     * to allow receivers to propagate results or abort the broadcast, you must
+     * send an ordered broadcast using
+     * {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission (optional) String naming a permission that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    @SystemApi
+    public abstract void sendBroadcast(Intent intent,
+            @Nullable String receiverPermission,
+            @Nullable Bundle options);
+
+    /**
      * Like {@link #sendBroadcast(Intent, String)}, but also allows specification
      * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
@@ -1591,9 +1623,58 @@ public abstract class Context {
      * @see android.app.Activity#RESULT_OK
      */
     public abstract void sendOrderedBroadcast(@NonNull Intent intent,
-            @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
+            @Nullable String receiverPermission, @Nullable BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
+
+    /**
+     * Version of {@link #sendBroadcast(Intent)} that allows you to
+     * receive data back from the broadcast.  This is accomplished by
+     * supplying your own BroadcastReceiver when calling, which will be
+     * treated as a final receiver at the end of the broadcast -- its
+     * {@link BroadcastReceiver#onReceive} method will be called with
+     * the result values collected from the other receivers.  The broadcast will
+     * be serialized in the same way as calling
+     * {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>Like {@link #sendBroadcast(Intent)}, this method is
+     * asynchronous; it will return before
+     * resultReceiver.onReceive() is called.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission String naming a permissions that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     * @see #sendBroadcast(Intent)
+     * @see #sendBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see android.app.Activity#RESULT_OK
+     * @hide
+     */
+    @SystemApi
+    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+            @Nullable String receiverPermission, @Nullable Bundle options,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras);
 
     /**
      * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,

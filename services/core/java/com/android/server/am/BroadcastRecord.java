@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.IIntentReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -52,6 +53,7 @@ final class BroadcastRecord extends Binder {
     final String resolvedType; // the resolved data type
     final String requiredPermission; // a permission the caller has required
     final int appOp;        // an app op that is associated with this broadcast
+    final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     IIntentReceiver resultTo; // who receives final result if non-null
     long enqueueClockTime;  // the clock time the broadcast was enqueued
@@ -104,6 +106,9 @@ final class BroadcastRecord extends Binder {
         if (requiredPermission != null || appOp != AppOpsManager.OP_NONE) {
             pw.print(prefix); pw.print("requiredPermission="); pw.print(requiredPermission);
                     pw.print("  appOp="); pw.println(appOp);
+        }
+        if (options != null) {
+            pw.print(prefix); pw.print("options="); pw.println(options.toBundle());
         }
         pw.print(prefix); pw.print("enqueueClockTime=");
                 pw.print(new Date(enqueueClockTime));
@@ -180,8 +185,8 @@ final class BroadcastRecord extends Binder {
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
             int _callingPid, int _callingUid, String _resolvedType, String _requiredPermission,
-            int _appOp, List _receivers, IIntentReceiver _resultTo, int _resultCode,
-            String _resultData, Bundle _resultExtras, boolean _serialized,
+            int _appOp, BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo,
+            int _resultCode, String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
             int _userId) {
         queue = _queue;
@@ -194,6 +199,7 @@ final class BroadcastRecord extends Binder {
         resolvedType = _resolvedType;
         requiredPermission = _requiredPermission;
         appOp = _appOp;
+        options = _options;
         receivers = _receivers;
         resultTo = _resultTo;
         resultCode = _resultCode;

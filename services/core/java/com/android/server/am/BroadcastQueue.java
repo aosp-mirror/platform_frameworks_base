@@ -26,6 +26,7 @@ import java.util.Set;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -43,6 +44,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
+import com.android.server.DeviceIdleController;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -146,6 +148,8 @@ public final class BroadcastQueue {
 
     static final int BROADCAST_INTENT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
     static final int BROADCAST_TIMEOUT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 1;
+    static final int SCHEDULE_TEMP_WHITELIST_MSG
+            = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 2;
 
     final BroadcastHandler mHandler;
 
@@ -165,6 +169,13 @@ public final class BroadcastQueue {
                 case BROADCAST_TIMEOUT_MSG: {
                     synchronized (mService) {
                         broadcastTimeoutLocked(true);
+                    }
+                } break;
+                case SCHEDULE_TEMP_WHITELIST_MSG: {
+                    DeviceIdleController.LocalService dic = mService.mLocalDeviceIdleController;
+                    if (dic != null) {
+                        dic.addPowerSaveTempWhitelistAppDirect(UserHandle.getAppId(msg.arg1),
+                                msg.arg2);
                     }
                 } break;
             }
@@ -547,6 +558,19 @@ public final class BroadcastQueue {
         }
     }
 
+    final void scheduleTempWhitelistLocked(int uid, long duration) {
+        if (duration > Integer.MAX_VALUE) {
+            duration = Integer.MAX_VALUE;
+        }
+        // XXX ideally we should pause the broadcast until everything behind this is done,
+        // or else we will likely start dispatching the broadcast before we have opened
+        // access to the app (there is a lot of asynchronicity behind this).  It is probably
+        // not that big a deal, however, because the main purpose here is to allow apps
+        // to hold wake locks, and they will be able to acquire their wake lock immediately
+        // it just won't be enabled until we get through this work.
+        mHandler.obtainMessage(SCHEDULE_TEMP_WHITELIST_MSG, uid, (int)duration).sendToTarget();
+    }
+
     final void processNextBroadcast(boolean fromMsg) {
         synchronized(mService) {
             BroadcastRecord r;
@@ -721,7 +745,9 @@ public final class BroadcastQueue {
                 setBroadcastTimeoutLocked(timeoutTime);
             }
 
-            Object nextReceiver = r.receivers.get(recIdx);
+            final BroadcastOptions brOptions = r.options;
+            final Object nextReceiver = r.receivers.get(recIdx);
+
             if (nextReceiver instanceof BroadcastFilter) {
                 // Simple case: this is a registered receiver who gets
                 // a direct call.
@@ -739,6 +765,11 @@ public final class BroadcastQueue {
                             + r.ordered + " receiver=" + r.receiver);
                     r.state = BroadcastRecord.IDLE;
                     scheduleBroadcastsLocked();
+                } else {
+                    if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
+                        scheduleTempWhitelistLocked(filter.owningUid,
+                                brOptions.getTemporaryAppWhitelistDuration());
+                    }
                 }
                 return;
             }
@@ -880,6 +911,11 @@ public final class BroadcastQueue {
                 Slog.v(TAG_MU, "Updated broadcast record activity info for secondary user, "
                         + info.activityInfo + ", callingUid = " + r.callingUid + ", uid = "
                         + info.activityInfo.applicationInfo.uid);
+            }
+
+            if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
+                scheduleTempWhitelistLocked(receiverUid,
+                        brOptions.getTemporaryAppWhitelistDuration());
             }
 
             // Broadcast is being executed, its package can't be stopped.

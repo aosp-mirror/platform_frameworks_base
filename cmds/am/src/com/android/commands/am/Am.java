@@ -1002,7 +1002,7 @@ public class Am extends BaseCommand {
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
         mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, mReceiverPermission,
-                android.app.AppOpsManager.OP_NONE, true, false, mUserId);
+                android.app.AppOpsManager.OP_NONE, null, true, false, mUserId);
         receiver.waitForFinish();
     }
 
@@ -1658,7 +1658,7 @@ public class Am extends BaseCommand {
         Intent intent = new Intent(
                 "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE");
         mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
-                android.app.AppOpsManager.OP_NONE, true, false, UserHandle.USER_ALL);
+                android.app.AppOpsManager.OP_NONE, null, true, false, UserHandle.USER_ALL);
     }
 
     private void runScreenCompat() throws Exception {

@@ -19,7 +19,6 @@ package com.android.server;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
-import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -27,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
@@ -100,10 +98,6 @@ public class DeviceIdleController extends SystemService
 
     private static final String ACTION_ENTER_INACTIVE_STATE =
         "com.android.server.device_idle.ENTER_INACTIVE_STATE";
-
-    // TODO: These need to be moved to system settings.
-
-
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
@@ -180,7 +174,7 @@ public class DeviceIdleController extends SystemService
      * List of end times for UIDs that are temporarily marked as being allowed to access
      * the network and acquire wakelocks. Times are in milliseconds.
      */
-    private SparseLongArray mTempWhitelistAppIdEndTimes = new SparseLongArray();
+    private final SparseLongArray mTempWhitelistAppIdEndTimes = new SparseLongArray();
 
     /**
      * Current app IDs of temporarily whitelist apps for high-priority messages.
@@ -234,7 +228,7 @@ public class DeviceIdleController extends SystemService
      * global Settings. Any access to this class or its fields should be done while
      * holding the DeviceIdleController lock.
      */
-    private class Constants extends ContentObserver {
+    private final class Constants extends ContentObserver {
         // Key names stored in the settings value.
         private static final String KEY_INACTIVE_TIMEOUT = "inactive_to";
         private static final String KEY_SENSING_TIMEOUT = "sensing_to";
@@ -403,49 +397,49 @@ public class DeviceIdleController extends SystemService
         void dump(PrintWriter pw) {
             pw.println("  Settings:");
 
-            pw.print("    DOZE_INACTIVE_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_INACTIVE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(INACTIVE_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_SENSING_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_SENSING_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(SENSING_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_MOTION_INACTIVE_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_MOTION_INACTIVE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(MOTION_INACTIVE_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_IDLE_AFTER_INACTIVE_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_IDLE_AFTER_INACTIVE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(IDLE_AFTER_INACTIVE_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_IDLE_PENDING_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_IDLE_PENDING_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(IDLE_PENDING_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_MAX_IDLE_PENDING_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_MAX_IDLE_PENDING_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(MAX_IDLE_PENDING_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_IDLE_PENDING_FACTOR=");
+            pw.print("    "); pw.print(KEY_IDLE_PENDING_FACTOR); pw.print("=");
             pw.println(IDLE_PENDING_FACTOR);
 
-            pw.print("    DOZE_IDLE_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_IDLE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(IDLE_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_MAX_IDLE_TIMEOUT=");
+            pw.print("    "); pw.print(KEY_MAX_IDLE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(MAX_IDLE_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    DOZE_IDLE_FACTOR=");
+            pw.print("    "); pw.print(KEY_IDLE_FACTOR); pw.print("=");
             pw.println(IDLE_FACTOR);
 
-            pw.print("    DOZE_MIN_TIME_TO_ALARM=");
+            pw.print("    "); pw.print(KEY_MIN_TIME_TO_ALARM); pw.print("=");
             TimeUtils.formatDuration(MIN_TIME_TO_ALARM, pw);
             pw.println();
 
-            pw.print("    DOZE_MAX_TEMP_APP_WHITELIST_DURATION=");
+            pw.print("    "); pw.print(KEY_MAX_TEMP_APP_WHITELIST_DURATION); pw.print("=");
             TimeUtils.formatDuration(MAX_TEMP_APP_WHITELIST_DURATION, pw);
             pw.println();
         }
@@ -465,6 +459,7 @@ public class DeviceIdleController extends SystemService
             } else if (result == AnyMotionDetector.RESULT_MOVED) {
                 if (DEBUG) Slog.d(TAG, "RESULT_MOVED received.");
                 synchronized (this) {
+                    EventLogTags.writeDeviceIdle(mState, "sense_moved");
                     enterInactiveStateLocked();
                 }
             }
@@ -573,15 +568,11 @@ public class DeviceIdleController extends SystemService
                     userId,
                     /*allowAll=*/ false,
                     /*requireFull=*/ false,
-                    "addAppBrieflyToWhitelist", null);
+                    "addPowerSaveTempWhitelistApp", null);
             final long token = Binder.clearCallingIdentity();
             try {
-                PackageInfo pi = AppGlobals.getPackageManager()
-                        .getPackageInfo(packageName, 0, userId);
-                if (pi == null) return;
                 DeviceIdleController.this.addPowerSaveTempWhitelistAppInternal(packageName,
                         duration, userId);
-            } catch (RemoteException re) {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -589,6 +580,12 @@ public class DeviceIdleController extends SystemService
 
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             DeviceIdleController.this.dump(fd, pw, args);
+        }
+    }
+
+    public final class LocalService {
+        public void addPowerSaveTempWhitelistAppDirect(int appId, long duration) {
+            DeviceIdleController.this.addPowerSaveTempWhitelistAppDirectInternal(appId, duration);
         }
     }
 
@@ -635,6 +632,7 @@ public class DeviceIdleController extends SystemService
         }
 
         publishBinderService(Context.DEVICE_IDLE_CONTROLLER, new BinderService());
+        publishLocalService(LocalService.class, new LocalService());
     }
 
     @Override
@@ -765,23 +763,31 @@ public class DeviceIdleController extends SystemService
         try {
             int uid = getContext().getPackageManager().getPackageUid(packageName, userId);
             int appId = UserHandle.getAppId(uid);
-            final long timeNow = System.currentTimeMillis();
-            synchronized (this) {
-                duration = Math.min(duration, mConstants.MAX_TEMP_APP_WHITELIST_DURATION);
-                long currentEndTime = mTempWhitelistAppIdEndTimes.get(appId);
-                // Set the new end time
-                mTempWhitelistAppIdEndTimes.put(appId, timeNow + duration);
-                if (DEBUG) {
-                    Slog.d(TAG, "Adding AppId " + appId + " to temp whitelist");
-                }
-                if (currentEndTime == 0) {
-                    // No pending timeout for the app id, post a delayed message
-                    postTempActiveTimeoutMessage(appId, duration);
-                    updateTempWhitelistAppIdsLocked();
-                    reportTempWhitelistChangedLocked();
-                }
-            }
+            addPowerSaveTempWhitelistAppDirectInternal(appId, duration);
         } catch (NameNotFoundException e) {
+        }
+    }
+
+    /**
+     * Adds an app to the temporary whitelist and resets the endTime for granting the
+     * app an exemption to access network and acquire wakelocks.
+     */
+    public void addPowerSaveTempWhitelistAppDirectInternal(int appId, long duration) {
+        final long timeNow = SystemClock.elapsedRealtime();
+        synchronized (this) {
+            duration = Math.min(duration, mConstants.MAX_TEMP_APP_WHITELIST_DURATION);
+            long currentEndTime = mTempWhitelistAppIdEndTimes.get(appId);
+            // Set the new end time
+            mTempWhitelistAppIdEndTimes.put(appId, timeNow + duration);
+            if (DEBUG) {
+                Slog.d(TAG, "Adding AppId " + appId + " to temp whitelist");
+            }
+            if (currentEndTime == 0) {
+                // No pending timeout for the app id, post a delayed message
+                postTempActiveTimeoutMessage(appId, duration);
+                updateTempWhitelistAppIdsLocked();
+                reportTempWhitelistChangedLocked();
+            }
         }
     }
 
@@ -791,7 +797,7 @@ public class DeviceIdleController extends SystemService
     }
 
     void checkTempAppWhitelistTimeout(int uid) {
-        final long timeNow = System.currentTimeMillis();
+        final long timeNow = SystemClock.elapsedRealtime();
         synchronized (this) {
             long endTime = mTempWhitelistAppIdEndTimes.get(uid);
             if (endTime == 0) {
@@ -1295,6 +1301,8 @@ public class DeviceIdleController extends SystemService
         }
 
         synchronized (this) {
+            mConstants.dump(pw);
+
             int size = mPowerSaveWhitelistApps.size();
             if (size > 0) {
                 pw.println("  Whitelist system apps:");
@@ -1313,17 +1321,34 @@ public class DeviceIdleController extends SystemService
             }
             size = mPowerSaveWhitelistAppIds.size();
             if (size > 0) {
-                pw.println("  Whitelist app uids:");
+                pw.println("  Whitelist app ids:");
                 for (int i = 0; i < size; i++) {
-                    pw.print("    UID=");
+                    pw.print("    ");
                     pw.print(mPowerSaveWhitelistAppIds.keyAt(i));
-                    pw.print(": ");
-                    pw.print(mPowerSaveWhitelistAppIds.valueAt(i));
                     pw.println();
                 }
             }
-
-            mConstants.dump(pw);
+            size = mTempWhitelistAppIdEndTimes.size();
+            if (size > 0) {
+                pw.println("  Temp whitelist schedule:");
+                final long timeNow = SystemClock.elapsedRealtime();
+                for (int i = 0; i < size; i++) {
+                    pw.print("    UID=");
+                    pw.print(mTempWhitelistAppIdEndTimes.keyAt(i));
+                    pw.print(": ");
+                    TimeUtils.formatDuration(mTempWhitelistAppIdEndTimes.valueAt(i), timeNow, pw);
+                    pw.println();
+                }
+            }
+            size = mTempWhitelistAppIdArray != null ? mTempWhitelistAppIdArray.length : 0;
+            if (size > 0) {
+                pw.println("  Temp whitelist app ids:");
+                for (int i = 0; i < size; i++) {
+                    pw.print("    ");
+                    pw.print(mTempWhitelistAppIdArray[i]);
+                    pw.println();
+                }
+            }
 
             pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);

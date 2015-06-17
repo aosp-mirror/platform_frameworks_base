@@ -108,7 +108,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         try {
             getDefault().broadcastIntent(
                 null, intent, null, null, Activity.RESULT_OK, null, null,
-                null /*permission*/, appOp, false, true, userId);
+                null /*permission*/, appOp, null, false, true, userId);
         } catch (RemoteException ex) {
         }
     }
@@ -458,12 +458,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             Bundle resultExtras = data.readBundle();
             String perm = data.readString();
             int appOp = data.readInt();
+            Bundle options = data.readBundle();
             boolean serialized = data.readInt() != 0;
             boolean sticky = data.readInt() != 0;
             int userId = data.readInt();
             int res = broadcastIntent(app, intent, resolvedType, resultTo,
                     resultCode, resultData, resultExtras, perm, appOp,
-                    serialized, sticky, userId);
+                    options, serialized, sticky, userId);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -2991,9 +2992,9 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     public int broadcastIntent(IApplicationThread caller,
-            Intent intent, String resolvedType,  IIntentReceiver resultTo,
+            Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle map,
-            String requiredPermission, int appOp, boolean serialized,
+            String requiredPermission, int appOp, Bundle options, boolean serialized,
             boolean sticky, int userId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -3008,6 +3009,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeBundle(map);
         data.writeString(requiredPermission);
         data.writeInt(appOp);
+        data.writeBundle(options);
         data.writeInt(serialized ? 1 : 0);
         data.writeInt(sticky ? 1 : 0);
         data.writeInt(userId);
