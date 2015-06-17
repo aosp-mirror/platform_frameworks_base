@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Gem"</string>
     <string name="menu_share" msgid="3075149983979628146">"Del"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Slet"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"Markér alle"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopiér til…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Vis intern lagerplads"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Vis SD-kort"</string>

@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"సేవ్ చేయి"</string>
     <string name="menu_share" msgid="3075149983979628146">"భాగస్వామ్యం చేయి"</string>
     <string name="menu_delete" msgid="8138799623850614177">"తొలగించు"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"అన్నీ ఎంచుకోండి"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ఇక్కడికి కాపీ చేయి…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"అంతర్గత నిల్వను చూపు"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD కార్డ్‌ను చూపు"</string>

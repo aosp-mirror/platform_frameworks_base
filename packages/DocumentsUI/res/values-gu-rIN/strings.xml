@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"સાચવો"</string>
     <string name="menu_share" msgid="3075149983979628146">"શેર કરો"</string>
     <string name="menu_delete" msgid="8138799623850614177">"કાઢી નાખો"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"બધા પસંદ કરો"</string>
     <string name="menu_copy" msgid="3612326052677229148">"આના પર કૉપિ કરો…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ દર્શાવો"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ દર્શાવો"</string>

@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Tallenna"</string>
     <string name="menu_share" msgid="3075149983979628146">"Jaa"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Poista"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"Valitse kaikki"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopioi kohteeseen…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Näytä sis. tallennustila"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Näytä SD-kortti"</string>
