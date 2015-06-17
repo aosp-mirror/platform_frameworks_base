@@ -21,12 +21,13 @@ import java.security.InvalidKeyException;
 /**
  * Indicates that the key can no longer be used because it has been permanently invalidated.
  *
- * <p>This can currently occur only for keys that require user authentication. Such keys are
- * permanently invalidated once the secure lock screen is disabled (i.e., reconfigured to None,
- * Swipe or other mode which does not authenticate the user) or when the secure lock screen is
- * forcibly reset (e.g., by Device Admin). Additionally, keys configured to require user
- * authentication for every use of the key are also permanently invalidated once a new fingerprint
- * is enrolled or once no more fingerprints are enrolled.
+ * <p>This only occurs for keys which are authorized to be used only if the user has been
+ * authenticated. Such keys are permanently and irreversibly invalidated once the secure lock screen
+ * is disabled (i.e., reconfigured to None, Swipe or other mode which does not authenticate the
+ * user) or when the secure lock screen is forcibly reset (e.g., by Device Admin). Additionally,
+ * keys configured to require user authentication to take place for every of the keys, are also
+ * permanently invalidated once a new fingerprint is enrolled or once no more fingerprints are
+ * enrolled.
  */
 public class KeyPermanentlyInvalidatedException extends InvalidKeyException {
 
