@@ -80,7 +80,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     public static final int SHOW_WITH_ASSIST = 1<<0;
 
     /**
-     * @hide
      * Flag received in {@link #onShow}: originator requested that the session be started with
      * a screen shot of the currently focused activity.
      */
@@ -1162,7 +1161,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         onHandleAssist(data);
     }
 
-    /** @hide */
     public void onHandleScreenshot(Bitmap screenshot) {
     }
 
