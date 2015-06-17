@@ -20,7 +20,7 @@
         <shape android:shape="rectangle"
                android:tint="?attr/colorControlNormal">
             <size android:height="@dimen/seekbar_track_background_height_material" />
-            <solid android:color="#ff000000" />
+            <solid android:color="@color/white_disabled_material" />
         </shape>
     </item>
     <item android:id="@id/secondaryProgress"
