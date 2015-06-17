@@ -296,13 +296,13 @@ Asset::~Asset(void)
  * Create a new Asset from compressed data in a memory mapping.
  */
 /*static*/ Asset* Asset::createFromCompressedMap(FileMap* dataMap,
-    int method, size_t uncompressedLen, AccessMode mode)
+    size_t uncompressedLen, AccessMode mode)
 {
     _CompressedAsset* pAsset;
     status_t result;
 
     pAsset = new _CompressedAsset;
-    result = pAsset->openChunk(dataMap, method, uncompressedLen);
+    result = pAsset->openChunk(dataMap, uncompressedLen);
     if (result != NO_ERROR)
         return NULL;
 
@@ -734,17 +734,11 @@ status_t _CompressedAsset::openChunk(int fd, off64_t offset,
  *
  * Nothing is expanded until the first read call.
  */
-status_t _CompressedAsset::openChunk(FileMap* dataMap, int compressionMethod,
-    size_t uncompressedLen)
+status_t _CompressedAsset::openChunk(FileMap* dataMap, size_t uncompressedLen)
 {
     assert(mFd < 0);        // no re-open
     assert(mMap == NULL);
     assert(dataMap != NULL);
-
-    if (compressionMethod != ZipFileRO::kCompressDeflated) {
-        assert(false);
-        return UNKNOWN_ERROR;
-    }
 
     mMap = dataMap;
     mStart = -1;        // not used
