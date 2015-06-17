@@ -70,6 +70,7 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
     @Override
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo) {
         if (mCb == null) return;
+        if (mContext == null) return;
 
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
         if (appWidgetId > -1 && appWidgetId == mConfig.searchBarAppWidgetId) {

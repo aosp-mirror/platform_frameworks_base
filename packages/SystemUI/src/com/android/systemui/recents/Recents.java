@@ -316,14 +316,12 @@ public class Recents extends SystemUI
 
     void hideRecentsInternal(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mBootCompleted) {
-            ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
-            if (topTask != null && mSystemServicesProxy.isRecentsTopMost(topTask, null)) {
-                // Notify recents to hide itself
-                Intent intent = createLocalBroadcastIntent(mContext, ACTION_HIDE_RECENTS_ACTIVITY);
-                intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
-                intent.putExtra(EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
-                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-            }
+            // Defer to the activity to handle hiding recents, if it handles it, then it must still
+            // be visible
+            Intent intent = createLocalBroadcastIntent(mContext, ACTION_HIDE_RECENTS_ACTIVITY);
+            intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
+            intent.putExtra(EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
+            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
         }
     }
 
