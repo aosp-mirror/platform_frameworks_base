@@ -409,8 +409,8 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
             }
             case DO_REPORT_FULLSCREEN_MODE: {
                 InputConnection ic = mInputConnection.get();
-                if (ic == null || !isActive()) {
-                    Log.w(TAG, "showStatusIcon on inactive InputConnection");
+                if (ic == null) {
+                    Log.w(TAG, "reportFullscreenMode on inexistent InputConnection");
                     return;
                 }
                 ic.reportFullscreenMode(msg.arg1 == 1);
