@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> күн"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> сағ."</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> сағ."</string>
@@ -249,7 +250,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"қоңырау шалу және телефон қоңырауларын басқару"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлар"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"өмірлік белгілер мен дене белсенділігі туралы ақпаратқа қол жеткізу"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ағза күйінің көрсеткіштері мен дене белсенділігі туралы ақпаратқа қол жеткізу"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ашық тұрған терезе мазмұнын тексеру."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
@@ -541,8 +542,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Сақталған қолданба деректерінің кодталуын қажет етеді."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Камераларды өшіру"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Құрылғыдағы барлық камералар қолданысын бөгеу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Кейбір экран бекітпесі мүмк-тері өшіріледі"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Кейбір экран бекітпесінің мүмкіндіктерін пайдалануға тыйым салынады."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экран құлпы функцияларын өшіру"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Кейбір экранды құлыптау мүмкіндіктерін пайдалануға тыйым салынады."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Үй"</item>
     <item msgid="869923650527136615">"Ұялы тел."</item>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Кескін басталды"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Кескін өшірілді"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Тор қосылды"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> ұяшығы қосылды"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Кескін аяқталды"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d виджет, барлығы %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Виджет қосу."</string>
@@ -1102,15 +1102,15 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Деректер <xliff:g id="NAME">%s</xliff:g> ішіне тасымалданды"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Деректерді тасымалдау мүмкін емес"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Деректер бастапқы орнында қалды"</string>
-    <string name="ext_media_status_removed" msgid="6576172423185918739">"Алып тасталды"</string>
-    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Шығарып алынды"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Алынды"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Ажыратылды"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Тексерілуде…"</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"Дайын"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Тек оқуға арналған"</string>
-    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Қауіпсіз алынбады"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Қауіпсіз түрде алынды"</string>
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"Бүлінген"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Қолданылмайды"</string>
-    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Шығарылуда..."</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Ажыратылуда..."</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Пішімделуде..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Салынбады"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Сәйкес әрекеттер табылмады."</string>
@@ -1546,5 +1546,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB перифериялық порты"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Қосымша опциялар"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Артық толуды жабу"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> таңдалды</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
+    </plurals>
 </resources>

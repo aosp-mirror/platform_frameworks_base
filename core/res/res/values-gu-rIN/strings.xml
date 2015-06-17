@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> દિવસ"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> દિવસ <xliff:g id="HOURS">%2$d</xliff:g> કલાક"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> દિવસ <xliff:g id="HOURS">%2$d</xliff:g> કલાક"</string>
@@ -541,7 +542,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"જરૂરી છે કે સંગ્રહિત એપ્લિકેશન એન્ક્રિપ્ટ થાય."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"કૅમેરા અક્ષમ કરો"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"તમામ ઉપકરણ કૅમેરાનો ઉપયોગ અટકાવો."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"કેટલીક સ્ક્રીન લૉક સુવિધાઓ અક્ષમ કરો"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"અમુક સ્ક્રીનલૉક સુવિધા અક્ષમ કરો"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"કેટલીક સ્ક્રીન લૉક સુવિધાઓના ઉપયોગને અટકાવો."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ઘર"</item>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"પેટર્ન શરૂ કરી"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"પેટર્ન સાફ કરી"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"કોષ ઉમેર્યો"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> કોષ ઉમેર્યો"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"પેટર્ન પૂર્ણ કરી"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d માંથી %2$d વિજેટ."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"વિજેટ ઉમેરો."</string>
@@ -1546,5 +1546,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB પેરિફેરલ પોર્ટ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"વધુ વિકલ્પો"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ઓવરફ્લો બંધ કરો"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> પસંદ કરી</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> પસંદ કરી</item>
+    </plurals>
 </resources>

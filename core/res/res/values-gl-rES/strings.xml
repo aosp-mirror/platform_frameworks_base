@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> días"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> hrs"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> hr"</string>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Iniciouse o padrón"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Borrouse o padrón"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Engadiuse un móbil"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Engadiuse a cela <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Completouse o padrón"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d de %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Engadir widget."</string>
@@ -1081,10 +1081,10 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Comprobando se hai erros"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Detectouse unha <xliff:g id="NAME">%s</xliff:g> nova"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos e contidos multimedia"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> danada"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> está danada. Toca para solucionar o problema."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> danado"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> está danado. Toca para solucionar o problema."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> incompatible"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Este dispositivo non é compatible coa <xliff:g id="NAME">%s</xliff:g>. Toca para configurala nun formato compatible."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Este dispositivo non é compatible con <xliff:g id="NAME">%s</xliff:g>. Toca para configuralo nun formato compatible."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Retirouse a <xliff:g id="NAME">%s</xliff:g> de forma inesperada"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Desactiva a <xliff:g id="NAME">%s</xliff:g> antes de retirala para evitar a perda de datos"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Retirouse a <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1102,13 +1102,13 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"Migráronse os datos a <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Non se puideron migrar os datos"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Quedan datos na localización orixinal"</string>
-    <string name="ext_media_status_removed" msgid="6576172423185918739">"Extraída"</string>
-    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Expulsada"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Extraído"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Expulsado"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Comprobando..."</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"Listo"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Só lectura"</string>
     <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Extraeuse de forma non segura"</string>
-    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Danada"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Danado"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Non compatible"</string>
     <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Expulsando…"</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatando…"</string>
@@ -1546,5 +1546,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porto periférico USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Máis opcións"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Pechar barra de ferramentas adicional"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other">Seleccionáronse <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one">Seleccionouse <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
 </resources>

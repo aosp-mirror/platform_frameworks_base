@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> дн."</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> день <xliff:g id="HOURS">%2$d</xliff:g> ч."</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> день <xliff:g id="HOURS">%2$d</xliff:g> ч."</string>
@@ -237,11 +238,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <!-- no translation found for permgroupdesc_sms (4656988620100940350) -->
-    <skip />
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправка и просмотр SMS-сообщений"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
-    <!-- no translation found for permgroupdesc_storage (637758554581589203) -->
-    <skip />
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фотографиям, файлам и мультимедийному контенту на вашем устройстве"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Пользовательский словарь"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Чтение слов в пользовательском словаре или их запись."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Закладки и история"</string>
@@ -253,8 +252,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществление телефонных звонков и управление ими"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Датчики"</string>
-    <!-- no translation found for permgroupdesc_sensors (2280821510554029577) -->
-    <skip />
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"доступ к основным показателям состояния организма и сведениям о физической активности"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки"</string>
@@ -733,8 +731,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ввод графического ключа"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Графический ключ сброшен"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ячейка добавлена"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Ячейка <xliff:g id="CELL_INDEX">%1$s</xliff:g> добавлена"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Графический ключ введен"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виджет %2$d из %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Добавить виджет"</string>
@@ -1577,12 +1574,16 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-запрос преобразован в DIAL-запрос."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-запрос преобразован в USSD-запрос."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-запрос преобразован в новый SS-запрос."</string>
-    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
-    <skip />
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Рабочий профиль"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Внешний USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Внешний USB-порт"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Ещё"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Закрыть дополнительное меню"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="few">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="many">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
 </resources>
