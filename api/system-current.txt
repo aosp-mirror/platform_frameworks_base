@@ -31045,6 +31045,7 @@ package android.service.voice {
     method public void onDestroy();
     method public boolean[] onGetSupportedCommands(java.lang.String[]);
     method public void onHandleAssist(android.os.Bundle, android.app.assist.AssistStructure, android.app.assist.AssistContent);
+    method public void onHandleScreenshot(android.graphics.Bitmap);
     method public void onHide();
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
@@ -31067,6 +31068,7 @@ package android.service.voice {
     method public void startVoiceActivity(android.content.Intent);
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
     field public static final int SHOW_WITH_ASSIST = 1; // 0x1
+    field public static final int SHOW_WITH_SCREENSHOT = 2; // 0x2
   }
 
   public static final class VoiceInteractionSession.AbortVoiceRequest extends android.service.voice.VoiceInteractionSession.Request {
