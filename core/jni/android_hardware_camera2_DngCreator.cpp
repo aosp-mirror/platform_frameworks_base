@@ -1466,6 +1466,26 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
             }
         }
 
+        size_t listSize = builder.getSize();
+        uint8_t opcodeListBuf[listSize];
+        err = builder.buildOpList(opcodeListBuf);
+        if (err == OK) {
+            BAIL_IF_INVALID(writer->addEntry(TAG_OPCODELIST2, listSize, opcodeListBuf,
+                    TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
+        } else {
+            ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
+                    "map.", __FUNCTION__);
+            jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
+                    " correction and lens shading map");
+            return;
+        }
+    }
+
+    {
+        // Set up opcode List 3
+        OpcodeListBuilder builder;
+        status_t err = OK;
+
         // Set up rectilinear distortion correction
         camera_metadata_entry entry3 =
                 results.find(ANDROID_LENS_RADIAL_DISTORTION);
@@ -1484,13 +1504,12 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
             }
         }
 
-
         size_t listSize = builder.getSize();
         uint8_t opcodeListBuf[listSize];
         err = builder.buildOpList(opcodeListBuf);
         if (err == OK) {
-            BAIL_IF_INVALID(writer->addEntry(TAG_OPCODELIST2, listSize, opcodeListBuf,
-                    TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
+            BAIL_IF_INVALID(writer->addEntry(TAG_OPCODELIST3, listSize, opcodeListBuf,
+                    TIFF_IFD_0), env, TAG_OPCODELIST3, writer);
         } else {
             ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
                     "map.", __FUNCTION__);
@@ -1718,6 +1737,7 @@ static void DngCreator_nativeSetThumbnail(JNIEnv* env, jobject thiz, jobject buf
         tagsToMove.add(TAG_DEFAULTCROPORIGIN);
         tagsToMove.add(TAG_DEFAULTCROPSIZE);
         tagsToMove.add(TAG_OPCODELIST2);
+        tagsToMove.add(TAG_OPCODELIST3);
 
         if (moveEntries(writer, TIFF_IFD_0, TIFF_IFD_SUB1, tagsToMove) != OK) {
             jniThrowException(env, "java/lang/IllegalStateException", "Failed to move entries");
