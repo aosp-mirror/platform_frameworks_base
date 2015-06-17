@@ -1812,7 +1812,7 @@ public final class Pm {
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
             public int send(int code, Intent intent, String resolvedType,
-                    IIntentReceiver finishedReceiver, String requiredPermission) {
+                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
                 try {
                     mResult.offer(intent, 5, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {

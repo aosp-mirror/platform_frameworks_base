@@ -3758,7 +3758,7 @@ package android.app {
     method public void requestUsageTimeReport(android.app.PendingIntent);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
-    field public static final java.lang.String EXTRA_USAGE_TIME_REPORT = "android.usage_time";
+    field public static final java.lang.String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
     field public static final java.lang.String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
   }
 
@@ -5194,6 +5194,7 @@ package android.app {
     method public void send(int, android.app.PendingIntent.OnFinished, android.os.Handler) throws android.app.PendingIntent.CanceledException;
     method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler) throws android.app.PendingIntent.CanceledException;
     method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, java.lang.String) throws android.app.PendingIntent.CanceledException;
+    method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, java.lang.String, android.os.Bundle) throws android.app.PendingIntent.CanceledException;
     method public static void writePendingIntentOrNullToParcel(android.app.PendingIntent, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.PendingIntent> CREATOR;
