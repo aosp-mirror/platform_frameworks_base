@@ -832,6 +832,15 @@ exit:
     return jStatus;
 }
 
+static bool hasFormat(int* formats, size_t size, int format) {
+    for (size_t index = 0; index < size; index++) {
+        if (formats[index] == format) {
+            return true; // found
+        }
+    }
+    return false; // not found
+}
+
 static jint convertAudioPortFromNative(JNIEnv *env,
                                            jobject *jAudioPort, const struct audio_port *nAudioPort)
 {
@@ -839,6 +848,7 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     jintArray jSamplingRates = NULL;
     jintArray jChannelMasks = NULL;
     jintArray jChannelIndexMasks = NULL;
+    int* cFormats = NULL;
     jintArray jFormats = NULL;
     jobjectArray jGains = NULL;
     jobject jHandle = NULL;
@@ -846,7 +856,7 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     bool useInMask;
     size_t numPositionMasks = 0;
     size_t numIndexMasks = 0;
-
+    size_t numUniqueFormats;
     ALOGV("convertAudioPortFromNative id %d role %d type %d name %s",
         nAudioPort->id, nAudioPort->role, nAudioPort->type, nAudioPort->name);
 
@@ -897,15 +907,20 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     }
 
     // formats
-    jFormats = env->NewIntArray(nAudioPort->num_formats);
+    cFormats = new int[nAudioPort->num_formats];
+    numUniqueFormats = 0;
+    for (size_t index = 0; index < nAudioPort->num_formats; index++) {
+        int format = audioFormatFromNative(nAudioPort->formats[index]);
+        if (!hasFormat(cFormats, numUniqueFormats, format)) {
+            cFormats[numUniqueFormats++] = format;
+        }
+    }
+    jFormats = env->NewIntArray(numUniqueFormats);
     if (jFormats == NULL) {
         jStatus = (jint)AUDIO_JAVA_ERROR;
         goto exit;
     }
-    for (size_t j = 0; j < nAudioPort->num_formats; j++) {
-        jint jFormat = audioFormatFromNative(nAudioPort->formats[j]);
-        env->SetIntArrayRegion(jFormats, j, 1, &jFormat);
-    }
+    env->SetIntArrayRegion(jFormats, 0, numUniqueFormats, cFormats);
 
     // gains
     jGains = env->NewObjectArray(nAudioPort->num_gains,
@@ -999,6 +1014,12 @@ exit:
     }
     if (jChannelMasks != NULL) {
         env->DeleteLocalRef(jChannelMasks);
+    }
+    if (jChannelIndexMasks != NULL) {
+        env->DeleteLocalRef(jChannelIndexMasks);
+    }
+    if (cFormats != NULL) {
+        delete[] cFormats;
     }
     if (jFormats != NULL) {
         env->DeleteLocalRef(jFormats);
