@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 
 #include "idmap.h"
@@ -130,14 +131,14 @@ namespace {
             ALOGW("%s: failed to find entry AndroidManifest.xml\n", __FUNCTION__);
             return -1;
         }
-        size_t uncompLen = 0;
-        int method;
+        uint32_t uncompLen = 0;
+        uint16_t method;
         if (!zip->getEntryInfo(entry, &method, &uncompLen, NULL, NULL, NULL, NULL)) {
             ALOGW("%s: failed to read entry info\n", __FUNCTION__);
             return -1;
         }
         if (method != ZipFileRO::kCompressDeflated) {
-            ALOGW("%s: cannot handle zip compression method %d\n", __FUNCTION__, method);
+            ALOGW("%s: cannot handle zip compression method %" PRIu16 "\n", __FUNCTION__, method);
             return -1;
         }
         FileMap *dataMap = zip->createEntryFileMap(entry);
@@ -147,19 +148,19 @@ namespace {
         }
         char *buf = new char[uncompLen];
         if (NULL == buf) {
-            ALOGW("%s: failed to allocate %zd byte\n", __FUNCTION__, uncompLen);
+            ALOGW("%s: failed to allocate %" PRIu32 " byte\n", __FUNCTION__, uncompLen);
             delete dataMap;
             return -1;
         }
         StreamingZipInflater inflater(dataMap, uncompLen);
         if (inflater.read(buf, uncompLen) < 0) {
-            ALOGW("%s: failed to inflate %zd byte\n", __FUNCTION__, uncompLen);
+            ALOGW("%s: failed to inflate %" PRIu32 " byte\n", __FUNCTION__, uncompLen);
             delete[] buf;
             delete dataMap;
             return -1;
         }
 
-        int priority = parse_manifest(buf, uncompLen, target_package_name);
+        int priority = parse_manifest(buf, static_cast<size_t>(uncompLen), target_package_name);
         delete[] buf;
         delete dataMap;
         return priority;
