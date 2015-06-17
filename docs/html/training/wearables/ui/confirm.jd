@@ -52,12 +52,18 @@ gets notified if the user cancels the action and when the timer expires.</p>
 <p>To show a confirmation timer when users complete an action in your app:</p>
 
 <ol>
-<li>Add a <code>DelayedConfirmationView</code> element to your layout.</li>
-<li>Implement the <code>DelayedConfirmationListener</code> interface in your activity.</li>
+<li>Add a
+<a href="{@docRoot}reference/android/support/wearable/view/DelayedConfirmationView.html"><code>&lt;DelayedConfirmationView&gt;</code></a>
+element to your layout.</li>
+<li>Implement the
+<a href="{@docRoot}reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html"><code>DelayedConfirmationListener</code></a>
+interface in your activity.</li>
 <li>Set the duration of the timer and start it when the user completes an action.</li>
 </ol>
 
-<p>Add the <code>DelayedConfirmationView</code> element to your layout as follows:</p>
+<p>Add the
+<a href="{@docRoot}reference/android/support/wearable/view/DelayedConfirmationView.html"><code>&lt;DelayedConfirmationView&gt;</code></a>
+element to your layout as follows:</p>
 
 <pre>
 &lt;android.support.wearable.view.DelayedConfirmationView
@@ -125,19 +131,24 @@ A confirmation animation.</p>
 <h2 id="show-confirmation">Show Confirmation Animations</h2>
 
 <p>To show a confirmation animation when users complete an action in your app, create an intent
-that starts <code>ConfirmationActivity</code> from one of your activities. You can specify
-one of the these animations with the <code>EXTRA_ANIMATION_TYPE</code> intent extra:</p>
+that starts
+<a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html"><code>ConfirmationActivity</code></a>
+from one of your activities. You can specify
+one of the these animations with the
+<a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html#EXTRA_ANIMATION_TYPE"><code>EXTRA_ANIMATION_TYPE</code></a>
+intent extra:</p>
 
 <ul>
-<li><code>SUCCESS_ANIMATION</code></li>
-<li><code>FAILURE_ANIMATION</code></li>
-<li><code>OPEN_ON_PHONE_ANIMATION</code></li>
+<li><a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html#SUCCESS_ANIMATION"><code>SUCCESS_ANIMATION</code></a></li>
+<li><a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html#FAILURE_ANIMATION"><code>FAILURE_ANIMATION</code></a></li>
+<li><a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html#OPEN_ON_PHONE_ANIMATION"><code>OPEN_ON_PHONE_ANIMATION</code></a></li>
 </ul>
 
 <p>You can also add a message that appears under the confirmation icon.</p>
 
-<p>To use the <code>ConfirmationActivity</code> in your app, first declare this activity in your
-manifest file:</p>
+<p>To use the
+<a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html"><code>ConfirmationActivity</code></a>
+in your app, first declare this activity in your manifest file:</p>
 
 <pre>
 &lt;manifest>
@@ -161,5 +172,6 @@ intent.putExtra(ConfirmationActivity.EXTRA_MESSAGE,
 startActivity(intent);
 </pre>
 
-<p>After showing the confirmation animation, <code>ConfirmationActivity</code> finishes and your
-activity resumes.</p>
+<p>After showing the confirmation animation,
+<a href="{@docRoot}reference/android/support/wearable/activity/ConfirmationActivity.html"><code>ConfirmationActivity</code></a>
+finishes and your activity resumes.</p>
