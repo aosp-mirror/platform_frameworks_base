@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-kaarti pole."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothi jagamine."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lennurežiim."</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-kaarti pole."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Operaatori võrku muudetakse."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Aku: <xliff:g id="NUMBER">%d</xliff:g> protsenti."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Süsteemiseaded"</string>
@@ -321,8 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Telefoni kasutamiseks pühkige ikoonilt eemale"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Häälabi kasutamiseks pühkige ikoonilt eemale"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Kaamera kasutamiseks pühkige ikoonilt eemale"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Täielik vaikus. See vaigistab ka ekraanilugejad."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Täielik vaikus"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Ainult prioriteetsed"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult alarmid"</string>
@@ -332,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Kasutaja vahetamine"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Kasutaja vahetamine, praegune kasutaja: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Praegune kasutaja <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Kuva profiil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Kasutaja lisamine"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Uus kasutaja"</string>
@@ -348,8 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Alusta uuesti"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Jah, jätka"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Külaliskasutaja"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Rakenduste ja andmete kustutamiseks eemaldage külaliskasutaja"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"EEMALDA KÜLALINE"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Kas lisada uus kasutaja?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab värskendada rakendusi kõigi kasutajate jaoks."</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Keela"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> on helitugevuse dialoog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Originaali taastamiseks puudutage."</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Kasutate oma tööprofiili"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Süsteemi kasutajaliidese tuuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Kuva lisatud akutaseme protsent"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Akutaseme protsendi kuvamine olekuriba ikoonil, kui akut ei laeta"</string>
@@ -426,6 +421,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"kell <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Kiirseaded, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Leviala"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Tööprofiil"</string>
 </resources>

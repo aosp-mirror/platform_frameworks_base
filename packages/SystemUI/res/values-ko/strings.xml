@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM이 없습니다."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"블루투스 테더링입니다."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"비행기 모드입니다."</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM 카드가 없습니다."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"이동통신사 네트워크가 변경됩니다."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"배터리 <xliff:g id="NUMBER">%d</xliff:g>퍼센트"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"시스템 설정"</string>
@@ -321,8 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"전화 기능을 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="voice_hint" msgid="8939888732119726665">"음성 지원을 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="camera_hint" msgid="7939688436797157483">"카메라를 사용하려면 아이콘에서 스와이프하세요."</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"전체 무음입니다. 이렇게 하면 스크린 리더도 무음으로 설정됩니다."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"모두 차단"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"중요 알림만"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"알람만 수신"</string>
@@ -332,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"사용자 전환"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"사용자 전환, 현재 사용자 <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"현재 사용자: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"프로필 표시"</string>
     <string name="user_add_user" msgid="5110251524486079492">"사용자 추가"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"새 사용자"</string>
@@ -348,8 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"다시 시작"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"예, 계속합니다."</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"게스트 사용자"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"앱 및 데이터를 삭제하려면 게스트 사용자를 삭제하세요."</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"게스트 삭제"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"새 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"거부"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"직장 프로필을 사용하고 있습니다."</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"시스템 UI 튜너"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"내장형 배터리 잔량 비율 표시"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
@@ -426,6 +421,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"일시: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"빠른 설정하기, <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"핫스팟"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"직장 프로필"</string>
 </resources>

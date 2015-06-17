@@ -320,8 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Pasatu hatza ikonotik, telefonoa irekitzeko"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Pasatu hatza ikonotik, ahots-laguntza irekitzeko"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Pasatu hatza ikonotik, kamera irekitzeko"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Isiltasun osoa. Pantaila-irakurgailuak ere isilaraziko dira."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Isiltasun osoa"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Lehentasunezkoak"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmak soilik"</string>
@@ -331,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatu arte)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Aldatu erabiltzailez. <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> da saioa hasita duena."</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Uneko erabiltzailea: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Erakutsi profila"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Gehitu erabiltzailea"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Erabiltzaile berria"</string>
@@ -347,8 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Hasi berriro"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Bai, jarraitu"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Erabiltzaile gonbidatua"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Aplikazioak eta datuak ezabatzeko, kendu gonbidatua"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"KENDU GONBIDATUA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Beste erabiltzaile bat gehitu?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Erabiltzaile bat gehitzen duzunean, horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
@@ -376,7 +373,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN konexioa"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da laneko profilaren kudeatzailea, eta Profila <xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora konektatuta dago. Aplikazio horrek sarean egiten dituzun laneko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da laneko profilaren kudeatzailea, eta profila <xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora konektatuta dago. Aplikazio horrek sarean egiten dituzun laneko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da laneko profilaren kudeatzailea, eta profila <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> aplikaziora konektatuta dago. Aplikazio horrek sarean egiten dituzun laneko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nHorrez gain, sarean egiten dituzun jarduera pertsonalak kontrola ditzakeen <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> aplikaziora konektatuta zaude."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da gailuaren kudeatzailea.\n\nAdministratzaileak ezarpenak, enpresako sarbidea, aplikazioak, gailuarekin lotutako datuak eta gailuaren kokapenari buruzko informazioa kontrola eta kudea ditzake.\n\n<xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Gailua blokeatuta egongo da eskuz desblokeatu arte"</string>

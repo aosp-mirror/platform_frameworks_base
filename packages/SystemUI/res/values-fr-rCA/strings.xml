@@ -322,8 +322,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Balayez à partir de l\'icône pour accéder au téléphone"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Balayez à partir de l\'icône pour accéder à l\'assist. vocale"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Balayez à partir de l\'icône pour accéder à l\'appareil photo"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Aucune interruption"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priorités seulement"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes uniquement"</string>
@@ -333,8 +332,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charge en cours... (chargée à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Changer d\'utilisateur (utilisateur actuel <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Afficher le profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Ajouter un utilisateur"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nouvel utilisateur"</string>
@@ -349,8 +347,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Recommencer"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Oui, continuer"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Utilisateur invité"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Pour supprimer des applications et des données, retirez l\'utilisateur invité"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"RETIRER L\'INVITÉ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ajouter un utilisateur?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
@@ -378,7 +375,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"RPV"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Vous êtes connecté à <xliff:g id="APPLICATION">%1$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les courriels, les applications et les sites Web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Vous êtes connecté à <xliff:g id="APPLICATION">%1$s</xliff:g>. Cette application peut contrôler votre activité personnelle sur le réseau, y compris les courriels, les applications et les sites Web."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Il est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les courriels, les applications et les sites Web.\n\nPour en savoir plus, communiquer avec votre administrateur."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Il est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les courriels, les applications et les sites Web.\n\nPour en savoir plus, communiquez avec votre administrateur."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Il est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les courriels, les applications et les sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>. Cette application peut contrôler votre activité personnelle sur le réseau."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus de l\'entreprise, les applications, les données associées à cet appareil et ses données de localisation.\n\nVous êtes connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité réseau, y compris les courriels, les applications et les  sites Web.\n\nPour en savoir plus, communiquez avec votre administrateur."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement"</string>

@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема СИМ картичка."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Се поврзува со Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим на работа во авион."</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема СИМ-картичка"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Променување на мрежата на операторот."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -323,8 +322,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Повлечете од иконата за телефонот"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Повлечете од иконата за гласовна помош"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Повлечете од иконата за камерата"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Целосна тишина. Ова ќе ги замолчи и читачите на екран."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Целосна тишина"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Само приоритетно"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Само аларми"</string>
@@ -334,8 +332,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Се полни (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> додека не се наполни)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Промени го корисникот"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Промени го корисникот, тековен корисник <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Тековен корисник <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Прикажи го профилот"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Додај корисник"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Нов корисник"</string>
@@ -350,8 +347,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Почни одново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Да, продолжи"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Корисник-гостин"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"За да избришете апликации и податоци, отстранете го гостинот"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ОТСТРАНИ ГОСТИН"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Да се додаде нов корисник?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Кога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници."</string>
@@ -406,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Одбиј"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> е дијалог за јачина на звук"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Допрете за да го вратите оригиналот."</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Го користите работниот профил"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Дотерување на кориснички интерфејс"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Прикажи вграден процент на батеријата"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Прикажи процент на ниво на батеријата во внатрешноста на иконата со статусна лента кога не се полни"</string>
@@ -428,6 +423,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Брзи поставки, <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка на пристап"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Работен профил"</string>
 </resources>
