@@ -43,7 +43,7 @@ public class ActivityOptions {
      * A long in the extras delivered by {@link #requestUsageTimeReport} that contains
      * the total time (in ms) the user spent in the app flow.
      */
-    public static final String EXTRA_USAGE_TIME_REPORT = "android.usage_time";
+    public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
 
     /**
      * A Bundle in the extras delivered by {@link #requestUsageTimeReport} that contains
@@ -56,67 +56,67 @@ public class ActivityOptions {
      * The package name that created the options.
      * @hide
      */
-    public static final String KEY_PACKAGE_NAME = "android:packageName";
+    public static final String KEY_PACKAGE_NAME = "android:activity.packageName";
 
     /**
      * Type of animation that arguments specify.
      * @hide
      */
-    public static final String KEY_ANIM_TYPE = "android:animType";
+    public static final String KEY_ANIM_TYPE = "android:activity.animType";
 
     /**
      * Custom enter animation resource ID.
      * @hide
      */
-    public static final String KEY_ANIM_ENTER_RES_ID = "android:animEnterRes";
+    public static final String KEY_ANIM_ENTER_RES_ID = "android:activity.animEnterRes";
 
     /**
      * Custom exit animation resource ID.
      * @hide
      */
-    public static final String KEY_ANIM_EXIT_RES_ID = "android:animExitRes";
+    public static final String KEY_ANIM_EXIT_RES_ID = "android:activity.animExitRes";
 
     /**
      * Custom in-place animation resource ID.
      * @hide
      */
-    public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:animInPlaceRes";
+    public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:activity.animInPlaceRes";
 
     /**
      * Bitmap for thumbnail animation.
      * @hide
      */
-    public static final String KEY_ANIM_THUMBNAIL = "android:animThumbnail";
+    public static final String KEY_ANIM_THUMBNAIL = "android:activity.animThumbnail";
 
     /**
      * Start X position of thumbnail animation.
      * @hide
      */
-    public static final String KEY_ANIM_START_X = "android:animStartX";
+    public static final String KEY_ANIM_START_X = "android:activity.animStartX";
 
     /**
      * Start Y position of thumbnail animation.
      * @hide
      */
-    public static final String KEY_ANIM_START_Y = "android:animStartY";
+    public static final String KEY_ANIM_START_Y = "android:activity.animStartY";
 
     /**
      * Initial width of the animation.
      * @hide
      */
-    public static final String KEY_ANIM_WIDTH = "android:animWidth";
+    public static final String KEY_ANIM_WIDTH = "android:activity.animWidth";
 
     /**
      * Initial height of the animation.
      * @hide
      */
-    public static final String KEY_ANIM_HEIGHT = "android:animHeight";
+    public static final String KEY_ANIM_HEIGHT = "android:activity.animHeight";
 
     /**
      * Callback for when animation is started.
      * @hide
      */
-    public static final String KEY_ANIM_START_LISTENER = "android:animStartListener";
+    public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
      * For Activity transitions, the calling Activity's TransitionListener used to
@@ -124,15 +124,18 @@ public class ActivityOptions {
      * complete.
      */
     private static final String KEY_TRANSITION_COMPLETE_LISTENER
-            = "android:transitionCompleteListener";
+            = "android:activity.transitionCompleteListener";
 
-    private static final String KEY_TRANSITION_IS_RETURNING = "android:transitionIsReturning";
-    private static final String KEY_TRANSITION_SHARED_ELEMENTS = "android:sharedElementNames";
-    private static final String KEY_RESULT_DATA = "android:resultData";
-    private static final String KEY_RESULT_CODE = "android:resultCode";
-    private static final String KEY_EXIT_COORDINATOR_INDEX = "android:exitCoordinatorIndex";
+    private static final String KEY_TRANSITION_IS_RETURNING
+            = "android:activity.transitionIsReturning";
+    private static final String KEY_TRANSITION_SHARED_ELEMENTS
+            = "android:activity.sharedElementNames";
+    private static final String KEY_RESULT_DATA = "android:activity.resultData";
+    private static final String KEY_RESULT_CODE = "android:activity.resultCode";
+    private static final String KEY_EXIT_COORDINATOR_INDEX
+            = "android:activity.exitCoordinatorIndex";
 
-    private static final String KEY_USAGE_TIME_REPORT = "android:usageTimeReport";
+    private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
 
     /** @hide */
     public static final int ANIM_NONE = 0;

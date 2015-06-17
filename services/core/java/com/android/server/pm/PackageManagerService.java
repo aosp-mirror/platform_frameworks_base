@@ -8808,7 +8808,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         am.broadcastIntent(null, intent, null, finishedReceiver,
                                 0, null, null, null, android.app.AppOpsManager.OP_NONE,
-                                finishedReceiver != null, false, id);
+                                null, finishedReceiver != null, false, id);
                     }
                 } catch (RemoteException ex) {
                 }
@@ -8982,7 +8982,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                         .setPackage(packageName);
                 am.broadcastIntent(null, bcIntent, null, null, 0, null, null, null,
-                        android.app.AppOpsManager.OP_NONE, false, false, userId);
+                        android.app.AppOpsManager.OP_NONE, null, false, false, userId);
             }
         } catch (RemoteException e) {
             // shouldn't happen

@@ -981,7 +981,7 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private class BinderService extends IUsageStatsManager.Stub {
+    private final class BinderService extends IUsageStatsManager.Stub {
 
         private boolean hasPermission(String callingPackage) {
             final int callingUid = Binder.getCallingUid();
@@ -1121,7 +1121,7 @@ public class UsageStatsService extends SystemService implements
      * ActivityManagerService will call these methods holding the 'am' lock, which means we
      * shouldn't be doing any IO work or other long running tasks in these methods.
      */
-    private class LocalService extends UsageStatsManagerInternal {
+    private final class LocalService extends UsageStatsManagerInternal {
 
         @Override
         public void reportEvent(ComponentName component, int userId, int eventType) {
