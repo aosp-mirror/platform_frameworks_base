@@ -25,13 +25,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
-import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,21 +47,45 @@ import java.util.Map;
  * {@hide}
  */
 public class NotificationUsageStats {
-    // WARNING: Aggregated stats can grow unboundedly with pkg+id+tag.
-    // Don't enable on production builds.
-    private static final boolean ENABLE_AGGREGATED_IN_MEMORY_STATS = false;
-    private static final boolean ENABLE_SQLITE_LOG = true;
+    private static final String TAG = "NotificationUsageStats";
 
+    private static final boolean ENABLE_AGGREGATED_IN_MEMORY_STATS = true;
+    private static final boolean ENABLE_SQLITE_LOG = true;
     private static final AggregatedStats[] EMPTY_AGGREGATED_STATS = new AggregatedStats[0];
+    private static final String DEVICE_GLOBAL_STATS = "__global"; // packages start with letters
+    private static final int MSG_EMIT = 1;
+
+    private static final boolean DEBUG = false;
+    public static final int TEN_SECONDS = 1000 * 10;
+    public static final int ONE_HOUR = 1000 * 60 * 60;
+    private static final long EMIT_PERIOD = DEBUG ? TEN_SECONDS : ONE_HOUR;
 
     // Guarded by synchronized(this).
-    private final Map<String, AggregatedStats> mStats = new HashMap<String, AggregatedStats>();
+    private final Map<String, AggregatedStats> mStats = new HashMap<>();
+    private final ArrayDeque<AggregatedStats[]> mStatsArrays = new ArrayDeque<>();
     private final SQLiteLog mSQLiteLog;
     private final Context mContext;
+    private final Handler mHandler;
+    private long mLastEmitTime;
 
     public NotificationUsageStats(Context context) {
         mContext = context;
+        mLastEmitTime = SystemClock.elapsedRealtime();
         mSQLiteLog = ENABLE_SQLITE_LOG ? new SQLiteLog(context) : null;
+        mHandler = new Handler(mContext.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_EMIT:
+                        emit();
+                        break;
+                    default:
+                        Log.wtf(TAG, "Unknown message type: " + msg.what);
+                        break;
+                }
+            }
+        };
+        mHandler.sendEmptyMessageDelayed(MSG_EMIT, EMIT_PERIOD);
     }
 
     /**
@@ -70,9 +94,12 @@ public class NotificationUsageStats {
     public synchronized void registerPostedByApp(NotificationRecord notification) {
         notification.stats = new SingleNotificationStats();
         notification.stats.posttimeElapsedMs = SystemClock.elapsedRealtime();
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
+
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numPostedByApp++;
         }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.logPosted(notification);
         }
@@ -83,9 +110,11 @@ public class NotificationUsageStats {
      */
     public void registerUpdatedByApp(NotificationRecord notification, NotificationRecord old) {
         notification.stats = old.stats;
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numUpdatedByApp++;
         }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
     }
 
     /**
@@ -93,10 +122,11 @@ public class NotificationUsageStats {
      */
     public synchronized void registerRemovedByApp(NotificationRecord notification) {
         notification.stats.onRemoved();
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numRemovedByApp++;
-            stats.collect(notification.stats);
         }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.logRemoved(notification);
         }
@@ -109,10 +139,6 @@ public class NotificationUsageStats {
         MetricsLogger.histogram(mContext, "note_dismiss_longevity",
                 (int) (System.currentTimeMillis() - notification.getRankingTimeMs()) / (60 * 1000));
         notification.stats.onDismiss();
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
-            stats.numDismissedByUser++;
-            stats.collect(notification.stats);
-        }
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.logDismissed(notification);
         }
@@ -125,36 +151,36 @@ public class NotificationUsageStats {
         MetricsLogger.histogram(mContext, "note_click_longevity",
                 (int) (System.currentTimeMillis() - notification.getRankingTimeMs()) / (60 * 1000));
         notification.stats.onClick();
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
-            stats.numClickedByUser++;
-        }
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.logClicked(notification);
         }
     }
 
-    /**
-     * Called when the notification is canceled because the user clicked it.
-     *
-     * <p>Called after {@link #registerClickedByUser(NotificationRecord)}.</p>
-     */
-    public synchronized void registerCancelDueToClick(NotificationRecord notification) {
-        notification.stats.onCancel();
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
-            stats.collect(notification.stats);
+    public synchronized void registerPeopleAffinity(NotificationRecord notification, boolean valid,
+            boolean starred, boolean cached) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            if (valid) {
+                stats.numWithValidPeople++;
+            }
+            if (starred) {
+                stats.numWithStaredPeople++;
+            }
+            if (cached) {
+                stats.numPeopleCacheHit++;
+            } else {
+                stats.numPeopleCacheMiss++;
+            }
         }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
     }
 
-    /**
-     * Called when the notification is canceled due to unknown reasons.
-     *
-     * <p>Called for notifications of apps being uninstalled, for example.</p>
-     */
-    public synchronized void registerCancelUnknown(NotificationRecord notification) {
-        notification.stats.onCancel();
-        for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
-            stats.collect(notification.stats);
+    public synchronized void registerBlocked(NotificationRecord notification) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numBlocked++;
         }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
     }
 
     // Locked by this.
@@ -163,24 +189,28 @@ public class NotificationUsageStats {
             return EMPTY_AGGREGATED_STATS;
         }
 
-        StatusBarNotification n = record.sbn;
+        // TODO: expand to package-level counts in the future.
+        AggregatedStats[] array = mStatsArrays.poll();
+        if (array == null) {
+            array = new AggregatedStats[1];
+        }
+        array[0] = getOrCreateAggregatedStatsLocked(DEVICE_GLOBAL_STATS);
+        return array;
+    }
 
-        String user = String.valueOf(n.getUserId());
-        String userPackage = user + ":" + n.getPackageName();
-
-        // TODO: Use pool of arrays.
-        return new AggregatedStats[] {
-                getOrCreateAggregatedStatsLocked(user),
-                getOrCreateAggregatedStatsLocked(userPackage),
-                getOrCreateAggregatedStatsLocked(n.getKey()),
-        };
+    // Locked by this.
+    private void releaseAggregatedStatsLocked(AggregatedStats[] array) {
+        for(int i = 0; i < array.length; i++) {
+            array[i] = null;
+        }
+        mStatsArrays.offer(array);
     }
 
     // Locked by this.
     private AggregatedStats getOrCreateAggregatedStatsLocked(String key) {
         AggregatedStats result = mStats.get(key);
         if (result == null) {
-            result = new AggregatedStats(key);
+            result = new AggregatedStats(mContext, key);
             mStats.put(key, result);
         }
         return result;
@@ -193,64 +223,74 @@ public class NotificationUsageStats {
                     continue;
                 as.dump(pw, indent);
             }
+            pw.println(indent + "mStatsArrays.size(): " + mStatsArrays.size());
         }
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.dump(pw, indent, filter);
         }
     }
 
+    public synchronized void emit() {
+        // TODO: expand to package-level counts in the future.
+        AggregatedStats stats = getOrCreateAggregatedStatsLocked(DEVICE_GLOBAL_STATS);
+        stats.emit();
+        mLastEmitTime = SystemClock.elapsedRealtime();
+        mHandler.removeMessages(MSG_EMIT);
+        mHandler.sendEmptyMessageDelayed(MSG_EMIT, EMIT_PERIOD);
+    }
+
     /**
      * Aggregated notification stats.
      */
     private static class AggregatedStats {
+
+        private final Context mContext;
         public final String key;
 
         // ---- Updated as the respective events occur.
         public int numPostedByApp;
         public int numUpdatedByApp;
         public int numRemovedByApp;
-        public int numClickedByUser;
-        public int numDismissedByUser;
+        public int numPeopleCacheHit;
+        public int numPeopleCacheMiss;;
+        public int numWithStaredPeople;
+        public int numWithValidPeople;
+        public int numBlocked;
 
-        // ----  Updated when a notification is canceled.
-        public final Aggregate posttimeMs = new Aggregate();
-        public final Aggregate posttimeToDismissMs = new Aggregate();
-        public final Aggregate posttimeToFirstClickMs = new Aggregate();
-        public final Aggregate airtimeCount = new Aggregate();
-        public final Aggregate airtimeMs = new Aggregate();
-        public final Aggregate posttimeToFirstAirtimeMs = new Aggregate();
-        public final Aggregate userExpansionCount = new Aggregate();
-        public final Aggregate airtimeExpandedMs = new Aggregate();
-        public final Aggregate posttimeToFirstVisibleExpansionMs = new Aggregate();
+        private AggregatedStats mPrevious;
 
-        public AggregatedStats(String key) {
+        public AggregatedStats(Context context, String key) {
             this.key = key;
+            mContext = context;
         }
 
-        public void collect(SingleNotificationStats singleNotificationStats) {
-            posttimeMs.addSample(
-                    SystemClock.elapsedRealtime() - singleNotificationStats.posttimeElapsedMs);
-            if (singleNotificationStats.posttimeToDismissMs >= 0) {
-                posttimeToDismissMs.addSample(singleNotificationStats.posttimeToDismissMs);
+        public void emit() {
+            if (mPrevious == null) {
+                mPrevious = new AggregatedStats(null, key);
             }
-            if (singleNotificationStats.posttimeToFirstClickMs >= 0) {
-                posttimeToFirstClickMs.addSample(singleNotificationStats.posttimeToFirstClickMs);
-            }
-            airtimeCount.addSample(singleNotificationStats.airtimeCount);
-            if (singleNotificationStats.airtimeMs >= 0) {
-                airtimeMs.addSample(singleNotificationStats.airtimeMs);
-            }
-            if (singleNotificationStats.posttimeToFirstAirtimeMs >= 0) {
-                posttimeToFirstAirtimeMs.addSample(
-                        singleNotificationStats.posttimeToFirstAirtimeMs);
-            }
-            if (singleNotificationStats.posttimeToFirstVisibleExpansionMs >= 0) {
-                posttimeToFirstVisibleExpansionMs.addSample(
-                        singleNotificationStats.posttimeToFirstVisibleExpansionMs);
-            }
-            userExpansionCount.addSample(singleNotificationStats.userExpansionCount);
-            if (singleNotificationStats.airtimeExpandedMs >= 0) {
-                airtimeExpandedMs.addSample(singleNotificationStats.airtimeExpandedMs);
+
+            maybeCount("note_post", (numPostedByApp - mPrevious.numPostedByApp));
+            maybeCount("note_update", (numUpdatedByApp - mPrevious.numUpdatedByApp));
+            maybeCount("note_remove", (numRemovedByApp - mPrevious.numRemovedByApp));
+            maybeCount("note_with_people", (numWithValidPeople - mPrevious.numWithValidPeople));
+            maybeCount("note_with_stars", (numWithStaredPeople - mPrevious.numWithStaredPeople));
+            maybeCount("people_cache_hit", (numPeopleCacheHit - mPrevious.numPeopleCacheHit));
+            maybeCount("people_cache_miss", (numPeopleCacheMiss - mPrevious.numPeopleCacheMiss));
+            maybeCount("note_blocked", (numBlocked - mPrevious.numBlocked));
+
+            mPrevious.numPostedByApp = numPostedByApp;
+            mPrevious.numUpdatedByApp = numUpdatedByApp;
+            mPrevious.numRemovedByApp = numRemovedByApp;
+            mPrevious.numPeopleCacheHit = numPeopleCacheHit;
+            mPrevious.numPeopleCacheMiss = numPeopleCacheMiss;
+            mPrevious.numWithStaredPeople = numWithStaredPeople;
+            mPrevious.numWithValidPeople = numWithValidPeople;
+            mPrevious.numBlocked = numBlocked;
+        }
+
+        void maybeCount(String name, int value) {
+            if (value > 0) {
+                MetricsLogger.count(mContext, name, value);
             }
         }
 
@@ -269,17 +309,11 @@ public class NotificationUsageStats {
                     indent + "  numPostedByApp=" + numPostedByApp + ",\n" +
                     indent + "  numUpdatedByApp=" + numUpdatedByApp + ",\n" +
                     indent + "  numRemovedByApp=" + numRemovedByApp + ",\n" +
-                    indent + "  numClickedByUser=" + numClickedByUser + ",\n" +
-                    indent + "  numDismissedByUser=" + numDismissedByUser + ",\n" +
-                    indent + "  posttimeMs=" + posttimeMs + ",\n" +
-                    indent + "  posttimeToDismissMs=" + posttimeToDismissMs + ",\n" +
-                    indent + "  posttimeToFirstClickMs=" + posttimeToFirstClickMs + ",\n" +
-                    indent + "  airtimeCount=" + airtimeCount + ",\n" +
-                    indent + "  airtimeMs=" + airtimeMs + ",\n" +
-                    indent + "  posttimeToFirstAirtimeMs=" + posttimeToFirstAirtimeMs + ",\n" +
-                    indent + "  userExpansionCount=" + userExpansionCount + ",\n" +
-                    indent + "  airtimeExpandedMs=" + airtimeExpandedMs + ",\n" +
-                    indent + "  posttimeToFVEMs=" + posttimeToFirstVisibleExpansionMs + ",\n" +
+                    indent + "  numPeopleCacheHit=" + numPeopleCacheHit + ",\n" +
+                    indent + "  numWithStaredPeople=" + numWithStaredPeople + ",\n" +
+                    indent + "  numWithValidPeople=" + numWithValidPeople + ",\n" +
+                    indent + "  numPeopleCacheMiss=" + numPeopleCacheMiss + ",\n" +
+                    indent + "  numBlocked=" + numBlocked + ",\n" +
                     indent + "}";
         }
     }
