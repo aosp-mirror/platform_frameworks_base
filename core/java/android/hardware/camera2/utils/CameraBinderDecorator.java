@@ -138,8 +138,8 @@ public class CameraBinderDecorator {
          * errors, then add them to the top switch statement
          */
         if (errorFlag < 0) {
-            throw new UnsupportedOperationException(String.format("Unknown error %d",
-                    errorFlag));
+            throw new CameraRuntimeException(CAMERA_ERROR,
+                    String.format("Unknown camera device error %d", errorFlag));
         }
     }
 
