@@ -345,7 +345,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Сүрөтчөнү серпип үн жардамчысына өтүңүз"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү серпип камерага өтүңүз"</string>
-    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук тынчтык. Бул экрандагыны окугучтарды да тынчтандырат."</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Артыкчылык гана"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкучтар гана"</string>

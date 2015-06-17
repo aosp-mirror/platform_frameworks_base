@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ไม่มีซิมการ์ด"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"ไม่มีซิมการ์ด"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"การเปลี่ยนเครือข่ายผู้ให้บริการ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"แบตเตอรี่ <xliff:g id="NUMBER">%d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"การตั้งค่าระบบ"</string>
@@ -401,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ปฏิเสธ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> เป็นช่องโต้ตอบระดับเสียง"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"แตะเพื่อคืนค่าดั้งเดิม"</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"คุณกำลังใช้โปรไฟล์งานของคุณ"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"ตัวปรับ UI ระบบ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"แสดงเปอร์เซ็นต์ของแบตเตอรี่ในตัว"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"แสดงเปอร์เซ็นต์ของระดับแบตเตอรี่ภายในไอคอนแถบสถานะเมื่อไม่มีการชาร์จ"</string>
@@ -423,6 +421,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"ในวันที่ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"การตั้งค่าด่วน <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ฮอตสปอต"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"โปรไฟล์งาน"</string>
 </resources>

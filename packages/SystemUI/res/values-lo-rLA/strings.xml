@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ບໍ່ມີຊິມ."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ການປ່ອຍສັນຍານ Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ໂໝດໃນຍົນ."</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"ບໍ່ມີແຜ່ນ SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ການ​ປ່ຽນ​ແປງ​ເຄືອ​ຂ່າຍ​ບໍ​ລ​ິ​ສັດ​ເຄືອ​ຂ່າຍ​ມື​ຖື."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ແບັດເຕີຣີ <xliff:g id="NUMBER">%d</xliff:g> ເປີເຊັນ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ການຕັ້ງຄ່າລະບົບ."</string>
@@ -321,8 +320,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"ປັດ​ຈາກ​ໄອ​ຄອນ​ສຳ​ລັບ​ໂທ​ລະ​ສັບ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"ປັດ​ຈາກ​ໄອ​ຄອນ​ສຳ​ລັບ​ການ​ຊ່ວຍ​ທາງ​ສຽງ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ປັດ​ຈາກ​ໄອ​ຄອນ​ສຳ​ລັບ​ກ້ອງ​ຖ່າຍ​ຮູບ"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"ງຽບທັງໝົດ. ນີ້ຈະຍັງປິດສຽງເຄື່ອງອ່ານໜ້າຈໍນໍາອີກ."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"ຄວາມງຽບ​ທັງ​ໝົດ"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ບຸ​ລິ​ມະ​ສິດເທົ່າ​ນັ້ນ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"ໂມງ​ປຸກ​ເທົ່າ​ນັ້ນ"</string>
@@ -332,8 +330,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ສະ​ລັບ​ຜູ່ໃຊ້"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ປ່ຽນຜູ່ໃຊ້, ຜູ່ໃຊ້ປະຈຸບັນ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ຜູ້ໃຊ້ປະຈຸບັນ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"​ສະ​ແດງ​ໂປຣ​ໄຟລ໌"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ເພີ່ມຜູ່ໃຊ້"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ຜູ່ໃຊ້ໃໝ່"</string>
@@ -348,8 +345,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ເລີ່ມຕົ້ນໃຫມ່"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"​ຕົກ​ລົງ, ດຳ​ເນີນ​ການ​ຕໍ່"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"ຜູ້​ໃຊ້​ແຂກ"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"ເພື່ອລຶບແອັບ ແລະຂໍ້ມູນ, ໃຫ້ເອົາຜູ້ໃຊ້ທີ່ເປັນແຂກອອກ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ເອົາ​ແຂກອອກ​"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່​ບໍ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່, ຜູ່​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ່​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯ​ຂອງ​ຜູ່​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
@@ -404,8 +400,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ປະຕິເສດ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ສໍາ​ຜັດ​ເພື່ອກູ້​ຄືນ​ຕົ້ນ​ສະ​ບັບ​."</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ທ່ານກຳລັງໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"ຕົວ​ປັບ UI ລະ​ບົບ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ສະ​ແດງ​ເປີ​ເຊັນ​ແບັດ​ເຕີ​ຣີ​ທີ່​ຕິດ​ມາ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ສະ​ແດງ​ເປີ​ເຊັນ​ລະ​ດັບ​ແບັດ​ເຕີ​ຣີ​ຢູ່​ດ້ານ​ໃນ​ໄອ​ຄອນ​ແຖບ​ສະ​ຖາ​ນະ ເມື່ອ​ບໍ່​ສາກ​ຢູ່"</string>
@@ -426,6 +421,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"ວັນ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ການຕັ້ງຄ່າດ່ວນ, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"​ຮັອດ​ສະ​ປອດ"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
 </resources>

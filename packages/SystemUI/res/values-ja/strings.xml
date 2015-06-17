@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIMがありません。"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothテザリング。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"機内モード。"</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIMカードが挿入されていません。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"携帯通信会社のネットワークを変更します。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -323,8 +322,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"右にスワイプして通話"</string>
     <string name="voice_hint" msgid="8939888732119726665">"アイコンからスワイプして音声アシストを起動"</string>
     <string name="camera_hint" msgid="7939688436797157483">"左にスワイプしてカメラを起動"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"サイレント。スクリーンリーダーも消音されます。"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"サイレント"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"優先する通知のみ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"アラームのみ"</string>
@@ -334,8 +332,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中（フル充電まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ユーザーを切り替える、現在のユーザーは<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"現在のユーザー: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"プロフィールを表示"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ユーザーを追加"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"新しいユーザー"</string>
@@ -350,8 +347,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"最初から開始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"続行"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"ゲストユーザー"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"アプリとデータを削除するには、ゲストユーザーを削除します"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ゲストを削除"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新しいユーザーを追加しますか？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。\n\nすべてのユーザーは他のユーザーに代わってアプリを更新できます。"</string>
@@ -406,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"許可しない"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>を音量ダイアログとして使用"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"タップすると元の音量ダイアログが復元されます。"</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"仕事用プロファイルを使用しています"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"内蔵電池の残量の割合を表示する"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
@@ -428,6 +423,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"クイック設定、<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"アクセスポイント"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"仕事用プロファイル"</string>
 </resources>
