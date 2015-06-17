@@ -35,6 +35,7 @@
 #include <utils/FileMap.h>
 #include <utils/threads.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -68,9 +69,9 @@ typedef void* ZipEntryRO;
 class ZipFileRO {
 public:
     /* Zip compression methods we support */
-    enum {
-        kCompressStored     = 0,        // no compression
-        kCompressDeflated   = 8,        // standard deflate
+    enum : uint16_t {
+        kCompressStored = 0,
+        kCompressDeflated = 8
     };
 
     /*
@@ -108,10 +109,10 @@ public:
 
     /*
      * Copy the filename into the supplied buffer.  Returns 0 on success,
-     * -1 if "entry" is invalid, or the filename length if it didn't fit.  The
+     * -1 if "entry" is invalid, or the filename length if it didn't fit. The
      * length, and the returned string, include the null-termination.
      */
-    int getEntryFileName(ZipEntryRO entry, char* buffer, int bufLen) const;
+    int getEntryFileName(ZipEntryRO entry, char* buffer, size_t bufLen) const;
 
     /*
      * Get the vital stats for an entry.  Pass in NULL pointers for anything
@@ -122,8 +123,9 @@ public:
      * Returns "false" if "entry" is bogus or if the data in the Zip file
      * appears to be bad.
      */
-    bool getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
-        size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32) const;
+    bool getEntryInfo(ZipEntryRO entry, uint16_t* pMethod, uint32_t* pUncompLen,
+        uint32_t* pCompLen, off64_t* pOffset, uint32_t* pModWhen,
+        uint32_t* pCrc32) const;
 
     /*
      * Create a new FileMap object that maps a subset of the archive.  For
