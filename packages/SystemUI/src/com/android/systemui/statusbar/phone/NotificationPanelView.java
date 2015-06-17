@@ -1759,6 +1759,7 @@ public class NotificationPanelView extends PanelView implements
         mIsExpansionFromHeadsUp = false;
         mNotificationStackScroller.setTrackingHeadsUp(false);
         mExpandingFromHeadsUp = false;
+        setPanelScrimMinFraction(0.0f);
     }
 
     private void setListening(boolean listening) {
@@ -2309,7 +2310,7 @@ public class NotificationPanelView extends PanelView implements
         }
         x = Math.min(rightMost, Math.max(leftMost, x));
         setVerticalPanelTranslation(x -
-                (mNotificationStackScroller.getLeft() + mNotificationStackScroller.getWidth()/2));
+                (mNotificationStackScroller.getLeft() + mNotificationStackScroller.getWidth() / 2));
      }
 
     private void resetVerticalPanelPosition() {
@@ -2325,5 +2326,9 @@ public class NotificationPanelView extends PanelView implements
     private void updateStackHeight(float stackHeight) {
         mNotificationStackScroller.setStackHeight(stackHeight);
         updateKeyguardBottomAreaAlpha();
+    }
+
+    public void setPanelScrimMinFraction(float minFraction) {
+        mBar.panelScrimMinFractionChanged(minFraction);
     }
 }
