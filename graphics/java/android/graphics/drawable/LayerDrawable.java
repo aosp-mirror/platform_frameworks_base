@@ -1537,8 +1537,23 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
+            // Take the resolved layout direction into account. If start / end
+            // padding are defined, they will be resolved (hence overriding) to
+            // left / right or right / left depending on the resolved layout
+            // direction. If start / end padding are not defined, use the
+            // left / right ones.
+            final int insetL, insetR;
+            final int layoutDirection = getLayoutDirection();
+            if (layoutDirection == LayoutDirection.RTL) {
+                insetL = r.mInsetE == UNDEFINED_INSET ? r.mInsetL : r.mInsetE;
+                insetR = r.mInsetS == UNDEFINED_INSET ? r.mInsetR : r.mInsetS;
+            } else {
+                insetL = r.mInsetS == UNDEFINED_INSET ? r.mInsetL : r.mInsetS;
+                insetR = r.mInsetE == UNDEFINED_INSET ? r.mInsetR : r.mInsetE;
+            }
+
             final int minWidth = r.mWidth < 0 ? r.mDrawable.getIntrinsicWidth() : r.mWidth;
-            final int w = minWidth + r.mInsetL + r.mInsetR + padL + padR;
+            final int w = minWidth + insetL + insetR + padL + padR;
             if (w > width) {
                 width = w;
             }
