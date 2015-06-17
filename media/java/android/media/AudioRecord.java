@@ -527,10 +527,11 @@ public class AudioRecord
         }
 
         /**
-         * @return a new {@link AudioRecord} instance initialized with all the parameters set
-         *     on this <code>Builder</code>
+         * @return a new {@link AudioRecord} instance successfully initialized with all
+         *     the parameters set on this <code>Builder</code>.
          * @throws UnsupportedOperationException if the parameters set on the <code>Builder</code>
-         *     were incompatible, or if they are not supported by the device.
+         *     were incompatible, or if they are not supported by the device,
+         *     or if the device was not available.
          */
         public AudioRecord build() throws UnsupportedOperationException {
             if (mFormat == null) {
@@ -564,7 +565,13 @@ public class AudioRecord
                     mBufferSizeInBytes = mFormat.getChannelCount()
                             * mFormat.getBytesPerSample(mFormat.getEncoding());
                 }
-                return new AudioRecord(mAttributes, mFormat, mBufferSizeInBytes, mSessionId);
+                final AudioRecord record = new AudioRecord(
+                        mAttributes, mFormat, mBufferSizeInBytes, mSessionId);
+                if (record.getState() == STATE_UNINITIALIZED) {
+                    // release is not necessary
+                    throw new UnsupportedOperationException("Cannot create AudioRecord");
+                }
+                return record;
             } catch (IllegalArgumentException e) {
                 throw new UnsupportedOperationException(e.getMessage());
             }
