@@ -2112,15 +2112,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log(nai.name() + " got DISCONNECTED, was satisfying " + nai.networkRequests.size());
             }
             // A network agent has disconnected.
-            if (nai.created) {
-                // Tell netd to clean up the configuration for this network
-                // (routing rules, DNS, etc).
-                try {
-                    mNetd.removeNetwork(nai.network.netId);
-                } catch (Exception e) {
-                    loge("Exception removing network: " + e);
-                }
-            }
             // TODO - if we move the logic to the network agent (have them disconnect
             // because they lost all their requests or because their score isn't good)
             // then they would disconnect organically, report their new state and then
@@ -2139,8 +2130,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
             synchronized (mNetworkForNetId) {
+                // Remove the NetworkAgent, but don't mark the netId as
+                // available until we've told netd to delete it below.
                 mNetworkForNetId.remove(nai.network.netId);
-                mNetIdInUse.delete(nai.network.netId);
             }
             // Since we've lost the network, go through all the requests that
             // it was satisfying and see if any other factory can satisfy them.
@@ -2182,9 +2174,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 rematchNetworkAndRequests(networkToActivate, NascentState.NOT_JUST_VALIDATED,
                         ReapUnvalidatedNetworks.DONT_REAP);
             }
+            if (nai.created) {
+                // Tell netd to clean up the configuration for this network
+                // (routing rules, DNS, etc).
+                // This may be slow as it requires a lot of netd shelling out to ip and
+                // ip[6]tables to flush routes and remove the incoming packet mark rule, so do it
+                // after we've rematched networks with requests which should make a potential
+                // fallback network the default or requested a new network from the
+                // NetworkFactories, so network traffic isn't interrupted for an unnecessarily
+                // long time.
+                try {
+                    mNetd.removeNetwork(nai.network.netId);
+                } catch (Exception e) {
+                    loge("Exception removing network: " + e);
+                }
+            }
+            synchronized (mNetworkForNetId) {
+                mNetIdInUse.delete(nai.network.netId);
+            }
+        } else {
+            NetworkFactoryInfo nfi = mNetworkFactoryInfos.remove(msg.replyTo);
+            if (DBG && nfi != null) log("unregisterNetworkFactory for " + nfi.name);
         }
-        NetworkFactoryInfo nfi = mNetworkFactoryInfos.remove(msg.replyTo);
-        if (DBG && nfi != null) log("unregisterNetworkFactory for " + nfi.name);
     }
 
     // If this method proves to be too slow then we can maintain a separate
