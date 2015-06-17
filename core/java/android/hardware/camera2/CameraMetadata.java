@@ -667,7 +667,7 @@ public abstract class CameraMetadata<TKey> {
      * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.
      * The fps range can be controlled via {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}.</p>
      * <p>In this capability, the camera device will override aeMode, awbMode, and afMode to
-     * ON, ON, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
+     * ON, AUTO, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
      * controls will be overridden to be FAST. Therefore, no manual control of capture
      * and post-processing parameters is possible. All other controls operate the
      * same as when {@link CaptureRequest#CONTROL_MODE android.control.mode} == AUTO. This means that all other
@@ -1666,9 +1666,9 @@ public abstract class CameraMetadata<TKey> {
      * <p>Enabling this disables control.aeMode, control.awbMode and
      * control.afMode controls; the camera device will ignore
      * those settings while USE_SCENE_MODE is active (except for
-     * FACE_PRIORITY scene mode). Other control entries are still
-     * active.  This setting can only be used if scene mode is
-     * supported (i.e. {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}
+     * FACE_PRIORITY scene mode). Other control entries are still active.
+     * This setting can only be used if scene mode is supported (i.e.
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}
      * contain some modes other than DISABLED).</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
@@ -1939,6 +1939,40 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_HDR = 18;
+
+    /**
+     * <p>Same as FACE_PRIORITY scene mode, except that the camera
+     * device will choose higher sensivity values ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
+     * under low light conditions.</p>
+     * <p>The camera device may be tuned to expose the images in a reduced
+     * sensitivity range to produce the best quality images. For example,
+     * if the {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange} gives range of [100, 1600],
+     * the camera device auto-exposure routine tuning process may limit the actual
+     * exposure sensivity range to [100, 1200] to ensure that the noise level isn't
+     * exessive to compromise the image quality. Under this situation, the image under
+     * low light may be under-exposed when the sensor max exposure time (bounded by the
+     * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange} when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is one of the
+     * ON_* modes) and effecitve max sensitivity are reached. This scene mode allows the
+     * camera device auto-exposure routine to increase the sensitivity up to the max
+     * sensitivity specified by {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange} when the scene is too
+     * dark and the max exposure time is reached. The captured images may be noisier
+     * compared with the images captured in normal FACE_PRIORITY mode, therefore, it is
+     * recommended that the application only use this scene mode when it is capable of
+     * reducing the noise level of the captured images.</p>
+     * <p>Unlike the other scene modes, {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}
+     * remain active when FACE_PRIORITY_LOW_LIGHT is set.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_FACE_PRIORITY_LOW_LIGHT = 19;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
