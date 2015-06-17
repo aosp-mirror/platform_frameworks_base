@@ -33,7 +33,7 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
     the top of the ranking order, before it falls back to its natural position. */
     private static final long HANG_TIME_MS = 10000;
 
-    public void initialize(Context ctx) {
+    public void initialize(Context ctx, NotificationUsageStats usageStats) {
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
     }
 

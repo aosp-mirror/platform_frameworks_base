@@ -15,6 +15,9 @@
  */
 package com.android.server.notification;
 
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import android.app.Notification;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -24,6 +27,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import java.util.ArrayList;
 
 public class RankingHelperTest extends AndroidTestCase {
+    @Mock NotificationUsageStats mUsageStats;
 
     private Notification mNotiGroupGSortA;
     private Notification mNotiGroupGSortB;
@@ -39,9 +43,10 @@ public class RankingHelperTest extends AndroidTestCase {
 
     @Override
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         UserHandle user = UserHandle.ALL;
 
-        mHelper = new RankingHelper(getContext(), null, new String[0]);
+        mHelper = new RankingHelper(getContext(), null, mUsageStats, new String[0]);
 
         mNotiGroupGSortA = new Notification.Builder(getContext())
                 .setContentTitle("A")
