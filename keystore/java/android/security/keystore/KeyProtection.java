@@ -35,7 +35,7 @@ import javax.crypto.Mac;
  * Specification of how a key or key pair is secured when imported into the
  * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>. This class
  * specifies parameters such as whether user authentication is required for using the key, what uses
- * the key is authorized for (e.g., only in {@code CTR} mode, or only for signing -- decryption not
+ * the key is authorized for (e.g., only in {@code GCM} mode, or only for signing -- decryption not
  * permitted), the key's and validity start and end dates.
  *
  * <p>To import a key or key pair into the Android KeyStore, create an instance of this class using
@@ -55,8 +55,8 @@ import javax.crypto.Mac;
  *
  * <p><h3>Example: Symmetric Key</h3>
  * The following example illustrates how to import an AES key into the Android KeyStore under alias
- * {@code key1} authorized to be used only for encryption/decryption in CBC mode with PKCS#7
- * padding. The key must export its key material via {@link Key#getEncoded()} in {@code RAW} format.
+ * {@code key1} authorized to be used only for encryption/decryption in GCM mode with no padding.
+ * The key must export its key material via {@link Key#getEncoded()} in {@code RAW} format.
  * <pre> {@code
  * SecretKey key = ...; // AES key
  *
@@ -66,8 +66,8 @@ import javax.crypto.Mac;
  *         "key1",
  *         new KeyStore.SecretKeyEntry(key),
  *         new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
- *                 .setBlockMode(KeyProperties.BLOCK_MODE_CBC)
- *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+ *                 .setBlockMode(KeyProperties.BLOCK_MODE_GCM)
+ *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
  *                 .build());
  * // Key imported, obtain a reference to it.
  * SecretKey keyStoreKey = (SecretKey) keyStore.getKey("key1", null);
@@ -236,7 +236,7 @@ public final class KeyProtection implements ProtectionParameter {
     }
 
     /**
-     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used
+     * Gets the set of block modes (e.g., {@code GCM}, {@code CBC}) with which the key can be used
      * when encrypting/decrypting. Attempts to use the key with any other block modes will be
      * rejected.
      *
@@ -438,11 +438,11 @@ public final class KeyProtection implements ProtectionParameter {
         }
 
         /**
-         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}, {@code ECB}) with which the
-         * key can be used when encrypting/decrypting. Attempts to use the key with any other block
-         * modes will be rejected.
+         * Sets the set of block modes (e.g., {@code GCM}, {@code CBC}) with which the key can be
+         * used when encrypting/decrypting. Attempts to use the key with any other block modes will
+         * be rejected.
          *
-         * <p>This must be specified for encryption/decryption keys.
+         * <p>This must be specified for symmetric encryption/decryption keys.
          *
          * <p>See {@link KeyProperties}.{@code BLOCK_MODE} constants.
          */
@@ -467,8 +467,8 @@ public final class KeyProtection implements ProtectionParameter {
          * <ul>
          * <li>transformation which do not offer {@code IND-CPA}, such as symmetric ciphers using
          * {@code ECB} mode or RSA encryption without padding, are prohibited;</li>
-         * <li>in transformations which use an IV, such as symmetric ciphers in {@code CBC},
-         * {@code CTR}, and {@code GCM} block modes, caller-provided IVs are rejected when
+         * <li>in transformations which use an IV, such as symmetric ciphers in {@code GCM},
+         * {@code CBC}, and {@code CTR} block modes, caller-provided IVs are rejected when
          * encrypting, to ensure that only random IVs are used.</li>
          *
          * <p>Before disabling this requirement, consider the following approaches instead:
