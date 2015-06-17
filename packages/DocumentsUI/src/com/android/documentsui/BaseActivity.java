@@ -98,6 +98,22 @@ abstract class BaseActivity extends Activity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        final State state = getDisplayState();
+        final RootInfo root = getCurrentRoot();
+
+        // If we're browsing a specific root, and that root went away, then we
+        // have no reason to hang around
+        if (state.action == State.ACTION_BROWSE && root != null) {
+            if (mRoots.getRootBlocking(root.authority, root.rootId) == null) {
+                finish();
+            }
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
