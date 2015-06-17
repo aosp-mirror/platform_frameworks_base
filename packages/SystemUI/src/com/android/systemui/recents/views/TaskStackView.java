@@ -22,10 +22,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -133,6 +135,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
         });
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     /** Sets the callbacks */
@@ -350,6 +353,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mTmpTaskViewMap.clear();
             List<TaskView> taskViews = getTaskViews();
             int taskViewCount = taskViews.size();
+            boolean reaquireAccessibilityFocus = false;
             for (int i = taskViewCount - 1; i >= 0; i--) {
                 TaskView tv = taskViews.get(i);
                 Task task = tv.getTask();
@@ -358,6 +362,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mTmpTaskViewMap.put(task, tv);
                 } else {
                     mViewPool.returnViewToPool(tv);
+                    reaquireAccessibilityFocus |= (i == mPrevAccessibilityFocusedIndex);
 
                     // Hide the dismiss button if the front most task is invisible
                     if (task == mStack.getFrontMostTask()) {
@@ -402,14 +407,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
                 // Request accessibility focus on the next view if we removed the task
                 // that previously held accessibility focus
-                taskViews = getTaskViews();
-                taskViewCount = taskViews.size();
-                if (taskViewCount > 0 && ssp.isTouchExplorationEnabled()) {
-                    TaskView atv = taskViews.get(taskViewCount - 1);
-                    int indexOfTask = mStack.indexOfTask(atv.getTask());
-                    if (mPrevAccessibilityFocusedIndex != indexOfTask) {
-                        tv.requestAccessibilityFocus();
-                        mPrevAccessibilityFocusedIndex = indexOfTask;
+                if (reaquireAccessibilityFocus) {
+                    taskViews = getTaskViews();
+                    taskViewCount = taskViews.size();
+                    if (taskViewCount > 0 && ssp.isTouchExplorationEnabled() &&
+                            mPrevAccessibilityFocusedIndex != -1) {
+                        TaskView atv = taskViews.get(taskViewCount - 1);
+                        int indexOfTask = mStack.indexOfTask(atv.getTask());
+                        if (mPrevAccessibilityFocusedIndex != indexOfTask) {
+                            tv.requestAccessibilityFocus();
+                            mPrevAccessibilityFocusedIndex = indexOfTask;
+                        }
                     }
                 }
             }
@@ -496,25 +504,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
             mFocusedTaskIndex = taskIndex;
+            mPrevAccessibilityFocusedIndex = taskIndex;
 
             // Focus the view if possible, otherwise, focus the view after we scroll into position
-            Task t = mStack.getTasks().get(taskIndex);
-            TaskView tv = getChildViewForTask(t);
-            Runnable postScrollRunnable = null;
-            if (tv != null) {
-                tv.setFocusedTask(animateFocusedState);
-            } else {
-                postScrollRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        Task t = mStack.getTasks().get(mFocusedTaskIndex);
-                        TaskView tv = getChildViewForTask(t);
-                        if (tv != null) {
-                            tv.setFocusedTask(animateFocusedState);
-                        }
+            final Task t = mStack.getTasks().get(mFocusedTaskIndex);
+            Runnable postScrollRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    TaskView tv = getChildViewForTask(t);
+                    if (tv != null) {
+                        tv.setFocusedTask(animateFocusedState);
+                        tv.requestAccessibilityFocus();
                     }
-                };
-            }
+                }
+            };
 
             // Scroll the view into position (just center it in the curve)
             if (scrollToNewPosition) {
@@ -534,25 +537,30 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Ensures that there is a task focused, if nothing is focused, then we will use the task
      * at the center of the visible stack.
      */
-    public boolean ensureFocusedTask() {
+    public boolean ensureFocusedTask(boolean findClosestToCenter) {
         if (mFocusedTaskIndex < 0) {
-            // If there is no task focused, then find the task that is closes to the center
-            // of the screen and use that as the currently focused task
-            int x = mLayoutAlgorithm.mStackVisibleRect.centerX();
-            int y = mLayoutAlgorithm.mStackVisibleRect.centerY();
             List<TaskView> taskViews = getTaskViews();
             int taskViewCount = taskViews.size();
-            for (int i = taskViewCount - 1; i >= 0; i--) {
-                TaskView tv = taskViews.get(i);
-                tv.getHitRect(mTmpRect);
-                if (mTmpRect.contains(x, y)) {
-                    mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
-                    break;
+            if (findClosestToCenter) {
+                // If there is no task focused, then find the task that is closes to the center
+                // of the screen and use that as the currently focused task
+                int x = mLayoutAlgorithm.mStackVisibleRect.centerX();
+                int y = mLayoutAlgorithm.mStackVisibleRect.centerY();
+                for (int i = taskViewCount - 1; i >= 0; i--) {
+                    TaskView tv = taskViews.get(i);
+                    tv.getHitRect(mTmpRect);
+                    if (mTmpRect.contains(x, y)) {
+                        mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
+                        mPrevAccessibilityFocusedIndex = mFocusedTaskIndex;
+                        break;
+                    }
                 }
             }
             // If we can't find the center task, then use the front most index
             if (mFocusedTaskIndex < 0 && taskViewCount > 0) {
-                mFocusedTaskIndex = taskViewCount - 1;
+                TaskView tv = taskViews.get(taskViewCount - 1);
+                mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
+                mPrevAccessibilityFocusedIndex = mFocusedTaskIndex;
             }
         }
         return mFocusedTaskIndex >= 0;
@@ -600,6 +608,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         mFocusedTaskIndex = -1;
+        mPrevAccessibilityFocusedIndex = -1;
     }
 
     @Override
@@ -617,6 +626,53 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         event.setItemCount(mStack.getTaskCount());
         event.setScrollY(mStackScroller.mScroller.getCurrY());
         event.setMaxScrollY(mStackScroller.progressToScrollRange(mLayoutAlgorithm.mMaxScrollP));
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        if (taskViewCount > 1 && mPrevAccessibilityFocusedIndex != -1) {
+            info.setScrollable(true);
+            if (mPrevAccessibilityFocusedIndex > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+            if (mPrevAccessibilityFocusedIndex < mStack.getTaskCount() - 1) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+        }
+    }
+
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return TaskStackView.class.getName();
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
+        if (ensureFocusedTask(false)) {
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                    if (mPrevAccessibilityFocusedIndex > 0) {
+                        focusNextTask(true, false);
+                        return true;
+                    }
+                }
+                break;
+                case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                    if (mPrevAccessibilityFocusedIndex < mStack.getTaskCount() - 1) {
+                        focusNextTask(false, false);
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -724,8 +780,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mDismissAllButton != null) {
             int taskRectWidth = mLayoutAlgorithm.mTaskRect.width();
             mDismissAllButton.measure(
-                MeasureSpec.makeMeasureSpec(taskRectWidth, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mConfig.dismissAllButtonSizePx, MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(taskRectWidth, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(mConfig.dismissAllButtonSizePx, MeasureSpec.EXACTLY));
         }
 
         setMeasuredDimension(width, height);
