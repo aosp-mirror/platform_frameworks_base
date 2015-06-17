@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> दिन"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> दिन<xliff:g id="HOURS">%2$d</xliff:g> घन्टा"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> दिन<xliff:g id="HOURS">%2$d</xliff:g> घन्टा"</string>
@@ -249,7 +250,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कलहरू गर्नुहोस् र व्यवस्थापन गर्नुहोस्"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"सेन्सरहरू"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"तपाईँको अत्यावश्यक संकेत र शारीरिक गतिविधि बारे जानकारी पहुँच गर्नुहोस्"</string>
+    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"तपाईँको महत्त्वपूर्ण संकेत र शारीरिक गतिविधिबारे जानकारीको पहुँच गर्नुहोस्"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विन्डो सामग्रीको पुनःबहाली गर्नुहोस्।"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तपाईँको अन्तरक्रिया भइरहेको विन्डोको सामग्रीको निरीक्षण गर्नुहोस्।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छोएर गरिने खोजलाई सुचारु गर्नुहोस्"</string>
@@ -541,8 +542,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"भण्डार गरिएको डेटा इन्क्रिप्ट हुनु आवश्यक छ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"क्यामेरालाई असक्षम गराउनुहोस्"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"सबै उपकरण क्यामराहरूको प्रयोग रोक्नुहोस्"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"स्क्रीन लकका केही सुविधाहरू निष्क्रिय गर्नुहोस्"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"स्क्रीन लक केही सुविधाहरूको प्रयोगमा रोक लगाउनुहोस्।"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"केही स्क्रिन लकका  सुविधाहरू अक्षम गर्नुहोस्"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"केही स्क्रिन लक  सुविधाहरूको प्रयोगमा रोक लगाउनुहोस्।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"गृह"</item>
     <item msgid="869923650527136615">"मोबाइल"</item>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"ढाँचा सुरु भयो"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"ढाँचा हटाइएको"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"सेल थप गरियो"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"कक्ष <xliff:g id="CELL_INDEX">%1$s</xliff:g> थपियो"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"ढाँचा पुरा भयो"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. विजेट %2$d of %3$d।"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"विजेट थप गर्नुहोस्।"</string>
@@ -1087,8 +1087,8 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटिहरूको लागि जाँच गर्दै"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नयाँ <xliff:g id="NAME">%s</xliff:g> भेटियो"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"तस्बिरहरू र मिडिया स्थानान्तरणका लागि"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"खराब <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> खराब छ। समाधान गर्न छुनुहोस्।"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"बिग्रेको <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> बिग्रेको छ। समाधान गर्न छुनुहोस्।"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"असमर्थित <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"यो यन्त्रले यो <xliff:g id="NAME">%s</xliff:g> समर्थन गर्दैन। समर्थित ढाँचामा सेट गर्न छुनुहोस्।"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूपमा निकालियो"</string>
@@ -1114,7 +1114,7 @@
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"तयार"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"पढ्नका लागि मात्र"</string>
     <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"असुरक्षित रुपले हटाइयो"</string>
-    <string name="ext_media_status_unmountable" msgid="805594039236667894">"खराब"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"बिग्रेको"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"असमर्थित"</string>
     <string name="ext_media_status_ejecting" msgid="5463887263101234174">"निकाल्दै..."</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"फरम्याट गर्दै…"</string>
@@ -1552,5 +1552,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB पेरिफेरल पोर्ट"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"थप विकल्पहरू"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ओभरफ्लो बन्द गर्नुहोस्"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयन गरियो</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> चयन गरियो</item>
+    </plurals>
 </resources>

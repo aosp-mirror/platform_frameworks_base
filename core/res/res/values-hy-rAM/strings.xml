@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Տբ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Պբ"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> օր"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> օր <xliff:g id="HOURS">%2$d</xliff:g> ժ"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> օր <xliff:g id="HOURS">%2$d</xliff:g> ժ"</string>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Սխեմայի հավաքումը սկսված է"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Սխեման մաքրված է"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ավելացվել է վանդակ"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> դասիչով բջիջը ավելացված է"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Սխեմայի հավաքումն ավարտված է"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Վիջեթ %2$d of %3$d:"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ավելացնել վիջեթ:"</string>
@@ -1546,5 +1546,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB արտաքին միացք"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Այլ ընտրանքներ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Փակել ավելորդ տեղեկությունները"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
 </resources>

@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ימים"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"יום <xliff:g id="DAYS">%1$d</xliff:g> ‏<xliff:g id="HOURS">%2$d</xliff:g> שע\'"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"יום <xliff:g id="DAYS">%1$d</xliff:g> שעה <xliff:g id="HOURS">%2$d</xliff:g>"</string>
@@ -252,13 +253,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"התקשרות וניהול של שיחות טלפון"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"חיישנים"</string>
     <string name="permgroupdesc_sensors" msgid="2280821510554029577">"גישה אל מידע על הסימנים החיוניים והפעילות הגופנית שלך"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"לאחזר תוכן של חלון"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"להפעיל את \'גילוי באמצעות מגע\'"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעלה של \'גילוי באמצעות מגע\'"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"פריטים שנגעת בהם ייאמרו בקול וניתן לנווט במסך באמצעות תנועות."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"להפעיל גישה משופרת לאינטרנט"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של אפליקציות."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"להציג טקסט בזמן הקלדה"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצגת טקסט בזמן הקלדה"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
@@ -730,8 +731,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"יצירת התבנית החלה"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"התבנית נמחקה"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"התא נוסף"</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"תא <xliff:g id="CELL_INDEX">%1$s</xliff:g> נוסף"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"התבנית הושלמה"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"‏%1$s. Widget %2$d מתוך %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"‏הוסף Widget."</string>
@@ -1580,5 +1580,10 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏יציאת USB בציוד היקפי"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"אפשרויות נוספות"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"סגור את האפשרויות הנוספות"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="two">בחרת <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="many">בחרת <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">בחרת <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one">בחרת <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
 </resources>

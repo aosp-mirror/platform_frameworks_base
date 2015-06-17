@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"გბაიტი"</string>
     <string name="terabyteShort" msgid="231613018159186962">"ტბაიტი"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
+    <skip />
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> დღე"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> დღე <xliff:g id="HOURS">%2$d</xliff:g> სთ"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> დღე <xliff:g id="HOURS">%2$d</xliff:g> სთ"</string>
@@ -728,8 +729,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"ნიმუშის შექმნა დაწყებულია"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"ნიმუში წაიშალა"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"უჯრედი დაემატა."</string>
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"უჯრედი <xliff:g id="CELL_INDEX">%1$s</xliff:g> დამატებულია"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"ნიმუშის შექმნა დასრულებულია"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. ვიჯეტი %2$d of %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ვიჯეტის დამატება"</string>
@@ -1102,8 +1102,8 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"მონაცემები გადატანილი იქნა <xliff:g id="NAME">%s</xliff:g>-ში"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"მონაცემების გადატანა ვერ მოხერხდა"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"მონაცემები დარჩა თავდაპირველ მდებარეობაში"</string>
-    <string name="ext_media_status_removed" msgid="6576172423185918739">"ამოიშალა"</string>
-    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ამოღებულია"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"ამოღებულია"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ჩახსნილია სისტემიდან"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"შემოწმება..."</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"მზად არის"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"მხოლოდ კითხვა"</string>
@@ -1540,12 +1540,14 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS მოთხოვნა შეიცვალა DIAL მოთხოვნით."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS მოთხოვნა შეიცვალა USSD მოთხოვნით."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS მოთხოვნა შეიცვალა ახალი SS მოთხოვნით."</string>
-    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
-    <skip />
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"სამსახურის პროფილი"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android-ის პერიფერიული USB პორტი"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"პერიფერიული USB პორტი"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"სხვა ვარიანტები"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"გადავსების დახურვა"</string>
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> შერჩეული</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> შერჩეული</item>
+    </plurals>
 </resources>
