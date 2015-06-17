@@ -226,7 +226,7 @@ public class SpellCheckerSession {
         private static String taskToString(int task) {
             switch (task) {
                 case TASK_CANCEL:
-                    return "STATE_WAIT_CONNECTION";
+                    return "TASK_CANCEL";
                 case TASK_GET_SUGGESTIONS_MULTIPLE:
                     return "TASK_GET_SUGGESTIONS_MULTIPLE";
                 case TASK_CLOSE:
