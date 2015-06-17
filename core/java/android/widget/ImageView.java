@@ -216,7 +216,7 @@ public class ImageView extends View {
     protected boolean verifyDrawable(Drawable dr) {
         return mDrawable == dr || super.verifyDrawable(dr);
     }
-    
+
     @Override
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
@@ -226,6 +226,15 @@ public class ImageView extends View {
     @Override
     public void invalidateDrawable(Drawable dr) {
         if (dr == mDrawable) {
+            if (dr != null) {
+                // update cached drawable dimensions if they've changed
+                final int w = dr.getIntrinsicWidth();
+                final int h = dr.getIntrinsicHeight();
+                if (w != mDrawableWidth || h != mDrawableHeight) {
+                    mDrawableWidth = w;
+                    mDrawableHeight = h;
+                }
+            }
             /* we invalidate the whole view in this case because it's very
              * hard to know where the drawable actually is. This is made
              * complicated because of the offsets and transformations that
