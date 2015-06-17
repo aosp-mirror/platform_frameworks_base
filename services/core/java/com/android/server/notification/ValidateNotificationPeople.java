@@ -34,7 +34,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
-import com.android.internal.logging.MetricsLogger;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -85,11 +84,13 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private Handler mHandler;
     private ContentObserver mObserver;
     private int mEvictionCount;
+    private NotificationUsageStats mUsageStats;
 
-    public void initialize(Context context) {
+    public void initialize(Context context, NotificationUsageStats usageStats) {
         if (DEBUG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
         mUserToContextMap = new ArrayMap<>();
         mBaseContext = context;
+        mUsageStats = usageStats;
         mPeopleCache = new LruCache<String, LookupResult>(PEOPLE_CACHE_SIZE);
         mEnabled = ENABLE_PEOPLE_VALIDATOR && 1 == Settings.Global.getInt(
                 mBaseContext.getContentResolver(), SETTING_ENABLE_PEOPLE_VALIDATOR, 1);
@@ -203,8 +204,15 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         final String key = record.getKey();
         final Bundle extras = record.getNotification().extras;
         final float[] affinityOut = new float[1];
-        final RankingReconsideration rr = validatePeople(context, key, extras, affinityOut);
-        record.setContactAffinity(affinityOut[0]);
+        final PeopleRankingReconsideration rr = validatePeople(context, key, extras, affinityOut);
+        final float affinity = affinityOut[0];
+        record.setContactAffinity(affinity);
+        if (rr == null) {
+            mUsageStats.registerPeopleAffinity(record, affinity > NONE, affinity == STARRED_CONTACT,
+                    true /* cached */);
+        } else {
+            rr.setRecord(record);
+        }
         return rr;
     }
 
@@ -245,7 +253,6 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         if (pendingLookups.isEmpty()) {
             if (VERBOSE) Slog.i(TAG, "final affinity: " + affinity);
-            if (affinity != NONE) MetricsLogger.count(mBaseContext, "note_with_people", 1);
             return null;
         }
 
@@ -413,6 +420,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         private final Context mContext;
 
         private float mContactAffinity = NONE;
+        private NotificationRecord mRecord;
 
         private PeopleRankingReconsideration(Context context, String key, LinkedList<String> pendingLookups) {
             super(key);
@@ -456,7 +464,10 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                         "ms");
             }
 
-            if (mContactAffinity != NONE) MetricsLogger.count(mBaseContext, "note_with_people", 1);
+            if (mRecord != null) {
+                mUsageStats.registerPeopleAffinity(mRecord, mContactAffinity > NONE,
+                        mContactAffinity == STARRED_CONTACT, false /* cached */);
+            }
         }
 
         @Override
@@ -468,6 +479,10 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         public float getContactAffinity() {
             return mContactAffinity;
+        }
+
+        public void setRecord(NotificationRecord record) {
+            mRecord = record;
         }
     }
 }
