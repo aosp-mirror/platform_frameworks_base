@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"সংরক্ষণ করুন"</string>
     <string name="menu_share" msgid="3075149983979628146">"ভাগ করুন"</string>
     <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"সবগুলি নির্বাচন করুন"</string>
     <string name="menu_copy" msgid="3612326052677229148">"এতে অনুলিপি করুন…"</string>
     <string name="menu_move" msgid="1828090633118079817">"এতে সরান..."</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"প্রতিলিপি করুন"</string>

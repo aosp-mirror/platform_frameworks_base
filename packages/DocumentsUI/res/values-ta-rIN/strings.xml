@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"சேமி"</string>
     <string name="menu_share" msgid="3075149983979628146">"பகிர்"</string>
     <string name="menu_delete" msgid="8138799623850614177">"நீக்கு"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"எல்லாவற்றையும் தேர்ந்தெடு"</string>
     <string name="menu_copy" msgid="3612326052677229148">"இங்கு நகலெடு…"</string>
     <string name="menu_move" msgid="1828090633118079817">"இதற்கு நகர்த்து…"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"நகலெடு"</string>

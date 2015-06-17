@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"محفوظ کریں"</string>
     <string name="menu_share" msgid="3075149983979628146">"اشتراک کریں"</string>
     <string name="menu_delete" msgid="8138799623850614177">"حذف کریں"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"سبھی کو منتخب کریں"</string>
     <string name="menu_copy" msgid="3612326052677229148">"اس میں کاپی کریں…"</string>
     <string name="menu_move" msgid="1828090633118079817">"اس میں منتقل کریں…"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"کاپی کریں"</string>
