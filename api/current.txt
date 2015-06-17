@@ -12305,7 +12305,6 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable.ConstantState getConstantState();
     method public android.graphics.drawable.Drawable getCurrent();
     method public android.graphics.Rect getDirtyBounds();
-    method public boolean getDither();
     method public void getHotspotBounds(android.graphics.Rect);
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
@@ -12322,6 +12321,7 @@ package android.graphics.drawable {
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
     method public boolean isAutoMirrored();
+    method public boolean isDither();
     method public boolean isFilterBitmap();
     method public boolean isStateful();
     method public final boolean isVisible();
