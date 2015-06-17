@@ -393,13 +393,18 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public void updateActionBar() {
         if (mRootsToolbar != null) {
-            if (mState.action == ACTION_OPEN ||
-                mState.action == ACTION_GET_CONTENT ||
-                mState.action == ACTION_OPEN_TREE) {
-                mRootsToolbar.setTitle(R.string.title_open);
-            } else if (mState.action == ACTION_CREATE ||
-                       mState.action == ACTION_OPEN_COPY_DESTINATION) {
-                mRootsToolbar.setTitle(R.string.title_save);
+            final String prompt = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
+            if (prompt != null) {
+                mRootsToolbar.setTitle(prompt);
+            } else {
+                if (mState.action == ACTION_OPEN ||
+                    mState.action == ACTION_GET_CONTENT ||
+                    mState.action == ACTION_OPEN_TREE) {
+                    mRootsToolbar.setTitle(R.string.title_open);
+                } else if (mState.action == ACTION_CREATE ||
+                           mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                    mRootsToolbar.setTitle(R.string.title_save);
+                }
             }
         }
 
