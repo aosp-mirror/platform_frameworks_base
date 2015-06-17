@@ -180,8 +180,6 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
 
     public boolean showLocked(Bundle args, int flags,
             IVoiceInteractionSessionShowCallback showCallback) {
-        // For now we never allow screenshots.
-        flags &= ~VoiceInteractionSession.SHOW_WITH_SCREENSHOT;
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
@@ -190,13 +188,15 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         new UserHandle(mUser));
             }
             mShown = true;
+            boolean allDataEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0;
             mShowArgs = args;
             mShowFlags = flags;
             mHaveAssistData = false;
             if ((flags& VoiceInteractionSession.SHOW_WITH_ASSIST) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_STRUCTURE, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
-                        && isStructureEnabled()) {
+                        && allDataEnabled) {
                     try {
                         mAm.requestAssistContextExtras(ActivityManager.ASSIST_CONTEXT_FULL,
                                 mAssistReceiver);
@@ -212,7 +212,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             mHaveScreenshot = false;
             if ((flags& VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_SCREENSHOT, mCallingUid,
-                        mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED) {
+                        mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
+                        && allDataEnabled) {
                     try {
                         mIWindowManager.requestAssistScreenshot(mScreenshotReceiver);
                     } catch (RemoteException e) {
@@ -464,11 +465,6 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     public void onServiceDisconnected(ComponentName name) {
         mCallback.sessionConnectionGone(this);
         mService = null;
-    }
-
-    private boolean isStructureEnabled() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0;
     }
 
     public void dump(String prefix, PrintWriter pw) {
