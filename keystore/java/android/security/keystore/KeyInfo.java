@@ -30,7 +30,7 @@ import javax.crypto.SecretKey;
  * Keystore system</a>. This class describes whether the key material is available in
  * plaintext outside of secure hardware, whether user authentication is required for using the key
  * and whether this requirement is enforced by secure hardware, the key's origin, what uses the key
- * is authorized for (e.g., only in {@code CBC} mode, or signing only), whether the key should be
+ * is authorized for (e.g., only in {@code GCM} mode, or signing only), whether the key should be
  * encrypted at rest, the key's and validity start and end dates.
  *
  * <p>Instances of this class are immutable.
@@ -191,7 +191,7 @@ public class KeyInfo implements KeySpec {
     }
 
     /**
-     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used
+     * Gets the set of block modes (e.g., {@code GCM}, {@code CBC}) with which the key can be used
      * when encrypting/decrypting. Attempts to use the key with any other block modes will be
      * rejected.
      *
