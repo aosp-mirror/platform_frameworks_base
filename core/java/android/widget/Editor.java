@@ -4413,6 +4413,10 @@ public class Editor {
         // Indicates whether the user is selecting text and using the drag accelerator.
         private boolean mDragAcceleratorActive;
         private boolean mHaventMovedEnoughToStartDrag;
+        // The line that a selection happened most recently with the drag accelerator.
+        private int mLineSelectionIsOn = -1;
+        // Whether the drag accelerator has selected past the initial line.
+        private boolean mSwitchedLines = false;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -4465,6 +4469,7 @@ public class Editor {
             // Start location of selection.
             mStartOffset = mTextView.getOffsetForPosition(mLastDownPositionX,
                     mLastDownPositionY);
+            mLineSelectionIsOn = mTextView.getLineAtCoordinate(mLastDownPositionY);
             // Don't show the handles until user has lifted finger.
             hide();
 
@@ -4548,17 +4553,35 @@ public class Editor {
                         break;
                     }
 
-                    if (mStartOffset != -1) {
+                    if (mStartOffset != -1 && mTextView.getLayout() != null) {
                         if (!mHaventMovedEnoughToStartDrag) {
-                            // Offset the finger by the same vertical offset as the handles. This
-                            // improves visibility of the content being selected by shifting
-                            // the finger below the content.
-                            final float fingerOffset = (mStartHandle != null)
-                                    ? mStartHandle.getIdealVerticalOffset()
-                                    : touchSlop;
-                            int offset =
-                                    mTextView.getOffsetForPosition(eventX, eventY - fingerOffset);
+
+                            float y = eventY;
+                            if (mSwitchedLines) {
+                                // Offset the finger by the same vertical offset as the handles.
+                                // This improves visibility of the content being selected by
+                                // shifting the finger below the content, this is applied once
+                                // the user has switched lines.
+                                final float fingerOffset = (mStartHandle != null)
+                                        ? mStartHandle.getIdealVerticalOffset()
+                                        : touchSlop;
+                                y = eventY - fingerOffset;
+                            }
+
+                            final int currLine = getCurrentLineAdjustedForSlop(
+                                    mTextView.getLayout(),
+                                    mLineSelectionIsOn, y);
+                            if (!mSwitchedLines && currLine != mLineSelectionIsOn) {
+                                // Break early here, we want to offset the finger position from
+                                // the selection highlight, once the user moved their finger
+                                // to a different line we should apply the offset and *not* switch
+                                // lines until recomputing the position with the finger offset.
+                                mSwitchedLines = true;
+                                break;
+                            }
+
                             int startOffset;
+                            int offset = mTextView.getOffsetAtCoordinate(currLine, eventX);
                             // Snap to word boundaries.
                             if (mStartOffset < offset) {
                                 // Expanding with end handle.
@@ -4569,6 +4592,7 @@ public class Editor {
                                 offset = getWordStart(offset);
                                 startOffset = getWordEnd(mStartOffset);
                             }
+                            mLineSelectionIsOn = currLine;
                             Selection.setSelection((Spannable) mTextView.getText(),
                                     startOffset, offset);
                         }
@@ -4605,6 +4629,7 @@ public class Editor {
                         startSelectionActionMode();
                         mDragAcceleratorActive = false;
                         mStartOffset = -1;
+                        mSwitchedLines = false;
                     }
                     break;
             }
@@ -4634,6 +4659,7 @@ public class Editor {
             mMinTouchOffset = mMaxTouchOffset = -1;
             mStartOffset = -1;
             mDragAcceleratorActive = false;
+            mSwitchedLines = false;
         }
 
         /**
