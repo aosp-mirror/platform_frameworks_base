@@ -154,8 +154,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-карта отсутствует."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим полета."</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Нет SIM-карты."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Сменить сеть"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -325,8 +324,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведите от значка"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Аудиоподсказки: проведите от значка"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Камера: проведите от значка"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Полная тишина. Также будет выключен звук в программах чтения с экрана."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Полная тишина"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Только важные"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Только будильник"</string>
@@ -336,8 +334,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядка батареи (осталось <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Сменить аккаунт. Вход выполнен под именем <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Выбран аккаунт пользователя <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Показать профиль."</string>
     <string name="user_add_user" msgid="5110251524486079492">"Добавить пользователя"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Новый пользователь"</string>
@@ -352,8 +349,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Начать заново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Да, продолжить"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Пользователь \"Гость\""</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Чтобы стереть все приложения и данные, удалите аккаунт гостя."</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"УДАЛИТЬ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Добавить пользователя?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"После создания профиля его необходимо настроить.\n\nОбновлять приложения для всех аккаунтов может любой пользователь устройства."</string>
@@ -408,8 +404,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Нет"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Вы перешли в рабочий профиль"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показывать уровень заряда батареи в процентах"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Когда устройство работает в автономном режиме, процент заряда батареи показан в строке состояния"</string>
@@ -430,6 +425,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Быстрые настройки, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка доступа"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Рабочий профиль"</string>
 </resources>

@@ -152,8 +152,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoratge de Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
-    <!-- no translation found for accessibility_no_sims (3957997018324995781) -->
-    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"S\'està canviant la xarxa de l\'operador de telefonia mòbil."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -323,8 +322,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Llisca des de la icona per obrir el telèfon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Llisca des de la icona per obrir l\'assistent de veu"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Llisca des de la icona per obrir la càmera"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Silenci total. També se silenciaran els lectors de pantalla."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silenci total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Només amb prioritat"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Només alarmes"</string>
@@ -334,8 +332,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregant (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar la càrrega)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia l\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Mostra el perfil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Afegeix un usuari"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Usuari nou"</string>
@@ -350,8 +347,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Torna a començar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sí, continua"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuari convidat"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Per suprimir aplicacions i dades, elimina l\'usuari convidat"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"SUPRIMEIX EL CONVIDAT"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
@@ -406,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Denega"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> és el diàleg de volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca per restaurar l\'original."</string>
-    <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estàs utilitzant el perfil professional"</string>
     <string name="system_ui_tuner" msgid="3442596010150119600">"Configurador de la IU del sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra el percentatge de la bateria inserit"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra el percentatge del nivell de bateria dins de la icona de la barra d\'estat quan no s\'estigui carregant"</string>
@@ -428,6 +423,5 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"Dia: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuració ràpida, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
-    <!-- no translation found for accessibility_managed_profile (6613641363112584120) -->
-    <skip />
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil professional"</string>
 </resources>

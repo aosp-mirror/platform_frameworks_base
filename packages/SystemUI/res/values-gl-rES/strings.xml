@@ -322,8 +322,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Pasa o dedo desde a icona para acceder ao asistente de voz"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Pasa o dedo desde a icona para acceder á cámara"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Silencio total. Esta acción tamén silenciará os lectores de pantalla."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silencio total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Só prioridade"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Só alarmas"</string>
@@ -333,8 +332,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para finalizar a carga)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Cambiar usuario, usuario actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuario actual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Engadir usuario"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Novo usuario"</string>
@@ -349,8 +347,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Comezar de novo"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Si, continuar"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuario convidado"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Para eliminar aplicacións e datos, elimina usuario invitado"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"QUITAR CONVIDADO"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Engadir un usuario novo?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Cando engadas un usuario novo, este deberá configurar o seu espazo\n\nCalquera usuario pode actualizar as aplicacións para todos os demais usuarios."</string>
