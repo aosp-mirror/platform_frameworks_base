@@ -1142,7 +1142,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mContentFrame.addView(view, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-
+        mContentFrame.requestApplyInsets();
     }
 
     /** @hide */
