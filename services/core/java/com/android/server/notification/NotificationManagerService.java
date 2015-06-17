@@ -1772,6 +1772,9 @@ public class NotificationManagerService extends SystemService {
                 for (int i=0; i<N; i++) {
                     final NotificationRecord r = mNotificationList.get(i);
                     if (r.sbn.getPackageName().equals(pkg) && r.sbn.getUserId() == userId) {
+                        if (r.sbn.getId() == id && TextUtils.equals(r.sbn.getTag(), tag)) {
+                            break;  // Allow updating existing notification
+                        }
                         count++;
                         if (count >= MAX_PACKAGE_NOTIFICATIONS) {
                             Slog.e(TAG, "Package has already posted " + count
@@ -2789,19 +2792,8 @@ public class NotificationManagerService extends SystemService {
         final int len = list.size();
         for (int i=0; i<len; i++) {
             NotificationRecord r = list.get(i);
-            if (!notificationMatchesUserId(r, userId) || r.sbn.getId() != id) {
-                continue;
-            }
-            if (tag == null) {
-                if (r.sbn.getTag() != null) {
-                    continue;
-                }
-            } else {
-                if (!tag.equals(r.sbn.getTag())) {
-                    continue;
-                }
-            }
-            if (r.sbn.getPackageName().equals(pkg)) {
+            if (notificationMatchesUserId(r, userId) && r.sbn.getId() == id &&
+                    TextUtils.equals(r.sbn.getTag(), tag) && r.sbn.getPackageName().equals(pkg)) {
                 return i;
             }
         }
