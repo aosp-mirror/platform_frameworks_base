@@ -153,17 +153,17 @@ public class DisconnectCause {
     /**
      * The outgoing call failed with an unknown cause.
      */
-    public static final int OUTGOING_FAILURE = 43;
+    public static final int OUTGOING_FAILURE               = 43;
 
     /**
      * The outgoing call was canceled by the {@link android.telecom.ConnectionService}.
      */
-    public static final int OUTGOING_CANCELED = 44;
+    public static final int OUTGOING_CANCELED              = 44;
 
     /**
      * The call, which was an IMS call, disconnected because it merged with another call.
      */
-    public static final int IMS_MERGED_SUCCESSFULLY = 45;
+    public static final int IMS_MERGED_SUCCESSFULLY        = 45;
 
     /**
      * Stk Call Control modified DIAL request to USSD request.
@@ -181,6 +181,12 @@ public class DisconnectCause {
      */
     public static final int DIAL_MODIFIED_TO_DIAL          = 48;
 
+    /**
+     * The call was terminated because CDMA phone service and roaming have already been activated.
+     * {@hide}
+     */
+    public static final int CDMA_ALREADY_ACTIVATED         = 49;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -189,14 +195,14 @@ public class DisconnectCause {
     // 4) Update toString() with the newly added disconnect type.
     // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
     //
-    // NextId: 49
+    // NextId: 50
     //*********************************************************************************************
 
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = DIAL_MODIFIED_TO_DIAL;
+    public static final int MAXIMUM_VALID_VALUE = CDMA_ALREADY_ACTIVATED;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -302,6 +308,8 @@ public class DisconnectCause {
             return "OUTGOING_CANCELED";
         case IMS_MERGED_SUCCESSFULLY:
             return "IMS_MERGED_SUCCESSFULLY";
+        case CDMA_ALREADY_ACTIVATED:
+            return "CDMA_ALREADY_ACTIVATED";
         default:
             return "INVALID: " + cause;
         }
