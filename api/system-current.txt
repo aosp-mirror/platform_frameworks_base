@@ -39105,6 +39105,8 @@ package android.view {
     method public boolean onRequestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public boolean onStartNestedScroll(android.view.View, android.view.View, int);
     method public void onStopNestedScroll(android.view.View);
+    method public void onViewAdded(android.view.View);
+    method public void onViewRemoved(android.view.View);
     method public void recomputeViewAttributes(android.view.View);
     method public void removeAllViews();
     method public void removeAllViewsInLayout();
