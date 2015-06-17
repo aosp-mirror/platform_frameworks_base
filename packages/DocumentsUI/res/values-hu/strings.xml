@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Mentés"</string>
     <string name="menu_share" msgid="3075149983979628146">"Megosztás"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Törlés"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"Összes kijelölése"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Másolás ide…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Áthelyezés…"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Másolás"</string>

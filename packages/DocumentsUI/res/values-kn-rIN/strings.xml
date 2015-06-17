@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"ಉಳಿಸು"</string>
     <string name="menu_share" msgid="3075149983979628146">"ಹಂಚು"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ಅಳಿಸು"</string>
-    <!-- no translation found for menu_select_all (8323579667348729928) -->
-    <skip />
+    <string name="menu_select_all" msgid="8323579667348729928">"ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ಇದಕ್ಕೆ ನಕಲಿಸಿ…"</string>
     <string name="menu_move" msgid="1828090633118079817">"ಇದಕ್ಕೆ ಸರಿಸು…"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ನಕಲಿಸು"</string>
