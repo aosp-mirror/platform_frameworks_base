@@ -167,7 +167,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean getDither() {
+    public boolean isDither() {
         return mDrawableContainerState.mDither;
     }
 

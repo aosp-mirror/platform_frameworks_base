@@ -826,7 +826,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public boolean getDither() {
+    public boolean isDither() {
         return mGradientState.mDither;
     }
 
