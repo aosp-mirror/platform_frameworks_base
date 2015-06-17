@@ -111,9 +111,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"هنگامی که دستگاه را راه‌اندازی مجدد می‌کنید الگو درخواست می‌شود."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"هنگامی که دستگاه را راه‌اندازی مجدد می‌کنید پین درخواست می‌شود."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"هنگامی که دستگاه را راه‌اندازی مجدد می‌کنید گذرواژه درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"هنگامی که نمایه‌ها را تعویض می‌کنید الگو درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"هنگامی که نمایه‌ها را تعویض می‌کنید پین درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"هنگامی که نمایه‌ها را تعویض می‌کنید گذرواژه درخواست می‌شود."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"هنگامی که میان نمایه‌ها جابجا می‌شوید، الگو درخواست می‌شود."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"هنگامی که میان نمایه‌ها جابجا می‌شوید، پین درخواست می‌شود."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"هنگامی که میان نمایه‌ها جابجا می‌شوید، گذرواژه درخواست می‌شود."</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">قفل دستگاه به مدت <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. الگو را تأیید کنید.</item>
       <item quantity="other">قفل دستگاه به مدت <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. الگو را تأیید کنید.</item>

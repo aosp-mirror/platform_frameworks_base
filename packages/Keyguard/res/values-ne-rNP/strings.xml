@@ -108,23 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"कुनै सेवा छैन।"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट विधि बटन स्विच गर्नुहोस्।"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"हवाइजहाज मोड"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"यन्त्र पुनारम्भ गर्न तपाईँलाई प्रतिमा रुप चाहिन्छ।"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"यन्त्र पुनारम्भ गर्न तपाईँलाई PIN चाहिन्छ।"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"यन्त्र पुनारम्भ गर्न तपाईँलाई पासवर्ड चाहिन्छ।"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"प्रोफाइल फेर्न तपाईँलाई प्रतिमा रुप चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"यन्त्र पुन:सुरू गर्न तपाईँलाई ढाँचा चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"यन्त्र पुन:सुरू गर्न तपाईँलाई PIN चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"यन्त्र पुन:सुरू गर्न तपाईँलाई पासवर्ड चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"प्रोफाइल फेर्न तपाईँलाई ढाँचा चाहिन्छ।"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"प्रोफाइल फेर्न तपाईँलाई PIN चाहिन्छ।"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"प्रोफाइल फेर्न तपाईँलाई पासवर्ड चाहिन्छ।"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। प्रतिमा रुप निश्चित गर्नुहोस्।</item>
-      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। प्रतिमा रुप निश्चित गर्नुहोस्। </item>
+      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। ढाँचा पुष्टि गर्नुहोस्।</item>
+      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। ढाँचा पुष्टि गर्नुहोस्। </item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। PIN निश्चित गर्नुहोस्।</item>
-      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। PIN निश्चित गर्नुहोस्।</item>
+      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। PIN पुष्टि गर्नुहोस्।</item>
+      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। PIN पुष्टि गर्नुहोस्।</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड निश्चित गर्नुहोस्।</item>
-      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड निश्चित गर्नुहोस्।</item>
+      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड पुष्टि गर्नुहोस्।</item>
+      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड पुष्टि गर्नुहोस्।</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"चिनिएको छैन"</string>
 </resources>
