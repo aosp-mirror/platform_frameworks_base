@@ -4013,7 +4013,15 @@ public class Editor {
 
         @Override
         public void updatePosition(float x, float y) {
-            positionAtCursorOffset(mTextView.getOffsetForPosition(x, y), false);
+            Layout layout = mTextView.getLayout();
+            int offset;
+            if (layout != null) {
+                int currLine = getCurrentLineAdjustedForSlop(layout, mPrevLine, y);
+                offset = mTextView.getOffsetAtCoordinate(currLine, x);
+            } else {
+                offset = mTextView.getOffsetForPosition(x, y);
+            }
+            positionAtCursorOffset(offset, false);
             if (mTextActionMode != null) {
                 mTextActionMode.invalidate();
             }
