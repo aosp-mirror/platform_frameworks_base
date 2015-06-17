@@ -374,7 +374,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public boolean getDither() {
+    public boolean isDither() {
         return mPaint == null ? DEFAULT_DITHER : mPaint.isDither();
     }
 
