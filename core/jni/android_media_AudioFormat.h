@@ -80,6 +80,13 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_PCM_8BIT;
     case AUDIO_FORMAT_PCM_FLOAT:
         return ENCODING_PCM_FLOAT;
+
+    // map these to ENCODING_PCM_FLOAT
+    case AUDIO_FORMAT_PCM_8_24_BIT:
+    case AUDIO_FORMAT_PCM_24_BIT_PACKED:
+    case AUDIO_FORMAT_PCM_32_BIT:
+        return ENCODING_PCM_FLOAT;
+
     case AUDIO_FORMAT_AC3:
         return ENCODING_AC3;
     case AUDIO_FORMAT_E_AC3:
