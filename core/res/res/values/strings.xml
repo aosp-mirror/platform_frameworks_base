@@ -1969,9 +1969,9 @@
     <string name="lockscreen_access_pattern_start">Pattern started</string>
     <!-- Accessibility description sent when the pattern times out and is cleared. [CHAR LIMIT=NONE] -->
     <string name="lockscreen_access_pattern_cleared">Pattern cleared</string>
-    <!-- Accessibility description sent when user adds a cell to the pattern. [CHAR LIMIT=NONE]  -->
+    <!-- Accessibility description sent when user adds a dot to the pattern. [CHAR LIMIT=NONE]  -->
     <string name="lockscreen_access_pattern_cell_added">Cell added</string>
-    <!-- Accessibility description sent when user adds a cell to the pattern. Announces the 
+    <!-- Accessibility description sent when user adds a dot to the pattern. Announces the 
     actual cell when headphones are connected [CHAR LIMIT=NONE]  -->
     <string name="lockscreen_access_pattern_cell_added_verbose">
             Cell <xliff:g id="cell_index" example="3">%1$s</xliff:g> added</string>
