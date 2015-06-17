@@ -908,6 +908,10 @@ public class SyncManager {
         return types;
     }
 
+    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId) {
+        return mSyncAdapters.getSyncAdapterPackagesForAuthority(authority, userId);
+    }
+
     private void sendSyncAlarmMessage() {
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "sending MESSAGE_SYNC_ALARM");
         mSyncHandler.sendEmptyMessage(SyncHandler.MESSAGE_SYNC_ALARM);

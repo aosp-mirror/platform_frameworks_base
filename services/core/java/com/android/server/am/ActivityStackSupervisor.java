@@ -233,10 +233,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<>();
 
     /** Used on user changes */
-    final ArrayList<UserStartedState> mStartingUsers = new ArrayList<>();
+    final ArrayList<UserState> mStartingUsers = new ArrayList<>();
 
     /** Used to queue up any background users being started */
-    final ArrayList<UserStartedState> mStartingBackgroundUsers = new ArrayList<>();
+    final ArrayList<UserState> mStartingBackgroundUsers = new ArrayList<>();
 
     /** Set to indicate whether to issue an onUserLeaving callback when a newly launched activity
      * is being brought in front of us. */
@@ -2371,7 +2371,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ArrayList<ActivityRecord> stops = null;
         ArrayList<ActivityRecord> finishes = null;
-        ArrayList<UserStartedState> startingUsers = null;
+        ArrayList<UserState> startingUsers = null;
         int NS = 0;
         int NF = 0;
         boolean booting = false;
@@ -2468,7 +2468,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             // Complete starting up of background users
             if (mStartingBackgroundUsers.size() > 0) {
-                startingUsers = new ArrayList<UserStartedState>(mStartingBackgroundUsers);
+                startingUsers = new ArrayList<UserState>(mStartingBackgroundUsers);
                 mStartingBackgroundUsers.clear();
                 for (int i = 0; i < startingUsers.size(); i++) {
                     mService.finishUserBoot(startingUsers.get(i));
@@ -3230,7 +3230,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    boolean switchUserLocked(int userId, UserStartedState uss) {
+    boolean switchUserLocked(int userId, UserState uss) {
         mUserStackInFront.put(mCurrentUser, mFocusedStack.getStackId());
         final int restoreStackId = mUserStackInFront.get(userId, HOME_STACK_ID);
         mCurrentUser = userId;
@@ -3271,7 +3271,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * @param userId The user being started in the background
      * @param uss The state object for the user.
      */
-    public void startBackgroundUserLocked(int userId, UserStartedState uss) {
+    public void startBackgroundUserLocked(int userId, UserState uss) {
         mStartingBackgroundUsers.add(uss);
     }
 

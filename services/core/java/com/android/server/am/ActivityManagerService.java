@@ -676,9 +676,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     final SparseArray<UidRecord> mActiveUids = new SparseArray<>();
 
     /**
-     * Which uses have been started, so are allowed to run code.
+     * Which users have been started, so are allowed to run code.
      */
-    final SparseArray<UserStartedState> mStartedUsers = new SparseArray<>();
+    final SparseArray<UserState> mStartedUsers = new SparseArray<>();
 
     /**
      * LRU list of history of current users.  Most recently current is at the end.
@@ -1781,15 +1781,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case REPORT_USER_SWITCH_MSG: {
-                dispatchUserSwitch((UserStartedState) msg.obj, msg.arg1, msg.arg2);
+                dispatchUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case CONTINUE_USER_SWITCH_MSG: {
-                continueUserSwitch((UserStartedState) msg.obj, msg.arg1, msg.arg2);
+                continueUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case USER_SWITCH_TIMEOUT_MSG: {
-                timeoutUserSwitch((UserStartedState) msg.obj, msg.arg1, msg.arg2);
+                timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case IMMERSIVE_MODE_LOCK_MSG: {
@@ -2309,7 +2309,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
 
         // User 0 is the first and only user that runs at boot.
-        mStartedUsers.put(UserHandle.USER_OWNER, new UserStartedState(UserHandle.OWNER, true));
+        mStartedUsers.put(UserHandle.USER_OWNER, new UserState(UserHandle.OWNER, true));
         mUserLru.add(UserHandle.USER_OWNER);
         updateStartedUserArrayLocked();
 
@@ -6313,9 +6313,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     SystemProperties.set("dev.bootcomplete", "1");
                 }
                 for (int i=0; i<mStartedUsers.size(); i++) {
-                    UserStartedState uss = mStartedUsers.valueAt(i);
-                    if (uss.mState == UserStartedState.STATE_BOOTING) {
-                        uss.mState = UserStartedState.STATE_RUNNING;
+                    UserState uss = mStartedUsers.valueAt(i);
+                    if (uss.mState == UserState.STATE_BOOTING) {
+                        uss.mState = UserState.STATE_RUNNING;
                         final int userId = mStartedUsers.keyAt(i);
                         Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
@@ -9442,6 +9442,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     boolean success = updateOomAdjLocked(cpr.proc);
+                    maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
                     checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
                     if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
                     // NOTE: there is still a race here where a signal could be
@@ -9831,6 +9832,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         dst.notifyAll();
                     }
                     updateOomAdjLocked(r);
+                    maybeUpdateProviderUsageStatsLocked(r, src.info.packageName,
+                            src.info.authority);
                 }
             }
 
@@ -13343,7 +13346,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = false;
             pw.println("  mStartedUsers:");
             for (int i=0; i<mStartedUsers.size(); i++) {
-                UserStartedState uss = mStartedUsers.valueAt(i);
+                UserState uss = mStartedUsers.valueAt(i);
                 pw.print("    User #"); pw.print(uss.mHandle.getIdentifier());
                         pw.print(": "); uss.dump("", pw);
             }
@@ -18615,6 +18618,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         uidRec.pendingChange.processState = uidRec.setProcState;
     }
 
+    private void maybeUpdateProviderUsageStatsLocked(ProcessRecord app, String providerPkgName,
+            String authority) {
+        if (app == null) return;
+        if (app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+            UserState userState = mStartedUsers.get(app.userId);
+            if (userState == null) return;
+            final long now = SystemClock.elapsedRealtime();
+            Long lastReported = userState.mProviderLastReportedFg.get(authority);
+            if (lastReported == null || lastReported < now - 60 * 1000L) {
+                mUsageStatsService.reportContentProviderUsage(
+                        authority, providerPkgName, app.userId);
+                userState.mProviderLastReportedFg.put(authority, now);
+            }
+        }
+    }
+
     private void maybeUpdateUsageStatsLocked(ProcessRecord app) {
         if (DEBUG_USAGE_STATS) {
             Slog.d(TAG, "Checking proc [" + Arrays.toString(app.getPackageList())
@@ -19602,7 +19621,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // If the user we are switching to is not currently started, then
                 // we need to start it now.
                 if (mStartedUsers.get(userId) == null) {
-                    mStartedUsers.put(userId, new UserStartedState(new UserHandle(userId), false));
+                    mStartedUsers.put(userId, new UserState(new UserHandle(userId), false));
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }
@@ -19627,26 +19646,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mUserLru.add(currentUserIdInt);
                 }
 
-                final UserStartedState uss = mStartedUsers.get(userId);
+                final UserState uss = mStartedUsers.get(userId);
 
                 // Make sure user is in the started state.  If it is currently
                 // stopping, we need to knock that off.
-                if (uss.mState == UserStartedState.STATE_STOPPING) {
+                if (uss.mState == UserState.STATE_STOPPING) {
                     // If we are stopping, we haven't sent ACTION_SHUTDOWN,
                     // so we can just fairly silently bring the user back from
                     // the almost-dead.
-                    uss.mState = UserStartedState.STATE_RUNNING;
+                    uss.mState = UserState.STATE_RUNNING;
                     updateStartedUserArrayLocked();
                     needStart = true;
-                } else if (uss.mState == UserStartedState.STATE_SHUTDOWN) {
+                } else if (uss.mState == UserState.STATE_SHUTDOWN) {
                     // This means ACTION_SHUTDOWN has been sent, so we will
                     // need to treat this as a new boot of the user.
-                    uss.mState = UserStartedState.STATE_BOOTING;
+                    uss.mState = UserState.STATE_BOOTING;
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }
 
-                if (uss.mState == UserStartedState.STATE_BOOTING) {
+                if (uss.mState == UserState.STATE_BOOTING) {
                     // Booting up a new user, need to tell system services about it.
                     // Note that this is on the same handler as scheduling of broadcasts,
                     // which is important because it needs to go first.
@@ -19784,7 +19803,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void dispatchUserSwitch(final UserStartedState uss, final int oldUserId,
+    void dispatchUserSwitch(final UserState uss, final int oldUserId,
             final int newUserId) {
         final int N = mUserSwitchObservers.beginBroadcast();
         if (N > 0) {
@@ -19821,21 +19840,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         mUserSwitchObservers.finishBroadcast();
     }
 
-    void timeoutUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
+    void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
         synchronized (this) {
             Slog.w(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
             sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
         }
     }
 
-    void sendContinueUserSwitchLocked(UserStartedState uss, int oldUserId, int newUserId) {
+    void sendContinueUserSwitchLocked(UserState uss, int oldUserId, int newUserId) {
         mCurUserSwitchCallback = null;
         mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(CONTINUE_USER_SWITCH_MSG,
                 oldUserId, newUserId, uss));
     }
 
-    void onUserInitialized(UserStartedState uss, boolean foreground, int oldUserId, int newUserId) {
+    void onUserInitialized(UserState uss, boolean foreground, int oldUserId, int newUserId) {
         synchronized (this) {
             if (foreground) {
                 moveUserToForeground(uss, oldUserId, newUserId);
@@ -19845,7 +19864,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         completeSwitchAndInitalize(uss, newUserId, true, false);
     }
 
-    void moveUserToForeground(UserStartedState uss, int oldUserId, int newUserId) {
+    void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
         boolean homeInFront = mStackSupervisor.switchUserLocked(newUserId, uss);
         if (homeInFront) {
             startHomeActivityLocked(newUserId, "moveUserToFroreground");
@@ -19857,11 +19876,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
     }
 
-    void continueUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
+    void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
         completeSwitchAndInitalize(uss, newUserId, false, true);
     }
 
-    void completeSwitchAndInitalize(UserStartedState uss, int newUserId,
+    void completeSwitchAndInitalize(UserState uss, int newUserId,
             boolean clearInitializing, boolean clearSwitching) {
         boolean unfrozen = false;
         synchronized (this) {
@@ -19898,10 +19917,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int num = mUserLru.size();
             for (int i = 0; i < num; i++) {
                 Integer oldUserId = mUserLru.get(i);
-                UserStartedState oldUss = mStartedUsers.get(oldUserId);
+                UserState oldUss = mStartedUsers.get(oldUserId);
                 if (oldUserId == UserHandle.USER_OWNER || oldUserId == mCurrentUserId
-                        || oldUss.mState == UserStartedState.STATE_STOPPING
-                        || oldUss.mState == UserStartedState.STATE_SHUTDOWN) {
+                        || oldUss.mState == UserState.STATE_STOPPING
+                        || oldUss.mState == UserState.STATE_SHUTDOWN) {
                     continue;
                 }
                 UserInfo userInfo = mUserManager.getUserInfo(oldUserId);
@@ -19942,11 +19961,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void finishUserBoot(UserStartedState uss) {
+    void finishUserBoot(UserState uss) {
         synchronized (this) {
-            if (uss.mState == UserStartedState.STATE_BOOTING
+            if (uss.mState == UserState.STATE_BOOTING
                     && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
-                uss.mState = UserStartedState.STATE_RUNNING;
+                uss.mState = UserState.STATE_RUNNING;
                 final int userId = uss.mHandle.getIdentifier();
                 Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
@@ -19959,7 +19978,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void finishUserSwitch(UserStartedState uss) {
+    void finishUserSwitch(UserState uss) {
         synchronized (this) {
             finishUserBoot(uss);
 
@@ -19969,15 +19988,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             int i = 0;
             while (num > MAX_RUNNING_USERS && i < mUserLru.size()) {
                 Integer oldUserId = mUserLru.get(i);
-                UserStartedState oldUss = mStartedUsers.get(oldUserId);
+                UserState oldUss = mStartedUsers.get(oldUserId);
                 if (oldUss == null) {
                     // Shouldn't happen, but be sane if it does.
                     mUserLru.remove(i);
                     num--;
                     continue;
                 }
-                if (oldUss.mState == UserStartedState.STATE_STOPPING
-                        || oldUss.mState == UserStartedState.STATE_SHUTDOWN) {
+                if (oldUss.mState == UserState.STATE_STOPPING
+                        || oldUss.mState == UserState.STATE_SHUTDOWN) {
                     // This user is already stopping, doesn't count.
                     num--;
                     i++;
@@ -20022,7 +20041,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return ActivityManager.USER_OP_IS_CURRENT;
         }
 
-        final UserStartedState uss = mStartedUsers.get(userId);
+        final UserState uss = mStartedUsers.get(userId);
         if (uss == null) {
             // User is not started, nothing to do...  but we do need to
             // callback if requested.
@@ -20044,9 +20063,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             uss.mStopCallbacks.add(callback);
         }
 
-        if (uss.mState != UserStartedState.STATE_STOPPING
-                && uss.mState != UserStartedState.STATE_SHUTDOWN) {
-            uss.mState = UserStartedState.STATE_STOPPING;
+        if (uss.mState != UserState.STATE_STOPPING
+                && uss.mState != UserState.STATE_SHUTDOWN) {
+            uss.mState = UserState.STATE_STOPPING;
             updateStartedUserArrayLocked();
 
             long ident = Binder.clearCallingIdentity();
@@ -20074,11 +20093,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                         // On to the next.
                         synchronized (ActivityManagerService.this) {
-                            if (uss.mState != UserStartedState.STATE_STOPPING) {
+                            if (uss.mState != UserState.STATE_STOPPING) {
                                 // Whoops, we are being started back up.  Abort, abort!
                                 return;
                             }
-                            uss.mState = UserStartedState.STATE_SHUTDOWN;
+                            uss.mState = UserState.STATE_SHUTDOWN;
                         }
                         mBatteryStatsService.noteEvent(
                                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
@@ -20102,7 +20121,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return ActivityManager.USER_OP_SUCCESS;
     }
 
-    void finishUserStop(UserStartedState uss) {
+    void finishUserStop(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         boolean stopped;
         ArrayList<IStopUserCallback> callbacks;
@@ -20110,7 +20129,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             callbacks = new ArrayList<IStopUserCallback>(uss.mStopCallbacks);
             if (mStartedUsers.get(userId) != uss) {
                 stopped = false;
-            } else if (uss.mState != UserStartedState.STATE_SHUTDOWN) {
+            } else if (uss.mState != UserState.STATE_SHUTDOWN) {
                 stopped = false;
             } else {
                 stopped = true;
@@ -20184,15 +20203,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     boolean isUserRunningLocked(int userId, boolean orStopped) {
-        UserStartedState state = mStartedUsers.get(userId);
+        UserState state = mStartedUsers.get(userId);
         if (state == null) {
             return false;
         }
         if (orStopped) {
             return true;
         }
-        return state.mState != UserStartedState.STATE_STOPPING
-                && state.mState != UserStartedState.STATE_SHUTDOWN;
+        return state.mState != UserState.STATE_STOPPING
+                && state.mState != UserState.STATE_SHUTDOWN;
     }
 
     @Override
@@ -20214,19 +20233,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void updateStartedUserArrayLocked() {
         int num = 0;
         for (int i=0; i<mStartedUsers.size();  i++) {
-            UserStartedState uss = mStartedUsers.valueAt(i);
+            UserState uss = mStartedUsers.valueAt(i);
             // This list does not include stopping users.
-            if (uss.mState != UserStartedState.STATE_STOPPING
-                    && uss.mState != UserStartedState.STATE_SHUTDOWN) {
+            if (uss.mState != UserState.STATE_STOPPING
+                    && uss.mState != UserState.STATE_SHUTDOWN) {
                 num++;
             }
         }
         mStartedUserArray = new int[num];
         num = 0;
         for (int i=0; i<mStartedUsers.size();  i++) {
-            UserStartedState uss = mStartedUsers.valueAt(i);
-            if (uss.mState != UserStartedState.STATE_STOPPING
-                    && uss.mState != UserStartedState.STATE_SHUTDOWN) {
+            UserState uss = mStartedUsers.valueAt(i);
+            if (uss.mState != UserState.STATE_STOPPING
+                    && uss.mState != UserState.STATE_SHUTDOWN) {
                 mStartedUserArray[num] = mStartedUsers.keyAt(i);
                 num++;
             }

@@ -84,7 +84,7 @@ public abstract class RegisteredServicesCache<V> {
     private final String mAttributesName;
     private final XmlSerializerAndParser<V> mSerializerAndParser;
 
-    private final Object mServicesLock = new Object();
+    protected final Object mServicesLock = new Object();
 
     @GuardedBy("mServicesLock")
     private final SparseArray<UserServices<V>> mUserServices = new SparseArray<UserServices<V>>(2);
@@ -232,6 +232,7 @@ public abstract class RegisteredServicesCache<V> {
         synchronized (mServicesLock) {
             final UserServices<V> user = findOrCreateUserLocked(userId);
             user.services = null;
+            onServicesChangedLocked(userId);
         }
     }
 
@@ -489,9 +490,14 @@ public abstract class RegisteredServicesCache<V> {
                 }
             }
             if (changed) {
+                onServicesChangedLocked(userId);
                 writePersistentServicesLocked(user, userId);
             }
         }
+    }
+
+    protected void onServicesChangedLocked(int userId) {
+        // Feel free to override
     }
 
     /**
@@ -687,7 +693,9 @@ public abstract class RegisteredServicesCache<V> {
 
     @VisibleForTesting
     protected void onUserRemoved(int userId) {
-        mUserServices.remove(userId);
+        synchronized (mServicesLock) {
+            mUserServices.remove(userId);
+        }
     }
 
     @VisibleForTesting

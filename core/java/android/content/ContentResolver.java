@@ -48,6 +48,7 @@ import android.util.Log;
 
 import dalvik.system.CloseGuard;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -57,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -1933,6 +1935,19 @@ public abstract class ContentResolver {
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
+    }
+
+    /**
+     * @hide
+     * Returns the package names of syncadapters that match a given user and authority.
+     */
+    public static String[] getSyncAdapterPackagesForAuthorityAsUser(String authority,
+            int userId) {
+        try {
+            return getContentService().getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
+        } catch (RemoteException e) {
+        }
+        return ArrayUtils.emptyArray(String.class);
     }
 
     /**
