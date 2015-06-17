@@ -197,6 +197,13 @@ public class FloatingActionMode extends ActionMode {
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        checkToolbarInitialized();
+        mFloatingToolbarVisibilityHelper.setWindowFocused(hasWindowFocus);
+        mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+    }
+
+    @Override
     public void finish() {
         checkToolbarInitialized();
         reset();
@@ -237,6 +244,7 @@ public class FloatingActionMode extends ActionMode {
     }
 
     private void reset() {
+        mFloatingToolbar.dismiss();
         mFloatingToolbarVisibilityHelper.deactivate();
         mOriginatingView.removeCallbacks(mMovingOff);
         mOriginatingView.removeCallbacks(mHideOff);
@@ -253,6 +261,7 @@ public class FloatingActionMode extends ActionMode {
         private boolean mHideRequested;
         private boolean mMoving;
         private boolean mOutOfBounds;
+        private boolean mWindowFocused = true;
 
         private boolean mActive;
 
@@ -264,6 +273,7 @@ public class FloatingActionMode extends ActionMode {
             mHideRequested = false;
             mMoving = false;
             mOutOfBounds = false;
+            mWindowFocused = true;
 
             mActive = true;
         }
@@ -285,12 +295,16 @@ public class FloatingActionMode extends ActionMode {
             mOutOfBounds = outOfBounds;
         }
 
+        public void setWindowFocused(boolean windowFocused) {
+            mWindowFocused = windowFocused;
+        }
+
         public void updateToolbarVisibility() {
             if (!mActive) {
                 return;
             }
 
-            if (mHideRequested || mMoving || mOutOfBounds) {
+            if (mHideRequested || mMoving || mOutOfBounds || !mWindowFocused) {
                 mToolbar.hide();
             } else {
                 mToolbar.show();
