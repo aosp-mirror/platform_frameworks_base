@@ -2747,13 +2747,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         return index;
     }
 
+    private static void killProcessGroup(int uid, int pid) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "killProcessGroup");
+        Process.killProcessGroup(uid, pid);
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
     final void removeLruProcessLocked(ProcessRecord app) {
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui >= 0) {
             if (!app.killed) {
                 Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
                 Process.killProcessQuiet(app.pid);
-                Process.killProcessGroup(app.info.uid, app.pid);
+                killProcessGroup(app.info.uid, app.pid);
             }
             if (lrui <= mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
@@ -3118,7 +3124,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // clean it up now.
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG_PROCESSES, "App died: " + app);
             checkTime(startTime, "startProcess: bad proc running, killing");
-            Process.killProcessGroup(app.info.uid, app.pid);
+            killProcessGroup(app.info.uid, app.pid);
             handleAppDiedLocked(app, true, true);
             checkTime(startTime, "startProcess: done killing old proc");
         }
@@ -4604,7 +4610,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!fromBinderDied) {
                 Process.killProcessQuiet(pid);
             }
-            Process.killProcessGroup(app.info.uid, pid);
+            killProcessGroup(app.info.uid, pid);
             app.killed = true;
         }
 
@@ -5927,7 +5933,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             EventLog.writeEvent(EventLogTags.AM_DROP_PROCESS, pid);
             if (pid > 0 && pid != MY_PID) {
                 Process.killProcessQuiet(pid);
-                //TODO: Process.killProcessGroup(app.info.uid, pid);
+                //TODO: killProcessGroup(app.info.uid, pid);
             } else {
                 try {
                     thread.scheduleExit();
@@ -12390,7 +12396,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             } else {
                                 // Huh.
                                 Process.killProcess(pid);
-                                Process.killProcessGroup(uid, pid);
+                                killProcessGroup(uid, pid);
                             }
                         }
                         return;
