@@ -73,6 +73,8 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
     private byte[] mBuffered = EmptyArray.BYTE;
     private int mBufferedOffset;
     private int mBufferedLength;
+    private long mConsumedInputSizeBytes;
+    private long mProducedOutputSizeBytes;
 
     public KeyStoreCryptoOperationChunkedStreamer(Stream operation) {
         this(operation, DEFAULT_MAX_CHUNK_SIZE);
@@ -119,6 +121,7 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
             // Update input array references to reflect that some of its bytes are now in mBuffered.
             inputOffset += inputBytesInChunk;
             inputLength -= inputBytesInChunk;
+            mConsumedInputSizeBytes += inputBytesInChunk;
 
             OperationResult opResult = mKeyStoreStream.update(chunk);
             if (opResult == null) {
@@ -167,9 +170,10 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                     }
                 } else {
                     // No more output will be produced in this loop
+                    byte[] result;
                     if (bufferedOutput == null) {
                         // No previously buffered output
-                        return opResult.output;
+                        result = opResult.output;
                     } else {
                         // There was some previously buffered output
                         try {
@@ -177,18 +181,23 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                         } catch (IOException e) {
                             throw new IllegalStateException("Failed to buffer output", e);
                         }
-                        return bufferedOutput.toByteArray();
+                        result = bufferedOutput.toByteArray();
                     }
+                    mProducedOutputSizeBytes += result.length;
+                    return result;
                 }
             }
         }
 
+        byte[] result;
         if (bufferedOutput == null) {
             // No output produced
-            return EmptyArray.BYTE;
+            result = EmptyArray.BYTE;
         } else {
-            return bufferedOutput.toByteArray();
+            result = bufferedOutput.toByteArray();
         }
+        mProducedOutputSizeBytes += result.length;
+        return result;
     }
 
     @Override
@@ -210,14 +219,11 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
             throw KeyStore.getKeyStoreException(opResult.resultCode);
         }
+        mProducedOutputSizeBytes += opResult.output.length;
 
         return ArrayUtils.concat(output, opResult.output);
     }
 
-    /**
-     * Passes all of buffered input into the the KeyStore operation (via the {@code update}
-     * operation) and returns output.
-     */
     public byte[] flush() throws KeyStoreException {
         if (mBufferedLength <= 0) {
             return EmptyArray.BYTE;
@@ -243,7 +249,19 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                     + " . Provided: " + chunk.length + ", consumed: " + opResult.inputConsumed);
         }
 
-        return (opResult.output != null) ? opResult.output : EmptyArray.BYTE;
+        byte[] result = (opResult.output != null) ? opResult.output : EmptyArray.BYTE;
+        mProducedOutputSizeBytes += result.length;
+        return result;
+    }
+
+    @Override
+    public long getConsumedInputSizeBytes() {
+        return mConsumedInputSizeBytes;
+    }
+
+    @Override
+    public long getProducedOutputSizeBytes() {
+        return mProducedOutputSizeBytes;
     }
 
     /**

@@ -81,7 +81,6 @@ public final class KeymasterDefs {
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
-    public static final int KM_TAG_AEAD_TAG = KM_BYTES | 1002;
     public static final int KM_TAG_AUTH_TOKEN = KM_BYTES | 1003;
     public static final int KM_TAG_MAC_LENGTH = KM_INT | 1004;
 

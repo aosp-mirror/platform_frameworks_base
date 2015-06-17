@@ -93,6 +93,9 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
         putSymmetricCipherImpl("AES/CTR/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CTR$NoPadding");
 
+        putSymmetricCipherImpl("AES/GCM/NoPadding",
+                PACKAGE_NAME + ".AndroidKeyStoreAuthenticatedAESCipherSpi$GCM$NoPadding");
+
         putAsymmetricCipherImpl("RSA/ECB/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreRSACipherSpi$NoPadding");
         put("Alg.Alias.Cipher.RSA/None/NoPadding", "RSA/ECB/NoPadding");

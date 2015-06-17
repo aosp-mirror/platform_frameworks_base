@@ -26,6 +26,8 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 
+import libcore.util.EmptyArray;
+
 import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -78,6 +80,8 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     private IBinder mOperationToken;
     private long mOperationHandle;
     private KeyStoreCryptoOperationStreamer mMainDataStreamer;
+    private KeyStoreCryptoOperationStreamer mAdditionalAuthenticationDataStreamer;
+    private boolean mAdditionalAuthenticationDataStreamerClosed;
 
     /**
      * Encountered exception which could not be immediately thrown because it was encountered inside
@@ -189,6 +193,8 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         mOperationToken = null;
         mOperationHandle = 0;
         mMainDataStreamer = null;
+        mAdditionalAuthenticationDataStreamer = null;
+        mAdditionalAuthenticationDataStreamerClosed = false;
         mCachedException = null;
     }
 
@@ -209,6 +215,8 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         mOperationToken = null;
         mOperationHandle = 0;
         mMainDataStreamer = null;
+        mAdditionalAuthenticationDataStreamer = null;
+        mAdditionalAuthenticationDataStreamerClosed = false;
         mCachedException = null;
     }
 
@@ -273,6 +281,9 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
 
         loadAlgorithmSpecificParametersFromBeginResult(opResult.outParams);
         mMainDataStreamer = createMainDataStreamer(mKeyStore, opResult.token);
+        mAdditionalAuthenticationDataStreamer =
+                createAdditionalAuthenticationDataStreamer(mKeyStore, opResult.token);
+        mAdditionalAuthenticationDataStreamerClosed = false;
     }
 
     /**
@@ -287,6 +298,20 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         return new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         keyStore, operationToken));
+    }
+
+    /**
+     * Creates a streamer which sends Additional Authentication Data (AAD) into the KeyStore.
+     *
+     * <p>This implementation returns {@code null}.
+     *
+     * @returns stream or {@code null} if AAD is not supported by this cipher.
+     */
+    @Nullable
+    protected KeyStoreCryptoOperationStreamer createAdditionalAuthenticationDataStreamer(
+            @SuppressWarnings("unused") KeyStore keyStore,
+            @SuppressWarnings("unused") IBinder operationToken) {
+        return null;
     }
 
     @Override
@@ -307,6 +332,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
 
         byte[] output;
         try {
+            flushAAD();
             output = mMainDataStreamer.update(input, inputOffset, inputLen);
         } catch (KeyStoreException e) {
             mCachedException = e;
@@ -318,6 +344,25 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         }
 
         return output;
+    }
+
+    private void flushAAD() throws KeyStoreException {
+        if ((mAdditionalAuthenticationDataStreamer != null)
+                && (!mAdditionalAuthenticationDataStreamerClosed)) {
+            byte[] output;
+            try {
+                output = mAdditionalAuthenticationDataStreamer.doFinal(
+                        EmptyArray.BYTE, 0, 0,
+                        null // no additional entropy needed flushing AAD
+                        );
+            } finally {
+                mAdditionalAuthenticationDataStreamerClosed = true;
+            }
+            if ((output != null) && (output.length > 0)) {
+                throw new ProviderException(
+                        "AAD update unexpectedly returned data: " + output.length + " bytes");
+            }
+        }
     }
 
     @Override
@@ -344,12 +389,64 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
 
     @Override
     protected final void engineUpdateAAD(byte[] input, int inputOffset, int inputLen) {
-        super.engineUpdateAAD(input, inputOffset, inputLen);
+        if (mCachedException != null) {
+            return;
+        }
+
+        try {
+            ensureKeystoreOperationInitialized();
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            mCachedException = e;
+            return;
+        }
+
+        if (mAdditionalAuthenticationDataStreamerClosed) {
+            throw new IllegalStateException(
+                    "AAD can only be provided before Cipher.update is invoked");
+        }
+
+        if (mAdditionalAuthenticationDataStreamer == null) {
+            throw new IllegalStateException("This cipher does not support AAD");
+        }
+
+        byte[] output;
+        try {
+            output = mAdditionalAuthenticationDataStreamer.update(input, inputOffset, inputLen);
+        } catch (KeyStoreException e) {
+            mCachedException = e;
+            return;
+        }
+
+        if ((output != null) && (output.length > 0)) {
+            throw new ProviderException("AAD update unexpectedly produced output: "
+                    + output.length + " bytes");
+        }
     }
 
     @Override
     protected final void engineUpdateAAD(ByteBuffer src) {
-        super.engineUpdateAAD(src);
+        if (src == null) {
+            throw new IllegalArgumentException("src == null");
+        }
+        if (!src.hasRemaining()) {
+            return;
+        }
+
+        byte[] input;
+        int inputOffset;
+        int inputLen;
+        if (src.hasArray()) {
+            input = src.array();
+            inputOffset = src.arrayOffset() + src.position();
+            inputLen = src.remaining();
+            src.position(src.limit());
+        } else {
+            input = new byte[src.remaining()];
+            inputOffset = 0;
+            inputLen = input.length;
+            src.get(input);
+        }
+        super.engineUpdateAAD(input, inputOffset, inputLen);
     }
 
     @Override
@@ -368,6 +465,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
 
         byte[] output;
         try {
+            flushAAD();
             byte[] additionalEntropy =
                     KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                             mRng, getAdditionalEntropyAmountForFinish());
@@ -613,6 +711,20 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     @NonNull
     protected final KeyStore getKeyStore() {
         return mKeyStore;
+    }
+
+    protected final long getConsumedInputSizeBytes() {
+        if (mMainDataStreamer == null) {
+            throw new IllegalStateException("Not initialized");
+        }
+        return mMainDataStreamer.getConsumedInputSizeBytes();
+    }
+
+    protected final long getProducedOutputSizeBytes() {
+        if (mMainDataStreamer == null) {
+            throw new IllegalStateException("Not initialized");
+        }
+        return mMainDataStreamer.getProducedOutputSizeBytes();
     }
 
     // The methods below need to be implemented by subclasses.
