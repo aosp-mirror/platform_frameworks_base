@@ -40,7 +40,7 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
 
-    void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+    oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller);
 
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
