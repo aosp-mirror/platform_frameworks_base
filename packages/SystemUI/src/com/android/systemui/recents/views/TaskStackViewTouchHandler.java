@@ -396,11 +396,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // Find the front most task and scroll the next task to the front
                     float vScroll = ev.getAxisValue(MotionEvent.AXIS_VSCROLL);
                     if (vScroll > 0) {
-                        if (mSv.ensureFocusedTask()) {
+                        if (mSv.ensureFocusedTask(true)) {
                             mSv.focusNextTask(true, false);
                         }
                     } else {
-                        if (mSv.ensureFocusedTask()) {
+                        if (mSv.ensureFocusedTask(true)) {
                             mSv.focusNextTask(false, false);
                         }
                     }
