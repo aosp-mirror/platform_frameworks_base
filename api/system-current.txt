@@ -4906,7 +4906,6 @@ package android.app {
     method public android.graphics.drawable.Icon getLargeIcon();
     method public android.graphics.drawable.Icon getSmallIcon();
     method public java.lang.String getSortKey();
-    method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.media.AudioAttributes AUDIO_ATTRIBUTES_DEFAULT;
     field public static final java.lang.String CATEGORY_ALARM = "alarm";
