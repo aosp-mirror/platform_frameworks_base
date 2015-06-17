@@ -530,7 +530,7 @@ bool BootAnimation::movie()
         if (leaf.size() > 0) {
             for (size_t j=0 ; j<pcount ; j++) {
                 if (path == animation.parts[j].path) {
-                    int method;
+                    uint16_t method;
                     // supports only stored png files
                     if (mZip->getEntryInfo(entry, &method, NULL, NULL, NULL, NULL, NULL)) {
                         if (method == ZipFileRO::kCompressStored) {
