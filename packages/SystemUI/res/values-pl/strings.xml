@@ -322,8 +322,7 @@
     <string name="phone_hint" msgid="4872890986869209950">"Aby włączyć telefon, przesuń palcem od ikony"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Aby uzyskać pomoc głosową, przesuń palcem od ikony"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Przesuń palcem od ikony, by włączyć aparat"</string>
-    <!-- no translation found for interruption_level_none_with_warning (5114872171614161084) -->
-    <skip />
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Całkowita cisza. Wyciszone zostaną też czytniki ekranu."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Całkowita cisza"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Tylko priorytetowe"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Tylko alarmy"</string>
@@ -333,8 +332,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Ładuje się (pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Przełącz użytkownika. Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_multi_user_switch_inactive (1424081831468083402) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Pokaż profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Dodaj użytkownika"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nowy użytkownik"</string>
@@ -349,8 +347,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Rozpocznij nową"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Tak, kontynuuj"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gość"</string>
-    <!-- no translation found for guest_notification_text (335747957734796689) -->
-    <skip />
+    <string name="guest_notification_text" msgid="335747957734796689">"Usuń gościa, by usunąć aplikacje i dane"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"USUŃ GOŚCIA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
