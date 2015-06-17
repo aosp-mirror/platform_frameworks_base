@@ -4384,7 +4384,7 @@ i
             <enum name="simple" value="0" />
             <!-- Line breaking uses high-quality strategy, including hyphenation. -->
             <enum name="high_quality" value="1" />
-            <!-- Line breaking stratgegy balances line lengths. -->
+            <!-- Line breaking strategy balances line lengths. -->
             <enum name="balanced" value="2" />
         </attr>
         <!-- Frequency of automatic hyphenation. -->
@@ -4398,10 +4398,10 @@ i
             screens with limited space for text. -->
             <enum name="full" value="2" />
         </attr>
-        <!-- Array of indents, one dimension value per line, left side. -->
-        <attr name="leftIndents" format="reference" />
-        <!-- Array of indents, one dimension value per line, right side. -->
-        <attr name="rightIndents" format="reference" />
+        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
+        <attr name="__removeBeforeMRelease_leftIndents" format="reference" />
+        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
+        <attr name="__removeBeforeMRelease_rightIndents" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
