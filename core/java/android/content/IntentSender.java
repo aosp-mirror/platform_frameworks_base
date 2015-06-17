@@ -195,7 +195,7 @@ public class IntentSender implements Parcelable {
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
                             : null,
-                    requiredPermission);
+                    requiredPermission, null);
             if (res < 0) {
                 throw new SendIntentException();
             }
