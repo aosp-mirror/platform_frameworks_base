@@ -104,8 +104,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     /* EC */
     private static final int EC_DEFAULT_KEY_SIZE = 256;
-    private static final int EC_MIN_KEY_SIZE = 192;
-    private static final int EC_MAX_KEY_SIZE = 521;
 
     /* RSA */
     private static final int RSA_DEFAULT_KEY_SIZE = 2048;
@@ -115,15 +113,12 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private static final Map<String, Integer> SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE =
             new HashMap<String, Integer>();
     private static final List<String> SUPPORTED_EC_NIST_CURVE_NAMES = new ArrayList<String>();
+    private static final List<Integer> SUPPORTED_EC_NIST_CURVE_SIZES = new ArrayList<Integer>();
     static {
-        // Aliases for NIST P-192
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-192", 192);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp192r1", 192);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("prime192v1", 192);
-
         // Aliases for NIST P-224
         SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-224", 224);
         SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp224r1", 224);
+
 
         // Aliases for NIST P-256
         SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-256", 256);
@@ -140,6 +135,10 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         SUPPORTED_EC_NIST_CURVE_NAMES.addAll(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.keySet());
         Collections.sort(SUPPORTED_EC_NIST_CURVE_NAMES);
+
+        SUPPORTED_EC_NIST_CURVE_SIZES.addAll(
+                new HashSet<Integer>(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.values()));
+        Collections.sort(SUPPORTED_EC_NIST_CURVE_SIZES);
     }
 
     private final int mOriginalKeymasterAlgorithm;
@@ -598,9 +597,9 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             throws InvalidAlgorithmParameterException {
         switch (keymasterAlgorithm) {
             case KeymasterDefs.KM_ALGORITHM_EC:
-                if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
-                    throw new InvalidAlgorithmParameterException("EC key size must be >= "
-                            + EC_MIN_KEY_SIZE + " and <= " + EC_MAX_KEY_SIZE);
+                if (!SUPPORTED_EC_NIST_CURVE_SIZES.contains(keySize)) {
+                    throw new InvalidAlgorithmParameterException("Unsupported EC key size: "
+                            + keySize + " bits. Supported: " + SUPPORTED_EC_NIST_CURVE_SIZES);
                 }
                 break;
             case KeymasterDefs.KM_ALGORITHM_RSA:
