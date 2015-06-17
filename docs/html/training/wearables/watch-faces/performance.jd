@@ -34,13 +34,15 @@ power on the device.</p>
 <p>Many watch faces consist of a background image and other graphic assets that are transformed
 and overlapped on top of the background image, such as clock hands and other elements of the design
 that move over time. Typically these graphic elements are rotated (and sometimes scaled) inside the
-<code>Engine.onDraw()</code> method every time the system redraws the watch face, as described in
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>Engine.onDraw()</code></a>
+method every time the system redraws the watch face, as described in
 <a href="{@docRoot}training/wearables/watch-faces/drawing.html#Drawing">Draw Your Watch
 Face</a>.</p>
 
 <p>The larger these graphic assets are, the more computationally expensive it is to transform them.
-Transforming large graphic assets in the <code>Engine.onDraw()</code> method drastically reduces
-the frame rate at which the system can run your animations.</p>
+Transforming large graphic assets in the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>Engine.onDraw()</code></a>
+method drastically reduces the frame rate at which the system can run your animations.</p>
 
 <div id="fig1" style="float:right;width:250px;margin-left:25px">
 <img src="{@docRoot}training/wearables/watch-faces/images/ClockHandFull.png" alt=""
@@ -105,11 +107,14 @@ active, disable bitmap filtering.</p>
 
 <h2 id="OutDrawing">Move Expensive Operations Outside the Drawing Method</h2>
 
-<p>The system calls the <code>Engine.onDraw()</code> method every time it redraws your watch
-face, so you should only include operations that are strictly required to update the watch
-face inside this method to improve performance.<p>
+<p>The system calls the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>Engine.onDraw()</code></a>
+method every time it redraws your watch face, so you should only include operations that are
+strictly required to update the watch face inside this method to improve performance.<p>
 
-<p>When possible, avoid performing these operations inside the <code>onDraw()</code> method:</p>
+<p>When possible, avoid performing these operations inside the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>Engine.onDraw()</code></a>
+method:</p>
 
 <ul>
 <li>Loading images and other resources.</li>
@@ -118,13 +123,17 @@ face inside this method to improve performance.<p>
 <li>Performing computations whose result does not change between frames.</li>
 </ul>
 
-<p>You can usually perform these operations in the <code>Engine.onCreate()</code> method instead.
+<p>You can usually perform these operations in the
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onCreate(android.view.SurfaceHolder)"><code>Engine.onCreate()</code></a>
+method instead.
 You can resize images ahead of time in the {@link
 android.service.wallpaper.WallpaperService.Engine#onSurfaceChanged(android.view.SurfaceHolder, int, int, int)
 Engine.onSurfaceChanged()} method, which provides you with the size of the canvas.</p>
 
 <p>To analyze the performance of your watch face, use the Android Device Monitor. In particular,
-ensure that the execution time for your <code>Engine.onDraw()</code> implementation is short and
+ensure that the execution time for your
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>Engine.onDraw()</code></a>
+implementation is short and
 consistent across invocations. For more information, see
 <a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a>.</p>
 
