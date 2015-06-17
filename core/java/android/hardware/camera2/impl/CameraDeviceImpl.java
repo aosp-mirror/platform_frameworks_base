@@ -2049,6 +2049,8 @@ public class CameraDeviceImpl extends CameraDevice {
         // Prepare the Request builders: need carry over the request controls.
         // First, create a request builder that will only include preview or recording target.
         CameraMetadataNative requestMetadata = new CameraMetadataNative(request.getNativeCopy());
+        // Note that after this step, the requestMetadata is mutated (swapped) and can not be used
+        // for next request builder creation.
         CaptureRequest.Builder singleTargetRequestBuilder = new CaptureRequest.Builder(
                 requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
 
@@ -2069,6 +2071,9 @@ public class CameraDeviceImpl extends CameraDevice {
         // Second, Create a request builder that will include both preview and recording targets.
         CaptureRequest.Builder doubleTargetRequestBuilder = null;
         if (outputSurfaces.size() == 2) {
+            // Have to create a new copy, the original one was mutated after a new
+            // CaptureRequest.Builder creation.
+            requestMetadata = new CameraMetadataNative(request.getNativeCopy());
             doubleTargetRequestBuilder = new CaptureRequest.Builder(
                     requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
             doubleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
