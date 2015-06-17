@@ -1156,13 +1156,11 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
     Asset* pAsset = NULL;
 
     // TODO: look for previously-created shared memory slice?
-    int method;
-    size_t uncompressedLen;
+    uint16_t method;
+    uint32_t uncompressedLen;
 
     //printf("USING Zip '%s'\n", pEntry->getFileName());
 
-    //pZipFile->getEntryInfo(entry, &method, &uncompressedLen, &compressedLen,
-    //    &offset);
     if (!pZipFile->getEntryInfo(entry, &method, &uncompressedLen, NULL, NULL,
             NULL, NULL))
     {
@@ -1181,8 +1179,8 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
         ALOGV("Opened uncompressed entry %s in zip %s mode %d: %p", entryName.string(),
                 dataMap->getFileName(), mode, pAsset);
     } else {
-        pAsset = Asset::createFromCompressedMap(dataMap, method,
-            uncompressedLen, mode);
+        pAsset = Asset::createFromCompressedMap(dataMap,
+            static_cast<size_t>(uncompressedLen), mode);
         ALOGV("Opened compressed entry %s in zip %s mode %d: %p", entryName.string(),
                 dataMap->getFileName(), mode, pAsset);
     }

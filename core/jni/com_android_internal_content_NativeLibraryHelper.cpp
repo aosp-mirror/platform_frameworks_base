@@ -105,8 +105,8 @@ isFilenameSafe(const char* filename)
 }
 
 static bool
-isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
-        long zipCrc, struct stat64* st)
+isFileDifferent(const char* filePath, uint32_t fileSize, time_t modifiedTime,
+        uint32_t zipCrc, struct stat64* st)
 {
     if (lstat64(filePath, st) < 0) {
         // File is not found or cannot be read.
@@ -134,7 +134,9 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
         return true;
     }
 
-    long crc = crc32(0L, Z_NULL, 0);
+    // uLong comes from zlib.h. It's a bit of a wart that they're
+    // potentially using a 64-bit type for a 32-bit CRC.
+    uLong crc = crc32(0L, Z_NULL, 0);
     unsigned char crcBuffer[16384];
     ssize_t numBytes;
     while ((numBytes = TEMP_FAILURE_RETRY(read(fd, crcBuffer, sizeof(crcBuffer)))) > 0) {
@@ -142,9 +144,9 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
     }
     close(fd);
 
-    ALOGV("%s: crc = %lx, zipCrc = %lx\n", filePath, crc, zipCrc);
+    ALOGV("%s: crc = %lx, zipCrc = %" PRIu32 "\n", filePath, crc, zipCrc);
 
-    if (crc != zipCrc) {
+    if (crc != static_cast<uLong>(zipCrc)) {
         return true;
     }
 
@@ -155,13 +157,13 @@ static install_status_t
 sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char*)
 {
     size_t* total = (size_t*) arg;
-    size_t uncompLen;
+    uint32_t uncompLen;
 
     if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, NULL, NULL)) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    *total += uncompLen;
+    *total += static_cast<size_t>(uncompLen);
 
     return INSTALL_SUCCEEDED;
 }
@@ -181,12 +183,11 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
 
-    size_t uncompLen;
-    long when;
-    long crc;
-    time_t modTime;
+    uint32_t uncompLen;
+    uint32_t when;
+    uint32_t crc;
 
-    int method;
+    uint16_t method;
     off64_t offset;
 
     if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, NULL, &offset, &when, &crc)) {
@@ -233,7 +234,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     // Only copy out the native file if it's different.
     struct tm t;
     ZipUtils::zipTimeToTimespec(when, &t);
-    modTime = mktime(&t);
+    const time_t modTime = mktime(&t);
     struct stat64 st;
     if (!isFileDifferent(localFileName, uncompLen, modTime, crc, &st)) {
         return INSTALL_SUCCEEDED;
