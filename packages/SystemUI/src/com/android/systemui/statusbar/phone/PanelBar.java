@@ -25,7 +25,7 @@ import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 
-public class PanelBar extends FrameLayout {
+public abstract class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelBar.class.getSimpleName();
     public static final void LOG(String fmt, Object... args) {
@@ -155,6 +155,8 @@ public class PanelBar extends FrameLayout {
             }
         }
     }
+
+    public abstract void panelScrimMinFractionChanged(float minFraction);
 
     /**
      * @param panel the panel which changed its expansion state

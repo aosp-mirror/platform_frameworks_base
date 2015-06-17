@@ -40,6 +40,8 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mNotificationPanel;
     private final PhoneStatusBarTransitions mBarTransitions;
     private ScrimController mScrimController;
+    private float mMinFraction;
+    private float mPanelFraction;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -180,8 +182,22 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
+    public void panelScrimMinFractionChanged(float minFraction) {
+        if (mMinFraction != minFraction) {
+            mMinFraction = minFraction;
+            updateScrimFraction();
+        }
+    }
+
+    @Override
     public void panelExpansionChanged(PanelView panel, float frac, boolean expanded) {
         super.panelExpansionChanged(panel, frac, expanded);
-        mScrimController.setPanelExpansion(frac);
+        mPanelFraction = frac;
+        updateScrimFraction();
+    }
+
+    private void updateScrimFraction() {
+        float scrimFraction = Math.max(mPanelFraction - mMinFraction / (1.0f - mMinFraction), 0);
+        mScrimController.setPanelExpansion(scrimFraction);
     }
 }
