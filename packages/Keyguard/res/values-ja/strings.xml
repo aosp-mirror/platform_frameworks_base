@@ -108,20 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"通信サービスはありません。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"機内モード"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
-    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
-    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"端末を再起動するにはパターンが必要です。"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"端末を再起動するにはPINが必要です。"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"端末を再起動するにはパスワードが必要です。"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"プロファイルを切り替えるにはパターンが必要です。"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"プロファイルを切り替えるにはPINが必要です。"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"プロファイルを切り替えるにはパスワードが必要です。"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
+      <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。PINを確認してください。</item>
+      <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。PINを確認してください。</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。パスワードを確認してください。</item>
+      <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。パスワードを確認してください。</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"認識されませんでした"</string>
 </resources>
