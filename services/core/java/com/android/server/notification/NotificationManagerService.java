@@ -856,8 +856,10 @@ public class NotificationManagerService extends SystemService {
         } catch (Resources.NotFoundException e) {
             extractorNames = new String[0];
         }
+        mUsageStats = new NotificationUsageStats(getContext());
         mRankingHelper = new RankingHelper(getContext(),
                 new RankingWorkerHandler(mRankingThread.getLooper()),
+                mUsageStats,
                 extractorNames);
         mConditionProviders = new ConditionProviders(getContext(), mHandler, mUserProfiles);
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
@@ -882,7 +884,6 @@ public class NotificationManagerService extends SystemService {
         });
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
-        mUsageStats = new NotificationUsageStats(getContext());
 
         importOldBlockDb();
 
@@ -2074,6 +2075,7 @@ public class NotificationManagerService extends SystemService {
                             r.score = JUNK_SCORE;
                             Slog.e(TAG, "Suppressing notification from package " + pkg
                                     + " by user request.");
+                            mUsageStats.registerBlocked(r);
                         }
                     }
 
@@ -2738,12 +2740,6 @@ public class NotificationManagerService extends SystemService {
             case REASON_NOMAN_CANCEL:
             case REASON_NOMAN_CANCEL_ALL:
                 mUsageStats.registerRemovedByApp(r);
-                break;
-            case REASON_DELEGATE_CLICK:
-                mUsageStats.registerCancelDueToClick(r);
-                break;
-            default:
-                mUsageStats.registerCancelUnknown(r);
                 break;
         }
 
