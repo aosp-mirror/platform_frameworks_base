@@ -16,7 +16,8 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/qs_detail_item_height"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/qs_detail_item_height"
     android:background="@drawable/btn_borderless_rect"
     android:clickable="true"
     android:gravity="center_vertical"
