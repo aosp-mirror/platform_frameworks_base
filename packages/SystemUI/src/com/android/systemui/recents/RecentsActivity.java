@@ -134,9 +134,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     dismissRecentsToFocusedTaskOrHome(false);
                 } else if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
                     // Otherwise, dismiss Recents to Home
-                    dismissRecentsToHome(true);
+                    dismissRecentsToHomeRaw(true);
                 } else {
-                    // Do nothing, another activity is being launched on top of Recents
+                    // Do nothing
                 }
             } else if (action.equals(Recents.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // If we are toggling Recents, then first unfilter any filtered stacks first
