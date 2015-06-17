@@ -238,17 +238,27 @@ public class KeyInfo implements KeySpec {
     }
 
     /**
-     * Returns {@code true} if user authentication is required for this key to be used.
+     * Returns {@code true} if the key is authorized to be used only if the user has been
+     * authenticated.
+     *
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
      *
      * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see KeyGenParameterSpec.Builder#setUserAuthenticationRequired(boolean)
+     * @see KeyProtection.Builder#setUserAuthenticationRequired(boolean)
      */
     public boolean isUserAuthenticationRequired() {
         return mUserAuthenticationRequired;
     }
 
     /**
-     * Gets the duration of time (seconds) for which this key can be used after the user is
-     * successfully authenticated. This has effect only if user authentication is required.
+     * Gets the duration of time (seconds) for which this key is authorized to be used after the
+     * user is successfully authenticated. This has effect only if user authentication is required
+     * (see {@link #isUserAuthenticationRequired()}).
+     *
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
      *
      * @return duration in seconds or {@code -1} if authentication is required for every use of the
      *         key.
