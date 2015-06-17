@@ -291,6 +291,8 @@ package android {
 
   public static final class R.attr {
     ctor public R.attr();
+    field public static final int __removeBeforeMRelease_leftIndents = 16844016; // 0x10104f0
+    field public static final int __removeBeforeMRelease_rightIndents = 16844017; // 0x10104f1
     field public static final int __reserved0 = 16844020; // 0x10104f4
     field public static final int __reserved1 = 16844019; // 0x10104f3
     field public static final int __reserved2 = 16843999; // 0x10104df
@@ -877,7 +879,6 @@ package android {
     field public static final int layout_x = 16843135; // 0x101017f
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
-    field public static final int leftIndents = 16844016; // 0x10104f0
     field public static final int letterSpacing = 16843958; // 0x10104b6
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
@@ -1103,7 +1104,6 @@ package android {
     field public static final int reversible = 16843851; // 0x101044b
     field public static final int revisionCode = 16843989; // 0x10104d5
     field public static final int right = 16843183; // 0x10101af
-    field public static final int rightIndents = 16844017; // 0x10104f1
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
     field public static final int rotation = 16843558; // 0x1010326
@@ -44196,7 +44196,6 @@ package android.widget {
     method public int getInputType();
     method public final android.text.method.KeyListener getKeyListener();
     method public final android.text.Layout getLayout();
-    method public int[] getLeftIndents();
     method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
     method public int getLineCount();
@@ -44219,7 +44218,6 @@ package android.widget {
     method public android.text.TextPaint getPaint();
     method public int getPaintFlags();
     method public java.lang.String getPrivateImeOptions();
-    method public int[] getRightIndents();
     method public int getSelectionEnd();
     method public int getSelectionStart();
     method public int getShadowColor();
@@ -44299,7 +44297,6 @@ package android.widget {
     method public void setImeActionLabel(java.lang.CharSequence, int);
     method public void setImeOptions(int);
     method public void setIncludeFontPadding(boolean);
-    method public void setIndents(int[], int[]);
     method public void setInputExtras(int) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void setInputType(int);
     method public void setKeyListener(android.text.method.KeyListener);
