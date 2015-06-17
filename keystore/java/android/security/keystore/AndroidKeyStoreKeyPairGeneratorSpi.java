@@ -226,9 +226,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                                     | KeyProperties.PURPOSE_VERIFY);
                             // Authorized to be used with any digest (including no digest).
                             specBuilder.setDigests(KeyProperties.DIGEST_NONE);
-                            specBuilder.setSignaturePaddings(
-                                    KeyProperties.SIGNATURE_PADDING_RSA_PKCS1);
-                            // Authorized to be used with any padding (including no padding).
+                            // Authorized to be used with any encryption and signature padding
+                            // scheme (including no padding).
                             specBuilder.setEncryptionPaddings(
                                     KeyProperties.ENCRYPTION_PADDING_NONE);
                             // Disable randomized encryption requirement to support encryption
