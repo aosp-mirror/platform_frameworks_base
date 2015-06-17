@@ -1742,7 +1742,6 @@ public class Notification implements Parcelable
      * Stack</a> document.
      *
      * @deprecated Use {@link Builder} instead.
-     * @removed
      */
     @Deprecated
     public void setLatestEventInfo(Context context,
