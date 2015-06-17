@@ -108,23 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"沒有服務。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"飛航模式"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"需要圖案以重新啟動裝置。"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"需要 PIN 以重新啟動裝置。"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"需要密碼以重新啟動裝置。"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"需要圖案以切換設定檔。"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"需要 PIN 以切換設定檔。"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"需要密碼以切換設定檔。"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"需要圖案方可重新啟動裝置。"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"需要 PIN 方可重新啟動裝置。"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"需要密碼方可重新啟動裝置。"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"需要圖案方可切換設定檔。"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"需要 PIN 方可切換設定檔。"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"需要密碼方可切換設定檔。"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">裝置在<xliff:g id="NUMBER_1">%d</xliff:g>小時後尚未解鎖，請確認圖案。</item>
-      <item quantity="one">裝置在<xliff:g id="NUMBER_0">%d</xliff:g>小時後尚未解鎖，請確認圖案。</item>
+      <item quantity="other">裝置在 <xliff:g id="NUMBER_1">%d</xliff:g> 小時後尚未解鎖，請確認圖案。</item>
+      <item quantity="one">裝置在 <xliff:g id="NUMBER_0">%d</xliff:g> 小時後尚未解鎖，請確認圖案。</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other">裝置在<xliff:g id="NUMBER_1">%d</xliff:g>小時後尚未解鎖，請確認 PIN。</item>
-      <item quantity="one">裝置在<xliff:g id="NUMBER_0">%d</xliff:g>小時後尚未解鎖，請確認 PIN。</item>
+      <item quantity="other">裝置在 <xliff:g id="NUMBER_1">%d</xliff:g> 小時後尚未解鎖，請確認 PIN。</item>
+      <item quantity="one">裝置在 <xliff:g id="NUMBER_0">%d</xliff:g> 小時後尚未解鎖，請確認 PIN。</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other">裝置在<xliff:g id="NUMBER_1">%d</xliff:g>小時後尚未解鎖，請確認密碼。</item>
-      <item quantity="one">裝置在<xliff:g id="NUMBER_0">%d</xliff:g>小時後尚未解鎖，請確認密碼。</item>
+      <item quantity="other">裝置在 <xliff:g id="NUMBER_1">%d</xliff:g> 小時後尚未解鎖，請確認密碼。</item>
+      <item quantity="one">裝置在 <xliff:g id="NUMBER_0">%d</xliff:g> 小時後尚未解鎖，請確認密碼。</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"未能辨別"</string>
 </resources>

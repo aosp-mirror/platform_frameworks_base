@@ -108,20 +108,23 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Teenus puudub."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Sisestusmeetodi vahetamise nupp."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Lennukirežiim"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (489430505491862444) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (994878216570694974) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (2375742919528461664) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3802056699323773969) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (8108020184731052246) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_password (6755997057852042672) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_time_pattern (2697444392228541853) -->
-    <!-- no translation found for kg_prompt_reason_time_pin (2118758475374354849) -->
-    <!-- no translation found for kg_prompt_reason_time_password (5132693663364913675) -->
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Seadme taaskäivitamisel on vaja mustrit."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Seadme taaskäivitamisel on vaja PIN-koodi."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Seadme taaskäivitamisel on vaja parooli."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profiilide vahetamisel on vaja mustrit."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profiilide vahetamisel on vaja PIN-koodi."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profiilide vahetamisel on vaja parooli."</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage muster.</item>
+      <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage muster.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage PIN-kood.</item>
+      <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage PIN-kood.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage parool.</item>
+      <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage parool.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ei tuvastatud"</string>
 </resources>
