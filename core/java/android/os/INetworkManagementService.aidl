@@ -342,7 +342,9 @@ interface INetworkManagementService
     void setFirewallInterfaceRule(String iface, boolean allow);
     void setFirewallEgressSourceRule(String addr, boolean allow);
     void setFirewallEgressDestRule(String addr, int port, boolean allow);
-    void setFirewallUidRule(int uid, int rule);
+    void setFirewallUidRule(int chain, int uid, int rule);
+    void setFirewallUidRules(int chain, in int[] uids, in int[] rules);
+    void setFirewallChainEnabled(int chain, boolean enable);
 
     /**
      * Set all packets from users in ranges to go through VPN specified by netId.
