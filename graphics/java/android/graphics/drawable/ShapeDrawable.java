@@ -328,7 +328,7 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public boolean getDither() {
+    public boolean isDither() {
         return mShapeState.mPaint.isDither();
     }
 

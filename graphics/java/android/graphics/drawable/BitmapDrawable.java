@@ -363,7 +363,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public boolean getDither() {
+    public boolean isDither() {
         return mBitmapState.mPaint.isDither();
     }
 
