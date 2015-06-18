@@ -27,6 +27,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.FileUtils;
@@ -65,9 +66,35 @@ public class BugreportReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        final Configuration conf = context.getResources().getConfiguration();
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
 
+        if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
+            triggerLocalNotification(context, bugreportFile, screenshotFile);
+        }
+
+        // Clean up older bugreports in background
+        final PendingResult result = goAsync();
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                FileUtils.deleteOlderFiles(
+                        bugreportFile.getParentFile(), MIN_KEEP_COUNT, MIN_KEEP_AGE);
+                result.finish();
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Responsible for triggering a notification that allows the user to start a
+     * "share" intent with the bug report. On watches we have other methods to allow the user to
+     * start this intent (usually by triggering it on another connected device); we don't need to
+     * display the notification in this case.
+     */
+    private void triggerLocalNotification(final Context context, final File bugreportFile,
+            final File screenshotFile) {
         // Files are kept on private storage, so turn into Uris that we can
         // grant temporary permissions for.
         final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
@@ -97,18 +124,6 @@ public class BugreportReceiver extends BroadcastReceiver {
                         com.android.internal.R.color.system_notification_accent_color));
 
         NotificationManager.from(context).notify(TAG, 0, builder.build());
-
-        // Clean up older bugreports in background
-        final PendingResult result = goAsync();
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                FileUtils.deleteOlderFiles(
-                        bugreportFile.getParentFile(), MIN_KEEP_COUNT, MIN_KEEP_AGE);
-                result.finish();
-                return null;
-            }
-        }.execute();
     }
 
     private static Intent buildWarningIntent(Context context, Intent sendIntent) {
