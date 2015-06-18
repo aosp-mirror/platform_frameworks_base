@@ -124,6 +124,9 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
 
     private void updateSlot(String slot, String iconPkg, int iconId) {
         if (!mDemoMode) return;
+        if (iconPkg == null) {
+            iconPkg = mContext.getPackageName();
+        }
         int removeIndex = -1;
         for (int i = 0; i < getChildCount(); i++) {
             StatusBarIconView v = (StatusBarIconView) getChildAt(i);
@@ -143,10 +146,10 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
         if (iconId == 0) {
             if (removeIndex != -1) {
                 removeViewAt(removeIndex);
-                return;
             }
+            return;
         }
-        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.CURRENT, iconId, 0, 0, "Demo");
+        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.OWNER, iconId, 0, 0, "Demo");
         StatusBarIconView v = new StatusBarIconView(getContext(), null, null);
         v.setTag(slot);
         v.set(icon);
