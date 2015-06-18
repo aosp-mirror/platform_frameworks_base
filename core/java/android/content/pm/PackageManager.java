@@ -2900,7 +2900,7 @@ public abstract class PackageManager {
      *
      * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         Receiver. These are ordered from first to last in priority.  If
-     *         there are no matching receivers, an empty list is returned.
+     *         there are no matching receivers, an empty list or {@code null} is returned.
      *
      * @see #MATCH_DEFAULT_ONLY
      * @see #GET_INTENT_FILTERS
@@ -2936,7 +2936,7 @@ public abstract class PackageManager {
      *         ServiceInfo. These are ordered from best to worst match -- that
      *         is, the first item in the list is what is returned by
      *         resolveService().  If there are no matching services, an empty
-     *         list is returned.
+     *         list or {@code null} is returned.
      *
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
@@ -2955,7 +2955,7 @@ public abstract class PackageManager {
      *         ServiceInfo. These are ordered from best to worst match -- that
      *         is, the first item in the list is what is returned by
      *         resolveService().  If there are no matching services, an empty
-     *         list is returned.
+     *         list or {@code null} is returned.
      *
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
@@ -2977,7 +2977,7 @@ public abstract class PackageManager {
      * @param flags Additional option flags.
      * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         ProviderInfo. These are ordered from best to worst match. If
-     *         there are no matching providers, an empty list is returned.
+     *         there are no matching providers, an empty list or {@code null} is returned.
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
      */
