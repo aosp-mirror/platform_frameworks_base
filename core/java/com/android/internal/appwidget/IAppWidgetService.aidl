@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ParceledListSlice;
 import android.appwidget.AppWidgetProviderInfo;
 import com.android.internal.appwidget.IAppWidgetHost;
 import android.os.Bundle;
@@ -54,7 +55,7 @@ interface IAppWidgetService {
             in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
     void notifyAppWidgetViewDataChanged(String packageName, in int[] appWidgetIds, int viewId);
-    List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
+    ParceledListSlice getInstalledProvidersForProfile(int categoryFilter,
             int profileId);
     AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId);
     boolean hasBindAppWidgetPermission(in String packageName, int userId);
