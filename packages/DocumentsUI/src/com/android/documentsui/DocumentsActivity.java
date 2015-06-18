@@ -408,15 +408,8 @@ public class DocumentsActivity extends BaseActivity {
             }
         }
 
-        final RootInfo root = getCurrentRoot();
-        final boolean showRootIcon = mShowAsDialog
-                || (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE);
-        if (showRootIcon) {
-            mToolbar.setNavigationIcon(
-                    root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(null);
-        } else {
+        if (!mShowAsDialog && mDrawerLayout.getDrawerLockMode(mRootsDrawer) ==
+                DrawerLayout.LOCK_MODE_UNLOCKED) {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -425,6 +418,10 @@ public class DocumentsActivity extends BaseActivity {
                     setRootsDrawerOpen(true);
                 }
             });
+        } else {
+            mToolbar.setNavigationIcon(null);
+            mToolbar.setNavigationContentDescription(R.string.drawer_open);
+            mToolbar.setNavigationOnClickListener(null);
         }
 
         if (mSearchManager.isExpanded()) {
@@ -433,7 +430,7 @@ public class DocumentsActivity extends BaseActivity {
             mToolbarStack.setAdapter(null);
         } else {
             if (mState.stack.size() <= 1) {
-                mToolbar.setTitle(root.title);
+                mToolbar.setTitle(getCurrentRoot().title);
                 mToolbarStack.setVisibility(View.GONE);
                 mToolbarStack.setAdapter(null);
             } else {
