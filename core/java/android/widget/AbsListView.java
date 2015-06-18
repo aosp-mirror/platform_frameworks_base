@@ -3113,9 +3113,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private boolean performStylusButtonPressAction(MotionEvent ev) {
-        if (ev.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
-                && ev.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
-                && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
+        if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
             final View child = getChildAt(mMotionPosition - mFirstPosition);
             if (child != null) {
                 final int longPressPosition = mMotionPosition;
@@ -3785,7 +3783,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         if (mTouchMode == TOUCH_MODE_DOWN && mMotionPosition != INVALID_POSITION
-                && (performButtonActionOnTouchDown(ev) || performStylusButtonPressAction(ev))) {
+                && performButtonActionOnTouchDown(ev)) {
                 removeCallbacks(mPendingCheckForTap);
         }
     }
@@ -3828,11 +3826,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mTouchMode = TOUCH_MODE_DONE_WAITING;
                     updateSelectorState();
                 } else if (motionView != null) {
-                    if (performStylusButtonPressAction(ev)) {
-                        removeCallbacks(mPendingCheckForTap);
-                        removeCallbacks(mPendingCheckForLongPress);
-                    }
-
                     // Still within bounds, update the hotspot.
                     final float[] point = mTmpPoint;
                     point[0] = x;
@@ -4072,7 +4065,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean onGenericMotionEvent(MotionEvent event) {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL: {
+                case MotionEvent.ACTION_SCROLL:
                     if (mTouchMode == TOUCH_MODE_REST) {
                         final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         if (vscroll != 0) {
@@ -4082,9 +4075,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             }
                         }
                     }
-                }
+                    break;
+
+                case MotionEvent.ACTION_BUTTON_PRESS:
+                    int actionButton = event.getActionButton();
+                    if ((actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                            || actionButton == MotionEvent.BUTTON_SECONDARY)
+                            && (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_TAP)) {
+                        if (performStylusButtonPressAction(event)) {
+                            removeCallbacks(mPendingCheckForLongPress);
+                            removeCallbacks(mPendingCheckForTap);
+                        }
+                    }
+                    break;
             }
         }
+
         return super.onGenericMotionEvent(event);
     }
 
