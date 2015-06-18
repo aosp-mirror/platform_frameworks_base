@@ -535,7 +535,7 @@ public abstract class PanelView extends FrameLayout {
      */
     protected abstract boolean isInContentBounds(float x, float y);
 
-    private void cancelHeightAnimator() {
+    protected void cancelHeightAnimator() {
         if (mHeightAnimator != null) {
             mHeightAnimator.cancel();
         }
