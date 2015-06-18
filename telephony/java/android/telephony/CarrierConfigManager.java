@@ -217,32 +217,24 @@ public class CarrierConfigManager {
     /* The following 3 fields are related to carrier visual voicemail. */
 
     /**
-     * The carrier number MO sms messages are sent to.
-     *
-     * @hide
+     * The carrier number mobile outgoing (MO) sms messages are sent to.
      */
     public static final String KEY_VVM_DESTINATION_NUMBER_STRING = "vvm_destination_number_string";
 
     /**
-     * The port through which the MO sms messages are sent through.
-     *
-     * @hide
+     * The port through which the mobile outgoing (MO) sms messages are sent through.
      */
     public static final String KEY_VVM_PORT_NUMBER_INT = "vvm_port_number_int";
 
     /**
      * The type of visual voicemail protocol the carrier adheres to. See {@link TelephonyManager}
      * for possible values. For example {@link TelephonyManager#VVM_TYPE_OMTP}.
-     *
-     * @hide
      */
     public static final String KEY_VVM_TYPE_STRING = "vvm_type_string";
 
     /**
      * The package name of the carrier's visual voicemail app to ensure that dialer visual voicemail
      * and carrier visual voicemail are not active at the same time.
-     *
-     * @hide
      */
     public static final String KEY_CARRIER_VVM_PACKAGE_NAME_STRING = "carrier_vvm_package_name_string";
 
