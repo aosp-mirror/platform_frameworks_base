@@ -211,6 +211,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FUN);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SAFE_BOOT);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CREATE_WINDOWS);
     }
 
     // The following user restrictions cannot be changed by any active admin, including device
