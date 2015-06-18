@@ -50,21 +50,43 @@ public final class MidiDevice implements Closeable {
      * Close this object to terminate the connection.
      */
     public class MidiConnection implements Closeable {
-        private final IBinder mToken;
-        private final MidiInputPort mInputPort;
+        private final IMidiDeviceServer mInputPortDeviceServer;
+        private final IBinder mInputPortToken;
+        private final IBinder mOutputPortToken;
+        private final CloseGuard mGuard = CloseGuard.get();
+        private boolean mIsClosed;
 
-        MidiConnection(IBinder token, MidiInputPort inputPort) {
-            mToken = token;
-            mInputPort = inputPort;
+        MidiConnection(IBinder outputPortToken, MidiInputPort inputPort) {
+            mInputPortDeviceServer = inputPort.getDeviceServer();
+            mInputPortToken = inputPort.getToken();
+            mOutputPortToken = outputPortToken;
+            mGuard.open("close");
         }
 
         @Override
         public void close() throws IOException {
+            synchronized (mGuard) {
+                if (mIsClosed) return;
+                mGuard.close();
+                try {
+                    // close input port
+                    mInputPortDeviceServer.closePort(mInputPortToken);
+                    // close output port
+                    mDeviceServer.closePort(mOutputPortToken);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in MidiConnection.close");
+                }
+                mIsClosed = true;
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
             try {
-                mDeviceServer.closePort(mToken);
-                IoUtils.closeQuietly(mInputPort);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in MidiConnection.close");
+                mGuard.warnIfOpen();
+                close();
+            } finally {
+                super.finalize();
             }
         }
     }
