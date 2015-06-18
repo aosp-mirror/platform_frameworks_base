@@ -237,6 +237,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         sendEnableMsg(mQuietEnableExternal);
                     }
                 }
+
+                if (!isNameAndAddressSet()) {
+                    // Sync the Bluetooth name and address from the Bluetooth Adapter
+                    if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
+                    getNameAndAddress();
+                }
             }
         }
     };
