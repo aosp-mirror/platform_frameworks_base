@@ -2143,7 +2143,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getMergedSubscriberIds();
+                return telephony.getMergedSubscriberIds(mContext.getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
