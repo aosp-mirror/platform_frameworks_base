@@ -2112,8 +2112,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Not hiding: forced show not cancelled by not-always hide");
             return false;
         }
+
+        // There is a chance that IMM#hideSoftInput() is called in a transient state where
+        // IMMS#InputShown is already updated to be true whereas IMMS#mImeWindowVis is still waiting
+        // to be updated with the new value sent from IME process.  Even in such a transient state
+        // historically we have accepted an incoming call of IMM#hideSoftInput() from the
+        // application process as a valid request, and have even promised such a behavior with CTS
+        // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
+        // IMMS#InputShown indicates that the software keyboard is shown.
+        // TODO: Clean up, IMMS#mInputShown, IMMS#mImeWindowVis and mShowRequested.
+        final boolean shouldHideSoftInput = (mCurMethod != null) && (mInputShown ||
+                (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
         boolean res;
-        if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0 && mCurMethod != null) {
+        if (shouldHideSoftInput) {
+            // The IME will report its visible state again after the following message finally
+            // delivered to the IME process as an IPC.  Hence the inconsistency between
+            // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
+            // the final state.
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                     MSG_HIDE_SOFT_INPUT, mCurMethod, resultReceiver));
             res = true;
