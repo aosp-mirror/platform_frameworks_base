@@ -17,6 +17,9 @@
 <resources>
 
     <style name="PrintActivity" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">@*android:color/material_blue_grey_900</item>
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_950</item>
+        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
