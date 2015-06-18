@@ -163,6 +163,8 @@ option java_package com.android.server
 31005 wm_home_stack_moved (ToTop|1)
 # Stack removed.
 31006 wm_stack_removed (StackId|1|5)
+# bootanim finished:
+31007 wm_boot_animation_done (time|2|3)
 
 
 # ---------------------------

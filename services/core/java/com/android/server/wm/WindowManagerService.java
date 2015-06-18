@@ -5831,6 +5831,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
             mDisplayEnabled = true;
             if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG, "******************** ENABLING SCREEN!");
 
