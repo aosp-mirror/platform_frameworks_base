@@ -257,7 +257,14 @@ public final class MidiDeviceServer implements Closeable {
         public void connectPorts(IBinder token, ParcelFileDescriptor pfd,
                 int outputPortNumber) {
             MidiInputPort inputPort = new MidiInputPort(pfd, outputPortNumber);
-            mOutputPortDispatchers[outputPortNumber].getSender().connect(inputPort);
+            MidiDispatcher dispatcher = mOutputPortDispatchers[outputPortNumber];
+            synchronized (dispatcher) {
+                dispatcher.getSender().connect(inputPort);
+                int openCount = dispatcher.getReceiverCount();
+                mOutputPortOpenCount[outputPortNumber] = openCount;
+                updateDeviceStatus();
+            }
+
             mInputPorts.add(inputPort);
             OutputPortClient client = new OutputPortClient(token, inputPort);
             synchronized (mPortClients) {
