@@ -3739,13 +3739,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
         } else if (attrs.type == TYPE_VOICE_INTERACTION) {
-            pf.left = df.left = of.left = cf.left = vf.left = mUnrestrictedScreenLeft;
+            pf.left = df.left = of.left = mUnrestrictedScreenLeft;
             pf.top = df.top = of.top = mUnrestrictedScreenTop;
-            pf.right = df.right = of.right = cf.right = vf.right = mUnrestrictedScreenLeft
-                    + mUnrestrictedScreenWidth;
-            pf.bottom = df.bottom = of.bottom = cf.bottom = mUnrestrictedScreenTop
-                    + mUnrestrictedScreenHeight;
+            pf.right = df.right = of.right = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+            pf.bottom = df.bottom = of.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
             cf.bottom = vf.bottom = mStableBottom;
+            // Note: In Phone landscape mode, the button bar should also be excluded.
+            cf.right = vf.right = mStableRight;
+            cf.left = vf.left = mStableLeft;
             cf.top = vf.top = mStableTop;
         } else if (win == mStatusBar) {
             pf.left = df.left = of.left = mUnrestrictedScreenLeft;

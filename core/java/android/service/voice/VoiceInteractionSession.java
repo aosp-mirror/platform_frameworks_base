@@ -1097,7 +1097,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
         mWindow.getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
         mWindow.setToken(mToken);
