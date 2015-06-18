@@ -136,11 +136,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -3920,10 +3922,52 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         return !routeDiff.added.isEmpty() || !routeDiff.removed.isEmpty();
     }
+
+    // TODO: investigate moving this into LinkProperties, if only to make more accurate
+    // the isProvisioned() checks.
+    private static Collection<InetAddress> getLikelyReachableDnsServers(LinkProperties lp) {
+        final ArrayList<InetAddress> dnsServers = new ArrayList<InetAddress>();
+        final List<RouteInfo> allRoutes = lp.getAllRoutes();
+        for (InetAddress nameserver : lp.getDnsServers()) {
+            // If the LinkProperties doesn't include a route to the nameserver, ignore it.
+            final RouteInfo bestRoute = RouteInfo.selectBestRoute(allRoutes, nameserver);
+            if (bestRoute == null) {
+                continue;
+            }
+
+            // TODO: better source address evaluation for destination addresses.
+            if (nameserver instanceof Inet4Address) {
+                if (!lp.hasIPv4Address()) {
+                    continue;
+                }
+            } else if (nameserver instanceof Inet6Address) {
+                if (nameserver.isLinkLocalAddress()) {
+                    if (((Inet6Address)nameserver).getScopeId() == 0) {
+                        // For now, just make sure link-local DNS servers have
+                        // scopedIds set, since DNS lookups will fail otherwise.
+                        // TODO: verify the scopeId matches that of lp's interface.
+                        continue;
+                    }
+                }  else {
+                    if (bestRoute.isIPv6Default() && !lp.hasGlobalIPv6Address()) {
+                        // TODO: reconsider all corner cases (disconnected ULA networks, ...).
+                        continue;
+                    }
+                }
+            }
+
+            dnsServers.add(nameserver);
+        }
+        return Collections.unmodifiableList(dnsServers);
+    }
+
     private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId,
                              boolean flush, boolean useDefaultDns) {
+        // TODO: consider comparing the getLikelyReachableDnsServers() lists, in case the
+        // route to a DNS server has been removed (only really applicable in special cases
+        // where there is no default route).
         if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
-            Collection<InetAddress> dnses = newLp.getDnsServers();
+            Collection<InetAddress> dnses = getLikelyReachableDnsServers(newLp);
             if (dnses.size() == 0 && mDefaultDns != null && useDefaultDns) {
                 dnses = new ArrayList();
                 dnses.add(mDefaultDns);
