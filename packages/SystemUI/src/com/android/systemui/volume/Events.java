@@ -16,11 +16,13 @@
 
 package com.android.systemui.volume;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.provider.Settings.Global;
 import android.util.Log;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.volume.VolumeDialogController.State;
 
 import java.util.Arrays;
@@ -47,6 +49,7 @@ public class Events {
     public static final int EVENT_ZEN_MODE_CHANGED = 13; // (mode|int)
     public static final int EVENT_SUPPRESSOR_CHANGED = 14;  // (component|string) (name|string)
     public static final int EVENT_MUTE_CHANGED = 15;  // (stream|int) (muted|bool)
+    public static final int EVENT_TOUCH_LEVEL_DONE = 16;  // (stream|int) (level|bool)
 
     private static final String[] EVENT_TAGS = {
         "show_dialog",
@@ -65,6 +68,7 @@ public class Events {
         "zen_mode_changed",
         "suppressor_changed",
         "mute_changed",
+        "touch_level_done",
     };
 
     public static final int DISMISS_REASON_UNKNOWN = 0;
@@ -100,36 +104,59 @@ public class Events {
 
     public static Callback sCallback;
 
-    public static void writeEvent(int tag, Object... list) {
+    public static void writeEvent(Context context, int tag, Object... list) {
         final long time = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder("writeEvent ").append(EVENT_TAGS[tag]);
         if (list != null && list.length > 0) {
             sb.append(" ");
             switch (tag) {
                 case EVENT_SHOW_DIALOG:
+                    MetricsLogger.visible(context, MetricsLogger.VOLUME_DIALOG);
+                    MetricsLogger.histogram(context, "volume_from_keyguard",
+                            (Boolean) list[1] ? 1 : 0);
                     sb.append(SHOW_REASONS[(Integer) list[0]]).append(" keyguard=").append(list[1]);
                     break;
                 case EVENT_EXPAND:
+                    MetricsLogger.visibility(context, MetricsLogger.VOLUME_DIALOG_DETAILS,
+                            (Boolean) list[0]);
                     sb.append(list[0]);
                     break;
                 case EVENT_DISMISS_DIALOG:
+                    MetricsLogger.hidden(context, MetricsLogger.VOLUME_DIALOG);
                     sb.append(DISMISS_REASONS[(Integer) list[0]]);
                     break;
                 case EVENT_ACTIVE_STREAM_CHANGED:
+                    MetricsLogger.action(context, MetricsLogger.ACTION_VOLUME_STREAM,
+                            (Integer) list[0]);
                     sb.append(AudioSystem.streamToString((Integer) list[0]));
                     break;
                 case EVENT_ICON_CLICK:
+                    MetricsLogger.action(context, MetricsLogger.ACTION_VOLUME_ICON,
+                            (Integer) list[1]);
                     sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
                             .append(iconStateToString((Integer) list[1]));
                     break;
+                case EVENT_TOUCH_LEVEL_DONE:
+                    MetricsLogger.action(context, MetricsLogger.ACTION_VOLUME_SLIDER,
+                            (Integer) list[1]);
+                    // fall through
                 case EVENT_TOUCH_LEVEL_CHANGED:
                 case EVENT_LEVEL_CHANGED:
                 case EVENT_MUTE_CHANGED:
                     sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
                             .append(list[1]);
                     break;
-                case EVENT_INTERNAL_RINGER_MODE_CHANGED:
+                case EVENT_KEY:
+                    MetricsLogger.action(context, MetricsLogger.ACTION_VOLUME_KEY,
+                            (Integer) list[1]);
+                    sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
+                            .append(list[1]);
+                    break;
                 case EVENT_EXTERNAL_RINGER_MODE_CHANGED:
+                    MetricsLogger.action(context, MetricsLogger.ACTION_RINGER_MODE,
+                            (Integer) list[0]);
+                    // fall through
+                case EVENT_INTERNAL_RINGER_MODE_CHANGED:
                     sb.append(ringerModeToString((Integer) list[0]));
                     break;
                 case EVENT_ZEN_MODE_CHANGED:
