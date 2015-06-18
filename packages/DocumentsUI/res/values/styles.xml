@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="DialogWhenReallyLarge" parent="@android:style/Theme.Material.DayNight.DarkActionBar" />
+    <style name="DialogWhenReallyLarge" parent="@android:style/Theme.DeviceDefault.Light.DarkActionBar" />
 
     <style name="DocumentsTheme" parent="@style/DialogWhenReallyLarge">
         <item name="android:actionBarWidgetTheme">@null</item>

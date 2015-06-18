@@ -2194,22 +2194,6 @@ package android {
     field public static final int Theme_Light_Panel = 16973914; // 0x103005a
     field public static final int Theme_Light_WallpaperSettings = 16973922; // 0x1030062
     field public static final int Theme_Material = 16974372; // 0x1030224
-    field public static final int Theme_Material_DayNight = 16974548; // 0x10302d4
-    field public static final int Theme_Material_DayNight_DarkActionBar = 16974549; // 0x10302d5
-    field public static final int Theme_Material_DayNight_Dialog = 16974550; // 0x10302d6
-    field public static final int Theme_Material_DayNight_DialogWhenLarge = 16974556; // 0x10302dc
-    field public static final int Theme_Material_DayNight_DialogWhenLarge_DarkActionBar = 16974568; // 0x10302e8
-    field public static final int Theme_Material_DayNight_DialogWhenLarge_NoActionBar = 16974557; // 0x10302dd
-    field public static final int Theme_Material_DayNight_Dialog_Alert = 16974551; // 0x10302d7
-    field public static final int Theme_Material_DayNight_Dialog_MinWidth = 16974552; // 0x10302d8
-    field public static final int Theme_Material_DayNight_Dialog_NoActionBar = 16974553; // 0x10302d9
-    field public static final int Theme_Material_DayNight_Dialog_NoActionBar_MinWidth = 16974554; // 0x10302da
-    field public static final int Theme_Material_DayNight_Dialog_Presentation = 16974555; // 0x10302db
-    field public static final int Theme_Material_DayNight_NoActionBar = 16974558; // 0x10302de
-    field public static final int Theme_Material_DayNight_NoActionBar_Fullscreen = 16974559; // 0x10302df
-    field public static final int Theme_Material_DayNight_NoActionBar_Overscan = 16974560; // 0x10302e0
-    field public static final int Theme_Material_DayNight_NoActionBar_TranslucentDecor = 16974561; // 0x10302e1
-    field public static final int Theme_Material_DayNight_Panel = 16974562; // 0x10302e2
     field public static final int Theme_Material_Dialog = 16974373; // 0x1030225
     field public static final int Theme_Material_DialogWhenLarge = 16974379; // 0x103022b
     field public static final int Theme_Material_DialogWhenLarge_NoActionBar = 16974380; // 0x103022c
@@ -2223,7 +2207,6 @@ package android {
     field public static final int Theme_Material_Light_DarkActionBar = 16974392; // 0x1030238
     field public static final int Theme_Material_Light_Dialog = 16974393; // 0x1030239
     field public static final int Theme_Material_Light_DialogWhenLarge = 16974399; // 0x103023f
-    field public static final int Theme_Material_Light_DialogWhenLarge_DarkActionBar = 16974567; // 0x10302e7
     field public static final int Theme_Material_Light_DialogWhenLarge_NoActionBar = 16974400; // 0x1030240
     field public static final int Theme_Material_Light_Dialog_Alert = 16974394; // 0x103023a
     field public static final int Theme_Material_Light_Dialog_MinWidth = 16974395; // 0x103023b
@@ -2679,6 +2662,21 @@ package android {
     field public static final int Widget_Toolbar = 16974311; // 0x10301e7
     field public static final int Widget_Toolbar_Button_Navigation = 16974312; // 0x10301e8
     field public static final int Widget_WebView = 16973875; // 0x1030033
+    field public static final int __reserved10 = 16974550; // 0x10302d6
+    field public static final int __reserved11 = 16974551; // 0x10302d7
+    field public static final int __reserved12 = 16974552; // 0x10302d8
+    field public static final int __reserved13 = 16974553; // 0x10302d9
+    field public static final int __reserved14 = 16974554; // 0x10302da
+    field public static final int __reserved15 = 16974555; // 0x10302db
+    field public static final int __reserved16 = 16974556; // 0x10302dc
+    field public static final int __reserved17 = 16974557; // 0x10302dd
+    field public static final int __reserved18 = 16974558; // 0x10302de
+    field public static final int __reserved19 = 16974559; // 0x10302df
+    field public static final int __reserved20 = 16974560; // 0x10302e0
+    field public static final int __reserved21 = 16974561; // 0x10302e1
+    field public static final int __reserved22 = 16974562; // 0x10302e2
+    field public static final int __reserved8 = 16974548; // 0x10302d4
+    field public static final int __reserved9 = 16974549; // 0x10302d5
   }
 
   public static final class R.transition {
