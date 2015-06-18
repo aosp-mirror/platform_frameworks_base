@@ -103,15 +103,31 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
 
     // used by MidiDevice.connectInputPort() to connect our socket directly to another device
     /* package */ ParcelFileDescriptor claimFileDescriptor() {
-        synchronized (mBuffer) {
-            ParcelFileDescriptor pfd = mParcelFileDescriptor;
-            if (pfd != null) {
+        synchronized (mGuard) {
+            ParcelFileDescriptor pfd;
+            synchronized (mBuffer) {
+                pfd = mParcelFileDescriptor;
+                if (pfd == null) return null;
                 IoUtils.closeQuietly(mOutputStream);
                 mParcelFileDescriptor = null;
                 mOutputStream = null;
             }
+
+            // Set mIsClosed = true so we will not call mDeviceServer.closePort() in close().
+            // MidiDevice.MidiConnection.close() will do the cleanup instead.
+            mIsClosed = true;
             return pfd;
         }
+    }
+
+    // used by MidiDevice.MidiConnection to close this port after the connection is closed
+    /* package */ IBinder getToken() {
+        return mToken;
+    }
+
+    // used by MidiDevice.MidiConnection to close this port after the connection is closed
+    /* package */ IMidiDeviceServer getDeviceServer() {
+        return mDeviceServer;
     }
 
     @Override
