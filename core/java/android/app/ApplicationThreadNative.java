@@ -288,6 +288,7 @@ public abstract class ApplicationThreadNative extends Binder
             IUiAutomationConnection uiAutomationConnection =
                     IUiAutomationConnection.Stub.asInterface(binder);
             int testMode = data.readInt();
+            boolean enableBinderTracking = data.readInt() != 0;
             boolean openGlTrace = data.readInt() != 0;
             boolean restrictedBackupMode = (data.readInt() != 0);
             boolean persistent = (data.readInt() != 0);
@@ -296,8 +297,8 @@ public abstract class ApplicationThreadNative extends Binder
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info, providers, testName, profilerInfo, testArgs,
-                    testWatcher, uiAutomationConnection, testMode, openGlTrace,
-                    restrictedBackupMode, persistent, config, compatInfo, services, coreSettings);
+                    testWatcher, uiAutomationConnection, testMode, enableBinderTracking,
+                    openGlTrace, restrictedBackupMode, persistent, config, compatInfo, services, coreSettings);
             return true;
         }
 
@@ -690,6 +691,28 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case START_BINDER_TRACKING_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            startBinderTracking();
+            return true;
+        }
+
+        case STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ParcelFileDescriptor fd = data.readFileDescriptor();
+            if (fd != null) {
+                stopBinderTrackingAndDump(fd.getFileDescriptor());
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
+            }
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -980,12 +1003,12 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void bindApplication(String packageName, ApplicationInfo info,
-            List<ProviderInfo> providers, ComponentName testName, ProfilerInfo profilerInfo,
-            Bundle testArgs, IInstrumentationWatcher testWatcher,
-            IUiAutomationConnection uiAutomationConnection, int debugMode,
-            boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
-            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-            Bundle coreSettings) throws RemoteException {
+                                      List<ProviderInfo> providers, ComponentName testName, ProfilerInfo profilerInfo,
+                                      Bundle testArgs, IInstrumentationWatcher testWatcher,
+                                      IUiAutomationConnection uiAutomationConnection, int debugMode,
+                                      boolean enableBinderTracking, boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
+                                      Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
+                                      Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -1007,6 +1030,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongInterface(testWatcher);
         data.writeStrongInterface(uiAutomationConnection);
         data.writeInt(debugMode);
+        data.writeInt(enableBinderTracking ? 1 : 0);
         data.writeInt(openGlTrace ? 1 : 0);
         data.writeInt(restrictedBackupMode ? 1 : 0);
         data.writeInt(persistent ? 1 : 0);
@@ -1394,6 +1418,25 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeByteArray(firstPacket);
         mRemote.transact(NOTIFY_CLEARTEXT_NETWORK_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void startBinderTracking() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        mRemote.transact(START_BINDER_TRACKING_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void stopBinderTrackingAndDump(FileDescriptor fd) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeFileDescriptor(fd);
+        mRemote.transact(STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }

@@ -74,11 +74,62 @@ public class Binder implements IBinder {
      */
     private static String sDumpDisabled = null;
 
+    /**
+     * Global transaction tracker instance for this process.
+     */
+    private static TransactionTracker sTransactionTracker = null;
+
+    // Transaction tracking code.
+
+    /**
+     * Flag indicating whether we should be tracing transact calls.
+     *
+     */
+    private static boolean sTracingEnabled = false;
+
+    /**
+     * Enable Binder IPC tracing.
+     *
+     * @hide
+     */
+    public static void  enableTracing() {
+        sTracingEnabled = true;
+    };
+
+    /**
+     * Disable Binder IPC tracing.
+     *
+     * @hide
+     */
+    public static void  disableTracing() {
+        sTracingEnabled = false;
+    }
+
+    /**
+     * Check if binder transaction tracing is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTracingEnabled() {
+        return sTracingEnabled;
+    }
+
+    /**
+     * Get the binder transaction tracker for this process.
+     *
+     * @hide
+     */
+    public synchronized static TransactionTracker getTransactionTracker() {
+        if (sTransactionTracker == null)
+            sTransactionTracker = new TransactionTracker();
+        return sTransactionTracker;
+    }
+
     /* mObject is used by native code, do not remove or rename */
     private long mObject;
     private IInterface mOwner;
     private String mDescriptor;
-    
+
     /**
      * Return the ID of the process that sent you the current transaction
      * that is being processed.  This pid can be used with higher-level
@@ -381,6 +432,7 @@ public class Binder implements IBinder {
     public final boolean transact(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException {
         if (false) Log.v("Binder", "Transact: " + code + " to " + this);
+
         if (data != null) {
             data.setDataPosition(0);
         }
@@ -500,6 +552,7 @@ final class BinderProxy implements IBinder {
 
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
+        if (Binder.isTracingEnabled()) { Binder.getTransactionTracker().addTrace(); }
         return transactNative(code, data, reply, flags);
     }
 
