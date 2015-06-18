@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NONE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 
@@ -201,8 +202,8 @@ public class LockdownVpnTracker {
                     setFirewallEgressSourceRule(addr, true);
                 }
 
-                mNetService.setFirewallUidRule(ROOT_UID, FIREWALL_RULE_ALLOW);
-                mNetService.setFirewallUidRule(Os.getuid(), FIREWALL_RULE_ALLOW);
+                mNetService.setFirewallUidRule(FIREWALL_CHAIN_NONE, ROOT_UID, FIREWALL_RULE_ALLOW);
+                mNetService.setFirewallUidRule(FIREWALL_CHAIN_NONE, Os.getuid(), FIREWALL_RULE_ALLOW);
 
                 mErrorCount = 0;
                 mAcceptedIface = iface;
@@ -291,8 +292,8 @@ public class LockdownVpnTracker {
                     setFirewallEgressSourceRule(addr, false);
                 }
 
-                mNetService.setFirewallUidRule(ROOT_UID, FIREWALL_RULE_DEFAULT);
-                mNetService.setFirewallUidRule(Os.getuid(), FIREWALL_RULE_DEFAULT);
+                mNetService.setFirewallUidRule(FIREWALL_CHAIN_NONE, ROOT_UID, FIREWALL_RULE_DEFAULT);
+                mNetService.setFirewallUidRule(FIREWALL_CHAIN_NONE,Os.getuid(), FIREWALL_RULE_DEFAULT);
 
                 mAcceptedSourceAddr = null;
             }

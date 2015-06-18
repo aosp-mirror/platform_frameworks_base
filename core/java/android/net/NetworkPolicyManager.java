@@ -61,6 +61,17 @@ public class NetworkPolicyManager {
     public static final int FIREWALL_RULE_ALLOW = 1;
     public static final int FIREWALL_RULE_DENY = 2;
 
+    public static final int FIREWALL_TYPE_WHITELIST = 0;
+    public static final int FIREWALL_TYPE_BLACKLIST = 1;
+
+    public static final int FIREWALL_CHAIN_NONE = 0;
+    public static final int FIREWALL_CHAIN_DOZABLE = 1;
+    public static final int FIREWALL_CHAIN_STANDBY = 2;
+
+    public static final String FIREWALL_CHAIN_NAME_NONE = "none";
+    public static final String FIREWALL_CHAIN_NAME_DOZABLE = "dozable";
+    public static final String FIREWALL_CHAIN_NAME_STANDBY = "standby";
+
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
     /**
