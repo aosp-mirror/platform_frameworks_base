@@ -342,7 +342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         String name = values.getAsString(Settings.Secure.NAME);
-        if (TextUtils.isEmpty(name)) {
+        if (!isKeyValid(name)) {
             return null;
         }
 
@@ -406,10 +406,9 @@ public class SettingsProvider extends ContentProvider {
             return 0;
         }
 
-        if (TextUtils.isEmpty(args.name)) {
+        if (!isKeyValid(args.name)) {
             return 0;
         }
-
 
         switch (args.table) {
             case TABLE_GLOBAL: {
@@ -446,10 +445,11 @@ public class SettingsProvider extends ContentProvider {
             return 0;
         }
 
-        String value = values.getAsString(Settings.Secure.VALUE);
-        if (TextUtils.isEmpty(value)) {
+        String name = values.getAsString(Settings.Secure.NAME);
+        if (!isKeyValid(name)) {
             return 0;
         }
+        String value = values.getAsString(Settings.Secure.VALUE);
 
         switch (args.table) {
             case TABLE_GLOBAL: {
@@ -525,11 +525,18 @@ public class SettingsProvider extends ContentProvider {
         final int valueColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
 
         do {
-            pw.append("_id:").append(cursor.getString(idColumnIdx));
-            pw.append(" name:").append(cursor.getString(nameColumnIdx));
-            pw.append(" value:").append(cursor.getString(valueColumnIdx));
+            pw.append("_id:").append(toDumpString(cursor.getString(idColumnIdx)));
+            pw.append(" name:").append(toDumpString(cursor.getString(nameColumnIdx)));
+            pw.append(" value:").append(toDumpString(cursor.getString(valueColumnIdx)));
             pw.println();
         } while (cursor.moveToNext());
+    }
+
+    private static final String toDumpString(String s) {
+        if (s != null) {
+            return s;
+        }
+        return "{null}";
     }
 
     private void registerBroadcastReceivers() {
@@ -1280,6 +1287,10 @@ public class SettingsProvider extends ContentProvider {
         cursor.addRow(values);
     }
 
+    private static boolean isKeyValid(String key) {
+        return !(TextUtils.isEmpty(key) || SettingsState.isBinary(key));
+    }
+
     private static final class Arguments {
         private static final Pattern WHERE_PATTERN_WITH_PARAM_NO_BRACKETS =
                 Pattern.compile("[\\s]*name[\\s]*=[\\s]*\\?[\\s]*");
@@ -1812,7 +1823,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 120;
+            private static final int SETTINGS_VERSION = 121;
 
             private final int mUserId;
 
@@ -1939,6 +1950,10 @@ public class SettingsProvider extends ContentProvider {
 
                     currentVersion = 120;
                 }
+
+                // Before 121, we used a different string encoding logic.  We just bump the version
+                // here; SettingsState knows how to handle pre-version 120 files.
+                currentVersion = 121;
 
                 // vXXX: Add new settings above this point.
 

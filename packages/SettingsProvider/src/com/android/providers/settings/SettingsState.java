@@ -23,6 +23,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.Base64;
 import android.util.Slog;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
@@ -59,6 +60,8 @@ final class SettingsState {
 
     private static final String LOG_TAG = "SettingsState";
 
+    static final int SETTINGS_VERSOIN_NEW_ENCODING = 121;
+
     private static final long WRITE_SETTINGS_DELAY_MILLIS = 200;
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
@@ -76,9 +79,19 @@ final class SettingsState {
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_ID = "id";
     private static final String ATTR_NAME = "name";
+
+    /** Non-binary value will be written in this attribute. */
     private static final String ATTR_VALUE = "value";
 
-    private static final String NULL_VALUE = "null";
+    /**
+     * KXmlSerializer won't like some characters.  We encode such characters in base64 and
+     * store in this attribute.
+     * NOTE: A null value will have NEITHER ATTR_VALUE nor ATTR_VALUE_BASE64.
+     */
+    private static final String ATTR_VALUE_BASE64 = "valueBase64";
+
+    // This was used in version 120 and before.
+    private static final String NULL_VALUE_OLD_STYLE = "null";
 
     private final Object mLock;
 
@@ -364,12 +377,8 @@ final class SettingsState {
             for (int i = 0; i < settingCount; i++) {
                 Setting setting = settings.valueAt(i);
 
-                serializer.startTag(null, TAG_SETTING);
-                serializer.attribute(null, ATTR_ID, setting.getId());
-                serializer.attribute(null, ATTR_NAME, setting.getName());
-                serializer.attribute(null, ATTR_VALUE, packValue(setting.getValue()));
-                serializer.attribute(null, ATTR_PACKAGE, packValue(setting.getPackageName()));
-                serializer.endTag(null, TAG_SETTING);
+                writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
+                        setting.getValue(), setting.getPackageName());
 
                 if (DEBUG_PERSISTENCE) {
                     Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "=" + setting.getValue());
@@ -391,6 +400,64 @@ final class SettingsState {
             throw new IllegalStateException("Failed to write settings, restoring backup", t);
         } finally {
             IoUtils.closeQuietly(out);
+        }
+    }
+
+    static void writeSingleSetting(int version, XmlSerializer serializer, String id,
+            String name, String value, String packageName) throws IOException {
+        if (id == null || isBinary(id) || name == null || isBinary(name)
+                || packageName == null || isBinary(packageName)) {
+            // This shouldn't happen.
+            return;
+        }
+        serializer.startTag(null, TAG_SETTING);
+        serializer.attribute(null, ATTR_ID, id);
+        serializer.attribute(null, ATTR_NAME, name);
+        setValueAttribute(version, serializer, value);
+        serializer.attribute(null, ATTR_PACKAGE, packageName);
+        serializer.endTag(null, TAG_SETTING);
+    }
+
+    static void setValueAttribute(int version, XmlSerializer serializer, String value)
+            throws IOException {
+        if (version >= SETTINGS_VERSOIN_NEW_ENCODING) {
+            if (value == null) {
+                // Null value -> No ATTR_VALUE nor ATTR_VALUE_BASE64.
+            } else if (isBinary(value)) {
+                serializer.attribute(null, ATTR_VALUE_BASE64, base64Encode(value));
+            } else {
+                serializer.attribute(null, ATTR_VALUE, value);
+            }
+        } else {
+            // Old encoding.
+            if (value == null) {
+                serializer.attribute(null, ATTR_VALUE, NULL_VALUE_OLD_STYLE);
+            } else {
+                serializer.attribute(null, ATTR_VALUE, value);
+            }
+        }
+    }
+
+    private String getValueAttribute(XmlPullParser parser) {
+        if (mVersion >= SETTINGS_VERSOIN_NEW_ENCODING) {
+            final String value = parser.getAttributeValue(null, ATTR_VALUE);
+            if (value != null) {
+                return value;
+            }
+            final String base64 = parser.getAttributeValue(null, ATTR_VALUE_BASE64);
+            if (base64 != null) {
+                return base64Decode(base64);
+            }
+            // null has neither ATTR_VALUE nor ATTR_VALUE_BASE64.
+            return null;
+        } else {
+            // Old encoding.
+            final String stored = parser.getAttributeValue(null, ATTR_VALUE);
+            if (NULL_VALUE_OLD_STYLE.equals(stored)) {
+                return null;
+            } else {
+                return stored;
+            }
         }
     }
 
@@ -452,10 +519,9 @@ final class SettingsState {
             if (tagName.equals(TAG_SETTING)) {
                 String id = parser.getAttributeValue(null, ATTR_ID);
                 String name = parser.getAttributeValue(null, ATTR_NAME);
-                String value = parser.getAttributeValue(null, ATTR_VALUE);
+                String value = getValueAttribute(parser);
                 String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-                mSettings.put(name, new Setting(name, unpackValue(value),
-                        unpackValue(packageName), id));
+                mSettings.put(name, new Setting(name, value, packageName, id));
 
                 if (DEBUG_PERSISTENCE) {
                     Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
@@ -484,20 +550,6 @@ final class SettingsState {
                 break;
             }
         }
-    }
-
-    private static String packValue(String value) {
-        if (value == null) {
-            return NULL_VALUE;
-        }
-        return value;
-    }
-
-    private static String unpackValue(String value) {
-        if (NULL_VALUE.equals(value)) {
-            return null;
-        }
-        return value;
     }
 
     public final class Setting {
@@ -547,5 +599,59 @@ final class SettingsState {
             this.id = String.valueOf(mNextId++);
             return true;
         }
+    }
+
+    /**
+     * @return TRUE if a string is considered "binary" from KXML's point of view.  NOTE DO NOT
+     * pass null.
+     */
+    public static boolean isBinary(String s) {
+        if (s == null) {
+            throw new NullPointerException();
+        }
+        // See KXmlSerializer.writeEscaped
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            boolean allowedInXml = (c >= 0x20 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xfffd);
+            if (!allowedInXml) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String base64Encode(String s) {
+        return Base64.encodeToString(toBytes(s), Base64.NO_WRAP);
+    }
+
+    private static String base64Decode(String s) {
+        return fromBytes(Base64.decode(s, Base64.DEFAULT));
+    }
+
+    // Note the followings are basically just UTF-16 encode/decode.  But we want to preserve
+    // contents as-is, even if it contains broken surrogate pairs, we do it by ourselves,
+    // since I don't know how Charset would treat them.
+
+    private static byte[] toBytes(String s) {
+        final byte[] result = new byte[s.length() * 2];
+        int resultIndex = 0;
+        for (int i = 0; i < s.length(); ++i) {
+            char ch = s.charAt(i);
+            result[resultIndex++] = (byte) (ch >> 8);
+            result[resultIndex++] = (byte) ch;
+        }
+        return result;
+    }
+
+    private static String fromBytes(byte[] bytes) {
+        final StringBuffer sb = new StringBuffer(bytes.length / 2);
+
+        final int last = bytes.length - 1;
+
+        for (int i = 0; i < last; i += 2) {
+            final char ch = (char) ((bytes[i] & 0xff) << 8 | (bytes[i + 1] & 0xff));
+            sb.append(ch);
+        }
+        return sb.toString();
     }
 }
