@@ -231,15 +231,24 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHandle, jobject parcel)
 {
     const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
-    if (parcel == NULL) {
+    if (parcel == nullptr) {
         return JNI_FALSE;
     }
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    size_t size = region->writeToMemory(NULL);
+    const size_t size = region->writeToMemory(nullptr);
     p->writeInt32(size);
-    region->writeToMemory(p->writeInplace(size));
+    void* dst = p->writeInplace(size);
+    if (dst == nullptr) {
+        ALOGE("Region.writeToParcel could not write %zi bytes", size);
+        return JNI_FALSE;
+    }
+    const size_t sizeWritten = region->writeToMemory(dst);
+    if (sizeWritten != size) {
+        ALOGE("SkRegion::writeToMemory should have written %zi bytes but wrote %zi",
+                size, sizeWritten);
+    }
 
     return JNI_TRUE;
 }
