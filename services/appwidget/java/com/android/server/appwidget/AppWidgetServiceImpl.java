@@ -1298,7 +1298,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
-            ArrayList<AppWidgetProviderInfo> result = null;
+            ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>();
 
             final int providerCount = mProviders.size();
             for (int i = 0; i < providerCount; i++) {
@@ -1315,9 +1315,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (providerProfileId == profileId
                         && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
                             provider.id.componentName.getPackageName(), providerProfileId)) {
-                    if (result == null) {
-                        result = new ArrayList<>();
-                    }
                     result.add(cloneIfLocalBinder(info));
                 }
             }
