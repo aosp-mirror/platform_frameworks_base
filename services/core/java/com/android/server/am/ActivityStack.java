@@ -1326,7 +1326,12 @@ final class ActivityStack {
                         if (r != starting) {
                             mStackSupervisor.startSpecificActivityLocked(
                                     r, noStackActivityResumed, false);
-                            noStackActivityResumed = false;
+                            if (activityNdx >= activities.size()) {
+                                // Record may be removed if its process needs to restart.
+                                activityNdx = activities.size() - 1;
+                            } else {
+                                noStackActivityResumed = false;
+                            }
                         }
 
                     } else if (r.visible) {
