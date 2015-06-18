@@ -445,6 +445,11 @@ final class ServiceRecord extends Binder {
                             // icon, but this used to be able to slip through, so for
                             // those dirty apps we will create a notification clearly
                             // blaming the app.
+                            Slog.v(TAG, "Attempted to start a foreground service ("
+                                    + name
+                                    + ") with a broken notification (no icon: "
+                                    + localForegroundNoti
+                                    + ")");
 
                             CharSequence appName = appInfo.loadLabel(
                                     ams.mContext.getPackageManager());
@@ -460,6 +465,12 @@ final class ServiceRecord extends Binder {
 
                                 // it's ugly, but it clearly identifies the app
                                 notiBuilder.setSmallIcon(appInfo.icon);
+
+                                // mark as foreground
+                                notiBuilder.setFlag(Notification.FLAG_FOREGROUND_SERVICE, true);
+
+                                // we are doing the app a kindness here
+                                notiBuilder.setPriority(Notification.PRIORITY_MIN);
 
                                 Intent runningIntent = new Intent(
                                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -498,6 +509,8 @@ final class ServiceRecord extends Binder {
                         nm.enqueueNotification(localPackageName, localPackageName,
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
                                 outId, userId);
+
+                        foregroundNoti = localForegroundNoti; // save it for amending next time
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't

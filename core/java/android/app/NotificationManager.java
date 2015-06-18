@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -216,6 +217,12 @@ public class NotificationManager
             }
         }
         fixLegacySmallIcon(notification, pkg);
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            if (notification.getSmallIcon() == null) {
+                throw new IllegalArgumentException("Invalid notification (no valid small icon): "
+                    + notification);
+            }
+        }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         Notification stripped = notification.clone();
         Builder.stripForDelivery(stripped);
