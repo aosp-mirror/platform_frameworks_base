@@ -116,7 +116,7 @@ public class AccessPointControllerImpl
             // Unknown network, need to add it.
             if (ap.getSecurity() != AccessPoint.SECURITY_NONE) {
                 Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                intent.putExtra(EXTRA_START_CONNECT_SSID, ap.getSsid());
+                intent.putExtra(EXTRA_START_CONNECT_SSID, ap.getSsidStr());
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 fireSettingsIntentCallback(intent);
                 return true;
