@@ -107,6 +107,11 @@ public final class DocumentsContract {
      */
     public static final String EXTRA_ORIENTATION = "android.content.extra.ORIENTATION";
 
+    /**
+     * Overrides the default prompt text in DocumentsUI when set in an intent.
+     */
+    public static final String EXTRA_PROMPT = "android.provider.extra.PROMPT";
+
     /** {@hide} */
     public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
     /** {@hide} */
