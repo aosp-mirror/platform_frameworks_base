@@ -3568,13 +3568,24 @@ public class Editor {
         }
 
         protected void updateDrawable() {
+            if (mIsDragging) {
+                // Don't update drawable during dragging.
+                return;
+            }
             final int offset = getCurrentCursorOffset();
             final boolean isRtlCharAtOffset = mTextView.getLayout().isRtlCharAt(offset);
             final Drawable oldDrawable = mDrawable;
             mDrawable = isRtlCharAtOffset ? mDrawableRtl : mDrawableLtr;
             mHotspotX = getHotspotX(mDrawable, isRtlCharAtOffset);
             mHorizontalGravity = getHorizontalGravity(isRtlCharAtOffset);
-            if (oldDrawable != mDrawable) {
+            final Layout layout = mTextView.getLayout();
+            if (layout != null && oldDrawable != mDrawable && isShowing()) {
+                // Update popup window position.
+                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX -
+                        getHorizontalOffset() + getCursorOffset());
+                mPositionX += mTextView.viewportToContentHorizontalOffset();
+                mPositionHasChanged = true;
+                updatePosition(mLastParentX, mLastParentY, false, false);
                 postInvalidate();
             }
         }
@@ -3848,10 +3859,12 @@ public class Editor {
                 case MotionEvent.ACTION_UP:
                     filterOnTouchUp();
                     mIsDragging = false;
+                    updateDrawable();
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
                     mIsDragging = false;
+                    updateDrawable();
                     break;
             }
             return true;
