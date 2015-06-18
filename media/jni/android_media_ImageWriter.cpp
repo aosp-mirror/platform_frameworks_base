@@ -361,8 +361,7 @@ static void ImageWriter_close(JNIEnv* env, jobject thiz, jlong nativeCtx) {
     ALOGV("%s:", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "ImageWriterContext is not initialized");
+        // ImageWriter is already closed.
         return;
     }
 
