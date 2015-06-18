@@ -127,6 +127,8 @@ public class ResolverDrawerLayout extends ViewGroup {
         final ViewConfiguration vc = ViewConfiguration.get(context);
         mTouchSlop = vc.getScaledTouchSlop();
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
+
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     public void setSmallCollapsed(boolean smallCollapsed) {
@@ -590,11 +592,6 @@ public class ResolverDrawerLayout extends ViewGroup {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public CharSequence getAccessibilityClassName() {
-        return ResolverDrawerLayout.class.getName();
     }
 
     @Override
