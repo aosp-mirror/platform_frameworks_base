@@ -132,52 +132,52 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
 
         putSignatureImpl("MD5withRSA",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$MD5WithPKCS1Padding");
-        put("Alg.Alias.Signature.MD5WithRSAEncryption", "MD5WithRSA");
-        put("Alg.Alias.Signature.MD5/RSA", "MD5WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.4", "MD5WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.2.5with1.2.840.113549.1.1.1", "MD5WithRSA");
+        put("Alg.Alias.Signature.MD5WithRSAEncryption", "MD5withRSA");
+        put("Alg.Alias.Signature.MD5/RSA", "MD5withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.4", "MD5withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.2.5with1.2.840.113549.1.1.1", "MD5withRSA");
 
         putSignatureImpl("SHA1withRSA",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA1WithPKCS1Padding");
-        put("Alg.Alias.Signature.SHA1WithRSAEncryption", "SHA1WithRSA");
-        put("Alg.Alias.Signature.SHA1/RSA", "SHA1WithRSA");
-        put("Alg.Alias.Signature.SHA-1/RSA", "SHA1WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.5", "SHA1WithRSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.1", "SHA1WithRSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.5", "SHA1WithRSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.29", "SHA1WithRSA");
+        put("Alg.Alias.Signature.SHA1WithRSAEncryption", "SHA1withRSA");
+        put("Alg.Alias.Signature.SHA1/RSA", "SHA1withRSA");
+        put("Alg.Alias.Signature.SHA-1/RSA", "SHA1withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.5", "SHA1withRSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.1", "SHA1withRSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.5", "SHA1withRSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.29", "SHA1withRSA");
 
         putSignatureImpl("SHA224withRSA",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA224WithPKCS1Padding");
-        put("Alg.Alias.Signature.SHA224WithRSAEncryption", "SHA224WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.11", "SHA224WithRSA");
+        put("Alg.Alias.Signature.SHA224WithRSAEncryption", "SHA224withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.11", "SHA224withRSA");
         put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.4with1.2.840.113549.1.1.1",
-                "SHA224WithRSA");
+                "SHA224withRSA");
         put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.4with1.2.840.113549.1.1.11",
-                "SHA224WithRSA");
+                "SHA224withRSA");
 
         putSignatureImpl("SHA256withRSA",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA256WithPKCS1Padding");
-        put("Alg.Alias.Signature.SHA256WithRSAEncryption", "SHA256WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.11", "SHA256WithRSA");
+        put("Alg.Alias.Signature.SHA256WithRSAEncryption", "SHA256withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.11", "SHA256withRSA");
         put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.1with1.2.840.113549.1.1.1",
-                "SHA256WithRSA");
+                "SHA256withRSA");
         put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.1with1.2.840.113549.1.1.11",
-                "SHA256WithRSA");
+                "SHA256withRSA");
 
         putSignatureImpl("SHA384withRSA",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA384WithPKCS1Padding");
-        put("Alg.Alias.Signature.SHA384WithRSAEncryption", "SHA384WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.12", "SHA384WithRSA");
+        put("Alg.Alias.Signature.SHA384WithRSAEncryption", "SHA384withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.12", "SHA384withRSA");
         put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.2with1.2.840.113549.1.1.1",
-                "SHA384WithRSA");
+                "SHA384withRSA");
 
         putSignatureImpl("SHA512withRSA",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA512WithPKCS1Padding");
-        put("Alg.Alias.Signature.SHA512WithRSAEncryption", "SHA512WithRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.13", "SHA512WithRSA");
+        put("Alg.Alias.Signature.SHA512WithRSAEncryption", "SHA512withRSA");
+        put("Alg.Alias.Signature.1.2.840.113549.1.1.13", "SHA512withRSA");
         put("Alg.Alias.Signature.2.16.840.1.101.3.4.2.3with1.2.840.113549.1.1.1",
-                "SHA512WithRSA");
+                "SHA512withRSA");
 
         putSignatureImpl("SHA1withRSA/PSS",
                 PACKAGE_NAME + ".AndroidKeyStoreRSASignatureSpi$SHA1WithPSSPadding");
