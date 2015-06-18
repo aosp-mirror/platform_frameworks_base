@@ -1342,6 +1342,11 @@
         android:description="@string/permdesc_killBackgroundProcesses"
         android:protectionLevel="normal" />
 
+    <!-- @SystemApi @hide Allows an application to retrieve a package's importance.
+         This permission is not available to third party applications. -->
+    <permission android:name="android.permission.GET_PACKAGE_IMPORTANCE"
+        android:protectionLevel="signature|system" />
+
     <!-- ================================== -->
     <!-- Permissions affecting the display of other applications  -->
     <!-- ================================== -->
