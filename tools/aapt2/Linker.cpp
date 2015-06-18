@@ -160,7 +160,7 @@ const Attribute* Linker::doResolveAttribute(Reference& attribute, const SourceLi
 void Linker::visit(Reference& reference, ValueVisitorArgs& a) {
     Args& args = static_cast<Args&>(a);
 
-    if (!reference.name.isValid()) {
+    if (reference.name.entry.empty()) {
         // We can't have a completely bad reference.
         if (!reference.id.isValid()) {
             Logger::error() << "srsly? " << args.referrer << std::endl;
