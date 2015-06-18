@@ -7139,20 +7139,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public Configuration computeNewConfiguration() {
         synchronized (mWindowMap) {
-            if (!mDisplayReady) {
-                return null;
-            }
-            Configuration config = computeNewConfigurationLocked();
-            if (mWaitingForConfig) {
-                mWaitingForConfig = false;
-                mLastFinishedFreezeSource = "new-config";
-                performLayoutAndPlaceSurfacesLocked();
-            }
-            return config;
+            return computeNewConfigurationLocked();
         }
     }
 
-    Configuration computeNewConfigurationLocked() {
+    private Configuration computeNewConfigurationLocked() {
+        if (!mDisplayReady) {
+            return null;
+        }
         Configuration config = new Configuration();
         config.fontScale = 0;
         computeScreenConfigurationLocked(config);
@@ -9678,7 +9672,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     *  @param w WindowState this method is applied to.
+     * @param w WindowState this method is applied to.
      * @param innerDw Width of app window.
      * @param innerDh Height of app window.
      */
