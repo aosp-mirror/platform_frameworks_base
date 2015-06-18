@@ -1124,13 +1124,14 @@ public class SubscriptionManager {
      * {@hide}
      */
     public static int getSimStateForSlotIdx(int slotIdx) {
-        int simState;
+        int simState = TelephonyManager.SIM_STATE_UNKNOWN;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            simState = iSub.getSimStateForSlotIdx(slotIdx);
+            if (iSub != null) {
+                simState = iSub.getSimStateForSlotIdx(slotIdx);
+            }
         } catch (RemoteException ex) {
-            simState = TelephonyManager.SIM_STATE_UNKNOWN;
         }
         logd("getSimStateForSubscriber: simState=" + simState + " slotIdx=" + slotIdx);
         return simState;
@@ -1144,7 +1145,9 @@ public class SubscriptionManager {
     public boolean isActiveSubId(int subId) {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            return iSub.isActiveSubId(subId);
+            if (iSub != null) {
+                return iSub.isActiveSubId(subId);
+            }
         } catch (RemoteException ex) {
         }
         return false;
