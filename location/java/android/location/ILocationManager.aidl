@@ -75,6 +75,7 @@ interface ILocationManager
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     boolean providerMeetsCriteria(String provider, in Criteria criteria);
     ProviderProperties getProviderProperties(String provider);
+    String getNetworkProviderPackage();
     boolean isProviderEnabled(String provider);
 
     void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
