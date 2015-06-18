@@ -1608,7 +1608,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    protected void onViewRemoved(View child) {
+    public void onViewRemoved(View child) {
         super.onViewRemoved(child);
         // we only call our internal methods if this is actually a removal and not just a
         // notification which becomes a child notification
@@ -1745,7 +1745,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    protected void onViewAdded(View child) {
+    public void onViewAdded(View child) {
         super.onViewAdded(child);
         onViewAddedInternal(child);
     }
