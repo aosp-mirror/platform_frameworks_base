@@ -41,6 +41,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -1396,6 +1397,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             final StatusBarIcon ic = new StatusBarIcon(
                     entry.notification.getUser(),
+                    entry.notification.getPackageName(),
                     entry.notification.getNotification().getSmallIcon(),
                     entry.notification.getNotification().iconLevel,
                     entry.notification.getNotification().number,
@@ -1682,10 +1684,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         final StatusBarIcon ic = new StatusBarIcon(
                 sbn.getUser(),
-                    n.getSmallIcon(),
-                    n.iconLevel,
-                    n.number,
-                    n.tickerText);
+                sbn.getPackageName(),
+                n.getSmallIcon(),
+                n.iconLevel,
+                n.number,
+                n.tickerText);
         if (!iconView.set(ic)) {
             handleNotificationError(sbn, "Couldn't create icon: " + ic);
             return null;
@@ -1825,6 +1828,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     // Update the icon
                     final StatusBarIcon ic = new StatusBarIcon(
                             notification.getUser(),
+                            notification.getPackageName(),
                             n.getSmallIcon(),
                             n.iconLevel,
                             n.number,
@@ -1847,6 +1851,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
             final StatusBarIcon ic = new StatusBarIcon(
                     notification.getUser(),
+                    notification.getPackageName(),
                     n.getSmallIcon(),
                     n.iconLevel,
                     n.number,
