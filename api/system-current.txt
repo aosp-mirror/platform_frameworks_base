@@ -5969,7 +5969,6 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED = "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCALE = "android.app.extra.PROVISIONING_LOCALE";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.PROVISIONING_LOCAL_TIME";
-    field public static final java.lang.String EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS = "android.app.extra.PROVISIONING_RESET_PROTECTION_PARAMETERS";
     field public static final java.lang.String EXTRA_PROVISIONING_SKIP_ENCRYPTION = "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
     field public static final java.lang.String EXTRA_PROVISIONING_TIME_ZONE = "android.app.extra.PROVISIONING_TIME_ZONE";
     field public static final java.lang.String EXTRA_PROVISIONING_WIFI_HIDDEN = "android.app.extra.PROVISIONING_WIFI_HIDDEN";
@@ -30918,7 +30917,6 @@ package android.service.persistentdata {
     method public abstract byte[] read() throws android.os.RemoteException;
     method public abstract void setOemUnlockEnabled(boolean) throws android.os.RemoteException;
     method public abstract void wipe() throws android.os.RemoteException;
-    method public abstract void wipeIfAllowed(android.os.Bundle, android.app.PendingIntent) throws android.os.RemoteException;
     method public abstract int write(byte[]) throws android.os.RemoteException;
   }
 
@@ -30930,14 +30928,7 @@ package android.service.persistentdata {
     method public byte[] read();
     method public void setOemUnlockEnabled(boolean);
     method public void wipe();
-    method public void wipeIfAllowed(android.os.Bundle, android.app.PendingIntent);
     method public int write(byte[]);
-    field public static final java.lang.String ACTION_WIPE_IF_ALLOWED = "android.service.persistentdata.action.WIPE_IF_ALLOWED";
-    field public static final java.lang.String EXTRA_WIPE_IF_ALLOWED_CALLBACK = "android.service.persistentdata.extra.WIPE_IF_ALLOWED_CALLBACK";
-    field public static final int STATUS_ERROR_NETWORK_ERROR = 2; // 0x2
-    field public static final int STATUS_ERROR_NOT_COMPLIANT = 3; // 0x3
-    field public static final int STATUS_ERROR_REMOTE_EXCEPTION = 1; // 0x1
-    field public static final int STATUS_SUCCESS = 0; // 0x0
   }
 
 }
