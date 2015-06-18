@@ -1371,6 +1371,9 @@ public class Notification implements Parcelable
         when = parcel.readLong();
         if (parcel.readInt() != 0) {
             mSmallIcon = Icon.CREATOR.createFromParcel(parcel);
+            if (mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
+                icon = mSmallIcon.getResId();
+            }
         }
         number = parcel.readInt();
         if (parcel.readInt() != 0) {
@@ -1588,13 +1591,17 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Flatten this notification from a parcel.
+     * Flatten this notification into a parcel.
      */
     public void writeToParcel(Parcel parcel, int flags)
     {
         parcel.writeInt(1);
 
         parcel.writeLong(when);
+        if (mSmallIcon == null && icon != 0) {
+            // you snuck an icon in here without using the builder; let's try to keep it
+            mSmallIcon = Icon.createWithResource("", icon);
+        }
         if (mSmallIcon != null) {
             parcel.writeInt(1);
             mSmallIcon.writeToParcel(parcel, 0);
@@ -2791,7 +2798,10 @@ public class Notification implements Parcelable
             return this;
         }
 
-        private void setFlag(int mask, boolean value) {
+        /**
+         * @hide
+         */
+        public void setFlag(int mask, boolean value) {
             if (value) {
                 mFlags |= mask;
             } else {

@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -258,16 +259,21 @@ public final class Icon implements Parcelable {
                 return new BitmapDrawable(context.getResources(), getBitmap());
             case TYPE_RESOURCE:
                 if (getResources() == null) {
-                    if (getResPackage() == null || "android".equals(getResPackage())) {
+                    // figure out where to load resources from
+                    String resPackage = getResPackage();
+                    if (TextUtils.isEmpty(resPackage)) {
+                        // if none is specified, try the given context
+                        resPackage = context.getPackageName();
+                    }
+                    if ("android".equals(resPackage)) {
                         mObj1 = Resources.getSystem();
                     } else {
                         final PackageManager pm = context.getPackageManager();
                         try {
-                            mObj1 = pm.getResourcesForApplication(getResPackage());
+                            mObj1 = pm.getResourcesForApplication(resPackage);
                         } catch (PackageManager.NameNotFoundException e) {
-                            Log.e(TAG, String.format("Unable to find pkg=%s",
-                                            getResPackage()),
-                                    e);
+                            Log.e(TAG, String.format("Unable to find pkg=%s for icon %s",
+                                    resPackage, this), e);
                             break;
                         }
                     }
@@ -320,12 +326,15 @@ public final class Icon implements Parcelable {
      */
     public Drawable loadDrawableAsUser(Context context, int userId) {
         if (mType == TYPE_RESOURCE) {
-            if (getResources() == null
-                    && getResPackage() != null
-                    && !(getResPackage().equals("android"))) {
+            String resPackage = getResPackage();
+            if (TextUtils.isEmpty(resPackage)) {
+                resPackage = context.getPackageName();
+            }
+            if (getResources() == null && !(getResPackage().equals("android"))) {
                 final PackageManager pm = context.getPackageManager();
                 try {
-                    mObj1 = pm.getResourcesForApplicationAsUser(getResPackage(), userId);
+                    // assign getResources() as the correct user
+                    mObj1 = pm.getResourcesForApplicationAsUser(resPackage, userId);
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG, String.format("Unable to find pkg=%s user=%d",
                                     getResPackage(),
@@ -410,6 +419,9 @@ public final class Icon implements Parcelable {
      * @param resId ID of the drawable resource
      */
     public static Icon createWithResource(Context context, @DrawableRes int resId) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context must not be null.");
+        }
         final Icon rep = new Icon(TYPE_RESOURCE);
         rep.mInt1 = resId;
         rep.mString1 = context.getPackageName();
