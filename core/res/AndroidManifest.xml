@@ -242,6 +242,7 @@
     <protected-broadcast android:name="android.intent.action.DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN" />
 
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_SCAN" />
+    <protected-broadcast android:name="com.android.server.WifiManager.action.START_PNO" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />
     <protected-broadcast android:name="android.net.wifi.WIFI_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
