@@ -509,6 +509,13 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     @Override
+    public void showPromptReason(int reason) {
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            getSecurityView(mCurrentSecuritySelection).showPromptReason(reason);
+        }
+    }
+
+    @Override
     public void showUsabilityHint() {
         mSecurityViewFlipper.showUsabilityHint();
     }
