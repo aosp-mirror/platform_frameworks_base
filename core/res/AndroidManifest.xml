@@ -316,8 +316,6 @@
     <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED" />
 
     <protected-broadcast android:name="android.internal.policy.action.BURN_IN_PROTECTION" />
-    <protected-broadcast android:name="android.service.persistentdata.action.WIPE_IF_ALLOWED" />
-
     <protected-broadcast android:name="android.app.action.SYSTEM_UPDATE_POLICY_CHANGED" />
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
