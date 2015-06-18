@@ -1958,6 +1958,27 @@ public class LocationManagerService extends ILocationManager.Stub {
         return p.getProperties();
     }
 
+    /**
+     * @return null if the provider does not exist
+     * @throws SecurityException if the provider is not allowed to be
+     * accessed by the caller
+     */
+    @Override
+    public String getNetworkProviderPackage() {
+        LocationProviderInterface p;
+        synchronized (mLock) {
+            if (mProvidersByName.get(LocationManager.NETWORK_PROVIDER) == null) {
+                return null;
+            }
+            p = mProvidersByName.get(LocationManager.NETWORK_PROVIDER);
+        }
+
+        if (p instanceof LocationProviderProxy) {
+            return ((LocationProviderProxy) p).getConnectedPackageName();
+        }
+        return null;
+    }
+
     @Override
     public boolean isProviderEnabled(String provider) {
         // Fused provider is accessed indirectly via criteria rather than the provider-based APIs,
