@@ -491,7 +491,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void closeQs() {
-        cancelAnimation();
+        cancelQsAnimation();
         setQsExpansion(mQsMinExpansionHeight);
     }
 
@@ -508,7 +508,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void openQs() {
-        cancelAnimation();
+        cancelQsAnimation();
         if (mQsExpansionEnabled) {
             setQsExpansion(mQsMaxExpansionHeight);
         }
@@ -921,7 +921,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
-        cancelAnimation();
+        cancelQsAnimation();
         if (!mQsExpansionEnabled) {
             amount = 0f;
         }
@@ -953,7 +953,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void onQsExpansionStarted(int overscrollAmount) {
-        cancelAnimation();
+        cancelQsAnimation();
+        cancelHeightAnimator();
 
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight - mScrollView.getScrollY() - overscrollAmount;
@@ -1391,7 +1392,7 @@ public class NotificationPanelView extends PanelView implements
         return mVelocityTracker.getYVelocity();
     }
 
-    private void cancelAnimation() {
+    private void cancelQsAnimation() {
         if (mQsExpansionAnimator != null) {
             mQsExpansionAnimator.cancel();
         }
