@@ -4157,6 +4157,11 @@ public class Editor {
                         offset = adjustedOffset;
                     }
                     positionCursor = true;
+                } else if (adjustedOffset < mPreviousOffset) {
+                    // Handle has jumped to the start of the word, and the user is moving
+                    // their finger towards the handle, the delta should be updated.
+                    mTouchWordDelta = mTextView.convertToLocalHorizontalCoordinate(x)
+                            - layout.getPrimaryHorizontal(mPreviousOffset);
                 }
             }
 
@@ -4291,6 +4296,11 @@ public class Editor {
                         offset = adjustedOffset;
                     }
                     positionCursor = true;
+                } else if (adjustedOffset > mPreviousOffset) {
+                    // Handle has jumped to the end of the word, and the user is moving
+                    // their finger towards the handle, the delta should be updated.
+                    mTouchWordDelta = layout.getPrimaryHorizontal(mPreviousOffset)
+                            - mTextView.convertToLocalHorizontalCoordinate(x);
                 }
             }
 
