@@ -756,8 +756,8 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
                 zipFile->uncompress(entry));
         assert(uncompressedData);
 
-        BinaryResourceParser parser(table, resolver, source, uncompressedData.get(),
-                                    entry->getUncompressedLen());
+        BinaryResourceParser parser(table, resolver, source, options.appInfo.package, 
+                                    uncompressedData.get(), entry->getUncompressedLen());
         if (!parser.parse()) {
             return false;
         }
@@ -1085,50 +1085,47 @@ static AaptOptions prepareArgs(int argc, char** argv) {
     }
 
     bool isStaticLib = false;
+    if (options.phase == AaptOptions::Phase::Link) {
+        flag::requiredFlag("--manifest", "AndroidManifest.xml of your app",
+                [&options](const StringPiece& arg) {
+                    options.manifest = Source{ arg.toString() };
+                });
+
+        flag::optionalFlag("-I", "add an Android APK to link against",
+                [&options](const StringPiece& arg) {
+                    options.libraries.push_back(Source{ arg.toString() });
+                });
+
+        flag::optionalFlag("--java", "directory in which to generate R.java",
+                [&options](const StringPiece& arg) {
+                    options.generateJavaClass = Source{ arg.toString() };
+                });
+
+        flag::optionalFlag("--proguard", "file in which to output proguard rules",
+                [&options](const StringPiece& arg) {
+                    options.generateProguardRules = Source{ arg.toString() };
+                });
+
+        flag::optionalSwitch("--static-lib", "generate a static Android library", true,
+                             &isStaticLib);
+
+        flag::optionalFlag("--binding", "Output directory for binding XML files",
+                [&options](const StringPiece& arg) {
+                    options.bindingOutput = Source{ arg.toString() };
+                });
+        flag::optionalSwitch("--no-version", "Disables automatic style and layout versioning",
+                             false, &options.versionStylesAndLayouts);
+    }
+
     if (options.phase == AaptOptions::Phase::Compile ||
             options.phase == AaptOptions::Phase::Link) {
-        if (options.phase == AaptOptions::Phase::Compile) {
-            flag::requiredFlag("--package", "Android package name",
-                    [&options](const StringPiece& arg) {
-                        options.appInfo.package = util::utf8ToUtf16(arg);
-                    });
-        } else if (options.phase == AaptOptions::Phase::Link) {
-            flag::requiredFlag("--manifest", "AndroidManifest.xml of your app",
-                    [&options](const StringPiece& arg) {
-                        options.manifest = Source{ arg.toString() };
-                    });
-
-            flag::optionalFlag("-I", "add an Android APK to link against",
-                    [&options](const StringPiece& arg) {
-                        options.libraries.push_back(Source{ arg.toString() });
-                    });
-
-            flag::optionalFlag("--java", "directory in which to generate R.java",
-                    [&options](const StringPiece& arg) {
-                        options.generateJavaClass = Source{ arg.toString() };
-                    });
-
-            flag::optionalFlag("--proguard", "file in which to output proguard rules",
-                    [&options](const StringPiece& arg) {
-                        options.generateProguardRules = Source{ arg.toString() };
-                    });
-
-            flag::optionalSwitch("--static-lib", "generate a static Android library", true,
-                                 &isStaticLib);
-
-            flag::optionalFlag("--binding", "Output directory for binding XML files",
-                    [&options](const StringPiece& arg) {
-                        options.bindingOutput = Source{ arg.toString() };
-                    });
-            flag::optionalSwitch("--no-version", "Disables automatic style and layout versioning",
-                                 false, &options.versionStylesAndLayouts);
-        }
-
         // Common flags for all steps.
         flag::requiredFlag("-o", "Output path", [&options](const StringPiece& arg) {
             options.output = Source{ arg.toString() };
         });
-    } else if (options.phase == AaptOptions::Phase::DumpStyleGraph) {
+    }
+
+    if (options.phase == AaptOptions::Phase::DumpStyleGraph) {
         flag::requiredFlag("--style", "Name of the style to dump",
                 [&options](const StringPiece& arg, std::string* outError) -> bool {
                     Reference styleReference;
@@ -1191,7 +1188,7 @@ static bool doDump(const AaptOptions& options) {
                 zipFile->uncompress(entry));
         assert(uncompressedData);
 
-        BinaryResourceParser parser(table, resolver, source, uncompressedData.get(),
+        BinaryResourceParser parser(table, resolver, source, {}, uncompressedData.get(),
                                     entry->getUncompressedLen());
         if (!parser.parse()) {
             return false;
@@ -1223,16 +1220,17 @@ int main(int argc, char** argv) {
         if (!loadAppInfo(options.manifest, &options.appInfo)) {
             return false;
         }
-    }
 
-    // Verify we have some common options set.
-    if (options.appInfo.package.empty()) {
-        Logger::error() << "no package name specified." << std::endl;
-        return false;
+        if (options.appInfo.package.empty()) {
+            Logger::error() << "no package name specified." << std::endl;
+            return false;
+        }
     }
 
     // Every phase needs a resource table.
     std::shared_ptr<ResourceTable> table = std::make_shared<ResourceTable>();
+
+    // The package name is empty when in the compile phase.
     table->setPackage(options.appInfo.package);
     if (options.appInfo.package == u"android") {
         table->setPackageId(0x01);
