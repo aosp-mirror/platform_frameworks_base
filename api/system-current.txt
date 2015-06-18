@@ -96,6 +96,7 @@ package android {
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String GET_ACCOUNTS = "android.permission.GET_ACCOUNTS";
     field public static final java.lang.String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
+    field public static final java.lang.String GET_PACKAGE_IMPORTANCE = "android.permission.GET_PACKAGE_IMPORTANCE";
     field public static final java.lang.String GET_PACKAGE_SIZE = "android.permission.GET_PACKAGE_SIZE";
     field public static final deprecated java.lang.String GET_TASKS = "android.permission.GET_TASKS";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
