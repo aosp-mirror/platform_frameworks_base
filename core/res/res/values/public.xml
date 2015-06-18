@@ -2631,27 +2631,41 @@
   <public type="attr" name="fullBackupContent" />
 
   <public type="style" name="Widget.Material.Button.Colored" />
-  <public type="style" name="Theme.Material.DayNight" />
-  <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
-  <public type="style" name="Theme.Material.DayNight.Dialog" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.Alert" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
-  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
-  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
-  <public type="style" name="Theme.Material.DayNight.Panel" />
+
+  <style name="__reserved8" />
+  <public type="style" name="__reserved8" />
+  <style name="__reserved9" />
+  <public type="style" name="__reserved9" />
+  <style name="__reserved10" />
+  <public type="style" name="__reserved10" />
+  <style name="__reserved11" />
+  <public type="style" name="__reserved11" />
+  <style name="__reserved12" />
+  <public type="style" name="__reserved12" />
+  <style name="__reserved13" />
+  <public type="style" name="__reserved13" />
+  <style name="__reserved14" />
+  <public type="style" name="__reserved14" />
+  <style name="__reserved15" />
+  <public type="style" name="__reserved15" />
+  <style name="__reserved16" />
+  <public type="style" name="__reserved16" />
+  <style name="__reserved17" />
+  <public type="style" name="__reserved17" />
+  <style name="__reserved18" />
+  <public type="style" name="__reserved18" />
+  <style name="__reserved19" />
+  <public type="style" name="__reserved19" />
+  <style name="__reserved20" />
+  <public type="style" name="__reserved20" />
+  <style name="__reserved21" />
+  <public type="style" name="__reserved21" />
+  <style name="__reserved22" />
+  <public type="style" name="__reserved22" />
   <public type="style" name="Theme.Material.Light.LightStatusBar" />
   <public type="style" name="ThemeOverlay.Material.Dialog" />
   <public type="style" name="TextAppearance.Material.Widget.Button.Inverse" />
   <public type="style" name="ThemeOverlay.Material.Dialog.Alert" />
-  <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
-  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 
   <public type="id" name="pasteAsPlainText" />
   <public type="id" name="undo" />
