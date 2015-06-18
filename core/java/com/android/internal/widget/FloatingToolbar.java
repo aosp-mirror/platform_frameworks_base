@@ -20,7 +20,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -89,6 +91,19 @@ public final class FloatingToolbar {
     private int mSuggestedWidth;
     private boolean mWidthChanged = true;
 
+    private final ComponentCallbacks mOrientationChangeHandler = new ComponentCallbacks() {
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            if (mPopup.isShowing() && mPopup.viewPortHasChanged()) {
+                mWidthChanged = true;
+                updateLayout();
+            }
+        }
+
+        @Override
+        public void onLowMemory() {}
+    };
+
     /**
      * Initializes a floating toolbar.
      */
@@ -151,6 +166,8 @@ public final class FloatingToolbar {
      * Shows this floating toolbar.
      */
     public FloatingToolbar show() {
+        mContext.unregisterComponentCallbacks(mOrientationChangeHandler);
+        mContext.registerComponentCallbacks(mOrientationChangeHandler);
         List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
         if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
             mPopup.dismiss();
@@ -181,6 +198,7 @@ public final class FloatingToolbar {
      * Dismisses this floating toolbar.
      */
     public void dismiss() {
+        mContext.unregisterComponentCallbacks(mOrientationChangeHandler);
         mPopup.dismiss();
     }
 
@@ -329,6 +347,7 @@ public final class FloatingToolbar {
 
         private final Rect mViewPort = new Rect();
         private final Point mCoords = new Point();
+        private final Rect mTmpRect = new Rect();
 
         private final Region mTouchableRegion = new Region();
         private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
@@ -871,6 +890,11 @@ public final class FloatingToolbar {
 
         private void refreshViewPort() {
             mParent.getWindowVisibleDisplayFrame(mViewPort);
+        }
+
+        private boolean viewPortHasChanged() {
+            mParent.getWindowVisibleDisplayFrame(mTmpRect);
+            return !mTmpRect.equals(mViewPort);
         }
 
         private int getToolbarWidth(int suggestedWidth) {
