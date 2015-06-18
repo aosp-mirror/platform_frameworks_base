@@ -95,8 +95,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class BatteryStatsImpl extends BatteryStats {
     private static final String TAG = "BatteryStatsImpl";
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_ENERGY = false;
-    public static final boolean DEBUG_ENERGY_CPU = DEBUG_ENERGY || false;
+    public static final boolean DEBUG_ENERGY = false;
+    private static final boolean DEBUG_ENERGY_CPU = DEBUG_ENERGY || false;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
@@ -182,6 +182,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public interface ExternalStatsSync {
         void scheduleSync(String reason);
+        void scheduleWifiSync(String reason);
     }
 
     public final MyHandler mHandler;
@@ -3496,7 +3497,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = true;
             mWifiOnTimer.startRunningLocked(elapsedRealtime);
-            scheduleSyncExternalStatsLocked("wifi-off");
+            scheduleSyncExternalWifiStatsLocked("wifi-off");
         }
     }
 
@@ -3510,7 +3511,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = false;
             mWifiOnTimer.stopRunningLocked(elapsedRealtime);
-            scheduleSyncExternalStatsLocked("wifi-on");
+            scheduleSyncExternalWifiStatsLocked("wifi-on");
         }
     }
 
@@ -3762,7 +3763,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
             }
-            scheduleSyncExternalStatsLocked("wifi-running");
+            scheduleSyncExternalWifiStatsLocked("wifi-running");
         } else {
             Log.w(TAG, "noteWifiRunningLocked -- called while WIFI running");
         }
@@ -3801,7 +3802,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
-            scheduleSyncExternalStatsLocked("wifi-stopped");
+            scheduleSyncExternalWifiStatsLocked("wifi-stopped");
         } else {
             Log.w(TAG, "noteWifiStoppedLocked -- called while WIFI not running");
         }
@@ -3816,7 +3817,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mWifiState = wifiState;
             mWifiStateTimer[wifiState].startRunningLocked(elapsedRealtime);
-            scheduleSyncExternalStatsLocked("wifi-state");
+            scheduleSyncExternalWifiStatsLocked("wifi-state");
         }
     }
 
@@ -7548,6 +7549,10 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param info The energy information from the WiFi controller.
      */
     public void updateWifiStateLocked(@Nullable final WifiActivityEnergyInfo info) {
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Updating wifi stats");
+        }
+
         final long elapsedRealtimeMs = SystemClock.elapsedRealtime();
         NetworkStats delta = null;
         try {
@@ -7745,6 +7750,10 @@ public final class BatteryStatsImpl extends BatteryStats {
      * Distribute Cell radio energy info and network traffic to apps.
      */
     public void updateMobileRadioStateLocked(final long elapsedRealtimeMs) {
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Updating mobile radio stats");
+        }
+
         NetworkStats delta = null;
         try {
             if (!ArrayUtils.isEmpty(mMobileIfaces)) {
@@ -7817,6 +7826,10 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param info The energy information from the bluetooth controller.
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Updating bluetooth stats");
+        }
+
         if (info != null && mOnBatteryInternal) {
             mHasBluetoothEnergyReporting = true;
             mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
@@ -8236,6 +8249,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     private void scheduleSyncExternalStatsLocked(String reason) {
         if (mExternalSync != null) {
             mExternalSync.scheduleSync(reason);
+        }
+    }
+
+    private void scheduleSyncExternalWifiStatsLocked(String reason) {
+        if (mExternalSync != null) {
+            mExternalSync.scheduleWifiSync(reason);
         }
     }
 
