@@ -392,6 +392,9 @@ public class CarrierConfigManager {
      * specific SIM card. If an invalid subId is used, the returned config will contain default
      * values.
      *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
@@ -413,6 +416,9 @@ public class CarrierConfigManager {
     /**
      * Gets the configuration values for the default subscription.
      *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
      * @see #getConfigForSubId
      */
     @Nullable
@@ -427,6 +433,8 @@ public class CarrierConfigManager {
      * This should be called by a carrier service app if it wants to update config at an arbitrary
      * moment.
      * </p>
+     * <p>Requires that the calling app has carrier privileges.
+     * @see #hasCarrierPrivileges
      * <p>
      * This method returns before the reload has completed, and
      * {@link android.service.carrier.CarrierService#onLoadConfig} will be called from an
