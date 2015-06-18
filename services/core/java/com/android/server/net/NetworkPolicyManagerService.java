@@ -36,8 +36,10 @@ import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_STANDBY;
+import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
@@ -80,7 +82,6 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
-import android.app.IProcessObserver;
 import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -141,7 +142,6 @@ import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TrustedTime;
@@ -279,6 +279,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     final SparseIntArray mUidPolicy = new SparseIntArray();
     /** Currently derived rules for each UID. */
     final SparseIntArray mUidRules = new SparseIntArray();
+    final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
     /**
      * UIDs that have been white-listed to always be able to have network access
@@ -411,8 +412,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         }
 
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
-
-        final PackageManager pm = mContext.getPackageManager();
 
         synchronized (mRulesLock) {
             updatePowerSaveWhitelistLocked();
@@ -1103,7 +1102,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         // will not have a bandwidth limit.  Also only do this if restrict
         // background data use is *not* enabled, since that takes precendence
         // use over those networks can have a cost associated with it).
-        final boolean powerSave = (mRestrictPower || mDeviceIdleMode) && !mRestrictBackground;
+        final boolean powerSave = mRestrictPower && !mRestrictBackground;
 
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
@@ -2024,6 +2023,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         }
     }
 
+    void updateRulesForDeviceIdleLocked() {
+        if (mDeviceIdleMode) {
+            // sync the whitelists before enable dozable chain.  We don't care about the rules if
+            // we are disabling the chain.
+            SparseIntArray uidRules = new SparseIntArray();
+            final List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo user : users) {
+                for (int i = mPowerSaveTempWhitelistAppIds.size() - 1; i >= 0; i--) {
+                    int appId = mPowerSaveTempWhitelistAppIds.keyAt(i);
+                    int uid = UserHandle.getUid(user.id, appId);
+                    uidRules.put(uid, FIREWALL_RULE_ALLOW);
+                }
+                for (int i = mPowerSaveWhitelistAppIds.size() - 1; i >= 0; i--) {
+                    int appId = mPowerSaveWhitelistAppIds.keyAt(i);
+                    int uid = UserHandle.getUid(user.id, appId);
+                    uidRules.put(uid, FIREWALL_RULE_ALLOW);
+                }
+            }
+            setUidFirewallRules(FIREWALL_CHAIN_DOZABLE, uidRules);
+        }
+        enableFirewallChain(FIREWALL_CHAIN_DOZABLE, mDeviceIdleMode);
+    }
+
     /**
      * Update rules that might be changed by {@link #mRestrictBackground},
      * {@link #mRestrictPower}, or {@link #mDeviceIdleMode} value.
@@ -2034,9 +2056,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         // If we are in restrict power mode, we allow all important apps
         // to have data access.  Otherwise, we restrict data access to only
         // the top apps.
-        mCurForegroundState = (!mRestrictBackground && (mRestrictPower || mDeviceIdleMode))
+        mCurForegroundState = (!mRestrictBackground && mRestrictPower)
                 ? ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
                 : ActivityManager.PROCESS_STATE_TOP;
+
+        updateRulesForDeviceIdleLocked();
 
         // update rules for all installed applications
         final List<UserInfo> users = mUserManager.getUsers();
@@ -2131,7 +2155,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                 // uid in background, and global background disabled
                 uidRules = RULE_REJECT_METERED;
             }
-        } else if (mRestrictPower || mDeviceIdleMode) {
+        } else if (mRestrictPower) {
             final boolean whitelisted = mPowerSaveWhitelistAppIds.get(appId)
                     || mPowerSaveTempWhitelistAppIds.get(appId);
             if (!whitelisted && !uidForeground
@@ -2162,7 +2186,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         final boolean oldFirewallReject = (oldRules & RULE_REJECT_ALL) != 0;
         final boolean firewallReject = (uidRules & RULE_REJECT_ALL) != 0;
         if (oldFirewallReject != firewallReject) {
-            setUidFirewallRules(uid, firewallReject);
+            setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, firewallReject);
+            if (mDeviceIdleMode && !firewallReject) {
+                // if we are in device idle mode, and we decide to allow this uid.  we need to punch
+                // a hole in the device idle chain.
+                setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, false);
+            }
         }
 
         // dispatch changed rule to existing listeners
@@ -2314,16 +2343,54 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     }
 
     /**
-     * Add or remove a uid to the firewall blacklist for all network ifaces.
-     * @param uid
-     * @param rejectOnAll
+     * Set uid rules on a particular firewall chain. This is going to synchronize the rules given
+     * here to netd.  It will clean up dead rules and make sure the target chain only contains rules
+     * specified here.
      */
-    private void setUidFirewallRules(int uid, boolean rejectOnAll) {
+    private void setUidFirewallRules(int chain, SparseIntArray uidRules) {
         try {
-            mNetworkManager.setFirewallUidRule(uid,
-                    rejectOnAll ? FIREWALL_RULE_DENY : FIREWALL_RULE_DEFAULT);
+            int size = uidRules.size();
+            int[] uids = new int[size];
+            int[] rules = new int[size];
+            for(int index = size - 1; index >= 0; --index) {
+                uids[index] = uidRules.keyAt(index);
+                rules[index] = uidRules.valueAt(index);
+            }
+            mNetworkManager.setFirewallUidRules(chain, uids, rules);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting firewall uid rules", e);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
+        }
+    }
+
+    /**
+     * Add or remove a uid to the firewall blacklist for all network ifaces.
+     */
+    private void setUidFirewallRule(int chain, int uid, boolean rejectOnAll) {
+        try {
+            mNetworkManager.setFirewallUidRule(chain, uid,
+                    rejectOnAll ? FIREWALL_RULE_DENY : FIREWALL_RULE_ALLOW);
+        } catch (IllegalStateException e) {
+            Log.wtf(TAG, "problem setting firewall uid rules", e);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
+        }
+    }
+
+    /**
+     * Add or remove a uid to the firewall blacklist for all network ifaces.
+     */
+    private void enableFirewallChain(int chain, boolean enable) {
+        if (mFirewallChainStates.indexOfKey(chain) >= 0 &&
+                mFirewallChainStates.get(chain) == enable) {
+            // All is the same, nothing to do.
+            return;
+        }
+        try {
+            mNetworkManager.setFirewallChainEnabled(chain, enable);
+        } catch (IllegalStateException e) {
+            Log.wtf(TAG, "problem enable firewall chain", e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
