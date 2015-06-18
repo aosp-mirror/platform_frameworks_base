@@ -8,6 +8,7 @@ page.tags=studio, configuration
 
     <h2>In this document</h2>
     <ol>
+      <li><a href="#sdk-mgr">SDK Manager</a></li>
       <li><a href="#update-channel">Update Channels</a></li>
       <li><a href="#proxy">Proxy Settings</a></li>
     </ol>
@@ -23,7 +24,7 @@ page.tags=studio, configuration
 </div>
 
 
-<p>During installation, Android Studio provides wizards and templates that verify your system
+<p>Android Studio provides wizards and templates that verify your system
 requirements, such as the Java Development Kit (JDK) and available RAM, and configure default
 settings, such as an optimized default Android Virtual Device (AVD) emulation and updated system
 images. This document describes additional configuration settings you may want to use to
@@ -33,6 +34,20 @@ customize your use of Android Studio. </p>
 <a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>,
 <a href="{@docRoot}tools/device.html">Using Hardware Devices</a>, and
 <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a>. </p>
+
+
+<h2 id="sdk-mgr">SDK Manager</h2>
+<p>After the initial Android Studio installation and setup, use the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> to verify and update the tools,
+platforms, packages, and other components used by your apps. You can also use the
+<strong>File</strong> &gt; <strong>Settings</strong> &gt;
+<strong>Appearance & Behavior</strong> &gt; <strong>System Settings</strong> &gt;
+<strong>Updates</strong> to configure the SDK Manager to automatically prompt whenever updates are
+available. </p>
+
+<p class="note"><strong>Note:</strong> You can also customize the <code>build.gradle</code> file
+so each app uses a specific build chain and compilation options. For more information see,
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.   </p>
 
 
 
