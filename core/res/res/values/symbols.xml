@@ -2018,7 +2018,7 @@
   <java-symbol type="attr" name="actionModeWebSearchDrawable" />
   <java-symbol type="string" name="websearch" />
   <java-symbol type="drawable" name="ic_media_video_poster" />
-  <java-symbol type="array" name="config_webViewPackageNames" />
+  <java-symbol type="string" name="config_webViewPackageName" />
 
   <!-- From SubtitleView -->
   <java-symbol type="dimen" name="subtitle_corner_radius" />
