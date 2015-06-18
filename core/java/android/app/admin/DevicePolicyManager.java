@@ -552,19 +552,6 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM";
 
     /**
-     * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
-     * holds data needed by the system to wipe factory reset protection. The data needed to wipe
-     * the device depend on the installed factory reset protection implementation. For example,
-     * if an account is needed to unlock a device, this extra may contain data used to
-     * authenticate that account.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS
-            = "android.app.extra.PROVISIONING_RESET_PROTECTION_PARAMETERS";
-
-    /**
      * This MIME type is used for starting the Device Owner provisioning that does not require
      * provisioning features introduced in Android API level
      * {@link android.os.Build.VERSION_CODES#MNC} or later levels.
