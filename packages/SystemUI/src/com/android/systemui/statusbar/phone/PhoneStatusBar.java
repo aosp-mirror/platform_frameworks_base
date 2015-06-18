@@ -3460,6 +3460,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
             mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
+            mStatusBarView.removePendingHideExpandedRunnables();
         } else {
             mKeyguardIndicationController.setVisible(false);
             mKeyguardUserSwitcher.setKeyguard(false,
