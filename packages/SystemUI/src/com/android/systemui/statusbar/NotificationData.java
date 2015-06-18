@@ -125,16 +125,22 @@ public class NotificationData {
 
         @Override
         public int compare(Entry a, Entry b) {
-            String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
-            boolean aMedia = a.key.equals(mediaNotification);
-            boolean bMedia = b.key.equals(mediaNotification);
-
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
+            final int aPriority = na.getNotification().priority;
+            final int bPriority = nb.getNotification().priority;
 
-            boolean aSystemMax = na.getNotification().priority >= Notification.PRIORITY_MAX &&
+            String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
+
+            // PRIORITY_MIN media streams are allowed to drift to the bottom
+            final boolean aMedia = a.key.equals(mediaNotification)
+                    && aPriority > Notification.PRIORITY_MIN;
+            final boolean bMedia = b.key.equals(mediaNotification)
+                    && bPriority > Notification.PRIORITY_MIN;
+
+            boolean aSystemMax = aPriority >= Notification.PRIORITY_MAX &&
                     isSystemNotification(na);
-            boolean bSystemMax = nb.getNotification().priority >= Notification.PRIORITY_MAX &&
+            boolean bSystemMax = bPriority >= Notification.PRIORITY_MAX &&
                     isSystemNotification(nb);
             int d = nb.getScore() - na.getScore();
 
