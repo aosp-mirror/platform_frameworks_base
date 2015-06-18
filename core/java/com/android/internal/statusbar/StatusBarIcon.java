@@ -20,17 +20,27 @@ import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.text.TextUtils;
 
 public class StatusBarIcon implements Parcelable {
     public UserHandle user;
+    public String pkg;
     public Icon icon;
     public int iconLevel;
     public boolean visible = true;
     public int number;
     public CharSequence contentDescription;
 
-    public StatusBarIcon(UserHandle user, Icon icon, int iconLevel, int number,
+    public StatusBarIcon(UserHandle user, String resPackage, Icon icon, int iconLevel, int number,
             CharSequence contentDescription) {
+        if (icon.getType() == Icon.TYPE_RESOURCE
+                && TextUtils.isEmpty(icon.getResPackage())) {
+            // This is an odd situation where someone's managed to hand us an icon without a
+            // package inside, probably by mashing an int res into a Notification object.
+            // Now that we have the correct package name handy, let's fix it.
+            icon = Icon.createWithResource(resPackage, icon.getResId());
+        }
+        this.pkg = resPackage;
         this.user = user;
         this.icon = icon;
         this.iconLevel = iconLevel;
@@ -41,21 +51,23 @@ public class StatusBarIcon implements Parcelable {
     public StatusBarIcon(String iconPackage, UserHandle user,
             int iconId, int iconLevel, int number,
             CharSequence contentDescription) {
-        this(user, Icon.createWithResource(iconPackage, iconId),
+        this(user, iconPackage, Icon.createWithResource(iconPackage, iconId),
                 iconLevel, number, contentDescription);
     }
 
     @Override
     public String toString() {
-        return "StatusBarIcon(icon=" + this.icon
+        return "StatusBarIcon(icon=" + icon
+                + ((iconLevel != 0)?(" level=" + iconLevel):"")
+                + (visible?" visible":"")
                 + " user=" + user.getIdentifier()
-                + " level=" + this.iconLevel + " visible=" + visible
-                + " num=" + this.number + " )";
+                + ((number != 0)?(" num=" + number):"")
+                + " )";
     }
 
     @Override
     public StatusBarIcon clone() {
-        StatusBarIcon that = new StatusBarIcon(this.user, this.icon,
+        StatusBarIcon that = new StatusBarIcon(this.user, this.pkg, this.icon,
                 this.iconLevel, this.number, this.contentDescription);
         that.visible = this.visible;
         return that;
@@ -70,6 +82,7 @@ public class StatusBarIcon implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         this.icon = (Icon) in.readParcelable(null);
+        this.pkg = in.readString();
         this.user = (UserHandle) in.readParcelable(null);
         this.iconLevel = in.readInt();
         this.visible = in.readInt() != 0;
@@ -79,6 +92,7 @@ public class StatusBarIcon implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(this.icon, 0);
+        out.writeString(this.pkg);
         out.writeParcelable(this.user, 0);
         out.writeInt(this.iconLevel);
         out.writeInt(this.visible ? 1 : 0);
