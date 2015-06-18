@@ -856,7 +856,8 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     bool useInMask;
     size_t numPositionMasks = 0;
     size_t numIndexMasks = 0;
-    size_t numUniqueFormats;
+    size_t numUniqueFormats = 0;
+
     ALOGV("convertAudioPortFromNative id %d role %d type %d name %s",
         nAudioPort->id, nAudioPort->role, nAudioPort->type, nAudioPort->name);
 
@@ -907,12 +908,13 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     }
 
     // formats
-    cFormats = new int[nAudioPort->num_formats];
-    numUniqueFormats = 0;
-    for (size_t index = 0; index < nAudioPort->num_formats; index++) {
-        int format = audioFormatFromNative(nAudioPort->formats[index]);
-        if (!hasFormat(cFormats, numUniqueFormats, format)) {
-            cFormats[numUniqueFormats++] = format;
+    if (nAudioPort->num_formats != 0) {
+        cFormats = new int[nAudioPort->num_formats];
+        for (size_t index = 0; index < nAudioPort->num_formats; index++) {
+            int format = audioFormatFromNative(nAudioPort->formats[index]);
+            if (!hasFormat(cFormats, numUniqueFormats, format)) {
+                cFormats[numUniqueFormats++] = format;
+            }
         }
     }
     jFormats = env->NewIntArray(numUniqueFormats);
@@ -920,7 +922,9 @@ static jint convertAudioPortFromNative(JNIEnv *env,
         jStatus = (jint)AUDIO_JAVA_ERROR;
         goto exit;
     }
-    env->SetIntArrayRegion(jFormats, 0, numUniqueFormats, cFormats);
+    if (numUniqueFormats != 0) {
+        env->SetIntArrayRegion(jFormats, 0, numUniqueFormats, cFormats);
+    }
 
     // gains
     jGains = env->NewObjectArray(nAudioPort->num_gains,
