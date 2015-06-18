@@ -116,9 +116,11 @@ private:
 BinaryResourceParser::BinaryResourceParser(const std::shared_ptr<ResourceTable>& table,
                                            const std::shared_ptr<IResolver>& resolver,
                                            const Source& source,
+                                           const std::u16string& defaultPackage,
                                            const void* data,
                                            size_t len) :
-        mTable(table), mResolver(resolver), mSource(source), mData(data), mDataLen(len) {
+        mTable(table), mResolver(resolver), mSource(source), mDefaultPackage(defaultPackage),
+        mData(data), mDataLen(len) {
 }
 
 bool BinaryResourceParser::parse() {
@@ -176,6 +178,9 @@ bool BinaryResourceParser::getSymbol(const void* data, ResourceNameRef* outSymbo
             const ResourceType* type = parseResourceType(typeStr);
             if (!type) {
                 return false;
+            }
+            if (outSymbol->package.empty()) {
+                outSymbol->package = mTable->getPackage();
             }
             outSymbol->type = *type;
 
@@ -350,7 +355,22 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
 
     size_t len = strnlen16(reinterpret_cast<const char16_t*>(packageHeader->name),
             sizeof(packageHeader->name) / sizeof(packageHeader->name[0]));
-    mTable->setPackage(StringPiece16(reinterpret_cast<const char16_t*>(packageHeader->name), len));
+    if (mTable->getPackage().empty() && len == 0) {
+        mTable->setPackage(mDefaultPackage);
+    } else if (len > 0) {
+        StringPiece16 thisPackage(reinterpret_cast<const char16_t*>(packageHeader->name), len);
+        if (mTable->getPackage().empty()) {
+            mTable->setPackage(thisPackage);
+        } else if (thisPackage != mTable->getPackage()) {
+            Logger::error(mSource)
+                    << "incompatible packages: "
+                    << mTable->getPackage()
+                    << " vs. "
+                    << thisPackage
+                    << std::endl;
+            return false;
+        }
+    }
 
     ResChunkPullParser parser(getChunkData(packageHeader->header),
                               getChunkDataLen(packageHeader->header));
