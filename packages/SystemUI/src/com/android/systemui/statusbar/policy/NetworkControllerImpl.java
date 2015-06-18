@@ -408,7 +408,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean hasNoSims = mHasMobileDataFeature && mMobileSignalControllers.size() == 0;
         if (hasNoSims != mHasNoSims) {
             mHasNoSims = hasNoSims;
-            notifyListeners();
+            mCallbackHandler.setNoSims(mHasNoSims);
         }
     }
 
@@ -660,8 +660,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
             String nosim = args.getString("nosim");
             if (nosim != null) {
-                boolean show = nosim.equals("show");
-                mCallbackHandler.setNoSims(show);
+                mHasNoSims = nosim.equals("show");
+                mCallbackHandler.setNoSims(mHasNoSims);
             }
             String mobile = args.getString("mobile");
             if (mobile != null) {
