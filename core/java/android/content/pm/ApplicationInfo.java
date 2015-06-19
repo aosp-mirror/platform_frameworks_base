@@ -962,6 +962,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    public boolean isPrivilegedApp() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    /**
+     * @hide
+     */
     public boolean isUpdatedSystemApp() {
         return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
