@@ -154,6 +154,12 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     private void updateConnected() {
+        // Make sure our connection state is up to date.
+        int state = mLocalBluetoothManager.getBluetoothAdapter().getConnectionState();
+        if (state != mConnectionState) {
+            mConnectionState = state;
+            mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+        }
         if (mLastDevice != null && mLastDevice.isConnected()) {
             // Our current device is still valid.
             return;
@@ -203,9 +209,9 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     @Override
     public void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
-        mConnectionState = state;
         mLastDevice = cachedDevice;
         updateConnected();
+        mConnectionState = state;
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
