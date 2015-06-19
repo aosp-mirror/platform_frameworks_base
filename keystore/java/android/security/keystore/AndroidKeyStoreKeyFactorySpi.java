@@ -24,9 +24,12 @@ import java.security.Key;
 import java.security.KeyFactorySpi;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * {@link KeyFactorySpi} backed by Android KeyStore.
@@ -40,32 +43,83 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
     @Override
     protected <T extends KeySpec> T engineGetKeySpec(Key key, Class<T> keySpecClass)
             throws InvalidKeySpecException {
-        if (keySpecClass == null) {
-            throw new InvalidKeySpecException("keySpecClass == null");
-        }
-        if (!(key instanceof AndroidKeyStorePrivateKey)) {
-            throw new InvalidKeySpecException("Only Android KeyStore private keys supported: " +
-                    ((key != null) ? key.getClass().getName() : "null"));
-        }
-        if (PKCS8EncodedKeySpec.class.isAssignableFrom(keySpecClass)) {
+        if (key == null) {
+            throw new InvalidKeySpecException("key == null");
+        } else if ((!(key instanceof AndroidKeyStorePrivateKey))
+            && (!(key instanceof AndroidKeyStorePublicKey))) {
             throw new InvalidKeySpecException(
-                    "Key material export of Android KeyStore keys is not supported");
-        }
-        if (!KeyInfo.class.equals(keySpecClass)) {
-            throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
-        }
-        String keyAliasInKeystore = ((AndroidKeyStoreKey) key).getAlias();
-        String entryAlias;
-        if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
-            entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
-        } else {
-            throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
+                    "Unsupported key type: " + key.getClass().getName()
+                    + ". This KeyFactory supports only Android Keystore asymmetric keys");
         }
 
-        @SuppressWarnings("unchecked")
-        T result = (T) AndroidKeyStoreSecretKeyFactorySpi.getKeyInfo(
-                mKeyStore, entryAlias, keyAliasInKeystore);
-        return result;
+        // key is an Android Keystore private or public key
+
+        if (keySpecClass == null) {
+            throw new InvalidKeySpecException("keySpecClass == null");
+        } else if (KeyInfo.class.equals(keySpecClass)) {
+            if (!(key instanceof AndroidKeyStorePrivateKey)) {
+                throw new InvalidKeySpecException(
+                        "Unsupported key type: " + key.getClass().getName()
+                        + ". KeyInfo can be obtained only for Android Keystore private keys");
+            }
+            String keyAliasInKeystore = ((AndroidKeyStorePrivateKey) key).getAlias();
+            String entryAlias;
+            if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
+                entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
+            } else {
+                throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
+            }
+            @SuppressWarnings("unchecked")
+            T result = (T) AndroidKeyStoreSecretKeyFactorySpi.getKeyInfo(
+                    mKeyStore, entryAlias, keyAliasInKeystore);
+            return result;
+        } else if (X509EncodedKeySpec.class.equals(keySpecClass)) {
+            if (!(key instanceof AndroidKeyStorePublicKey)) {
+                throw new InvalidKeySpecException(
+                        "Unsupported key type: " + key.getClass().getName()
+                        + ". X509EncodedKeySpec can be obtained only for Android Keystore public"
+                        + " keys");
+            }
+            @SuppressWarnings("unchecked")
+            T result = (T) new X509EncodedKeySpec(((AndroidKeyStorePublicKey) key).getEncoded());
+            return result;
+        } else if (PKCS8EncodedKeySpec.class.equals(keySpecClass)) {
+            if (key instanceof AndroidKeyStorePrivateKey) {
+                throw new InvalidKeySpecException(
+                        "Key material export of Android Keystore private keys is not supported");
+            } else {
+                throw new InvalidKeySpecException(
+                        "Cannot export key material of public key in PKCS#8 format."
+                        + " Only X.509 format (X509EncodedKeySpec) supported for public keys.");
+            }
+        } else if (RSAPublicKeySpec.class.equals(keySpecClass)) {
+            if (key instanceof AndroidKeyStoreRSAPublicKey) {
+                AndroidKeyStoreRSAPublicKey rsaKey = (AndroidKeyStoreRSAPublicKey) key;
+                @SuppressWarnings("unchecked")
+                T result =
+                        (T) new RSAPublicKeySpec(rsaKey.getModulus(), rsaKey.getPublicExponent());
+                return result;
+            } else {
+                throw new InvalidKeySpecException(
+                        "Obtaining RSAPublicKeySpec not supported for " + key.getAlgorithm() + " "
+                        + ((key instanceof AndroidKeyStorePrivateKey) ? "private" : "public")
+                        + " key");
+            }
+        } else if (ECPublicKeySpec.class.equals(keySpecClass)) {
+            if (key instanceof AndroidKeyStoreECPublicKey) {
+                AndroidKeyStoreECPublicKey ecKey = (AndroidKeyStoreECPublicKey) key;
+                @SuppressWarnings("unchecked")
+                T result = (T) new ECPublicKeySpec(ecKey.getW(), ecKey.getParams());
+                return result;
+            } else {
+                throw new InvalidKeySpecException(
+                        "Obtaining RSAPublicKeySpec not supported for " + key.getAlgorithm() + " "
+                        + ((key instanceof AndroidKeyStorePrivateKey) ? "private" : "public")
+                        + " key");
+            }
+        } else {
+            throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
+        }
     }
 
     @Override
