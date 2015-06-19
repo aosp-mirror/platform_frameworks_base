@@ -209,7 +209,8 @@ public class AccountManager {
     /**
      * Bundle key used to supply the last time the credentials of the account
      * were authenticated successfully. Time is specified in milliseconds since
-     * epoch.
+     * epoch. Associated time is updated on successful authentication of account
+     * on adding account, confirming credentials, or updating credentials.
      */
     public static final String KEY_LAST_AUTHENTICATED_TIME = "lastAuthenticatedTime";
 
@@ -651,18 +652,25 @@ public class AccountManager {
     }
 
     /**
-     * Adds an account directly to the AccountManager.  Normally used by sign-up
+     * Adds an account directly to the AccountManager. Normally used by sign-up
      * wizards associated with authenticators, not directly by applications.
-     *
+     * <p>Calling this method does not update the last authenticated timestamp,
+     * referred by {@link #KEY_LAST_AUTHENTICATED_TIME}. To update it, call
+     * {@link #notifyAccountAuthenticated(Account)} after getting success.
+     * However, if this method is called when it is triggered by addAccount() or
+     * addAccountAsUser() or similar functions, then there is no need to update
+     * timestamp manually as it is updated automatically by framework on
+     * successful completion of the mentioned functions.
      * <p>It is safe to call this method from the main thread.
      * <p>This method requires the caller to have a signature match with the
      * authenticator that owns the specified account.
      *
      * @param account The {@link Account} to add
      * @param password The password to associate with the account, null for none
-     * @param userdata String values to use for the account's userdata, null for none
+     * @param userdata String values to use for the account's userdata, null for
+     *            none
      * @return True if the account was successfully added, false if the account
-     *     already exists, the account is null, or another error occurs.
+     *         already exists, the account is null, or another error occurs.
      */
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
         if (account == null) throw new IllegalArgumentException("account is null");
@@ -976,17 +984,19 @@ public class AccountManager {
     }
 
     /**
-     * Sets or forgets a saved password.  This modifies the local copy of the
-     * password used to automatically authenticate the user; it does
-     * not change the user's account password on the server.  Intended for use
-     * by the authenticator, not directly by applications.
-     *
+     * Sets or forgets a saved password. This modifies the local copy of the
+     * password used to automatically authenticate the user; it does not change
+     * the user's account password on the server. Intended for use by the
+     * authenticator, not directly by applications.
+     * <p>Calling this method does not update the last authenticated timestamp,
+     * referred by {@link #KEY_LAST_AUTHENTICATED_TIME}. To update it, call
+     * {@link #notifyAccountAuthenticated(Account)} after getting success.
      * <p>It is safe to call this method from the main thread.
-     *
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
      *
-     * @param account The account whose password is to be set. Cannot be {@code null}.
+     * @param account The account whose password is to be set. Cannot be
+     *            {@code null}.
      * @param password The password to set, null to clear the password
      */
     public void setPassword(final Account account, final String password) {
