@@ -139,7 +139,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             IVoiceInteractionSessionShowCallback showCallback) {
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
-                    mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid);
+                    mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
         return mActiveSession.showLocked(args, flags, showCallback);
     }
