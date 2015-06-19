@@ -298,13 +298,26 @@ public class WebViewClient {
      * Notify the host application to handle a SSL client certificate
      * request. The host application is responsible for showing the UI
      * if desired and providing the keys. There are three ways to
-     * respond: proceed(), cancel() or ignore(). Webview remembers the
-     * response if proceed() or cancel() is called and does not
-     * call onReceivedClientCertRequest() again for the same host and port
-     * pair. Webview does not remember the response if ignore() is called.
+     * respond: proceed(), cancel() or ignore(). Webview stores the response
+     * in memory (for the life of the application) if proceed() or cancel() is
+     * called and does not call onReceivedClientCertRequest() again for the
+     * same host and port pair. Webview does not store the response if ignore()
+     * is called.
      *
      * This method is called on the UI thread. During the callback, the
      * connection is suspended.
+     *
+     * For most use cases, the application program should implement the
+     * {@link android.security.KeyChainAliasCallback} interface and pass it to
+     * {@link android.security.KeyChain.choosePrivateKeyAlias} to start an
+     * activity for the user to choose the proper alias. The keychain activity will
+     * provide the alias through the callback method in the implemented interface. Next
+     * the application should create an async task to call
+     * {@link android.security.KeyChain.getPrivateKey} to receive the key.
+     *
+     * An example implementation of client certificates can be seen at
+     * <A href="https://android.googlesource.com/platform/packages/apps/Browser/+/android-5.1.1_r1/src/com/android/browser/Tab.java">
+     * AOSP Browser</a>
      *
      * The default behavior is to cancel, returning no client certificate.
      *
