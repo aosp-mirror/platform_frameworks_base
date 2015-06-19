@@ -93,8 +93,9 @@ public class AssistDisclosure {
     private class AssistDisclosureView extends View
             implements ValueAnimator.AnimatorUpdateListener {
 
-        public static final int TRACING_ANIMATION_DURATION = 300;
-        public static final int ALPHA_ANIMATION_DURATION = 200;
+        public static final int TRACING_ANIMATION_DURATION = 600;
+        public static final int ALPHA_IN_ANIMATION_DURATION = 450;
+        public static final int ALPHA_OUT_ANIMATION_DURATION = 400;
 
         private float mThickness;
         private float mShadowThickness;
@@ -102,11 +103,12 @@ public class AssistDisclosure {
         private final Paint mShadowPaint = new Paint();
 
         private final ValueAnimator mTracingAnimator;
-        private final ValueAnimator mAlphaAnimator;
+        private final ValueAnimator mAlphaOutAnimator;
+        private final ValueAnimator mAlphaInAnimator;
         private final AnimatorSet mAnimator;
 
         private float mTracingProgress = 0;
-        private int mAlpha = 255;
+        private int mAlpha = 0;
 
         public AssistDisclosureView(Context context) {
             super(context);
@@ -114,13 +116,19 @@ public class AssistDisclosure {
             mTracingAnimator = ValueAnimator.ofFloat(0, 1).setDuration(TRACING_ANIMATION_DURATION);
             mTracingAnimator.addUpdateListener(this);
             mTracingAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
+                    R.interpolator.assist_disclosure_trace));
+            mAlphaInAnimator = ValueAnimator.ofInt(0, 255).setDuration(ALPHA_IN_ANIMATION_DURATION);
+            mAlphaInAnimator.addUpdateListener(this);
+            mAlphaInAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
                     android.R.interpolator.fast_out_slow_in));
-            mAlphaAnimator = ValueAnimator.ofInt(255, 0).setDuration(ALPHA_ANIMATION_DURATION);
-            mAlphaAnimator.addUpdateListener(this);
-            mAlphaAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
+            mAlphaOutAnimator = ValueAnimator.ofInt(255, 0).setDuration(
+                    ALPHA_OUT_ANIMATION_DURATION);
+            mAlphaOutAnimator.addUpdateListener(this);
+            mAlphaOutAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
                     android.R.interpolator.fast_out_linear_in));
             mAnimator = new AnimatorSet();
-            mAnimator.play(mTracingAnimator).before(mAlphaAnimator);
+            mAnimator.play(mAlphaInAnimator).with(mTracingAnimator);
+            mAnimator.play(mAlphaInAnimator).before(mAlphaOutAnimator);
             mAnimator.addListener(new AnimatorListenerAdapter() {
                 boolean mCancelled;
 
@@ -167,7 +175,7 @@ public class AssistDisclosure {
             mAnimator.cancel();
 
             mTracingProgress = 0;
-            mAlpha = 255;
+            mAlpha = 0;
         }
 
         private void startAnimation() {
@@ -240,8 +248,10 @@ public class AssistDisclosure {
 
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            if (animation == mAlphaAnimator) {
-                mAlpha = (int) mAlphaAnimator.getAnimatedValue();
+            if (animation == mAlphaOutAnimator) {
+                mAlpha = (int) mAlphaOutAnimator.getAnimatedValue();
+            } else if (animation == mAlphaInAnimator) {
+                mAlpha = (int) mAlphaInAnimator.getAnimatedValue();
             } else if (animation == mTracingAnimator) {
                 mTracingProgress = (float) mTracingAnimator.getAnimatedValue();
             }
