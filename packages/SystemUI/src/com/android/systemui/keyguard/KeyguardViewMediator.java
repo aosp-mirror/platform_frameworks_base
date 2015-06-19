@@ -62,6 +62,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardDisplayManager;
+import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -525,6 +526,17 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public boolean isScreenOn() {
             return mDeviceInteractive;
+        }
+
+        @Override
+        public int getBouncerPromptReason() {
+            int currentUser = ActivityManager.getCurrentUser();
+            if ((mUpdateMonitor.getUserTrustIsManaged(currentUser)
+                    || mUpdateMonitor.isUnlockWithFingerPrintPossible(currentUser))
+                    && !mTrustManager.hasUserAuthenticatedSinceBoot(currentUser)) {
+                return KeyguardSecurityView.PROMPT_REASON_RESTART;
+            }
+            return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
     };
 

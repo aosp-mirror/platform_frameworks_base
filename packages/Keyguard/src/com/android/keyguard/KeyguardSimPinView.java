@@ -95,6 +95,12 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         }
     }
 
+    @Override
+    protected int getPromtReasonStringRes(int reason) {
+        // No message on SIM Pin
+        return 0;
+    }
+
     private String getPinPasswordErrorMessage(int attemptsRemaining) {
         String displayMessage;
 
