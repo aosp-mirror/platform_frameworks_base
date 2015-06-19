@@ -154,6 +154,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 }
             }
         }
+
+        @Override
+        public void showAssistDisclosure() {
+            if (mBar != null) {
+                try {
+                    mBar.showAssistDisclosure();
+                } catch (RemoteException e) {
+                }
+            }
+        }
     };
 
     // ================================================================================

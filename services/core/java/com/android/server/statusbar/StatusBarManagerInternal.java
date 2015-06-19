@@ -24,4 +24,5 @@ public interface StatusBarManagerInternal {
     void notificationLightPulse(int argb, int onMillis, int offMillis);
     void notificationLightOff();
     void showScreenPinningRequest();
+    void showAssistDisclosure();
 }

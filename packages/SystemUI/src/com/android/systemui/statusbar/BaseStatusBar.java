@@ -2101,4 +2101,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         return mStatusBarKeyguardViewManager.isSecure();
     }
+
+    @Override
+    public void showAssistDisclosure() {
+        if (mAssistManager != null) {
+            mAssistManager.showDisclosure();
+        }
+    }
 }
