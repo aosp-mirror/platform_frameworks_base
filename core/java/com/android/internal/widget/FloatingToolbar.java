@@ -546,25 +546,25 @@ public final class FloatingToolbar {
         private void refreshCoordinatesAndOverflowDirection(Rect contentRect) {
             refreshViewPort();
 
-            int availableHeightAboveContent =
-                    contentRect.top - mViewPort.top - 2 * mMarginVertical;
-            int availableHeightBelowContent =
-                    mViewPort.bottom - contentRect.bottom - 2 * mMarginVertical;
-            int availableHeightThroughContent =
-                    mViewPort.bottom - contentRect.top + getToolbarHeightWithVerticalMargin();
-
             int x = contentRect.centerX() - getWidth() / 2;
             // Update x so that the toolbar isn't rendered behind the nav bar in landscape.
             x = Math.max(0, Math.min(x, mViewPort.right - getWidth()));
 
             int y;
+
+            int availableHeightAboveContent = contentRect.top - mViewPort.top;
+            int availableHeightBelowContent = mViewPort.bottom - contentRect.bottom;
+
             if (mOverflowPanel == null) {  // There is no overflow.
-                if (availableHeightAboveContent > getToolbarHeightWithVerticalMargin()) {
+                if (availableHeightAboveContent >= getToolbarHeightWithVerticalMargin()) {
                     // There is enough space at the top of the content.
                     y = contentRect.top - getToolbarHeightWithVerticalMargin();
-                } else if (availableHeightBelowContent > getToolbarHeightWithVerticalMargin()) {
+                } else if (availableHeightBelowContent >= getToolbarHeightWithVerticalMargin()) {
                     // There is enough space at the bottom of the content.
                     y = contentRect.bottom;
+                } else if (availableHeightBelowContent >= getEstimatedToolbarHeight(getContext())) {
+                    // Just enough space to fit the toolbar with no vertical margins.
+                    y = contentRect.bottom - mMarginVertical;
                 } else {
                     // Not enough space. Prefer to position as high as possible.
                     y = Math.max(
@@ -572,32 +572,47 @@ public final class FloatingToolbar {
                             contentRect.top - getToolbarHeightWithVerticalMargin());
                 }
             } else {  // There is an overflow.
-                if (availableHeightAboveContent > mOverflowPanel.getMinimumHeight()) {
+                int margin = 2 * mMarginVertical;
+                int minimumOverflowHeightWithMargin = mOverflowPanel.getMinimumHeight() + margin;
+                int availableHeightThroughContentDown =
+                        mViewPort.bottom - contentRect.top + getToolbarHeightWithVerticalMargin();
+                int availableHeightThroughContentUp =
+                        contentRect.bottom - mViewPort.top + getToolbarHeightWithVerticalMargin();
+
+                if (availableHeightAboveContent >= minimumOverflowHeightWithMargin) {
                     // There is enough space at the top of the content rect for the overflow.
                     // Position above and open upwards.
-                    updateOverflowHeight(availableHeightAboveContent);
+                    updateOverflowHeight(availableHeightAboveContent - margin);
                     y = contentRect.top - getHeight();
                     mOverflowDirection = OVERFLOW_DIRECTION_UP;
-                } else if (availableHeightAboveContent > getToolbarHeightWithVerticalMargin()
-                        && availableHeightThroughContent > mOverflowPanel.getMinimumHeight()) {
+                } else if (availableHeightAboveContent >= getToolbarHeightWithVerticalMargin()
+                        && availableHeightThroughContentDown >= minimumOverflowHeightWithMargin) {
                     // There is enough space at the top of the content rect for the main panel
                     // but not the overflow.
                     // Position above but open downwards.
-                    updateOverflowHeight(availableHeightThroughContent);
+                    updateOverflowHeight(availableHeightThroughContentDown - margin);
                     y = contentRect.top - getToolbarHeightWithVerticalMargin();
                     mOverflowDirection = OVERFLOW_DIRECTION_DOWN;
-                } else if (availableHeightBelowContent > mOverflowPanel.getMinimumHeight()) {
+                } else if (availableHeightBelowContent >= minimumOverflowHeightWithMargin) {
                     // There is enough space at the bottom of the content rect for the overflow.
                     // Position below and open downwards.
-                    updateOverflowHeight(availableHeightBelowContent);
+                    updateOverflowHeight(availableHeightBelowContent - margin);
                     y = contentRect.bottom;
                     mOverflowDirection = OVERFLOW_DIRECTION_DOWN;
+                } else if (availableHeightBelowContent >= getToolbarHeightWithVerticalMargin()
+                        && mViewPort.height() >= minimumOverflowHeightWithMargin) {
+                    // There is enough space at the bottom of the content rect for the main panel
+                    // but not the overflow.
+                    // Position below but open upwards.
+                    updateOverflowHeight(availableHeightThroughContentUp - margin);
+                    y = contentRect.bottom + getToolbarHeightWithVerticalMargin() - getHeight();
+                    mOverflowDirection = OVERFLOW_DIRECTION_UP;
                 } else {
                     // Not enough space.
-                    // Position at the bottom of the view port and open upwards.
-                    updateOverflowHeight(mViewPort.height());
-                    y = mViewPort.bottom - getHeight();
-                    mOverflowDirection = OVERFLOW_DIRECTION_UP;
+                    // Position at the top of the view port and open downwards.
+                    updateOverflowHeight(mViewPort.height() - margin);
+                    y = mViewPort.top;
+                    mOverflowDirection = OVERFLOW_DIRECTION_DOWN;
                 }
                 mOverflowPanel.setOverflowDirection(mOverflowDirection);
             }
@@ -1422,7 +1437,6 @@ public final class FloatingToolbar {
         PopupWindow popupWindow = new PopupWindow(popupContentHolder);
         popupWindow.setWindowLayoutType(
                 WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
-        popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
         popupWindow.setAnimationStyle(0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         content.setLayoutParams(new ViewGroup.LayoutParams(
