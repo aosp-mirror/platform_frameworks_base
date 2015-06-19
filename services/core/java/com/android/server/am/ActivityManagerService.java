@@ -3590,6 +3590,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public int getPackageProcessState(String packageName) {
+        enforceCallingPermission(android.Manifest.permission.GET_PACKAGE_IMPORTANCE,
+                "getPackageProcessState");
         int procState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         synchronized (this) {
             for (int i=mLruProcesses.size()-1; i>=0; i--) {
