@@ -450,6 +450,8 @@ static void android_media_visualizer_native_release(JNIEnv *env,  jobject thiz) 
 
     if (lpJniStorage) {
         ALOGV("deleting pJniStorage: %p\n", lpJniStorage);
+        env->DeleteGlobalRef(lpJniStorage->mCallbackData.visualizer_class);
+        env->DeleteGlobalRef(lpJniStorage->mCallbackData.visualizer_ref);
         delete lpJniStorage;
     }
 }
