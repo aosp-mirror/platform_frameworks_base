@@ -1448,9 +1448,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Scene modes are custom camera modes optimized for a certain set of conditions and
      * capture settings.</p>
      * <p>This is the mode that that is active when
-     * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code>. Aside from FACE_PRIORITY,
-     * these modes will disable {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
-     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} while in use.</p>
+     * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code>. Aside from FACE_PRIORITY, these modes will
+     * disable {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}, {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}
+     * while in use.</p>
      * <p>The interpretation and implementation of these scene modes is left
      * to the implementor of the camera device. Their behavior will not be
      * consistent across all devices, and any given device may only implement
