@@ -1,5 +1,12 @@
 LOCAL_PATH:= $(call my-dir)
 
+# This is a list of libraries that need to be included in order to avoid
+# bad apps. This prevents a library from having a mismatch when resolving
+# new/delete from an app shared library.
+# See b/21032018 for more details.
+app_process_common_shared_libs := \
+    libwilhelm \
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -13,7 +20,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     liblog \
     libbinder \
-    libandroid_runtime
+    libandroid_runtime \
+    $(app_process_common_shared_libs) \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libsigchain
 
@@ -44,7 +52,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     liblog \
     libbinder \
-    libandroid_runtime
+    libandroid_runtime \
+    $(app_process_common_shared_libs) \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libsigchain
 
