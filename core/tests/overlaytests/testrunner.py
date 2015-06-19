@@ -301,7 +301,7 @@ class Md5Test:
         return self.path
 
     def execute(self):
-        returncode, stdout, stderr = _adb_shell('md5 %s' % self.path)
+        returncode, stdout, stderr = _adb_shell('md5sum %s' % self.path)
         if returncode != 0:
             return returncode, stdout, stderr
         actual_md5 = stdout.split()[0]
