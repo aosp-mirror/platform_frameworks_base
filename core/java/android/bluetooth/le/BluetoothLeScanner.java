@@ -19,6 +19,7 @@ package android.bluetooth.le;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallbackWrapper;
@@ -313,7 +314,7 @@ public final class BluetoothLeScanner {
                     mClientIf = clientIf;
                     try {
                         mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters,
-                                mResultStorages);
+                                mResultStorages, ActivityThread.currentOpPackageName());
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);
                         mClientIf = -1;
