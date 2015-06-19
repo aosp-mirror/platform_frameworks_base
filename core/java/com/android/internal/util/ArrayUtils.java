@@ -387,4 +387,26 @@ public class ArrayUtils {
     public static <T> boolean contains(ArrayList<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
     }
+
+    /**
+     * Returns true if the two ArrayLists are equal with respect to the objects they contain.
+     * The objects must be in the same order and be reference equal (== not .equals()).
+     */
+    public static <T> boolean referenceEquals(ArrayList<T> a, ArrayList<T> b) {
+        if (a == b) {
+            return true;
+        }
+
+        final int sizeA = a.size();
+        final int sizeB = b.size();
+        if (a == null || b == null || sizeA != sizeB) {
+            return false;
+        }
+
+        boolean diff = false;
+        for (int i = 0; i < sizeA && !diff; i++) {
+            diff |= a.get(i) != b.get(i);
+        }
+        return !diff;
+    }
 }

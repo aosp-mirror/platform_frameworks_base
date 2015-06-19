@@ -2488,10 +2488,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
-                        final int perc = bstats.startAddingCpuLocked();
-                        if (perc >= 0) {
-                            int remainUTime = 0;
-                            int remainSTime = 0;
+                        if (bstats.startAddingCpuLocked()) {
                             int totalUTime = 0;
                             int totalSTime = 0;
                             final int N = mProcessCpuTracker.countStats();
@@ -2501,10 +2498,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     continue;
                                 }
                                 ProcessRecord pr = mPidsSelfLocked.get(st.pid);
-                                int otherUTime = (st.rel_utime*perc)/100;
-                                int otherSTime = (st.rel_stime*perc)/100;
-                                remainUTime += otherUTime;
-                                remainSTime += otherSTime;
                                 totalUTime += st.rel_utime;
                                 totalSTime += st.rel_stime;
                                 if (pr != null) {
@@ -2513,8 +2506,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         pr.curProcBatteryStats = ps = bstats.getProcessStatsLocked(
                                                 pr.info.uid, pr.processName);
                                     }
-                                    ps.addCpuTimeLocked(st.rel_utime - otherUTime,
-                                            st.rel_stime - otherSTime);
+                                    ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                     pr.curCpuTime += st.rel_utime + st.rel_stime;
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
@@ -2522,8 +2514,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
                                                 bstats.mapUid(st.uid), st.name);
                                     }
-                                    ps.addCpuTimeLocked(st.rel_utime - otherUTime,
-                                            st.rel_stime - otherSTime);
+                                    ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
                             }
                             final int userTime = mProcessCpuTracker.getLastUserTime();
@@ -2532,9 +2523,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             final int irqTime = mProcessCpuTracker.getLastIrqTime();
                             final int softIrqTime = mProcessCpuTracker.getLastSoftIrqTime();
                             final int idleTime = mProcessCpuTracker.getLastIdleTime();
-                            bstats.finishAddingCpuLocked(perc, remainUTime,
-                                    remainSTime, totalUTime, totalSTime, userTime, systemTime,
-                                    iowaitTime, irqTime, softIrqTime, idleTime);
+                            bstats.finishAddingCpuLocked(totalUTime, totalSTime, userTime,
+                                    systemTime, iowaitTime, irqTime, softIrqTime, idleTime);
                         }
                     }
                 }

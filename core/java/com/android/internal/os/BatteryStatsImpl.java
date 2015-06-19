@@ -96,6 +96,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final String TAG = "BatteryStatsImpl";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_ENERGY = false;
+    public static final boolean DEBUG_ENERGY_CPU = DEBUG_ENERGY || false;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
@@ -151,6 +152,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             BatteryCallback cb = mCallback;
             switch (msg.what) {
                 case MSG_UPDATE_WAKELOCKS:
+                    synchronized (BatteryStatsImpl.this) {
+                        updateCpuTimeLocked();
+                    }
                     if (cb != null) {
                         cb.batteryNeedsCpuUpdate();
                     }
@@ -2503,12 +2507,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         boolean unpluggedScreenOff = unplugged && screenOff;
         if (unpluggedScreenOff != mOnBatteryScreenOffTimeBase.isRunning()) {
             updateKernelWakelocksLocked();
-            requestWakelockCpuUpdate();
-            if (!unpluggedScreenOff) {
-                // We are switching to no longer tracking wake locks, but we want
-                // the next CPU update we receive to take them in to account.
-                mDistributeWakelockCpu = true;
+            if (DEBUG_ENERGY_CPU) {
+                Slog.d(TAG, "Updating cpu time because screen is now " +
+                        (unpluggedScreenOff ? "off" : "on"));
             }
+            updateCpuTimeLocked();
             mOnBatteryScreenOffTimeBase.setRunning(unpluggedScreenOff, uptime, realtime);
         }
     }
@@ -2772,10 +2775,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWakeLockNesting++;
         }
         if (uid >= 0) {
-            //if (uid == 0) {
-            //    Slog.wtf(TAG, "Acquiring wake lock from root: " + name);
-            //}
-            requestWakelockCpuUpdate();
+            if (mOnBatteryScreenOffTimeBase.isRunning()) {
+                // We only update the cpu time when a wake lock is acquired if the screen is off.
+                // If the screen is on, we don't distribute the power amongst partial wakelocks.
+                if (DEBUG_ENERGY_CPU) {
+                    Slog.d(TAG, "Updating cpu time because of +wake_lock");
+                }
+                requestWakelockCpuUpdate();
+            }
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
         }
     }
@@ -2805,7 +2812,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
         if (uid >= 0) {
-            requestWakelockCpuUpdate();
+            if (mOnBatteryScreenOffTimeBase.isRunning()) {
+                if (DEBUG_ENERGY_CPU) {
+                    Slog.d(TAG, "Updating cpu time because of -wake_lock");
+                }
+                requestWakelockCpuUpdate();
+            }
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
         }
     }
@@ -2874,46 +2886,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryRecordLocked(elapsedRealtime, uptime);
     }
 
-    public int startAddingCpuLocked() {
+    public boolean startAddingCpuLocked() {
         mHandler.removeMessages(MSG_UPDATE_WAKELOCKS);
-
-        if (!mOnBatteryInternal) {
-            return -1;
-        }
-
-        final int N = mPartialTimers.size();
-        if (N == 0) {
-            mLastPartialTimers.clear();
-            mDistributeWakelockCpu = false;
-            return 0;
-        }
-
-        if (!mOnBatteryScreenOffTimeBase.isRunning() && !mDistributeWakelockCpu) {
-            return 0;
-        }
-
-        mDistributeWakelockCpu = false;
-
-        // How many timers should consume CPU?  Only want to include ones
-        // that have already been in the list.
-        for (int i=0; i<N; i++) {
-            StopwatchTimer st = mPartialTimers.get(i);
-            if (st.mInList) {
-                Uid uid = st.mUid;
-                // We don't include the system UID, because it so often
-                // holds wake locks at one request or another of an app.
-                if (uid != null && uid.mUid != Process.SYSTEM_UID) {
-                    return 50;
-                }
-            }
-        }
-
-        return 0;
+        return mOnBatteryInternal;
     }
 
-    public void finishAddingCpuLocked(int perc, int remainUTime, int remainSTtime,
-            int totalUTime, int totalSTime, int statUserTime, int statSystemTime,
-            int statIOWaitTime, int statIrqTime, int statSoftIrqTime, int statIdleTime) {
+    public void finishAddingCpuLocked(int totalUTime, int totalSTime, int statUserTime,
+                                      int statSystemTime, int statIOWaitTime, int statIrqTime,
+                                      int statSoftIrqTime, int statIdleTime) {
         if (DEBUG) Slog.d(TAG, "Adding cpu: tuser=" + totalUTime + " tsys=" + totalSTime
                 + " user=" + statUserTime + " sys=" + statSystemTime
                 + " io=" + statIOWaitTime + " irq=" + statIrqTime
@@ -2926,70 +2906,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         mCurStepStatIrqTime += statIrqTime;
         mCurStepStatSoftIrqTime += statSoftIrqTime;
         mCurStepStatIdleTime += statIdleTime;
-
-        final int N = mPartialTimers.size();
-        if (perc != 0) {
-            int num = 0;
-            for (int i=0; i<N; i++) {
-                StopwatchTimer st = mPartialTimers.get(i);
-                if (st.mInList) {
-                    Uid uid = st.mUid;
-                    // We don't include the system UID, because it so often
-                    // holds wake locks at one request or another of an app.
-                    if (uid != null && uid.mUid != Process.SYSTEM_UID) {
-                        num++;
-                    }
-                }
-            }
-            if (num != 0) {
-                for (int i=0; i<N; i++) {
-                    StopwatchTimer st = mPartialTimers.get(i);
-                    if (st.mInList) {
-                        Uid uid = st.mUid;
-                        if (uid != null && uid.mUid != Process.SYSTEM_UID) {
-                            int myUTime = remainUTime/num;
-                            int mySTime = remainSTtime/num;
-                            remainUTime -= myUTime;
-                            remainSTtime -= mySTime;
-                            num--;
-                            Uid.Proc proc = uid.getProcessStatsLocked("*wakelock*");
-                            proc.addCpuTimeLocked(myUTime, mySTime);
-                        }
-                    }
-                }
-            }
-
-            // Just in case, collect any lost CPU time.
-            if (remainUTime != 0 || remainSTtime != 0) {
-                Uid uid = getUidStatsLocked(Process.SYSTEM_UID);
-                if (uid != null) {
-                    Uid.Proc proc = uid.getProcessStatsLocked("*lost*");
-                    proc.addCpuTimeLocked(remainUTime, remainSTtime);
-                }
-            }
-        }
-
-        final int NL = mLastPartialTimers.size();
-        boolean diff = N != NL;
-        for (int i=0; i<NL && !diff; i++) {
-            diff |= mPartialTimers.get(i) != mLastPartialTimers.get(i);
-        }
-        if (!diff) {
-            for (int i=0; i<NL; i++) {
-                mPartialTimers.get(i).mInList = true;
-            }
-            return;
-        }
-
-        for (int i=0; i<NL; i++) {
-            mLastPartialTimers.get(i).mInList = false;
-        }
-        mLastPartialTimers.clear();
-        for (int i=0; i<N; i++) {
-            StopwatchTimer st = mPartialTimers.get(i);
-            st.mInList = true;
-            mLastPartialTimers.add(st);
-        }
     }
 
     public void noteProcessDiedLocked(int uid, int pid) {
@@ -7959,30 +7875,196 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    // We use an anonymous class to access these variables,
+    // so they can't live on the stack or they'd have to be
+    // final MutableLong objects (more allocations).
+    // Used in updateCpuTimeLocked().
+    long mTempTotalCpuUserTimeUs;
+    long mTempTotalCpuSystemTimeUs;
+
     /**
-     * Read and distribute CPU usage across apps.
+     * Read and distribute CPU usage across apps. If their are partial wakelocks being held
+     * and we are on battery with screen off, we give more of the cpu time to those apps holding
+     * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
      */
-    public void updateCpuTimeLocked(boolean firstTime) {
+    public void updateCpuTimeLocked() {
+        if (DEBUG_ENERGY_CPU) {
+            Slog.d(TAG, "!Cpu updating!");
+        }
+
+        // Holding a wakelock costs more than just using the cpu.
+        // Currently, we assign only half the cpu time to an app that is running but
+        // not holding a wakelock. The apps holding wakelocks get the rest of the blame.
+        // If no app is holding a wakelock, then the distribution is normal.
+        final int wakelockWeight = 50;
+
+        // Read the time spent at various cpu frequencies.
         final int cpuSpeedSteps = getCpuSpeedSteps();
         final long[] cpuSpeeds = mKernelCpuSpeedReader.readDelta();
-        KernelUidCpuTimeReader.Callback callback = null;
-        if (mOnBatteryInternal && !firstTime) {
-            callback = new KernelUidCpuTimeReader.Callback() {
-                @Override
-                public void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs) {
-                    final Uid u = getUidStatsLocked(mapUid(uid));
-                    u.mUserCpuTime.addCountLocked(userTimeUs);
-                    u.mSystemCpuTime.addCountLocked(systemTimeUs);
-                    for (int i = 0; i < cpuSpeedSteps; i++) {
-                        if (u.mSpeedBins[i] == null) {
-                            u.mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase);
-                        }
-                        u.mSpeedBins[i].addCountLocked(cpuSpeeds[i]);
-                    }
+
+        int numWakelocks = 0;
+
+        // Calculate how many wakelocks we have to distribute amongst. The system is excluded.
+        // Only distribute cpu power to wakelocks if the screen is off and we're on battery.
+        final int numPartialTimers = mPartialTimers.size();
+        if (mOnBatteryScreenOffTimeBase.isRunning()) {
+            for (int i = 0; i < numPartialTimers; i++) {
+                final StopwatchTimer timer = mPartialTimers.get(i);
+                if (timer.mInList && timer.mUid != null && timer.mUid.mUid != Process.SYSTEM_UID) {
+                    // Since the collection and blaming of wakelocks can be scheduled to run after
+                    // some delay, the mPartialTimers list may have new entries. We can't blame
+                    // the newly added timer for past cpu time, so we only consider timers that
+                    // were present for one round of collection. Once a timer has gone through
+                    // a round of collection, its mInList field is set to true.
+                    numWakelocks++;
                 }
-            };
+            }
         }
-        mKernelUidCpuTimeReader.readDelta(callback);
+
+        final int numWakelocksF = numWakelocks;
+        mTempTotalCpuUserTimeUs = 0;
+        mTempTotalCpuSystemTimeUs = 0;
+
+        // Read the CPU data for each UID. This will internally generate a snapshot so next time
+        // we read, we get a delta. If we are to distribute the cpu time, then do so. Otherwise
+        // we just ignore the data.
+        final long startTimeMs = SystemClock.elapsedRealtime();
+        mKernelUidCpuTimeReader.readDelta(!mOnBatteryInternal ? null :
+                new KernelUidCpuTimeReader.Callback() {
+                    @Override
+                    public void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs) {
+                        final Uid u = getUidStatsLocked(mapUid(uid));
+
+                        // Accumulate the total system and user time.
+                        mTempTotalCpuUserTimeUs += userTimeUs;
+                        mTempTotalCpuSystemTimeUs += systemTimeUs;
+
+                        StringBuilder sb = null;
+                        if (DEBUG_ENERGY_CPU) {
+                            sb = new StringBuilder();
+                            sb.append("  got time for uid=").append(u.mUid).append(": u=");
+                            TimeUtils.formatDuration(userTimeUs / 1000, sb);
+                            sb.append(" s=");
+                            TimeUtils.formatDuration(systemTimeUs / 1000, sb);
+                            sb.append("\n");
+                        }
+
+                        if (numWakelocksF > 0) {
+                            // We have wakelocks being held, so only give a portion of the
+                            // time to the process. The rest will be distributed among wakelock
+                            // holders.
+                            userTimeUs = (userTimeUs * wakelockWeight) / 100;
+                            systemTimeUs = (systemTimeUs * wakelockWeight) / 100;
+                        }
+
+                        if (sb != null) {
+                            sb.append("  adding to uid=").append(u.mUid).append(": u=");
+                            TimeUtils.formatDuration(userTimeUs / 1000, sb);
+                            sb.append(" s=");
+                            TimeUtils.formatDuration(systemTimeUs / 1000, sb);
+                            Slog.d(TAG, sb.toString());
+                        }
+
+                        u.mUserCpuTime.addCountLocked(userTimeUs);
+                        u.mSystemCpuTime.addCountLocked(systemTimeUs);
+
+                        // Add the cpu speeds to this UID. These are used as a ratio
+                        // for computing the power this UID used.
+                        for (int i = 0; i < cpuSpeedSteps; i++) {
+                            if (u.mSpeedBins[i] == null) {
+                                u.mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+                            }
+                            u.mSpeedBins[i].addCountLocked(cpuSpeeds[i]);
+                        }
+                    }
+                });
+
+        if (DEBUG_ENERGY_CPU) {
+            Slog.d(TAG, "Reading cpu stats took " + (SystemClock.elapsedRealtime() - startTimeMs) +
+                    " ms");
+        }
+
+        if (mOnBatteryInternal && numWakelocks > 0) {
+            // Distribute a portion of the total cpu time to wakelock holders.
+            mTempTotalCpuUserTimeUs = (mTempTotalCpuUserTimeUs * (100 - wakelockWeight)) / 100;
+            mTempTotalCpuSystemTimeUs =
+                    (mTempTotalCpuSystemTimeUs * (100 - wakelockWeight)) / 100;
+
+            for (int i = 0; i < numPartialTimers; i++) {
+                final StopwatchTimer timer = mPartialTimers.get(i);
+
+                // The system does not share any blame, as it is usually holding the wakelock
+                // on behalf of an app.
+                if (timer.mInList && timer.mUid != null && timer.mUid.mUid != Process.SYSTEM_UID) {
+                    int userTimeUs = (int) (mTempTotalCpuUserTimeUs / numWakelocks);
+                    int systemTimeUs = (int) (mTempTotalCpuSystemTimeUs / numWakelocks);
+
+                    if (DEBUG_ENERGY_CPU) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("  Distributing wakelock uid=").append(timer.mUid.mUid)
+                                .append(": u=");
+                        TimeUtils.formatDuration(userTimeUs / 1000, sb);
+                        sb.append(" s=");
+                        TimeUtils.formatDuration(systemTimeUs / 1000, sb);
+                        Slog.d(TAG, sb.toString());
+                    }
+
+                    timer.mUid.mUserCpuTime.addCountLocked(userTimeUs);
+                    timer.mUid.mSystemCpuTime.addCountLocked(systemTimeUs);
+
+                    final Uid.Proc proc = timer.mUid.getProcessStatsLocked("*wakelock*");
+                    proc.addCpuTimeLocked(userTimeUs, systemTimeUs);
+
+                    mTempTotalCpuUserTimeUs -= userTimeUs;
+                    mTempTotalCpuSystemTimeUs -= systemTimeUs;
+                    numWakelocks--;
+                }
+            }
+
+            if (mTempTotalCpuUserTimeUs > 0 || mTempTotalCpuSystemTimeUs > 0) {
+                // Anything left over is given to the system.
+                if (DEBUG_ENERGY_CPU) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("  Distributing lost time to system: u=");
+                    TimeUtils.formatDuration(mTempTotalCpuUserTimeUs / 1000, sb);
+                    sb.append(" s=");
+                    TimeUtils.formatDuration(mTempTotalCpuSystemTimeUs / 1000, sb);
+                    Slog.d(TAG, sb.toString());
+                }
+
+                final Uid u = getUidStatsLocked(Process.SYSTEM_UID);
+                u.mUserCpuTime.addCountLocked(mTempTotalCpuUserTimeUs);
+                u.mSystemCpuTime.addCountLocked(mTempTotalCpuSystemTimeUs);
+
+                final Uid.Proc proc = u.getProcessStatsLocked("*lost*");
+                proc.addCpuTimeLocked((int) mTempTotalCpuUserTimeUs,
+                        (int) mTempTotalCpuSystemTimeUs);
+            }
+        }
+
+        // See if there is a difference in wakelocks between this collection and the last
+        // collection.
+        if (ArrayUtils.referenceEquals(mPartialTimers, mLastPartialTimers)) {
+            // No difference, so each timer is now considered for the next collection.
+            for (int i = 0; i < numPartialTimers; i++) {
+                mPartialTimers.get(i).mInList = true;
+            }
+        } else {
+            // The lists are different, meaning we added (or removed a timer) since the last
+            // collection.
+            final int numLastPartialTimers = mLastPartialTimers.size();
+            for (int i = 0; i < numLastPartialTimers; i++) {
+                mLastPartialTimers.get(i).mInList = false;
+            }
+            mLastPartialTimers.clear();
+
+            // Mark the current timers as gone through a collection.
+            for (int i = 0; i < numPartialTimers; i++) {
+                final StopwatchTimer timer = mPartialTimers.get(i);
+                timer.mInList = true;
+                mLastPartialTimers.add(timer);
+            }
+        }
     }
 
     boolean setChargingLocked(boolean charging) {

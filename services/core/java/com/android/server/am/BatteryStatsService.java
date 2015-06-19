@@ -64,7 +64,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         implements PowerManagerInternal.LowPowerModeListener {
     static final String TAG = "BatteryStatsService";
 
-    private boolean mFirstExternalStatsUpdate = true;
     static IBatteryStats sService;
     final BatteryStatsImpl mStats;
     final BatteryStatsHandler mHandler;
@@ -807,7 +806,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         // Sync external stats first as the battery has changed states. If we don't sync
         // immediately here, we may not collect the relevant data later.
-        updateExternalStats("battery-state", false);
+        updateExternalStats("battery-state", true);
         synchronized (mStats) {
             mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
         }
@@ -1217,17 +1216,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     mStats.addHistoryEventLocked(elapsedRealtime, uptime,
                             BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS, reason, 0);
                 }
-                mStats.updateCpuTimeLocked(mFirstExternalStatsUpdate);
+
+                if (BatteryStatsImpl.DEBUG_ENERGY_CPU) {
+                    Slog.d(TAG, "Updating cpu time from external: " + reason);
+                }
+                mStats.updateCpuTimeLocked();
                 mStats.updateKernelWakelocksLocked();
                 mStats.updateMobileRadioStateLocked(SystemClock.elapsedRealtime());
                 mStats.updateWifiStateLocked(wifiEnergyInfo);
                 mStats.updateBluetoothStateLocked(bluetoothEnergyInfo);
-            }
-
-            if (mFirstExternalStatsUpdate) {
-                // We have read the stats for the first time, which means we have a baseline
-                // from which to calculate delta.
-                mFirstExternalStatsUpdate = false;
             }
         }
     }
