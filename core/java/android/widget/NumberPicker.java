@@ -149,6 +149,11 @@ public class NumberPicker extends LinearLayout {
     private static final int SIZE_UNSPECIFIED = -1;
 
     /**
+     * User choice on whether the selector wheel should be wrapped.
+     */
+    private boolean mWrapSelectorWheelPreferred = true;
+
+    /**
      * Use a custom NumberPicker formatting callback to use two-digit minutes
      * strings like "01". Keeping a static formatter etc. is the most efficient
      * way to do this; it avoids creating temporary objects on every call to
@@ -1353,10 +1358,21 @@ public class NumberPicker extends LinearLayout {
      * @param wrapSelectorWheel Whether to wrap.
      */
     public void setWrapSelectorWheel(boolean wrapSelectorWheel) {
+        mWrapSelectorWheelPreferred = wrapSelectorWheel;
+        updateWrapSelectorWheel();
+
+    }
+
+    /**
+     * Whether or not the selector wheel should be wrapped is determined by user choice and whether
+     * the choice is allowed. The former comes from {@link #setWrapSelectorWheel(boolean)}, the
+     * latter is calculated based on min & max value set vs selector's visual length. Therefore,
+     * this method should be called any time any of the 3 values (i.e. user choice, min and max
+     * value) gets updated.
+     */
+    private void updateWrapSelectorWheel() {
         final boolean wrappingAllowed = (mMaxValue - mMinValue) >= mSelectorIndices.length;
-        if ((!wrapSelectorWheel || wrappingAllowed) && wrapSelectorWheel != mWrapSelectorWheel) {
-            mWrapSelectorWheel = wrapSelectorWheel;
-        }
+        mWrapSelectorWheel = wrappingAllowed && mWrapSelectorWheelPreferred;
     }
 
     /**
@@ -1412,8 +1428,7 @@ public class NumberPicker extends LinearLayout {
         if (mMinValue > mValue) {
             mValue = mMinValue;
         }
-        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
-        setWrapSelectorWheel(wrapSelectorWheel);
+        updateWrapSelectorWheel();
         initializeSelectorWheelIndices();
         updateInputTextView();
         tryComputeMaxWidth();
@@ -1450,8 +1465,7 @@ public class NumberPicker extends LinearLayout {
         if (mMaxValue < mValue) {
             mValue = mMaxValue;
         }
-        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
-        setWrapSelectorWheel(wrapSelectorWheel);
+        updateWrapSelectorWheel();
         initializeSelectorWheelIndices();
         updateInputTextView();
         tryComputeMaxWidth();
