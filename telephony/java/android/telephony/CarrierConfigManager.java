@@ -298,6 +298,14 @@ public class CarrierConfigManager {
     public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING =
             "ci_action_on_sys_update_extra_val_string";
 
+    /**
+     * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
+     * prevent manual operator selection. If false, this SIM setting will be ignored and manual
+     * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
+     * information
+     */
+    public static final String KEY_CSP_ENABLED_BOOL = "csp_enabled_bool";
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
@@ -403,6 +411,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
+        sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
