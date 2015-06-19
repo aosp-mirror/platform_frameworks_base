@@ -1915,7 +1915,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 ActivityRecord intentActivity = !launchSingleInstance ?
                         findTaskLocked(r) : findActivityLocked(intent, r.info);
                 if (intentActivity != null) {
-                    if (isLockTaskModeViolation(intentActivity.task)) {
+                    // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused
+                    // but still needs to be a lock task mode violation since the task gets
+                    // cleared out and the device would otherwise leave the locked task.
+                    if (isLockTaskModeViolation(intentActivity.task,
+                            (launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
+                            == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
                         showLockTaskToast();
                         Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
                         return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
@@ -3780,7 +3785,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean isLockTaskModeViolation(TaskRecord task) {
-        if (getLockedTaskLocked() == task) {
+        return isLockTaskModeViolation(task, false);
+    }
+
+    boolean isLockTaskModeViolation(TaskRecord task, boolean isNewClearTask) {
+        if (getLockedTaskLocked() == task && !isNewClearTask) {
             return false;
         }
         final int lockTaskAuth = task.mLockTaskAuth;
