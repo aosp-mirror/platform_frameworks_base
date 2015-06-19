@@ -477,39 +477,6 @@ public class TelecomManager {
     }
 
     /**
-     * Sets the SIM call manager to the specified phone account.
-     *
-     * @param accountHandle The phone account handle of the account to set as the sim call manager.
-     * @hide
-     */
-    public void setSimCallManager(PhoneAccountHandle accountHandle) {
-        try {
-            if (isServiceConnected()) {
-                getTelecomService().setSimCallManager(accountHandle);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#setSimCallManager");
-        }
-    }
-
-    /**
-     * Returns the list of registered SIM call managers.
-     *
-     * @return List of registered SIM call managers.
-     * @hide
-     */
-    public List<PhoneAccountHandle> getSimCallManagers() {
-        try {
-            if (isServiceConnected()) {
-                return getTelecomService().getSimCallManagers(mContext.getOpPackageName());
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getSimCallManagers");
-        }
-        return new ArrayList<>();
-    }
-
-    /**
      * Returns the current connection manager. Apps must be prepared for this method to return
      * {@code null}, indicating that there currently exists no user-chosen default
      * {@code PhoneAccount}.
