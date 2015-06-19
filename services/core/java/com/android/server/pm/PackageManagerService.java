@@ -8253,6 +8253,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 res.icon = info.icon;
             }
+            res.iconResourceId = info.icon;
             res.system = res.activityInfo.applicationInfo.isSystemApp();
             return res;
         }
