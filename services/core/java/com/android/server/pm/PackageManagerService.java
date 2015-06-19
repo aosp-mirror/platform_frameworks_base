@@ -14085,7 +14085,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+            if (!checkin
+                    && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)
+                    && packageName == null) {
                 pw.println();
                 int count = mSettings.mPackages.size();
                 if (count == 0) {
