@@ -42,6 +42,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
+import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
@@ -1119,6 +1120,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     return null;
                 }
 
+                final long timePeriodMs = info.mTimestamp - mLastInfo.mTimestamp;
+                final long lastIdleMs = mLastInfo.mControllerIdleTimeMs;
+                final long lastTxMs = mLastInfo.mControllerTxTimeMs;
+                final long lastRxMs = mLastInfo.mControllerRxTimeMs;
+                final long lastEnergy = mLastInfo.mControllerEnergyUsed;
+
                 // We will modify the last info object to be the delta, and store the new
                 // WifiActivityEnergyInfo object as our last one.
                 final WifiActivityEnergyInfo result = mLastInfo;
@@ -1126,19 +1133,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 result.mStackState = info.getStackState();
 
                 // These times seem to be the most reliable.
-                result.mControllerTxTimeMs =
-                        info.mControllerTxTimeMs - mLastInfo.mControllerTxTimeMs;
-                result.mControllerRxTimeMs =
-                        info.mControllerRxTimeMs - mLastInfo.mControllerRxTimeMs;
+                result.mControllerTxTimeMs = info.mControllerTxTimeMs - lastTxMs;
+                result.mControllerRxTimeMs = info.mControllerRxTimeMs - lastRxMs;
 
                 // WiFi calculates the idle time as a difference from the on time and the various
                 // Rx + Tx times. There seems to be some missing time there because this sometimes
                 // becomes negative. Just cap it at 0 and move on.
                 // b/21613534
-                result.mControllerIdleTimeMs =
-                        Math.max(0, info.mControllerIdleTimeMs - mLastInfo.mControllerIdleTimeMs);
+                result.mControllerIdleTimeMs = Math.max(0, info.mControllerIdleTimeMs - lastIdleMs);
                 result.mControllerEnergyUsed =
-                        Math.max(0, info.mControllerEnergyUsed - mLastInfo.mControllerEnergyUsed);
+                        Math.max(0, info.mControllerEnergyUsed - lastEnergy);
 
                 if (result.mControllerTxTimeMs < 0 ||
                         result.mControllerRxTimeMs < 0) {
@@ -1151,6 +1155,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                     Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + result);
                 }
+
+                final long totalTimeMs = result.mControllerIdleTimeMs + result.mControllerRxTimeMs +
+                        result.mControllerTxTimeMs;
+                if (totalTimeMs > timePeriodMs) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Total time ");
+                    TimeUtils.formatDuration(totalTimeMs, sb);
+                    sb.append(" is longer than sample period ");
+                    TimeUtils.formatDuration(timePeriodMs, sb);
+                    sb.append(".\n");
+                    sb.append("Previous WiFi snapshot: ").append("idle=");
+                    TimeUtils.formatDuration(lastIdleMs, sb);
+                    sb.append(" rx=");
+                    TimeUtils.formatDuration(lastRxMs, sb);
+                    sb.append(" tx=");
+                    TimeUtils.formatDuration(lastTxMs, sb);
+                    sb.append(" e=").append(lastEnergy);
+                    sb.append("\n");
+                    sb.append("Current WiFi snapshot: ").append("idle=");
+                    TimeUtils.formatDuration(info.mControllerIdleTimeMs, sb);
+                    sb.append(" rx=");
+                    TimeUtils.formatDuration(info.mControllerRxTimeMs, sb);
+                    sb.append(" tx=");
+                    TimeUtils.formatDuration(info.mControllerTxTimeMs, sb);
+                    sb.append(" e=").append(info.mControllerEnergyUsed);
+                    Slog.wtf(TAG, sb.toString());
+                }
+
                 mLastInfo = info;
                 return result;
             }
