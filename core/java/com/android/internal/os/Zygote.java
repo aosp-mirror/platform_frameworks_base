@@ -41,8 +41,8 @@ public final class Zygote {
     public static final int DEBUG_ENABLE_JNI_LOGGING = 1 << 4;
     /** enable the JIT compiler */
     public static final int DEBUG_ENABLE_JIT         = 1 << 5;
-    /** Force generation of CFI code */
-    public static final int DEBUG_GENERATE_CFI       = 1 << 6;
+    /** Force generation of native debugging information. */
+    public static final int DEBUG_GENERATE_DEBUG_INFO = 1 << 6;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
