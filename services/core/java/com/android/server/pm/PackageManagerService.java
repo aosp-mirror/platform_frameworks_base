@@ -1586,6 +1586,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 grantRequestedRuntimePermissionsForUser(pkg, someUserId);
             }
         }
+
+        // We could have touched GID membership, so flush out packages.list
+        synchronized (mPackages) {
+            mSettings.writePackageListLPr();
+        }
     }
 
     private void grantRequestedRuntimePermissionsForUser(PackageParser.Package pkg, int userId) {
