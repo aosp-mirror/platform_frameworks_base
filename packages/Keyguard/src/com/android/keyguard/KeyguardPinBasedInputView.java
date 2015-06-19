@@ -93,6 +93,16 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    protected int getPromtReasonStringRes(int reason) {
+        switch (reason) {
+            case PROMPT_REASON_RESTART:
+                return R.string.kg_prompt_reason_restart_pin;
+            default:
+                return 0;
+        }
+    }
+
     private void performClick(View view) {
         view.performClick();
     }

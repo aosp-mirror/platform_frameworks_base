@@ -21,6 +21,9 @@ public interface KeyguardSecurityView {
     static public final int SCREEN_ON = 1;
     static public final int VIEW_REVEALED = 2;
 
+    int PROMPT_REASON_NONE = 0;
+    int PROMPT_REASON_RESTART = 1;
+
     /**
      * Interface back to keyguard to tell it when security
      * @param callback
@@ -64,6 +67,14 @@ public interface KeyguardSecurityView {
      * @return KeyguardSecurityCallback
      */
     KeyguardSecurityCallback getCallback();
+
+    /**
+     * Show a string explaining why the security view needs to be solved.
+     *
+     * @param reason a flag indicating which string should be shown, see {@link #PROMPT_REASON_NONE}
+     *               and {@link #PROMPT_REASON_RESTART}
+     */
+    void showPromptReason(int reason);
 
     /**
      * Instruct the view to show usability hints, if any.

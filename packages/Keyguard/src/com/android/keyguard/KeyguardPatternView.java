@@ -85,10 +85,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
     };
     private Rect mTempRect = new Rect();
-    private SecurityMessageDisplay mSecurityMessageDisplay;
+    private KeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
     private ViewGroup mContainer;
-    private KeyguardMessageArea mHelpMessage;
     private int mDisappearYTranslation;
 
     enum FooterMode {
@@ -141,10 +140,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
-        mSecurityMessageDisplay = KeyguardMessageArea.findSecurityMessageDisplay(this);
+        mSecurityMessageDisplay =
+                (KeyguardMessageArea) KeyguardMessageArea.findSecurityMessageDisplay(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         mContainer = (ViewGroup) findViewById(R.id.container);
-        mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
 
         EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
         if (button != null) {
@@ -320,6 +319,17 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
+    public void showPromptReason(int reason) {
+        switch (reason) {
+            case PROMPT_REASON_RESTART:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_restart_pattern,
+                        true /* important */);
+                break;
+            default:
+        }
+    }
+
+    @Override
     public void startAppearAnimation() {
         enableClipping(false);
         setAlpha(1f);
@@ -337,8 +347,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     }
                 },
                 this);
-        if (!TextUtils.isEmpty(mHelpMessage.getText())) {
-            mAppearAnimationUtils.createAnimation(mHelpMessage, 0,
+        if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {
+            mAppearAnimationUtils.createAnimation(mSecurityMessageDisplay, 0,
                     AppearAnimationUtils.DEFAULT_APPEAR_DURATION,
                     mAppearAnimationUtils.getStartTranslation(),
                     true /* appearing */,
@@ -366,8 +376,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                         }
                     }
                 }, KeyguardPatternView.this);
-        if (!TextUtils.isEmpty(mHelpMessage.getText())) {
-            mDisappearAnimationUtils.createAnimation(mHelpMessage, 0,
+        if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {
+            mDisappearAnimationUtils.createAnimation(mSecurityMessageDisplay, 0,
                     200,
                     - mDisappearAnimationUtils.getStartTranslation() * 3,
                     false /* appearing */,
