@@ -831,8 +831,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason) {
         moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE, reason);
-        startActivityLocked(null, intent, null, aInfo, null, null, null, null, 0, 0, 0, null,
-                0, 0, 0, null, false, null, null, null);
+        startActivityLocked(null /* caller */, intent, null /* resolvedType */, aInfo,
+                null /* voiceSession */, null /* voiceInteractor */, null /* resultTo */,
+                null /* resultWho */, 0 /* requestCode */, 0 /* callingPid */, 0 /* callingUid */,
+                null /* callingPackage */, 0 /* realCallingPid */, 0 /* realCallingUid */,
+                0 /* startFlags */, null /* options */, false /* componentSpecified */,
+                null /* outActivity */, null /* container */,  null /* inTask */);
+        if (inResumeTopActivity) {
+            // If we are in resume section already, home activity will be initialized, but not
+            // resumed (to avoid recursive resume) and will stay that way until something pokes it
+            // again. We need to schedule another resume.
+            scheduleResumeTopActivities();
+        }
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
