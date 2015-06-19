@@ -27,6 +27,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.FileUtils;
@@ -77,21 +78,12 @@ public class BugreportReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        final Configuration conf = context.getResources().getConfiguration();
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
 
-        // Files are kept on private storage, so turn into Uris that we can
-        // grant temporary permissions for.
-        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
-        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
-
-        boolean isPlainText = bugreportFile.getName().toLowerCase().endsWith(".txt");
-        if (!isPlainText) {
-            // Already zipped, send it right away.
-            sendBugreportNotification(context, bugreportFile, screenshotFile);
-        } else {
-            // Asynchronously zip the file first, then send it.
-            sendZippedBugreportNotification(context, bugreportFile, screenshotFile);
+        if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
+            triggerLocalNotification(context, bugreportFile, screenshotFile);
         }
 
         // Clean up older bugreports in background
@@ -105,6 +97,29 @@ public class BugreportReceiver extends BroadcastReceiver {
                 return null;
             }
         }.execute();
+    }
+
+    /**
+     * Responsible for triggering a notification that allows the user to start a
+     * "share" intent with the bug report. On watches we have other methods to allow the user to
+     * start this intent (usually by triggering it on another connected device); we don't need to
+     * display the notification in this case.
+     */
+    private void triggerLocalNotification(final Context context, final File bugreportFile,
+            final File screenshotFile) {
+        // Files are kept on private storage, so turn into Uris that we can
+        // grant temporary permissions for.
+        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
+        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
+
+        boolean isPlainText = bugreportFile.getName().toLowerCase().endsWith(".txt");
+        if (!isPlainText) {
+            // Already zipped, send it right away.
+            sendBugreportNotification(context, bugreportFile, screenshotFile);
+        } else {
+            // Asynchronously zip the file first, then send it.
+            sendZippedBugreportNotification(context, bugreportFile, screenshotFile);
+        }
     }
 
     private static Intent buildWarningIntent(Context context, Intent sendIntent) {
