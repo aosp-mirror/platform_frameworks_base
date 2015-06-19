@@ -81,4 +81,12 @@ public interface ViewMediatorCallback {
      * @return true if the screen is on
      */
     boolean isScreenOn();
+
+    /**
+     * @return one of the reasons why the bouncer needs to be shown right now and the user can't use
+     *         his normal unlock method like fingerprint or trust agents. See
+     *         {@link KeyguardSecurityView#PROMPT_REASON_NONE}
+     *         and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}.
+     */
+    int getBouncerPromptReason();
 }
