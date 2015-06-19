@@ -261,6 +261,16 @@ public abstract class ActionMode {
     public abstract MenuInflater getMenuInflater();
 
     /**
+     * Called when the window containing the view that started this action mode gains or loses
+     * focus.
+     *
+     * @param hasWindowFocus True if the window containing the view that started this action mode
+     *        now has focus, false otherwise.
+     *
+     */
+    public void onWindowFocusChanged(boolean hasWindowFocus) {}
+
+    /**
      * Returns whether the UI presenting this action mode can take focus or not.
      * This is used by internal components within the framework that would otherwise
      * present an action mode UI that requires focus, such as an EditText as a custom view.
