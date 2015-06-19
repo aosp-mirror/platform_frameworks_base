@@ -390,7 +390,7 @@ public class QSPanel extends ViewGroup {
             mDetailSettingsButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mHost.startSettingsActivity(settingsIntent);
+                    mHost.startActivityDismissingKeyguard(settingsIntent);
                 }
             });
 

@@ -96,7 +96,11 @@ public class IntentTile extends QSTile<QSTile.State> {
     private void sendIntent(String type, PendingIntent pi, String uri) {
         try {
             if (pi != null) {
-                pi.send();
+                if (pi.isActivity()) {
+                    getHost().startActivityDismissingKeyguard(pi.getIntent());
+                } else {
+                    pi.send();
+                }
             } else if (uri != null) {
                 final Intent intent = Intent.parseUri(uri, Intent.URI_INTENT_SCHEME);
                 mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
