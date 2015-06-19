@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.app.Activity;
+import android.content.res.TypedArray;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.Selection;
@@ -25,6 +26,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.SuggestionSpan;
 import android.text.style.TextAppearanceSpan;
+import android.view.View;
 
 import com.android.frameworks.coretests.R;
 
@@ -54,8 +56,12 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
         final int multiWordSpanStart = 0;
         final int multiWordSpanEnd = 11;
 
-        TextAppearanceSpan expectedSpan = new TextAppearanceSpan(activity,
-                android.R.style.TextAppearance_SuggestionHighlight);
+        TypedArray array = activity.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
+        int id = array.getResourceId(
+                com.android.internal.R.styleable.Theme_textEditSuggestionHighlightStyle, 0);
+        array.recycle();
+
+        TextAppearanceSpan expectedSpan = new TextAppearanceSpan(activity, id);
         TextPaint tmpTp = new TextPaint();
         expectedSpan.updateDrawState(tmpTp);
         final int expectedHighlightTextColor = tmpTp.getColor();
@@ -89,6 +95,7 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
         // | abc *Def* ghi |
         // | *ABC DEF GHI* |
         // | *Abc Def Ghi* |
+        // -----------------
         // | DELETE        |
         // -----------------
         // *XX* means that XX is highlighted.
@@ -99,13 +106,15 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
                         editor.getSuggestionsPopupWindowForTesting();
                 assertNotNull(popupWindow);
 
-                ListView listView = (ListView) popupWindow.getContentViewForTesting();
+                LinearLayout linearLayout = (LinearLayout) popupWindow.getContentViewForTesting();
+                assertNotNull(linearLayout);
+
+                ListView listView = (ListView)linearLayout.findViewById(
+                        com.android.internal.R.id.suggestionContainer);
                 assertNotNull(listView);
 
                 int childNum = listView.getChildCount();
-                // +1 for "DELETE" command.
-                assertEquals(singleWordCandidates.length + multiWordCandidates.length + 1,
-                        childNum);
+                assertEquals(singleWordCandidates.length + multiWordCandidates.length, childNum);
 
                 for (int i = 0; i < singleWordCandidates.length; ++i) {
                     TextView textView = (TextView) listView.getChildAt(i);
@@ -156,6 +165,10 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
                     assertEquals(multiWordSpanStart, spanned.getSpanStart(taSpan[0]));
                     assertEquals(multiWordSpanEnd, spanned.getSpanEnd(taSpan[0]));
                 }
+
+                TextView deleteButton = (TextView)linearLayout.findViewById(
+                        com.android.internal.R.id.deleteButton);
+                assertEquals(View.VISIBLE, deleteButton.getWindowVisibility());
             }
         };
 

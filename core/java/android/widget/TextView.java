@@ -624,7 +624,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
     int mCursorDrawableRes;
-    // These four fields, could be moved to Editor, since we know their default values and we
+    // These six fields, could be moved to Editor, since we know their default values and we
     // could condition the creation of the Editor to a non standard value. This is however
     // brittle since the hardcoded values here (such as
     // com.android.internal.R.drawable.text_select_handle_left) would have to be updated if the
@@ -633,6 +633,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextSelectHandleRightRes;
     int mTextSelectHandleRes;
     int mTextEditSuggestionItemLayout;
+    int mTextEditSuggestionContainerLayout;
+    int mTextEditSuggestionHighlightStyle;
 
     /**
      * EditText specific data, created on demand when one of the Editor fields is used.
@@ -1153,6 +1155,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textEditSuggestionItemLayout:
                 mTextEditSuggestionItemLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSuggestionContainerLayout:
+                mTextEditSuggestionContainerLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSuggestionHighlightStyle:
+                mTextEditSuggestionHighlightStyle = a.getResourceId(attr, 0);
                 break;
 
             case com.android.internal.R.styleable.TextView_textIsSelectable:

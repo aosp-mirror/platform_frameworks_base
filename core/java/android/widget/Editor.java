@@ -2634,8 +2634,11 @@ public class Editor {
     @VisibleForTesting
     public class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
-        private static final int ADD_TO_DICTIONARY = -1;
-        private static final int DELETE_TEXT = -2;
+
+        // Key of intent extras for inserting new word into user dictionary.
+        private static final String USER_DICTIONARY_EXTRA_WORD = "word";
+        private static final String USER_DICTIONARY_EXTRA_LOCALE = "locale";
+
         private SuggestionInfo[] mSuggestionInfos;
         private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
@@ -2644,7 +2647,10 @@ public class Editor {
         private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
         private final TextAppearanceSpan mHighlightSpan = new TextAppearanceSpan(
-                mTextView.getContext(), android.R.style.TextAppearance_SuggestionHighlight);
+                mTextView.getContext(), mTextView.mTextEditSuggestionHighlightStyle);
+        private TextView mAddToDictionaryButton;
+        private TextView mDeleteButton;
+        private SuggestionSpan mMisspelledSpan;
 
         private class CustomPopupWindow extends PopupWindow {
             public CustomPopupWindow(Context context, int defStyleAttr) {
@@ -2684,17 +2690,73 @@ public class Editor {
 
         @Override
         protected void initContentView() {
-            ListView listView = new ListView(mTextView.getContext());
-            mSuggestionsAdapter = new SuggestionAdapter();
-            listView.setAdapter(mSuggestionsAdapter);
-            listView.setOnItemClickListener(this);
-            mContentView = listView;
+            final LayoutInflater inflater = (LayoutInflater) mTextView.getContext().
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final LinearLayout linearLayout = (LinearLayout) inflater.inflate(
+                    mTextView.mTextEditSuggestionContainerLayout, null);
 
-            // Inflate the suggestion items once and for all. + 2 for add to dictionary and delete
-            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS + 2];
+            final ListView suggestionListView = (ListView) linearLayout.findViewById(
+                    com.android.internal.R.id.suggestionContainer);
+
+            mSuggestionsAdapter = new SuggestionAdapter();
+            suggestionListView.setAdapter(mSuggestionsAdapter);
+            suggestionListView.setOnItemClickListener(this);
+
+            // Inflate the suggestion items once and for all.
+            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS];
             for (int i = 0; i < mSuggestionInfos.length; i++) {
                 mSuggestionInfos[i] = new SuggestionInfo();
             }
+
+            mContentView = linearLayout;
+
+            mAddToDictionaryButton = (TextView) linearLayout.findViewById(
+                    com.android.internal.R.id.addToDictionaryButton);
+            mAddToDictionaryButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    final Editable editable = (Editable) mTextView.getText();
+                    final int spanStart = editable.getSpanStart(mMisspelledSpan);
+                    final int spanEnd = editable.getSpanEnd(mMisspelledSpan);
+                    final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
+
+                    final Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
+                    intent.putExtra(USER_DICTIONARY_EXTRA_WORD, originalText);
+                    intent.putExtra(USER_DICTIONARY_EXTRA_LOCALE,
+                            mTextView.getTextServicesLocale().toString());
+                    intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mTextView.getContext().startActivity(intent);
+                    // There is no way to know if the word was indeed added. Re-check.
+                    // TODO The ExtractEditText should remove the span in the original text instead
+                    editable.removeSpan(mMisspelledSpan);
+                    Selection.setSelection(editable, spanEnd);
+                    updateSpellCheckSpans(spanStart, spanEnd, false);
+                    hideWithCleanUp();
+                }
+            });
+
+            mDeleteButton = (TextView) linearLayout.findViewById(
+                    com.android.internal.R.id.deleteButton);
+            mDeleteButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    final Editable editable = (Editable) mTextView.getText();
+
+                    final int spanUnionStart = editable.getSpanStart(mSuggestionRangeSpan);
+                    int spanUnionEnd = editable.getSpanEnd(mSuggestionRangeSpan);
+                    if (spanUnionStart >= 0 && spanUnionEnd > spanUnionStart) {
+                        // Do not leave two adjacent spaces after deletion, or one at beginning of
+                        // text
+                        if (spanUnionEnd < editable.length() &&
+                                Character.isSpaceChar(editable.charAt(spanUnionEnd)) &&
+                                (spanUnionStart == 0 ||
+                                Character.isSpaceChar(editable.charAt(spanUnionStart - 1)))) {
+                            spanUnionEnd = spanUnionEnd + 1;
+                        }
+                        mTextView.deleteText_internal(spanUnionStart, spanUnionEnd);
+                    }
+                    hideWithCleanUp();
+                }
+            });
+
         }
 
         public boolean isShowingUp() {
@@ -2753,14 +2815,6 @@ public class Editor {
 
                 final SuggestionInfo suggestionInfo = mSuggestionInfos[position];
                 textView.setText(suggestionInfo.text);
-
-                if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY ||
-                suggestionInfo.suggestionIndex == DELETE_TEXT) {
-                    textView.setBackgroundColor(Color.TRANSPARENT);
-                } else {
-                    textView.setBackgroundColor(Color.WHITE);
-                }
-
                 return textView;
             }
         }
@@ -2843,6 +2897,14 @@ public class Editor {
                 width = Math.max(width, view.getMeasuredWidth());
             }
 
+            if (mAddToDictionaryButton.getVisibility() != View.GONE) {
+                mAddToDictionaryButton.measure(horizontalMeasure, verticalMeasure);
+                width = Math.max(width, mAddToDictionaryButton.getMeasuredWidth());
+            }
+
+            mDeleteButton.measure(horizontalMeasure, verticalMeasure);
+            width = Math.max(width, mDeleteButton.getMeasuredWidth());
+
             // Enforce the width based on actual text widths
             mContentView.measure(
                     View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
@@ -2878,6 +2940,7 @@ public class Editor {
             for (final SuggestionInfo info : mSuggestionInfos) {
                 info.clear();
             }
+            mMisspelledSpan = null;
             hide();
         }
 
@@ -2893,7 +2956,7 @@ public class Editor {
             int spanUnionStart = mTextView.getText().length();
             int spanUnionEnd = 0;
 
-            SuggestionSpan misspelledSpan = null;
+            mMisspelledSpan = null;
             int underlineColor = 0;
 
             for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
@@ -2904,7 +2967,7 @@ public class Editor {
                 spanUnionEnd = Math.max(spanEnd, spanUnionEnd);
 
                 if ((suggestionSpan.getFlags() & SuggestionSpan.FLAG_MISSPELLED) != 0) {
-                    misspelledSpan = suggestionSpan;
+                    mMisspelledSpan = suggestionSpan;
                 }
 
                 // The first span dictates the background color of the highlighted text
@@ -2949,31 +3012,16 @@ public class Editor {
                 highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
             }
 
-            // Add "Add to dictionary" item if there is a span with the misspelled flag
-            if (misspelledSpan != null) {
-                final int misspelledStart = spannable.getSpanStart(misspelledSpan);
-                final int misspelledEnd = spannable.getSpanEnd(misspelledSpan);
+            // Make "Add to dictionary" item visible if there is a span with the misspelled flag
+            int addToDictionaryButtonVisibility = View.GONE;
+            if (mMisspelledSpan != null) {
+                final int misspelledStart = spannable.getSpanStart(mMisspelledSpan);
+                final int misspelledEnd = spannable.getSpanEnd(mMisspelledSpan);
                 if (misspelledStart >= 0 && misspelledEnd > misspelledStart) {
-                    SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
-                    suggestionInfo.suggestionSpan = misspelledSpan;
-                    suggestionInfo.suggestionIndex = ADD_TO_DICTIONARY;
-                    suggestionInfo.text.replace(0, suggestionInfo.text.length(), mTextView.
-                            getContext().getString(com.android.internal.R.string.addToDictionary));
-                    suggestionInfo.text.setSpan(mHighlightSpan, 0, 0,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                    mNumberOfSuggestions++;
+                    addToDictionaryButtonVisibility = View.VISIBLE;
                 }
             }
-
-            // Delete item
-            SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
-            suggestionInfo.suggestionSpan = null;
-            suggestionInfo.suggestionIndex = DELETE_TEXT;
-            suggestionInfo.text.replace(0, suggestionInfo.text.length(),
-                    mTextView.getContext().getString(com.android.internal.R.string.deleteText));
-            suggestionInfo.text.setSpan(mHighlightSpan, 0, 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            mNumberOfSuggestions++;
+            mAddToDictionaryButton.setVisibility(addToDictionaryButtonVisibility);
 
             if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
             if (underlineColor == 0) {
@@ -3017,23 +3065,6 @@ public class Editor {
             Editable editable = (Editable) mTextView.getText();
             SuggestionInfo suggestionInfo = mSuggestionInfos[position];
 
-            if (suggestionInfo.suggestionIndex == DELETE_TEXT) {
-                final int spanUnionStart = editable.getSpanStart(mSuggestionRangeSpan);
-                int spanUnionEnd = editable.getSpanEnd(mSuggestionRangeSpan);
-                if (spanUnionStart >= 0 && spanUnionEnd > spanUnionStart) {
-                    // Do not leave two adjacent spaces after deletion, or one at beginning of text
-                    if (spanUnionEnd < editable.length() &&
-                            Character.isSpaceChar(editable.charAt(spanUnionEnd)) &&
-                            (spanUnionStart == 0 ||
-                            Character.isSpaceChar(editable.charAt(spanUnionStart - 1)))) {
-                        spanUnionEnd = spanUnionEnd + 1;
-                    }
-                    mTextView.deleteText_internal(spanUnionStart, spanUnionEnd);
-                }
-                hideWithCleanUp();
-                return;
-            }
-
             final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
             final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
             if (spanStart < 0 || spanEnd <= spanStart) {
@@ -3044,75 +3075,59 @@ public class Editor {
 
             final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
 
-            if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY) {
-                Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
-                intent.putExtra("word", originalText);
-                intent.putExtra("locale", mTextView.getTextServicesLocale().toString());
-                // Put a listener to replace the original text with a word which the user
-                // modified in a user dictionary dialog.
-                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mTextView.getContext().startActivity(intent);
-                // There is no way to know if the word was indeed added. Re-check.
-                // TODO The ExtractEditText should remove the span in the original text instead
-                editable.removeSpan(suggestionInfo.suggestionSpan);
-                Selection.setSelection(editable, spanEnd);
-                updateSpellCheckSpans(spanStart, spanEnd, false);
-            } else {
-                // SuggestionSpans are removed by replace: save them before
-                SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
-                        SuggestionSpan.class);
-                final int length = suggestionSpans.length;
-                int[] suggestionSpansStarts = new int[length];
-                int[] suggestionSpansEnds = new int[length];
-                int[] suggestionSpansFlags = new int[length];
-                for (int i = 0; i < length; i++) {
-                    final SuggestionSpan suggestionSpan = suggestionSpans[i];
-                    suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
-                    suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
-                    suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
+            // SuggestionSpans are removed by replace: save them before
+            final SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
+                    SuggestionSpan.class);
+            final int length = suggestionSpans.length;
+            final int[] suggestionSpansStarts = new int[length];
+            final int[] suggestionSpansEnds = new int[length];
+            final int[] suggestionSpansFlags = new int[length];
+            for (int i = 0; i < length; i++) {
+                final SuggestionSpan suggestionSpan = suggestionSpans[i];
+                suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
+                suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
+                suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
 
-                    // Remove potential misspelled flags
-                    int suggestionSpanFlags = suggestionSpan.getFlags();
-                    if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
-                        suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
-                        suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
-                        suggestionSpan.setFlags(suggestionSpanFlags);
-                    }
+                // Remove potential misspelled flags
+                int suggestionSpanFlags = suggestionSpan.getFlags();
+                if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
+                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
+                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
+                    suggestionSpan.setFlags(suggestionSpanFlags);
                 }
-
-                final int suggestionStart = suggestionInfo.suggestionStart;
-                final int suggestionEnd = suggestionInfo.suggestionEnd;
-                final String suggestion = suggestionInfo.text.subSequence(
-                        suggestionStart, suggestionEnd).toString();
-                mTextView.replaceText_internal(spanStart, spanEnd, suggestion);
-
-                // Notify source IME of the suggestion pick. Do this before
-                // swaping texts.
-                suggestionInfo.suggestionSpan.notifySelection(
-                        mTextView.getContext(), originalText, suggestionInfo.suggestionIndex);
-
-                // Swap text content between actual text and Suggestion span
-                String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
-                suggestions[suggestionInfo.suggestionIndex] = originalText;
-
-                // Restore previous SuggestionSpans
-                final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
-                for (int i = 0; i < length; i++) {
-                    // Only spans that include the modified region make sense after replacement
-                    // Spans partially included in the replaced region are removed, there is no
-                    // way to assign them a valid range after replacement
-                    if (suggestionSpansStarts[i] <= spanStart &&
-                            suggestionSpansEnds[i] >= spanEnd) {
-                        mTextView.setSpan_internal(suggestionSpans[i], suggestionSpansStarts[i],
-                                suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
-                    }
-                }
-
-                // Move cursor at the end of the replaced word
-                final int newCursorPosition = spanEnd + lengthDifference;
-                mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
             }
 
+            final int suggestionStart = suggestionInfo.suggestionStart;
+            final int suggestionEnd = suggestionInfo.suggestionEnd;
+            final String suggestion = suggestionInfo.text.subSequence(
+                    suggestionStart, suggestionEnd).toString();
+            mTextView.replaceText_internal(spanStart, spanEnd, suggestion);
+
+            // Notify source IME of the suggestion pick. Do this before
+            // swaping texts.
+            suggestionInfo.suggestionSpan.notifySelection(
+                    mTextView.getContext(), originalText, suggestionInfo.suggestionIndex);
+
+            // Swap text content between actual text and Suggestion span
+            final String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
+            suggestions[suggestionInfo.suggestionIndex] = originalText;
+
+            // Restore previous SuggestionSpans
+            final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
+            for (int i = 0; i < length; i++) {
+                // Only spans that include the modified region make sense after replacement
+                // Spans partially included in the replaced region are removed, there is no
+                // way to assign them a valid range after replacement
+                if (suggestionSpansStarts[i] <= spanStart &&
+                        suggestionSpansEnds[i] >= spanEnd) {
+                    mTextView.setSpan_internal(suggestionSpans[i], suggestionSpansStarts[i],
+                            suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
+                }
+            }
+
+            // Move cursor at the end of the replaced word
+            final int newCursorPosition = spanEnd + lengthDifference;
+            mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
             hideWithCleanUp();
         }
     }

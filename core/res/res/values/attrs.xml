@@ -942,6 +942,10 @@ i
 
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" format="reference" />
+        <!-- Layout of the container of the suggestion popup window. -->
+        <attr name="textEditSuggestionContainerLayout" format="reference" />
+        <!-- Text appearance of the focused words to be replaced by suggested word. -->
+        <attr name="textEditSuggestionHighlightStyle" format="reference" />
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
@@ -4411,6 +4415,10 @@ i
 
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" />
+        <!-- Layout of the container of the suggestion popup window. -->
+        <attr name="textEditSuggestionContainerLayout" />
+        <!-- Style of the highlighted string in the suggestion popup window. -->
+        <attr name="textEditSuggestionHighlightStyle" />
 
 
         <!-- Reference to a drawable that will be drawn under the insertion cursor. -->

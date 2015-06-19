@@ -2341,4 +2341,9 @@
 
   <java-symbol type="string" name="config_packagedKeyboardName" />
   <java-symbol type="string" name="default_notification_topic_label" />
+
+  <!-- EditText suggestion popup. -->
+  <java-symbol type="id" name="suggestionContainer" />
+  <java-symbol type="id" name="addToDictionaryButton" />
+  <java-symbol type="id" name="deleteButton" />
 </resources>

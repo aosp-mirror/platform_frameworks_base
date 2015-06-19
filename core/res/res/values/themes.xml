@@ -256,8 +256,6 @@ please see themes_device_defaults.xml.
         <item name="textEditNoPasteWindowLayout">@layout/text_edit_no_paste_window</item>
         <item name="textEditSidePasteWindowLayout">@layout/text_edit_side_paste_window</item>
         <item name="textEditSideNoPasteWindowLayout">@layout/text_edit_side_no_paste_window</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.TextSuggestionsPopupWindow</item>
-        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
         <item name="textCursorDrawable">@null</item>
 
         <!-- Widget styles -->
