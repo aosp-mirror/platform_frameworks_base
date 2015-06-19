@@ -71,9 +71,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     Context mContext;
     PowerManagerInternal mPowerManagerInternal;
 
+    final int UPDATE_CPU = 0x01;
+    final int UPDATE_WIFI = 0x02;
+    final int UPDATE_RADIO = 0x04;
+    final int UPDATE_BT = 0x08;
+    final int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
+
     class BatteryStatsHandler extends Handler implements BatteryStatsImpl.ExternalStatsSync {
         public static final int MSG_SYNC_EXTERNAL_STATS = 1;
         public static final int MSG_WRITE_TO_DISK = 2;
+        private int mUpdateFlags = 0;
 
         public BatteryStatsHandler(Looper looper) {
             super(looper);
@@ -83,11 +90,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SYNC_EXTERNAL_STATS:
-                    updateExternalStats((String)msg.obj, false);
+                    final int updateFlags;
+                    synchronized (this) {
+                        removeMessages(MSG_SYNC_EXTERNAL_STATS);
+                        updateFlags = mUpdateFlags;
+                        mUpdateFlags = 0;
+                    }
+                    updateExternalStats((String)msg.obj, updateFlags);
                     break;
 
                 case MSG_WRITE_TO_DISK:
-                    updateExternalStats("write", true);
+                    updateExternalStats("write", UPDATE_ALL);
                     synchronized (mStats) {
                         mStats.writeAsyncLocked();
                     }
@@ -97,9 +110,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         @Override
         public void scheduleSync(String reason) {
-            if (!hasMessages(MSG_SYNC_EXTERNAL_STATS)) {
-                Message msg = Message.obtain(this, MSG_SYNC_EXTERNAL_STATS, reason);
-                sendMessage(msg);
+            scheduleSyncImpl(reason, UPDATE_ALL);
+        }
+
+        @Override
+        public void scheduleWifiSync(String reason) {
+            scheduleSyncImpl(reason, UPDATE_WIFI);
+        }
+
+        private void scheduleSyncImpl(String reason, int updateFlags) {
+            synchronized (this) {
+                if (mUpdateFlags == 0) {
+                    sendMessage(Message.obtain(this, MSG_SYNC_EXTERNAL_STATS, reason));
+                }
+                mUpdateFlags |= updateFlags;
             }
         }
     }
@@ -137,7 +161,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
 
-        updateExternalStats("shutdown", true);
+        updateExternalStats("shutdown", UPDATE_ALL);
         synchronized (mStats) {
             mStats.shutdownLocked();
         }
@@ -237,7 +261,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        updateExternalStats("get-stats", true);
+        updateExternalStats("get-stats", UPDATE_ALL);
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
         }
@@ -252,7 +276,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        updateExternalStats("get-stats", true);
+        updateExternalStats("get-stats", UPDATE_ALL);
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
         }
@@ -603,8 +627,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         // There was a change in WiFi power state.
         // Collect data now for the past activity.
-        mHandler.scheduleSync("wifi-data");
         synchronized (mStats) {
+            if (mStats.isOnBattery()) {
+                mHandler.scheduleWifiSync("wifi-data");
+            }
             mStats.noteWifiRadioPowerState(powerState, tsNanos);
         }
     }
@@ -807,7 +833,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         // Sync external stats first as the battery has changed states. If we don't sync
         // immediately here, we may not collect the relevant data later.
-        updateExternalStats("battery-state", true);
+        updateExternalStats("battery-state", UPDATE_ALL);
         synchronized (mStats) {
             mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
         }
@@ -961,9 +987,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }
-                    updateExternalStats("dump", true);
+                    updateExternalStats("dump", UPDATE_ALL);
                 } else if ("--write".equals(arg)) {
-                    updateExternalStats("dump", true);
+                    updateExternalStats("dump", UPDATE_ALL);
                     synchronized (mStats) {
                         mStats.writeSyncLocked();
                         pw.println("Battery stats written.");
@@ -1027,7 +1053,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
             }
             // Fetch data from external sources and update the BatteryStatsImpl object with them.
-            updateExternalStats("dump", true);
+            updateExternalStats("dump", UPDATE_ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1215,15 +1241,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * We first grab a lock specific to this method, then once all the data has been collected,
      * we grab the mStats lock and update the data.
      *
-     * TODO(adamlesinski): When we start distributing bluetooth data to apps, we'll want to
-     * separate these external stats so that they can be collected individually and on different
-     * intervals.
-     *
      * @param reason The reason why this collection was requested. Useful for debugging.
-     * @param force If false, some stats may decide not to be collected for efficiency as their
-     *              results aren't needed immediately. When true, collect all stats unconditionally.
+     * @param updateFlags Which external stats to update. Can be a combination of
+     *                    {@link #UPDATE_CPU}, {@link #UPDATE_RADIO}, {@link #UPDATE_WIFI},
+     *                    and {@link #UPDATE_BT}.
      */
-    void updateExternalStats(String reason, boolean force) {
+    void updateExternalStats(final String reason, final int updateFlags) {
         synchronized (mExternalStatsLock) {
             if (mContext == null) {
                 // We haven't started yet (which means the BatteryStatsImpl object has
@@ -1231,32 +1254,46 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return;
             }
 
-            final WifiActivityEnergyInfo wifiEnergyInfo = pullWifiEnergyInfoLocked();
-            final BluetoothActivityEnergyInfo bluetoothEnergyInfo;
-            if (force) {
+            if (BatteryStatsImpl.DEBUG_ENERGY) {
+                Slog.d(TAG, "Updating external stats: reason=" + reason);
+            }
+
+            WifiActivityEnergyInfo wifiEnergyInfo = null;
+            if ((updateFlags & UPDATE_WIFI) != 0) {
+                wifiEnergyInfo = pullWifiEnergyInfoLocked();
+            }
+
+            BluetoothActivityEnergyInfo bluetoothEnergyInfo = null;
+            if ((updateFlags & UPDATE_BT) != 0) {
                 // We only pull bluetooth stats when we have to, as we are not distributing its
                 // use amongst apps and the sampling frequency does not matter.
                 bluetoothEnergyInfo = pullBluetoothEnergyInfoLocked();
-            } else {
-                bluetoothEnergyInfo = null;
             }
 
             synchronized (mStats) {
+                final long elapsedRealtime = SystemClock.elapsedRealtime();
+                final long uptime = SystemClock.uptimeMillis();
                 if (mStats.mRecordAllHistory) {
-                    final long elapsedRealtime = SystemClock.elapsedRealtime();
-                    final long uptime = SystemClock.uptimeMillis();
                     mStats.addHistoryEventLocked(elapsedRealtime, uptime,
                             BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS, reason, 0);
                 }
 
-                if (BatteryStatsImpl.DEBUG_ENERGY_CPU) {
-                    Slog.d(TAG, "Updating cpu time from external: " + reason);
+                if ((updateFlags & UPDATE_CPU) != 0) {
+                    mStats.updateCpuTimeLocked();
+                    mStats.updateKernelWakelocksLocked();
                 }
-                mStats.updateCpuTimeLocked();
-                mStats.updateKernelWakelocksLocked();
-                mStats.updateMobileRadioStateLocked(SystemClock.elapsedRealtime());
-                mStats.updateWifiStateLocked(wifiEnergyInfo);
-                mStats.updateBluetoothStateLocked(bluetoothEnergyInfo);
+
+                if ((updateFlags & UPDATE_RADIO) != 0) {
+                    mStats.updateMobileRadioStateLocked(elapsedRealtime);
+                }
+
+                if ((updateFlags & UPDATE_WIFI) != 0) {
+                    mStats.updateWifiStateLocked(wifiEnergyInfo);
+                }
+
+                if ((updateFlags & UPDATE_BT) != 0) {
+                    mStats.updateBluetoothStateLocked(bluetoothEnergyInfo);
+                }
             }
         }
     }
