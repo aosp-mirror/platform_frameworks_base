@@ -12498,6 +12498,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (clearPackagePreferredActivitiesLPw(packageName, removeUser)) {
                     scheduleWritePackageRestrictionsLocked(removeUser);
                 }
+                revokeRuntimePermissionsAndClearAllFlagsLocked(ps.getPermissionsState(),
+                        removeUser);
             }
             return true;
         }
@@ -12704,13 +12706,37 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | PackageManager.FLAG_PERMISSION_USER_FIXED
                 | PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 
+        revokeRuntimePermissionsAndClearFlagsLocked(permissionsState, userId, userSetFlags);
+    }
+
+    /**
+     * Revokes granted runtime permissions and clears all flags.
+     *
+     * @param permissionsState The permission state to reset.
+     * @param userId The device user for which to do a reset.
+     */
+    private void revokeRuntimePermissionsAndClearAllFlagsLocked(
+            PermissionsState permissionsState, int userId) {
+        revokeRuntimePermissionsAndClearFlagsLocked(permissionsState, userId,
+                PackageManager.MASK_PERMISSION_FLAGS);
+    }
+
+    /**
+     * Revokes granted runtime permissions and clears certain flags.
+     *
+     * @param permissionsState The permission state to reset.
+     * @param userId The device user for which to do a reset.
+     * @param flags The flags that is going to be reset.
+     */
+    private void revokeRuntimePermissionsAndClearFlagsLocked(
+            PermissionsState permissionsState, int userId, int flags) {
         boolean needsWrite = false;
 
         for (PermissionState state : permissionsState.getRuntimePermissionStates(userId)) {
             BasePermission bp = mSettings.mPermissions.get(state.getName());
             if (bp != null) {
                 permissionsState.revokeRuntimePermission(bp, userId);
-                permissionsState.updatePermissionFlags(bp, userId, userSetFlags, 0);
+                permissionsState.updatePermissionFlags(bp, userId, flags, 0);
                 needsWrite = true;
             }
         }
