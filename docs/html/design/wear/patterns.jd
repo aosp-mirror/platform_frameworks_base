@@ -46,11 +46,9 @@ page.title=UI Patterns for Android Wear
 
 <h2 id="Dismissing" style="clear:both">Dismissing cards</h2>
 
-  <img src="{@docRoot}design/media/wear/dismiss_cards.png" height="147">
-
 <p>Swiping from left to right on a card causes it to be dismissed from the stream. Dismissed cards may return when they next have relevant information. State is synced between the Android Wear context stream and the notifications on the Android handheld device, so dismissing from one causes an automatic dismissal from the other.</p>
 
-
+<img src="{@docRoot}design/media/wear/dismiss_cards.png" height="147">
 
 <h2 id="Actions" style="clear:both">Action buttons</h2>
 
@@ -162,11 +160,10 @@ to check-in to.</p>
 
 <h2 id="Selection" style="clear:both">Selection List</h2>
 
-  <img src="{@docRoot}design/media/wear/selection_list.png" width="147" height="147" style="float:right;margin:0 0 20px 40px;border:1px solid #ddd">
+  <img src="{@docRoot}design/media/wear/selection_list.png" width="147" height="147" style="float:left;margin:0 0 20px 40px;border:1px solid #ddd">
 
 <p>Choosing an item from a list is a common interaction. The Selection List pattern (available as the <a
 href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WearableListView</code></a> component) creates a simple list optimized for ease of use on a small screen where the focused item snaps to the center of the screen and a single tap selects. This widget is recommended as a common pattern for selecting items. It is used throughout the system UI, including in the list that can be accessed by swiping up on the cue card.</p>
-
 
 <p>Of course, it is possible for Android Wear apps to extend themselves beyond the familiarities of these patterns. For a deeper look at the options available, see the <a href="{@docRoot}design/wear/structure.html">App Structure</a> guide.</p>
 
@@ -176,3 +173,5 @@ href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WearableLi
     <p>Creating Lists</p>
   </div>
 </a>
+
+<p style="clear:both;height:0">&nbsp;</p>

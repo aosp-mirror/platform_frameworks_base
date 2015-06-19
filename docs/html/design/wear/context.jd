@@ -2,19 +2,19 @@ page.title=Context Awareness on Android Wear
 @jd:body
 
 <style>
-div.slide-wrapper {
+.slide-wrapper {
   width:780px;
   overflow:visible;
 }
-div.slide {
+.slide {
   width:370px;
   float:left;
   margin:0 20px 0 0;
 }
-div.slide p {
+.slide p {
   height:40px;
 }
-div.slide img {
+.slide img {
   height: 208px;
 }
 </style>
@@ -140,8 +140,8 @@ app.</p>
 
 <div class="slide">
 <h2>Location-based Query</h2>
-<p>Ask things like, "Are there any picnic tables free at the park?" and get answers from 
-people who are there.</p>
+<p>Ask questions like, "Are there any picnic tables free at the park?" and get answers in real-time
+from people in the area.</p>
 <img src="{@docRoot}design/media/wear/ContextualExample.015.png" alt=""
      srcset="{@docRoot}design/media/wear/ContextualExample.015.png 1x,
              {@docRoot}design/media/wear/ContextualExample.015_2x.png 2x" />
@@ -150,3 +150,5 @@ people who are there.</p>
 
 
 </div>
+
+<p style="clear:both;height:0">&nbsp;</p>
