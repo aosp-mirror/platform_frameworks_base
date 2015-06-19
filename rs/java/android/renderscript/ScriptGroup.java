@@ -851,13 +851,13 @@ public final class ScriptGroup extends BaseObj {
          * Returns the field ID
          */
 
-        public Script.FieldID getField() { return mField; }
+        Script.FieldID getField() { return mField; }
 
         /**
          * Returns the value
          */
 
-        public Object getValue() { return mValue; }
+        Object getValue() { return mValue; }
     }
 
     /**
