@@ -268,7 +268,7 @@ public class AnimationUtils {
      * @return The animation object reference by the specified id
      * @throws NotFoundException
      */
-    public static Interpolator loadInterpolator(Context context, @InterpolatorRes int id)
+    public static Interpolator loadInterpolator(Context context, @AnimRes @InterpolatorRes int id)
             throws NotFoundException {
         XmlResourceParser parser = null;
         try {

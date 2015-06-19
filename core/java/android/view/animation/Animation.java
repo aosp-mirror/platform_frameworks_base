@@ -16,6 +16,7 @@
 
 package android.view.animation;
 
+import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.InterpolatorRes;
 import android.content.Context;
@@ -389,7 +390,7 @@ public abstract class Animation implements Cloneable {
      * @param resID The resource identifier of the interpolator to load
      * @attr ref android.R.styleable#Animation_interpolator
      */
-    public void setInterpolator(Context context, @InterpolatorRes int resID) {
+    public void setInterpolator(Context context, @AnimRes @InterpolatorRes int resID) {
         setInterpolator(AnimationUtils.loadInterpolator(context, resID));
     }
 
