@@ -86,7 +86,6 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -154,7 +153,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.google.android.collect.Lists;
 
@@ -182,8 +180,7 @@ import java.util.List;
  * and delivers to listeners, such as {@link ConnectivityManager}, for
  * enforcement.
  */
-public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
-        implements AppIdleStateChangeListener {
+public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG = "NetworkPolicy";
     private static final boolean LOGD = false;
     private static final boolean LOGV = false;
@@ -279,6 +276,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     final SparseIntArray mUidPolicy = new SparseIntArray();
     /** Currently derived rules for each UID. */
     final SparseIntArray mUidRules = new SparseIntArray();
+    /** Set of states for the child firewall chains. True if the chain is active. */
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
     /**
@@ -508,7 +506,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                 WifiManager.NETWORK_STATE_CHANGED_ACTION);
         mContext.registerReceiver(mWifiStateReceiver, wifiStateFilter, null, mHandler);
 
-        mUsageStats.addAppIdleStateChangeListener(this);
+        mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
 
     }
 
@@ -2043,7 +2041,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
             }
             setUidFirewallRules(FIREWALL_CHAIN_DOZABLE, uidRules);
         }
-        enableFirewallChain(FIREWALL_CHAIN_DOZABLE, mDeviceIdleMode);
+        enableFirewallChainLocked(FIREWALL_CHAIN_DOZABLE, mDeviceIdleMode);
+    }
+
+    void updateRulesForAppIdleParoleLocked() {
+        boolean enableChain = !mUsageStats.isAppIdleParoleOn();
+        enableFirewallChainLocked(FIREWALL_CHAIN_STANDBY, enableChain);
     }
 
     /**
@@ -2187,9 +2190,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         final boolean firewallReject = (uidRules & RULE_REJECT_ALL) != 0;
         if (oldFirewallReject != firewallReject) {
             setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, firewallReject);
-            if (mDeviceIdleMode && !firewallReject) {
-                // if we are in device idle mode, and we decide to allow this uid.  we need to punch
-                // a hole in the device idle chain.
+            if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE) && !firewallReject) {
+                // if the dozable chain is on, and we decide to allow this uid.  we need to punch
+                // a hole in the dozable chain.
                 setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, false);
             }
         }
@@ -2207,15 +2210,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         }
     }
 
-    @Override
-    public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
-        try {
-            int uid = mContext.getPackageManager().getPackageUid(packageName, userId);
-            synchronized (mRulesLock) {
-                updateRulesForUidLocked(uid);
+    private class AppIdleStateChangeListener
+            extends UsageStatsManagerInternal.AppIdleStateChangeListener {
+
+        @Override
+        public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
+            try {
+                int uid = mContext.getPackageManager().getPackageUid(packageName, userId);
+                synchronized (mRulesLock) {
+                    updateRulesForUidLocked(uid);
+                }
+            } catch (NameNotFoundException nnfe) {
             }
-        } catch (NameNotFoundException nnfe) {
-            return;
+        }
+
+        @Override
+        public void onParoleStateChanged(boolean isParoleOn) {
+            synchronized (mRulesLock) {
+                updateRulesForAppIdleParoleLocked();
+            }
         }
     }
 
@@ -2381,12 +2394,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     /**
      * Add or remove a uid to the firewall blacklist for all network ifaces.
      */
-    private void enableFirewallChain(int chain, boolean enable) {
+    private void enableFirewallChainLocked(int chain, boolean enable) {
         if (mFirewallChainStates.indexOfKey(chain) >= 0 &&
                 mFirewallChainStates.get(chain) == enable) {
             // All is the same, nothing to do.
             return;
         }
+        mFirewallChainStates.put(chain, enable);
         try {
             mNetworkManager.setFirewallChainEnabled(chain, enable);
         } catch (IllegalStateException e) {
