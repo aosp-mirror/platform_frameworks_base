@@ -423,6 +423,7 @@ public class RippleDrawable extends LayerDrawable {
         if (super.setDrawableByLayerId(id, drawable)) {
             if (id == R.id.mask) {
                 mMask = drawable;
+                mHasValidMask = false;
             }
 
             return true;
