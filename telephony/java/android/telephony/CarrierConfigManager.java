@@ -84,7 +84,7 @@ public class CarrierConfigManager {
      * from config.xml under apps/Contacts.
      */
     public static final String
-            KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL = "enable_dialer_vibration_bool";
+            KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL = "enable_dialer_key_vibration_bool";
 
     /** Flag indicating if dtmf tone type is enabled */
     public static final String KEY_DTMF_TYPE_ENABLED_BOOL = "dtmf_type_enabled_bool";
