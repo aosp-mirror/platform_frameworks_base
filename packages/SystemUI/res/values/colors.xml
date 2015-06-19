@@ -143,6 +143,4 @@
     <color name="volume_icon_color">#ffffffff</color>
     <color name="volume_settings_icon_color">#7fffffff</color>
     <color name="volume_slider_inactive">#FFB0BEC5</color><!-- blue grey 200 -->
-
-    <color name="managed_profile_toast_background">#E5000000</color><!-- 90% black -->
 </resources>
