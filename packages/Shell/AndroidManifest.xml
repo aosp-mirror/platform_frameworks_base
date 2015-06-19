@@ -128,7 +128,7 @@
 
         <activity
             android:name=".BugreportWarningActivity"
-            android:theme="@*android:style/Theme.Material.DayNight.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />
