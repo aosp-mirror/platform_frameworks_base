@@ -2098,7 +2098,7 @@ final class Settings {
                 }
 
                 final ApplicationInfo ai = pkg.pkg.applicationInfo;
-                final String dataPath = ai.dataDir;
+                final String dataPath = new File(ai.dataDir).getCanonicalPath();
                 final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 final int[] gids = pkg.getPermissionsState().computeGids(userIds);
 
