@@ -4,7 +4,7 @@ page.title=Watch Faces for Android Wear
 
 <!-- developer docs box -->
 <a class="notice-developers right" href="{@docRoot}training/wearables/watch-faces/index.html"
-   style="clear:left;margin-bottom:90px">
+   style="clear:left">
   <div>
     <h3>Developer Docs</h3>
     <p>Creating Watch Faces</p>
@@ -22,7 +22,7 @@ ambient modes, and consider how system user interface elements will interact wit
 <p>Follow the guidelines in this page to design your custom watch faces.</p>
 
 <!-- H2 creative vision -->
-<div style="float:right;margin-top:-100px;margin-bottom:20px;margin-left:20px">
+<div style="float:right;margin-bottom:20px;margin-left:20px">
   <img src="{@docRoot}design/media/wear/Render_Next.png"
        width="200" height="195" alt="" style="margin-right:5px"/><br/>
   <img src="{@docRoot}design/media/wear/Render_Interactive.png"
@@ -137,44 +137,39 @@ You can configure your watch face to display different ambient designs depending
 of screen available on the device. Consider the best design for your watch faces on all
 screens.</p>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>Reduced color space</h3>
-  <p>Some displays use a reduced color space in ambient mode to save power.</p>
-  <p>One reduced color space power saving method is to use a "low-bit" mode. In low-bit mode,
-  the available colors are limited to black, white, blue, red, magenta, green, cyan, and yellow.
-  When designing for low-bit ambient mode, use a black or a white background. For OLED screens,
-  you must use a black background. Non-background pixels must be less than 10 percent of total
-  pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it.
-  You should also disable antialiasing in your paint styles for this mode. Make sure to test
-  your design on devices with low-bit ambient mode.</p>
-  <p>Other displays save power in ambient mode by not producing any color. When designing for
-  displays which do not use color in ambient mode, the background may be either black or
-  white.</p>
-</div>
-<div class="col-4">
+<div style="float:right;margin-bottom:20px;margin-left:20px">
   <img src="{@docRoot}design/media/wear/Render_LowBit.png" width="200"
        height="" alt="" style="margin-top:45px;margin-left:13px">
 </div>
-</div>
+<h3>Reduced color space</h3>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>Burn protection techniques</h3>
-  <p>When designing for OLED screens, you should consider power efficiency and the screen
-  burn-in effect. When these screens are in ambient mode, the system shifts the contents of
-  the screen periodically by a few pixels to avoid pixel burn-in. Do not use large blocks of
-  pixels in your ambient mode designs and keep 95% of the pixels black. Replace solid shapes in
-  your regular ambient mode designs with outlined shapes in burn-protected ambient mode. Also
-  replace filled images with pixel patterns. For analog watch face designs, hollow out the center
-  where the hands meet to avoid pixel burn-in in this mode.</p>
-</div>
-<div class="col-4">
+<p>Some displays use a reduced color space in ambient mode to save power.</p>
+<p>One reduced color space power saving method is to use a "low-bit" mode. In low-bit mode,
+the available colors are limited to black, white, blue, red, magenta, green, cyan, and yellow.
+When designing for low-bit ambient mode, use a black or a white background. For OLED screens,
+you must use a black background. Non-background pixels must be less than 10 percent of total
+pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it.
+You should also disable antialiasing in your paint styles for this mode. Make sure to test
+your design on devices with low-bit ambient mode.</p>
+<p>Other displays save power in ambient mode by not producing any color. When designing for
+displays which do not use color in ambient mode, the background may be either black or
+white.</p>
+
+
+<h3>Burn protection techniques</h3>
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
   <img src="{@docRoot}design/media/wear/Render_1Bit.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
-</div>
 
+<p>When designing for OLED screens, you should consider power efficiency and the screen
+burn-in effect. When these screens are in ambient mode, the system shifts the contents of
+the screen periodically by a few pixels to avoid pixel burn-in. Do not use large blocks of
+pixels in your ambient mode designs and keep 95% of the pixels black. Replace solid shapes in
+your regular ambient mode designs with outlined shapes in burn-protected ambient mode. Also
+replace filled images with pixel patterns. For analog watch face designs, hollow out the center
+where the hands meet to avoid pixel burn-in in this mode.</p>
 
 
 <h2 id="SystemUI">Accomodate System UI Elements</h2>
@@ -183,9 +178,11 @@ screens.</p>
 user the status of the wearable and show notifications from services on the user's phone. Try
 to keep critical elements in your watch face designs from being obscured by the UI elements.</p>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>Cards</h3>
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/CardsRender_Build.png" width="200"
+        height="" alt="" style="margin-top:20px;margin-left:13px">
+</div>
+<h3>Cards</h3>
 <p>Cards are the notification system that bridges information between the wearable and a
 mobile device. Cards are also how most applications communicate with users. The user will be
 notified on the wearable about items such as emails and messages. As a watch face developer,
@@ -201,16 +198,13 @@ variable peek card is that it displays more notification information. Faces with
 the bottom half of the face should leverage the small peek card instead.</p>
 <p>The system notifies your watch face when the bounds of a peek card change, so you can
 rearrange the elements in your design if necessary.</p>
-</div>
-<div class="col-4">
-  <img src="{@docRoot}design/media/wear/CardsRender_Build.png" width="200"
-       height="" alt="" style="margin-top:20px;margin-left:13px">
-</div>
-</div>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>Indicators</h3>
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Indicators_Cropped.png" width="200"
+       height="" alt="" style="margin-top:0px;margin-left:13px">
+</div>
+<h3>Indicators</h3>
 <p>Indicators tell the user the status of the wearable, such as charging and airplane mode.
 When designing a watch face, consider how the indicator will fall over the watch face.</p>
 <p>The indicators can be placed in several fixed locations on the wearable. If you have a
@@ -218,16 +212,12 @@ large peek card, the indicators should go on the top or on the center of the scr
 position the status icons or the hotword on the bottom of the screen, the system forces small
 peek cards. If the edge of the watch face contains strong visual elements, such as
 ticks or numbers, place the indicators on the center of the screen.</p>
-</div>
-<div class="col-4">
-  <img src="{@docRoot}design/media/wear/Indicators_Cropped.png" width="200"
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Hotword_Cropped.png" width="200"
        height="" alt="" style="margin-top:0px;margin-left:13px">
 </div>
-</div>
-
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>The hotword</h3>
+<h3>The hotword</h3>
 <p>The hotword is the phrase "OK Google", which tells the user that they can interact with
 the watch using voice commands. When a user turns on the wearable, the hotword appears on
 the screen for a few seconds.</p>
@@ -236,12 +226,6 @@ this element is not as critical. You should still avoid covering up elements of 
 watch face. Finally, background protection for the hotword and the indicators should be
 turned on unless your design is tailored to have these elements appear on top of them, for example
 using dark solid colors with no patterns.</p>
-</div>
-<div class="col-4">
-  <img src="{@docRoot}design/media/wear/Hotword_Cropped.png" width="200"
-       height="" alt="" style="margin-top:0px;margin-left:13px">
-</div>
-</div>
 
 <p>For more information about measurements and positioning of system UI elements, see
 <a href="#SpecsAssets">Specifications and Assets</a>.</p>
@@ -253,24 +237,27 @@ using dark solid colors with no patterns.</p>
 <p>Your watch face can show users contextually relevant data and react to it by changing styles
 and colors in your design.</p>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>What do you want your user to know?</h3>
+<h3>What do you want your user to know?</h3>
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Render_Saturn.png" width="200"
+       height="" alt="" style="margin-top:-10px;margin-left:13px">
+</div>
+
 <p>The first step in designing a data-integrated watch face is to define a conceptual user
 outcome based on available data. First, generate a strong concept or outcome you believe is
 supported by real user needs. What do you want your users to know after they have glanced
 at your design? Once you have identified your outcome, you need to determine how to obtain
 the required data.</p>
-</div>
-<div class="col-4">
-  <img src="{@docRoot}design/media/wear/Render_Saturn.png" width="200"
+
+<div style="clear:both;"/>
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Render_Episode.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
-</div>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>A watch dial is a timeline; add data to it</h3>
+<h3>A watch dial is a timeline; add data to it</h3>
 <p>Your watch face concept may include use of data beyond time, such as weather, calendar
 and fitness data. Consider the inclusion of data integration creatively. Avoid simply
 overlaying a time-based watch face with extra data. Rather, think about how the data can
@@ -278,16 +265,13 @@ be expressed through the lens of time. For example, instead of designing a weath
 watch face as a clock with an indication of the current temperature in degrees overlayed,
 you might design a watch face that describes how the temperature will change over the
 course of the day.</p>
-</div>
-<div class="col-4">
-  <img src="{@docRoot}design/media/wear/Render_Episode.png" width="200"
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Render_Albumem.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
-</div>
 
-<div class="cols" style="margin-top:20px">
-<div class="col-9">
-  <h3>Stick to one message</h3>
+<h3>Stick to one message</h3>
 <p>Once you have solidified your conceptual direction or desired outcome, you will need to
 begin visualizing your watch face. The strongest watch face designs are highly glanceable
 and deliver a singular expression of data. In order to identify your singular message, you
@@ -295,12 +279,6 @@ must identify the most important supporting data point. For instance, instead of
 an entire month of calendar events,  you might decide to display only the next
 upcoming event. By a process of reduction, you should arrive at a powerful singular
 expression of data to include in your design.</p>
-</div>
-<div class="col-4">
-  <img src="{@docRoot}design/media/wear/Render_Albumem.png" width="200"
-       height="" alt="" style="margin-top:-10px;margin-left:13px">
-</div>
-</div>
 
 <h3>Begin with some insight and test as you go</h3>
 <p>Make sure your approach begins with insight into the needs and expectations of your users.
