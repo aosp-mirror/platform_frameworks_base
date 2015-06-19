@@ -106,7 +106,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 127 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 128 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -3187,11 +3187,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteDeviceIdleModeLocked(boolean enabled, boolean fromActive, boolean fromMotion) {
+    public void noteDeviceIdleModeLocked(boolean enabled, String activeReason, int activeUid) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
         boolean nowIdling = enabled;
-        if (mDeviceIdling && !enabled && !fromActive && !fromMotion) {
+        if (mDeviceIdling && !enabled && activeReason == null) {
             // We don't go out of general idling mode until explicitly taken out of
             // device idle through going active or significant motion.
             nowIdling = true;
@@ -3209,14 +3209,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         if (mDeviceIdleModeEnabled != enabled) {
             mDeviceIdleModeEnabled = enabled;
-            if (fromMotion) {
-                addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_SIGNIFICANT_MOTION,
-                        "", 0);
-            }
-            if (fromActive) {
-                addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ACTIVE,
-                        "", 0);
-            }
+            addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ACTIVE,
+                    activeReason != null ? activeReason : "", activeUid);
             if (enabled) {
                 mHistoryCur.states2 |= HistoryItem.STATE2_DEVICE_IDLE_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Device idle mode enabled to: "
