@@ -767,10 +767,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteDeviceIdleMode(boolean enabled, boolean fromActive, boolean fromMotion) {
+    public void noteDeviceIdleMode(boolean enabled, String activeReason, int activeUid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteDeviceIdleModeLocked(enabled, fromActive, fromMotion);
+            mStats.noteDeviceIdleModeLocked(enabled, activeReason, activeUid);
         }
     }
 

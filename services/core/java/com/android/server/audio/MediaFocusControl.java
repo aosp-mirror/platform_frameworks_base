@@ -46,10 +46,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
@@ -1086,6 +1088,14 @@ public class MediaFocusControl implements OnFinished {
             voiceIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
             Log.i(TAG, "voice-based interactions: about to use ACTION_WEB_SEARCH");
         } else {
+            IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
+                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+            if (dic != null) {
+                try {
+                    dic.exitIdle("voice-search");
+                } catch (RemoteException e) {
+                }
+            }
             voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
             voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE,
                     isLocked && mKeyguardManager.isKeyguardSecure());
