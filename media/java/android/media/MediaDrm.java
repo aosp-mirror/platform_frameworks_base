@@ -89,10 +89,23 @@ import android.util.Log;
  * encrypted content, the samples returned from the extractor remain encrypted, they
  * are only decrypted when the samples are delivered to the decoder.
  * <p>
- * MediaDrm methods throw {@link java.lang.IllegalStateException}
- * when a method is called on a MediaDrm object that is in an invalid or inoperable
- * state. This is typically due to incorrect application API usage, but may also
- * be due to an unrecoverable failure in the DRM plugin or security hardware.
+ * MediaDrm methods throw {@link android.media.MediaDrm.MediaDrmStateException}
+ * when a method is called on a MediaDrm object that has had an unrecoverable failure 
+ * in the DRM plugin or security hardware. 
+ * {@link android.media.MediaDrm.MediaDrmStateException} extends 
+ * {@link java.lang.IllegalStateException} with the addition of a developer-readable 
+ * diagnostic information string associated with the exception.
+ * <p>
+ * In the event of a mediaserver process crash or restart while a MediaDrm object
+ * is active, MediaDrm methods may throw {@link android.media.MediaDrmResetException}.
+ * To recover, the app must release the MediaDrm object, then create and initialize
+ * a new one.
+ * <p>
+ * As {@link android.media.MediaDrmResetException} and 
+ * {@link android.media.MediaDrm.MediaDrmStateException} both extend 
+ * {@link java.lang.IllegalStateException}, they should be in an earlier catch() 
+ * block than {@link java.lang.IllegalStateException} if handled separately.
+ * <p>
  * <a name="Callbacks"></a>
  * <h3>Callbacks</h3>
  * <p>Applications should register for informational events in order
