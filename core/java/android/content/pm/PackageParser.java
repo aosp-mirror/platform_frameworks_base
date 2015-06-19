@@ -4508,6 +4508,13 @@ public class PackageParser {
         /**
          * @hide
          */
+        public boolean isPrivilegedApp() {
+            return applicationInfo.isPrivilegedApp();
+        }
+
+        /**
+         * @hide
+         */
         public boolean isUpdatedSystemApp() {
             return applicationInfo.isUpdatedSystemApp();
         }
