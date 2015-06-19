@@ -3101,16 +3101,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 || (mDisabled1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
-    public void postStartSettingsActivity(final Intent intent, int delay) {
+    public void postStartActivityDismissingKeyguard(final Intent intent, int delay) {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                handleStartSettingsActivity(intent, true /*onlyProvisioned*/);
+                handleStartActivityDismissingKeyguard(intent, true /*onlyProvisioned*/);
             }
         }, delay);
     }
 
-    private void handleStartSettingsActivity(Intent intent, boolean onlyProvisioned) {
+    private void handleStartActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */);
     }
 
