@@ -29,6 +29,7 @@ import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.server.LocalServices;
@@ -660,7 +661,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onNotificationVisibilityChanged(
-            String[] newlyVisibleKeys, String[] noLongerVisibleKeys) throws RemoteException {
+            NotificationVisibility[] newlyVisibleKeys, NotificationVisibility[] noLongerVisibleKeys)
+            throws RemoteException {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
