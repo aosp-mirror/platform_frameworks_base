@@ -613,15 +613,17 @@ public class ChooserActivity extends ResolverActivity {
                     ri.activityInfo = ai;
                     UserManager userManager =
                             (UserManager) getSystemService(Context.USER_SERVICE);
-                    if (userManager.isManagedProfile()) {
-                        ri.noResourceId = true;
-                    }
                     if (ii instanceof LabeledIntent) {
                         LabeledIntent li = (LabeledIntent)ii;
                         ri.resolvePackageName = li.getSourcePackage();
                         ri.labelRes = li.getLabelResource();
                         ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                         ri.icon = li.getIconResource();
+                        ri.iconResourceId = ri.icon;
+                    }
+                    if (userManager.isManagedProfile()) {
+                        ri.noResourceId = true;
+                        ri.icon = 0;
                     }
                     mCallerTargets.add(new DisplayResolveInfo(ii, ri,
                             ri.loadLabel(pm), null, ii));
