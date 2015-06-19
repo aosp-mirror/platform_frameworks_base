@@ -55,6 +55,8 @@ public class AssistManager {
 
     private final Context mContext;
     private final WindowManager mWindowManager;
+    private final AssistDisclosure mAssistDisclosure;
+
     private AssistOrbContainer mView;
     private final PhoneStatusBar mBar;
     private final AssistUtils mAssistUtils;
@@ -100,6 +102,7 @@ public class AssistManager {
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT), false,
                 mAssistSettingsObserver);
         mAssistSettingsObserver.onChange(false);
+        mAssistDisclosure = new AssistDisclosure(context, new Handler());
     }
 
     public void onConfigurationChanged() {
@@ -187,13 +190,20 @@ public class AssistManager {
         mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL |
                 CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL);
 
+        boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
+
         final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+                .getAssistIntent(mContext, structureEnabled, UserHandle.USER_CURRENT);
         if (intent == null) {
             return;
         }
         if (mAssistComponent != null) {
             intent.setComponent(mAssistComponent);
+        }
+
+        if (structureEnabled) {
+            showDisclosure();
         }
 
         try {
@@ -296,5 +306,9 @@ public class AssistManager {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("AssistManager state:");
         pw.print("  mAssistComponent="); pw.println(mAssistComponent);
+    }
+
+    public void showDisclosure() {
+        mAssistDisclosure.postShow();
     }
 }
