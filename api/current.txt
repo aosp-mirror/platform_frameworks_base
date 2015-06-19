@@ -34581,6 +34581,7 @@ package android.view {
     method public abstract void invalidate();
     method public void invalidateContentRect();
     method public boolean isTitleOptional();
+    method public void onWindowFocusChanged(boolean);
     method public abstract void setCustomView(android.view.View);
     method public abstract void setSubtitle(java.lang.CharSequence);
     method public abstract void setSubtitle(int);
