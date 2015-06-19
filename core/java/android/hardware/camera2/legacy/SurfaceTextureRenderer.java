@@ -630,8 +630,6 @@ public class SurfaceTextureRenderer {
                 holder.width = surfaceSize.getWidth();
                 holder.height = surfaceSize.getHeight();
                 if (LegacyCameraDevice.needsConversion(s)) {
-                    // Always override to YV12 output for YUV surface formats.
-                    LegacyCameraDevice.setSurfaceFormat(s, ImageFormat.YV12);
                     mConversionSurfaces.add(holder);
                 } else {
                     mSurfaces.add(holder);
