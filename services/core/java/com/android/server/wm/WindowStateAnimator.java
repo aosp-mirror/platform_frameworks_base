@@ -1417,10 +1417,21 @@ class WindowStateAnimator {
 
         // Adjust for surface insets.
         final LayoutParams attrs = w.getAttrs();
-        width += attrs.surfaceInsets.left + attrs.surfaceInsets.right;
-        height += attrs.surfaceInsets.top + attrs.surfaceInsets.bottom;
-        left -= attrs.surfaceInsets.left;
-        top -= attrs.surfaceInsets.top;
+        final int displayId = w.getDisplayId();
+        float scale = 1.0f;
+        // Magnification is supported only for the default display.
+        if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
+            MagnificationSpec spec =
+                    mService.mAccessibilityController.getMagnificationSpecForWindowLocked(w);
+            if (spec != null && !spec.isNop()) {
+                scale = spec.scale;
+            }
+        }
+
+        width += scale * (attrs.surfaceInsets.left + attrs.surfaceInsets.right);
+        height += scale * (attrs.surfaceInsets.top + attrs.surfaceInsets.bottom);
+        left -= scale * attrs.surfaceInsets.left;
+        top -= scale * attrs.surfaceInsets.top;
 
         final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
         if (surfaceMoved) {
