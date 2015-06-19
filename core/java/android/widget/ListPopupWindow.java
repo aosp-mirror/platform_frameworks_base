@@ -105,7 +105,7 @@ public class ListPopupWindow {
     private final ListSelectorHider mHideSelector = new ListSelectorHider();
     private Runnable mShowDropDownRunnable;
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler;
 
     private Rect mTempRect = new Rect();
 
@@ -212,6 +212,7 @@ public class ListPopupWindow {
      */
     public ListPopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
+        mHandler = new Handler(context.getMainLooper());
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ListPopupWindow,
                 defStyleAttr, defStyleRes);
