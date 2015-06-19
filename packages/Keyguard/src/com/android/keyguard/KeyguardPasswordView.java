@@ -111,6 +111,16 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected int getPromtReasonStringRes(int reason) {
+        switch (reason) {
+            case PROMPT_REASON_RESTART:
+                return R.string.kg_prompt_reason_restart_password;
+            default:
+                return 0;
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         mImm.hideSoftInputFromWindow(getWindowToken(), 0);

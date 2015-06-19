@@ -26,6 +26,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
+import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 
@@ -46,6 +47,7 @@ public class KeyguardBouncer {
     private ViewGroup mRoot;
     private boolean mShowingSoon;
     private Choreographer mChoreographer = Choreographer.getInstance();
+    private int mBouncerPromptReason;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, StatusBarWindowManager windowManager,
@@ -68,6 +70,8 @@ public class KeyguardBouncer {
             return;
         }
 
+        mBouncerPromptReason = mCallback.getBouncerPromptReason();
+
         // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
         // Keyguard. If we need to authenticate, show the bouncer.
         if (!mKeyguardView.dismiss()) {
@@ -84,11 +88,23 @@ public class KeyguardBouncer {
         public void run() {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.onResume();
+            showPromptReason(mBouncerPromptReason);
             mKeyguardView.startAppearAnimation();
             mShowingSoon = false;
             mKeyguardView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
     };
+
+    /**
+     * Show a string explaining why the security view needs to be solved.
+     *
+     * @param reason a flag indicating which string should be shown, see
+     *               {@link KeyguardSecurityView#PROMPT_REASON_NONE}
+     *               and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}
+     */
+    public void showPromptReason(int reason) {
+        mKeyguardView.showPromptReason(reason);
+    }
 
     private void cancelShowRunnable() {
         mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION, mShowRunnable, null);

@@ -131,6 +131,14 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
+    public void showPromptReason(int reason) {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.showPromptReason(reason);
+        }
+    }
+
+    @Override
     public void showUsabilityHint() {
         KeyguardSecurityView ksv = getSecurityView();
         if (ksv != null) {
