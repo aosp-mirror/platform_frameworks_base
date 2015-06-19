@@ -216,6 +216,19 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         return mCallback;
     }
 
+    @Override
+    public void showPromptReason(int reason) {
+        if (reason != PROMPT_REASON_NONE) {
+            int promtReasonStringRes = getPromtReasonStringRes(reason);
+            if (promtReasonStringRes != 0) {
+                mSecurityMessageDisplay.setMessage(promtReasonStringRes,
+                        true /* important */);
+            }
+        }
+    }
+
+    protected abstract int getPromtReasonStringRes(int reason);
+
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
         if (mEnableHaptics) {

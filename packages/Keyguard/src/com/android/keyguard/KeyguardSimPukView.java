@@ -140,6 +140,12 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         }
     }
 
+    @Override
+    protected int getPromtReasonStringRes(int reason) {
+        // No message on SIM Puk
+        return 0;
+    }
+
     private String getPukPasswordErrorMessage(int attemptsRemaining) {
         String displayMessage;
 

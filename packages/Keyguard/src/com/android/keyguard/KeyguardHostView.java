@@ -160,6 +160,17 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     }
 
     /**
+     * Show a string explaining why the security view needs to be solved.
+     *
+     * @param reason a flag indicating which string should be shown, see
+     *               {@link KeyguardSecurityView#PROMPT_REASON_NONE}
+     *               and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}
+     */
+    public void showPromptReason(int reason) {
+        mSecurityContainer.showPromptReason(reason);
+    }
+
+    /**
      *  Dismisses the keyguard by going to the next screen or making it gone.
      *
      *  @return True if the keyguard is done.
