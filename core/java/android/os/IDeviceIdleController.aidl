@@ -28,4 +28,5 @@ interface IDeviceIdleController {
     int[] getAppIdTempWhitelist();
     boolean isPowerSaveWhitelistApp(String name);
     void addPowerSaveTempWhitelistApp(String name, long duration, int userId);
+    void exitIdle(String reason);
 }

@@ -56,6 +56,7 @@ import android.os.Debug;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -2734,6 +2735,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!keyguardOn) {
                     voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
                 } else {
+                    IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
+                            ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+                    if (dic != null) {
+                        try {
+                            dic.exitIdle("voice-search");
+                        } catch (RemoteException e) {
+                        }
+                    }
                     voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
                     voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, true);
                 }
@@ -5192,6 +5201,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void launchVoiceAssistWithWakeLock(boolean keyguardActive) {
+        IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+        if (dic != null) {
+            try {
+                dic.exitIdle("voice-search");
+            } catch (RemoteException e) {
+            }
+        }
         Intent voiceIntent =
             new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, keyguardActive);

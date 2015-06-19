@@ -45,6 +45,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -487,7 +488,7 @@ public class DeviceIdleController extends SystemService
                     mLocalPowerManager.setDeviceIdleMode(true);
                     try {
                         mNetworkPolicyManager.setDeviceIdleMode(true);
-                        mBatteryStats.noteDeviceIdleMode(true, false, false);
+                        mBatteryStats.noteDeviceIdleMode(true, null, Process.myUid());
                     } catch (RemoteException e) {
                     }
                     getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
@@ -496,18 +497,19 @@ public class DeviceIdleController extends SystemService
                     mLocalPowerManager.setDeviceIdleMode(false);
                     try {
                         mNetworkPolicyManager.setDeviceIdleMode(false);
-                        mBatteryStats.noteDeviceIdleMode(false, false, false);
+                        mBatteryStats.noteDeviceIdleMode(false, null, Process.myUid());
                     } catch (RemoteException e) {
                     }
                     getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                 } break;
                 case MSG_REPORT_ACTIVE: {
-                    boolean fromMotion = msg.arg1 != 0;
+                    String activeReason = (String)msg.obj;
+                    int activeUid = msg.arg1;
                     boolean needBroadcast = msg.arg2 != 0;
                     mLocalPowerManager.setDeviceIdleMode(false);
                     try {
                         mNetworkPolicyManager.setDeviceIdleMode(false);
-                        mBatteryStats.noteDeviceIdleMode(false, !fromMotion, fromMotion);
+                        mBatteryStats.noteDeviceIdleMode(false, activeReason, activeUid);
                     } catch (RemoteException e) {
                     }
                     if (needBroadcast) {
@@ -576,6 +578,12 @@ public class DeviceIdleController extends SystemService
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override public void exitIdle(String reason) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            exitIdleInternal(reason);
         }
 
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -818,6 +826,12 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    public void exitIdleInternal(String reason) {
+        synchronized (this) {
+            becomeActiveLocked(reason, Binder.getCallingUid());
+        }
+    }
+
     void updateDisplayLocked() {
         mCurDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         // We consider any situation where the display is showing something to be it on,
@@ -830,7 +844,7 @@ public class DeviceIdleController extends SystemService
             becomeInactiveIfAppropriateLocked();
         } else if (screenOn) {
             mScreenOn = true;
-            becomeActiveLocked("screen");
+            becomeActiveLocked("screen", Process.myUid());
         }
     }
 
@@ -841,21 +855,21 @@ public class DeviceIdleController extends SystemService
             becomeInactiveIfAppropriateLocked();
         } else if (charging) {
             mCharging = charging;
-            becomeActiveLocked("charging");
+            becomeActiveLocked("charging", Process.myUid());
         }
     }
 
-    void scheduleReportActiveLocked(boolean fromMotion) {
-        Message msg = mHandler.obtainMessage(MSG_REPORT_ACTIVE, fromMotion ? 1 : 0,
-                mState == STATE_IDLE ? 1 : 0);
+    void scheduleReportActiveLocked(String activeReason, int activeUid) {
+        Message msg = mHandler.obtainMessage(MSG_REPORT_ACTIVE, activeUid,
+                mState == STATE_IDLE ? 1 : 0, activeReason);
         mHandler.sendMessage(msg);
     }
 
-    void becomeActiveLocked(String reason) {
-        if (DEBUG) Slog.i(TAG, "becomeActiveLocked, reason = " + reason);
+    void becomeActiveLocked(String activeReason, int activeUid) {
+        if (DEBUG) Slog.i(TAG, "becomeActiveLocked, reason = " + activeReason);
         if (mState != STATE_ACTIVE) {
-            EventLogTags.writeDeviceIdle(STATE_ACTIVE, reason);
-            scheduleReportActiveLocked(false);
+            EventLogTags.writeDeviceIdle(STATE_ACTIVE, activeReason);
+            scheduleReportActiveLocked(activeReason, activeUid);
             mState = STATE_ACTIVE;
             mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
             mNextIdlePendingDelay = 0;
@@ -896,7 +910,7 @@ public class DeviceIdleController extends SystemService
         if ((now+mConstants.MIN_TIME_TO_ALARM) > mAlarmManager.getNextWakeFromIdleTime()) {
             // Whoops, there is an upcoming alarm.  We don't actually want to go idle.
             if (mState != STATE_ACTIVE) {
-                becomeActiveLocked("alarm");
+                becomeActiveLocked("alarm", Process.myUid());
             }
             return;
         }
@@ -954,7 +968,7 @@ public class DeviceIdleController extends SystemService
         // state to wait again for no motion.  Note that we only monitor for significant
         // motion after moving out of the inactive state, so no need to worry about that.
         if (mState != STATE_ACTIVE) {
-            scheduleReportActiveLocked(true);
+            scheduleReportActiveLocked("motion", Process.myUid());
             mState = STATE_ACTIVE;
             mInactiveTimeout = mConstants.MOTION_INACTIVE_TIMEOUT;
             EventLogTags.writeDeviceIdle(mState, "motion");
@@ -1240,7 +1254,7 @@ public class DeviceIdleController extends SystemService
                     synchronized (this) {
                         if (!mIdleDisabled) {
                             mIdleDisabled = true;
-                            becomeActiveLocked("disabled");
+                            becomeActiveLocked("disabled", Process.myUid());
                             pw.println("Idle mode disabled");
                         }
                     }
