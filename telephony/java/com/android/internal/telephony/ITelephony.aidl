@@ -795,7 +795,7 @@ interface ITelephony {
      */
     String getLine1AlphaTagForDisplay(int subId, String callingPackage);
 
-    String[] getMergedSubscriberIds();
+    String[] getMergedSubscriberIds(String callingPackage);
 
     /**
      * Override the operator branding for the current ICCID.
