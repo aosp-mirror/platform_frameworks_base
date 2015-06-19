@@ -575,4 +575,7 @@
 
     <!-- Standard image button size for volume dialog buttons -->
     <dimen name="volume_button_size">48dp</dimen>
+
+    <!-- Padding between icon and text for managed profile toast -->
+    <dimen name="managed_profile_toast_padding">4dp</dimen>
 </resources>

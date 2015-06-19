@@ -397,13 +397,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (recentTask != null && recentTask.size() > 0) {
                     UserInfo user = mUserManager.getUserInfo(recentTask.get(0).userId);
                     if (user != null && user.isManagedProfile()) {
-                        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                                Context.LAYOUT_INFLATER_SERVICE);
-                        View layout = inflater.inflate(R.layout.managed_profile_toast, null);
-                        Toast toast = new Toast(mContext);
-                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-                        toast.setDuration(Toast.LENGTH_SHORT);
-                        toast.setView(layout);
+                        Toast toast = Toast.makeText(mContext,
+                                R.string.managed_profile_foreground_toast,
+                                Toast.LENGTH_SHORT);
+                        TextView text = (TextView) toast.getView().findViewById(
+                                android.R.id.message);
+                        text.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                                R.drawable.stat_sys_managed_profile_status, 0, 0, 0);
+                        int paddingPx = mContext.getResources().getDimensionPixelSize(
+                                R.dimen.managed_profile_toast_padding);
+                        text.setCompoundDrawablePadding(paddingPx);
                         toast.show();
                     }
                 }
