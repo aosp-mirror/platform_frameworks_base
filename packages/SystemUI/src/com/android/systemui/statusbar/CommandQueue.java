@@ -61,6 +61,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_APP_TRANSITION_PENDING     = 19 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_CANCELLED   = 20 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_STARTING    = 21 << MSG_SHIFT;
+    private static final int MSG_ASSIST_DISCLOSURE          = 22 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -104,6 +105,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void appTransitionPending();
         public void appTransitionCancelled();
         public void appTransitionStarting(long startTime, long duration);
+        public void showAssistDisclosure();
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -274,6 +276,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void showAssistDisclosure() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_ASSIST_DISCLOSURE);
+            mHandler.obtainMessage(MSG_ASSIST_DISCLOSURE).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -365,6 +374,9 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_APP_TRANSITION_STARTING:
                     Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
                     mCallbacks.appTransitionStarting(data.first, data.second);
+                    break;
+                case MSG_ASSIST_DISCLOSURE:
+                    mCallbacks.showAssistDisclosure();
                     break;
             }
         }
