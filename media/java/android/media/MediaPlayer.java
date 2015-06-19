@@ -3264,6 +3264,13 @@ public class MediaPlayer implements SubtitleController.Listener
     /** Some operation takes too long to complete, usually more than 3-5 seconds. */
     public static final int MEDIA_ERROR_TIMED_OUT = -110;
 
+    /** Unspecified low-level system error. This value originated from UNKNOWN_ERROR in
+     * system/core/include/utils/Errors.h
+     * @see android.media.MediaPlayer.OnErrorListener
+     * @hide
+     */
+    public static final int MEDIA_ERROR_SYSTEM = -2147483648;
+
     /**
      * Interface definition of a callback to be invoked when there
      * has been an error during an asynchronous operation (other errors
@@ -3287,6 +3294,7 @@ public class MediaPlayer implements SubtitleController.Listener
          * <li>{@link #MEDIA_ERROR_MALFORMED}
          * <li>{@link #MEDIA_ERROR_UNSUPPORTED}
          * <li>{@link #MEDIA_ERROR_TIMED_OUT}
+         * <li><code>MEDIA_ERROR_SYSTEM (-2147483648)</code> - low-level system error.
          * </ul>
          * @return True if the method handled the error, false if it didn't.
          * Returning false, or not having an OnErrorListener at all, will
@@ -3346,6 +3354,14 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public static final int MEDIA_INFO_BUFFERING_END = 702;
 
+    /** Estimated network bandwidth information (kbps) is available; currently this event fires
+     * simultaneously as {@link #MEDIA_INFO_BUFFERING_START} and {@link #MEDIA_INFO_BUFFERING_END}
+     * when playing network files.
+     * @see android.media.MediaPlayer.OnInfoListener
+     * @hide
+     */
+    public static final int MEDIA_INFO_NETWORK_BANDWIDTH = 703;
+
     /** Bad interleaving means that a media has been improperly interleaved or
      * not interleaved at all, e.g has all the video samples first then all the
      * audio ones. Video is playing but a lot of disk seeks may be happening.
@@ -3403,6 +3419,8 @@ public class MediaPlayer implements SubtitleController.Listener
          * <li>{@link #MEDIA_INFO_VIDEO_RENDERING_START}
          * <li>{@link #MEDIA_INFO_BUFFERING_START}
          * <li>{@link #MEDIA_INFO_BUFFERING_END}
+         * <li><code>MEDIA_INFO_NETWORK_BANDWIDTH (703)</code> -
+         *     bandwidth information is available (as <code>extra</code> kbps)
          * <li>{@link #MEDIA_INFO_BAD_INTERLEAVING}
          * <li>{@link #MEDIA_INFO_NOT_SEEKABLE}
          * <li>{@link #MEDIA_INFO_METADATA_UPDATE}
