@@ -106,7 +106,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 128 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 129 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -208,6 +208,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     final ArrayList<StopwatchTimer> mPartialTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mFullTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mWindowTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mDozeTimers = new ArrayList<>();
     final SparseArray<ArrayList<StopwatchTimer>> mSensorTimers = new SparseArray<>();
     final ArrayList<StopwatchTimer> mWifiRunningTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mFullWifiLockTimers = new ArrayList<>();
@@ -5648,6 +5649,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             StopwatchTimer mTimerWindow;
 
             /**
+             * How long (in ms) this uid has had a doze wake lock.
+             */
+            StopwatchTimer mTimerDoze;
+
+            /**
              * Reads a possibly null Timer from a Parcel.  The timer is associated with the
              * proper timer pool from the given BatteryStatsImpl object.
              *
@@ -5674,6 +5680,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (mTimerWindow != null) {
                     wlactive |= !mTimerWindow.reset(false);
                 }
+                if (mTimerDoze != null) {
+                    wlactive |= !mTimerDoze.reset(false);
+                }
                 if (!wlactive) {
                     if (mTimerFull != null) {
                         mTimerFull.detach();
@@ -5687,6 +5696,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mTimerWindow.detach();
                         mTimerWindow = null;
                     }
+                    if (mTimerDoze != null) {
+                        mTimerDoze.detach();
+                        mTimerDoze = null;
+                    }
                 }
                 return !wlactive;
             }
@@ -5694,16 +5707,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
                 mTimerPartial = readTimerFromParcel(WAKE_TYPE_PARTIAL,
                         mPartialTimers, screenOffTimeBase, in);
-                mTimerFull = readTimerFromParcel(WAKE_TYPE_FULL,
-                        mFullTimers, timeBase, in);
-                mTimerWindow = readTimerFromParcel(WAKE_TYPE_WINDOW,
-                        mWindowTimers, timeBase, in);
+                mTimerFull = readTimerFromParcel(WAKE_TYPE_FULL, mFullTimers, timeBase, in);
+                mTimerWindow = readTimerFromParcel(WAKE_TYPE_WINDOW, mWindowTimers, timeBase, in);
+                mTimerDoze = readTimerFromParcel(WAKE_TYPE_DOZE, mDozeTimers, timeBase, in);
             }
 
             void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
                 Timer.writeTimerToParcel(out, mTimerPartial, elapsedRealtimeUs);
                 Timer.writeTimerToParcel(out, mTimerFull, elapsedRealtimeUs);
                 Timer.writeTimerToParcel(out, mTimerWindow, elapsedRealtimeUs);
+                Timer.writeTimerToParcel(out, mTimerDoze, elapsedRealtimeUs);
             }
 
             @Override
@@ -5712,6 +5725,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 case WAKE_TYPE_FULL: return mTimerFull;
                 case WAKE_TYPE_PARTIAL: return mTimerPartial;
                 case WAKE_TYPE_WINDOW: return mTimerWindow;
+                case WAKE_TYPE_DOZE: return mTimerDoze;
                 default: throw new IllegalArgumentException("type = " + type);
                 }
             }
@@ -5743,6 +5757,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                             mTimerWindow = t;
                         }
                         return t;
+                    case WAKE_TYPE_DOZE:
+                        t = mTimerDoze;
+                        if (t == null) {
+                            t = new StopwatchTimer(Uid.this, WAKE_TYPE_DOZE,
+                                    mDozeTimers, mOnBatteryTimeBase);
+                            mTimerDoze = t;
+                        }
                     default:
                         throw new IllegalArgumentException("type=" + type);
                 }
@@ -6598,6 +6619,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (in.readInt() != 0) {
                 wl.getStopwatchTimer(WAKE_TYPE_WINDOW).readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
+                wl.getStopwatchTimer(WAKE_TYPE_DOZE).readSummaryFromParcelLocked(in);
             }
         }
 
@@ -9583,6 +9607,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (wl.mTimerWindow != null) {
                     out.writeInt(1);
                     wl.mTimerWindow.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                } else {
+                    out.writeInt(0);
+                }
+                if (wl.mTimerDoze != null) {
+                    out.writeInt(1);
+                    wl.mTimerDoze.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                 } else {
                     out.writeInt(0);
                 }
