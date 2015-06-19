@@ -104,7 +104,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     @Override
     protected void handleSecondaryClick() {
         if (!mWifiController.canConfigWifi()) {
-            mHost.startSettingsActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_WIFI_SETTINGS));
             return;
         }
         if (!mState.enabled) {
@@ -290,7 +290,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public void onSettingsActivityTriggered(Intent settingsIntent) {
-            mHost.startSettingsActivity(settingsIntent);
+            mHost.startActivityDismissingKeyguard(settingsIntent);
         }
 
         @Override

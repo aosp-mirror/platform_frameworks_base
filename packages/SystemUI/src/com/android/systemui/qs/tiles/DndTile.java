@@ -263,7 +263,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private final ZenModePanel.Callback mZenModePanelCallback = new ZenModePanel.Callback() {
         @Override
         public void onPrioritySettings() {
-            mHost.startSettingsActivity(ZEN_PRIORITY_SETTINGS);
+            mHost.startActivityDismissingKeyguard(ZEN_PRIORITY_SETTINGS);
         }
 
         @Override

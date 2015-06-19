@@ -306,7 +306,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     public interface Host {
-        void startSettingsActivity(Intent intent);
+        void startActivityDismissingKeyguard(Intent intent);
         void warn(String message, Throwable t);
         void collapsePanels();
         Looper getLooper();
