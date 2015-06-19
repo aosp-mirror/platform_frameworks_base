@@ -16,9 +16,11 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseLongArray;
+import android.util.TimeUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -49,6 +51,7 @@ public class KernelUidCpuTimeReader {
 
     private SparseLongArray mLastUserTimeUs = new SparseLongArray();
     private SparseLongArray mLastSystemTimeUs = new SparseLongArray();
+    private long mLastTimeRead = 0;
 
     /**
      * Reads the proc file, calling into the callback with a delta of time for each UID.
@@ -57,6 +60,7 @@ public class KernelUidCpuTimeReader {
      *                 a fresh delta.
      */
     public void readDelta(@Nullable Callback callback) {
+        long now = SystemClock.elapsedRealtime();
         try (BufferedReader reader = new BufferedReader(new FileReader(sProcFile))) {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
             String line;
@@ -75,10 +79,32 @@ public class KernelUidCpuTimeReader {
                         userTimeDeltaUs -= mLastUserTimeUs.valueAt(index);
                         systemTimeDeltaUs -= mLastSystemTimeUs.valueAt(index);
 
-                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0) {
-                            // The UID must have been removed from accounting, then added back.
-                            userTimeDeltaUs = userTimeUs;
-                            systemTimeDeltaUs = systemTimeUs;
+                        final long timeDiffMs = (now - mLastTimeRead) * 1000;
+                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0 ||
+                                userTimeDeltaUs > timeDiffMs || systemTimeDeltaUs > timeDiffMs ) {
+                            StringBuilder sb = new StringBuilder("Malformed cpu data!\n");
+                            sb.append("Time between reads: ");
+                            TimeUtils.formatDuration(timeDiffMs, sb);
+                            sb.append("ms\n");
+                            sb.append("Previous times: u=");
+                            TimeUtils.formatDuration(mLastUserTimeUs.valueAt(index) / 1000, sb);
+                            sb.append("ms s=");
+                            TimeUtils.formatDuration(mLastSystemTimeUs.valueAt(index) / 1000, sb);
+                            sb.append("ms\n");
+                            sb.append("Current times: u=");
+                            TimeUtils.formatDuration(userTimeUs / 1000, sb);
+                            sb.append("ms s=");
+                            TimeUtils.formatDuration(systemTimeUs / 1000, sb);
+                            sb.append("ms\n");
+                            sb.append("Delta for UID=").append(uid).append(": u=");
+                            TimeUtils.formatDuration(userTimeDeltaUs / 1000, sb);
+                            sb.append("ms s=");
+                            TimeUtils.formatDuration(systemTimeDeltaUs / 1000, sb);
+                            sb.append("ms");
+                            Slog.wtf(TAG, sb.toString());
+
+                            userTimeDeltaUs = 0;
+                            systemTimeDeltaUs = 0;
                         }
                     }
 
@@ -92,6 +118,7 @@ public class KernelUidCpuTimeReader {
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read uid_cputime", e);
         }
+        mLastTimeRead = now;
     }
 
     /**
