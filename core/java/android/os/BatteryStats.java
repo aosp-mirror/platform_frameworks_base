@@ -4017,8 +4017,10 @@ public abstract class BatteryStats implements Parcelable {
             if (userCpuTimeUs > 0 || systemCpuTimeUs > 0) {
                 sb.setLength(0);
                 sb.append(prefix);
-                sb.append("    Total cpu time: ");
-                formatTimeMs(sb, (userCpuTimeUs + systemCpuTimeUs) / 1000);
+                sb.append("    Total cpu time: u=");
+                formatTimeMs(sb, userCpuTimeUs / 1000);
+                sb.append("s=");
+                formatTimeMs(sb, systemCpuTimeUs / 1000);
                 pw.println(sb.toString());
             }
 
