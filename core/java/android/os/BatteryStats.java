@@ -1165,25 +1165,23 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_USER_FOREGROUND = 0x0008;
         // Event for connectivity changed.
         public static final int EVENT_CONNECTIVITY_CHANGED = 0x0009;
-        // Event for significant motion taking us out of idle mode.
-        public static final int EVENT_SIGNIFICANT_MOTION = 0x000a;
         // Event for becoming active taking us out of idle mode.
-        public static final int EVENT_ACTIVE = 0x000b;
+        public static final int EVENT_ACTIVE = 0x000a;
         // Event for a package being installed.
-        public static final int EVENT_PACKAGE_INSTALLED = 0x000c;
+        public static final int EVENT_PACKAGE_INSTALLED = 0x000b;
         // Event for a package being uninstalled.
-        public static final int EVENT_PACKAGE_UNINSTALLED = 0x000d;
+        public static final int EVENT_PACKAGE_UNINSTALLED = 0x000c;
         // Event for a package being uninstalled.
-        public static final int EVENT_ALARM = 0x000e;
+        public static final int EVENT_ALARM = 0x000d;
         // Record that we have decided we need to collect new stats data.
-        public static final int EVENT_COLLECT_EXTERNAL_STATS = 0x000f;
+        public static final int EVENT_COLLECT_EXTERNAL_STATS = 0x000e;
         // Event for a package becoming inactive due to being unused for a period of time.
-        public static final int EVENT_PACKAGE_INACTIVE = 0x0010;
+        public static final int EVENT_PACKAGE_INACTIVE = 0x000f;
         // Event for a package becoming active due to an interaction.
-        public static final int EVENT_PACKAGE_ACTIVE = 0x0011;
+        public static final int EVENT_PACKAGE_ACTIVE = 0x0010;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0012;
+        public static final int EVENT_COUNT = 0x0011;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1840,12 +1838,12 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "motion", "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active"
+            "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Esm", "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa"
+            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa"
     };
 
     /**
