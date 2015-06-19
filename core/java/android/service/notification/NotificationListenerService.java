@@ -41,6 +41,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -463,15 +464,28 @@ public abstract class NotificationListenerService extends Service {
             ParceledListSlice<StatusBarNotification> parceledList = getNotificationInterface()
                     .getActiveNotificationsFromListener(mWrapper, keys, trim);
             List<StatusBarNotification> list = parceledList.getList();
-
+            ArrayList<StatusBarNotification> corruptNotifications = null;
             int N = list.size();
             for (int i = 0; i < N; i++) {
-                Notification notification = list.get(i).getNotification();
-                Builder.rebuild(getContext(), notification);
-                // convert icon metadata to legacy format for older clients
-                createLegacyIconExtras(notification);
+                StatusBarNotification sbn = list.get(i);
+                Notification notification = sbn.getNotification();
+                try {
+                    Builder.rebuild(getContext(), notification);
+                    // convert icon metadata to legacy format for older clients
+                    createLegacyIconExtras(notification);
+                } catch (IllegalArgumentException e) {
+                    if (corruptNotifications == null) {
+                        corruptNotifications = new ArrayList<>(N);
+                    }
+                    corruptNotifications.add(sbn);
+                    Log.w(TAG, "onNotificationPosted: can't rebuild notification from " +
+                            sbn.getPackageName());
+                }
             }
-            return list.toArray(new StatusBarNotification[N]);
+            if (corruptNotifications != null) {
+                list.removeAll(corruptNotifications);
+            }
+            return list.toArray(new StatusBarNotification[list.size()]);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -671,16 +685,28 @@ public abstract class NotificationListenerService extends Service {
                 Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification", e);
                 return;
             }
-            Notification.Builder.rebuild(getContext(), sbn.getNotification());
 
-            // convert icon metadata to legacy format for older clients
-            createLegacyIconExtras(sbn.getNotification());
+            try {
+                Notification.Builder.rebuild(getContext(), sbn.getNotification());
+                // convert icon metadata to legacy format for older clients
+                createLegacyIconExtras(sbn.getNotification());
+            } catch (IllegalArgumentException e) {
+                // drop corrupt notification
+                sbn = null;
+                Log.w(TAG, "onNotificationPosted: can't rebuild notification from " +
+                        sbn.getPackageName());
+            }
 
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
             synchronized (mWrapper) {
                 applyUpdate(update);
                 try {
-                    NotificationListenerService.this.onNotificationPosted(sbn, mRankingMap);
+                    if (sbn != null) {
+                        NotificationListenerService.this.onNotificationPosted(sbn, mRankingMap);
+                    } else {
+                        // still pass along the ranking map, it may contain other information
+                        NotificationListenerService.this.onNotificationRankingUpdate(mRankingMap);
+                    }
                 } catch (Throwable t) {
                     Log.w(TAG, "Error running onNotificationPosted", t);
                 }
