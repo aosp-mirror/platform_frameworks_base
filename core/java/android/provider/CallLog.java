@@ -518,11 +518,6 @@ public class CallLog {
             if (callType == MISSED_TYPE) {
                 values.put(IS_READ, Integer.valueOf(0));
             }
-            if (ci != null) {
-                values.put(CACHED_NAME, ci.name);
-                values.put(CACHED_NUMBER_TYPE, ci.numberType);
-                values.put(CACHED_NUMBER_LABEL, ci.numberLabel);
-            }
 
             if ((ci != null) && (ci.contactIdOrZero > 0)) {
                 // Update usage information for the number associated with the contact ID.
