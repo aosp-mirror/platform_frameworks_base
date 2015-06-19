@@ -3223,12 +3223,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 cb.onWindowFocusChanged(hasWindowFocus);
             }
 
-            if (mFloatingToolbar != null) {
-                if (hasWindowFocus) {
-                    mFloatingToolbar.show();
-                } else {
-                    mFloatingToolbar.dismiss();
-                }
+            if (mPrimaryActionMode != null) {
+                mPrimaryActionMode.onWindowFocusChanged(hasWindowFocus);
+            }
+            if (mFloatingActionMode != null) {
+                mFloatingActionMode.onWindowFocusChanged(hasWindowFocus);
             }
         }
 
@@ -3441,8 +3440,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mFloatingActionMode = mode;
             mFloatingToolbar = new FloatingToolbar(mContext, PhoneWindow.this);
             ((FloatingActionMode) mFloatingActionMode).setFloatingToolbar(mFloatingToolbar);
-            mFloatingActionMode.invalidate();
-            mFloatingToolbar.show();
+            mFloatingActionMode.invalidate();  // Will show the floating toolbar if necessary.
             mFloatingActionModeOriginatingView.getViewTreeObserver()
                 .addOnPreDrawListener(mFloatingToolbarPreDrawListener);
         }
