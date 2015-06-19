@@ -433,7 +433,7 @@ public abstract class Drawable {
 
     /**
      * Set the layout direction for this drawable. Should be a resolved
-     * layout direction, as the Drawable as no capacity to do the resolution on
+     * layout direction, as the Drawable has no capacity to do the resolution on
      * its own.
      *
      * @param layoutDirection the resolved layout direction for the drawable,
