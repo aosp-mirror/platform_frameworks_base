@@ -1139,17 +1139,6 @@ final class Settings {
         return new File(userDir, RUNTIME_PERMISSIONS_FILE_NAME);
     }
 
-    boolean isFirstRuntimePermissionsBoot() {
-        return !getUserRuntimePermissionsFile(UserHandle.USER_OWNER).exists();
-    }
-
-    void deleteRuntimePermissionsFiles() {
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
-            File file = getUserRuntimePermissionsFile(userId);
-            file.delete();
-        }
-    }
-
     private File getUserPackagesStateBackupFile(int userId) {
         return new File(Environment.getUserSystemDirectory(userId),
                 "package-restrictions-backup.xml");
@@ -2466,6 +2455,22 @@ final class Settings {
                     } catch (NumberFormatException e) {
                     }
                     mFingerprint = parser.getAttributeValue(null, "fingerprint");
+
+                    // If the build is setup to drop runtime permissions
+                    // on update drop the files before loading them.
+                    if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
+                        if (!Build.FINGERPRINT.equals(mFingerprint)) {
+                            if (users == null) {
+                                mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
+                                        UserHandle.USER_OWNER);
+                            } else {
+                                for (UserInfo user : users) {
+                                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
+                                            user.id);
+                                }
+                            }
+                        }
+                    }
                 } else if (tagName.equals("database-version")) {
                     mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
                     try {
@@ -2554,12 +2559,18 @@ final class Settings {
         } else {
             if (users == null) {
                 readPackageRestrictionsLPr(0);
-                mRuntimePermissionsPersistence.readStateForUserSyncLPr(UserHandle.USER_OWNER);
             } else {
                 for (UserInfo user : users) {
                     readPackageRestrictionsLPr(user.id);
-                    mRuntimePermissionsPersistence.readStateForUserSyncLPr(user.id);
                 }
+            }
+        }
+
+        if (users == null) {
+            mRuntimePermissionsPersistence.readStateForUserSyncLPr(UserHandle.USER_OWNER);
+        } else {
+            for (UserInfo user : users) {
+                mRuntimePermissionsPersistence.readStateForUserSyncLPr(user.id);
             }
         }
 
@@ -3056,18 +3067,6 @@ final class Settings {
             }
         }
 
-        // We keep track for which users we granted permissions to be able
-        // to grant runtime permissions to system apps for newly appeared
-        // users or newly appeared system apps. If we supported runtime
-        // permissions during the previous boot, then we already granted
-        // permissions for all device users. In such a case we set the users
-        // for which we granted permissions to avoid clobbering of runtime
-        // permissions we granted to system apps but the user revoked later.
-        if (!isFirstRuntimePermissionsBoot()) {
-            final int[] userIds = UserManagerService.getInstance().getUserIds();
-            ps.setPermissionsUpdatedForUserIds(userIds);
-        }
-
         mDisabledSysPackages.put(name, ps);
     }
 
@@ -3364,18 +3363,6 @@ final class Settings {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
-
-            // We keep track for which users we granted permissions to be able
-            // to grant runtime permissions to system apps for newly appeared
-            // users or newly appeared system apps. If we supported runtime
-            // permissions during the previous boot, then we already granted
-            // permissions for all device users. In such a case we set the users
-            // for which we granted permissions to avoid clobbering of runtime
-            // permissions we granted to system apps but the user revoked later.
-            if (!isFirstRuntimePermissionsBoot()) {
-                final int[] userIds = UserManagerService.getInstance().getUserIds();
-                packageSetting.setPermissionsUpdatedForUserIds(userIds);
-            }
         } else {
             XmlUtils.skipCurrentTag(parser);
         }
@@ -3492,18 +3479,6 @@ final class Settings {
                             "Unknown element under <shared-user>: " + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
-            }
-
-            // We keep track for which users we granted permissions to be able
-            // to grant runtime permissions to system apps for newly appeared
-            // users or newly appeared system apps. If we supported runtime
-            // permissions during the previous boot, then we already granted
-            // permissions for all device users. In such a case we set the users
-            // for which we granted permissions to avoid clobbering of runtime
-            // permissions we granted to system apps but the user revoked later.
-            if (!isFirstRuntimePermissionsBoot()) {
-                final int[] userIds = UserManagerService.getInstance().getUserIds();
-                su.setPermissionsUpdatedForUserIds(userIds);
             }
         } else {
             XmlUtils.skipCurrentTag(parser);
@@ -4397,6 +4372,10 @@ final class Settings {
             }
         }
 
+        public void deleteUserRuntimePermissionsFile(int userId) {
+            getUserRuntimePermissionsFile(userId).delete();
+        }
+
         public void readStateForUserSyncLPr(int userId) {
             File permissionsFile = getUserRuntimePermissionsFile(userId);
             if (!permissionsFile.exists()) {
@@ -4489,22 +4468,12 @@ final class Settings {
                                 ? Integer.parseInt(flagsStr, 16) : 0;
 
                         if (granted) {
-                            if (permissionsState.grantRuntimePermission(bp, userId) ==
-                                    PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                Slog.w(PackageManagerService.TAG, "Duplicate permission:" + name);
-                            } else {
-                                permissionsState.updatePermissionFlags(bp, userId,
+                            permissionsState.grantRuntimePermission(bp, userId);
+                            permissionsState.updatePermissionFlags(bp, userId,
                                         PackageManager.MASK_PERMISSION_FLAGS, flags);
-
-                            }
                         } else {
-                            if (permissionsState.revokeRuntimePermission(bp, userId) ==
-                                    PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                Slog.w(PackageManagerService.TAG, "Duplicate permission:" + name);
-                            } else {
-                                permissionsState.updatePermissionFlags(bp, userId,
-                                        PackageManager.MASK_PERMISSION_FLAGS, flags);
-                            }
+                            permissionsState.updatePermissionFlags(bp, userId,
+                                    PackageManager.MASK_PERMISSION_FLAGS, flags);
                         }
 
                     } break;

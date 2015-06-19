@@ -24,7 +24,6 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.os.storage.VolumeInfo;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -223,7 +222,6 @@ abstract class PackageSettingBase extends SettingBase {
      * Make a shallow copy of this package settings.
      */
     public void copyFrom(PackageSettingBase base) {
-        setPermissionsUpdatedForUserIds(base.getPermissionsUpdatedForUserIds());
         mPermissionsState.copyFrom(base.mPermissionsState);
         primaryCpuAbiString = base.primaryCpuAbiString;
         secondaryCpuAbiString = base.secondaryCpuAbiString;

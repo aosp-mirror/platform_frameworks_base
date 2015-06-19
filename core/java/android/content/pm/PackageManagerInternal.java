@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.content.pm;
+
+import android.annotation.NonNull;
+
+/**
+ * Package manager local system service interface.
+ *
+ * @hide Only for use within the system server.
+ */
+public abstract class PackageManagerInternal {
+
+    /**
+     * Provider for package names.
+     */
+    public interface PackagesProvider {
+
+        /**
+         * Gets the packages for a given user.
+         * @param userId The user id.
+         * @return The package names.
+         */
+        public String[] getPackages(int userId);
+    }
+
+    /**
+     * Sets the location provider packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setLocationPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the input method packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setImePackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the voice interaction packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
+}
