@@ -35,6 +35,9 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.TransactionTooLargeException;
+import android.util.Log;
+
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
@@ -921,8 +924,13 @@ class ApplicationThreadProxy implements IApplicationThread {
         info.writeToParcel(data, 0);
         compatInfo.writeToParcel(data, 0);
         data.writeInt(processState);
-        mRemote.transact(SCHEDULE_CREATE_SERVICE_TRANSACTION, data, null,
-                IBinder.FLAG_ONEWAY);
+        try {
+            mRemote.transact(SCHEDULE_CREATE_SERVICE_TRANSACTION, data, null,
+                    IBinder.FLAG_ONEWAY);
+        } catch (TransactionTooLargeException e) {
+            Log.e("CREATE_SERVICE", "Binder failure starting service; service=" + info);
+            throw e;
+        }
         data.recycle();
     }
 
