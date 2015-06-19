@@ -616,15 +616,11 @@ public class TelephonyManager {
 
     /**
      * The OMTP protocol.
-     *
-     * @hide
      */
     public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
 
     /**
-     * A flavor of OMTP protocol for Comverse.
-     *
-     * @hide
+     * A flavor of OMTP protocol with a different mobile originated (MO) format
      */
     public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
 
