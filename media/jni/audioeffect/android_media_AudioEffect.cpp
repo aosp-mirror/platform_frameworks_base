@@ -472,6 +472,8 @@ static void android_media_AudioEffect_native_release(JNIEnv *env,  jobject thiz)
 
     if (lpJniStorage) {
         ALOGV("deleting pJniStorage: %p\n", lpJniStorage);
+        env->DeleteGlobalRef(lpJniStorage->mCallbackData.audioEffect_class);
+        env->DeleteGlobalRef(lpJniStorage->mCallbackData.audioEffect_ref);
         delete lpJniStorage;
     }
 }
