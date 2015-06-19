@@ -21,8 +21,9 @@ import java.util.ArrayList;
 
 import android.app.IStopUserCallback;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 
-public final class UserStartedState {
+public final class UserState {
     // User is first coming up.
     public final static int STATE_BOOTING = 0;
     // User is in the normal running state.
@@ -40,7 +41,13 @@ public final class UserStartedState {
     public boolean switching;
     public boolean initializing;
 
-    public UserStartedState(UserHandle handle, boolean initial) {
+    /**
+     * The last time that a provider was reported to usage stats as being brought to important
+     * foreground procstate.
+     */
+    public final ArrayMap<String,Long> mProviderLastReportedFg = new ArrayMap<>();
+
+    public UserState(UserHandle handle, boolean initial) {
         mHandle = handle;
     }
 

@@ -54,6 +54,14 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportConfigurationChange(Configuration config, int userId);
 
     /**
+     * Reports that a content provider has been accessed by a foreground app.
+     * @param name The authority of the content provider
+     * @param pkgName The package name of the content provider
+     * @param userId The user in which the content provider was accessed.
+     */
+    public abstract void reportContentProviderUsage(String name, String pkgName, int userId);
+
+    /**
      * Prepares the UsageStatsService for shutdown.
      */
     public abstract void prepareShutdown();
