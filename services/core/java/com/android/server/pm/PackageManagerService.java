@@ -7724,7 +7724,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
-        
+
         if (pkgInfo != null) {
             grantPermissionsLPw(pkgInfo, (flags&UPDATE_PERMISSIONS_REPLACE_PKG) != 0, changingPkg);
         }
@@ -8004,7 +8004,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Persist the runtime permissions state for users with changes.
         for (int userId : changedRuntimePermissionUserIds) {
-            mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+            mSettings.writeRuntimePermissionsForUserLPr(userId, false);
         }
     }
 
