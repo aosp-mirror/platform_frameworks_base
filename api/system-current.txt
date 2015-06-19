@@ -17118,6 +17118,10 @@ package android.media {
     ctor public MediaDrmException(java.lang.String);
   }
 
+  public class MediaDrmResetException extends java.lang.IllegalStateException {
+    ctor public MediaDrmResetException(java.lang.String);
+  }
+
   public final class MediaExtractor {
     ctor public MediaExtractor();
     method public boolean advance();

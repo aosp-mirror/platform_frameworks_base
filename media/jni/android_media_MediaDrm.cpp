@@ -308,6 +308,10 @@ static bool throwExceptionAsNecessary(
     } else if (err == ERROR_DRM_DEVICE_REVOKED) {
         jniThrowException(env, "android/media/DeniedByServerException", msg);
         return true;
+    } else if (err == DEAD_OBJECT) {
+        jniThrowException(env, "android/media/MediaDrmResetException",
+                "mediaserver died");
+        return true;
     } else if (err != OK) {
         String8 errbuf;
         if (drmMessage != NULL) {
