@@ -1480,7 +1480,11 @@ public class IntentFilter implements Parcelable {
      * Write the contents of the IntentFilter as an XML stream.
      */
     public void writeToXml(XmlSerializer serializer) throws IOException {
-        serializer.attribute(null, AUTO_VERIFY_STR, Boolean.toString(getAutoVerify()));
+
+        if (getAutoVerify()) {
+            serializer.attribute(null, AUTO_VERIFY_STR, Boolean.toString(true));
+        }
+
         int N = countActions();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, ACTION_STR);
