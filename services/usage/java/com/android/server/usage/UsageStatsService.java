@@ -31,9 +31,12 @@ import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SyncAdapterType;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -69,6 +72,7 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleController;
 import com.android.server.SystemService;
@@ -117,6 +121,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_CHECK_IDLE_STATES = 5;
     static final int MSG_CHECK_PAROLE_TIMEOUT = 6;
     static final int MSG_PAROLE_END_TIMEOUT = 7;
+    static final int MSG_REPORT_CONTENT_PROVIDER_USAGE = 8;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -583,6 +588,29 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    void reportContentProviderUsage(String authority, String providerPkgName, int userId) {
+        // Get sync adapters for the authority
+        String[] packages = ContentResolver.getSyncAdapterPackagesForAuthorityAsUser(
+                authority, userId);
+        for (String packageName: packages) {
+            // Only force the sync adapters to active if the provider is not in the same package and
+            // the sync adapter is a system package.
+            try {
+                PackageInfo pi = AppGlobals.getPackageManager().getPackageInfo(
+                        packageName, 0, userId);
+                if (pi == null || pi.applicationInfo == null
+                        || !pi.applicationInfo.isSystemApp()) {
+                    continue;
+                }
+                if (!packageName.equals(providerPkgName)) {
+                    forceIdleState(packageName, userId, false);
+                }
+            } catch (RemoteException re) {
+                // Shouldn't happen
+            }
+        }
+    }
+
     /**
      * Forces the app's beginIdleTime and lastUsedTime to reflect idle or active. If idle,
      * then it rolls back the beginIdleTime and lastUsedTime to a point in time that's behind
@@ -605,7 +633,7 @@ public class UsageStatsService extends SystemService implements
                     timeNow - (idle ? mAppIdleWallclockThresholdMillis : 0) - 5000);
             // Inform listeners if necessary
             if (previouslyIdle != idle) {
-                // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
+                // Slog.d(TAG, "Informing listeners of out-of-idle " + packageName);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
                         /* idle = */ idle ? 1 : 0, packageName));
                 if (!idle) {
@@ -916,6 +944,14 @@ public class UsageStatsService extends SystemService implements
                     setAppIdleParoled(false);
                     break;
 
+                case MSG_REPORT_CONTENT_PROVIDER_USAGE:
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    reportContentProviderUsage((String) args.arg1, // authority name
+                            (String) args.arg2, // package name
+                            (int) args.arg3); // userId
+                    args.recycle();
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -1174,6 +1210,16 @@ public class UsageStatsService extends SystemService implements
             event.mEventType = UsageEvents.Event.CONFIGURATION_CHANGE;
             event.mConfiguration = new Configuration(config);
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
+
+        @Override
+        public void reportContentProviderUsage(String name, String packageName, int userId) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = name;
+            args.arg2 = packageName;
+            args.arg3 = userId;
+            mHandler.obtainMessage(MSG_REPORT_CONTENT_PROVIDER_USAGE, args)
+                    .sendToTarget();
         }
 
         @Override

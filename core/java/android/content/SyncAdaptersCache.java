@@ -20,12 +20,19 @@ import android.content.pm.RegisteredServicesCache;
 import android.content.pm.XmlSerializerAndParser;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A cache of services that export the {@link android.content.ISyncAdapter} interface.
@@ -38,6 +45,10 @@ public class SyncAdaptersCache extends RegisteredServicesCache<SyncAdapterType> 
     private static final String SERVICE_META_DATA = "android.content.SyncAdapter";
     private static final String ATTRIBUTES_NAME = "sync-adapter";
     private static final MySerializer sSerializer = new MySerializer();
+
+    @GuardedBy("mServicesLock")
+    private SparseArray<ArrayMap<String,String[]>> mAuthorityToSyncAdapters
+            = new SparseArray<>();
 
     public SyncAdaptersCache(Context context) {
         super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME, sSerializer);
@@ -74,6 +85,57 @@ public class SyncAdaptersCache extends RegisteredServicesCache<SyncAdapterType> 
         } finally {
             sa.recycle();
         }
+    }
+
+    @Override
+    protected void onServicesChangedLocked(int userId) {
+        synchronized (mServicesLock) {
+            ArrayMap<String,String[]> adapterMap = mAuthorityToSyncAdapters.get(userId);
+            if (adapterMap != null) {
+                adapterMap.clear();
+            }
+        }
+
+        super.onServicesChangedLocked(userId);
+    }
+
+    public String[] getSyncAdapterPackagesForAuthority(String authority, int userId) {
+        synchronized (mServicesLock) {
+            ArrayMap<String,String[]> adapterMap = mAuthorityToSyncAdapters.get(userId);
+            if (adapterMap == null) {
+                adapterMap = new ArrayMap<>();
+                mAuthorityToSyncAdapters.put(userId, adapterMap);
+            }
+            // If the mapping exists, return it
+            if (adapterMap.containsKey(authority)) {
+                return adapterMap.get(authority);
+            }
+            // Create the mapping and cache it
+            String[] syncAdapterPackages;
+            final Collection<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> serviceInfos;
+            serviceInfos = getAllServices(userId);
+            ArrayList<String> packages = new ArrayList<>();
+            for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> serviceInfo : serviceInfos) {
+                if (authority.equals(serviceInfo.type.authority)
+                        && serviceInfo.componentName != null) {
+                    packages.add(serviceInfo.componentName.getPackageName());
+                }
+            }
+            syncAdapterPackages = new String[packages.size()];
+            packages.toArray(syncAdapterPackages);
+            adapterMap.put(authority, syncAdapterPackages);
+
+            return syncAdapterPackages;
+        }
+    }
+
+    @Override
+    protected void onUserRemoved(int userId) {
+        synchronized (mServicesLock) {
+            mAuthorityToSyncAdapters.remove(userId);
+        }
+
+        super.onUserRemoved(userId);
     }
 
     static class MySerializer implements XmlSerializerAndParser<SyncAdapterType> {
