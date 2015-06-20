@@ -614,6 +614,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     };
 
+    private final Runnable mHideTransientIndicationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mIndicationController.hideTransientIndication();
+        }
+    };
+
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
@@ -657,6 +664,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public void onFingerprintError(int msgId, String errString) {
             // TODO: Go to bouncer if this is "too many attempts" (lockout) error.
+            mIndicationController.showTransientIndication(errString,
+                    getResources().getColor(R.color.system_warning_color, null));
+            removeCallbacks(mHideTransientIndicationRunnable);
+            postDelayed(mHideTransientIndicationRunnable, 5000);
         }
     };
 
