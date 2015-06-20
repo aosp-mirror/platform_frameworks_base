@@ -28,6 +28,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -35,9 +36,12 @@ import com.android.settingslib.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -45,6 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class WifiTracker {
     private static final String TAG = "WifiTracker";
+    private static final boolean DBG = false;
 
     /** verbose logging flag. this flag is set thru developer debugging options
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
@@ -70,6 +75,10 @@ public class WifiTracker {
     private boolean mSavedNetworksExist;
     private boolean mRegistered;
     private ArrayList<AccessPoint> mAccessPoints = new ArrayList<>();
+    private HashMap<String, Integer> mSeenBssids = new HashMap<>();
+    private HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
+    private Integer mScanId = 0;
+    private static final int NUM_SCANS_TO_CONFIRM_AP_LOSS = 3;
 
     private NetworkInfo mLastNetworkInfo;
     private WifiInfo mLastInfo;
@@ -166,6 +175,11 @@ public class WifiTracker {
         if (mScanner == null) {
             mScanner = new Scanner();
         }
+
+        mScanResultCache.clear();
+        mSeenBssids.clear();
+        mScanId = 0;
+
         if (mWifiManager.isWifiEnabled()) {
             mScanner.resume();
         }
@@ -237,6 +251,33 @@ public class WifiTracker {
         }
     }
 
+    private Collection<ScanResult> fetchScanResults() {
+        mScanId++;
+        final List<ScanResult> newResults = mWifiManager.getScanResults();
+        for (ScanResult newResult : newResults) {
+            mScanResultCache.put(newResult.BSSID, newResult);
+            mSeenBssids.put(newResult.BSSID, mScanId);
+        }
+
+        if (mScanId > NUM_SCANS_TO_CONFIRM_AP_LOSS) {
+            if (DBG) Log.d(TAG, "------ Dumping SSIDs that were expired on this scan ------");
+            Integer threshold = mScanId - NUM_SCANS_TO_CONFIRM_AP_LOSS;
+            for (Iterator<Map.Entry<String, Integer>> it = mSeenBssids.entrySet().iterator();
+                    it.hasNext(); /* nothing */) {
+                Map.Entry<String, Integer> e = it.next();
+                if (e.getValue() < threshold) {
+                    ScanResult result = mScanResultCache.get(e.getKey());
+                    if (DBG) Log.d(TAG, "Removing " + e.getKey() + ":(" + result.SSID + ")");
+                    mScanResultCache.remove(e.getKey());
+                    it.remove();
+                }
+            }
+            if (DBG) Log.d(TAG, "---- Done Dumping SSIDs that were expired on this scan ----");
+        }
+
+        return mScanResultCache.values();
+    }
+
     private void updateAccessPoints() {
         // Swap the current access points into a cached list.
         List<AccessPoint> cachedAccessPoints = getAccessPoints();
@@ -283,7 +324,7 @@ public class WifiTracker {
             }
         }
 
-        final List<ScanResult> results = mWifiManager.getScanResults();
+        final Collection<ScanResult> results = fetchScanResults();
         if (results != null) {
             for (ScanResult result : results) {
                 // Ignore hidden and ad-hoc networks.
@@ -328,6 +369,24 @@ public class WifiTracker {
 
         // Pre-sort accessPoints to speed preference insertion
         Collections.sort(accessPoints);
+
+        // Log accesspoints that were deleted
+        if (DBG) Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
+        for (AccessPoint prevAccessPoint : mAccessPoints) {
+            if (prevAccessPoint.getSsid() == null) continue;
+            String prevSsid = prevAccessPoint.getSsidStr();
+            boolean found = false;
+            for (AccessPoint newAccessPoint : accessPoints) {
+                if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid().equals(prevSsid)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                if (DBG) Log.d(TAG, "Did not find " + prevSsid + " in this scan");
+        }
+        if (DBG)  Log.d(TAG, "---- Done dumping SSIDs that were not seen on this scan ----");
+
         mAccessPoints = accessPoints;
         mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
     }
