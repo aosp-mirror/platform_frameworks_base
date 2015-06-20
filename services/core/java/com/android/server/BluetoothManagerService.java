@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothGatt;
@@ -114,6 +115,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private static final int SERVICE_IBLUETOOTH = 1;
     private static final int SERVICE_IBLUETOOTHGATT = 2;
+
+    private static final String[] DEVICE_TYPE_NAMES = new String[] {
+            "???",
+            "BR/EDR",
+            "LE",
+            "DUAL"
+        };
 
     private final Context mContext;
 
@@ -1530,12 +1538,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         writer.println("  state: " + mState);
         writer.println("  address: " + mAddress);
         writer.println("  name: " + mName + "\n");
-        writer.flush();
 
         if (mBluetooth == null) {
             writer.println("Bluetooth Service not connected");
         } else {
             try {
+                writer.println("Bonded devices:");
+                for (BluetoothDevice device : mBluetooth.getBondedDevices()) {
+                    writer.println("  " + device.getAddress() +
+                            " [" + DEVICE_TYPE_NAMES[device.getType()] + "] " +
+                            device.getName());
+                }
+                writer.flush();
+
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd);
                 mBluetooth.dump(pfd);
                 pfd.close();
