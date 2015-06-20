@@ -2185,7 +2185,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // Not setting bestNetwork here as a listening NetworkRequest may be
                     // satisfied by multiple Networks.  Instead the request is added to
                     // each satisfying Network and notified about each.
-                    network.addRequest(nri.request);
+                    if (!network.addRequest(nri.request)) {
+                        Slog.wtf(TAG, "BUG: " + network.name() + " already has " + nri.request);
+                    }
                     notifyNetworkCallback(network, nri);
                 } else if (bestNetwork == null ||
                         bestNetwork.getCurrentScore() < network.getCurrentScore()) {
@@ -2196,7 +2198,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (bestNetwork != null) {
             if (DBG) log("using " + bestNetwork.name());
             unlinger(bestNetwork);
-            bestNetwork.addRequest(nri.request);
+            if (!bestNetwork.addRequest(nri.request)) {
+                Slog.wtf(TAG, "BUG: " + bestNetwork.name() + " already has " + nri.request);
+            }
             mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
             notifyNetworkCallback(bestNetwork, nri);
             if (nri.request.legacyType != TYPE_NONE) {
@@ -4197,6 +4201,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
         ArrayList<NetworkAgentInfo> affectedNetworks = new ArrayList<NetworkAgentInfo>();
+        ArrayList<NetworkRequestInfo> addedRequests = new ArrayList<NetworkRequestInfo>();
         if (VDBG) log(" network has: " + newNetwork.networkCapabilities);
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
@@ -4215,7 +4220,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (!nri.isRequest) {
                     // This is not a request, it's a callback listener.
                     // Add it to newNetwork regardless of score.
-                    newNetwork.addRequest(nri.request);
+                    if (newNetwork.addRequest(nri.request)) addedRequests.add(nri);
                     continue;
                 }
 
@@ -4238,7 +4243,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     unlinger(newNetwork);
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
-                    newNetwork.addRequest(nri.request);
+                    if (!newNetwork.addRequest(nri.request)) {
+                        Slog.wtf(TAG, "BUG: " + newNetwork.name() + " already has " + nri.request);
+                    }
+                    addedRequests.add(nri);
                     keep = true;
                     // Tell NetworkFactories about the new score, so they can stop
                     // trying to connect if they know they cannot match it.
@@ -4281,7 +4289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // do this after the default net is switched, but
             // before LegacyTypeTracker sends legacy broadcasts
-            notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
+            for (NetworkRequestInfo nri : addedRequests) notifyNetworkCallback(newNetwork, nri);
 
             if (isNewDefault) {
                 // Maintain the illusion: since the legacy API only
