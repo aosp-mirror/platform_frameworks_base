@@ -22,9 +22,10 @@ import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -646,7 +647,8 @@ public class InputMethodUtils {
     }
 
     public static void setNonSelectedSystemImesDisabledUntilUsed(
-            PackageManager packageManager, List<InputMethodInfo> enabledImis) {
+            IPackageManager packageManager, List<InputMethodInfo> enabledImis,
+            int userId, String callingPackage) {
         if (DEBUG) {
             Slog.d(TAG, "setNonSelectedSystemImesDisabledUntilUsed");
         }
@@ -685,9 +687,11 @@ public class InputMethodUtils {
             ApplicationInfo ai = null;
             try {
                 ai = packageManager.getApplicationInfo(packageName,
-                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS);
-            } catch (NameNotFoundException e) {
-                Slog.w(TAG, "NameNotFoundException: " + packageName, e);
+                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "getApplicationInfo failed. packageName=" + packageName
+                        + " userId=" + userId, e);
+                continue;
             }
             if (ai == null) {
                 // No app found for packageName
@@ -697,19 +701,34 @@ public class InputMethodUtils {
             if (!isSystemPackage) {
                 continue;
             }
-            setDisabledUntilUsed(packageManager, packageName);
+            setDisabledUntilUsed(packageManager, packageName, userId, callingPackage);
         }
     }
 
-    private static void setDisabledUntilUsed(PackageManager packageManager, String packageName) {
-        final int state = packageManager.getApplicationEnabledSetting(packageName);
+    private static void setDisabledUntilUsed(IPackageManager packageManager, String packageName,
+            int userId, String callingPackage) {
+        final int state;
+        try {
+            state = packageManager.getApplicationEnabledSetting(packageName, userId);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "getApplicationEnabledSetting failed. packageName=" + packageName
+                    + " userId=" + userId, e);
+            return;
+        }
         if (state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                 || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             if (DEBUG) {
                 Slog.d(TAG, "Update state(" + packageName + "): DISABLED_UNTIL_USED");
             }
-            packageManager.setApplicationEnabledSetting(packageName,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED, 0);
+            try {
+                packageManager.setApplicationEnabledSetting(packageName,
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
+                        0 /* newState */, userId, callingPackage);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "setApplicationEnabledSetting failed. packageName=" + packageName
+                        + " userId=" + userId + " callingPackage=" + callingPackage, e);
+                return;
+            }
         } else {
             if (DEBUG) {
                 Slog.d(TAG, packageName + " is already DISABLED_UNTIL_USED");
