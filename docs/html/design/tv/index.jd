@@ -4,6 +4,12 @@ page.metaDescription=Guidelines to help you create a great leanback experience o
 page.image=design/tv/images/apps-games-rows.jpg
 @jd:body
 
+<a class="notice-designers" style="clear:none" href="http://www.google.com/design/spec-tv">
+  <div>
+    <h3>Material Design</h3>
+    <p>Android TV Design Guidelines</p>
+  </div>
+</a>
 
 <p>The Android TV platform user interface provides the launch pad for your app's big screen
   experience. It's important to understand how your app is presented in the main user interface and
