@@ -215,6 +215,10 @@
     <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
+    <!-- Content description of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_button_fingerprint">Unlock button, waiting for fingerprint</string>
+    <!-- Accessibility action of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_without_fingerprint">Unlock without using your fingerprint</string>
     <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
     <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
