@@ -33,6 +33,10 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_VOLUME_KEY = 211;
     public static final int ACTION_VOLUME_ICON = 212;
     public static final int ACTION_RINGER_MODE = 213;
+    public static final int ACTION_ACTIVITY_CHOOSER_SHOWN = 214;
+    public static final int ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET = 215;
+    public static final int ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET = 216;
+    public static final int ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET = 217;
     // Temporary constants go here, to await migration to MetricsConstants.
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
