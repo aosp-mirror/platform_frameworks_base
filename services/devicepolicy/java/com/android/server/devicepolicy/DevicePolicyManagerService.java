@@ -3229,15 +3229,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final UserHandle caller = Binder.getCallingUserHandle();
-        final ComponentName profileOwner = getProfileOwner(caller.getIdentifier());
-
-        if (profileOwner == null) {
+        // If there is a profile owner, redirect to that; otherwise query the device owner.
+        ComponentName aliasChooser = getProfileOwner(caller.getIdentifier());
+        if (aliasChooser == null && caller.isOwner()) {
+            ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdmin();
+            if (deviceOwnerAdmin != null) {
+                aliasChooser = deviceOwnerAdmin.info.getComponent();
+            }
+        }
+        if (aliasChooser == null) {
             sendPrivateKeyAliasResponse(null, response);
             return;
         }
 
         Intent intent = new Intent(DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS);
-        intent.setComponent(profileOwner);
+        intent.setComponent(aliasChooser);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, uid);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URI, uri);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS, alias);
