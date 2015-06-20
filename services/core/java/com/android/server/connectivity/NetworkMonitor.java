@@ -178,6 +178,13 @@ public class NetworkMonitor extends StateMachine {
      */
     private static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = BASE + 11;
 
+    /**
+     * Retest network to see if captive portal is still in place.
+     * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
+     *        0 indicates self-initiated, so nobody to blame.
+     */
+    private static final int CMD_CAPTIVE_PORTAL_RECHECK = BASE + 12;
+
     private static final String LINGER_DELAY_PROPERTY = "persist.netmon.linger";
     // Default to 30s linger time-out.  Modifyable only for testing.
     private static int DEFAULT_LINGER_DELAY_MS = 30000;
@@ -194,6 +201,8 @@ public class NetworkMonitor extends StateMachine {
     private int mUidResponsibleForReeval = INVALID_UID;
     // Stop blaming UID that requested re-evaluation after this many attempts.
     private static final int BLAME_FOR_EVALUATION_ATTEMPTS = 5;
+    // Delay between reevaluations once a captive portal has been found.
+    private static final int CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10*60*1000;
 
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
@@ -287,6 +296,7 @@ public class NetworkMonitor extends StateMachine {
                     quit();
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
+                case CMD_CAPTIVE_PORTAL_RECHECK:
                     if (DBG) log("Forcing reevaluation");
                     mUidResponsibleForReeval = message.arg1;
                     transitionTo(mEvaluatingState);
@@ -517,12 +527,20 @@ public class NetworkMonitor extends StateMachine {
                     mNetworkAgentInfo.network.netId,
                     mLaunchCaptivePortalAppBroadcastReceiver.getPendingIntent());
             mConnectivityServiceHandler.sendMessage(message);
+            // Retest for captive portal occasionally.
+            sendMessageDelayed(CMD_CAPTIVE_PORTAL_RECHECK, 0 /* no UID */,
+                    CAPTIVE_PORTAL_REEVALUATE_DELAY_MS);
         }
 
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString());
             return NOT_HANDLED;
+        }
+
+        @Override
+        public void exit() {
+             removeMessages(CMD_CAPTIVE_PORTAL_RECHECK);
         }
     }
 
