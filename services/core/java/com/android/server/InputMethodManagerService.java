@@ -16,6 +16,7 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageManagerInternal;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -31,6 +32,7 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
+import com.android.server.pm.UserManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -859,6 +861,38 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
+
+        // Let the package manager query which are the default imes
+        // as they get certain permissions granted by default.
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setImePackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+                    @Override
+                    public String[] getPackages(int userId) {
+                        synchronized (mMethodMap) {
+                            final int currentUserId = mSettings.getCurrentUserId();
+                            // TODO: We are switching the current user id in the settings
+                            // object to query it and then revert the user id. Ideally, we
+                            // should call a API in settings with the user id as an argument.
+                            mSettings.setCurrentUserId(userId);
+                            List<InputMethodInfo> imes = mSettings
+                                    .getEnabledInputMethodListLocked();
+                            String[] packageNames = null;
+                            if (imes != null) {
+                                final int imeCount = imes.size();
+                                packageNames = new String[imeCount];
+                                for (int i = 0; i < imeCount; i++) {
+                                    InputMethodInfo ime = imes.get(i);
+                                    packageNames[i] = ime.getPackageName();
+                                }
+                            }
+                            mSettings.setCurrentUserId(currentUserId);
+                            return packageNames;
+                        }
+                    }
+                });
+
         updateCurrentProfileIds();
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
         synchronized (mMethodMap) {

@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -57,6 +58,7 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 
@@ -83,6 +85,21 @@ public class VoiceInteractionManagerService extends SystemService {
         mDbHelper = new DatabaseHelper(context);
         mSoundTriggerHelper = new SoundTriggerHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
+
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setVoiceInteractionPackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+            @Override
+            public String[] getPackages(int userId) {
+                mServiceStub.initForUser(userId);
+                ComponentName interactor = mServiceStub.getCurInteractor(userId);
+                if (interactor != null) {
+                    return new String[] {interactor.getPackageName()};
+                }
+                return null;
+            }
+        });
     }
 
     @Override

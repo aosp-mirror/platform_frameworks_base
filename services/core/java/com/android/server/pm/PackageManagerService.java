@@ -55,7 +55,6 @@ import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageParser.isApkFile;
-import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.O_CREAT;
@@ -111,6 +110,7 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.PackageLite;
@@ -278,6 +278,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_VERIFY = false;
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
+
+    static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = Build.IS_DEBUGGABLE;
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -548,6 +550,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
             = new SparseArray<IntentFilterVerificationState>();
+
+    final DefaultPermissionGrantPolicy mDefaultPermissionPolicy =
+            new DefaultPermissionGrantPolicy(this);
 
     private interface IntentFilterVerifier<T extends IntentFilter> {
         boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
@@ -2197,6 +2202,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         // are all flushed.  Not really needed, but keeps things nice and
         // tidy.
         Runtime.getRuntime().gc();
+
+        // Expose private service for system components to use.
+        LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
     }
 
     @Override
@@ -3153,7 +3161,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String name, int userId) {
+    public void grantRuntimePermission(String packageName, String name, final int userId) {
         if (!sUserManager.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -3166,7 +3174,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "grantRuntimePermission");
 
-        boolean gidsChanged = false;
         final SettingBase sb;
 
         synchronized (mPackages) {
@@ -3202,7 +3209,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
-                    gidsChanged = true;
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            killSettingPackagesForUser(sb, userId, KILL_APP_REASON_GIDS_CHANGED);
+                        }
+                    });
                 } break;
             }
 
@@ -3210,10 +3222,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Not critical if that is lost - app has to request again.
             mSettings.writeRuntimePermissionsForUserLPr(userId, false);
-        }
-
-        if (gidsChanged) {
-            killSettingPackagesForUser(sb, userId, KILL_APP_REASON_GIDS_CHANGED);
         }
     }
 
@@ -3321,15 +3329,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "updatePermissionFlags");
 
-        // Only the system can change policy flags.
+        // Only the system can change policy and system fixed flags.
         if (getCallingUid() != Process.SYSTEM_UID) {
             flagMask &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
             flagValues &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-        }
 
-        // Only the package manager can change system flags.
-        flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-        flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+            flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+        }
 
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
@@ -3405,6 +3412,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+    }
+
+    void grantInstallPermissionLPw(String permission, PackageParser.Package pkg) {
+        BasePermission bp = mSettings.mPermissions.get(permission);
+        if (bp == null) {
+            throw new SecurityException("Missing " + permission + " permission");
+        }
+
+        SettingBase sb = (SettingBase) pkg.mExtras;
+        PermissionsState permissionsState = sb.getPermissionsState();
+
+        if (permissionsState.grantInstallPermission(bp) !=
+                PermissionsState.PERMISSION_OPERATION_FAILURE) {
+            scheduleWriteSettingsLocked();
+        }
     }
 
     @Override
@@ -7751,7 +7773,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
 
-        int[] upgradeUserIds = EMPTY_INT_ARRAY;
         int[] changedRuntimePermissionUserIds = EMPTY_INT_ARRAY;
 
         boolean changedInstallPermission = false;
@@ -7808,32 +7829,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                         // For legacy apps dangerous permissions are install time ones.
                         grant = GRANT_INSTALL_LEGACY;
-                    } else if (ps.isSystem()) {
-                        final int[] updatedUserIds = ps.getPermissionsUpdatedForUserIds();
-                        if (origPermissions.hasInstallPermission(bp.name)) {
-                            // If a system app had an install permission, then the app was
-                            // upgraded and we grant the permissions as runtime to all users.
-                            grant = GRANT_UPGRADE;
-                            upgradeUserIds = currentUserIds;
-                        } else if (!Arrays.equals(updatedUserIds, currentUserIds)) {
-                            // If users changed since the last permissions update for a
-                            // system app, we grant the permission as runtime to the new users.
-                            grant = GRANT_UPGRADE;
-                            upgradeUserIds = currentUserIds;
-                            for (int userId : updatedUserIds) {
-                                upgradeUserIds = ArrayUtils.removeInt(upgradeUserIds, userId);
-                            }
-                        } else {
-                            // Otherwise, we grant the permission as runtime if the app
-                            // already had it, i.e. we preserve runtime permissions.
-                            grant = GRANT_RUNTIME;
-                        }
                     } else if (origPermissions.hasInstallPermission(bp.name)) {
                         // For legacy apps that became modern, install becomes runtime.
                         grant = GRANT_UPGRADE;
-                        upgradeUserIds = currentUserIds;
-                    } else if (replace) {
-                        // For upgraded modern apps keep runtime permissions unchanged.
+                    } else {
+                        // For modern apps keep runtime permissions unchanged.
                         grant = GRANT_RUNTIME;
                     }
                 } break;
@@ -7868,7 +7868,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 switch (grant) {
                     case GRANT_INSTALL: {
                         // Revoke this as runtime permission to handle the case of
-                        // a runtime permssion being downgraded to an install one.
+                        // a runtime permission being downgraded to an install one.
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             if (origPermissions.getRuntimePermissionState(
                                     bp.name, userId) != null) {
@@ -7899,26 +7899,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     case GRANT_RUNTIME: {
                         // Grant previously granted runtime permissions.
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
+                            PermissionState permissionState = origPermissions
+                                    .getRuntimePermissionState(bp.name, userId);
+                            final int flags = permissionState != null
+                                    ? permissionState.getFlags() : 0;
                             if (origPermissions.hasRuntimePermission(bp.name, userId)) {
-                                PermissionState permissionState = origPermissions
-                                        .getRuntimePermissionState(bp.name, userId);
-                                final int flags = permissionState.getFlags();
                                 if (permissionsState.grantRuntimePermission(bp, userId) ==
                                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
                                     // If we cannot put the permission as it was, we have to write.
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
-                                } else {
-                                    // System components not only get the permissions but
-                                    // they are also fixed, so nothing can change that.
-                                    final int newFlags = !isSystemComponentOrPersistentPrivApp(pkg)
-                                            ? flags
-                                            : flags | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-                                    // Propagate the permission flags.
-                                    permissionsState.updatePermissionFlags(bp, userId,
-                                            newFlags, newFlags);
                                 }
                             }
+                            // Propagate the permission flags.
+                            permissionsState.updatePermissionFlags(bp, userId, flags, flags);
                         }
                     } break;
 
@@ -7928,25 +7922,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 .getInstallPermissionState(bp.name);
                         final int flags = permissionState != null ? permissionState.getFlags() : 0;
 
-                        origPermissions.revokeInstallPermission(bp);
-                        // We will be transferring the permission flags, so clear them.
-                        origPermissions.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                PackageManager.MASK_PERMISSION_FLAGS, 0);
+                        if (origPermissions.revokeInstallPermission(bp)
+                                != PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                            // We will be transferring the permission flags, so clear them.
+                            origPermissions.updatePermissionFlags(bp, UserHandle.USER_ALL,
+                                    PackageManager.MASK_PERMISSION_FLAGS, 0);
+                            changedInstallPermission = true;
+                        }
 
                         // If the permission is not to be promoted to runtime we ignore it and
                         // also its other flags as they are not applicable to install permissions.
                         if ((flags & PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE) == 0) {
-                            for (int userId : upgradeUserIds) {
+                            for (int userId : currentUserIds) {
                                 if (permissionsState.grantRuntimePermission(bp, userId) !=
                                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                    // System components not only get the permissions but
-                                    // they are also fixed so nothing can change that.
-                                    final int newFlags = !isSystemComponentOrPersistentPrivApp(pkg)
-                                            ? flags
-                                            : flags | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
                                     // Transfer the permission flags.
                                     permissionsState.updatePermissionFlags(bp, userId,
-                                            newFlags, newFlags);
+                                            flags, flags);
                                     // If we granted the permission, we have to write.
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
@@ -7997,8 +7989,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // changed.
             ps.installPermissionsFixed = true;
         }
-
-        ps.setPermissionsUpdatedForUserIds(currentUserIds);
 
         // Persist the runtime permissions state for users with changes.
         for (int userId : changedRuntimePermissionUserIds) {
@@ -11879,13 +11869,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private boolean isSystemComponentOrPersistentPrivApp(PackageParser.Package pkg) {
-        return UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID
-                || ((pkg.applicationInfo.privateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0
-                && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0);
-    }
-
     private static boolean isMultiArch(PackageSetting ps) {
         return (ps.pkgFlags & ApplicationInfo.FLAG_MULTIARCH) != 0;
     }
@@ -13704,6 +13687,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         sUserManager.systemReady();
 
+        // If we upgraded grant all default permissions before kicking off.
+        if (isFirstBoot()) {
+            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
+            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+            }
+        }
+
         // Kick off any messages waiting for system ready
         if (mPostSystemReadyMessages != null) {
             for (Message msg : mPostSystemReadyMessages) {
@@ -15093,9 +15084,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void newUserCreatedLILPw(int userHandle) {
-        // Adding a user requires updating runtime permissions for system apps.
-        updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
+    void newUserCreatedLILPw(final int userHandle) {
+        // We cannot grant the default permissions with a lock held as
+        // we query providers from other components for default handlers
+        // such as enabled IMEs, etc.
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mDefaultPermissionPolicy.grantDefaultPermissions(userHandle);
+            }
+        });
     }
 
     @Override
@@ -15444,6 +15442,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             } finally {
                 mPermissionListeners.finishBroadcast();
+            }
+        }
+    }
+
+    private class PackageManagerInternalImpl extends PackageManagerInternal {
+        @Override
+        public void setLocationPackagesProvider(PackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setLocationPackagesProviderLPw(provider);
+            }
+        }
+
+        @Override
+        public void setImePackagesProvider(PackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setImePackagesProviderLPr(provider);
+            }
+        }
+
+        @Override
+        public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setVoiceInteractionPackagesProviderLPw(provider);
             }
         }
     }
