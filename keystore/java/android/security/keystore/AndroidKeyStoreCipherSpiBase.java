@@ -446,7 +446,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             inputLen = input.length;
             src.get(input);
         }
-        super.engineUpdateAAD(input, inputOffset, inputLen);
+        engineUpdateAAD(input, inputOffset, inputLen);
     }
 
     @Override
