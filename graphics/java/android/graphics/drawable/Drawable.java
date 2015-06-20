@@ -270,8 +270,13 @@ public abstract class Drawable {
 
     /**
      * Set to true to have the drawable dither its colors when drawn to a device
-     * with fewer than 8-bits per color component. This can improve the look on
-     * those devices, but can also slow down the drawing a little.
+     * with fewer than 8-bits per color component.
+     *
+     * <p>This can improve the look on those devices, but can also slow down
+     * the drawing a little.</p>
+     *
+     * @see #isDither()
+     * @see android.graphics.Paint#setDither(boolean);
      */
     public void setDither(boolean dither) {}
 
@@ -284,15 +289,19 @@ public abstract class Drawable {
     }
 
     /**
-     * Set to true to have the drawable filter its bitmap when scaled or rotated
-     * (for drawables that use bitmaps). If the drawable does not use bitmaps,
-     * this call is ignored. This can improve the look when scaled or rotated,
-     * but also slows down the drawing.
+     * Set to true to have the drawable filter its bitmaps with bilinear
+     * sampling when they are scaled or rotated.
+     *
+     * <p>This can improve appearance when bitmaps are rotated. If the drawable
+     * does not use bitmaps, this call is ignored.</p>
+     *
+     * @see #isFilterBitmap()
+     * @see android.graphics.Paint#setFilterBitmap(boolean);
      */
     public void setFilterBitmap(boolean filter) {}
 
     /**
-     * @return whether this drawable filters its bitmap
+     * @return whether this drawable filters its bitmaps
      * @see #setFilterBitmap(boolean)
      */
     public boolean isFilterBitmap() {
