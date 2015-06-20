@@ -28,13 +28,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An abstract implementation of a SyncAdapter that spawns a thread to invoke a sync operation.
- * If a sync operation is already in progress when a startSync() request is received then an error
- * will be returned to the new request and the existing request will be allowed to continue.
- * When a startSync() is received and there is no sync operation in progress then a thread
- * will be started to run the operation and {@link #onPerformSync} will be invoked on that thread.
- * If a cancelSync() is received that matches an existing sync operation then the thread
- * that is running that sync operation will be interrupted, which will indicate to the thread
- * that the sync has been canceled.
+ * If a sync operation is already in progress when a sync request is received, an error will be
+ * returned to the new request and the existing request will be allowed to continue.
+ * However if there is no sync in progress then a thread will be spawned and {@link #onPerformSync}
+ * will be invoked on that thread.
+ * <p>
+ * Syncs can be cancelled at any time by the framework. For example a sync that was not
+ * user-initiated and lasts longer than 30 minutes will be considered timed-out and cancelled.
+ * Similarly the framework will attempt to determine whether or not an adapter is making progress
+ * by monitoring its network activity over the course of a minute. If the network traffic over this
+ * window is close enough to zero the sync will be cancelled. You can also request the sync be
+ * cancelled via {@link ContentResolver#cancelSync(Account, String)} or
+ * {@link ContentResolver#cancelSync(SyncRequest)}.
+ * <p>
+ * A sync is cancelled by issuing a {@link Thread#interrupt()} on the syncing thread. <strong>Either
+ * your code in {@link #onPerformSync(Account, Bundle, String, ContentProviderClient, SyncResult)}
+ * must check {@link Thread#interrupted()}, or you you must override one of
+ * {@link #onSyncCanceled(Thread)}/{@link #onSyncCanceled()}</strong> (depending on whether or not
+ * your adapter supports syncing of multiple accounts in parallel). If your adapter does not
+ * respect the cancel issued by the framework you run the risk of your app's entire process being
+ * killed.
  * <p>
  * In order to be a sync adapter one must extend this class, provide implementations for the
  * abstract methods and write a service that returns the result of {@link #getSyncAdapterBinder()}

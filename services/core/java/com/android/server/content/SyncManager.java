@@ -55,6 +55,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,7 +101,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -160,6 +160,19 @@ public class SyncManager {
      * How long to wait before considering an active sync to have timed-out, and cancelling it.
      */
     private static final long ACTIVE_SYNC_TIMEOUT_MILLIS = 30L * 60 * 1000;  // 30 mins
+
+    /**
+     * How often to periodically poll network traffic for an adapter performing a sync to determine
+     * whether progress is being made.
+     */
+    private static final long SYNC_MONITOR_WINDOW_LENGTH_MILLIS = 60 * 1000; // 60 seconds
+
+    /**
+     * How many bytes must be transferred (Tx + Rx) over the period of time defined by
+     * {@link #SYNC_MONITOR_WINDOW_LENGTH_MILLIS} for the sync to be considered to be making
+     * progress.
+     */
+    private static final int SYNC_MONITOR_PROGRESS_THRESHOLD_BYTES = 10; // 10 bytes
 
     /**
      * How long to delay each queued {@link SyncHandler} message that may have occurred before boot
@@ -953,20 +966,42 @@ public class SyncManager {
     }
 
     /**
-     * Remove any time-outs previously posted for the provided active sync.
+     * Post a delayed message that will monitor the given sync context by periodically checking how
+     * much network has been used by the uid.
      */
-    private void removeSyncExpiryMessage(ActiveSyncContext activeSyncContext) {
+    private void postMonitorSyncProgressMessage(ActiveSyncContext activeSyncContext) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "removing all MESSAGE_SYNC_EXPIRED for " + activeSyncContext.toString());
+            Log.v(TAG, "posting MESSAGE_SYNC_MONITOR in " +
+                    (SYNC_MONITOR_WINDOW_LENGTH_MILLIS/1000) + "s");
         }
-        mSyncHandler.removeMessages(SyncHandler.MESSAGE_SYNC_EXPIRED, activeSyncContext);
+
+        activeSyncContext.mBytesTransferredAtLastPoll =
+                getTotalBytesTransferredByUid(activeSyncContext.mSyncAdapterUid);
+        activeSyncContext.mLastPolledTimeElapsed = SystemClock.elapsedRealtime();
+        Message monitorMessage =
+                mSyncHandler.obtainMessage(
+                        SyncHandler.MESSAGE_MONITOR_SYNC,
+                        activeSyncContext);
+        mSyncHandler.sendMessageDelayed(monitorMessage, SYNC_MONITOR_WINDOW_LENGTH_MILLIS);
     }
 
+    /**
+     * Monitor sync progress by calculating how many bytes it is managing to send to and fro.
+     */
+    private long getTotalBytesTransferredByUid(int uid) {
+        return (TrafficStats.getUidRxBytes(uid) + TrafficStats.getUidTxBytes(uid));
+    }
+
+    /**
+     * Convenience class for passing parameters for a finished or cancelled sync to the handler
+     * to be processed.
+     */
     class SyncHandlerMessagePayload {
         public final ActiveSyncContext activeSyncContext;
         public final SyncResult syncResult;
 
-        SyncHandlerMessagePayload(ActiveSyncContext syncContext, SyncResult syncResult) {
+        SyncHandlerMessagePayload(ActiveSyncContext syncContext,
+                                  SyncResult syncResult) {
             this.activeSyncContext = syncContext;
             this.syncResult = syncResult;
         }
@@ -1272,6 +1307,14 @@ public class SyncManager {
         SyncInfo mSyncInfo;
         boolean mIsLinkedToDeath = false;
         String mEventName;
+
+        /** Total bytes transferred, counted at {@link #mLastPolledTimeElapsed} */
+        long mBytesTransferredAtLastPoll;
+        /**
+         * Last point in {@link SystemClock#elapsedRealtime()} at which we checked the # of bytes
+         * transferred to/fro by this adapter.
+         */
+        long mLastPolledTimeElapsed;
 
         /**
          * Create an ActiveSyncContext for an impending sync and grab the wakelock for that
@@ -2044,8 +2087,16 @@ public class SyncManager {
         private static final int MESSAGE_SERVICE_CONNECTED = 4;
         private static final int MESSAGE_SERVICE_DISCONNECTED = 5;
         private static final int MESSAGE_CANCEL = 6;
-        /** Posted delayed in order to expire syncs that are long-running. */
+        /**
+         * Posted delayed in order to expire syncs that are long-running.
+         * obj: {@link com.android.server.content.SyncManager.ActiveSyncContext}
+         */
         private static final int MESSAGE_SYNC_EXPIRED = 7;
+        /**
+         * Posted periodically to monitor network process for long-running syncs.
+         * obj: {@link com.android.server.content.SyncManager.ActiveSyncContext}
+         */
+        private static final int MESSAGE_MONITOR_SYNC = 8;
 
         public final SyncNotificationInfo mSyncNotificationInfo = new SyncNotificationInfo();
         private Long mAlarmScheduleTime = null;
@@ -2163,28 +2214,16 @@ public class SyncManager {
                 // to also take into account the periodic syncs.
                 earliestFuturePollTime = scheduleReadyPeriodicSyncs();
                 switch (msg.what) {
-                    case SyncHandler.MESSAGE_SYNC_EXPIRED:
-                        ActiveSyncContext expiredContext = (ActiveSyncContext) msg.obj;
-                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SYNC_EXPIRED: expiring "
-                                    + expiredContext);
-                        }
-                        cancelActiveSync(expiredContext.mSyncOperation.target,
-                                expiredContext.mSyncOperation.extras);
-                        nextPendingSyncTime = maybeStartNextSyncH();
-                        break;
-
-                    case SyncHandler.MESSAGE_CANCEL: {
-                        SyncStorageEngine.EndPoint payload = (SyncStorageEngine.EndPoint) msg.obj;
+                    case SyncHandler.MESSAGE_CANCEL:
+                        SyncStorageEngine.EndPoint endpoint = (SyncStorageEngine.EndPoint) msg.obj;
                         Bundle extras = msg.peekData();
                         if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SERVICE_CANCEL: "
-                                    + payload + " bundle: " + extras);
+                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_CANCEL: "
+                                    + endpoint + " bundle: " + extras);
                         }
-                        cancelActiveSyncLocked(payload, extras);
+                        cancelActiveSyncH(endpoint, extras);
                         nextPendingSyncTime = maybeStartNextSyncH();
                         break;
-                    }
 
                     case SyncHandler.MESSAGE_SYNC_FINISHED:
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -2250,7 +2289,6 @@ public class SyncManager {
                             // since a sync just finished check if it is time to start a new sync
                             nextPendingSyncTime = maybeStartNextSyncH();
                         }
-
                         break;
                     }
 
@@ -2274,6 +2312,36 @@ public class SyncManager {
                         }
                         nextPendingSyncTime = maybeStartNextSyncH();
                         break;
+                    case SyncHandler.MESSAGE_SYNC_EXPIRED:
+                        ActiveSyncContext expiredContext = (ActiveSyncContext) msg.obj;
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SYNC_EXPIRED:" +
+                                    " cancelling " + expiredContext);
+                        }
+                        runSyncFinishedOrCanceledH(
+                                null /* cancel => no result */,
+                                expiredContext);
+                        nextPendingSyncTime = maybeStartNextSyncH();
+                        break;
+                    case SyncHandler.MESSAGE_MONITOR_SYNC:
+                        ActiveSyncContext monitoredSyncContext = (ActiveSyncContext) msg.obj;
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_MONITOR_SYNC: " +
+                                    monitoredSyncContext.mSyncOperation.target);
+                        }
+
+                        if (isSyncNotUsingNetworkH(monitoredSyncContext)) {
+                            Log.w(TAG, String.format(
+                                    "Detected sync making no progress for %s. cancelling.",
+                                    monitoredSyncContext));
+                            runSyncFinishedOrCanceledH(
+                                    null /* cancel => no result */, monitoredSyncContext);
+                        } else {
+                            // Repost message to check again.
+                            postMonitorSyncProgressMessage(monitoredSyncContext);
+                        }
+                    break;
+
                 }
             } finally {
                 manageSyncNotificationLocked();
@@ -2695,6 +2763,30 @@ public class SyncManager {
             return nextReadyToRunTime;
         }
 
+        private boolean isSyncNotUsingNetworkH(ActiveSyncContext activeSyncContext) {
+            final long bytesTransferredCurrent =
+                    getTotalBytesTransferredByUid(activeSyncContext.mSyncAdapterUid);
+            final long deltaBytesTransferred =
+                    bytesTransferredCurrent - activeSyncContext.mBytesTransferredAtLastPoll;
+
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                // Bytes transferred
+                long remainder = deltaBytesTransferred;
+                long mb = remainder / (1024 * 1024);
+                remainder %= 1024 * 1024;
+                long kb = remainder / 1024;
+                remainder %= 1024;
+                long b = remainder;
+                Log.d(TAG, String.format(
+                                "Time since last update: %ds. Delta transferred: %dMBs,%dKBs,%dBs",
+                                (SystemClock.elapsedRealtime()
+                                        - activeSyncContext.mLastPolledTimeElapsed)/1000,
+                                mb, kb, b)
+                );
+            }
+            return (deltaBytesTransferred <= SYNC_MONITOR_PROGRESS_THRESHOLD_BYTES);
+        }
+
         /**
          * Determine if a sync is no longer valid and should be dropped from the sync queue and its
          * pending op deleted.
@@ -2845,18 +2937,22 @@ public class SyncManager {
             }
             ActiveSyncContext activeSyncContext =
                     new ActiveSyncContext(op, insertStartSyncEvent(op), targetUid);
-            activeSyncContext.mSyncInfo = mSyncStorageEngine.addActiveSync(activeSyncContext);
-            mActiveSyncContexts.add(activeSyncContext);
-            if (!activeSyncContext.mSyncOperation.isInitialization() &&
-                    !activeSyncContext.mSyncOperation.isExpedited() &&
-                    !activeSyncContext.mSyncOperation.isManual() &&
-                    !activeSyncContext.mSyncOperation.isIgnoreSettings()) {
-                // Post message to expire this sync if it runs for too long.
-                postSyncExpiryMessage(activeSyncContext);
-            }
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "dispatchSyncOperation: starting " + activeSyncContext);
             }
+
+            activeSyncContext.mSyncInfo = mSyncStorageEngine.addActiveSync(activeSyncContext);
+            mActiveSyncContexts.add(activeSyncContext);
+            // Post message to cancel this sync if it runs for too long.
+            if (!activeSyncContext.mSyncOperation.isExpedited() &&
+                    !activeSyncContext.mSyncOperation.isManual() &&
+                    !activeSyncContext.mSyncOperation.isIgnoreSettings()) {
+                postSyncExpiryMessage(activeSyncContext);
+            }
+
+            // Post message to begin monitoring this sync's progress.
+            postMonitorSyncProgressMessage(activeSyncContext);
+
             if (!activeSyncContext.bindToSyncAdapter(targetComponent, info.userId)) {
                 Log.e(TAG, "Bind attempt failed - target: " + targetComponent);
                 closeActiveSyncContext(activeSyncContext);
@@ -2898,9 +2994,10 @@ public class SyncManager {
 
         /**
          * Cancel the sync for the provided target that matches the given bundle.
-         * @param info can have null fields to indicate all the active syncs for that field.
+         * @param info Can have null fields to indicate all the active syncs for that field.
+         * @param extras Can be null to indicate <strong>all</strong> syncs for the given endpoint.
          */
-        private void cancelActiveSyncLocked(SyncStorageEngine.EndPoint info, Bundle extras) {
+        private void cancelActiveSyncH(SyncStorageEngine.EndPoint info, Bundle extras) {
             ArrayList<ActiveSyncContext> activeSyncs =
                     new ArrayList<ActiveSyncContext>(mActiveSyncContexts);
             for (ActiveSyncContext activeSyncContext : activeSyncs) {
@@ -2916,8 +3013,7 @@ public class SyncManager {
                                     false /* no config settings */)) {
                         continue;
                     }
-                    runSyncFinishedOrCanceledH(null /* no result since this is a cancel */,
-                            activeSyncContext);
+                    runSyncFinishedOrCanceledH(null /* cancel => no result */, activeSyncContext);
                 }
             }
         }
@@ -3030,7 +3126,13 @@ public class SyncManager {
             mActiveSyncContexts.remove(activeSyncContext);
             mSyncStorageEngine.removeActiveSync(activeSyncContext.mSyncInfo,
                     activeSyncContext.mSyncOperation.target.userId);
-            removeSyncExpiryMessage(activeSyncContext);
+
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "removing all MESSAGE_MONITOR_SYNC & MESSAGE_SYNC_EXPIRED for "
+                        + activeSyncContext.toString());
+            }
+            mSyncHandler.removeMessages(SyncHandler.MESSAGE_SYNC_EXPIRED, activeSyncContext);
+            mSyncHandler.removeMessages(SyncHandler.MESSAGE_MONITOR_SYNC, activeSyncContext);
         }
 
         /**
