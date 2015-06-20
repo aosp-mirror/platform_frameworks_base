@@ -22,6 +22,8 @@ public interface LocationController extends CallbackController<LocationChangeCal
     boolean isLocationActive();
     boolean isLocationEnabled();
     boolean setLocationEnabled(boolean enabled);
+    boolean setLocationMode(int mode);
+    int getLocationCurrentState();
 
     /**
      * A callback for change in location settings (the user has enabled/disabled location).
