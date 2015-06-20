@@ -16,14 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
@@ -54,6 +53,7 @@ public class LockIcon extends KeyguardAffordanceView {
     private final TrustDrawable mTrustDrawable;
     private final UnlockMethodCache mUnlockMethodCache;
     private AccessibilityController mAccessibilityController;
+    private boolean mHasFingerPrintIcon;
 
     public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -128,6 +128,11 @@ public class LockIcon extends KeyguardAffordanceView {
             setRestingAlpha(
                     anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
             setImageDrawable(icon);
+            String contentDescription = getResources().getString(anyFingerprintIcon
+                    ? R.string.accessibility_unlock_button_fingerprint
+                    : R.string.accessibility_unlock_button);
+            setContentDescription(contentDescription);
+            mHasFingerPrintIcon = anyFingerprintIcon;
             if (animation != null) {
 
                 // If we play the draw on animation, delay it by one frame when the screen is
@@ -165,6 +170,20 @@ public class LockIcon extends KeyguardAffordanceView {
         setClickable(clickToForceLock || clickToUnlock);
         setLongClickable(longClickToForceLock);
         setFocusable(mAccessibilityController.isAccessibilityEnabled());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (mHasFingerPrintIcon) {
+            // Avoid that the button description is also spoken
+            info.setClassName(LockIcon.class.getName());
+            AccessibilityNodeInfo.AccessibilityAction unlock
+                    = new AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.ACTION_CLICK,
+                    getContext().getString(R.string.accessibility_unlock_without_fingerprint));
+            info.addAction(unlock);
+        }
     }
 
     public void setAccessibilityController(AccessibilityController accessibilityController) {
