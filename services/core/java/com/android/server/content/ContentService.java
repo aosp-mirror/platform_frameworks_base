@@ -506,6 +506,21 @@ public final class ContentService extends IContentService.Stub {
     }
 
     @Override
+    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read sync settings for user " + userId);
+        // This makes it so that future permission checks will be in the context of this
+        // process rather than the caller's process. We will restore this before returning.
+        final long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            return syncManager.getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
     public boolean getSyncAutomatically(Account account, String providerName) {
         return getSyncAutomaticallyAsUser(account, providerName, UserHandle.getCallingUserId());
     }
