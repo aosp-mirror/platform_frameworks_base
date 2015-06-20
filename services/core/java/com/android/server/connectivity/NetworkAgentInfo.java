@@ -106,8 +106,16 @@ public class NetworkAgentInfo {
         networkMisc = misc;
     }
 
-    public void addRequest(NetworkRequest networkRequest) {
+    /**
+     * Add {@code networkRequest} to this network as it's satisfied by this network.
+     * NOTE: This function must only be called on ConnectivityService's main thread.
+     * @return true if {@code networkRequest} was added or false if {@code networkRequest} was
+     *         already present.
+     */
+    public boolean addRequest(NetworkRequest networkRequest) {
+        if (networkRequests.get(networkRequest.requestId) == networkRequest) return false;
         networkRequests.put(networkRequest.requestId, networkRequest);
+        return true;
     }
 
     // Does this network satisfy request?
