@@ -12726,6 +12726,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        // Ensure default permissions are never cleared.
+        mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+
         if (needsWrite) {
             mSettings.writeRuntimePermissionsForUserLPr(userId, true);
         }
