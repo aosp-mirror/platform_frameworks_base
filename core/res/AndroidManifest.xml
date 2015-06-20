@@ -1424,13 +1424,13 @@
     <permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
         android:label="@string/permlab_install_shortcut"
         android:description="@string/permdesc_install_shortcut"
-        android:protectionLevel="dangerous"/>
+        android:protectionLevel="normal"/>
 
     <!-- Allows an application to uninstall a shortcut in Launcher -->
     <permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"
         android:label="@string/permlab_uninstall_shortcut"
         android:description="@string/permdesc_uninstall_shortcut"
-        android:protectionLevel="dangerous"/>
+        android:protectionLevel="normal"/>
 
     <!-- ==================================================== -->
     <!-- Permissions related to accessing sync settings   -->
