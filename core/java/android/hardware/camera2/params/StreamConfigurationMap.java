@@ -22,9 +22,9 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.legacy.LegacyMetadataMapper;
-import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;
 import android.view.Surface;
 import android.util.Range;
 import android.util.Size;
@@ -389,27 +389,24 @@ public final class StreamConfigurationMap {
     public boolean isOutputSupportedFor(Surface surface) {
         checkNotNull(surface, "surface must not be null");
 
-        Size surfaceSize;
-        int surfaceFormat = -1;
-        try {
-            surfaceSize = LegacyCameraDevice.getSurfaceSize(surface);
-            surfaceFormat = LegacyCameraDevice.detectSurfaceType(surface);
-        } catch(BufferQueueAbandonedException e) {
-            throw new IllegalArgumentException("Abandoned surface", e);
-        }
+        Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
+        int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
+        int surfaceDataspace = SurfaceUtils.getSurfaceDataspace(surface);
 
         // See if consumer is flexible.
-        boolean isFlexible = LegacyCameraDevice.isFlexibleConsumer(surface);
+        boolean isFlexible = SurfaceUtils.isFlexibleConsumer(surface);
 
         // Override RGB formats to IMPLEMENTATION_DEFINED, b/9487482
         if ((surfaceFormat >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
                         surfaceFormat <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
-            surfaceFormat = LegacyMetadataMapper.HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
+            surfaceFormat = HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
         }
 
-        for (StreamConfiguration config : mConfigurations) {
+        StreamConfiguration[] configs =
+                surfaceDataspace != HAL_DATASPACE_DEPTH ? mConfigurations : mDepthConfigurations;
+        for (StreamConfiguration config : configs) {
             if (config.getFormat() == surfaceFormat && config.isOutput()) {
-                // Mathing format, either need exact size match, or a flexible consumer
+                // Matching format, either need exact size match, or a flexible consumer
                 // and a size no bigger than MAX_DIMEN_FOR_ROUNDING
                 if (config.getSize().equals(surfaceSize)) {
                     return true;
