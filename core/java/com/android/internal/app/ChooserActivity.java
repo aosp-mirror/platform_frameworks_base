@@ -50,11 +50,13 @@ import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -185,6 +187,8 @@ public class ChooserActivity extends ResolverActivity {
         setSafeForwardingMode(true);
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
+
+        MetricsLogger.action(this, MetricsLogger.ACTION_ACTIVITY_CHOOSER_SHOWN);
     }
 
     @Override
@@ -289,6 +293,36 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
         return super.onTargetSelected(target, alwaysCheck);
+    }
+
+    @Override
+    void startSelected(int which, boolean always, boolean filtered) {
+        super.startSelected(which, always, filtered);
+
+        if (mChooserListAdapter != null) {
+            // Log the index of which type of target the user picked.
+            // Lower values mean the ranking was better.
+            int cat = 0;
+            int value = which;
+            switch (mChooserListAdapter.getPositionTargetType(which)) {
+                case ChooserListAdapter.TARGET_CALLER:
+                    cat = MetricsLogger.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
+                    break;
+                case ChooserListAdapter.TARGET_SERVICE:
+                    cat = MetricsLogger.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET;
+                    value -= mChooserListAdapter.getCallerTargetCount();
+                    break;
+                case ChooserListAdapter.TARGET_STANDARD:
+                    cat = MetricsLogger.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
+                    value -= mChooserListAdapter.getCallerTargetCount()
+                            + mChooserListAdapter.getServiceTargetCount();
+                    break;
+            }
+
+            if (cat != 0) {
+                MetricsLogger.action(this, cat, value);
+            }
+        }
     }
 
     void queryTargetServices(ChooserListAdapter adapter) {
@@ -849,6 +883,14 @@ public class ChooserActivity extends ResolverActivity {
                         @Override
                         public void onClick(View v) {
                             startSelected(itemIndex, false, true);
+                        }
+                    });
+                    v.setOnLongClickListener(new OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            showAppDetails(
+                                    mChooserListAdapter.resolveInfoForPosition(itemIndex, true));
+                            return true;
                         }
                     });
                 } else {
