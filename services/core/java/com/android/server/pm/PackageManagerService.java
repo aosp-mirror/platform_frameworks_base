@@ -13688,7 +13688,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         sUserManager.systemReady();
 
         // If we upgraded grant all default permissions before kicking off.
-        if (isFirstBoot()) {
+        if (isFirstBoot() || (CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE && mIsUpgrade)) {
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
             for (int userId : UserManagerService.getInstance().getUserIds()) {
                 mDefaultPermissionPolicy.grantDefaultPermissions(userId);
