@@ -4339,8 +4339,6 @@ final class Settings {
                 Slog.wtf(PackageManagerService.TAG,
                         "Failed to write settings, restoring backup", t);
                 destination.failWrite(out);
-                throw new IllegalStateException("Failed to write runtime permissions,"
-                        + " restoring backup", t);
             } finally {
                 IoUtils.closeQuietly(out);
             }
