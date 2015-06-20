@@ -2461,7 +2461,7 @@ public class ConnectivityManager {
      * Intent to reserve the network or it will be released shortly after the Intent
      * is processed.
      * <p>
-     * If there is already an request for this Intent registered (with the equality of
+     * If there is already a request for this Intent registered (with the equality of
      * two Intents defined by {@link Intent#filterEquals}), then it will be removed and
      * replaced by this one, effectively releasing the previous {@link NetworkRequest}.
      * <p>
@@ -2518,6 +2518,44 @@ public class ConnectivityManager {
      */
     public void registerNetworkCallback(NetworkRequest request, NetworkCallback networkCallback) {
         sendRequestForNetwork(request.networkCapabilities, networkCallback, 0, LISTEN, TYPE_NONE);
+    }
+
+    /**
+     * Registers a PendingIntent to be sent when a network is available which satisfies the given
+     * {@link NetworkRequest}.
+     *
+     * This function behaves identically to the version that takes a NetworkCallback, but instead
+     * of {@link NetworkCallback} a {@link PendingIntent} is used.  This means
+     * the request may outlive the calling application and get called back when a suitable
+     * network is found.
+     * <p>
+     * The operation is an Intent broadcast that goes to a broadcast receiver that
+     * you registered with {@link Context#registerReceiver} or through the
+     * &lt;receiver&gt; tag in an AndroidManifest.xml file
+     * <p>
+     * The operation Intent is delivered with two extras, a {@link Network} typed
+     * extra called {@link #EXTRA_NETWORK} and a {@link NetworkRequest}
+     * typed extra called {@link #EXTRA_NETWORK_REQUEST} containing
+     * the original requests parameters.
+     * <p>
+     * If there is already a request for this Intent registered (with the equality of
+     * two Intents defined by {@link Intent#filterEquals}), then it will be removed and
+     * replaced by this one, effectively releasing the previous {@link NetworkRequest}.
+     * <p>
+     * The request may be released normally by calling
+     * {@link #releaseNetworkRequest(android.app.PendingIntent)}.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * @param request {@link NetworkRequest} describing this request.
+     * @param operation Action to perform when the network is available (corresponds
+     *                  to the {@link NetworkCallback#onAvailable} call.  Typically
+     *                  comes from {@link PendingIntent#getBroadcast}. Cannot be null.
+     */
+    public void registerNetworkCallback(NetworkRequest request, PendingIntent operation) {
+        checkPendingIntent(operation);
+        try {
+            mService.pendingListenForNetwork(request.networkCapabilities, operation);
+        } catch (RemoteException e) {}
     }
 
     /**

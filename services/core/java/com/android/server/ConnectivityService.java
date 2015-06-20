@@ -326,7 +326,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * used to add a network request with a pending intent
-     * includes a NetworkRequestInfo
+     * obj = NetworkRequestInfo
      */
     private static final int EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT = 26;
 
@@ -355,6 +355,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * used internally to (re)configure mobile data always-on settings.
      */
     private static final int EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON = 30;
+
+    /**
+     * used to add a network listener with a pending intent
+     * obj = NetworkRequestInfo
+     */
+    private static final int EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT = 31;
 
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
@@ -2484,7 +2490,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleRegisterNetworkRequest((NetworkRequestInfo) msg.obj);
                     break;
                 }
-                case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT: {
+                case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT:
+                case EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT: {
                     handleRegisterNetworkRequestWithIntent(msg);
                     break;
                 }
@@ -3693,6 +3700,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void pendingListenForNetwork(NetworkCapabilities networkCapabilities,
             PendingIntent operation) {
+        checkNotNull(operation, "PendingIntent cannot be null.");
+        if (!hasWifiNetworkListenPermission(networkCapabilities)) {
+            enforceAccessPermission();
+        }
+
+        NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
+                networkCapabilities), TYPE_NONE, nextNetworkRequestId());
+        if (DBG) log("pendingListenForNetwork for " + networkRequest + " to trigger " + operation);
+        NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
+                NetworkRequestInfo.LISTEN);
+
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
     }
 
     @Override
