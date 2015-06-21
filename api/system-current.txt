@@ -19127,6 +19127,7 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
     field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
     field public static final java.lang.String COLUMN_POSTER_ART_URI = "poster_art_uri";
+    field public static final java.lang.String COLUMN_SEARCHABLE = "searchable";
     field public static final java.lang.String COLUMN_SEASON_NUMBER = "season_number";
     field public static final java.lang.String COLUMN_SHORT_DESCRIPTION = "short_description";
     field public static final java.lang.String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
