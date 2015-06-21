@@ -1978,7 +1978,7 @@ public final class TvInputManager {
                 mPendingEvents.removeAt(index);
 
                 if (timeout) {
-                    Log.w(TAG, "Timeout waiting for seesion to handle input event after "
+                    Log.w(TAG, "Timeout waiting for session to handle input event after "
                             + INPUT_SESSION_NOT_RESPONDING_TIMEOUT + " ms: " + mToken);
                 } else {
                     mHandler.removeMessages(InputEventHandler.MSG_TIMEOUT_INPUT_EVENT, p);
