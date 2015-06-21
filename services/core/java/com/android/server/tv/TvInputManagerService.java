@@ -1658,10 +1658,9 @@ public final class TvInputManagerService extends SystemService {
                     UserState userState = getUserStateLocked(resolvedUserId);
                     if (userState.sessionStateMap.size() == 1) {
                         return true;
-                    }
-                    else if (userState.sessionStateMap.size() == 2) {
+                    } else if (userState.sessionStateMap.size() == 2) {
                         SessionState[] sessionStates = userState.sessionStateMap.values().toArray(
-                                new SessionState[0]);
+                                new SessionState[2]);
                         // Check if there is a wrapper input.
                         if (sessionStates[0].hardwareSessionToken != null
                                 || sessionStates[1].hardwareSessionToken != null) {
