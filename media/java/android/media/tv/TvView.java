@@ -337,8 +337,14 @@ public class TvView extends ViewGroup {
     }
 
     private void resetInternal() {
+        mPendingAppPrivateCommands.clear();
         if (mSession != null) {
-            release();
+            setSessionSurface(null);
+            removeSessionOverlayView();
+            mUseRequestedSurfaceLayout = false;
+            mSession.release();
+            mSession = null;
+            mSessionCallback = null;
             resetSurfaceView();
         }
     }
@@ -736,17 +742,6 @@ public class TvView extends ViewGroup {
             mSurfaceView.setZOrderOnTop(true);
         }
         addView(mSurfaceView);
-    }
-
-    private void release() {
-        mPendingAppPrivateCommands.clear();
-
-        setSessionSurface(null);
-        removeSessionOverlayView();
-        mUseRequestedSurfaceLayout = false;
-        mSession.release();
-        mSession = null;
-        mSessionCallback = null;
     }
 
     private void setSessionSurface(Surface surface) {
