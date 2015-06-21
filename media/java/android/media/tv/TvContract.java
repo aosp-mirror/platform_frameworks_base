@@ -332,11 +332,11 @@ public final class TvContract {
      */
     public interface BaseTvColumns extends BaseColumns {
         /**
-         * The name of the package that owns a row in each table.
+         * The name of the package that owns the current row.
          *
-         * <p>The TV provider fills it in with the name of the package that provides the initial data
-         * of that row. If the package is later uninstalled, the rows it owns are automatically
-         * removed from the tables.
+         * <p>The TV provider fills in this column with the name of the package that provides the
+         * initial data of the row. If the package is later uninstalled, the rows it owns are
+         * automatically removed from the tables.
          *
          * <p>Type: TEXT
          */
@@ -680,12 +680,13 @@ public final class TvContract {
         /**
          * The flag indicating whether this TV channel is searchable or not.
          *
-         * <p>In some regions, it is not allowed to surface search results for a given channel
-         * without broadcaster's consent. This is used to impose such restriction. Channels marked
-         * with "not searchable" cannot be used by other services except for the system service that
-         * shows the TV content. A value of 1 indicates the channel is searchable and can be
-         * included in search results, a value of 0 indicates the channel and its TV programs are
-         * hidden from search. If not specified, this value is set to 1 (searchable) by default.
+         * <p>The columns of searchable channels can be read by other applications that have proper
+         * permission. Care must be taken not to open sensitive data.
+         *
+         * <p>A value of 1 indicates that the channel is searchable and its columns can be read by
+         * other applications, a value of 0 indicates that the channel is hidden and its columns can
+         * be read only by the package that owns the channel and the system. If not specified, this
+         * value is set to 1 (searchable) by default.
          *
          * <p>Type: INTEGER (boolean)
          */
@@ -1009,6 +1010,21 @@ public final class TvContract {
          * <p>Type: TEXT
          */
         public static final String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
+
+        /**
+         * The flag indicating whether this TV program is searchable or not.
+         *
+         * <p>The columns of searchable programs can be read by other applications that have proper
+         * permission. Care must be taken not to open sensitive data.
+         *
+         * <p>A value of 1 indicates that the program is searchable and its columns can be read by
+         * other applications, a value of 0 indicates that the program is hidden and its columns can
+         * be read only by the package that owns the program and the system. If not specified, this
+         * value is set to 1 (searchable) by default.
+         *
+         * <p>Type: INTEGER (boolean)
+         */
+        public static final String COLUMN_SEARCHABLE = "searchable";
 
         /**
          * Internal data used by individual TV input services.
