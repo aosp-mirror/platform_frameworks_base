@@ -89,12 +89,8 @@ public class TvStreamConfig implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder(128);
-        b.append("TvStreamConfig {");
-        b.append("mStreamId=").append(mStreamId).append(";");
-        b.append("mType=").append(mType).append(";");
-        b.append("mGeneration=").append(mGeneration).append("}");
-        return b.toString();
+        return "TvStreamConfig {mStreamId=" + mStreamId + ";" + "mType=" + mType + ";mGeneration="
+                + mGeneration + "}";
     }
 
     // Parcelable
