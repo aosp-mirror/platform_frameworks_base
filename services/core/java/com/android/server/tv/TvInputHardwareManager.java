@@ -900,7 +900,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 mAudioManager.createAudioPatch(
                         audioPatchArray,
                         new AudioPortConfig[] { sourceConfig },
-                        sinkConfigs.toArray(new AudioPortConfig[0]));
+                        sinkConfigs.toArray(new AudioPortConfig[sinkConfigs.size()]));
                 mAudioPatch = audioPatchArray[0];
                 if (sourceGainConfig != null) {
                     mAudioManager.setAudioPortGain(mAudioSource, sourceGainConfig);
