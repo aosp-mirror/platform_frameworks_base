@@ -340,7 +340,7 @@ public final class TvContract {
          *
          * <p>Type: TEXT
          */
-        public static final String COLUMN_PACKAGE_NAME = "package_name";
+        String COLUMN_PACKAGE_NAME = "package_name";
     }
 
     /** Column definitions for the TV channels table. */
