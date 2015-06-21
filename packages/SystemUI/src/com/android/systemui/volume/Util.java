@@ -16,11 +16,13 @@
 
 package com.android.systemui.volume;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.VolumeProvider;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.PlaybackState;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.TextView;
 
@@ -164,4 +166,9 @@ class Util {
         v.setVisibility(vis ? View.VISIBLE : View.INVISIBLE);
     }
 
+    public static boolean isVoiceCapable(Context context) {
+        final TelephonyManager telephony =
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        return telephony != null && telephony.isVoiceCapable();
+    }
 }
