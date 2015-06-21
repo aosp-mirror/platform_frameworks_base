@@ -233,10 +233,7 @@ public abstract class TvInputService extends Service {
             mTvInputManager = (TvInputManager) getSystemService(Context.TV_INPUT_SERVICE);
         }
         TvInputInfo info = mTvInputManager.getTvInputInfo(inputId);
-        if (info != null && info.isPassthroughInput()) {
-            return true;
-        }
-        return false;
+        return info != null && info.isPassthroughInput();
     }
 
     /**
@@ -1383,7 +1380,7 @@ public abstract class TvInputService extends Service {
             }
         }
 
-        private final void executeOrPostRunnable(Runnable action) {
+        private void executeOrPostRunnable(Runnable action) {
             synchronized(mLock) {
                 if (mSessionCallback == null) {
                     // The session is not initialized yet.
@@ -1651,13 +1648,13 @@ public abstract class TvInputService extends Service {
                     if (sessionImpl instanceof HardwareSession) {
                         HardwareSession proxySession =
                                 ((HardwareSession) sessionImpl);
-                        String harewareInputId = proxySession.getHardwareInputId();
-                        if (TextUtils.isEmpty(harewareInputId) ||
-                                !isPassthroughInput(harewareInputId)) {
-                            if (TextUtils.isEmpty(harewareInputId)) {
+                        String hardwareInputId = proxySession.getHardwareInputId();
+                        if (TextUtils.isEmpty(hardwareInputId) ||
+                                !isPassthroughInput(hardwareInputId)) {
+                            if (TextUtils.isEmpty(hardwareInputId)) {
                                 Log.w(TAG, "Hardware input id is not setup yet.");
                             } else {
-                                Log.w(TAG, "Invalid hardware input id : " + harewareInputId);
+                                Log.w(TAG, "Invalid hardware input id : " + hardwareInputId);
                             }
                             sessionImpl.onRelease();
                             try {
@@ -1672,7 +1669,7 @@ public abstract class TvInputService extends Service {
                         proxySession.mServiceHandler = mServiceHandler;
                         TvInputManager manager = (TvInputManager) getSystemService(
                                 Context.TV_INPUT_SERVICE);
-                        manager.createSession(harewareInputId,
+                        manager.createSession(hardwareInputId,
                                 proxySession.mHardwareSessionCallback, mServiceHandler);
                     } else {
                         SomeArgs someArgs = SomeArgs.obtain();

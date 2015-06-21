@@ -1929,7 +1929,7 @@ public final class TvInputManager {
              * @param handled {@code true} if the dispatched input event was handled properly.
              *            {@code false} otherwise.
              */
-            public void onFinishedInputEvent(Object token, boolean handled);
+            void onFinishedInputEvent(Object token, boolean handled);
         }
 
         // Must be called on the main looper
