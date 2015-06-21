@@ -19039,6 +19039,11 @@ package android.media.tv {
 
   public static final class TvContract.Channels implements android.media.tv.TvContract.BaseTvColumns {
     method public static final java.lang.String getVideoResolution(java.lang.String);
+    field public static final java.lang.String COLUMN_APP_LINK_COLOR = "app_link_color";
+    field public static final java.lang.String COLUMN_APP_LINK_ICON_URI = "app_link_icon_uri";
+    field public static final java.lang.String COLUMN_APP_LINK_INTENT_URI = "app_link_intent_uri";
+    field public static final java.lang.String COLUMN_APP_LINK_POSTER_ART_URI = "app_link_poster_art_uri";
+    field public static final java.lang.String COLUMN_APP_LINK_TEXT = "app_link_text";
     field public static final java.lang.String COLUMN_BROWSABLE = "browsable";
     field public static final java.lang.String COLUMN_DESCRIPTION = "description";
     field public static final java.lang.String COLUMN_DISPLAY_NAME = "display_name";
