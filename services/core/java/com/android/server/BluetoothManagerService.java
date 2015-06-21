@@ -61,7 +61,7 @@ import java.util.HashMap;
 import java.util.Map;
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
@@ -227,21 +227,23 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     }
                 }
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                if (DBG) Log.d(TAG, "Bluetooth user switched");
                 mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_USER_SWITCHED,
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                if (DBG) Log.d(TAG, "Bluetooth boot completed");
                 synchronized(mReceiver) {
                     if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
                         //Enable
                         if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
                         sendEnableMsg(mQuietEnableExternal);
                     }
-                }
-
-                if (!isNameAndAddressSet()) {
-                    // Sync the Bluetooth name and address from the Bluetooth Adapter
-                    if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
-                    getNameAndAddress();
+                    if (!isNameAndAddressSet()) {
+                        // Sync the Bluetooth name and address from the
+                        // Bluetooth Adapter
+                        if (DBG) Log.d(TAG, "Retrieving Bluetooth Adapter name and address...");
+                        getNameAndAddress();
+                    }
                 }
             }
         }
@@ -1099,7 +1101,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     boolean unbind = false;
                     if (DBG) Log.d(TAG,"MESSAGE_SAVE_NAME_AND_ADDRESS");
                     synchronized(mConnection) {
-                        if (!mEnable && mBluetooth != null) {
+                        if (!mEnable && mBluetooth != null && !mConnection.isGetNameAddressOnly()) {
                             try {
                                 mBluetooth.enable();
                             } catch (RemoteException e) {
@@ -1107,7 +1109,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             }
                         }
                     }
-                    if (mBluetooth != null) waitForOnOff(true, false);
+                    if (mBluetooth != null && !mConnection.isGetNameAddressOnly()) waitForOnOff(true, false);
                     synchronized(mConnection) {
                         if (mBluetooth != null) {
                             String name =  null;
@@ -1137,7 +1139,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                     }
                                 }
                             }
-                            if (!mEnable) {
+                            if (!mEnable && !mConnection.isGetNameAddressOnly()) {
                                 try {
                                     mBluetooth.disable();
                                 } catch (RemoteException e) {
@@ -1152,7 +1154,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             mHandler.sendMessage(getMsg);
                         }
                     }
-                    if (!mEnable && mBluetooth != null) waitForOnOff(false, true);
+                    if (!mEnable && mBluetooth != null && !mConnection.isGetNameAddressOnly()) {
+                        waitForOnOff(false, true);
+                    }
                     if (unbind) {
                         unbindAndFinish();
                     }
