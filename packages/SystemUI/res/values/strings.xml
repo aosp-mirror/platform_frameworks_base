@@ -755,8 +755,11 @@
     <!-- Zen mode: Priority only customization button label -->
     <string name="zen_priority_customize_button">Customize</string>
 
-    <!-- Zen mode: Total silence introduction message on first use -->
-    <string name="zen_silence_introduction">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games. You’ll still be able to make phone calls.</string>
+    <!-- Zen mode: Total silence introduction message on first use (voice capable devices) -->
+    <string name="zen_silence_introduction_voice">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games. You’ll still be able to make phone calls.</string>
+
+    <!-- Zen mode: Total silence introduction message on first use (non-voice capable devices) -->
+    <string name="zen_silence_introduction">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games.</string>
 
     <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
     <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>
