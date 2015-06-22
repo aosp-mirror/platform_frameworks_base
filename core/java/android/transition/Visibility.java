@@ -504,13 +504,20 @@ public abstract class Visibility extends Transition {
         private final boolean mIsForcedVisibility;
         private final View mView;
         private final int mFinalVisibility;
+        private final ViewGroup mParent;
 
+        private boolean mEnded;
         boolean mCanceled = false;
 
         public DisappearListener(View view, int finalVisibility, boolean isForcedVisibility) {
             this.mView = view;
             this.mIsForcedVisibility = isForcedVisibility;
             this.mFinalVisibility = finalVisibility;
+            this.mParent = (ViewGroup) view.getParent();
+            if (!isForcedVisibility && mParent != null) {
+                // Prevent a layout from including mView in its calculation.
+                mParent.suppressLayout(true);
+            }
         }
 
         @Override
@@ -552,13 +559,39 @@ public abstract class Visibility extends Transition {
             hideViewWhenNotCanceled();
         }
 
+        @Override
+        public void onTransitionPause(Transition transition) {
+            if (mParent != null && !mIsForcedVisibility) {
+                mParent.suppressLayout(false);
+            }
+        }
+
+        @Override
+        public void onTransitionResume(Transition transition) {
+            if (mParent != null && !mIsForcedVisibility) {
+                mParent.suppressLayout(true);
+            }
+        }
+
         private void hideViewWhenNotCanceled() {
-            if (!mCanceled) {
-                if (mIsForcedVisibility) {
-                    mView.setTransitionAlpha(0);
-                } else {
-                    mView.setVisibility(mFinalVisibility);
+            if (!mEnded) {
+                if (!mCanceled) {
+                    if (mIsForcedVisibility) {
+                        mView.setTransitionAlpha(0);
+                    } else {
+                        // Recreate the parent's display list in case it includes mView.
+                        mView.setTransitionVisibility(mFinalVisibility);
+                        if (mParent != null) {
+                            mParent.invalidate();
+                        }
+                    }
                 }
+                if (!mIsForcedVisibility && mParent != null) {
+                    // Layout is allowed now that the View is in its final state
+                    mParent.suppressLayout(false);
+                }
+                // Do this only once
+                mEnded = true;
             }
         }
     }
