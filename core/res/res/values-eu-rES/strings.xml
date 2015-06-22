@@ -26,8 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> egun"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> egun <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> egun <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
@@ -225,7 +224,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modu segurua"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistema"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"Aplikazio pertsonalak"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Pertsonalak"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Lana"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"Atzitu kontaktuak"</string>
@@ -729,7 +728,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Eredua marrazten hasi zara"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Eredua garbitu da"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Gelaxka gehitu da"</string>
-    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Gehitu da <xliff:g id="CELL_INDEX">%1$s</xliff:g> konexio zelularra"</string>
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Gehitu da <xliff:g id="CELL_INDEX">%1$s</xliff:g> puntua"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Eredua osatu da"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d/%3$d widgeta."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Gehitu widgeta."</string>
