@@ -136,6 +136,10 @@ public class FlpHardwareProvider {
         }
 
         maybeSendCapabilities();
+
+        if (mGeofenceHardwareSink != null) {
+            mGeofenceHardwareSink.setVersion(getVersion());
+        }
     }
 
     private void onBatchingStatus(int status) {
@@ -152,10 +156,23 @@ public class FlpHardwareProvider {
         }
     }
 
+    // Returns the current version of the FLP HAL.  This depends both on the version of the
+    // structure returned by the hardware layer, and whether or not we've received the
+    // capabilities callback on initialization.  Assume original version until we get
+    // the new initialization callback.
+    private int getVersion() {
+        synchronized (mLocationSinkLock) {
+            if (mHaveBatchingCapabilities) {
+                return mVersion;
+            }
+        }
+        return 1;
+    }
+
     private void setVersion(int version) {
         mVersion = version;
         if (mGeofenceHardwareSink != null) {
-            mGeofenceHardwareSink.setVersion(version);
+            mGeofenceHardwareSink.setVersion(getVersion());
         }
     }
 
@@ -375,7 +392,7 @@ public class FlpHardwareProvider {
 
         @Override
         public void flushBatchedLocations() {
-            if (mVersion >= FIRST_VERSION_WITH_FLUSH_LOCATIONS) {
+            if (getVersion() >= FIRST_VERSION_WITH_FLUSH_LOCATIONS) {
                 nativeFlushBatchedLocations();
             } else {
                 Log.wtf(TAG,
@@ -405,7 +422,7 @@ public class FlpHardwareProvider {
 
         @Override
         public int getVersion() {
-            return mVersion;
+            return FlpHardwareProvider.this.getVersion();
         }
     };
 
@@ -482,7 +499,7 @@ public class FlpHardwareProvider {
     private GeofenceHardwareImpl getGeofenceHardwareSink() {
         if (mGeofenceHardwareSink == null) {
             mGeofenceHardwareSink = GeofenceHardwareImpl.getInstance(mContext);
-            mGeofenceHardwareSink.setVersion(mVersion);
+            mGeofenceHardwareSink.setVersion(getVersion());
         }
 
         return mGeofenceHardwareSink;
