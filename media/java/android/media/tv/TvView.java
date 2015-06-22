@@ -191,7 +191,7 @@ public class TvView extends ViewGroup {
      * the active source.
      *
      * <p>First tuned {@link TvView} becomes main automatically, and keeps to be main until either
-     * {@link #reset} is called for the main {@link TvView} or {@link #setMain} is called for other
+     * {@link #reset} is called for the main {@link TvView} or {@code setMain()} is called for other
      * {@link TvView}.
      * @hide
      */

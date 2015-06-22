@@ -106,7 +106,7 @@ public final class TvInputInfo implements Parcelable {
      */
     public static final String EXTRA_INPUT_ID = "android.media.tv.extra.INPUT_ID";
 
-    private static SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
+    private static final SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
 
     private static final String XML_START_TAG_NAME = "tv-input";
     private static final String DELIMITER_INFO_IN_ID = "/";
@@ -594,7 +594,7 @@ public final class TvInputInfo implements Parcelable {
      * @param name the component name for generating an input id.
      * @return the generated input id for the given {@code name}.
      */
-    private static final String generateInputIdForComponentName(ComponentName name) {
+    private static String generateInputIdForComponentName(ComponentName name) {
         return name.flattenToShortString();
     }
 
@@ -605,7 +605,7 @@ public final class TvInputInfo implements Parcelable {
      * @param deviceInfo HdmiDeviceInfo describing this TV input.
      * @return the generated input id for the given {@code name} and {@code deviceInfo}.
      */
-    private static final String generateInputIdForHdmiDevice(
+    private static String generateInputIdForHdmiDevice(
             ComponentName name, HdmiDeviceInfo deviceInfo) {
         // Example of the format : "/HDMI%04X%02X"
         String format = DELIMITER_INFO_IN_ID + PREFIX_HDMI_DEVICE
@@ -622,7 +622,7 @@ public final class TvInputInfo implements Parcelable {
      * @param hardwareInfo TvInputHardwareInfo describing this TV input.
      * @return the generated input id for the given {@code name} and {@code hardwareInfo}.
      */
-    private static final String generateInputIdForHardware(
+    private static String generateInputIdForHardware(
             ComponentName name, TvInputHardwareInfo hardwareInfo) {
         return name.flattenToShortString() + DELIMITER_INFO_IN_ID + PREFIX_HARDWARE_DEVICE
                 + hardwareInfo.getDeviceId();
@@ -648,13 +648,13 @@ public final class TvInputInfo implements Parcelable {
         mSetupActivity = in.readString();
         mSettingsActivity = in.readString();
         mType = in.readInt();
-        mIsHardwareInput = in.readByte() == 1 ? true : false;
+        mIsHardwareInput = in.readByte() == 1;
         mHdmiDeviceInfo = in.readParcelable(null);
         mIcon = in.readParcelable(null);
         mIconUri = in.readParcelable(null);
         mLabelRes = in.readInt();
         mLabel = in.readString();
-        mIsConnectedToHdmiSwitch = in.readByte() == 1 ? true : false;
+        mIsConnectedToHdmiSwitch = in.readByte() == 1;
     }
 
     /**
