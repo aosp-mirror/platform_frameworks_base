@@ -230,10 +230,11 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         // Make sure we have a clean slate.
         deleteStringViaProviderApi(type, FAKE_SETTING_NAME);
         deleteStringViaProviderApi(type, FAKE_SETTING_NAME_1);
+        deleteStringViaProviderApi(type, FAKE_SETTING_NAME_2);
 
         try {
             Uri uri = getBaseUriForType(type);
-            ContentValues[] allValues = new ContentValues[2];
+            ContentValues[] allValues = new ContentValues[3];
 
             // Insert the first setting.
             ContentValues firstValues = new ContentValues();
@@ -241,15 +242,21 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             firstValues.put(Settings.NameValueTable.VALUE, FAKE_SETTING_VALUE);
             allValues[0] = firstValues;
 
-            // Insert the first setting.
+            // Insert the second setting.
             ContentValues secondValues = new ContentValues();
             secondValues.put(Settings.NameValueTable.NAME, FAKE_SETTING_NAME_1);
             secondValues.put(Settings.NameValueTable.VALUE, FAKE_SETTING_VALUE_1);
             allValues[1] = secondValues;
 
+            // Insert the third setting. (null)
+            ContentValues thirdValues = new ContentValues();
+            thirdValues.put(Settings.NameValueTable.NAME, FAKE_SETTING_NAME_2);
+            thirdValues.put(Settings.NameValueTable.VALUE, FAKE_SETTING_VALUE_2);
+            allValues[2] = thirdValues;
+
             // Verify insertion count.
             final int insertCount = getContext().getContentResolver().bulkInsert(uri, allValues);
-            assertSame("Couldn't insert both values", 2, insertCount);
+            assertSame("Couldn't insert both values", 3, insertCount);
 
             // Make sure the first setting is there.
             String firstValue = queryStringViaProviderApi(type, FAKE_SETTING_NAME);
@@ -258,10 +265,15 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             // Make sure the second setting is there.
             String secondValue = queryStringViaProviderApi(type, FAKE_SETTING_NAME_1);
             assertEquals("Second setting must be present", FAKE_SETTING_VALUE_1, secondValue);
+
+            // Make sure the third setting is there.
+            String thirdValue = queryStringViaProviderApi(type, FAKE_SETTING_NAME_2);
+            assertEquals("Third setting must be present", FAKE_SETTING_VALUE_2, thirdValue);
         } finally {
             // Clean up.
             deleteStringViaProviderApi(type, FAKE_SETTING_NAME);
             deleteStringViaProviderApi(type, FAKE_SETTING_NAME_1);
+            deleteStringViaProviderApi(type, FAKE_SETTING_NAME_2);
         }
     }
 
