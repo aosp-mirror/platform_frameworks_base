@@ -214,7 +214,7 @@ public class BugreportReceiver extends BroadcastReceiver {
         try (InputStream is = new FileInputStream(bugreportFile);
             ZipOutputStream zos = new ZipOutputStream(
                 new BufferedOutputStream(new FileOutputStream(bugreportZippedFile)))) {
-            ZipEntry entry = new ZipEntry("bugreport.txt");
+            ZipEntry entry = new ZipEntry(bugreportFile.getName());
             zos.putNextEntry(entry);
             int totalBytes = Streams.copy(is, zos);
             Log.v(TAG, "size of original bugreport: " + totalBytes + " bytes");
