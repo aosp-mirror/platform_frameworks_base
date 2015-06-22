@@ -95,6 +95,9 @@ final class Notifier {
     private final Intent mScreenOffIntent;
     private final Intent mScreenBrightnessBoostIntent;
 
+    // True if the device should suspend when the screen is off due to proximity.
+    private final boolean mSuspendWhenScreenOffDueToProximityConfig;
+
     // The current interactive state.  This is set as soon as an interactive state
     // transition begins so as to capture the reason that it happened.  At some point
     // this state will propagate to the pending state then eventually to the
@@ -143,6 +146,9 @@ final class Notifier {
         mScreenBrightnessBoostIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
 
+        mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
+
         // Initialize interactive state for battery stats.
         try {
             mBatteryStats.noteInteractive(true);
@@ -161,22 +167,24 @@ final class Notifier {
                     + ", workSource=" + workSource);
         }
 
-        try {
-            final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
-            boolean unimportantForLogging = (flags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
-                    && ownerUid == Process.SYSTEM_UID;
-            if (workSource != null) {
-                mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, historyTag,
-                        monitorType, unimportantForLogging);
-            } else {
-                mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, historyTag,
-                        monitorType, unimportantForLogging);
-                // XXX need to deal with disabled operations.
-                mAppOps.startOperation(AppOpsManager.getToken(mAppOps),
-                        AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
+        final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+        if (monitorType >= 0) {
+            try {
+                final boolean unimportantForLogging = ownerUid == Process.SYSTEM_UID
+                        && (flags & PowerManager.UNIMPORTANT_FOR_LOGGING) != 0;
+                if (workSource != null) {
+                    mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag,
+                            historyTag, monitorType, unimportantForLogging);
+                } else {
+                    mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, historyTag,
+                            monitorType, unimportantForLogging);
+                    // XXX need to deal with disabled operations.
+                    mAppOps.startOperation(AppOpsManager.getToken(mAppOps),
+                            AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
+                }
+            } catch (RemoteException ex) {
+                // Ignore
             }
-        } catch (RemoteException ex) {
-            // Ignore
         }
     }
 
@@ -188,17 +196,19 @@ final class Notifier {
             int newFlags, String newTag, String newPackageName, int newOwnerUid,
             int newOwnerPid, WorkSource newWorkSource, String newHistoryTag) {
 
-        if (workSource != null && newWorkSource != null) {
-            final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
-            final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
-            boolean unimportantForLogging = (newFlags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
-                    && newOwnerUid == Process.SYSTEM_UID;
+        final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+        final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
+        if (workSource != null && newWorkSource != null
+                && monitorType >= 0 && newMonitorType >= 0) {
             if (DEBUG) {
                 Slog.d(TAG, "onWakeLockChanging: flags=" + newFlags + ", tag=\"" + newTag
                         + "\", packageName=" + newPackageName
                         + ", ownerUid=" + newOwnerUid + ", ownerPid=" + newOwnerPid
                         + ", workSource=" + newWorkSource);
             }
+
+            final boolean unimportantForLogging = newOwnerUid == Process.SYSTEM_UID
+                    && (newFlags & PowerManager.UNIMPORTANT_FOR_LOGGING) != 0;
             try {
                 mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag, historyTag,
                         monitorType, newWorkSource, newOwnerPid, newTag, newHistoryTag,
@@ -225,28 +235,50 @@ final class Notifier {
                     + ", workSource=" + workSource);
         }
 
-        try {
-            final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
-            if (workSource != null) {
-                mBatteryStats.noteStopWakelockFromSource(workSource, ownerPid, tag, historyTag,
-                        monitorType);
-            } else {
-                mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag, historyTag, monitorType);
-                mAppOps.finishOperation(AppOpsManager.getToken(mAppOps),
-                        AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
+        final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+        if (monitorType >= 0) {
+            try {
+                if (workSource != null) {
+                    mBatteryStats.noteStopWakelockFromSource(workSource, ownerPid, tag,
+                            historyTag, monitorType);
+                } else {
+                    mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag,
+                            historyTag, monitorType);
+                    mAppOps.finishOperation(AppOpsManager.getToken(mAppOps),
+                            AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
+                }
+            } catch (RemoteException ex) {
+                // Ignore
             }
-        } catch (RemoteException ex) {
-            // Ignore
         }
     }
 
-    private static int getBatteryStatsWakeLockMonitorType(int flags) {
+    private int getBatteryStatsWakeLockMonitorType(int flags) {
         switch (flags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
             case PowerManager.PARTIAL_WAKE_LOCK:
-            case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                 return BatteryStats.WAKE_TYPE_PARTIAL;
-            default:
+
+            case PowerManager.SCREEN_DIM_WAKE_LOCK:
+            case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                 return BatteryStats.WAKE_TYPE_FULL;
+
+            case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+                if (mSuspendWhenScreenOffDueToProximityConfig) {
+                    return -1;
+                }
+                return BatteryStats.WAKE_TYPE_PARTIAL;
+
+            case PowerManager.DRAW_WAKE_LOCK:
+                return BatteryStats.WAKE_TYPE_DRAW;
+
+            case PowerManager.DOZE_WAKE_LOCK:
+                // Doze wake locks are an internal implementation detail of the
+                // communication between dream manager service and power manager
+                // service.  They have no additive battery impact.
+                return -1;
+
+            default:
+                return -1;
         }
     }
 
