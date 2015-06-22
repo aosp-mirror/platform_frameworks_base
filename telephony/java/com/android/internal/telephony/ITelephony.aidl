@@ -24,6 +24,8 @@ import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ModemActivityInfo;
+import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.OperatorInfo;
 import java.util.List;
 
 
@@ -679,6 +681,23 @@ interface ITelephony {
     void setNetworkSelectionModeAutomatic(int subId);
 
     /**
+     * Perform a radio scan and return the list of avialble networks.
+     *
+     * @param subId the id of the subscription.
+     * @return CellNetworkScanResult containing status of scan and networks.
+     */
+    CellNetworkScanResult getCellNetworkScanResults(int subId);
+
+    /**
+     * Ask the radio to connect to the input network and change selection mode to manual.
+     *
+     * @param subId the id of the subscription.
+     * @param operatorInfo the operator to attach to.
+     * @return true if the request suceeded.
+     */
+    boolean setNetworkSelectionModeManual(int subId, in OperatorInfo operator);
+
+    /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
@@ -917,7 +936,6 @@ interface ITelephony {
      * @return {@code true} if the device supports hearing aid compatibility.
      */
     boolean isHearingAidCompatibilitySupported();
-
     /**
      * Get IMS Registration Status
      */

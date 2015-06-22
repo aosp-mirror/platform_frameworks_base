@@ -33,9 +33,11 @@ import android.telecom.PhoneAccount;
 import android.util.Log;
 
 import com.android.internal.telecom.ITelecomService;
+import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
@@ -3430,6 +3432,55 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "setNetworkSelectionModeAutomatic NPE", ex);
         }
+    }
+
+    /**
+     * Perform a radio scan and return the list of avialble networks.
+     *
+     * The return value is a list of the OperatorInfo of the networks found. Note that this
+     * scan can take a long time (sometimes minutes) to happen.
+     *
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @hide
+     */
+    public CellNetworkScanResult getCellNetworkScanResults(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                return telephony.getCellNetworkScanResults(subId);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCellNetworkScanResults RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCellNetworkScanResults NPE", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Ask the radio to connect to the input network and change selection mode to manual.
+     *
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @hide
+     */
+    public boolean setNetworkSelectionModeManual(int subId, OperatorInfo operator) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                return telephony.setNetworkSelectionModeManual(subId, operator);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setNetworkSelectionModeManual RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setNetworkSelectionModeManual NPE", ex);
+        }
+        return false;
     }
 
     /**
