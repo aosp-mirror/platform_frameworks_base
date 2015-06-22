@@ -623,7 +623,7 @@ public class Editor {
         // One is the true focus lost where suggestions pop-up (if any) should be dismissed, and the
         // other is an side effect of showing the suggestions pop-up itself. We use isShowingUp()
         // to distinguish one from the other.
-        if (mSuggestionsPopupWindow != null && ((mTextView instanceof ExtractEditText) ||
+        if (mSuggestionsPopupWindow != null && ((mTextView.isInExtractedMode()) ||
                 !mSuggestionsPopupWindow.isShowingUp())) {
             // Should be done before hide insertion point controller since it triggers a show of it
             mSuggestionsPopupWindow.hide();
@@ -640,7 +640,7 @@ public class Editor {
         mTextView.removeAdjacentSuggestionSpans(end);
 
         if (mTextView.isTextEditable() && mTextView.isSuggestionsEnabled() &&
-                !(mTextView instanceof ExtractEditText)) {
+                !(mTextView.isInExtractedMode())) {
             if (mSpellChecker == null && createSpellChecker) {
                 mSpellChecker = new SpellChecker(mTextView);
             }
@@ -1063,7 +1063,7 @@ public class Editor {
                 // ExtractEditText clears focus, which gives focus to the ExtractEditText.
                 // This special case ensure that we keep current selection in that case.
                 // It would be better to know why the DecorView does not have focus at that time.
-                if (((mTextView instanceof ExtractEditText) || mSelectionMoved) &&
+                if (((mTextView.isInExtractedMode()) || mSelectionMoved) &&
                         selStart >= 0 && selEnd >= 0) {
                     /*
                      * Someone intentionally set the selection, so let them
@@ -1099,7 +1099,7 @@ public class Editor {
             // Don't leave us in the middle of a batch edit.
             mTextView.onEndBatchEdit();
 
-            if (mTextView instanceof ExtractEditText) {
+            if (mTextView.isInExtractedMode()) {
                 // terminateTextSelectionMode removes selection, which we want to keep when
                 // ExtractEditText goes out of focus.
                 final int selStart = mTextView.getSelectionStart();
@@ -1825,7 +1825,7 @@ public class Editor {
     }
 
     private boolean extractedTextModeWillBeStarted() {
-        if (!(mTextView instanceof ExtractEditText)) {
+        if (!(mTextView.isInExtractedMode())) {
             final InputMethodManager imm = InputMethodManager.peekInstance();
             return  imm != null && imm.isFullscreenMode();
         }
@@ -4657,7 +4657,9 @@ public class Editor {
                         mEndHandle.showAtLocation(endOffset);
 
                         // No longer the first dragging motion, reset.
-                        startSelectionActionMode();
+                        if (!(mTextView.isInExtractedMode())) {
+                            startSelectionActionMode();
+                        }
                         mDragAcceleratorActive = false;
                         mStartOffset = -1;
                         mSwitchedLines = false;
