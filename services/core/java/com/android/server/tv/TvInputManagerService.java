@@ -121,7 +121,7 @@ public final class TvInputManagerService extends SystemService {
     private int mCurrentUserId = UserHandle.USER_OWNER;
 
     // A map from user id to UserState.
-    private final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
+    private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
     private final WatchLogHandler mWatchLogHandler;
 
@@ -231,8 +231,7 @@ public final class TvInputManagerService extends SystemService {
                     }
                 }
 
-                ArrayList<ContentProviderOperation> operations =
-                        new ArrayList<ContentProviderOperation>();
+                ArrayList<ContentProviderOperation> operations = new ArrayList<>();
 
                 String selection = TvContract.BaseTvColumns.COLUMN_PACKAGE_NAME + "=?";
                 String[] selectionArgs = { packageName };
@@ -292,7 +291,7 @@ public final class TvInputManagerService extends SystemService {
                 new Intent(TvInputService.SERVICE_INTERFACE),
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
                 userId);
-        List<TvInputInfo> inputList = new ArrayList<TvInputInfo>();
+        List<TvInputInfo> inputList = new ArrayList<>();
         for (ResolveInfo ri : services) {
             ServiceInfo si = ri.serviceInfo;
             if (!android.Manifest.permission.BIND_TV_INPUT.equals(si.permission)) {
@@ -325,7 +324,7 @@ public final class TvInputManagerService extends SystemService {
             userState.packageSet.add(si.packageName);
         }
 
-        Map<String, TvInputState> inputMap = new HashMap<String, TvInputState>();
+        Map<String, TvInputState> inputMap = new HashMap<>();
         for (TvInputInfo info : inputList) {
             if (DEBUG) {
                 Slog.d(TAG, "add " + info.getId());
@@ -777,7 +776,7 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
-                    List<TvInputInfo> inputList = new ArrayList<TvInputInfo>();
+                    List<TvInputInfo> inputList = new ArrayList<>();
                     for (TvInputState state : userState.inputMap.values()) {
                         inputList.add(state.info);
                     }
@@ -934,7 +933,7 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
-                    List<String> ratings = new ArrayList<String>();
+                    List<String> ratings = new ArrayList<>();
                     for (TvContentRating rating
                             : userState.persistentDataStore.getBlockedRatings()) {
                         ratings.add(rating.flattenToString());
@@ -1012,7 +1011,7 @@ public final class TvInputManagerService extends SystemService {
                         userState.serviceStateMap.put(info.getComponent(), serviceState);
                     }
                     // Send a null token immediately while reconnecting.
-                    if (serviceState.reconnecting == true) {
+                    if (serviceState.reconnecting) {
                         sendSessionTokenToClientLocked(client, inputId, null, null, seq);
                         return;
                     }
@@ -1210,7 +1209,6 @@ public final class TvInputManagerService extends SystemService {
                                 .sendToTarget();
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in tune", e);
-                        return;
                     }
                 }
             } finally {
@@ -1799,30 +1797,26 @@ public final class TvInputManagerService extends SystemService {
 
     private static final class UserState {
         // A mapping from the TV input id to its TvInputState.
-        private Map<String, TvInputState> inputMap = new HashMap<String, TvInputState>();
+        private Map<String, TvInputState> inputMap = new HashMap<>();
 
         // A set of all TV input packages.
-        private final Set<String> packageSet = new HashSet<String>();
+        private final Set<String> packageSet = new HashSet<>();
 
         // A list of all TV content rating systems defined.
         private final List<TvContentRatingSystemInfo>
-                contentRatingSystemList = new ArrayList<TvContentRatingSystemInfo>();
+                contentRatingSystemList = new ArrayList<>();
 
         // A mapping from the token of a client to its state.
-        private final Map<IBinder, ClientState> clientStateMap =
-                new HashMap<IBinder, ClientState>();
+        private final Map<IBinder, ClientState> clientStateMap = new HashMap<>();
 
         // A mapping from the name of a TV input service to its state.
-        private final Map<ComponentName, ServiceState> serviceStateMap =
-                new HashMap<ComponentName, ServiceState>();
+        private final Map<ComponentName, ServiceState> serviceStateMap = new HashMap<>();
 
         // A mapping from the token of a TV input session to its state.
-        private final Map<IBinder, SessionState> sessionStateMap =
-                new HashMap<IBinder, SessionState>();
+        private final Map<IBinder, SessionState> sessionStateMap = new HashMap<>();
 
         // A set of callbacks.
-        private final Set<ITvInputManagerCallback> callbackSet =
-                new HashSet<ITvInputManagerCallback>();
+        private final Set<ITvInputManagerCallback> callbackSet = new HashSet<>();
 
         // The token of a "main" TV input session.
         private IBinder mainSessionToken = null;
@@ -1837,7 +1831,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class ClientState implements IBinder.DeathRecipient {
-        private final List<IBinder> sessionTokens = new ArrayList<IBinder>();
+        private final List<IBinder> sessionTokens = new ArrayList<>();
 
         private IBinder clientToken;
         private final int userId;
@@ -1870,11 +1864,11 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class ServiceState {
-        private final List<IBinder> sessionTokens = new ArrayList<IBinder>();
+        private final List<IBinder> sessionTokens = new ArrayList<>();
         private final ServiceConnection connection;
         private final ComponentName component;
         private final boolean isHardware;
-        private final List<TvInputInfo> inputList = new ArrayList<TvInputInfo>();
+        private final List<TvInputInfo> inputList = new ArrayList<>();
 
         private ITvInputService service;
         private ServiceCallback callback;
@@ -2124,13 +2118,13 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onSessionCreated(ITvInputSession session, IBinder harewareSessionToken) {
+        public void onSessionCreated(ITvInputSession session, IBinder hardwareSessionToken) {
             if (DEBUG) {
                 Slog.d(TAG, "onSessionCreated(inputId=" + mSessionState.info.getId() + ")");
             }
             synchronized (mLock) {
                 mSessionState.session = session;
-                mSessionState.hardwareSessionToken = harewareSessionToken;
+                mSessionState.hardwareSessionToken = hardwareSessionToken;
                 if (session != null && addSessionTokenToClientStateLocked(session)) {
                     sendSessionTokenToClientLocked(mSessionState.client,
                             mSessionState.info.getId(), mSessionState.sessionToken, mChannels[0],
@@ -2558,7 +2552,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onHdmiDeviceUpdated(String inputId, HdmiDeviceInfo deviceInfo) {
             synchronized (mLock) {
-                Integer state = null;
+                Integer state;
                 switch (deviceInfo.getDevicePowerStatus()) {
                     case HdmiControlManager.POWER_STATUS_ON:
                         state = INPUT_STATE_CONNECTED;
@@ -2574,7 +2568,7 @@ public final class TvInputManagerService extends SystemService {
                         break;
                 }
                 if (state != null) {
-                    setStateLocked(inputId, state.intValue(), mCurrentUserId);
+                    setStateLocked(inputId, state, mCurrentUserId);
                 }
             }
         }
