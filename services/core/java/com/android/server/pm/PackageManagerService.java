@@ -4118,7 +4118,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (matches.get(i).getTargetUserId() == targetUserId) return true;
             }
         }
+        if (hasWebURI(intent)) {
+            // cross-profile app linking works only towards the parent.
+            final UserInfo parent = getProfileParent(sourceUserId);
+            synchronized(mPackages) {
+                return getCrossProfileDomainPreferredLpr(intent, resolvedType, 0, sourceUserId,
+                        parent.id) != null;
+            }
+        }
         return false;
+    }
+
+    private UserInfo getProfileParent(int userId) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return sUserManager.getProfileParent(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private List<CrossProfileIntentFilter> getMatchingCrossProfileIntentFilters(Intent intent,
@@ -4161,11 +4178,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 List<CrossProfileIntentFilter> matchingFilters =
                         getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
                 // Check for results that need to skip the current profile.
-                ResolveInfo resolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
+                ResolveInfo xpResolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
                         resolvedType, flags, userId);
-                if (resolveInfo != null && isUserEnabled(resolveInfo.targetUserId)) {
+                if (xpResolveInfo != null && isUserEnabled(xpResolveInfo.targetUserId)) {
                     List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
-                    result.add(resolveInfo);
+                    result.add(xpResolveInfo);
                     return filterIfNotPrimaryUser(result, userId);
                 }
 
@@ -4174,15 +4191,36 @@ public class PackageManagerService extends IPackageManager.Stub {
                         intent, resolvedType, flags, userId);
 
                 // Check for cross profile results.
-                resolveInfo = queryCrossProfileIntents(
+                xpResolveInfo = queryCrossProfileIntents(
                         matchingFilters, intent, resolvedType, flags, userId);
-                if (resolveInfo != null && isUserEnabled(resolveInfo.targetUserId)) {
-                    result.add(resolveInfo);
+                if (xpResolveInfo != null && isUserEnabled(xpResolveInfo.targetUserId)) {
+                    result.add(xpResolveInfo);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
                 result = filterIfNotPrimaryUser(result, userId);
-                if (result.size() > 1 && hasWebURI(intent)) {
-                    return filterCandidatesWithDomainPreferedActivitiesLPr(flags, result);
+                if (hasWebURI(intent)) {
+                    CrossProfileDomainInfo xpDomainInfo = null;
+                    final UserInfo parent = getProfileParent(userId);
+                    if (parent != null) {
+                        xpDomainInfo = getCrossProfileDomainPreferredLpr(intent, resolvedType,
+                                flags, userId, parent.id);
+                    }
+                    if (xpDomainInfo != null) {
+                        if (xpResolveInfo != null) {
+                            // If we didn't remove it, the cross-profile ResolveInfo would be twice
+                            // in the result.
+                            result.remove(xpResolveInfo);
+                        }
+                        if (result.size() == 0) {
+                            result.add(xpDomainInfo.resolveInfo);
+                            return result;
+                        }
+                    } else if (result.size() <= 1) {
+                        return result;
+                    }
+                    result = filterCandidatesWithDomainPreferredActivitiesLPr(flags, result,
+                            xpDomainInfo);
+                    Collections.sort(result, mResolvePrioritySorter);
                 }
                 return result;
             }
@@ -4195,6 +4233,67 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return new ArrayList<ResolveInfo>();
         }
+    }
+
+    private static class CrossProfileDomainInfo {
+        /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
+        ResolveInfo resolveInfo;
+        /* Best domain verification status of the activities found in the other profile */
+        int bestDomainVerificationStatus;
+    }
+
+    private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
+            String resolvedType, int flags, int sourceUserId, int parentUserId) {
+        if (!sUserManager.hasUserRestriction(UserManager.ALLOW_PARENT_APP_LINKING,
+                sourceUserId)) {
+            return null;
+        }
+        List<ResolveInfo> resultTargetUser = mActivities.queryIntent(intent,
+                resolvedType, flags, parentUserId);
+
+        if (resultTargetUser == null || resultTargetUser.isEmpty()) {
+            return null;
+        }
+        CrossProfileDomainInfo result = null;
+        int size = resultTargetUser.size();
+        for (int i = 0; i < size; i++) {
+            ResolveInfo riTargetUser = resultTargetUser.get(i);
+            // Intent filter verification is only for filters that specify a host. So don't return
+            // those that handle all web uris.
+            if (riTargetUser.handleAllWebDataURI) {
+                continue;
+            }
+            String packageName = riTargetUser.activityInfo.packageName;
+            PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                continue;
+            }
+            int status = getDomainVerificationStatusLPr(ps, parentUserId);
+            if (result == null) {
+                result = new CrossProfileDomainInfo();
+                result.resolveInfo =
+                        createForwardingResolveInfo(null, sourceUserId, parentUserId);
+                result.bestDomainVerificationStatus = status;
+            } else {
+                result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
+                        result.bestDomainVerificationStatus);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Verification statuses are ordered from the worse to the best, except for
+     * INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER, which is the worse.
+     */
+    private int bestDomainVerificationStatus(int status1, int status2) {
+        if (status1 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+            return status2;
+        }
+        if (status2 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+            return status1;
+        }
+        return (int) MathUtils.max(status1, status2);
     }
 
     private boolean isUserEnabled(int userId) {
@@ -4236,8 +4335,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         return scheme.equals(IntentFilter.SCHEME_HTTP) || scheme.equals(IntentFilter.SCHEME_HTTPS);
     }
 
-    private List<ResolveInfo> filterCandidatesWithDomainPreferedActivitiesLPr(
-            int flags, List<ResolveInfo> candidates) {
+    private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(
+            int flags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo) {
         if (DEBUG_PREFERRED) {
             Slog.v("TAG", "Filtering results with prefered activities. Candidates count: " +
                     candidates.size());
@@ -4277,12 +4376,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            // First try to add the "always" if there is any
+            // First try to add the "always" resolution for the current user if there is any
             if (alwaysList.size() > 0) {
                 result.addAll(alwaysList);
+            // if there is an "always" for the parent user, add it.
+            } else if (xpDomainInfo != null && xpDomainInfo.bestDomainVerificationStatus
+                    == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
+                result.add(xpDomainInfo.resolveInfo);
             } else {
                 // Add all undefined Apps as we want them to appear in the Disambiguation dialog.
                 result.addAll(undefinedList);
+                if (xpDomainInfo != null && (
+                        xpDomainInfo.bestDomainVerificationStatus
+                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
+                        || xpDomainInfo.bestDomainVerificationStatus
+                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK)) {
+                    result.add(xpDomainInfo.resolveInfo);
+                }
                 // Also add Browsers (all of them or only the default one)
                 if ((flags & MATCH_ALL) != 0) {
                     result.addAll(matchAllList);

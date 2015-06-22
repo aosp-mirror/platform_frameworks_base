@@ -449,6 +449,22 @@ public class UserManager {
     public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
 
     /**
+     * This user restriction has an effect only in a managed profile.
+     * If set:
+     * Intent filters of activities in the parent profile with action
+     * {@link android.content.Intent#ACTION_VIEW},
+     * category {@link android.content.Intent#CATEGORY_BROWSABLE}, scheme http or https, and which
+     * define a host can handle intents from the managed profile.
+     * The default value is <code>false</code>.
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ALLOW_PARENT_APP_LINKING = "allow_parent_app_linking";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
