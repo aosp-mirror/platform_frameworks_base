@@ -32,8 +32,7 @@
     <skip />
     <!-- no translation found for petabyteShort (5637816680144990219) -->
     <skip />
-    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> күн"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> с"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> с"</string>
@@ -333,7 +332,7 @@
     <skip />
     <!-- no translation found for android_system_label (6577375335728551336) -->
     <skip />
-    <string name="user_owner_label" msgid="6465364741001216388">"Жеке колдономолор"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Жеке"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Жумуш"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Байланыштар"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"байланыштарыңызга уруксат"</string>
