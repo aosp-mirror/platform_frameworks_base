@@ -284,7 +284,7 @@ changed.</li>
     </tr>
     <tr>
         <td class="label_neg">drawPicture()</td>
-        <td class="value_neg">&#10007;</td>
+        <td class="value_neg">23</td>
     </tr>
     <tr>
         <td class="label_pos">drawPosText()</td>

@@ -323,10 +323,4 @@ public class DisplayListCanvas extends Canvas {
     }
 
     private static native void nDrawRects(long renderer, long region, long paint);
-
-    @Override
-    public void drawPicture(Picture picture) {
-        picture.endRecording();
-        // TODO: Implement rendering
-    }
 }
