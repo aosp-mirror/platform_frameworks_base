@@ -2427,6 +2427,13 @@
     <permission android:name="android.permission.LOCAL_MAC_ADDRESS"
                 android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows the Nfc stack to dispatch Nfc messages to applications. Applications
+        can use this permission to ensure incoming Nfc messages are from the Nfc stack
+        and not simulated by another application.
+        @hide -->
+    <permission android:name="android.permission.DISPATCH_NFC_MESSAGE"
+                android:protectionLevel="signatureOrSystem" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
