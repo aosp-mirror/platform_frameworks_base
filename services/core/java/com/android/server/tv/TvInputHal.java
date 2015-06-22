@@ -47,11 +47,10 @@ final class TvInputHal implements Handler.Callback {
     public static final int EVENT_FIRST_FRAME_CAPTURED = 4;
 
     public interface Callback {
-        public void onDeviceAvailable(
-                TvInputHardwareInfo info, TvStreamConfig[] configs);
-        public void onDeviceUnavailable(int deviceId);
-        public void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs);
-        public void onFirstFrameCaptured(int deviceId, int streamId);
+        void onDeviceAvailable(TvInputHardwareInfo info, TvStreamConfig[] configs);
+        void onDeviceUnavailable(int deviceId);
+        void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs);
+        void onFirstFrameCaptured(int deviceId, int streamId);
     }
 
     private native long nativeOpen(MessageQueue queue);
@@ -152,7 +151,7 @@ final class TvInputHal implements Handler.Callback {
 
     // Handler.Callback implementation
 
-    private final Queue<Message> mPendingMessageQueue = new LinkedList<Message>();
+    private final Queue<Message> mPendingMessageQueue = new LinkedList<>();
 
     @Override
     public boolean handleMessage(Message msg) {
