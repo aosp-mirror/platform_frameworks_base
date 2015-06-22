@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"電話"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"語音助手"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"解鎖"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"解鎖"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"開啟語音助手"</string>
@@ -314,7 +318,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"除了指定的鬧鐘、提醒、活動及來電者，您將不會受到其他聲音和震動騷擾。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"自訂"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"這會封鎖所有聲音和震動，包括鬧鐘、音樂、影片及遊戲，但您仍可撥打電話。"</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太緊急的通知會在下方顯示"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"再次輕觸即可開啟"</string>

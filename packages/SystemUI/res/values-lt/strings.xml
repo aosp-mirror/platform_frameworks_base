@@ -89,6 +89,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefonas"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Atrakinti"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"atrakinti"</string>
     <string name="phone_label" msgid="2320074140205331708">"atidaryti telefoną"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"atidaryti „Voice Assist“"</string>
@@ -314,7 +318,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Slyskite į kairę link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Jūsų netrikdys garsai ir vibravimas, išskyrus nurodytų signalų, priminimų, įvykių ir skambintojų garsus ir vibravimą."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tinkinti"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų ir žaidimų garsus ir vibravimą. Vis tiek galėsite skambinti telefonu."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mažiau skubūs pranešimai toliau"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Palieskite dar kartą, kad atidarytumėte"</string>

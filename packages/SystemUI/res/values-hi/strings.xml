@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"फ़ोन"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"वॉइस सहायक"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"अनलॉक करें"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करें"</string>
     <string name="phone_label" msgid="2320074140205331708">"फ़ोन खोलें"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"वॉइस सहायक खोलें"</string>
@@ -312,7 +316,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"आपको आपके द्वारा निर्दिष्ट किए गए अलार्म, रिमाइंडर्स, ईवेंट और कॉलर को छोड़कर अन्य ध्वनियों और कंपनों के द्वारा परेशान नहीं किया जाएगा."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"कस्टमाइज़ करें"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी ध्‍वनियां और कंपन अवरुद्ध हो जाते हैं. आप अभी भी फ़ोन काॅल कर सकेंगे."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"खोलने के लिए पुन: स्पर्श करें"</string>

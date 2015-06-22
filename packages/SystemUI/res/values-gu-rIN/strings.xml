@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"વૉઇસ સહાય"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"અનલૉક કરો"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"અનલૉક કરો"</string>
     <string name="phone_label" msgid="2320074140205331708">"ફોન ખોલો"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"વૉઇસ સહાય ખોલો"</string>
@@ -312,7 +316,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> માટે ડાબે સ્લાઇડ કરો."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"તમને તમે ઉલ્લેખિત એલાર્મ્સ, સ્મૃતિપત્રો, ઇવેન્ટ્સ અને કૉલર્સ સિવાયના ધ્વનિઓ અને વાઇબ્રેશન્સથી ખલેલ પહોંચાડવામાં આવશે નહીં."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"કસ્ટમાઇઝ કરો"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"આ એલાર્મ્સ, સંગીત, વિડિઓઝ અને રમતો સહિત બધા ધ્વનિઓ અને વાઇબ્રેશન્સને અવરોધિત કરે છે.  તમે હજુ પણ ફોન કૉલ્સ કરવા માટે સમર્થ હશો."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"ખોલવા માટે ફરી ટચ કરો"</string>
