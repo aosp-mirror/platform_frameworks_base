@@ -2315,4 +2315,6 @@
   <java-symbol type="plurals" name="selected_count" />
   <java-symbol type="drawable" name="ic_dialog_alert_material" />
 
+  <java-symbol type="bool" name="allow_stacked_button_bar" />
+
 </resources>
