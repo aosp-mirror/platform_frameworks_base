@@ -634,11 +634,12 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
 
         /**
          * Sets the set of digests algorithms (e.g., {@code SHA-256}, {@code SHA-384}) with which
-         * the key can be used when signing/verifying. Attempts to use the key with any other digest
-         * algorithm will be rejected.
+         * the key can be used. Attempts to use the key with any other digest algorithm will be
+         * rejected.
          *
-         * <p>This must be specified for keys which are used for signing/verification. For HMAC
-         * keys, the set of digests defaults to the digest associated with the key algorithm (e.g.,
+         * <p>This must be specified for signing/verification keys and RSA encryption/decryption
+         * keys used with RSA OAEP padding scheme because these operations involve a digest. For
+         * HMAC keys, the default is the digest associated with the key algorithm (e.g.,
          * {@code SHA-256} for key algorithm {@code HmacSHA256}).
          *
          * <p>For private keys used for TLS/SSL client or server authentication it is usually
