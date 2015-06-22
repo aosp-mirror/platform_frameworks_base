@@ -473,9 +473,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mLastLoggedStateFingerprint;
 
     private static final int VISIBLE_LOCATIONS = StackViewState.LOCATION_FIRST_CARD
-            | StackViewState.LOCATION_TOP_STACK_PEEKING
-            | StackViewState.LOCATION_MAIN_AREA
-            | StackViewState.LOCATION_BOTTOM_STACK_PEEKING;
+            | StackViewState.LOCATION_MAIN_AREA;
 
     private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
             new OnChildLocationsChangedListener() {
