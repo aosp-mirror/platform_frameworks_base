@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ஃபோன்"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"குரல் உதவி"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"குரல் உதவியைத் திற"</string>
@@ -312,7 +316,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> க்கு இடதுபக்கமாக இழுக்கவும்."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள், குறிப்பிட்ட அழைப்புகள் தவிர, ஒலிகளினாலும் அதிர்வினாலும் தொந்தரவு இருக்காது."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"தனிப்பயனாக்கு"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்கள் உட்பட எல்லா சத்தங்களையும் அதிர்வுகளையும் தடுக்கும். இருப்பினும் நீங்கள் அழைப்புகளைச் செய்யலாம்."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"திறக்க, மீண்டும் தட்டவும்"</string>
