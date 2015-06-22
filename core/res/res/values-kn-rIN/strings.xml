@@ -26,8 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ದಿನಗಳು"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> ದಿನ <xliff:g id="HOURS">%2$d</xliff:g> ಗಂಟೆಗಳು"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> ದಿನ <xliff:g id="HOURS">%2$d</xliff:g> ಗಂ"</string>
@@ -225,7 +224,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"ಸುರಕ್ಷಿತ ಮೋಡ್"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android ಸಿಸ್ಟಂ"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"ವೈಯಕ್ತಿಕ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"ವೈಯಕ್ತಿಕ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ಕಚೇರಿ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
@@ -902,7 +901,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ಇವರ ಜೊತೆಗೆ ಸಂಪಾದಿಸಿ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ಜೊತೆಗೆ ಸಂಪಾದಿಸಿ"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"ಇದರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"ಹೋಮ್‌ ಅಪ್ಲಿಕೇಶನ್‌  ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ಹೋಮ್‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
@@ -1066,8 +1065,8 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ನಿಮ್ಮ USB ಸಂಗ್ರಹಣೆಯಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ ಎಲ್ಲಾ ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಿಹಾಕಲಾಗುವುದು. ಈ ಕ್ರಿಯೆಯನ್ನು ಹಿಂತಿರುಗಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ನಲ್ಲಿರುವ ಎಲ್ಲಾ ಡೇಟಾ ಕಳೆದುಹೋಗುತ್ತದೆ."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"ಸ್ವರೂಪಿಸು"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ಡೀಬಗಿಂಗ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="select_input_method" msgid="8547250819326693584">"ಕೀಬೋರ್ಡ್ ಬದಲಿಸಿ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="show_ime" msgid="9157568568695230830">"ಇನ್‌ಪುಟ್‌ ವಿಧಾನವನ್ನು ತೋರಿಸು"</string>
@@ -1231,7 +1230,7 @@
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"ನಮೂದಿಸು"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ಅಪ್ಲಿಕೇಶನ್‌ವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ಇದರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"ಸ್ಲೈಡಿಂಗ್ ಹ್ಯಾಂಡಲ್. ಸ್ಪರ್ಶಿಸಿ &amp; ಇರಿಸಿ."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ಅನ್‍ಲಾಕ್ ಮಾಡಲು ಸ್ವೈಪ್ ಮಾಡಿ."</string>
@@ -1279,7 +1278,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ಫಿಂಗರ್‌ಪ್ರಿಂಟ್:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ಚಟುವಟಿಕೆಯನ್ನು ಆರಿಸಿ"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"ಇದರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ಬ್ರೌಸರ್ ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
