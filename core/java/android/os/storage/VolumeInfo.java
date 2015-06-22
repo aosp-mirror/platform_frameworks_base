@@ -137,6 +137,7 @@ public class VolumeInfo implements Parcelable {
     public final String id;
     public final int type;
     public final DiskInfo disk;
+    public final String partGuid;
     public int mountFlags = 0;
     public int mountUserId = -1;
     public int state = STATE_UNMOUNTED;
@@ -149,10 +150,11 @@ public class VolumeInfo implements Parcelable {
     /** Framework state */
     public final int mtpIndex;
 
-    public VolumeInfo(String id, int type, DiskInfo disk, int mtpIndex) {
+    public VolumeInfo(String id, int type, DiskInfo disk, String partGuid, int mtpIndex) {
         this.id = Preconditions.checkNotNull(id);
         this.type = type;
         this.disk = disk;
+        this.partGuid = partGuid;
         this.mtpIndex = mtpIndex;
     }
 
@@ -164,6 +166,7 @@ public class VolumeInfo implements Parcelable {
         } else {
             disk = null;
         }
+        partGuid = parcel.readString();
         mountFlags = parcel.readInt();
         mountUserId = parcel.readInt();
         state = parcel.readInt();
@@ -385,6 +388,7 @@ public class VolumeInfo implements Parcelable {
         pw.increaseIndent();
         pw.printPair("type", DebugUtils.valueToString(getClass(), "TYPE_", type));
         pw.printPair("diskId", getDiskId());
+        pw.printPair("partGuid", partGuid);
         pw.printPair("mountFlags", DebugUtils.flagsToString(getClass(), "MOUNT_FLAG_", mountFlags));
         pw.printPair("mountUserId", mountUserId);
         pw.printPair("state", DebugUtils.valueToString(getClass(), "STATE_", state));
@@ -453,6 +457,7 @@ public class VolumeInfo implements Parcelable {
         } else {
             parcel.writeInt(0);
         }
+        parcel.writeString(partGuid);
         parcel.writeInt(mountFlags);
         parcel.writeInt(mountUserId);
         parcel.writeInt(state);
