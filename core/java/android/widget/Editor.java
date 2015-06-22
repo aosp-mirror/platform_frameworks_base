@@ -123,6 +123,7 @@ public class Editor {
     private static final float[] TEMP_POSITION = new float[2];
     private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
     private static final float LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS = 0.5f;
+    private static final int UNSET_X_VALUE = -1;
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
@@ -735,7 +736,7 @@ public class Editor {
             retOffset = getWordIteratorWithText().getPunctuationBeginning(offset);
         } else {
             // Not on a punctuation boundary, find the word start.
-            retOffset = getWordIteratorWithText().getBeginning(offset);
+            retOffset = getWordIteratorWithText().getPrevWordBeginningOnTwoWordsBoundary(offset);
         }
         if (retOffset == BreakIterator.DONE) {
             return offset;
@@ -750,7 +751,7 @@ public class Editor {
             retOffset = getWordIteratorWithText().getPunctuationEnd(offset);
         } else {
             // Not on a punctuation boundary, find the word end.
-            retOffset = getWordIteratorWithText().getEnd(offset);
+            retOffset = getWordIteratorWithText().getNextWordEndOnTwoWordBoundary(offset);
         }
         if (retOffset == BreakIterator.DONE) {
             return offset;
@@ -4058,6 +4059,10 @@ public class Editor {
         private boolean mInWord = false;
         // Difference between touch position and word boundary position.
         private float mTouchWordDelta;
+        // X value of the previous updatePosition call.
+        private float mPrevX;
+        // Indicates if the handle has moved a boundary between LTR and RTL text.
+        private boolean mLanguageDirectionChanged = false;
 
         public SelectionStartHandleView(Drawable drawableLtr, Drawable drawableRtl) {
             super(drawableLtr, drawableRtl);
@@ -4118,7 +4123,43 @@ public class Editor {
             int end = getWordEnd(offset);
             int start = getWordStart(offset);
 
-            if (offset < mPreviousOffset) {
+            if (mPrevX == UNSET_X_VALUE) {
+                mPrevX = x;
+            }
+
+            final int selectionStart = mTextView.getSelectionStart();
+            final boolean selectionStartRtl = layout.isRtlCharAt(selectionStart);
+            final boolean atRtl = layout.isRtlCharAt(offset);
+            final boolean isLvlBoundary = layout.isLevelBoundary(offset);
+            boolean isExpanding;
+
+            // We can't determine if the user is expanding or shrinking the selection if they're
+            // on a bi-di boundary, so until they've moved past the boundary we'll just place
+            // the cursor at the current position.
+            if (isLvlBoundary || (selectionStartRtl && !atRtl) || (!selectionStartRtl && atRtl)) {
+                // We're on a boundary or this is the first direction change -- just update
+                // to the current position.
+                mLanguageDirectionChanged = true;
+                mTouchWordDelta = 0.0f;
+                positionAtCursorOffset(offset, false);
+                return;
+            } else if (mLanguageDirectionChanged && !isLvlBoundary) {
+                // We've just moved past the boundary so update the position. After this we can
+                // figure out if the user is expanding or shrinking to go by word or character.
+                positionAtCursorOffset(offset, false);
+                mTouchWordDelta = 0.0f;
+                mLanguageDirectionChanged = false;
+                return;
+            } else {
+                final float xDiff = x - mPrevX;
+                if (atRtl) {
+                    isExpanding = xDiff > 0 || currLine > mPrevLine;
+                } else {
+                    isExpanding = xDiff < 0 || currLine < mPrevLine;
+                }
+            }
+
+            if (isExpanding) {
                 // User is increasing the selection.
                 if (!mInWord || currLine < mPrevLine) {
                     // We're not in a word, or we're on a different line so we'll expand by
@@ -4173,6 +4214,7 @@ public class Editor {
                 }
                 positionAtCursorOffset(offset, false);
             }
+            mPrevX = x;
         }
 
         @Override
@@ -4187,6 +4229,7 @@ public class Editor {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 // Reset the touch word offset when the user has lifted their finger.
                 mTouchWordDelta = 0.0f;
+                mPrevX = UNSET_X_VALUE;
             }
             return superResult;
         }
@@ -4197,6 +4240,10 @@ public class Editor {
         private boolean mInWord = false;
         // Difference between touch position and word boundary position.
         private float mTouchWordDelta;
+        // X value of the previous updatePosition call.
+        private float mPrevX;
+        // Indicates if the handle has moved a boundary between LTR and RTL text.
+        private boolean mLanguageDirectionChanged = false;
 
         public SelectionEndHandleView(Drawable drawableLtr, Drawable drawableRtl) {
             super(drawableLtr, drawableRtl);
@@ -4257,7 +4304,43 @@ public class Editor {
             int end = getWordEnd(offset);
             int start = getWordStart(offset);
 
-            if (offset > mPreviousOffset) {
+            if (mPrevX == UNSET_X_VALUE) {
+                mPrevX = x;
+            }
+
+            final int selectionEnd = mTextView.getSelectionEnd();
+            final boolean selectionEndRtl = layout.isRtlCharAt(selectionEnd);
+            final boolean atRtl = layout.isRtlCharAt(offset);
+            final boolean isLvlBoundary = layout.isLevelBoundary(offset);
+            boolean isExpanding;
+
+            // We can't determine if the user is expanding or shrinking the selection if they're
+            // on a bi-di boundary, so until they've moved past the boundary we'll just place
+            // the cursor at the current position.
+            if (isLvlBoundary || (selectionEndRtl && !atRtl) || (!selectionEndRtl && atRtl)) {
+                // We're on a boundary or this is the first direction change -- just update
+                // to the current position.
+                mLanguageDirectionChanged = true;
+                mTouchWordDelta = 0.0f;
+                positionAtCursorOffset(offset, false);
+                return;
+            } else if (mLanguageDirectionChanged && !isLvlBoundary) {
+                // We've just moved past the boundary so update the position. After this we can
+                // figure out if the user is expanding or shrinking to go by word or character.
+                positionAtCursorOffset(offset, false);
+                mTouchWordDelta = 0.0f;
+                mLanguageDirectionChanged = false;
+                return;
+            } else {
+                final float xDiff = x - mPrevX;
+                if (atRtl) {
+                    isExpanding = xDiff < 0 || currLine < mPrevLine;
+                } else {
+                    isExpanding = xDiff > 0 || currLine > mPrevLine;
+                }
+            }
+
+            if (isExpanding) {
                 // User is increasing the selection.
                 if (!mInWord || currLine > mPrevLine) {
                     // We're not in a word, or we're on a different line so we'll expand by
@@ -4312,6 +4395,7 @@ public class Editor {
                 }
                 positionAtCursorOffset(offset, false);
             }
+            mPrevX = x;
         }
 
         @Override
@@ -4326,6 +4410,7 @@ public class Editor {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 // Reset the touch word offset when the user has lifted their finger.
                 mTouchWordDelta = 0.0f;
+                mPrevX = UNSET_X_VALUE;
             }
             return superResult;
         }
