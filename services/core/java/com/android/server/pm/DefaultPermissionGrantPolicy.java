@@ -45,7 +45,7 @@ import static android.os.Process.FIRST_APPLICATION_UID;
  * have phone related permission by default.
  */
 final class DefaultPermissionGrantPolicy {
-    private static final String TAG = "DefaultPermissionGrantPolicy";
+    private static final String TAG = "DefaultPermGrantPolicy"; // must be <= 23 chars
     private static final boolean DEBUG = false;
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
@@ -133,6 +133,7 @@ final class DefaultPermissionGrantPolicy {
     private PackagesProvider mImePackagesProvider;
     private PackagesProvider mLocationPackagesProvider;
     private PackagesProvider mVoiceInteractionPackagesProvider;
+    private PackagesProvider mCarrierAppPackagesProvider;
 
     public DefaultPermissionGrantPolicy(PackageManagerService service) {
         mService = service;
@@ -148,6 +149,10 @@ final class DefaultPermissionGrantPolicy {
 
     public void setVoiceInteractionPackagesProviderLPw(PackagesProvider provider) {
         mVoiceInteractionPackagesProvider = provider;
+    }
+
+    public void setCarrierAppPackagesProviderLPw(PackagesProvider provider) {
+        mCarrierAppPackagesProvider = provider;
     }
 
     public void grantDefaultPermissions(int userId) {
@@ -193,11 +198,13 @@ final class DefaultPermissionGrantPolicy {
         final PackagesProvider imePackagesProvider;
         final PackagesProvider locationPackagesProvider;
         final PackagesProvider voiceInteractionPackagesProvider;
+        final PackagesProvider carrierAppPackagesProvider;
 
         synchronized (mService.mPackages) {
             imePackagesProvider = mImePackagesProvider;
             locationPackagesProvider = mLocationPackagesProvider;
             voiceInteractionPackagesProvider = mVoiceInteractionPackagesProvider;
+            carrierAppPackagesProvider = mCarrierAppPackagesProvider;
         }
 
         String[] imePackageNames = (imePackagesProvider != null)
@@ -206,6 +213,8 @@ final class DefaultPermissionGrantPolicy {
                 ? voiceInteractionPackagesProvider.getPackages(userId) : null;
         String[] locationPackageNames = (locationPackagesProvider != null)
                 ? locationPackagesProvider.getPackages(userId) : null;
+        String[] carrierAppPackageNames = (carrierAppPackagesProvider != null)
+                ? carrierAppPackagesProvider.getPackages(userId) : null;
 
         synchronized (mService.mPackages) {
             // Installers
@@ -379,6 +388,18 @@ final class DefaultPermissionGrantPolicy {
                         grantRuntimePermissionsLPw(locationPackage, CAMERA_PERMISSIONS, userId);
                         grantRuntimePermissionsLPw(locationPackage, SENSORS_PERMISSIONS, userId);
                         grantRuntimePermissionsLPw(locationPackage, STORAGE_PERMISSIONS, userId);
+                    }
+                }
+            }
+
+            // Carrier apps
+            if (carrierAppPackageNames != null) {
+                for (String packageName : carrierAppPackageNames) {
+                    PackageParser.Package carrierPackage = getSystemPackageLPr(packageName);
+                    if (carrierPackage != null
+                            && doesPackageSupportRuntimePermissions(carrierPackage)) {
+                        grantRuntimePermissionsLPw(carrierPackage, PHONE_PERMISSIONS, userId);
+                        grantRuntimePermissionsLPw(carrierPackage, LOCATION_PERMISSIONS, userId);
                     }
                 }
             }
