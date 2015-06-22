@@ -1067,6 +1067,9 @@ public abstract class Connection extends Conferenceable {
     @SystemApi
     @Deprecated
     public final AudioState getAudioState() {
+        if (mCallAudioState == null) {
+          return null;
+        }
         return new AudioState(mCallAudioState);
     }
 
