@@ -191,6 +191,7 @@ public class MobileSignalController extends SignalController<
         } else {
             mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE, TelephonyIcons.LTE);
         }
+        mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyIcons.FOUR_G);
     }
 
     @Override
