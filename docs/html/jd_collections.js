@@ -13,6 +13,15 @@ var RESOURCE_COLLECTIONS = {
       "sdk/index.html"
     ]
   },
+  "index/secondary/carousel": {
+    "title": "",
+    "resources": [
+      "http://www.youtube.com/watch?v=0r36OJaeMo4",
+      "http://www.youtube.com/watch?v=1Iw7Tg_afKk",
+      "http://www.youtube.com/watch?v=TieksFvD-7o",
+      "http://www.youtube.com/watch?v=MCoh4Pxs_ok"
+    ]
+  },
   "index/multiscreen": {
     "title": "",
     "resources": [
@@ -175,10 +184,10 @@ var RESOURCE_COLLECTIONS = {
   "distribute/landing/carousel": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=Pd49vTkvu0U",
-      "http://www.youtube.com/watch?v=ekxABqJeRBc",
-     "http://www.youtube.com/watch?v=MPnH7h12h0U",
-      "http://www.youtube.com/watch?v=700gYRkhkLM"
+      "https://www.youtube.com/watch?v=QDM52bblwlg",
+      "https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+      "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+      "https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
     ]
   },
   "distribute/landing/googleplay": {
