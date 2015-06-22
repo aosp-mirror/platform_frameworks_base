@@ -202,6 +202,11 @@ public class Am extends BaseCommand {
                 "    --abi <ABI>: Launch the instrumented process with the selected ABI.\n"  +
                 "        This assumes that the process supports the selected ABI.\n" +
                 "\n" +
+                "am trace-ipc: Trace IPC transactions.\n" +
+                "  start: start tracing IPC transactions.\n" +
+                "  stop: stop tracing IPC transactions and dump the results to file.\n" +
+                "    --dump-file <FILE>: Specify the file the trace should be dumped to.\n" +
+                "\n" +
                 "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
                 "  may be either a process name or pid.  Options are:\n" +
                 "    --user <USER_ID> | current: When supplying a process name,\n" +
@@ -365,6 +370,8 @@ public class Am extends BaseCommand {
             runKillAll();
         } else if (op.equals("instrument")) {
             runInstrument();
+        } else if (op.equals("trace-ipc")) {
+            runTraceIpc();
         } else if (op.equals("broadcast")) {
             sendBroadcast();
         } else if (op.equals("profile")) {
@@ -1095,6 +1102,62 @@ public class Am extends BaseCommand {
         if (oldAnims != null) {
             wm.setAnimationScales(oldAnims);
         }
+    }
+
+    private void runTraceIpc() throws Exception {
+        String op = nextArgRequired();
+        if (op.equals("start")) {
+            runTraceIpcStart();
+        } else if (op.equals("stop")) {
+            runTraceIpcStop();
+        } else {
+            showError("Error: unknown command '" + op + "'");
+            return;
+        }
+    }
+
+    private void runTraceIpcStart() throws Exception {
+        System.out.println("Starting IPC tracing.");
+        mAm.startBinderTracking();
+    }
+
+    private void runTraceIpcStop() throws Exception {
+        String opt;
+        String filename = null;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--dump-file")) {
+                filename = nextArgRequired();
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        if (filename == null) {
+            System.err.println("Error: Specify filename to dump logs to.");
+            return;
+        }
+
+        ParcelFileDescriptor fd = null;
+
+        try {
+            File file = new File(filename);
+            file.delete();
+            fd = openForSystemServer(file,
+                    ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE |
+                            ParcelFileDescriptor.MODE_READ_WRITE);
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: Unable to open file: " + filename);
+            System.err.println("Consider using a file under /data/local/tmp/");
+            return;
+        }
+
+        ;
+        if (!mAm.stopBinderTrackingAndDump(fd)) {
+            throw new AndroidException("STOP TRACE FAILED.");
+        }
+
+        System.out.println("Stopped IPC tracing. Dumping logs to: " + filename);
     }
 
     static void removeWallOption() {

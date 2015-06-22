@@ -642,6 +642,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     final ArrayList<ProcessRecord> mPendingPssProcesses = new ArrayList<ProcessRecord>();
 
+    private boolean mBinderTransactionTrackingEnabled = false;
+
     /**
      * Last time we requested PSS data of all processes.
      */
@@ -6044,9 +6046,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop);
             thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
-                    app.instrumentationUiAutomationConnection, testMode, enableOpenGlTrace,
-                    isRestrictedBackupMode || !normalMode, app.persistent,
-                    new Configuration(mConfiguration), app.compat,
+                    app.instrumentationUiAutomationConnection, testMode,
+                    mBinderTransactionTrackingEnabled, enableOpenGlTrace, isRestrictedBackupMode
+                    || !normalMode, app.persistent, new Configuration(mConfiguration), app.compat,
                     getCommonServicesLocked(app.isolated),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, null);
@@ -20327,6 +20329,104 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityInfo info = new ActivityInfo(aInfo);
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
+    }
+
+    private boolean processSanityChecksLocked(ProcessRecord process) {
+        if (process == null || process.thread == null) {
+            return false;
+        }
+
+        boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+        if (!isDebuggable) {
+            if ((process.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean startBinderTracking() throws RemoteException {
+        synchronized (this) {
+            mBinderTransactionTrackingEnabled = true;
+            // TODO: hijacking SET_ACTIVITY_WATCHER, but should be changed to its own
+            // permission (same as profileControl).
+            if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires permission "
+                        + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+            }
+
+            for (int i = 0; i < mLruProcesses.size(); i++) {
+                ProcessRecord process = mLruProcesses.get(i);
+                if (!processSanityChecksLocked(process)) {
+                    continue;
+                }
+                try {
+                    process.thread.startBinderTracking();
+                } catch (RemoteException e) {
+                    Log.v(TAG, "Process disappared");
+                }
+            }
+            return true;
+        }
+    }
+
+    public boolean stopBinderTrackingAndDump(ParcelFileDescriptor fd) throws RemoteException {
+        try {
+            synchronized (this) {
+                mBinderTransactionTrackingEnabled = false;
+                // TODO: hijacking SET_ACTIVITY_WATCHER, but should be changed to its own
+                // permission (same as profileControl).
+                if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Requires permission "
+                            + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+                }
+
+                if (fd == null) {
+                    throw new IllegalArgumentException("null fd");
+                }
+
+                PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd.getFileDescriptor()));
+                pw.println("Binder transaction traces for all processes.\n");
+                for (ProcessRecord process : mLruProcesses) {
+                    if (!processSanityChecksLocked(process)) {
+                        continue;
+                    }
+
+                    pw.println("Traces for process: " + process.processName);
+                    pw.flush();
+                    try {
+                        TransferPipe tp = new TransferPipe();
+                        try {
+                            process.thread.stopBinderTrackingAndDump(
+                                    tp.getWriteFd().getFileDescriptor());
+                            tp.go(fd.getFileDescriptor());
+                        } finally {
+                            tp.kill();
+                        }
+                    } catch (IOException e) {
+                        pw.println("Failure while dumping IPC traces from " + process +
+                                ".  Exception: " + e);
+                        pw.flush();
+                    } catch (RemoteException e) {
+                        pw.println("Got a RemoteException while dumping IPC traces from " +
+                                process + ".  Exception: " + e);
+                        pw.flush();
+                    }
+                }
+                fd = null;
+                return true;
+            }
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
     private final class LocalService extends ActivityManagerInternal {

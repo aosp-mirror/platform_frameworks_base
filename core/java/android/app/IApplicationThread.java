@@ -95,9 +95,10 @@ public interface IApplicationThread extends IInterface {
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, ProfilerInfo profilerInfo, Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
-            int debugMode, boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
-            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-            Bundle coreSettings) throws RemoteException;
+            int debugMode, boolean enableBinderTracking, boolean openGlTrace,
+            boolean restrictedBackupMode, boolean persistent, Configuration config,
+            CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings)
+            throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
@@ -148,6 +149,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled) throws RemoteException;
     void scheduleEnterAnimationComplete(IBinder token) throws RemoteException;
     void notifyCleartextNetwork(byte[] firstPacket) throws RemoteException;
+    void startBinderTracking() throws RemoteException;
+    void stopBinderTrackingAndDump(FileDescriptor fd) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -206,4 +209,6 @@ public interface IApplicationThread extends IInterface {
     int BACKGROUND_VISIBLE_BEHIND_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
     int ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+54;
     int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+55;
+    int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+56;
+    int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+57;
 }

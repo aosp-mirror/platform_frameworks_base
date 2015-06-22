@@ -508,6 +508,13 @@ public interface IActivityManager extends IInterface {
     public boolean setProcessMemoryTrimLevel(String process, int uid, int level)
             throws RemoteException;
 
+    // Start Binder transaction tracking for all applications.
+    public boolean startBinderTracking() throws RemoteException;
+
+    // Stop Binder transaction tracking for all applications and dump trace data to the given file
+    // descriptor.
+    public boolean stopBinderTrackingAndDump(ParcelFileDescriptor fd) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -851,4 +858,7 @@ public interface IActivityManager extends IInterface {
     int KEYGUARD_GOING_AWAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+296;
     int REGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+297;
     int UNREGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+298;
+
+    int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 299;
+    int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 300;
 }

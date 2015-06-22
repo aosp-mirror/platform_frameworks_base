@@ -445,6 +445,7 @@ public final class ActivityThread {
         IInstrumentationWatcher instrumentationWatcher;
         IUiAutomationConnection instrumentationUiAutomationConnection;
         int debugMode;
+        boolean enableBinderTracking;
         boolean enableOpenGlTrace;
         boolean restrictedBackupMode;
         boolean persistent;
@@ -770,7 +771,8 @@ public final class ActivityThread {
                 ProfilerInfo profilerInfo, Bundle instrumentationArgs,
                 IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
-                boolean enableOpenGlTrace, boolean isRestrictedBackupMode, boolean persistent,
+                boolean enableBinderTracking, boolean enableOpenGlTrace,
+                boolean isRestrictedBackupMode, boolean persistent,
                 Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
                 Bundle coreSettings) {
 
@@ -827,6 +829,7 @@ public final class ActivityThread {
             data.instrumentationWatcher = instrumentationWatcher;
             data.instrumentationUiAutomationConnection = instrumentationUiConnection;
             data.debugMode = debugMode;
+            data.enableBinderTracking = enableBinderTracking;
             data.enableOpenGlTrace = enableOpenGlTrace;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.persistent = persistent;
@@ -1223,6 +1226,19 @@ public final class ActivityThread {
                 StrictMode.onCleartextNetworkDetected(firstPacket);
             }
         }
+
+        @Override
+        public void startBinderTracking() {
+            sendMessage(H.START_BINDER_TRACKING, null);
+        }
+
+        @Override
+        public void stopBinderTrackingAndDump(FileDescriptor fd) {
+            try {
+                sendMessage(H.STOP_BINDER_TRACKING_AND_DUMP, ParcelFileDescriptor.dup(fd));
+            } catch (IOException e) {
+            }
+        }
     }
 
     private class H extends Handler {
@@ -1276,6 +1292,8 @@ public final class ActivityThread {
         public static final int CANCEL_VISIBLE_BEHIND = 147;
         public static final int BACKGROUND_VISIBLE_BEHIND_CHANGED = 148;
         public static final int ENTER_ANIMATION_COMPLETE = 149;
+        public static final int START_BINDER_TRACKING = 150;
+        public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1557,6 +1575,12 @@ public final class ActivityThread {
                     break;
                 case ENTER_ANIMATION_COMPLETE:
                     handleEnterAnimationComplete((IBinder) msg.obj);
+                    break;
+                case START_BINDER_TRACKING:
+                    handleStartBinderTracking();
+                    break;
+                case STOP_BINDER_TRACKING_AND_DUMP:
+                    handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2660,6 +2684,20 @@ public final class ActivityThread {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             r.activity.dispatchEnterAnimationComplete();
+        }
+    }
+
+    private void handleStartBinderTracking() {
+        Binder.enableTracing();
+    }
+
+    private void handleStopBinderTrackingAndDump(ParcelFileDescriptor fd) {
+        try {
+            Binder.disableTracing();
+            Binder.getTransactionTracker().writeTracesToFile(fd);
+        } finally {
+            IoUtils.closeQuietly(fd);
+            Binder.getTransactionTracker().clearTraces();
         }
     }
 
@@ -4583,8 +4621,11 @@ public final class ActivityThread {
         }
 
         // Allow application-generated systrace messages if we're debuggable.
-        boolean appTracingAllowed = (data.appInfo.flags&ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        Trace.setAppTracingAllowed(appTracingAllowed);
+        boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        Trace.setAppTracingAllowed(isAppDebuggable);
+        if (isAppDebuggable && data.enableBinderTracking) {
+            Binder.enableTracing();
+        }
 
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.
