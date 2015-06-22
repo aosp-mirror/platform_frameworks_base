@@ -892,7 +892,6 @@ public class LocationManager {
      * @param listener listener object that no longer needs location updates
      * @throws IllegalArgumentException if listener is null
      */
-    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeUpdates(LocationListener listener) {
         checkListener(listener);
         String packageName = mContext.getPackageName();
@@ -1055,7 +1054,6 @@ public class LocationManager {
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
      */
-    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeProximityAlert(PendingIntent intent) {
         checkPendingIntent(intent);
         String packageName = mContext.getPackageName();
@@ -1083,7 +1081,6 @@ public class LocationManager {
      *
      * @hide
      */
-    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeGeofence(Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
         checkGeofence(fence);
@@ -1107,7 +1104,6 @@ public class LocationManager {
      *
      * @hide
      */
-    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeAllGeofences(PendingIntent intent) {
         checkPendingIntent(intent);
         String packageName = mContext.getPackageName();
