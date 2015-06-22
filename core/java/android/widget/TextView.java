@@ -8637,6 +8637,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return true if this TextView is specialized for showing and interacting with the extracted
+     * text in a full-screen input method.
+     * @hide
+     */
+    public boolean isInExtractedMode() {
+        return false;
+    }
+
+    /**
      * This is a temporary method. Future versions may support multi-locale text.
      * Caveat: This method may not return the latest spell checker locale, but this should be
      * acceptable and it's more important to make this method asynchronous.
