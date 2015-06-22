@@ -208,7 +208,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     final ArrayList<StopwatchTimer> mPartialTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mFullTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mWindowTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mDozeTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mDrawTimers = new ArrayList<>();
     final SparseArray<ArrayList<StopwatchTimer>> mSensorTimers = new SparseArray<>();
     final ArrayList<StopwatchTimer> mWifiRunningTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mFullWifiLockTimers = new ArrayList<>();
@@ -5649,9 +5649,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             StopwatchTimer mTimerWindow;
 
             /**
-             * How long (in ms) this uid has had a doze wake lock.
+             * How long (in ms) this uid has had a draw wake lock.
              */
-            StopwatchTimer mTimerDoze;
+            StopwatchTimer mTimerDraw;
 
             /**
              * Reads a possibly null Timer from a Parcel.  The timer is associated with the
@@ -5680,8 +5680,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (mTimerWindow != null) {
                     wlactive |= !mTimerWindow.reset(false);
                 }
-                if (mTimerDoze != null) {
-                    wlactive |= !mTimerDoze.reset(false);
+                if (mTimerDraw != null) {
+                    wlactive |= !mTimerDraw.reset(false);
                 }
                 if (!wlactive) {
                     if (mTimerFull != null) {
@@ -5696,9 +5696,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mTimerWindow.detach();
                         mTimerWindow = null;
                     }
-                    if (mTimerDoze != null) {
-                        mTimerDoze.detach();
-                        mTimerDoze = null;
+                    if (mTimerDraw != null) {
+                        mTimerDraw.detach();
+                        mTimerDraw = null;
                     }
                 }
                 return !wlactive;
@@ -5709,14 +5709,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mPartialTimers, screenOffTimeBase, in);
                 mTimerFull = readTimerFromParcel(WAKE_TYPE_FULL, mFullTimers, timeBase, in);
                 mTimerWindow = readTimerFromParcel(WAKE_TYPE_WINDOW, mWindowTimers, timeBase, in);
-                mTimerDoze = readTimerFromParcel(WAKE_TYPE_DOZE, mDozeTimers, timeBase, in);
+                mTimerDraw = readTimerFromParcel(WAKE_TYPE_DRAW, mDrawTimers, timeBase, in);
             }
 
             void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
                 Timer.writeTimerToParcel(out, mTimerPartial, elapsedRealtimeUs);
                 Timer.writeTimerToParcel(out, mTimerFull, elapsedRealtimeUs);
                 Timer.writeTimerToParcel(out, mTimerWindow, elapsedRealtimeUs);
-                Timer.writeTimerToParcel(out, mTimerDoze, elapsedRealtimeUs);
+                Timer.writeTimerToParcel(out, mTimerDraw, elapsedRealtimeUs);
             }
 
             @Override
@@ -5725,7 +5725,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 case WAKE_TYPE_FULL: return mTimerFull;
                 case WAKE_TYPE_PARTIAL: return mTimerPartial;
                 case WAKE_TYPE_WINDOW: return mTimerWindow;
-                case WAKE_TYPE_DOZE: return mTimerDoze;
+                case WAKE_TYPE_DRAW: return mTimerDraw;
                 default: throw new IllegalArgumentException("type = " + type);
                 }
             }
@@ -5757,13 +5757,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                             mTimerWindow = t;
                         }
                         return t;
-                    case WAKE_TYPE_DOZE:
-                        t = mTimerDoze;
+                    case WAKE_TYPE_DRAW:
+                        t = mTimerDraw;
                         if (t == null) {
-                            t = new StopwatchTimer(Uid.this, WAKE_TYPE_DOZE,
-                                    mDozeTimers, mOnBatteryTimeBase);
-                            mTimerDoze = t;
+                            t = new StopwatchTimer(Uid.this, WAKE_TYPE_DRAW,
+                                    mDrawTimers, mOnBatteryTimeBase);
+                            mTimerDraw = t;
                         }
+                        return t;
                     default:
                         throw new IllegalArgumentException("type=" + type);
                 }
@@ -6621,7 +6622,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 wl.getStopwatchTimer(WAKE_TYPE_WINDOW).readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
-                wl.getStopwatchTimer(WAKE_TYPE_DOZE).readSummaryFromParcelLocked(in);
+                wl.getStopwatchTimer(WAKE_TYPE_DRAW).readSummaryFromParcelLocked(in);
             }
         }
 
@@ -9610,9 +9611,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 } else {
                     out.writeInt(0);
                 }
-                if (wl.mTimerDoze != null) {
+                if (wl.mTimerDraw != null) {
                     out.writeInt(1);
-                    wl.mTimerDoze.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                    wl.mTimerDraw.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
                 } else {
                     out.writeInt(0);
                 }
