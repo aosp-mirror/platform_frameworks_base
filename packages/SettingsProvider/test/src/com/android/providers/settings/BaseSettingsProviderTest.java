@@ -39,8 +39,10 @@ abstract class BaseSettingsProviderTest extends AndroidTestCase {
 
     protected static final String FAKE_SETTING_NAME = "fake_setting_name";
     protected static final String FAKE_SETTING_NAME_1 = "fake_setting_name1";
+    protected static final String FAKE_SETTING_NAME_2 = "fake_setting_name2";
     protected static final String FAKE_SETTING_VALUE = "fake_setting_value";
-    protected static final String FAKE_SETTING_VALUE_1 = "fake_setting_value_1";
+    protected static final String FAKE_SETTING_VALUE_1 = SettingsStateTest.CRAZY_STRING;
+    protected static final String FAKE_SETTING_VALUE_2 = null;
 
     private static final String[] NAME_VALUE_COLUMNS = new String[] {
             Settings.NameValueTable.NAME, Settings.NameValueTable.VALUE
