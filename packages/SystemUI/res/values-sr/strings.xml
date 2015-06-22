@@ -88,6 +88,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Гласовна помоћ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Откључајте"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"откључај"</string>
     <string name="phone_label" msgid="2320074140205331708">"отвори телефон"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"отвори гласовну помоћ"</string>
@@ -313,7 +317,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Превуците улево за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Неће вас узнемиравати звукови и вибрације, осим за аларме, подсетнике, догађаје и позиваоце које изаберете."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Прилагоди"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"Ово блокира СВЕ звукове и вибрације укључујући аларме, музику, видео снимке и игре. И даље ћете моћи да упућујете позиве."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Мање хитна обавештења су у наставку"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Додирните поново да бисте отворили"</string>

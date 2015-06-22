@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Гласова помощ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Отключване"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"отключване"</string>
     <string name="phone_label" msgid="2320074140205331708">"отваряне на телефона"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"отваряне на гласовата помощ"</string>
@@ -312,7 +316,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Плъзнете наляво за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Няма да бъдете обезпокоявани от звуци и вибрирания, различни от будилници, напомняния, събития и обаждания от посочени от вас контакти."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Персонализиране"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри. Пак ще можете да извършвате телефонни обаждания."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Докоснете отново за отваряне"</string>

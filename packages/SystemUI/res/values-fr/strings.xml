@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Assistance vocale"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Déverrouiller"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"déverrouiller"</string>
     <string name="phone_label" msgid="2320074140205331708">"ouvrir le téléphone"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ouvrir l\'assistance vocale"</string>
@@ -314,7 +318,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez quand même passer des appels téléphoniques."</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes ci-dessous"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Appuyer à nouveau pour ouvrir"</string>

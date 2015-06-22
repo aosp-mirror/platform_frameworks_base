@@ -87,6 +87,10 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"電話"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"音声アシスト"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ロック解除"</string>
+    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"音声アシストを開く"</string>
@@ -314,7 +318,10 @@
     <string name="description_direction_left" msgid="7207478719805562165">"左にスライドして<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>を行います。"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"アラーム、リマインダー、予定、指定した人からの着信以外で音やバイブレーションに煩わされることはありません。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"カスタマイズ"</string>
-    <string name="zen_silence_introduction" msgid="575422795504098868">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。電話をかけることはできます。"</string>
+    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
+    <skip />
+    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"緊急度の低い通知を下に表示"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"開くにはもう一度タップしてください"</string>
