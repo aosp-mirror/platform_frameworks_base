@@ -10779,15 +10779,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
         }
-        pae.intent.replaceExtras(pae.extras);
-        pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        closeSystemDialogs("assist");
+
+        long ident = Binder.clearCallingIdentity();
         try {
-            mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
-        } catch (ActivityNotFoundException e) {
-            Slog.w(TAG, "No activity to handle assist action.", e);
+            pae.intent.replaceExtras(pae.extras);
+            pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            closeSystemDialogs("assist");
+            try {
+                mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "No activity to handle assist action.", e);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
