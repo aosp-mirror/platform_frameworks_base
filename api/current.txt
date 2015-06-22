@@ -5697,7 +5697,6 @@ package android.app.admin {
     field public static final java.lang.String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
     field public static final java.lang.String ACTION_PASSWORD_SUCCEEDED = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
     field public static final java.lang.String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.app.action.PROFILE_PROVISIONING_COMPLETE";
-    field public static final java.lang.String ACTION_READY_FOR_USER_INITIALIZATION = "android.app.action.READY_FOR_USER_INITIALIZATION";
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
     field public static final java.lang.String EXTRA_LOCK_TASK_PACKAGE = "android.app.extra.LOCK_TASK_PACKAGE";
@@ -5709,7 +5708,6 @@ package android.app.admin {
     method public void addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName);
     method public void addUserRestriction(android.content.ComponentName, java.lang.String);
     method public void clearCrossProfileIntentFilters(android.content.ComponentName);
-    method public void clearDeviceInitializerApp(android.content.ComponentName);
     method public void clearDeviceOwnerApp(java.lang.String);
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
@@ -5759,7 +5757,6 @@ package android.app.admin {
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
     method public boolean isApplicationHidden(android.content.ComponentName, java.lang.String);
-    method public boolean isDeviceInitializerApp(java.lang.String);
     method public boolean isDeviceOwnerApp(java.lang.String);
     method public boolean isLockTaskPermitted(java.lang.String);
     method public boolean isMasterVolumeMuted(android.content.ComponentName);
@@ -5778,7 +5775,6 @@ package android.app.admin {
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setCertInstallerPackage(android.content.ComponentName, java.lang.String) throws java.lang.SecurityException;
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);
-    method public boolean setDeviceInitializer(android.content.ComponentName, android.content.ComponentName) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public boolean setKeyguardDisabled(android.content.ComponentName, boolean);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
@@ -5811,7 +5807,6 @@ package android.app.admin {
     method public void setSystemUpdatePolicy(android.content.ComponentName, android.app.admin.SystemUpdatePolicy);
     method public void setTrustAgentConfiguration(android.content.ComponentName, android.content.ComponentName, android.os.PersistableBundle);
     method public void setUninstallBlocked(android.content.ComponentName, java.lang.String, boolean);
-    method public boolean setUserEnabled(android.content.ComponentName);
     method public void setUserIcon(android.content.ComponentName, android.graphics.Bitmap);
     method public boolean switchUser(android.content.ComponentName, android.os.UserHandle);
     method public void uninstallAllUserCaCerts(android.content.ComponentName);
@@ -5840,12 +5835,6 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
     field public static final deprecated java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM";
     field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
     field public static final java.lang.String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED = "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCALE = "android.app.extra.PROVISIONING_LOCALE";
