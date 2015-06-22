@@ -135,6 +135,8 @@ int DisplayListCanvas::saveLayer(float left, float top, float right, float botto
 }
 
 void DisplayListCanvas::translate(float dx, float dy) {
+    if (dx == 0.0f && dy == 0.0f) return;
+
     mHasDeferredTranslate = true;
     mTranslateX += dx;
     mTranslateY += dy;
@@ -143,11 +145,15 @@ void DisplayListCanvas::translate(float dx, float dy) {
 }
 
 void DisplayListCanvas::rotate(float degrees) {
+    if (degrees == 0.0f) return;
+
     addStateOp(new (alloc()) RotateOp(degrees));
     mState.rotate(degrees);
 }
 
 void DisplayListCanvas::scale(float sx, float sy) {
+    if (sx == 1.0f && sy == 1.0f) return;
+
     addStateOp(new (alloc()) ScaleOp(sx, sy));
     mState.scale(sx, sy);
 }
