@@ -306,6 +306,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<10;
     static final int SCAN_REQUIRE_KNOWN = 1<<12;
     static final int SCAN_MOVE = 1<<13;
+    static final int SCAN_INITIAL = 1<<14;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -1805,7 +1806,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
-            final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING;
+            final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING | SCAN_INITIAL;
 
             final ArraySet<String> alreadyDexOpted = new ArraySet<String>();
 
@@ -11154,7 +11155,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean shouldCheckUpgradeKeySetLP(PackageSetting oldPs, int scanFlags) {
         // Can't rotate keys during boot or if sharedUser.
-        if (oldPs == null || (scanFlags&SCAN_BOOTING) != 0 || oldPs.sharedUser != null
+        if (oldPs == null || (scanFlags&SCAN_INITIAL) != 0 || oldPs.sharedUser != null
                 || !oldPs.keySetData.isUsingUpgradeKeySets()) {
             return false;
         }
@@ -11538,6 +11539,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 || (args.volumeUuid != null));
         boolean replace = false;
         int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
+        if (args.move != null) {
+            // moving a complete application; perfom an initial scan on the new install location
+            scanFlags |= SCAN_INITIAL;
+        }
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
@@ -14651,7 +14656,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (PackageSetting ps : packages) {
                 final PackageParser.Package pkg;
                 try {
-                    pkg = scanPackageLI(ps.codePath, parseFlags, 0, 0, null);
+                    pkg = scanPackageLI(ps.codePath, parseFlags, SCAN_INITIAL, 0L, null);
                     loaded.add(pkg.applicationInfo);
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
