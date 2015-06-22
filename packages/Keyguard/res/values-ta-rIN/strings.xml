@@ -115,16 +115,16 @@
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"சுயவிவரங்களுக்கு இடையே மாறும் போது, பின் தேவை."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"சுயவிவரங்களுக்கு இடையே மாறும் போது, கடவுச்சொல் தேவை."</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரத்திற்குச் சாதனம் திறக்கப்படவில்லை. வடிவத்தை உறுதிப்படுத்தவும்.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரத்திற்குச் சாதனம் திறக்கப்படவில்லை. வடிவத்தை உறுதிப்படுத்தவும்.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. வடிவத்தை உறுதிப்படுத்தவும்.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. வடிவத்தை உறுதிப்படுத்தவும்.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரத்திற்குச் சாதனம் திறக்கப்படவில்லை. பின்னை உறுதிப்படுத்தவும்.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரத்திற்குச் சாதனம் திறக்கப்படவில்லை. பின்னை உறுதிப்படுத்தவும்.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. பின்னை உறுதிப்படுத்தவும்.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. பின்னை உறுதிப்படுத்தவும்.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரத்திற்குச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரத்திற்குச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"அறியப்படவில்லை"</string>
 </resources>
