@@ -97,9 +97,6 @@ public class DeviceIdleController extends SystemService
     private static final String ACTION_STEP_IDLE_STATE =
             "com.android.server.device_idle.STEP_IDLE_STATE";
 
-    private static final String ACTION_ENTER_INACTIVE_STATE =
-        "com.android.server.device_idle.ENTER_INACTIVE_STATE";
-
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
     private PowerManagerInternal mLocalPowerManager;
@@ -112,7 +109,7 @@ public class DeviceIdleController extends SystemService
     private Intent mIdleIntent;
     private Display mCurDisplay;
     private AnyMotionDetector mAnyMotionDetector;
-    private boolean mIdleDisabled;
+    private boolean mEnabled;
     private boolean mScreenOn;
     private boolean mCharging;
     private boolean mSigMotionActive;
@@ -190,10 +187,6 @@ public class DeviceIdleController extends SystemService
             } else if (ACTION_STEP_IDLE_STATE.equals(intent.getAction())) {
                 synchronized (DeviceIdleController.this) {
                     stepIdleStateLocked();
-                }
-            } else if (ACTION_ENTER_INACTIVE_STATE.equals(intent.getAction())) {
-                synchronized (DeviceIdleController.this) {
-                    enterInactiveStateLocked();
                 }
             }
         }
@@ -612,6 +605,8 @@ public class DeviceIdleController extends SystemService
         final PackageManager pm = getContext().getPackageManager();
 
         synchronized (this) {
+            mEnabled = getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.config_enableAutoPowerModes);
             SystemConfig sysConfig = SystemConfig.getInstance();
             ArraySet<String> allowPower = sysConfig.getAllowInPowerSave();
             for (int i=0; i<allowPower.size(); i++) {
@@ -881,7 +876,7 @@ public class DeviceIdleController extends SystemService
 
     void becomeInactiveIfAppropriateLocked() {
         if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
-        if (!mScreenOn && !mCharging && !mIdleDisabled && mState == STATE_ACTIVE) {
+        if (!mScreenOn && !mCharging && mEnabled && mState == STATE_ACTIVE) {
             // Screen has turned off; we are now going to become inactive and start
             // waiting to see if we will ultimately go idle.
             mState = STATE_INACTIVE;
@@ -1216,8 +1211,12 @@ public class DeviceIdleController extends SystemService
         pw.println("    Completely disable device idle mode.");
         pw.println("  enable");
         pw.println("    Re-enable device idle mode after it had previously been disabled.");
-        pw.println("  whitelist");
+        pw.println("  enabled");
+        pw.println("    Print 1 if device idle mode is currently enabled, else 0.");
+        pw.println("  whitelist [package ...]");
         pw.println("    Add (prefix with +) or remove (prefix with -) packages.");
+        pw.println("  tempwhitelist [package ..]");
+        pw.println("    Temporarily place packages in whitelist for 10 seconds.");
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -1252,8 +1251,8 @@ public class DeviceIdleController extends SystemService
                     return;
                 } else if ("disable".equals(arg)) {
                     synchronized (this) {
-                        if (!mIdleDisabled) {
-                            mIdleDisabled = true;
+                        if (mEnabled) {
+                            mEnabled = false;
                             becomeActiveLocked("disabled", Process.myUid());
                             pw.println("Idle mode disabled");
                         }
@@ -1261,11 +1260,16 @@ public class DeviceIdleController extends SystemService
                     return;
                 } else if ("enable".equals(arg)) {
                     synchronized (this) {
-                        if (mIdleDisabled) {
-                            mIdleDisabled = false;
+                        if (!mEnabled) {
+                            mEnabled = true;
                             becomeInactiveIfAppropriateLocked();
                             pw.println("Idle mode enabled");
                         }
+                    }
+                    return;
+                } else if ("enabled".equals(arg)) {
+                    synchronized (this) {
+                        pw.println(mEnabled ? "1" : " 0");
                     }
                     return;
                 } else if ("whitelist".equals(arg)) {
@@ -1364,9 +1368,9 @@ public class DeviceIdleController extends SystemService
                 }
             }
 
+            pw.print("  mEnabled="); pw.println(mEnabled);
             pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);
-            pw.print("  mIdleDisabled="); pw.println(mIdleDisabled);
             pw.print("  mScreenOn="); pw.println(mScreenOn);
             pw.print("  mCharging="); pw.println(mCharging);
             pw.print("  mSigMotionActive="); pw.println(mSigMotionActive);
