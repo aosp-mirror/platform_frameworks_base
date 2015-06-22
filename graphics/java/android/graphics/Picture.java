@@ -135,8 +135,8 @@ public class Picture {
      * properly and are highly discouraged.
      *
      * <p>
-     * <strong>Note:</strong> a picture created from an input stream cannot be
-     * replayed on a hardware accelerated canvas.
+     * <strong>Note:</strong> Prior to API level 23 a picture created from an
+     * input stream cannot be replayed on a hardware accelerated canvas.
      *
      * @see #writeToStream(java.io.OutputStream)
      * @deprecated The recommended alternative is to not use writeToStream and
@@ -155,8 +155,8 @@ public class Picture {
      * there is no guarantee that the Picture can be successfully reconstructed.
      *
      * <p>
-     * <strong>Note:</strong> a picture created from an input stream cannot be
-     * replayed on a hardware accelerated canvas.
+     * <strong>Note:</strong> Prior to API level 23 a picture created from an
+     * input stream cannot be replayed on a hardware accelerated canvas.
      *
      * @see #createFromStream(java.io.InputStream)
      * @deprecated The recommended alternative is to draw the picture into a
