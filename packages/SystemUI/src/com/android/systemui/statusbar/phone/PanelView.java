@@ -172,12 +172,7 @@ public abstract class PanelView extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 mPeekAnimator = null;
                 if (mCollapseAfterPeek && !mCancelled) {
-                    postOnAnimation(new Runnable() {
-                        @Override
-                        public void run() {
-                            collapse(false /* delayed */, 1.0f /* speedUpFactor */);
-                        }
-                    });
+                    postOnAnimation(mPostCollapseRunnable);
                 }
                 mCollapseAfterPeek = false;
             }
@@ -662,6 +657,11 @@ public abstract class PanelView extends FrameLayout {
                 animator.setDuration((long)
                         (animator.getDuration() * getCannedFlingDurationFactor()
                                 / collapseSpeedUpFactor));
+            }
+            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD
+                    && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+                Log.i(PhoneStatusBar.TAG, "Panel collapsed! Stacktrace: "
+                        + Log.getStackTraceString(new Throwable()));
             }
         }
         animator.addListener(new AnimatorListenerAdapter() {
