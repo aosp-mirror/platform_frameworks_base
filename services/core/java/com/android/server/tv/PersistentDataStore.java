@@ -111,8 +111,8 @@ final class PersistentDataStore {
     public boolean isRatingBlocked(TvContentRating rating) {
         loadIfNeeded();
         synchronized (mBlockedRatings) {
-            for (TvContentRating blcokedRating : mBlockedRatings) {
-                if (rating.contains(blcokedRating)) {
+            for (TvContentRating blockedRating : mBlockedRatings) {
+                if (rating.contains(blockedRating)) {
                     return true;
                 }
             }
