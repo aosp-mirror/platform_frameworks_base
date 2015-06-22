@@ -165,6 +165,14 @@ public class ExtractEditText extends EditText {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public boolean isInExtractedMode() {
+        return true;
+    }
+
+    /**
      * {@inheritDoc}
      * @hide
      */
