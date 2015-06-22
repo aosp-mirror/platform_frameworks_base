@@ -266,11 +266,19 @@ public class CaptioningManager {
      * background colors, edge properties, and typeface.
      */
     public static final class CaptionStyle {
-        /** Packed value for a color of 'none' and a cached opacity of 100%. */
+        /**
+         * Packed value for a color of 'none' and a cached opacity of 100%.
+         *
+         * @hide
+         */
         private static final int COLOR_NONE_OPAQUE = 0x000000FF;
 
-        /** Packed value for an unspecified color and opacity. */
-        private static final int COLOR_UNSPECIFIED = 0x000001FF;
+        /**
+         * Packed value for a color of 'default' and opacity of 100%.
+         *
+         * @hide
+         */
+        public static final int COLOR_UNSPECIFIED = 0x00FFFFFF;
 
         private static final CaptionStyle WHITE_ON_BLACK;
         private static final CaptionStyle BLACK_ON_WHITE;
@@ -350,11 +358,11 @@ public class CaptioningManager {
 
         private CaptionStyle(int foregroundColor, int backgroundColor, int edgeType, int edgeColor,
                 int windowColor, String rawTypeface) {
-            mHasForegroundColor = foregroundColor != COLOR_UNSPECIFIED;
-            mHasBackgroundColor = backgroundColor != COLOR_UNSPECIFIED;
+            mHasForegroundColor = hasColor(foregroundColor);
+            mHasBackgroundColor = hasColor(backgroundColor);
             mHasEdgeType = edgeType != EDGE_TYPE_UNSPECIFIED;
-            mHasEdgeColor = edgeColor != COLOR_UNSPECIFIED;
-            mHasWindowColor = windowColor != COLOR_UNSPECIFIED;
+            mHasEdgeColor = hasColor(edgeColor);
+            mHasWindowColor = hasColor(windowColor);
 
             // Always use valid colors, even when no override is specified, to
             // ensure backwards compatibility with apps targeting KitKat MR2.
@@ -365,6 +373,20 @@ public class CaptioningManager {
             this.windowColor = mHasWindowColor ? windowColor : COLOR_NONE_OPAQUE;
 
             mRawTypeface = rawTypeface;
+        }
+
+        /**
+         * Returns whether a packed color indicates a non-default value.
+         *
+         * @param packedColor the packed color value
+         * @return {@code true} if a non-default value is specified
+         * @hide
+         */
+        public static boolean hasColor(int packedColor) {
+            // Matches the color packing code from Settings. "Default" packed
+            // colors are indicated by zero alpha and non-zero red/blue. The
+            // cached alpha value used by Settings is stored in green.
+            return (packedColor >>> 24) != 0 || (packedColor & 0xFFFF00) == 0;
         }
 
         /**
