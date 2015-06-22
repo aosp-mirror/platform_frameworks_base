@@ -73,6 +73,7 @@ public class StatusBarKeyguardViewManager {
     private boolean mLastBouncerShowing;
     private boolean mLastBouncerDismissible;
     private OnDismissAction mAfterKeyguardGoneAction;
+    private boolean mScreenWillWakeUp;
 
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
@@ -163,6 +164,7 @@ public class StatusBarKeyguardViewManager {
 
     public void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         mScreenOn = true;
+        mScreenWillWakeUp = false;
         mPhoneStatusBar.onScreenTurnedOn();
         if (callback != null) {
             callbackAfterDraw(callback);
@@ -180,6 +182,10 @@ public class StatusBarKeyguardViewManager {
                 }
             }
         });
+    }
+
+    public void notifyScreenWakeUpRequested() {
+        mScreenWillWakeUp = true;
     }
 
     public void verifyUnlock() {
@@ -297,7 +303,7 @@ public class StatusBarKeyguardViewManager {
      * Dismisses the keyguard by going to the next screen or making it gone.
      */
     public void dismiss() {
-        if (mScreenOn) {
+        if (mScreenOn || mScreenWillWakeUp) {
             showBouncer();
         }
     }
