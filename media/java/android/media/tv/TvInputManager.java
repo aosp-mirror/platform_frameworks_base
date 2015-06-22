@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pools.Pool;
@@ -1652,14 +1653,16 @@ public final class TvInputManager {
          */
         boolean updateTrackSelection(int type, String trackId) {
             synchronized (mMetadataLock) {
-                if (type == TvTrackInfo.TYPE_AUDIO && trackId != mSelectedAudioTrackId) {
+                if (type == TvTrackInfo.TYPE_AUDIO
+                        && !TextUtils.equals(trackId, mSelectedAudioTrackId)) {
                     mSelectedAudioTrackId = trackId;
                     return true;
-                } else if (type == TvTrackInfo.TYPE_VIDEO && trackId != mSelectedVideoTrackId) {
+                } else if (type == TvTrackInfo.TYPE_VIDEO
+                        && !TextUtils.equals(trackId, mSelectedVideoTrackId)) {
                     mSelectedVideoTrackId = trackId;
                     return true;
                 } else if (type == TvTrackInfo.TYPE_SUBTITLE
-                        && trackId != mSelectedSubtitleTrackId) {
+                        && !TextUtils.equals(trackId, mSelectedSubtitleTrackId)) {
                     mSelectedSubtitleTrackId = trackId;
                     return true;
                 }
