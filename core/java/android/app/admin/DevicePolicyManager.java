@@ -468,6 +468,7 @@ public class DevicePolicyManager {
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
 
     /**
+     * @hide
      * On devices managed by a device owner app, a {@link ComponentName} extra indicating the
      * component of the application that is temporarily granted device owner privileges during
      * device initialization and profile owner privileges during secondary user initialization.
@@ -483,6 +484,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME";
 
     /**
+     * @hide
      * A String extra holding an http url that specifies the download location of the device
      * initializer package. When not provided it is assumed that the device initializer package is
      * already installed.
@@ -494,6 +496,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION";
 
     /**
+     * @hide
      * An int extra holding a minimum required version code for the device initializer package.
      * If the initializer is already installed on the device, it will only be re-downloaded from
      * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION} if the version of
@@ -506,6 +509,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE";
 
     /**
+     * @hide
      * A String extra holding a http cookie header which should be used in the http request to the
      * url specified in {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
      *
@@ -516,6 +520,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
+     * @hide
      * A String extra holding the URL-safe base64 encoded SHA-256 checksum of the file at download
      * location specified in
      * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
@@ -532,6 +537,7 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
 
     /**
+     * @hide
      * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
      * android package archive at the download location specified in {@link
      * #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
@@ -611,11 +617,6 @@ public class DevicePolicyManager {
      * {@link #MIME_TYPE_PROVISIONING_NFC}:
      * <ul>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}.
      * Replaces {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}. The value of the property
      * should be converted to a String via
@@ -2756,6 +2757,7 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
      * Sets the given component as the device initializer. The package must already be installed and
      * set as an active device administrator, and there must not be an existing device initializer,
      * for this call to succeed. This method can only be called by an app holding the
@@ -2784,6 +2786,7 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
      * Used to determine if a particular package has been registered as the device initializer.
      *
      * @param packageName the package name of the app, to compare with the registered device
@@ -2802,6 +2805,7 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
      * Removes the device initializer, so that it will not be invoked on user initialization for any
      * subsequently created users. This method can be called by either the device owner or device
      * initializer itself. The caller must be an active administrator.
@@ -2856,6 +2860,7 @@ public class DevicePolicyManager {
 
 
     /**
+     * @hide
      * Sets the enabled state of the user. A user should be enabled only once it is ready to
      * be used.
      *
