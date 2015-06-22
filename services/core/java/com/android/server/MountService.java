@@ -259,6 +259,7 @@ class MountService extends IMountService.Stub
     private static final String TAG_VOLUME = "volume";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_FS_UUID = "fsUuid";
+    private static final String ATTR_PART_GUID = "partGuid";
     private static final String ATTR_NICKNAME = "nickname";
     private static final String ATTR_USER_FLAGS = "userFlags";
 
@@ -689,7 +690,7 @@ class MountService extends IMountService.Stub
 
             // Create a stub volume that represents internal storage
             final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
-                    VolumeInfo.TYPE_PRIVATE, null, 0);
+                    VolumeInfo.TYPE_PRIVATE, null, null, 0);
             internal.state = VolumeInfo.STATE_MOUNTED;
             internal.path = Environment.getDataDirectory().getAbsolutePath();
             mVolumes.put(internal.id, internal);
@@ -900,10 +901,12 @@ class MountService extends IMountService.Stub
             case VoldResponseCode.VOLUME_CREATED: {
                 final String id = cooked[1];
                 final int type = Integer.parseInt(cooked[2]);
-                final String diskId = (cooked.length == 4) ? cooked[3] : null;
+                final String diskId = TextUtils.nullIfEmpty(cooked[3]);
+                final String partGuid = TextUtils.nullIfEmpty(cooked[4]);
+
                 final DiskInfo disk = mDisks.get(diskId);
                 final int mtpIndex = allocateMtpIndex(id);
-                final VolumeInfo vol = new VolumeInfo(id, type, disk, mtpIndex);
+                final VolumeInfo vol = new VolumeInfo(id, type, disk, partGuid, mtpIndex);
                 mVolumes.put(id, vol);
                 onVolumeCreatedLocked(vol);
                 break;
@@ -1091,13 +1094,21 @@ class MountService extends IMountService.Stub
         // Remember that we saw this volume so we're ready to accept user
         // metadata, or so we can annoy them when a private volume is ejected
         if (vol.isMountedReadable() && !TextUtils.isEmpty(vol.fsUuid)) {
-            if (!mRecords.containsKey(vol.fsUuid)) {
-                final VolumeRecord rec = new VolumeRecord(vol.type, vol.fsUuid);
+            VolumeRecord rec = mRecords.get(vol.fsUuid);
+            if (rec == null) {
+                rec = new VolumeRecord(vol.type, vol.fsUuid);
+                rec.partGuid = vol.partGuid;
                 if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                     rec.nickname = vol.disk.getDescription();
                 }
                 mRecords.put(rec.fsUuid, rec);
                 writeSettingsLocked();
+            } else {
+                // Handle upgrade case where we didn't store partition GUID
+                if (TextUtils.isEmpty(rec.partGuid)) {
+                    rec.partGuid = vol.partGuid;
+                    writeSettingsLocked();
+                }
             }
         }
 
@@ -1347,6 +1358,7 @@ class MountService extends IMountService.Stub
         final int type = readIntAttribute(in, ATTR_TYPE);
         final String fsUuid = readStringAttribute(in, ATTR_FS_UUID);
         final VolumeRecord meta = new VolumeRecord(type, fsUuid);
+        meta.partGuid = readStringAttribute(in, ATTR_PART_GUID);
         meta.nickname = readStringAttribute(in, ATTR_NICKNAME);
         meta.userFlags = readIntAttribute(in, ATTR_USER_FLAGS);
         return meta;
@@ -1356,6 +1368,7 @@ class MountService extends IMountService.Stub
         out.startTag(null, TAG_VOLUME);
         writeIntAttribute(out, ATTR_TYPE, rec.type);
         writeStringAttribute(out, ATTR_FS_UUID, rec.fsUuid);
+        writeStringAttribute(out, ATTR_PART_GUID, rec.partGuid);
         writeStringAttribute(out, ATTR_NICKNAME, rec.nickname);
         writeIntAttribute(out, ATTR_USER_FLAGS, rec.userFlags);
         out.endTag(null, TAG_VOLUME);
@@ -1573,9 +1586,11 @@ class MountService extends IMountService.Stub
 
         Preconditions.checkNotNull(fsUuid);
         synchronized (mLock) {
-            mRecords.remove(fsUuid);
-
-            // TODO: tell vold to forget keys
+            final VolumeRecord rec = mRecords.remove(fsUuid);
+            if (rec != null && !TextUtils.isEmpty(rec.partGuid)) {
+                forgetPartition(rec.partGuid);
+            }
+            mCallbacks.notifyVolumeForgotten(fsUuid);
 
             // If this had been primary storage, revert back to internal and
             // reset vold so we bind into new volume into place.
@@ -1584,7 +1599,6 @@ class MountService extends IMountService.Stub
                 resetIfReadyAndConnected();
             }
 
-            mCallbacks.notifyVolumeForgotten(fsUuid);
             writeSettingsLocked();
         }
     }
@@ -1597,6 +1611,10 @@ class MountService extends IMountService.Stub
         synchronized (mLock) {
             for (int i = 0; i < mRecords.size(); i++) {
                 final String fsUuid = mRecords.keyAt(i);
+                final VolumeRecord rec = mRecords.valueAt(i);
+                if (!TextUtils.isEmpty(rec.partGuid)) {
+                    forgetPartition(rec.partGuid);
+                }
                 mCallbacks.notifyVolumeForgotten(fsUuid);
             }
             mRecords.clear();
@@ -1607,6 +1625,14 @@ class MountService extends IMountService.Stub
 
             writeSettingsLocked();
             resetIfReadyAndConnected();
+        }
+    }
+
+    private void forgetPartition(String partGuid) {
+        try {
+            mConnector.execute("volume", "forget_partition", partGuid);
+        } catch (NativeDaemonConnectorException e) {
+            Slog.w(TAG, "Failed to forget key for " + partGuid + ": " + e);
         }
     }
 

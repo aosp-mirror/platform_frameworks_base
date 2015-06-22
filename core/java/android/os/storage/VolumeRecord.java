@@ -39,6 +39,7 @@ public class VolumeRecord implements Parcelable {
 
     public final int type;
     public final String fsUuid;
+    public String partGuid;
     public String nickname;
     public int userFlags;
 
@@ -50,6 +51,7 @@ public class VolumeRecord implements Parcelable {
     public VolumeRecord(Parcel parcel) {
         type = parcel.readInt();
         fsUuid = parcel.readString();
+        partGuid = parcel.readString();
         nickname = parcel.readString();
         userFlags = parcel.readInt();
     }
@@ -79,6 +81,8 @@ public class VolumeRecord implements Parcelable {
         pw.increaseIndent();
         pw.printPair("type", DebugUtils.valueToString(VolumeInfo.class, "TYPE_", type));
         pw.printPair("fsUuid", fsUuid);
+        pw.printPair("partGuid", partGuid);
+        pw.println();
         pw.printPair("nickname", nickname);
         pw.printPair("userFlags",
                 DebugUtils.flagsToString(VolumeRecord.class, "USER_FLAG_", userFlags));
@@ -133,6 +137,7 @@ public class VolumeRecord implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(type);
         parcel.writeString(fsUuid);
+        parcel.writeString(partGuid);
         parcel.writeString(nickname);
         parcel.writeInt(userFlags);
     }
