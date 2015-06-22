@@ -185,7 +185,7 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void notifyScreenWakeUpRequested() {
-        mScreenWillWakeUp = true;
+        mScreenWillWakeUp = !mScreenOn;
     }
 
     public void verifyUnlock() {
