@@ -142,9 +142,9 @@ public abstract class BatteryStats implements Parcelable {
     public static final int CAMERA_TURNED_ON = 17;
 
     /**
-     * A constant indicating a doze wake lock timer.
+     * A constant indicating a draw wake lock timer.
      */
-    public static final int WAKE_TYPE_DOZE = 18;
+    public static final int WAKE_TYPE_DRAW = 18;
 
     /**
      * Include all of the data in the stats, including previously saved data.
@@ -3839,7 +3839,7 @@ public abstract class BatteryStats implements Parcelable {
             final ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelocks
                     = u.getWakelockStats();
             long totalFullWakelock = 0, totalPartialWakelock = 0, totalWindowWakelock = 0;
-            long totalDozeWakelock = 0;
+            long totalDrawWakelock = 0;
             int countWakelock = 0;
             for (int iw=wakelocks.size()-1; iw>=0; iw--) {
                 final Uid.Wakelock wl = wakelocks.valueAt(iw);
@@ -3854,8 +3854,8 @@ public abstract class BatteryStats implements Parcelable {
                         "partial", which, linePrefix);
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), rawRealtime,
                         "window", which, linePrefix);
-                linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_DOZE), rawRealtime,
-                        "doze", which, linePrefix);
+                linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_DRAW), rawRealtime,
+                        "draw", which, linePrefix);
                 sb.append(" realtime");
                 pw.println(sb.toString());
                 uidActivity = true;
@@ -3867,7 +3867,7 @@ public abstract class BatteryStats implements Parcelable {
                         rawRealtime, which);
                 totalWindowWakelock += computeWakeLock(wl.getWakeTime(WAKE_TYPE_WINDOW),
                         rawRealtime, which);
-                totalDozeWakelock += computeWakeLock(wl.getWakeTime(WAKE_TYPE_DOZE),
+                totalDrawWakelock += computeWakeLock(wl.getWakeTime(WAKE_TYPE_DRAW),
                         rawRealtime, which);
             }
             if (countWakelock > 1) {
@@ -3898,13 +3898,13 @@ public abstract class BatteryStats implements Parcelable {
                         formatTimeMs(sb, totalWindowWakelock);
                         sb.append("window");
                     }
-                    if (totalDozeWakelock != 0) {
+                    if (totalDrawWakelock != 0) {
                         if (needComma) {
                             sb.append(",");
                         }
                         needComma = true;
-                        formatTimeMs(sb, totalDozeWakelock);
-                        sb.append("doze");
+                        formatTimeMs(sb, totalDrawWakelock);
+                        sb.append("draw");
                     }
                     sb.append(" realtime");
                     pw.println(sb.toString());
