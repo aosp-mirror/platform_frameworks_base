@@ -19,6 +19,7 @@ package android.app.admin;
 import android.accounts.AccountManager;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -227,14 +228,15 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
 
     /**
+     * @hide
      * Broadcast Action: This broadcast is sent to indicate that the system is ready for the device
      * initializer to perform user setup tasks. This is only applicable to devices managed by a
      * device owner app.
      *
      * <p>The broadcast will be limited to the {@link DeviceAdminReceiver} component specified in
-     * the {@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME} field
-     * of the original intent or NFC bump that started the provisioning process. You will generally
-     * handle this in {@link DeviceAdminReceiver#onReadyForUserInitialization}.
+     * the device initializer field of the original intent or NFC bump that started the provisioning
+     * process. You will generally handle this in
+     * {@link DeviceAdminReceiver#onReadyForUserInitialization}.
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
@@ -435,23 +437,22 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * Called during provisioning of a managed device to allow the device initializer to perform
      * user setup steps. Only device initializers should override this method.
      *
-     * <p> Called when the DeviceAdminReceiver receives a
-     * {@link #ACTION_READY_FOR_USER_INITIALIZATION} broadcast. As a prerequisite for the execution
-     * of this callback the {@link DeviceAdminReceiver} has
-     * to declare an intent filter for {@link #ACTION_READY_FOR_USER_INITIALIZATION}. Only the
-     * component specified in the
-     * {@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME} field of the
+     * <p> Called when the DeviceAdminReceiver receives an
+     * android.app.action.ACTION_READY_FOR_USER_INITIALIZATION broadcast. As a prerequisite for the
+     * execution of this callback the {@link DeviceAdminReceiver} has
+     * to declare an intent filter for android.app.action.ACTION_READY_FOR_USER_INITIALIZATION. Only
+     * the component specified in the device initializer component name field of the
      * original intent or NFC bump that started the provisioning process will receive this callback.
      *
      * <p>It is not assumed that the device initializer is finished when it returns from
-     * this call, as it may do additional setup asynchronously. The device initializer must call
-     * {@link DevicePolicyManager#setUserEnabled(ComponentName admin)} when it has finished any
-     * additional setup (such as adding an account by using the {@link AccountManager}) in order for
-     * the user to be functional.
+     * this call, as it may do additional setup asynchronously. The device initializer must enable
+     * the current user when it has finished any additional setup (such as adding an account by
+     * using the {@link AccountManager}) in order for the user to be functional.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
+    @SystemApi
     public void onReadyForUserInitialization(Context context, Intent intent) {
     }
 
