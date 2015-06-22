@@ -970,6 +970,7 @@ public final class PowerManagerService extends SystemService
                 case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                 case PowerManager.FULL_WAKE_LOCK:
                 case PowerManager.DOZE_WAKE_LOCK:
+                case PowerManager.DRAW_WAKE_LOCK:
                     return true;
 
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
