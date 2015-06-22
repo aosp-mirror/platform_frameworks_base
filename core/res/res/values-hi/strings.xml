@@ -26,8 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> दिन"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> दिन <xliff:g id="HOURS">%2$d</xliff:g> घंटे"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> दिन <xliff:g id="HOURS">%2$d</xliff:g> घंटा"</string>
@@ -225,7 +224,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"व्यक्तिगत ऐप्स"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"व्यक्तिगत"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"कार्यालय"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"अपने संपर्कों को ऐक्सेस करें"</string>
@@ -1273,7 +1272,7 @@
     <string name="validity_period" msgid="8818886137545983110">"मान्यता:"</string>
     <string name="issued_on" msgid="5895017404361397232">"जारी करने का दिनांक:"</string>
     <string name="expires_on" msgid="3676242949915959821">"समय समाप्ति दिनांक:"</string>
-    <string name="serial_number" msgid="758814067660862493">"क्रमांक:"</string>
+    <string name="serial_number" msgid="758814067660862493">"सीरियल नंबर:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"फ़िंगरप्रिंट:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 फ़िंगरप्रिंट:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 फ़िंगरप्रिंट:"</string>
