@@ -465,6 +465,11 @@ public class TextUtils {
             return false;
     }
 
+    /** {@hide} */
+    public static String nullIfEmpty(@Nullable String str) {
+        return isEmpty(str) ? null : str;
+    }
+
     /**
      * Returns the length that the specified CharSequence would have if
      * spaces and control characters were trimmed from the start and end,
