@@ -16,6 +16,7 @@
 
 package com.android.test.voiceinteraction;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.VoiceInteractor;
 import android.content.ComponentName;
@@ -111,38 +112,10 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     @Override
     public void onClick(View v) {
         if (v == mAbortButton) {
-            VoiceInteractor.AbortVoiceRequest req = new VoiceInteractor.AbortVoiceRequest(
-                    new VoiceInteractor.Prompt("Dammit, we suck :("), null) {
-                @Override
-                public void onCancel() {
-                    Log.i(TAG, "Canceled!");
-                    mLog.append("Canceled abort\n");
-                }
-
-                @Override
-                public void onAbortResult(Bundle result) {
-                    Log.i(TAG, "Abort result: result=" + result);
-                    mLog.append("Abort: result=" + result + "\n");
-                    getActivity().finish();
-                }
-            };
+            VoiceInteractor.AbortVoiceRequest req = new TestAbortVoice();
             mInteractor.submitRequest(req, REQUEST_ABORT);
         } else if (v == mCompleteButton) {
-            VoiceInteractor.CompleteVoiceRequest req = new VoiceInteractor.CompleteVoiceRequest(
-                    new VoiceInteractor.Prompt("Woohoo, completed!"), null) {
-                @Override
-                public void onCancel() {
-                    Log.i(TAG, "Canceled!");
-                    mLog.append("Canceled complete\n");
-                }
-
-                @Override
-                public void onCompleteResult(Bundle result) {
-                    Log.i(TAG, "Complete result: result=" + result);
-                    mLog.append("Complete: result=" + result + "\n");
-                    getActivity().finish();
-                }
-            };
+            VoiceInteractor.CompleteVoiceRequest req = new TestCompleteVoice();
             mInteractor.submitRequest(req, REQUEST_COMPLETE);
         } else if (v == mPickButton) {
             VoiceInteractor.PickOptionRequest.Option[] options =
@@ -152,36 +125,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
             options[2] = new VoiceInteractor.PickOptionRequest.Option("Three");
             options[3] = new VoiceInteractor.PickOptionRequest.Option("Four");
             options[4] = new VoiceInteractor.PickOptionRequest.Option("Five");
-            VoiceInteractor.PickOptionRequest req = new VoiceInteractor.PickOptionRequest(
-                    new VoiceInteractor.Prompt("Need to pick something"), options, null) {
-                @Override
-                public void onCancel() {
-                    Log.i(TAG, "Canceled!");
-                    mLog.append("Canceled pick\n");
-                }
-
-                @Override
-                public void onPickOptionResult(boolean finished, Option[] selections, Bundle result) {
-                    Log.i(TAG, "Pick result: finished=" + finished + " selections=" + selections
-                            + " result=" + result);
-                    StringBuilder sb = new StringBuilder();
-                    if (finished) {
-                        sb.append("Pick final result: ");
-                    } else {
-                        sb.append("Pick intermediate result: ");
-                    }
-                    for (int i=0; i<selections.length; i++) {
-                        if (i >= 1) {
-                            sb.append(", ");
-                        }
-                        sb.append(selections[i].getLabel());
-                    }
-                    mLog.append(sb.toString());
-                    if (finished) {
-                        getActivity().finish();
-                    }
-                }
-            };
+            VoiceInteractor.PickOptionRequest req = new TestPickOption(options);
             mInteractor.submitRequest(req, REQUEST_PICK);
         } else if (v == mJumpOutButton) {
             Log.i(TAG, "Jump out");
@@ -199,5 +143,67 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    static class TestAbortVoice extends VoiceInteractor.AbortVoiceRequest {
+        public TestAbortVoice() {
+            super(new VoiceInteractor.Prompt("Dammit, we suck :("), null);
+        }
+        @Override public void onCancel() {
+            Log.i(TAG, "Canceled!");
+            ((TestInteractionActivity)getActivity()).mLog.append("Canceled abort\n");
+        }
+        @Override public void onAbortResult(Bundle result) {
+            Log.i(TAG, "Abort result: result=" + result);
+            ((TestInteractionActivity)getActivity()).mLog.append("Abort: result=" + result + "\n");
+            getActivity().finish();
+        }
+    }
+
+    static class TestCompleteVoice extends VoiceInteractor.CompleteVoiceRequest {
+        public TestCompleteVoice() {
+            super(new VoiceInteractor.Prompt("Woohoo, completed!"), null);
+        }
+        @Override public void onCancel() {
+            Log.i(TAG, "Canceled!");
+            ((TestInteractionActivity)getActivity()).mLog.append("Canceled complete\n");
+        }
+        @Override public void onCompleteResult(Bundle result) {
+            Log.i(TAG, "Complete result: result=" + result);
+            ((TestInteractionActivity)getActivity()).mLog.append("Complete: result="
+                    + result + "\n");
+            getActivity().finish();
+        }
+    }
+
+    static class TestPickOption extends VoiceInteractor.PickOptionRequest {
+        public TestPickOption(Option[] options) {
+            super(new VoiceInteractor.Prompt("Need to pick something"), options, null);
+        }
+        @Override public void onCancel() {
+            Log.i(TAG, "Canceled!");
+            ((TestInteractionActivity)getActivity()).mLog.append("Canceled pick\n");
+        }
+        @Override
+        public void onPickOptionResult(boolean finished, Option[] selections, Bundle result) {
+            Log.i(TAG, "Pick result: finished=" + finished + " selections=" + selections
+                    + " result=" + result);
+            StringBuilder sb = new StringBuilder();
+            if (finished) {
+                sb.append("Pick final result: ");
+            } else {
+                sb.append("Pick intermediate result: ");
+            }
+            for (int i=0; i<selections.length; i++) {
+                if (i >= 1) {
+                    sb.append(", ");
+                }
+                sb.append(selections[i].getLabel());
+            }
+            ((TestInteractionActivity)getActivity()).mLog.append(sb.toString());
+            if (finished) {
+                getActivity().finish();
+            }
+        }
     }
 }

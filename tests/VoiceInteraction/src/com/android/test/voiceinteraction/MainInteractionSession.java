@@ -18,8 +18,8 @@ package com.android.test.voiceinteraction;
 
 import android.app.ActivityManager;
 import android.app.VoiceInteractor;
-import android.app.AssistContent;
-import android.app.AssistStructure;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -123,34 +123,8 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     public void onHandleAssist(Bundle assistBundle) {
-        boolean hasStructure = false;
-        if (assistBundle != null) {
-            Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
-            if (assistContext != null) {
-                mAssistStructure = AssistStructure.getAssistStructure(assistContext);
-                if (mAssistStructure != null) {
-                    if (mAssistVisualizer != null) {
-                        mAssistVisualizer.setAssistStructure(mAssistStructure);
-                        hasStructure = true;
-                    }
-                }
-                AssistContent content = AssistContent.getAssistContent(assistContext);
-                if (content != null) {
-                    Log.i(TAG, "Assist intent: " + content.getIntent());
-                    Log.i(TAG, "Assist clipdata: " + content.getClipData());
-                }
-            }
-            Uri referrer = assistBundle.getParcelable(Intent.EXTRA_REFERRER);
-            if (referrer != null) {
-                Log.i(TAG, "Referrer: " + referrer);
-            }
-        }
-        if (!hasStructure && mAssistVisualizer != null) {
-            mAssistVisualizer.clearAssistData();
-        }
     }
 
-    /*
     @Override
     public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
         mAssistStructure = structure;
@@ -158,13 +132,22 @@ public class MainInteractionSession extends VoiceInteractionSession
             if (mAssistVisualizer != null) {
                 mAssistVisualizer.setAssistStructure(mAssistStructure);
             }
+        } else {
+            if (mAssistVisualizer != null) {
+                mAssistVisualizer.clearAssistData();
+            }
         }
         if (content != null) {
             Log.i(TAG, "Assist intent: " + content.getIntent());
             Log.i(TAG, "Assist clipdata: " + content.getClipData());
         }
+        if (data != null) {
+            Uri referrer = data.getParcelable(Intent.EXTRA_REFERRER);
+            if (referrer != null) {
+                Log.i(TAG, "Referrer: " + referrer);
+            }
+        }
     }
-    */
 
     @Override
     public void onHandleScreenshot(Bitmap screenshot) {
