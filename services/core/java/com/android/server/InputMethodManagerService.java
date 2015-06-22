@@ -1043,8 +1043,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         resetAllInternalStateLocked(false  /* updateOnlyWhenLocaleChanged */,
                 initialUserSwitch /* needsToResetDefaultIme */);
         if (initialUserSwitch) {
-            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mContext.getPackageManager(),
-                    mSettings.getEnabledInputMethodListLocked());
+            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                    mSettings.getEnabledInputMethodListLocked(), newUserId,
+                    mContext.getBasePackageName());
         }
 
         if (DEBUG) Slog.d(TAG, "Switching user stage 3/3. newUserId=" + newUserId
@@ -1101,9 +1102,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (!mImeSelectedOnBoot) {
                     Slog.w(TAG, "Reset the default IME as \"Resource\" is ready here.");
                     resetStateIfCurrentLocaleChangedLocked();
-                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
-                            mContext.getPackageManager(),
-                            mSettings.getEnabledInputMethodListLocked());
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                            mSettings.getEnabledInputMethodListLocked(),
+                            mSettings.getCurrentUserId(), mContext.getBasePackageName());
                 }
                 mLastSystemLocale = mRes.getConfiguration().locale;
                 try {
