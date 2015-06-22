@@ -270,6 +270,17 @@ public class LocationManagerService extends ILocationManager.Stub {
             };
             mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null, callback);
 
+            PackageManager.OnPermissionsChangedListener permissionListener
+                    = new PackageManager.OnPermissionsChangedListener() {
+                @Override
+                public void onPermissionsChanged(final int uid) {
+                    synchronized (mLock) {
+                        applyAllProviderRequirementsLocked();
+                    }
+                }
+            };
+            mPackageManager.addOnPermissionsChangeListener(permissionListener);
+
             mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             updateUserProfiles(mCurrentUserId);
 
@@ -1133,23 +1144,34 @@ public class LocationManagerService extends ILocationManager.Stub {
         return -1;
     }
 
-    boolean reportLocationAccessNoThrow(int uid, String packageName, int allowedResolutionLevel) {
+    boolean reportLocationAccessNoThrow(
+            int pid, int uid, String packageName, int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
             if (mAppOps.noteOpNoThrow(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
         }
+
+        if (getAllowedResolutionLevel(pid, uid) < allowedResolutionLevel) {
+            return false;
+        }
+
         return true;
     }
 
-    boolean checkLocationAccess(int uid, String packageName, int allowedResolutionLevel) {
+    boolean checkLocationAccess(int pid, int uid, String packageName, int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
             if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
         }
+
+        if (getAllowedResolutionLevel(pid, uid) < allowedResolutionLevel) {
+            return false;
+        }
+
         return true;
     }
 
@@ -1347,7 +1369,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (records != null) {
             for (UpdateRecord record : records) {
                 if (isCurrentProfile(UserHandle.getUserId(record.mReceiver.mUid))) {
-                    if (checkLocationAccess(record.mReceiver.mUid, record.mReceiver.mPackageName,
+                    if (checkLocationAccess(
+                            record.mReceiver.mPid,
+                            record.mReceiver.mUid,
+                            record.mReceiver.mPackageName,
                             record.mReceiver.mAllowedResolutionLevel)) {
                         LocationRequest locationRequest = record.mRequest;
                         providerRequest.locationRequests.add(locationRequest);
@@ -1583,7 +1608,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         try {
             // We don't check for MODE_IGNORED here; we will do that when we go to deliver
             // a location.
-            checkLocationAccess(uid, packageName, allowedResolutionLevel);
+            checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
 
             synchronized (mLock) {
                 Receiver recevier = checkListenerOrIntentLocked(listener, intent, pid, uid,
@@ -1711,6 +1736,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 request.getProvider());
         // no need to sanitize this request, as only the provider name is used
 
+        final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -1720,7 +1746,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return null;
             }
 
-            if (!reportLocationAccessNoThrow(uid, packageName, allowedResolutionLevel)) {
+            if (!reportLocationAccessNoThrow(pid, uid, packageName, allowedResolutionLevel)) {
                 if (D) Log.d(TAG, "not returning last loc for no op app: " +
                         packageName);
                 return null;
@@ -1794,7 +1820,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void removeGeofence(Geofence geofence, PendingIntent intent, String packageName) {
-        checkResolutionLevelIsSufficientForGeofenceUse(getCallerAllowedResolutionLevel());
         checkPendingIntent(intent);
         checkPackageName(packageName);
 
@@ -1816,10 +1841,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
+        final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (!checkLocationAccess(uid, packageName, allowedResolutionLevel)) {
+            if (!checkLocationAccess(pid, uid, packageName, allowedResolutionLevel)) {
                 return false;
             }
         } finally {
@@ -1859,11 +1885,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                 allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
+        int pid = Binder.getCallingPid();
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         boolean hasLocationAccess;
         try {
-            hasLocationAccess = checkLocationAccess(uid, packageName, allowedResolutionLevel);
+            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1890,11 +1917,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                 allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
+        int pid = Binder.getCallingPid();
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         boolean hasLocationAccess;
         try {
-            hasLocationAccess = checkLocationAccess(uid, packageName, allowedResolutionLevel);
+            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -2209,7 +2237,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 continue;
             }
 
-            if (!reportLocationAccessNoThrow(receiver.mUid, receiver.mPackageName,
+            if (!reportLocationAccessNoThrow(receiver.mPid, receiver.mUid, receiver.mPackageName,
                     receiver.mAllowedResolutionLevel)) {
                 if (D) Log.d(TAG, "skipping loc update for no op app: " +
                         receiver.mPackageName);
