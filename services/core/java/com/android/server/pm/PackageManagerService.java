@@ -869,7 +869,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceDisconnected");
         }
-    };
+    }
 
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
@@ -881,7 +881,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             args = _a;
             res = _r;
         }
-    };
+    }
+
     final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<PostInstallData>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
@@ -1107,13 +1108,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mContainerService = (IMediaContainerService) msg.obj;
                     }
                     if (mContainerService == null) {
-                        // Something seriously wrong. Bail out
-                        Slog.e(TAG, "Cannot bind to media container service");
-                        for (HandlerParams params : mPendingInstalls) {
-                            // Indicate service bind error
-                            params.serviceError();
+                        if (!mBound) {
+                            // Something seriously wrong since we are not bound and we are not
+                            // waiting for connection. Bail out.
+                            Slog.e(TAG, "Cannot bind to media container service");
+                            for (HandlerParams params : mPendingInstalls) {
+                                // Indicate service bind error
+                                params.serviceError();
+                            }
+                            mPendingInstalls.clear();
+                        } else {
+                            Slog.w(TAG, "Waiting to connect to media container service");
                         }
-                        mPendingInstalls.clear();
                     } else if (mPendingInstalls.size() > 0) {
                         HandlerParams params = mPendingInstalls.get(0);
                         if (params != null) {
