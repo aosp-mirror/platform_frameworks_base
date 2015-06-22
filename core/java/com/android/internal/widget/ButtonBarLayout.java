@@ -31,7 +31,7 @@ import com.android.internal.R;
  */
 public class ButtonBarLayout extends LinearLayout {
     /** Whether the current configuration allows stacking. */
-    private final boolean mAllowStacking;
+    private boolean mAllowStacking;
 
     private int mLastWidthSize = -1;
 
@@ -41,6 +41,16 @@ public class ButtonBarLayout extends LinearLayout {
         final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ButtonBarLayout);
         mAllowStacking = ta.getBoolean(R.styleable.ButtonBarLayout_allowStacking, false);
         ta.recycle();
+    }
+
+    public void setAllowStacking(boolean allowStacking) {
+        if (mAllowStacking != allowStacking) {
+            mAllowStacking = allowStacking;
+            if (!mAllowStacking && getOrientation() == LinearLayout.VERTICAL) {
+                setStacked(false);
+            }
+            requestLayout();
+        }
     }
 
     @Override
