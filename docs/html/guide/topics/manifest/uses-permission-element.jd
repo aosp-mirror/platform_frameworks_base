@@ -81,6 +81,7 @@ permission is needed only up to API level 18 with a declaration such as this:
 </pre>
 <p>This way, beginning with API level 19, the system will no longer grant your app the
 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
+<p>This attribute was added in API level 19.</p>
 </dd>
 
 </dl></dd>
