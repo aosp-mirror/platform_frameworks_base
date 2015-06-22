@@ -282,12 +282,12 @@ public final class TvContract {
         return ContentUris.withAppendedId(WatchedPrograms.CONTENT_URI, watchedProgramId);
     }
 
-    private static final boolean isTvUri(Uri uri) {
+    private static boolean isTvUri(Uri uri) {
         return uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
                 && AUTHORITY.equals(uri.getAuthority());
     }
 
-    private static final boolean isTwoSegmentUriStartingWith(Uri uri, String pathSegment) {
+    private static boolean isTwoSegmentUriStartingWith(Uri uri, String pathSegment) {
         List<String> pathSegments = uri.getPathSegments();
         return pathSegments.size() == 2 && pathSegment.equals(pathSegments.get(0));
     }
@@ -565,7 +565,7 @@ public final class TvContract {
          * defined there (e.g. ETSI EN 300 468/TR 101 211 and ARIB STD-B10). If channels cannot be
          * globally identified by 2-tuple {{@link #COLUMN_TRANSPORT_STREAM_ID},
          * {@link #COLUMN_SERVICE_ID}}, one must carefully assign a value to this field to form a
-         * unique 3-tuple identification {{@link #COLUMN_ORIGINAL_NETWORK_ID},
+         * unique 3-tuple identification {{@code COLUMN_ORIGINAL_NETWORK_ID},
          * {@link #COLUMN_TRANSPORT_STREAM_ID}, {@link #COLUMN_SERVICE_ID}} for its channels.
          *
          * <p>This is a required field if the channel cannot be uniquely identified by a 2-tuple
