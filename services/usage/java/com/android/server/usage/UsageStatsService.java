@@ -35,8 +35,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SyncAdapterType;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -74,7 +72,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.DeviceIdleController;
 import com.android.server.SystemService;
 
 import java.io.BufferedReader;
@@ -138,6 +135,7 @@ public class UsageStatsService extends SystemService implements
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
 
+    boolean mAppIdleEnabled;
     boolean mAppIdleParoled;
     private boolean mScreenOn;
     private long mLastAppIdleParoledTime;
@@ -175,17 +173,21 @@ public class UsageStatsService extends SystemService implements
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, userActions,
                 null, null);
 
-        IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
-        deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
-        deviceStates.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
-        getContext().registerReceiver(new DeviceStateReceiver(), deviceStates);
+        mAppIdleEnabled = getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_enableAutoPowerModes);
+        if (mAppIdleEnabled) {
+            IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
+            deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
+            deviceStates.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+            getContext().registerReceiver(new DeviceStateReceiver(), deviceStates);
+        }
+
         synchronized (mLock) {
             cleanUpRemovedUsersLocked();
         }
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
-
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
@@ -342,6 +344,10 @@ public class UsageStatsService extends SystemService implements
 
     /** Check all running users' or specified user's apps to see if they enter an idle state. */
     void checkIdleStates(int checkUserId) {
+        if (!mAppIdleEnabled) {
+            return;
+        }
+
         final int[] userIds;
         try {
             if (checkUserId == UserHandle.USER_ALL) {
@@ -772,6 +778,10 @@ public class UsageStatsService extends SystemService implements
     private boolean isAppIdleFiltered(String packageName, int userId,
             UserUsageStatsService userService, long timeNow, long screenOnTime) {
         if (packageName == null) return false;
+        // If not enabled at all, of course nobody is ever idle.
+        if (!mAppIdleEnabled) {
+            return false;
+        }
         synchronized (mLock) {
             // Temporary exemption, probably due to device charging or occasional allowance to
             // be allowed to sync, etc.
@@ -899,6 +909,19 @@ public class UsageStatsService extends SystemService implements
 
             pw.print("  mAppIdleParoleDurationMillis=");
             TimeUtils.formatDuration(mAppIdleParoleDurationMillis, pw);
+            pw.println();
+
+            pw.println();
+            pw.print("mAppIdleEnabled="); pw.print(mAppIdleEnabled);
+            pw.print(" mAppIdleParoled="); pw.print(mAppIdleParoled);
+            pw.print(" mScreenOn="); pw.println(mScreenOn);
+            pw.print("mLastAppIdleParoledTime=");
+            TimeUtils.formatDuration(mLastAppIdleParoledTime, pw);
+            pw.println();
+            pw.print("mScreenOnTime="); TimeUtils.formatDuration(mScreenOnTime, pw);
+            pw.println();
+            pw.print("mScreenOnSystemTimeSnapshot=");
+            TimeUtils.formatDuration(mScreenOnSystemTimeSnapshot, pw);
             pw.println();
         }
     }
