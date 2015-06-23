@@ -29,8 +29,8 @@ import com.android.internal.telephony.ITelephonyRegistry;
  * <p>
  * To extend this class, you must declare the service in your manifest file to require the
  * {@link android.Manifest.permission#BIND_CARRIER_SERVICES} permission and include an intent
- * filter with the {@link #CONFIG_SERVICE_INTERFACE} action if the service exposes carrier config
- * and the {@link #BIND_SERVICE_INTERFACE} action if the service should have a long-lived binding.
+ * filter with the {@link #CARRIER_SERVICE_INTERFACE}. If the service should have a long-lived
+ * binding, set android.service.carrier.LONG_LIVED_BINDING to true in the service's metadata.
  * For example:
  * </p>
  *
@@ -39,16 +39,16 @@ import com.android.internal.telephony.ITelephonyRegistry;
  *       android:label="@string/service_name"
  *       android:permission="android.permission.BIND_CARRIER_SERVICES">
  *  <intent-filter>
- *      <action android:name="android.service.carrier.ConfigService" />
- *      <action android:name="android.service.carrier.BindService" />
+ *      <action android:name="android.service.carrier.CarrierService" />
  *  </intent-filter>
+ *  <meta-data android:name="android.service.carrier.LONG_LIVED_BINDING"
+ *             android:value="true" />
  * </service>
  * }</pre>
  */
 public abstract class CarrierService extends Service {
 
-    public static final String CONFIG_SERVICE_INTERFACE = "android.service.carrier.ConfigService";
-    public static final String BIND_SERVICE_INTERFACE = "android.service.carrier.BindService";
+    public static final String CARRIER_SERVICE_INTERFACE = "android.service.carrier.CarrierService";
 
     private static ITelephonyRegistry sRegistry;
 
@@ -127,13 +127,7 @@ public abstract class CarrierService extends Service {
     @Override
     @CallSuper
     public IBinder onBind(Intent intent) {
-        switch (intent.getAction()) {
-            case CONFIG_SERVICE_INTERFACE:
-            case BIND_SERVICE_INTERFACE:
-                return mStubWrapper;
-            default:
-                return null;
-        }
+        return mStubWrapper;
     }
 
     /**
