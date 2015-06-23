@@ -1504,6 +1504,8 @@ class MountService extends IMountService.Stub
         try {
             final NativeDaemonEvent res = mConnector.execute("volume", "benchmark", volId);
             return Long.parseLong(res.getMessage());
+        } catch (NativeDaemonTimeoutException e) {
+            return Long.MAX_VALUE;
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
