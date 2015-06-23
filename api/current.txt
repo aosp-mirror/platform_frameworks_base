@@ -19089,6 +19089,8 @@ package android.net.wifi {
 
   public class ScanResult implements android.os.Parcelable {
     method public int describeContents();
+    method public boolean is80211mcResponder();
+    method public boolean isPasspointNetwork();
     method public void writeToParcel(android.os.Parcel, int);
     field public java.lang.String BSSID;
     field public static final int CHANNEL_WIDTH_160MHZ = 3; // 0x3
@@ -19096,18 +19098,19 @@ package android.net.wifi {
     field public static final int CHANNEL_WIDTH_40MHZ = 1; // 0x1
     field public static final int CHANNEL_WIDTH_80MHZ = 2; // 0x2
     field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4; // 0x4
+    field public static final long FLAG_80211mc_RESPONDER = 2L; // 0x2L
+    field public static final long FLAG_PASSPOINT_NETWORK = 1L; // 0x1L
     field public java.lang.String SSID;
     field public java.lang.String capabilities;
     field public int centerFreq0;
     field public int centerFreq1;
     field public int channelWidth;
+    field public long flags;
     field public int frequency;
-    field public boolean is80211McRTTResponder;
     field public int level;
-    field public java.lang.String operatorFriendlyName;
-    field public boolean passpointNetwork;
+    field public java.lang.CharSequence operatorFriendlyName;
     field public long timestamp;
-    field public java.lang.String venueName;
+    field public java.lang.CharSequence venueName;
   }
 
   public final class SupplicantState extends java.lang.Enum implements android.os.Parcelable {
@@ -19150,7 +19153,7 @@ package android.net.wifi {
     field public java.lang.String preSharedKey;
     field public int priority;
     field public java.lang.String providerFriendlyName;
-    field public java.util.HashSet<java.lang.Long> roamingConsortiumIds;
+    field public java.lang.Long[] roamingConsortiumIds;
     field public int status;
     field public java.lang.String[] wepKeys;
     field public int wepTxKeyIndex;
@@ -19212,7 +19215,7 @@ package android.net.wifi {
     method public java.lang.String getAnonymousIdentity();
     method public java.security.cert.X509Certificate getCaCertificate();
     method public java.security.cert.X509Certificate getClientCertificate();
-    method public java.lang.String getDomainSubjectMatch();
+    method public java.lang.String getDomainSuffixMatch();
     method public int getEapMethod();
     method public java.lang.String getIdentity();
     method public java.lang.String getPassword();
