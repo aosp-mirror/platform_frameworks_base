@@ -1248,16 +1248,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean isDither() {
-        final Drawable dr = getFirstNonNullDrawable();
-        if (dr != null) {
-            return dr.isDither();
-        } else {
-            return super.isDither();
-        }
-    }
-
-    @Override
     public void setAlpha(int alpha) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;

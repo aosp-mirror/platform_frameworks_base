@@ -269,24 +269,14 @@ public abstract class Drawable {
     }
 
     /**
-     * Set to true to have the drawable dither its colors when drawn to a device
-     * with fewer than 8-bits per color component.
+     * Set to true to have the drawable dither its colors when drawn to a
+     * device with fewer than 8-bits per color component.
      *
-     * <p>This can improve the look on those devices, but can also slow down
-     * the drawing a little.</p>
-     *
-     * @see #isDither()
      * @see android.graphics.Paint#setDither(boolean);
+     * @deprecated This property is ignored.
      */
+    @Deprecated
     public void setDither(boolean dither) {}
-
-    /**
-     * @return whether this drawable dithers its colors
-     * @see #setDither(boolean)
-     */
-    public boolean isDither() {
-        return false;
-    }
 
     /**
      * Set to true to have the drawable filter its bitmaps with bilinear
