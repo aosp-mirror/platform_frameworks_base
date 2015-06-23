@@ -462,6 +462,12 @@ static int android_view_MotionEvent_nativeGetActionButton(JNIEnv* env, jclass cl
     return event->getActionButton();
 }
 
+static void android_view_MotionEvent_nativeSetActionButton(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint button) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setActionButton(button);
+}
+
 static jboolean android_view_MotionEvent_nativeIsTouchEvent(JNIEnv* env, jclass clazz,
         jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -779,6 +785,9 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetActionButton",
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetActionButton},
+    { "nativeSetActionButton",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetActionButton},
     { "nativeIsTouchEvent",
             "(J)Z",
             (void*)android_view_MotionEvent_nativeIsTouchEvent },
