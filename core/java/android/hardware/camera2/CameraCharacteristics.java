@@ -628,7 +628,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of available high speed video size, fps range and max batch size configurations
      * supported by the camera device, in the format of (width, height, fps_min, fps_max, batch_size_max).</p>
-     * <p>When CONSTRAINED_HIGH_SPEED_VIDEO is supported in android.control.availableCapabilities,
+     * <p>When CONSTRAINED_HIGH_SPEED_VIDEO is supported in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities},
      * this metadata will list the supported high speed video size, fps range and max batch size
      * configurations. All the sizes listed in this configuration will be a subset of the sizes
      * reported by {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes }
@@ -675,6 +675,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @hide
      */
     public static final Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS =
