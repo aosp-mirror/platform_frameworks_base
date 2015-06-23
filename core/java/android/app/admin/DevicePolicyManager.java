@@ -3972,6 +3972,7 @@ public class DevicePolicyManager {
      * <li>{@link Settings.Global#STAY_ON_WHILE_PLUGGED_IN}
      * This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards
      * and can only be set if {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
+     * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
      * </ul>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.

@@ -6685,6 +6685,17 @@ public final class Settings {
            "wifi_mobile_data_transition_wakelock_timeout_ms";
 
        /**
+        * This setting controls whether WiFi configurations created by a Device Owner app
+        * should be locked down (that is, be editable or removable only by the Device Owner App,
+        * not even by Settings app).
+        * This setting takes integer values. Non-zero values mean DO created configurations
+        * are locked down. Value of zero means they are not. Default value in the absence of
+        * actual value to this setting is 0.
+        */
+       public static final String WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN =
+               "wifi_device_owner_configs_lockdown";
+
+       /**
         * The operational wifi frequency band
         * Set to one of {@link WifiManager#WIFI_FREQUENCY_BAND_AUTO},
         * {@link WifiManager#WIFI_FREQUENCY_BAND_5GHZ} or
