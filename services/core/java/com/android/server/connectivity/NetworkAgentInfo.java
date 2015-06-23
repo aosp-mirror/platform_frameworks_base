@@ -66,7 +66,10 @@ public class NetworkAgentInfo {
 
     // Whether a captive portal was ever detected on this network.
     // This is a sticky bit; once set it is never cleared.
-    public boolean captivePortalDetected;
+    public boolean everCaptivePortalDetected;
+
+    // Whether a captive portal was found during the last network validation attempt.
+    public boolean lastCaptivePortalDetected;
 
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
@@ -174,7 +177,8 @@ public class NetworkAgentInfo {
                 "created{" + created + "}  " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
                 "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
-                "captivePortalDetected{" + captivePortalDetected + "} " +
+                "everCaptivePortalDetected{" + everCaptivePortalDetected + "} " +
+                "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} " +
                 "}";
     }
 
