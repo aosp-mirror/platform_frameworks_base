@@ -515,15 +515,23 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             return generateSelfSignedCertificateWithFakeSignature(publicKey);
         } else {
             // Key can be used to sign a certificate
-            return generateSelfSignedCertificateWithValidSignature(
-                    privateKey, publicKey, signatureAlgorithm);
+            try {
+                return generateSelfSignedCertificateWithValidSignature(
+                        privateKey, publicKey, signatureAlgorithm);
+            } catch (Exception e) {
+                // Failed to generate the self-signed certificate with valid signature. Fall back
+                // to generating a self-signed certificate with a fake signature. This is done for
+                // all exception types because we prefer key pair generation to succeed and end up
+                // producing a self-signed certificate with an invalid signature to key pair
+                // generation failing.
+                return generateSelfSignedCertificateWithFakeSignature(publicKey);
+            }
         }
     }
 
     @SuppressWarnings("deprecation")
     private X509Certificate generateSelfSignedCertificateWithValidSignature(
-            PrivateKey privateKey, PublicKey publicKey, String signatureAlgorithm)
-                    throws Exception {
+            PrivateKey privateKey, PublicKey publicKey, String signatureAlgorithm) throws Exception {
         final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         certGen.setPublicKey(publicKey);
         certGen.setSerialNumber(mSpec.getCertificateSerialNumber());
