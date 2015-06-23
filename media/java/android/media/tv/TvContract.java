@@ -710,7 +710,7 @@ public final class TvContract {
         public static final String COLUMN_LOCKED = "locked";
 
         /**
-         * The app badge icon of the app link template for this channel.
+         * The URI for the app badge icon of the app link template for this channel.
          *
          * <p>This small icon is overlaid at the bottom of the poster art specified by
          * {@link #COLUMN_APP_LINK_POSTER_ART_URI}. The data in the column must be a URI in one of
@@ -736,9 +736,10 @@ public final class TvContract {
         public static final String COLUMN_APP_LINK_ICON_URI = "app_link_icon_uri";
 
         /**
-         * The poster art used as the background of the app link template for this channel.
+         * The URI for the poster art used as the background of the app link template for this
+         * channel.
          *
-         * <p>The data in the column must be a URL or a URI in one of the following formats:
+         * <p>The data in the column must be a URL, or a URI in one of the following formats:
          *
          * <ul>
          * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
@@ -1100,6 +1101,15 @@ public final class TvContract {
         /**
          * The URI for the poster art of this TV program.
          *
+         * <p>The data in the column must be a URL, or a URI in one of the following formats:
+         *
+         * <ul>
+         * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+         * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})
+         * </li>
+         * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+         * </ul>
+         *
          * <p>Can be empty.
          *
          * <p>Type: TEXT
@@ -1108,6 +1118,19 @@ public final class TvContract {
 
         /**
          * The URI for the thumbnail of this TV program.
+         *
+         * <p>The system can generate a thumbnail from the poster art if this column is not
+         * specified. Thus it is not necessary for TV input services to include a thumbnail if it is
+         * just a scaled image of the poster art.
+         *
+         * <p>The data in the column must be a URL, or a URI in one of the following formats:
+         *
+         * <ul>
+         * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+         * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})
+         * </li>
+         * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+         * </ul>
          *
          * <p>Can be empty.
          *
