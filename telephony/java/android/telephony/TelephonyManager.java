@@ -944,10 +944,17 @@ public class TelephonyManager {
     /** {@hide} */
     @SystemApi
     public int getCurrentPhoneType(int subId) {
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId;
+        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            // if we don't have any sims, we don't have subscriptions, but we
+            // still may want to know what type of phone we've got.
+            phoneId = 0;
+        } else {
+            phoneId = SubscriptionManager.getPhoneId(subId);
+        }
         try{
             ITelephony telephony = getITelephony();
-            if (telephony != null) {
+            if (telephony != null && subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 return telephony.getActivePhoneTypeForSubscriber(subId);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
