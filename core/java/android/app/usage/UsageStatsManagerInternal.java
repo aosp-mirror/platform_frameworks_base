@@ -77,6 +77,12 @@ public abstract class UsageStatsManagerInternal {
     public abstract boolean isAppIdle(String packageName, int userId);
 
     /**
+     * @return True if currently app idle parole mode is on.  This means all idle apps are allow to
+     * run for a short period of time.
+     */
+    public abstract boolean isAppIdleParoleOn();
+
+    /**
      * Sets up a listener for changes to packages being accessed.
      * @param listener A listener within the system process.
      */
@@ -90,8 +96,9 @@ public abstract class UsageStatsManagerInternal {
     public abstract void removeAppIdleStateChangeListener(
             AppIdleStateChangeListener listener);
 
-    public interface AppIdleStateChangeListener {
-        void onAppIdleStateChanged(String packageName, int userId, boolean idle);
+    public static abstract class AppIdleStateChangeListener {
+        public abstract void onAppIdleStateChanged(String packageName, int userId, boolean idle);
+        public abstract void onParoleStateChanged(boolean isParoleOn);
     }
 
 }
