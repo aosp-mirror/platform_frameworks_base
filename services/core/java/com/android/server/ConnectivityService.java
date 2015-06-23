@@ -3578,12 +3578,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void ensureImmutableCapabilities(NetworkCapabilities networkCapabilities) {
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
+            throw new IllegalArgumentException(
+                    "Cannot request network with NET_CAPABILITY_VALIDATED");
+        }
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) {
+            throw new IllegalArgumentException(
+                    "Cannot request network with NET_CAPABILITY_CAPTIVE_PORTAL");
+        }
+    }
+
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
         enforceMeteredApnPolicy(networkCapabilities);
+        ensureImmutableCapabilities(networkCapabilities);
 
         if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
             throw new IllegalArgumentException("Bad timeout specified");
@@ -3652,6 +3664,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
         enforceMeteredApnPolicy(networkCapabilities);
+        ensureImmutableCapabilities(networkCapabilities);
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId());
