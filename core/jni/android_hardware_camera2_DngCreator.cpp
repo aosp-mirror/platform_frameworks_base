@@ -18,6 +18,8 @@
 #define LOG_TAG "DngCreator_JNI"
 #include <inttypes.h>
 #include <string.h>
+#include <algorithm>
+#include <memory>
 
 #include <utils/Log.h>
 #include <utils/Errors.h>
@@ -25,7 +27,6 @@
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
 #include <cutils/properties.h>
-
 #include <system/camera_metadata.h>
 #include <camera/CameraMetadata.h>
 #include <img_utils/DngUtils.h>
@@ -37,15 +38,6 @@
 #include <img_utils/StripSource.h>
 
 #include "core_jni_helpers.h"
-#include <utils/Log.h>
-#include <utils/Errors.h>
-#include <utils/StrongPointer.h>
-#include <utils/RefBase.h>
-#include <utils/Vector.h>
-#include <cutils/properties.h>
-
-#include <string.h>
-#include <inttypes.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
@@ -62,6 +54,14 @@ using namespace img_utils;
                 "Invalid metadata for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
         return; \
     }
+
+#define BAIL_IF_INVALID_R(expr, jnienv, tagId, writer) \
+    if ((expr) != OK) { \
+        jniThrowExceptionFmt(jnienv, "java/lang/IllegalArgumentException", \
+                "Invalid metadata for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
+        return -1; \
+    }
+
 
 #define BAIL_IF_EMPTY(entry, jnienv, tagId, writer) \
     if (entry.count == 0) { \
@@ -111,10 +111,13 @@ enum {
 class NativeContext : public LightRefBase<NativeContext> {
 
 public:
-    NativeContext();
+    NativeContext(const CameraMetadata& characteristics, const CameraMetadata& result);
     virtual ~NativeContext();
 
     TiffWriter* getWriter();
+
+    std::shared_ptr<const CameraMetadata> getCharacteristics() const;
+    std::shared_ptr<const CameraMetadata> getResult() const;
 
     uint32_t getThumbnailWidth();
     uint32_t getThumbnailHeight();
@@ -125,16 +128,29 @@ public:
 private:
     Vector<uint8_t> mCurrentThumbnail;
     TiffWriter mWriter;
+    std::shared_ptr<CameraMetadata> mCharacteristics;
+    std::shared_ptr<CameraMetadata> mResult;
     uint32_t mThumbnailWidth;
     uint32_t mThumbnailHeight;
 };
 
-NativeContext::NativeContext() : mThumbnailWidth(0), mThumbnailHeight(0) {}
+NativeContext::NativeContext(const CameraMetadata& characteristics, const CameraMetadata& result) :
+        mCharacteristics(std::make_shared<CameraMetadata>(characteristics)),
+        mResult(std::make_shared<CameraMetadata>(result)), mThumbnailWidth(0),
+        mThumbnailHeight(0) {}
 
 NativeContext::~NativeContext() {}
 
 TiffWriter* NativeContext::getWriter() {
     return &mWriter;
+}
+
+std::shared_ptr<const CameraMetadata> NativeContext::getCharacteristics() const {
+    return mCharacteristics;
+}
+
+std::shared_ptr<const CameraMetadata> NativeContext::getResult() const {
+    return mResult;
 }
 
 uint32_t NativeContext::getThumbnailWidth() {
@@ -626,25 +642,92 @@ uint32_t DirectStripSource::getIfd() const {
 // End of DirectStripSource
 // ----------------------------------------------------------------------------
 
-static bool validateDngHeader(JNIEnv* env, TiffWriter* writer, jint width, jint height) {
-    bool hasThumbnail = writer->hasIfd(TIFF_IFD_SUB1);
+/**
+ * Given a buffer crop rectangle relative to the pixel array size, and the active array crop
+ * rectangle for the camera characteristics, set the default crop rectangle in the TiffWriter
+ * relative to the buffer crop rectangle origin.
+ */
+static status_t calculateAndSetCrop(JNIEnv* env, const CameraMetadata& characteristics,
+        uint32_t bufXMin, uint32_t bufYMin, uint32_t bufWidth, uint32_t bufHeight,
+        TiffWriter* writer) {
 
+    camera_metadata_ro_entry entry =
+            characteristics.find(ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+    uint32_t xmin = static_cast<uint32_t>(entry.data.i32[0]);
+    uint32_t ymin = static_cast<uint32_t>(entry.data.i32[1]);
+    uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
+    uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
+
+    uint32_t aLeft = xmin;
+    uint32_t aTop = ymin;
+    uint32_t aRight = xmin + width;
+    uint32_t aBottom = ymin + height;
+
+    const uint32_t margin = 8; // Default margin recommended by Adobe for interpolation.
+
+    uint32_t bLeft = bufXMin + margin;
+    uint32_t bTop = bufYMin + margin;
+    uint32_t bRight = bufXMin + bufWidth - margin;
+    uint32_t bBottom = bufYMin + bufHeight - margin;
+
+    uint32_t defaultCropOrigin[] = {std::max(aLeft, bLeft), std::max(aTop, bTop)};
+    uint32_t defaultCropSize[] = {std::min(aRight, bRight) - defaultCropOrigin[0],
+            std::min(aBottom, bBottom) - defaultCropOrigin[1]};
+
+    BAIL_IF_INVALID_R(writer->addEntry(TAG_DEFAULTCROPORIGIN, 2, defaultCropOrigin,
+            TIFF_IFD_0), env, TAG_DEFAULTCROPORIGIN, writer);
+    BAIL_IF_INVALID_R(writer->addEntry(TAG_DEFAULTCROPSIZE, 2, defaultCropSize,
+            TIFF_IFD_0), env, TAG_DEFAULTCROPSIZE, writer);
+
+    return OK;
+}
+
+static bool validateDngHeader(JNIEnv* env, TiffWriter* writer,
+        const CameraMetadata& characteristics, jint width, jint height) {
     // TODO: handle lens shading map, etc. conversions for other raw buffer sizes.
-    uint32_t metadataWidth = *(writer->getEntry(TAG_IMAGEWIDTH, (hasThumbnail) ? TIFF_IFD_SUB1 :
-            TIFF_IFD_0)->getData<uint32_t>());
-    uint32_t metadataHeight = *(writer->getEntry(TAG_IMAGELENGTH, (hasThumbnail) ? TIFF_IFD_SUB1 :
-            TIFF_IFD_0)->getData<uint32_t>());
-
-    if (width < 0 || metadataWidth != static_cast<uint32_t>(width)) {
+    if (width <= 0) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
-                        "Metadata width %d doesn't match image width %d", metadataWidth, width);
+                        "Image width %d is invalid", width);
         return false;
     }
 
-    if (height < 0 || metadataHeight != static_cast<uint32_t>(height)) {
+    if (height <= 0) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
-                        "Metadata height %d doesn't match image height %d",
-                        metadataHeight, height);
+                        "Image height %d is invalid", height);
+        return false;
+    }
+
+    camera_metadata_ro_entry preCorrectionEntry =
+            characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
+    camera_metadata_ro_entry pixelArrayEntry =
+            characteristics.find(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE);
+
+    int pWidth = static_cast<int>(pixelArrayEntry.data.i32[0]);
+    int pHeight = static_cast<int>(pixelArrayEntry.data.i32[1]);
+    int cWidth = static_cast<int>(preCorrectionEntry.data.i32[2]);
+    int cHeight = static_cast<int>(preCorrectionEntry.data.i32[3]);
+
+    bool matchesPixelArray = (pWidth == width && pHeight == height);
+    bool matchesPreCorrectionArray = (cWidth == width && cHeight == height);
+
+    if (matchesPixelArray) {
+        if (calculateAndSetCrop(env, characteristics, 0, 0, static_cast<uint32_t>(pWidth),
+                static_cast<uint32_t>(pHeight), writer) != OK) {
+            return false;
+        }
+    } else if (matchesPreCorrectionArray) {
+        if (calculateAndSetCrop(env, characteristics,
+                static_cast<uint32_t>(preCorrectionEntry.data.i32[0]),
+                static_cast<uint32_t>(preCorrectionEntry.data.i32[1]),
+                static_cast<uint32_t>(preCorrectionEntry.data.i32[2]),
+                static_cast<uint32_t>(preCorrectionEntry.data.i32[3]), writer) != OK) {
+            return false;
+        }
+    } else {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
+                        "Image dimensions (w=%d,h=%d) are invalid, must match either the pixel "
+                        "array size (w=%d, h=%d) or the pre-correction array size (w=%d, h=%d)",
+                        width, height, pWidth, pHeight, cWidth, cHeight);
         return false;
     }
 
@@ -854,7 +937,7 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
         return;
     }
 
-    sp<NativeContext> nativeContext = new NativeContext();
+    sp<NativeContext> nativeContext = new NativeContext(characteristics, results);
     TiffWriter* writer = nativeContext->getWriter();
 
     writer->addIfd(TIFF_IFD_0);
@@ -906,7 +989,7 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
     {
         // Set dimensions
         camera_metadata_entry entry =
-                characteristics.find(ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+                characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
         BAIL_IF_EMPTY(entry, env, TAG_IMAGEWIDTH, writer);
         uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
         uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
@@ -1356,16 +1439,16 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
     }
 
     {
-        // Setup default crop + crop origin tags
-        uint32_t margin = 8; // Default margin recommended by Adobe for interpolation.
-        uint32_t dimensionLimit = 128; // Smallest image dimension crop margin from.
-        if (imageWidth >= dimensionLimit && imageHeight >= dimensionLimit) {
-            uint32_t defaultCropOrigin[] = {margin, margin};
-            uint32_t defaultCropSize[] = {imageWidth - 2 * margin, imageHeight - 2 * margin};
-            BAIL_IF_INVALID(writer->addEntry(TAG_DEFAULTCROPORIGIN, 2, defaultCropOrigin,
-                    TIFF_IFD_0), env, TAG_DEFAULTCROPORIGIN, writer);
-            BAIL_IF_INVALID(writer->addEntry(TAG_DEFAULTCROPSIZE, 2, defaultCropSize,
-                    TIFF_IFD_0), env, TAG_DEFAULTCROPSIZE, writer);
+        // Set dimensions
+        camera_metadata_entry entry =
+                characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
+        BAIL_IF_EMPTY(entry, env, TAG_DEFAULTCROPSIZE, writer);
+        uint32_t xmin = static_cast<uint32_t>(entry.data.i32[0]);
+        uint32_t ymin = static_cast<uint32_t>(entry.data.i32[1]);
+        uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
+        uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
+        if (calculateAndSetCrop(env, characteristics, xmin, ymin, width, height, writer) != OK) {
+            return;
         }
     }
 
@@ -1874,7 +1957,7 @@ static void DngCreator_nativeWriteImage(JNIEnv* env, jobject thiz, jobject outSt
     }
 
     // Validate DNG header
-    if (!validateDngHeader(env, writer, width, height)) {
+    if (!validateDngHeader(env, writer, *(context->getCharacteristics()), width, height)) {
         return;
     }
 
@@ -1978,7 +2061,7 @@ static void DngCreator_nativeWriteInputStream(JNIEnv* env, jobject thiz, jobject
     }
 
     // Validate DNG header
-    if (!validateDngHeader(env, writer, width, height)) {
+    if (!validateDngHeader(env, writer, *(context->getCharacteristics()), width, height)) {
         return;
     }
 
