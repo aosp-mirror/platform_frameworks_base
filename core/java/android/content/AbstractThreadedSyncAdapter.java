@@ -274,6 +274,10 @@ public abstract class AbstractThreadedSyncAdapter {
                 } else {
                     syncResult.databaseError = true;
                 }
+            } catch (SecurityException e) {
+                AbstractThreadedSyncAdapter.this.onSecurityException(mAccount, mExtras,
+                        mAuthority, syncResult);
+                syncResult.databaseError = true;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_SYNC_MANAGER);
 
@@ -317,6 +321,20 @@ public abstract class AbstractThreadedSyncAdapter {
      */
     public abstract void onPerformSync(Account account, Bundle extras,
             String authority, ContentProviderClient provider, SyncResult syncResult);
+
+    /**
+     * Report that there was a security exception when opening the content provider
+     * prior to calling {@link #onPerformSync}.  This will be treated as a sync
+     * database failure.
+     *
+     * @param account the account that attempted to sync
+     * @param extras SyncAdapter-specific parameters
+     * @param authority the authority of the failed sync request
+     * @param syncResult SyncAdapter-specific parameters
+     */
+    public void onSecurityException(Account account, Bundle extras,
+            String authority, SyncResult syncResult) {
+    }
 
     /**
      * Indicates that a sync operation has been canceled. This will be invoked on a separate

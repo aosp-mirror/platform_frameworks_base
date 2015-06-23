@@ -7215,6 +7215,7 @@ package android.content {
     method public android.content.Context getContext();
     method public final android.os.IBinder getSyncAdapterBinder();
     method public abstract void onPerformSync(android.accounts.Account, android.os.Bundle, java.lang.String, android.content.ContentProviderClient, android.content.SyncResult);
+    method public void onSecurityException(android.accounts.Account, android.os.Bundle, java.lang.String, android.content.SyncResult);
     method public void onSyncCanceled();
     method public void onSyncCanceled(java.lang.Thread);
     field public static final deprecated int LOG_SYNC_DETAILS = 2743; // 0xab7
