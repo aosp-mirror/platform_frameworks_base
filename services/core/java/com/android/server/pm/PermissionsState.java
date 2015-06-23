@@ -344,6 +344,22 @@ public final class PermissionsState {
         return permissionData.updateFlags(userId, flagMask, flagValues);
     }
 
+    public boolean updatePermissionFlagsForAllPermissions(
+            int userId, int flagMask, int flagValues) {
+        enforceValidUserId(userId);
+
+        if (mPermissions == null) {
+            return false;
+        }
+        boolean changed = false;
+        final int permissionCount = mPermissions.size();
+        for (int i = 0; i < permissionCount; i++) {
+            PermissionData permissionData = mPermissions.valueAt(i);
+            changed |= permissionData.updateFlags(userId, flagMask, flagValues);
+        }
+        return changed;
+    }
+
     /**
      * Compute the Linux gids for a given device user from the permissions
      * granted to this user. Note that these are computed to avoid additional

@@ -4350,6 +4350,12 @@ public class DevicePolicyManager {
      * group that the runtime permission belongs to. This method can only be called
      * by a profile or device owner.
      *
+     * <p/>Setting the grant state to {@link #PERMISSION_GRANT_STATE_DEFAULT default} does not
+     * revoke the permission. It retains the previous grant, if any.
+     *
+     * <p/>Permissions can be granted or revoked only for applications built with a
+     * {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#MNC} or later.
+     *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
      * @param permission The permission to grant or revoke.

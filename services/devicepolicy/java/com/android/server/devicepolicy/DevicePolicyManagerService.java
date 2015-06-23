@@ -4217,11 +4217,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 clearUserRestrictions(new UserHandle(UserHandle.USER_OWNER));
+                AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
+                        PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                        0, UserHandle.USER_OWNER);
                 if (mDeviceOwner != null) {
                     mDeviceOwner.clearDeviceOwner();
                     mDeviceOwner.writeOwnerFile();
                     updateDeviceOwnerLocked();
                 }
+            } catch (RemoteException re) {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4388,10 +4392,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 clearUserRestrictions(callingUser);
+                AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
+                        PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                        0, callingUser.getIdentifier());
                 if (mDeviceOwner != null) {
                     mDeviceOwner.removeProfileOwner(userId);
                     mDeviceOwner.writeOwnerFile();
                 }
+            } catch (RemoteException re) {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6390,21 +6398,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = Binder.clearCallingIdentity();
             try {
-                PackageManager packageManager = mContext.getPackageManager();
+                final ApplicationInfo ai = AppGlobals.getPackageManager()
+                        .getApplicationInfo(packageName, 0, user.getIdentifier());
+                final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
+                if (targetSdkVersion < android.os.Build.VERSION_CODES.MNC) {
+                    return false;
+                }
+                final PackageManager packageManager = mContext.getPackageManager();
                 switch (grantState) {
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED: {
+                        packageManager.grantRuntimePermission(packageName, permission, user);
                         packageManager.updatePermissionFlags(permission, packageName,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
-                        packageManager.grantRuntimePermission(packageName, permission, user);
                     } break;
 
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED: {
+                        packageManager.revokeRuntimePermission(packageName,
+                                permission, user);
                         packageManager.updatePermissionFlags(permission, packageName,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
-                        packageManager.revokeRuntimePermission(packageName,
-                                permission, user);
                     } break;
 
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT: {
