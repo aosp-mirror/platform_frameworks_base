@@ -27,48 +27,69 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
     private static final boolean DEBUG = false;
 
     // current schema of the backup state blob
-    private static final int STATE_VERSION = 2;
+    private static final int STATE_VERSION = 3;
 
     // key under which the preferred-activity state blob is committed to backup
     private static final String KEY_PREFERRED = "preferred-activity";
 
+    // key for default-browser [etc] state
+    private static final String KEY_DEFAULT_APPS = "default-apps";
+
+    // intent-filter verification state
+    private static final String KEY_INTENT_VERIFICATION = "intent-verification";
+
     public PreferredActivityBackupHelper() {
-        super(STATE_VERSION, KEY_PREFERRED);
+        super(STATE_VERSION,
+                KEY_PREFERRED,
+                KEY_DEFAULT_APPS,
+                KEY_INTENT_VERIFICATION);
     }
 
     @Override
     protected byte[] getBackupPayload(String key) {
-        if (KEY_PREFERRED.equals(key)) {
-            if (DEBUG) {
-                Slog.v(TAG, "Checking whether to back up");
+        IPackageManager pm = AppGlobals.getPackageManager();
+        if (DEBUG) {
+            Slog.d(TAG, "Handling backup of " + key);
+        }
+        try {
+            switch (key) {
+                case KEY_PREFERRED:
+                    return pm.getPreferredActivityBackup(UserHandle.USER_OWNER);
+                case KEY_DEFAULT_APPS:
+                    return pm.getDefaultAppsBackup(UserHandle.USER_OWNER);
+                case KEY_INTENT_VERIFICATION:
+                    return pm.getIntentFilterVerificationBackup(UserHandle.USER_OWNER);
+                default:
+                    Slog.w(TAG, "Unexpected backup key " + key);
             }
-            IPackageManager pm = AppGlobals.getPackageManager();
-            try {
-                return pm.getPreferredActivityBackup(UserHandle.USER_OWNER);
-            } catch (Exception e) {
-                Slog.e(TAG, "Unable to store backup payload", e);
-                // fall through to report null state
-            }
-        } else {
-            Slog.w(TAG, "Unexpected backup key " + key);
+        } catch (Exception e) {
+            Slog.e(TAG, "Unable to store payload " + key);
         }
         return null;
     }
 
     @Override
     protected void applyRestoredPayload(String key, byte[] payload) {
-        if (KEY_PREFERRED.equals(key)) {
-            if (DEBUG) {
-                Slog.v(TAG, "Restoring");
+        IPackageManager pm = AppGlobals.getPackageManager();
+        if (DEBUG) {
+            Slog.d(TAG, "Handling restore of " + key);
+        }
+        try {
+            switch (key) {
+                case KEY_PREFERRED:
+                    pm.restorePreferredActivities(payload, UserHandle.USER_OWNER);
+                    break;
+                case KEY_DEFAULT_APPS:
+                    pm.restoreDefaultApps(payload, UserHandle.USER_OWNER);
+                    break;
+                case KEY_INTENT_VERIFICATION:
+                    pm.restoreIntentFilterVerification(payload, UserHandle.USER_OWNER);
+                    break;
+                default:
+                    Slog.w(TAG, "Unexpected restore key " + key);
             }
-            IPackageManager pm = AppGlobals.getPackageManager();
-            try {
-                pm.restorePreferredActivities(payload, UserHandle.USER_OWNER);
-            } catch (Exception e) {
-                Slog.e(TAG, "Unable to restore", e);
-            }
-        } else {
-            Slog.w(TAG, "Unexpected restore key " + key);
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to restore key " + key);
         }
     }
 }
