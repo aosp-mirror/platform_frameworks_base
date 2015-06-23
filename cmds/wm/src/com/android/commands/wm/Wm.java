@@ -54,6 +54,7 @@ public class Wm extends BaseCommand {
                 "       wm density [reset|DENSITY]\n" +
                 "       wm overscan [reset|LEFT,TOP,RIGHT,BOTTOM]\n" +
                 "       wm scaling [off|auto]\n" +
+                "       wm screen-capture [userId] [true|false]\n" +
                 "\n" +
                 "wm size: return or override display size.\n" +
                 "         width and height in pixels unless suffixed with 'dp'.\n" +
@@ -62,7 +63,9 @@ public class Wm extends BaseCommand {
                 "\n" +
                 "wm overscan: set overscan area for display.\n" +
                 "\n" +
-                "wm scaling: set display scaling mode.\n"
+                "wm scaling: set display scaling mode.\n" +
+                "\n" +
+                "wm screen-capture: enable/disable screen capture.\n"
                 );
     }
 
@@ -85,16 +88,39 @@ public class Wm extends BaseCommand {
             runDisplayOverscan();
         } else if (op.equals("scaling")) {
             runDisplayScaling();
+        } else if (op.equals("screen-capture")) {
+            runSetScreenCapture();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
         }
     }
 
+    private void runSetScreenCapture() throws Exception {
+        String userIdStr = nextArg();
+        String enableStr = nextArg();
+        int userId;
+        boolean disable;
+
+        try {
+            userId = Integer.parseInt(userIdStr);
+        } catch (NumberFormatException e) {
+            System.err.println("Error: bad number " + e);
+            return;
+        }
+
+        disable = !Boolean.parseBoolean(enableStr);
+
+        try {
+            mWm.setScreenCaptureDisabled(userId, disable);
+        } catch (RemoteException e) {
+            System.err.println("Error: Can't set screen capture " + e);
+        }
+    }
+
     private void runDisplaySize() throws Exception {
         String size = nextArg();
         int w, h;
-        boolean scale = true;
         if (size == null) {
             Point initialSize = new Point();
             Point baseSize = new Point();
@@ -181,7 +207,6 @@ public class Wm extends BaseCommand {
     private void runDisplayOverscan() throws Exception {
         String overscanStr = nextArgRequired();
         Rect rect = new Rect();
-        int density;
         if ("reset".equals(overscanStr)) {
             rect.set(0, 0, 0, 0);
         } else {
