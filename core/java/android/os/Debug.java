@@ -1469,13 +1469,30 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *         </tr>
      *         <tr>
      *             <td>art.gc.gc-count-rate-histogram</td>
-     *             <td>The histogram of the number of garbage collection runs per 10 seconds.</td>
+     *             <td>Every 10 seconds, the gc-count-rate is computed as the number of garbage
+     *                 collection runs that have occurred over the last 10
+     *                 seconds. art.gc.gc-count-rate-histogram is a histogram of the gc-count-rate
+     *                 samples taken since the process began. The histogram can be used to identify
+     *                 instances of high rates of garbage collection runs. For example, a histogram
+     *                 of "0:34503,1:45350,2:11281,3:8088,4:43,5:8" shows that most of the time
+     *                 there are between 0 and 2 garbage collection runs every 10 seconds, but there
+     *                 were 8 distinct 10-second intervals in which 5 garbage collection runs
+     *                 occurred.</td>
      *             <td>{@code 0:34503,1:45350,2:11281,3:8088,4:43,5:8}</td>
      *             <td>23</td>
      *         </tr>
      *         <tr>
      *             <td>art.gc.blocking-gc-count-rate-histogram</td>
-     *             <td>The histogram of the number of garbage collection runs per 10 seconds.</td>
+     *             <td>Every 10 seconds, the blocking-gc-count-rate is computed as the number of
+     *                 blocking garbage collection runs that have occurred over the last 10
+     *                 seconds. art.gc.blocking-gc-count-rate-histogram is a histogram of the
+     *                 blocking-gc-count-rate samples taken since the process began. The histogram
+     *                 can be used to identify instances of high rates of blocking garbage
+     *                 collection runs. For example, a histogram of "0:99269,1:1,2:1" shows that
+     *                 most of the time there are zero blocking garbage collection runs every 10
+     *                 seconds, but there was one 10-second interval in which one blocking garbage
+     *                 collection run occurred, and there was one interval in which two blocking
+     *                 garbage collection runs occurred.</td>
      *             <td>{@code 0:99269,1:1,2:1}</td>
      *             <td>23</td>
      *         </tr>
