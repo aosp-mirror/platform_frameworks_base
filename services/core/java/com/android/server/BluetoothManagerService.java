@@ -19,6 +19,7 @@ package com.android.server;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
@@ -113,6 +114,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private static final int SERVICE_IBLUETOOTH = 1;
     private static final int SERVICE_IBLUETOOTHGATT = 2;
+
+    private static final String[] DEVICE_TYPE_NAMES = new String[] {
+            "???",
+            "BR/EDR",
+            "LE",
+            "DUAL"
+        };
 
     private final Context mContext;
     private static int mBleAppCount = 0;
@@ -1801,6 +1809,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         } else {
             ParcelFileDescriptor pfd = null;
             try {
+                writer.println("Bonded devices:");
+                for (BluetoothDevice device : mBluetooth.getBondedDevices()) {
+                    writer.println("  " + device.getAddress() +
+                            " [" + DEVICE_TYPE_NAMES[device.getType()] + "] " +
+                            device.getName());
+                }
+                writer.flush();
+
                 pfd = ParcelFileDescriptor.dup(fd);
                 mBluetooth.dump(pfd);
             } catch (RemoteException re) {
