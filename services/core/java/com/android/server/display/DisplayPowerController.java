@@ -231,6 +231,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
 
+    // True if we told the window manager policy that the screen was off.
+    private boolean mReportedScreenOffToPolicy;
+
     // Remembers whether certain kinds of brightness adjustments
     // were recently applied so that we can decide how to transition.
     private boolean mAppliedAutoBrightness;
@@ -764,24 +767,30 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             } catch (RemoteException ex) {
                 // same process
             }
-
-            // Tell the window manager what's happening.
-            // Temporarily block turning the screen on until the window manager is ready
-            // by leaving a black surface covering the screen.  This surface is essentially
-            // the final state of the color fade animation.
-            boolean isOn = (state != Display.STATE_OFF);
-            if (wasOn && !isOn) {
-                unblockScreenOn();
-                mWindowManagerPolicy.screenTurnedOff();
-            } else if (!wasOn && isOn) {
-                if (mPowerState.getColorFadeLevel() == 0.0f) {
-                    blockScreenOn();
-                } else {
-                    unblockScreenOn();
-                }
-                mWindowManagerPolicy.screenTurningOn(mPendingScreenOnUnblocker);
-            }
         }
+
+        // Tell the window manager policy when the screen is turned off or on unless it's due
+        // to the proximity sensor.  We temporarily block turning the screen on until the
+        // window manager is ready by leaving a black surface covering the screen.
+        // This surface is essentially the final state of the color fade animation and
+        // it is only removed once the window manager tells us that the activity has
+        // finished drawing underneath.
+        final boolean isOff = (state == Display.STATE_OFF);
+        if (isOff && !mReportedScreenOffToPolicy && !mScreenOffBecauseOfProximity) {
+            mReportedScreenOffToPolicy = true;
+            unblockScreenOn();
+            mWindowManagerPolicy.screenTurnedOff();
+        } else if (!isOff && mReportedScreenOffToPolicy) {
+            mReportedScreenOffToPolicy = false;
+            if (mPowerState.getColorFadeLevel() == 0.0f) {
+                blockScreenOn();
+            } else {
+                unblockScreenOn();
+            }
+            mWindowManagerPolicy.screenTurningOn(mPendingScreenOnUnblocker);
+        }
+
+        // Return true if the screen isn't blocked.
         return mPendingScreenOnUnblocker == null;
     }
 
@@ -1086,6 +1095,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mPendingScreenOnUnblocker=" + mPendingScreenOnUnblocker);
         pw.println("  mPendingScreenOff=" + mPendingScreenOff);
+        pw.println("  mReportedScreenOffToPolicy=" + mReportedScreenOffToPolicy);
 
         pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
                 mScreenBrightnessRampAnimator.isAnimating());
