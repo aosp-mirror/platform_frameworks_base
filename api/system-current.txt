@@ -30670,8 +30670,7 @@ package android.service.carrier {
     method public final void notifyCarrierNetworkChange(boolean);
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.os.PersistableBundle onLoadConfig(android.service.carrier.CarrierIdentifier);
-    field public static final java.lang.String BIND_SERVICE_INTERFACE = "android.service.carrier.BindService";
-    field public static final java.lang.String CONFIG_SERVICE_INTERFACE = "android.service.carrier.ConfigService";
+    field public static final java.lang.String CARRIER_SERVICE_INTERFACE = "android.service.carrier.CarrierService";
   }
 
   public final class MessagePdu implements android.os.Parcelable {
