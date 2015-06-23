@@ -417,12 +417,13 @@ public final class KeyProtection implements ProtectionParameter {
 
         /**
          * Sets the set of digest algorithms (e.g., {@code SHA-256}, {@code SHA-384}) with which the
-         * key can be used when signing/verifying or generating MACs. Attempts to use the key with
-         * any other digest algorithm will be rejected.
+         * key can be used. Attempts to use the key with any other digest algorithm will be
+         * rejected.
          *
-         * <p>For HMAC keys, the default is the digest algorithm specified in
-         * {@link Key#getAlgorithm()}. For asymmetric signing keys the set of digest algorithms
-         * must be specified.
+         * <p>This must be specified for signing/verification keys and RSA encryption/decryption
+         * keys used with RSA OAEP padding scheme because these operations involve a digest. For
+         * HMAC keys, the default is the digest specified in {@link Key#getAlgorithm()} (e.g.,
+         * {@code SHA-256} for key algorithm {@code HmacSHA256}).
          *
          * <p>For private keys used for TLS/SSL client or server authentication it is usually
          * necessary to authorize the use of no digest ({@link KeyProperties#DIGEST_NONE}). This is
