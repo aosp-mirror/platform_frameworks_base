@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import com.android.internal.statusbar.NotificationVisibility;
+
 public interface NotificationDelegate {
     void onSetDisabled(int status);
     void onClearAll(int callingUid, int callingPid, int userId);
@@ -30,6 +32,7 @@ public interface NotificationDelegate {
     void onPanelHidden();
     void clearEffects();
     void onNotificationVisibilityChanged(
-            String[] newlyVisibleKeys, String[] noLongerVisibleKeys);
+            NotificationVisibility[] newlyVisibleKeys,
+            NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
 }
