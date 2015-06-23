@@ -27,11 +27,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.content.Context.USER_SERVICE;
-import static android.Manifest.permission.READ_PROFILE;
+import static android.Manifest.permission.READ_CONTACTS;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
 import android.os.ServiceManager;
@@ -264,12 +263,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final void checkReadPermission(String requestedKey, int userId) {
         final int callingUid = Binder.getCallingUid();
 
-        for (int i = 0; i < READ_PROFILE_PROTECTED_SETTINGS.length; i++) {
-            String key = READ_PROFILE_PROTECTED_SETTINGS[i];
-            if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(READ_PROFILE)
+        for (int i = 0; i < READ_CONTACTS_PROTECTED_SETTINGS.length; i++) {
+            String key = READ_CONTACTS_PROTECTED_SETTINGS[i];
+            if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(READ_CONTACTS)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("uid=" + callingUid
-                        + " needs permission " + READ_PROFILE + " to read "
+                        + " needs permission " + READ_CONTACTS + " to read "
                         + requestedKey + " for user " + userId);
             }
         }
@@ -722,8 +721,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
     };
 
-    // Reading these settings needs the profile permission
-    private static final String[] READ_PROFILE_PROTECTED_SETTINGS = new String[] {
+    // Reading these settings needs the contacts permission
+    private static final String[] READ_CONTACTS_PROTECTED_SETTINGS = new String[] {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
     };
