@@ -106,6 +106,8 @@ interface IPackageManager {
     void updatePermissionFlags(String permissionName, String packageName, int flagMask,
             int flagValues, int userId);
 
+    void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
+
     boolean shouldShowRequestPermissionRationale(String permissionName,
             String packageName, int userId);
 
