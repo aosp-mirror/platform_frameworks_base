@@ -30,6 +30,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.widget.ImageView;
 
+import com.android.internal.logging.MetricsLogger;
+
 import java.util.ArrayList;
 
 public class BrightnessController implements ToggleSlider.Listener {
@@ -195,12 +197,16 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     @Override
-    public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
+    public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value,
+            boolean stopTracking) {
         updateIcon(mAutomatic);
         if (mExternalChange) return;
 
         if (!mAutomatic) {
             final int val = value + mMinimumBacklight;
+            if (stopTracking) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_BRIGHTNESS, val);
+            }
             setBrightness(val);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
@@ -213,6 +219,9 @@ public class BrightnessController implements ToggleSlider.Listener {
             }
         } else {
             final float adj = value / (BRIGHTNESS_ADJ_RESOLUTION / 2f) - 1;
+            if (stopTracking) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_BRIGHTNESS_AUTO, value);
+            }
             setBrightnessAdj(adj);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
