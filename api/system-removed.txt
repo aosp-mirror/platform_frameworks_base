@@ -117,6 +117,64 @@ package android.provider {
     field public static final deprecated java.lang.String URL = "url";
   }
 
+  public static final deprecated class ContactsContract.Contacts.StreamItems {
+    field public static final deprecated java.lang.String CONTENT_DIRECTORY = "stream_items";
+  }
+
+  public static final deprecated class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns {
+    field public static final deprecated java.lang.String CONTENT_DIRECTORY = "stream_items";
+  }
+
+  public static final deprecated class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns {
+    field public static final deprecated java.lang.String PHOTO = "photo";
+  }
+
+  protected static abstract deprecated interface ContactsContract.StreamItemPhotosColumns {
+    field public static final deprecated java.lang.String PHOTO_FILE_ID = "photo_file_id";
+    field public static final deprecated java.lang.String PHOTO_URI = "photo_uri";
+    field public static final deprecated java.lang.String SORT_INDEX = "sort_index";
+    field public static final deprecated java.lang.String STREAM_ITEM_ID = "stream_item_id";
+    field public static final deprecated java.lang.String SYNC1 = "stream_item_photo_sync1";
+    field public static final deprecated java.lang.String SYNC2 = "stream_item_photo_sync2";
+    field public static final deprecated java.lang.String SYNC3 = "stream_item_photo_sync3";
+    field public static final deprecated java.lang.String SYNC4 = "stream_item_photo_sync4";
+  }
+
+  public static final deprecated class ContactsContract.StreamItems implements android.provider.BaseColumns {
+    field public static final deprecated java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
+    field public static final deprecated android.net.Uri CONTENT_LIMIT_URI;
+    field public static final deprecated android.net.Uri CONTENT_PHOTO_URI;
+    field public static final deprecated java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
+    field public static final deprecated android.net.Uri CONTENT_URI;
+    field public static final deprecated java.lang.String MAX_ITEMS = "max_items";
+  }
+
+  public static final deprecated class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns {
+    field public static final deprecated java.lang.String CONTENT_DIRECTORY = "photo";
+    field public static final deprecated java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
+    field public static final deprecated java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
+  }
+
+  protected static abstract deprecated interface ContactsContract.StreamItemsColumns {
+    field public static final deprecated java.lang.String ACCOUNT_NAME = "account_name";
+    field public static final deprecated java.lang.String ACCOUNT_TYPE = "account_type";
+    field public static final deprecated java.lang.String COMMENTS = "comments";
+    field public static final deprecated java.lang.String CONTACT_ID = "contact_id";
+    field public static final deprecated java.lang.String CONTACT_LOOKUP_KEY = "contact_lookup";
+    field public static final deprecated java.lang.String DATA_SET = "data_set";
+    field public static final deprecated java.lang.String RAW_CONTACT_ID = "raw_contact_id";
+    field public static final deprecated java.lang.String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
+    field public static final deprecated java.lang.String RES_ICON = "icon";
+    field public static final deprecated java.lang.String RES_LABEL = "label";
+    field public static final deprecated java.lang.String RES_PACKAGE = "res_package";
+    field public static final deprecated java.lang.String SYNC1 = "stream_item_sync1";
+    field public static final deprecated java.lang.String SYNC2 = "stream_item_sync2";
+    field public static final deprecated java.lang.String SYNC3 = "stream_item_sync3";
+    field public static final deprecated java.lang.String SYNC4 = "stream_item_sync4";
+    field public static final deprecated java.lang.String TEXT = "text";
+    field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
+  }
+
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
     field public static final java.lang.String VOLUME_ALARM = "volume_alarm";
