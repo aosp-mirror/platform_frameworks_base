@@ -109,6 +109,14 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_COSTS_MONEY = 1<<0;
 
     /**
+     * Flag for {@link #protectionLevel}, corresponding
+     * to the <code>hide</code> value of
+     * {@link android.R.attr#permissionFlags}.
+     * @hide
+     */
+    public static final int PROTECTION_FLAG_HIDE = 1<<1;
+
+    /**
      * Additional flags about this permission as given by
      * {@link android.R.attr#permissionFlags}.
      */
