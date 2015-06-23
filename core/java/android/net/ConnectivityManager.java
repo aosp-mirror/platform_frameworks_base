@@ -2381,6 +2381,14 @@ public class ConnectivityManager {
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
+     * <p>It is presently unsupported to request a network with mutable
+     * {@link NetworkCapabilities} such as
+     * {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} or
+     * {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}
+     * as these {@code NetworkCapabilities} represent states that a particular
+     * network may never attain, and whether a network will attain these states
+     * is unknown prior to bringing up the network so the framework does not
+     * know how to go about satisfing a request with these capabilities.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      *
@@ -2388,6 +2396,8 @@ public class ConnectivityManager {
      * @param networkCallback The {@link NetworkCallback} to be utilized for this
      *                        request.  Note the callback must not be shared - they
      *                        uniquely specify this request.
+     * @throws IllegalArgumentException if {@code request} specifies any mutable
+     *         {@code NetworkCapabilities}.
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback) {
         sendRequestForNetwork(request.networkCapabilities, networkCallback, 0,
@@ -2469,12 +2479,22 @@ public class ConnectivityManager {
      * <p>
      * The request may be released normally by calling
      * {@link #releaseNetworkRequest(android.app.PendingIntent)}.
+     * <p>It is presently unsupported to request a network with either
+     * {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} or
+     * {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}
+     * as these {@code NetworkCapabilities} represent states that a particular
+     * network may never attain, and whether a network will attain these states
+     * is unknown prior to bringing up the network so the framework does not
+     * know how to go about satisfing a request with these capabilities.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * @param request {@link NetworkRequest} describing this request.
      * @param operation Action to perform when the network is available (corresponds
      *                  to the {@link NetworkCallback#onAvailable} call.  Typically
      *                  comes from {@link PendingIntent#getBroadcast}. Cannot be null.
+     * @throws IllegalArgumentException if {@code request} contains either
+     *         {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} or
+     *         {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}.
      */
     public void requestNetwork(NetworkRequest request, PendingIntent operation) {
         checkPendingIntent(operation);
