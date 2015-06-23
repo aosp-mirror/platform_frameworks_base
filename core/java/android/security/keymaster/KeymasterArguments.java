@@ -85,6 +85,12 @@ public class KeymasterArguments implements Parcelable {
         mArguments.add(new KeymasterDateArgument(tag, value));
     }
 
+    public void addDateIfNotNull(int tag, Date value) {
+        if (value != null) {
+            mArguments.add(new KeymasterDateArgument(tag, value));
+        }
+    }
+
     private KeymasterArgument getArgumentByTag(int tag) {
         for (KeymasterArgument arg : mArguments) {
             if (arg.tag == tag) {

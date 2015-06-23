@@ -435,17 +435,12 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 KeymasterUtils.addUserAuthArgs(importArgs,
                         spec.isUserAuthenticationRequired(),
                         spec.getUserAuthenticationValidityDurationSeconds());
-                importArgs.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
-                        (spec.getKeyValidityStart() != null)
-                                ? spec.getKeyValidityStart() : new Date(0));
-                importArgs.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                        (spec.getKeyValidityForOriginationEnd() != null)
-                                ? spec.getKeyValidityForOriginationEnd()
-                                : new Date(Long.MAX_VALUE));
-                importArgs.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                        (spec.getKeyValidityForConsumptionEnd() != null)
-                                ? spec.getKeyValidityForConsumptionEnd()
-                                : new Date(Long.MAX_VALUE));
+                importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
+                        spec.getKeyValidityStart());
+                importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                        spec.getKeyValidityForOriginationEnd());
+                importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                        spec.getKeyValidityForConsumptionEnd());
             } catch (IllegalArgumentException e) {
                 throw new KeyStoreException("Invalid parameter", e);
             }
@@ -646,15 +641,11 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         KeymasterUtils.addUserAuthArgs(args,
                 params.isUserAuthenticationRequired(),
                 params.getUserAuthenticationValidityDurationSeconds());
-        args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
-                (params.getKeyValidityStart() != null)
-                        ? params.getKeyValidityStart() : new Date(0));
-        args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                (params.getKeyValidityForOriginationEnd() != null)
-                        ? params.getKeyValidityForOriginationEnd() : new Date(Long.MAX_VALUE));
-        args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                (params.getKeyValidityForConsumptionEnd() != null)
-                        ? params.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, params.getKeyValidityStart());
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                params.getKeyValidityForOriginationEnd());
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                params.getKeyValidityForConsumptionEnd());
 
         if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!params.isRandomizedEncryptionRequired())) {

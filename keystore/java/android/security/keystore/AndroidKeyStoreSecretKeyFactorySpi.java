@@ -147,21 +147,10 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         }
 
         Date keyValidityStart = keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME);
-        if ((keyValidityStart != null) && (keyValidityStart.getTime() <= 0)) {
-            keyValidityStart = null;
-        }
         Date keyValidityForOriginationEnd =
                 keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME);
-        if ((keyValidityForOriginationEnd != null)
-                && (keyValidityForOriginationEnd.getTime() == Long.MAX_VALUE)) {
-            keyValidityForOriginationEnd = null;
-        }
         Date keyValidityForConsumptionEnd =
                 keyCharacteristics.getDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME);
-        if ((keyValidityForConsumptionEnd != null)
-                && (keyValidityForConsumptionEnd.getTime() == Long.MAX_VALUE)) {
-            keyValidityForConsumptionEnd = null;
-        }
         boolean userAuthenticationRequired =
                 !keyCharacteristics.getBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         int userAuthenticationValidityDurationSeconds =
