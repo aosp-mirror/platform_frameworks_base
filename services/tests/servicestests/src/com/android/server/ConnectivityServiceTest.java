@@ -34,6 +34,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -792,6 +793,30 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         handlerThread.quit();
     }
 
+    @LargeTest
+    public void testNoMutableNetworkRequests() throws Exception {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"), 0);
+        NetworkRequest.Builder builder = new NetworkRequest.Builder();
+        builder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        try {
+            mCm.requestNetwork(builder.build(), new NetworkCallback());
+            fail();
+        } catch (IllegalArgumentException expected) {}
+        try {
+            mCm.requestNetwork(builder.build(), pendingIntent);
+            fail();
+        } catch (IllegalArgumentException expected) {}
+        builder = new NetworkRequest.Builder();
+        builder.addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL);
+        try {
+            mCm.requestNetwork(builder.build(), new NetworkCallback());
+            fail();
+        } catch (IllegalArgumentException expected) {}
+        try {
+            mCm.requestNetwork(builder.build(), pendingIntent);
+            fail();
+        } catch (IllegalArgumentException expected) {}
+    }
 
 //    @Override
 //    public void tearDown() throws Exception {
