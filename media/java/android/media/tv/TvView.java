@@ -272,7 +272,7 @@ public class TvView extends ViewGroup {
     /**
      * Tunes to a given channel.
      *
-     * @param inputId The ID of TV input which will play the given channel.
+     * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
      */
     public void tune(@NonNull String inputId, Uri channelUri) {
@@ -282,9 +282,9 @@ public class TvView extends ViewGroup {
     /**
      * Tunes to a given channel.
      *
-     * @param inputId The ID of TV input which will play the given channel.
+     * @param inputId The ID of TV input for the given channel.
      * @param channelUri The URI of a channel.
-     * @param params Extra parameters which might be handled with the tune event.
+     * @param params Extra parameters.
      * @hide
      */
     @SystemApi
@@ -298,22 +298,26 @@ public class TvView extends ViewGroup {
                 sMainTvView = new WeakReference<>(this);
             }
         }
-        if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
+        if (mSessionCallback != null && TextUtils.equals(mSessionCallback.mInputId, inputId)) {
             if (mSession != null) {
                 mSession.tune(channelUri, params);
             } else {
-                // Session is not created yet. Replace the channel which will be set once the
-                // session is made.
+                // createSession() was called but the actual session for the given inputId has not
+                // yet been created. Just replace the existing tuning params in the callback with
+                // the new ones and tune later in onSessionCreated(). It is not necessary to create
+                // a new callback because this tuning request was made on the same inputId.
                 mSessionCallback.mChannelUri = channelUri;
                 mSessionCallback.mTuneParams = params;
             }
         } else {
             resetInternal();
-            // When createSession() is called multiple times before the callback is called,
-            // only the callback of the last createSession() call will be actually called back.
-            // The previous callbacks will be ignored. For the logic, mSessionCallback
-            // is newly assigned for every createSession request and compared with
-            // MySessionCreateCallback.this.
+            // In case createSession() is called multiple times across different inputId's before
+            // any session is created (e.g. when quickly tuning to a channel from input A and then
+            // to another channel from input B), only the callback for the last createSession()
+            // should be invoked. (The previous callbacks are simply ignored.) To do that, we create
+            // a new callback each time and keep mSessionCallback pointing to the last one. If
+            // MySessionCallback.this is different from mSessionCallback, we know that this callback
+            // is obsolete and should ignore it.
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             if (mTvInputManager != null) {
                 mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
@@ -337,6 +341,7 @@ public class TvView extends ViewGroup {
     }
 
     private void resetInternal() {
+        mSessionCallback = null;
         mPendingAppPrivateCommands.clear();
         if (mSession != null) {
             setSessionSurface(null);
@@ -344,7 +349,6 @@ public class TvView extends ViewGroup {
             mUseRequestedSurfaceLayout = false;
             mSession.release();
             mSession = null;
-            mSessionCallback = null;
             resetSurfaceView();
         }
     }
