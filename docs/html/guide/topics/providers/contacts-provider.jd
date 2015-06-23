@@ -57,7 +57,7 @@ page.title=Contacts Provider
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>android.provider.ContactsContract.StreamItems</li>
 </ol>
 <h2>Related Samples</h2>
 <ol>
@@ -606,13 +606,13 @@ page.title=Contacts Provider
     Access to the user profile requires special permissions. In addition to the
     {@link android.Manifest.permission#READ_CONTACTS} and
     {@link android.Manifest.permission#WRITE_CONTACTS} permissions needed to read and write, access
-    to the user profile requires the {@link android.Manifest.permission#READ_PROFILE} and
-    {@link android.Manifest.permission#WRITE_PROFILE} permissions for read and write access,
+    to the user profile requires the android.Manifest.permission#READ_PROFILE and
+    android.Manifest.permission#WRITE_PROFILE permissions for read and write access,
     respectively.
 </p>
 <p>
     Remember that you should consider a user's profile to be sensitive. The permission
-    {@link android.Manifest.permission#READ_PROFILE} allows you to access the device user's
+    android.Manifest.permission#READ_PROFILE allows you to access the device user's
     personally-identifying data. Make sure to tell the user why
     you need user profile access permissions in the description of your application.
 </p>
@@ -1826,8 +1826,8 @@ child elements that provide specific data to the
     </dl>
 <h2 id="SocialStream">Social Stream Data</h2>
 <p>
-    The {@link android.provider.ContactsContract.StreamItems} and
-    {@link android.provider.ContactsContract.StreamItemPhotos} tables
+    The android.provider.ContactsContract.StreamItems and
+    android.provider.ContactsContract.StreamItemPhotos tables
     manage incoming data from social networks. You can write a sync adapter that adds stream data
     from your own network to these tables, or you can read stream data from these tables and
     display it in your own application, or both. With these features, your social networking
@@ -1836,7 +1836,7 @@ child elements that provide specific data to the
 <h3 id="StreamText">Social stream text</h3>
 <p>
     Stream items are always associated with a raw contact. The
-    {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} links to the
+    android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID links to the
     <code>_ID</code> value for the raw contact. The account type and account name of the raw
     contact are also stored in the stream item row.
 </p>
@@ -1845,14 +1845,14 @@ child elements that provide specific data to the
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE
     </dt>
     <dd>
         <strong>Required.</strong> The user's account type for the raw contact associated with this
         stream item. Remember to set this value when you insert a stream item.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME
     </dt>
     <dd>
         <strong>Required.</strong> The user's account name for the raw contact associated with this
@@ -1866,30 +1866,30 @@ child elements that provide specific data to the
         insert a stream item:
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: The
-                {@link android.provider.BaseColumns#_ID} value of the contact that this stream
+                android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID: The
+                android.provider.BaseColumns#_ID value of the contact that this stream
                 item is associated with.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: The
-                {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} value of the
+                android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY: The
+                android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY value of the
                 contact this stream item is associated with.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: The
-                {@link android.provider.BaseColumns#_ID} value of the raw contact that this stream
+                android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID: The
+                android.provider.BaseColumns#_ID value of the raw contact that this stream
                 item is associated with.
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        android.provider.ContactsContract.StreamItemsColumns#COMMENTS
     </dt>
     <dd>
         Optional. Stores summary information that you can display at the beginning of a stream item.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        android.provider.ContactsContract.StreamItemsColumns#TEXT
     </dt>
     <dd>
         The text of the stream item, either the content that was posted by the source of the item,
@@ -1899,7 +1899,7 @@ child elements that provide specific data to the
         ellipsize long content, but it will try to avoid breaking tags.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP
     </dt>
     <dd>
         A text string containing the time the stream item was inserted or updated, in the form
@@ -1910,42 +1910,42 @@ child elements that provide specific data to the
 </dl>
 <p>
     To display identifying information for your stream items, use the
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}, and
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} to link to resources
+    android.provider.ContactsContract.StreamItemsColumns#RES_ICON,
+    android.provider.ContactsContract.StreamItemsColumns#RES_LABEL, and
+    android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE to link to resources
     in your application.
 </p>
 <p>
-    The {@link android.provider.ContactsContract.StreamItems} table also contains the columns
-    {@link android.provider.ContactsContract.StreamItemsColumns#SYNC1} through
-    {@link android.provider.ContactsContract.StreamItemsColumns#SYNC4} for the exclusive use of
+    The android.provider.ContactsContract.StreamItems table also contains the columns
+    android.provider.ContactsContract.StreamItemsColumns#SYNC1 through
+    android.provider.ContactsContract.StreamItemsColumns#SYNC4 for the exclusive use of
     sync adapters.
 </p>
 <h3 id="StreamPhotos">Social stream photos</h3>
 <p>
-   The {@link android.provider.ContactsContract.StreamItemPhotos} table stores photos associated
+   The android.provider.ContactsContract.StreamItemPhotos table stores photos associated
    with a stream item. The table's
-   {@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} column
+   android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID column
    links to values in the {@link android.provider.BaseColumns#_ID} column of
-   {@link android.provider.ContactsContract.StreamItems} table. Photo references are stored in the
+   android.provider.ContactsContract.StreamItems table. Photo references are stored in the
    table in these columns:
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} column (a BLOB).
+        android.provider.ContactsContract.StreamItemPhotos#PHOTO column (a BLOB).
     </dt>
     <dd>
         A binary representation of the photo, resized by the provider for storage and display.
         This column is available for backwards compatibility with previous versions of the Contacts
         Provider that used it for storing photos. However, in the current version
         you should not use this column to store photos. Instead, use
-        either {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} or
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (both of
+        either android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID or
+        android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI (both of
         which are described in the following points) to store photos in a file. This column now
         contains a thumbnail of the photo, which is available for reading.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID
     </dt>
     <dd>
         A numeric identifier of a photo for a raw contact. Append this value to the constant
@@ -1955,7 +1955,7 @@ child elements that provide specific data to the
         openAssetFileDescriptor()} to get a handle to the photo file.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI
     </dt>
     <dd>
         A content URI pointing directly to the photo file for the photo represented by this row.
@@ -1970,27 +1970,27 @@ child elements that provide specific data to the
     <ul>
         <li>
             These tables require additional access permissions. To read from them, your application
-            must have the permission {@link android.Manifest.permission#READ_SOCIAL_STREAM}. To
+            must have the permission android.Manifest.permission#READ_SOCIAL_STREAM. To
             modify them, your application must have the permission
-            {@link android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+            android.Manifest.permission#WRITE_SOCIAL_STREAM.
         </li>
         <li>
-            For the {@link android.provider.ContactsContract.StreamItems} table, the number of rows
+            For the android.provider.ContactsContract.StreamItems table, the number of rows
             stored for each raw contact is limited. Once this limit is reached,
             the Contacts Provider makes space for new stream item rows by automatically deleting
             the rows having the oldest
-            {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}. To get the
+            android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP. To get the
             limit, issue a query to the content URI
-            {@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. You can leave
+            android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI. You can leave
             all the arguments other than the content URI set to <code>null</code>. The query
             returns a Cursor containing a single row, with the single column
-            {@link android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+            android.provider.ContactsContract.StreamItems#MAX_ITEMS.
         </li>
     </ul>
 
 <p>
-    The class {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} defines a
-    sub-table of {@link android.provider.ContactsContract.StreamItemPhotos} containing the photo
+    The class android.provider.ContactsContract.StreamItems.StreamItemPhotos defines a
+    sub-table of android.provider.ContactsContract.StreamItemPhotos containing the photo
     rows for a single stream item.
 </p>
 <h3 id="SocialStreamInteraction">Social stream interactions</h3>
@@ -2003,8 +2003,8 @@ child elements that provide specific data to the
         <li>
             By syncing your social networking service to the Contacts Provider with a sync
             adapter, you can retrieve recent activity for a user's contacts and store it in
-            the {@link android.provider.ContactsContract.StreamItems} and
-            {@link android.provider.ContactsContract.StreamItemPhotos} tables for later use.
+            the android.provider.ContactsContract.StreamItems and
+            android.provider.ContactsContract.StreamItemPhotos tables for later use.
         </li>
         <li>
             Besides regular synchronization, you can trigger your sync adapter to retrieve
@@ -2356,6 +2356,6 @@ child elements that provide specific data to the
 </p>
 <p>
     Social stream data for a person may also include photos. These are stored in the
-    {@link android.provider.ContactsContract.StreamItemPhotos} table, which is described in more
+    android.provider.ContactsContract.StreamItemPhotos table, which is described in more
     detail in the section <a href="#StreamPhotos">Social stream photos</a>.
 </p>
