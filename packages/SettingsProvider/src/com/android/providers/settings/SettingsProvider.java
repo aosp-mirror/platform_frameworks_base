@@ -904,16 +904,16 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean mutateSystemSetting(String name, String value, int runAsUserId,
             int operation) {
-        // Make sure the caller can change the settings.
-        enforceWritePermission(Manifest.permission.WRITE_SETTINGS);
+        // Check for permissions first.
+        hasPermissionsToMutateSystemSettings();
 
         // Verify whether this operation is allowed for the calling package.
         if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
             return false;
         }
 
-        // Enforce what the calling package can mutate in the system settings.
-        enforceRestrictedSystemSettingsMutationForCallingPackageLocked(operation, name);
+        // Enforce what the calling package can mutate the system settings.
+        enforceRestrictedSystemSettingsMutationForCallingPackage(operation, name);
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
@@ -952,6 +952,28 @@ public class SettingsProvider extends ContentProvider {
 
             return false;
         }
+    }
+
+    private boolean hasPermissionsToMutateSystemSettings() {
+        // Write secure settings is a more protected permission. If caller has it we are good.
+        if (getContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        // The write settings permission gates mutation of system settings.
+        if (getContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        // Excpet we let system apps change system settings without the permission.
+        PackageInfo packageInfo = getCallingPackageInfoOrThrow();
+        if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            return true;
+        }
+
+        return false;
     }
 
     private void validateSystemSettingValue(String name, String value) {
@@ -1000,7 +1022,7 @@ public class SettingsProvider extends ContentProvider {
         return userId;
     }
 
-    private void enforceRestrictedSystemSettingsMutationForCallingPackageLocked(int operation,
+    private void enforceRestrictedSystemSettingsMutationForCallingPackage(int operation,
             String name) {
         // System/root/shell can mutate whatever secure settings they want.
         final int callingUid = Binder.getCallingUid();
