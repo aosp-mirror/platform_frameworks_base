@@ -1803,6 +1803,10 @@ i
         <enum name="KEYCODE_NAVIGATE_NEXT" value="261" />
         <enum name="KEYCODE_NAVIGATE_IN" value="262" />
         <enum name="KEYCODE_NAVIGATE_OUT" value="263" />
+        <enum name="KEYCODE_STEM_PRIMARY" value="264" />
+        <enum name="KEYCODE_STEM_1" value="265" />
+        <enum name="KEYCODE_STEM_2" value="266" />
+        <enum name="KEYCODE_STEM_3" value="267" />
     </attr>
 
     <!-- ***************************************************************** -->
