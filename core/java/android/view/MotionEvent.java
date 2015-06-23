@@ -1399,6 +1399,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private static native int nativeGetButtonState(long nativePtr);
     private static native void nativeSetButtonState(long nativePtr, int buttonState);
     private static native int nativeGetActionButton(long nativePtr);
+    private static native void nativeSetActionButton(long nativePtr, int actionButton);
     private static native void nativeOffsetLocation(long nativePtr, float deltaX, float deltaY);
     private static native float nativeGetXOffset(long nativePtr);
     private static native float nativeGetYOffset(long nativePtr);
@@ -2281,6 +2282,16 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public final int getActionButton() {
         return nativeGetActionButton(mNativePtr);
+    }
+
+    /**
+     * Sets the action button for the event.
+     *
+     * @see #getActionButton()
+     * @hide
+     */
+    public final void setActionButton(int button) {
+        nativeSetActionButton(mNativePtr, button);
     }
 
     /**
