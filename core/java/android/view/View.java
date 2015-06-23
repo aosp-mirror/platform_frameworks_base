@@ -6032,7 +6032,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public AccessibilityNodeInfo createAccessibilityNodeInfoInternal() {
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
-            return provider.createAccessibilityNodeInfo(View.NO_ID);
+            return provider.createAccessibilityNodeInfo(AccessibilityNodeProvider.HOST_VIEW_ID);
         } else {
             AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain(this);
             onInitializeAccessibilityNodeInfo(info);
@@ -6326,6 +6326,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        if (mAttachInfo == null) {
+            return;
+        }
+
         Rect bounds = mAttachInfo.mTmpInvalRect;
 
         getDrawingRect(bounds);
@@ -8774,7 +8778,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void notifyViewAccessibilityStateChangedIfNeeded(int changeType) {
-        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
         }
         if (mSendViewStateChangedAccessibilityEvent == null) {
@@ -8796,7 +8800,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void notifySubtreeAccessibilityStateChangedIfNeeded() {
-        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
         }
         if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
