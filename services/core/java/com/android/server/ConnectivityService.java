@@ -1870,7 +1870,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (nai == null) {
                         loge("EVENT_NETWORK_CAPABILITIES_CHANGED from unknown NetworkAgent");
                     } else {
-                        updateCapabilities(nai, (NetworkCapabilities)msg.obj);
+                        final NetworkCapabilities networkCapabilities =
+                                (NetworkCapabilities)msg.obj;
+                        if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL) ||
+                                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                            Slog.wtf(TAG, "BUG: " + nai + " has stateful capability.");
+                        }
+                        updateCapabilities(nai, networkCapabilities,
+                                NascentState.NOT_JUST_VALIDATED);
                     }
                     break;
                 }
@@ -1957,20 +1964,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (isLiveNetworkAgent(nai, "EVENT_NETWORK_TESTED")) {
                         final boolean valid =
                                 (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
-                        final boolean validationChanged = (valid != nai.lastValidated);
-                        nai.lastValidated = valid;
-                        if (valid) {
-                            if (DBG) log("Validated " + nai.name());
-                            nai.networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
-                            if (!nai.everValidated) {
-                                nai.everValidated = true;
-                                rematchNetworkAndRequests(nai, NascentState.JUST_VALIDATED,
-                                    ReapUnvalidatedNetworks.REAP);
-                                // If score has changed, rebroadcast to NetworkFactories. b/17726566
-                                sendUpdatedScoreToFactories(nai);
-                            }
-                        } else {
-                            nai.networkCapabilities.removeCapability(NET_CAPABILITY_VALIDATED);
+                        if (DBG) log(nai.name() + " validation " + (valid ? " passed" : "failed"));
+                        if (valid != nai.lastValidated) {
+                            final int oldScore = nai.getCurrentScore();
+                            final NascentState nascent = (valid && !nai.everValidated) ?
+                                    NascentState.JUST_VALIDATED : NascentState.NOT_JUST_VALIDATED;
+                            nai.lastValidated = valid;
+                            nai.everValidated |= valid;
+                            updateCapabilities(nai, nai.networkCapabilities, nascent);
+                            // If score has changed, rebroadcast to NetworkFactories. b/17726566
+                            if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
                         }
                         updateInetCondition(nai);
                         // Let the NetworkAgent know the state of its network
@@ -1978,10 +1981,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 android.net.NetworkAgent.CMD_REPORT_NETWORK_STATUS,
                                 (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
                                 0, null);
-
-                        if (validationChanged) {
-                            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
-                        }
                     }
                     break;
                 }
@@ -2003,7 +2002,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
                         nai.lastCaptivePortalDetected = visible;
                         nai.everCaptivePortalDetected |= visible;
-                        updateCapabilities(nai, nai.networkCapabilities);
+                        updateCapabilities(nai, nai.networkCapabilities,
+                                NascentState.NOT_JUST_VALIDATED);
                     }
                     if (!visible) {
                         setProvNotificationVisibleIntent(false, netId, null, 0, null, null);
@@ -2397,7 +2397,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (accept != nai.networkMisc.acceptUnvalidated) {
             int oldScore = nai.getCurrentScore();
             nai.networkMisc.acceptUnvalidated = accept;
-            rematchAllNetworksAndRequests(nai, oldScore);
+            rematchAllNetworksAndRequests(nai, oldScore, NascentState.NOT_JUST_VALIDATED);
             sendUpdatedScoreToFactories(nai);
         }
 
@@ -4060,9 +4060,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *
      * @param networkAgent the network having its capabilities updated.
      * @param networkCapabilities the new network capabilities.
+     * @param nascent indicates whether {@code networkAgent} was validated
+     *         (i.e. had everValidated set for the first time) immediately prior to this call.
      */
     private void updateCapabilities(NetworkAgentInfo networkAgent,
-            NetworkCapabilities networkCapabilities) {
+            NetworkCapabilities networkCapabilities, NascentState nascent) {
         // Don't modify caller's NetworkCapabilities.
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         if (networkAgent.lastValidated) {
@@ -4079,7 +4081,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (networkAgent) {
                 networkAgent.networkCapabilities = networkCapabilities;
             }
-            rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore());
+            rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore(), nascent);
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
     }
@@ -4423,15 +4425,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    // Attempt to rematch all Networks with NetworkRequests.  This may result in Networks
-    // being disconnected.
-    // If only one Network's score or capabilities have been modified since the last time
-    // this function was called, pass this Network in via the "changed" arugment, otherwise
-    // pass null.
-    // If only one Network has been changed but its NetworkCapabilities have not changed,
-    // pass in the Network's score (from getCurrentScore()) prior to the change via
-    // "oldScore", otherwise pass changed.getCurrentScore() or 0 if "changed" is null.
-    private void rematchAllNetworksAndRequests(NetworkAgentInfo changed, int oldScore) {
+    /**
+     * Attempt to rematch all Networks with NetworkRequests.  This may result in Networks
+     * being disconnected.
+     * @param changed If only one Network's score or capabilities have been modified since the last
+     *         time this function was called, pass this Network in this argument, otherwise pass
+     *         null.
+     * @param oldScore If only one Network has been changed but its NetworkCapabilities have not
+     *         changed, pass in the Network's score (from getCurrentScore()) prior to the change via
+     *         this argument, otherwise pass {@code changed.getCurrentScore()} or 0 if
+     *         {@code changed} is {@code null}. This is because NetworkCapabilities influence a
+     *         network's score.
+     * @param nascent indicates if {@code changed} has just been validated.
+     */
+    private void rematchAllNetworksAndRequests(NetworkAgentInfo changed, int oldScore,
+            NascentState nascent) {
         // TODO: This may get slow.  The "changed" parameter is provided for future optimization
         // to avoid the slowness.  It is not simply enough to process just "changed", for
         // example in the case where "changed"'s score decreases and another network should begin
@@ -4440,9 +4448,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Optimization: Only reprocess "changed" if its score improved.  This is safe because it
         // can only add more NetworkRequests satisfied by "changed", and this is exactly what
         // rematchNetworkAndRequests() handles.
-        if (changed != null && oldScore < changed.getCurrentScore()) {
-            rematchNetworkAndRequests(changed, NascentState.NOT_JUST_VALIDATED,
-                    ReapUnvalidatedNetworks.REAP);
+        if (changed != null &&
+                (oldScore < changed.getCurrentScore() || nascent == NascentState.JUST_VALIDATED)) {
+            rematchNetworkAndRequests(changed, nascent, ReapUnvalidatedNetworks.REAP);
         } else {
             for (Iterator i = mNetworkAgentInfos.values().iterator(); i.hasNext(); ) {
                 rematchNetworkAndRequests((NetworkAgentInfo)i.next(),
@@ -4569,7 +4577,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int oldScore = nai.getCurrentScore();
         nai.setCurrentScore(score);
 
-        rematchAllNetworksAndRequests(nai, oldScore);
+        rematchAllNetworksAndRequests(nai, oldScore, NascentState.NOT_JUST_VALIDATED);
 
         sendUpdatedScoreToFactories(nai);
     }

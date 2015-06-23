@@ -45,6 +45,7 @@ public class NetworkAgentInfo {
     // This Network object is always valid.
     public final Network network;
     public LinkProperties linkProperties;
+    // This should only be modified via ConnectivityService.updateCapabilities().
     public NetworkCapabilities networkCapabilities;
     public final NetworkMonitor networkMonitor;
     public final NetworkMisc networkMisc;
