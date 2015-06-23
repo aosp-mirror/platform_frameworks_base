@@ -604,12 +604,13 @@ public class WifiEnterpriseConfig implements Parcelable {
      * Get the domain_suffix_match value. See setDomSuffixMatch.
      * @return The domain value.
      */
-    public String getDomainSubjectMatch() {
+    public String getDomainSuffixMatch() {
         return getFieldValue(DOM_SUFFIX_MATCH_KEY, "");
     }
 
     /**
-     * Set realm for passpoint credential
+     * Set realm for passpoint credential; realm identifies a set of networks where your
+     * passpoint credential can be used
      * @param realm the realm
      */
     public void setRealm(String realm) {
@@ -617,7 +618,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get realm for passpoint credential
+     * Get realm for passpoint credential; see {@link #setRealm(String)} for more information
      * @return the realm
      */
     public String getRealm() {
@@ -625,15 +626,16 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set plmn for passpoint credential
-     * @param plmn the plmn value derived from mcc & mnc
+     * Set plmn (Public Land Mobile Network) of the provider of passpoint credential
+     * @param plmn the plmn value derived from mcc (mobile country code) & mnc (mobile network code)
      */
     public void setPlmn(String plmn) {
         setFieldValue(PLMN_KEY, plmn, "");
     }
 
     /**
-     * Get plmn for passpoint credential
+     * Get plmn (Public Land Mobile Network) for passpoint credential; see {@link #setPlmn
+     * (String)} for more information
      * @return the plmn
      */
     public String getPlmn() {
