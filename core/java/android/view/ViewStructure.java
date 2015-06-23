@@ -221,7 +221,7 @@ public abstract class ViewStructure {
      * children at <var>index</var>.
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
-    public abstract ViewAssistStructure newChild(int index);
+    public abstract ViewStructure newChild(int index);
 
     /**
      * Like {@link #newChild}, but allows the caller to asynchronously populate the returned
@@ -231,7 +231,7 @@ public abstract class ViewStructure {
      * population is done.
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
-    public abstract ViewAssistStructure asyncNewChild(int index);
+    public abstract ViewStructure asyncNewChild(int index);
 
     /**
      * Call when done populating a {@link ViewStructure} returned by
