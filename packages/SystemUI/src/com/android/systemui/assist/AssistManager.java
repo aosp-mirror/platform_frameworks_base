@@ -311,4 +311,12 @@ public class AssistManager {
     public void showDisclosure() {
         mAssistDisclosure.postShow();
     }
+
+    public void onUserSwitched(int newUserId) {
+        updateAssistInfo();
+    }
+
+    public void prepareBeforeInvocation() {
+        updateAssistInfo();
+    }
 }
