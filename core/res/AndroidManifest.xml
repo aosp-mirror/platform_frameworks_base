@@ -2090,7 +2090,7 @@
          <p>Declaring the permission implies intention to use the API and the user of the
          device can grant permission through the Settings application. -->
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
-        android:protectionLevel="signature|development|appop" />
+        android:protectionLevel="signature|system|development|appop" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- @hide Allows an application to change the app idle state of an app.
