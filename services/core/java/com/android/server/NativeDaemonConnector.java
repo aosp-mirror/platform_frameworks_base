@@ -421,7 +421,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             event = mResponseQueue.remove(sequenceNumber, timeout, logCmd);
             if (event == null) {
                 loge("timed-out waiting for response to " + logCmd);
-                throw new NativeDaemonFailureException(logCmd, event);
+                throw new NativeDaemonTimeoutException(logCmd, event);
             }
             if (VDBG) log("RMV <- {" + event + "}");
             events.add(event);
