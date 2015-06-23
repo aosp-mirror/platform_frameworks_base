@@ -31,6 +31,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IPackagesProvider;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
@@ -305,18 +306,18 @@ interface IPackageManager {
      * As per {@link android.content.pm.PackageManager#getComponentEnabledSetting}.
      */
     int getComponentEnabledSetting(in ComponentName componentName, int userId);
-    
+
     /**
      * As per {@link android.content.pm.PackageManager#setApplicationEnabledSetting}.
      */
     void setApplicationEnabledSetting(in String packageName, in int newState, int flags,
             int userId, String callingPackage);
-    
+
     /**
      * As per {@link android.content.pm.PackageManager#getApplicationEnabledSetting}.
      */
     int getApplicationEnabledSetting(in String packageName, int userId);
-    
+
     /**
      * Set whether the given package should be considered stopped, making
      * it not visible to implicit intents that filter out stopped packages.
@@ -369,7 +370,7 @@ interface IPackageManager {
      */
      void freeStorage(in String volumeUuid, in long freeStorageSize,
              in IntentSender pi);
-     
+
     /**
      * Delete all the cache files in an applications cache directory
      * @param packageName The package name of the application whose cache
@@ -377,7 +378,7 @@ interface IPackageManager {
      * @param observer a callback used to notify when the deletion is finished.
      */
     void deleteApplicationCacheFiles(in String packageName, IPackageDataObserver observer);
-    
+
     /**
      * Clear the user data directory of an application.
      * @param packageName The package name of the application whose cache
@@ -385,7 +386,7 @@ interface IPackageManager {
      * @param observer a callback used to notify when the operation is completed.
      */
     void clearApplicationUserData(in String packageName, IPackageDataObserver observer, int userId);
-    
+
    /**
      * Get package statistics including the code, data and cache size for
      * an already installed package
@@ -395,7 +396,7 @@ interface IPackageManager {
      * retrieval of information is complete.
      */
     void getPackageSizeInfo(in String packageName, int userHandle, IPackageStatsObserver observer);
-    
+
     /**
      * Get a list of shared libraries that are available on the
      * system.
@@ -409,7 +410,7 @@ interface IPackageManager {
     FeatureInfo[] getSystemAvailableFeatures();
 
     boolean hasSystemFeature(String name);
-    
+
     void enterSafeMode();
     boolean isSafeMode();
     void systemReady();
@@ -500,4 +501,7 @@ interface IPackageManager {
 
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
+
+    void grantDefaultPermissions(int userId);
+    void setCarrierAppPackagesProvider(in IPackagesProvider provider);
 }
