@@ -1759,11 +1759,24 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * 16:9 aspect ratio, the primary image will be cropped vertically (letterbox) to
      * generate the thumbnail image. The thumbnail image will always have a smaller Field
      * Of View (FOV) than the primary image when aspect ratios differ.</p>
+     * <p>When an {@link CaptureRequest#JPEG_ORIENTATION android.jpeg.orientation} of non-zero degree is requested,
+     * the camera device will handle thumbnail rotation in one of the following ways:</p>
+     * <ul>
+     * <li>Set the {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}
+     *   and keep jpeg and thumbnail image data unrotated.</li>
+     * <li>Rotate the jpeg and thumbnail image data and not set
+     *   {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}. In this
+     *   case, LIMITED or FULL hardware level devices will report rotated thumnail size in
+     *   capture result, so the width and height will be interchanged if 90 or 270 degree
+     *   orientation is requested. LEGACY device will always report unrotated thumbnail
+     *   size.</li>
+     * </ul>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#JPEG_AVAILABLE_THUMBNAIL_SIZES android.jpeg.availableThumbnailSizes}</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#JPEG_AVAILABLE_THUMBNAIL_SIZES
+     * @see CaptureRequest#JPEG_ORIENTATION
      */
     @PublicKey
     public static final Key<android.util.Size> JPEG_THUMBNAIL_SIZE =
