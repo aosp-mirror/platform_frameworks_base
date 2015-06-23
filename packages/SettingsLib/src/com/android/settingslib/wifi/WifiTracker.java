@@ -346,7 +346,7 @@ public class WifiTracker {
                         accessPoint.update(mLastInfo, mLastNetworkInfo);
                     }
 
-                    if (result.passpointNetwork) {
+                    if (result.isPasspointNetwork()) {
                         WifiConfiguration config = mWifiManager.getMatchingWifiConfig(result);
                         if (config != null) {
                             accessPoint.update(config);

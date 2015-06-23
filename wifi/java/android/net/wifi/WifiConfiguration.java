@@ -344,14 +344,15 @@ public class WifiConfiguration implements Parcelable {
     public String FQDN;
 
     /**
-     * Service provider name, for Passpoint credential.
+     * Name of passpoint credential provider
      */
     public String providerFriendlyName;
 
     /**
-     * Roaming Consortium Id, for Passpoint credential.
+     * Roaming Consortium Id list for passpoint credential; identifies a set of networks where
+     * passpoint credential will be considered valid
      */
-    public HashSet<Long> roamingConsortiumIds;
+    public Long[] roamingConsortiumIds;
 
     /**
      * @hide
@@ -906,7 +907,7 @@ public class WifiConfiguration implements Parcelable {
         SSID = null;
         BSSID = null;
         FQDN = null;
-        roamingConsortiumIds = new HashSet<Long>();
+        roamingConsortiumIds = new Long[0];
         priority = 0;
         hiddenSSID = false;
         disableReason = DISABLED_UNKNOWN_REASON;
@@ -1437,11 +1438,7 @@ public class WifiConfiguration implements Parcelable {
             SSID = source.SSID;
             BSSID = source.BSSID;
             FQDN = source.FQDN;
-            roamingConsortiumIds = new HashSet<Long>();
-            for (Long roamingConsortiumId : source.roamingConsortiumIds) {
-                roamingConsortiumIds.add(roamingConsortiumId);
-            }
-
+            roamingConsortiumIds = source.roamingConsortiumIds.clone();
             providerFriendlyName = source.providerFriendlyName;
             preSharedKey = source.preSharedKey;
 
@@ -1546,7 +1543,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(autoJoinBSSID);
         dest.writeString(FQDN);
         dest.writeString(providerFriendlyName);
-        dest.writeInt(roamingConsortiumIds.size());
+        dest.writeInt(roamingConsortiumIds.length);
         for (Long roamingConsortiumId : roamingConsortiumIds) {
             dest.writeLong(roamingConsortiumId);
         }
@@ -1622,8 +1619,9 @@ public class WifiConfiguration implements Parcelable {
                 config.FQDN = in.readString();
                 config.providerFriendlyName = in.readString();
                 int numRoamingConsortiumIds = in.readInt();
+                config.roamingConsortiumIds = new Long[numRoamingConsortiumIds];
                 for (int i = 0; i < numRoamingConsortiumIds; i++) {
-                    config.roamingConsortiumIds.add(in.readLong());
+                    config.roamingConsortiumIds[i] = in.readLong();
                 }
                 config.preSharedKey = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
