@@ -92,6 +92,9 @@ import android.security.Credentials;
 import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.LocalLog;
+import android.util.LocalLog.ReadOnlyLocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -139,6 +142,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -413,6 +417,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // sequence number of NetworkRequests
     private int mNextNetworkRequestId = 1;
+
+    // Array of <Network,ReadOnlyLocalLogs> tracking network validation and results
+    private static final int MAX_VALIDATION_LOGS = 10;
+    private final ArrayDeque<Pair<Network,ReadOnlyLocalLog>> mValidationLogs =
+            new ArrayDeque<Pair<Network,ReadOnlyLocalLog>>(MAX_VALIDATION_LOGS);
+
+    private void addValidationLogs(ReadOnlyLocalLog log, Network network) {
+        synchronized(mValidationLogs) {
+            while (mValidationLogs.size() >= MAX_VALIDATION_LOGS) {
+                mValidationLogs.removeLast();
+            }
+            mValidationLogs.addFirst(new Pair(network, log));
+        }
+    }
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -1715,11 +1733,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return ret;
     }
 
-    private boolean shouldPerformDiagnostics(String[] args) {
+    private boolean argsContain(String[] args, String target) {
         for (String arg : args) {
-            if (arg.equals("--diag")) {
-                return true;
-            }
+            if (arg.equals(target)) return true;
         }
         return false;
     }
@@ -1737,7 +1753,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
-        if (shouldPerformDiagnostics(args)) {
+        if (argsContain(args, "--diag")) {
             final long DIAG_TIME_MS = 5000;
             for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                 // Start gathering diagnostic information.
@@ -1823,6 +1839,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 pw.println(mInetLog.get(i));
             }
             pw.decreaseIndent();
+        }
+
+        if (argsContain(args, "--short") == false) {
+            pw.println();
+            synchronized (mValidationLogs) {
+                pw.println("mValidationLogs (most recent first):");
+                for (Pair<Network,ReadOnlyLocalLog> p : mValidationLogs) {
+                    pw.println(p.first);
+                    pw.increaseIndent();
+                    p.second.dump(fd, pw, args);
+                    pw.decreaseIndent();
+                }
+            }
         }
     }
 
@@ -3814,6 +3843,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
+        addValidationLogs(nai.networkMonitor.getValidationLogs(), nai.network);
         if (DBG) log("registerNetworkAgent " + nai);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
         return nai.network.netId;
