@@ -1559,7 +1559,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 NetworkCapabilities.TRANSPORT_WIFI)) {
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
-                                             5);
+                                             15);
             type = ConnectivityManager.TYPE_WIFI;
         } else {
             // do not track any other networks
