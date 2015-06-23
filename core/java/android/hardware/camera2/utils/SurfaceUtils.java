@@ -79,4 +79,30 @@ public class SurfaceUtils {
             throw new IllegalArgumentException("Surface was abandoned", e);
         }
     }
+
+    /**
+     * Get the Surface dataspace.
+     *
+     * @param surface The surface to be queried for dataspace.
+     * @return dataspace of the surface.
+     *
+     * @throws IllegalArgumentException if the surface is already abandoned.
+     */
+    public static int getSurfaceDataspace(Surface surface) {
+        try {
+            return LegacyCameraDevice.detectSurfaceDataspace(surface);
+        } catch (BufferQueueAbandonedException e) {
+            throw new IllegalArgumentException("Surface was abandoned", e);
+        }
+    }
+
+    /**
+     * Return true is the consumer is one of the consumers that can accept
+     * producer overrides of the default dimensions and format.
+     *
+     */
+    public static boolean isFlexibleConsumer(Surface output) {
+        return LegacyCameraDevice.isFlexibleConsumer(output);
+    }
+
 }

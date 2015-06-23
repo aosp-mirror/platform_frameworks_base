@@ -436,6 +436,23 @@ static jint LegacyCameraDevice_nativeDetectSurfaceType(JNIEnv* env, jobject thiz
     return fmt;
 }
 
+static jint LegacyCameraDevice_nativeDetectSurfaceDataspace(JNIEnv* env, jobject thiz, jobject surface) {
+    ALOGV("nativeDetectSurfaceDataspace");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    int32_t fmt = 0;
+    status_t err = anw->query(anw.get(), NATIVE_WINDOW_DEFAULT_DATASPACE, &fmt);
+    if(err != NO_ERROR) {
+        ALOGE("%s: Error while querying surface dataspace  %s (%d).", __FUNCTION__, strerror(-err),
+                err);
+        return err;
+    }
+    return fmt;
+}
+
 static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject thiz,
           jobject surface, jintArray dimens) {
     ALOGV("nativeGetSurfaceDimens");
@@ -717,6 +734,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeDetectSurfaceType",
     "(Landroid/view/Surface;)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceType },
+    { "nativeDetectSurfaceDataspace",
+    "(Landroid/view/Surface;)I",
+    (void *)LegacyCameraDevice_nativeDetectSurfaceDataspace },
     { "nativeDetectSurfaceDimens",
     "(Landroid/view/Surface;[I)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceDimens },
