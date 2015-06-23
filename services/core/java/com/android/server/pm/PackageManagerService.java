@@ -3352,11 +3352,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "updatePermissionFlags");
 
-        // Only the system can change policy and system fixed flags.
+        // Only the system can change system fixed flags.
         if (getCallingUid() != Process.SYSTEM_UID) {
-            flagMask &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-
             flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
             flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
         }
@@ -3385,14 +3382,59 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
+            boolean hadState = permissionsState.getRuntimePermissionState(name, userId) != null;
+
             if (permissionsState.updatePermissionFlags(bp, userId, flagMask, flagValues)) {
                 // Install and runtime permissions are stored in different places,
                 // so figure out what permission changed and persist the change.
                 if (permissionsState.getInstallPermissionState(name) != null) {
                     scheduleWriteSettingsLocked();
-                } else if (permissionsState.getRuntimePermissionState(name, userId) != null) {
+                } else if (permissionsState.getRuntimePermissionState(name, userId) != null
+                        || hadState) {
                     mSettings.writeRuntimePermissionsForUserLPr(userId, false);
                 }
+            }
+        }
+    }
+
+    /**
+     * Update the permission flags for all packages and runtime permissions of a user in order
+     * to allow device or profile owner to remove POLICY_FIXED.
+     */
+    @Override
+    public void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId) {
+        if (!sUserManager.exists(userId)) {
+            return;
+        }
+
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
+                "updatePermissionFlagsForAllApps");
+
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "updatePermissionFlagsForAllApps");
+
+        // Only the system can change system fixed flags.
+        if (getCallingUid() != Process.SYSTEM_UID) {
+            flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+        }
+
+        synchronized (mPackages) {
+            boolean changed = false;
+            final int packageCount = mPackages.size();
+            for (int pkgIndex = 0; pkgIndex < packageCount; pkgIndex++) {
+                final PackageParser.Package pkg = mPackages.valueAt(pkgIndex);
+                SettingBase sb = (SettingBase) pkg.mExtras;
+                if (sb == null) {
+                    continue;
+                }
+                PermissionsState permissionsState = sb.getPermissionsState();
+                changed |= permissionsState.updatePermissionFlagsForAllPermissions(
+                        userId, flagMask, flagValues);
+            }
+            if (changed) {
+                mSettings.writeRuntimePermissionsForUserLPr(userId, false);
             }
         }
     }
