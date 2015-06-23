@@ -25,7 +25,7 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.XmlRes;
 import android.app.Activity;
-import android.app.AssistStructure;
+import android.app.assist.AssistStructure;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
