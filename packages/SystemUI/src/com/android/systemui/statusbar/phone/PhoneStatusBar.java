@@ -1049,6 +1049,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mShowSearchHoldoff = 0;
     private Runnable mInvokeAssist = new Runnable() {
         public void run() {
+            mAssistManager.prepareBeforeInvocation();
             invokeAssistGesture(true /* vibrate */);
             awakenDreams();
             if (mNavigationBarView != null) {
@@ -2938,6 +2939,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
+        mAssistManager.onUserSwitched(newUserId);
     }
 
     private void setControllerUsers() {
