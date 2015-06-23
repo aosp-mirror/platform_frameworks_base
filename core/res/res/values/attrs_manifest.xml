@@ -231,6 +231,9 @@
              may cost the user money.  Such permissions may be highlighted
              when shown to the user with this additional information.  -->
         <flag name="costsMoney" value="0x0001" />
+        <!-- Additional flag from base permission type: this permission is hidden
+             and should not show in the UI. -->
+        <flag name="hide" value="0x2" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated
