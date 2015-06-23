@@ -12631,7 +12631,6 @@ package android.graphics.drawable {
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
     method public boolean isAutoMirrored();
-    method public boolean isDither();
     method public boolean isFilterBitmap();
     method public boolean isStateful();
     method public final boolean isVisible();
@@ -12651,7 +12650,7 @@ package android.graphics.drawable {
     method public void setChangingConfigurations(int);
     method public abstract void setColorFilter(android.graphics.ColorFilter);
     method public void setColorFilter(int, android.graphics.PorterDuff.Mode);
-    method public void setDither(boolean);
+    method public deprecated void setDither(boolean);
     method public void setFilterBitmap(boolean);
     method public void setHotspot(float, float);
     method public void setHotspotBounds(int, int, int, int);

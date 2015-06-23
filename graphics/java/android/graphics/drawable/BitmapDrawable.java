@@ -362,11 +362,6 @@ public class BitmapDrawable extends Drawable {
         invalidateSelf();
     }
 
-    @Override
-    public boolean isDither() {
-        return mBitmapState.mPaint.isDither();
-    }
-
     /**
      * Indicates the repeat behavior of this drawable on the X axis.
      *
