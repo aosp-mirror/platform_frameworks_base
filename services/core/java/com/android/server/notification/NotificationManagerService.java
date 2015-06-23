@@ -97,6 +97,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -622,22 +623,24 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationVisibilityChanged(
-                String[] newlyVisibleKeys, String[] noLongerVisibleKeys) {
+        public void onNotificationVisibilityChanged(NotificationVisibility[] newlyVisibleKeys,
+                NotificationVisibility[] noLongerVisibleKeys) {
             synchronized (mNotificationList) {
-                for (String key : newlyVisibleKeys) {
-                    NotificationRecord r = mNotificationsByKey.get(key);
+                for (NotificationVisibility nv : newlyVisibleKeys) {
+                    NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
-                    r.setVisibility(true);
+                    r.setVisibility(true, nv.rank);
+                    nv.recycle();
                 }
                 // Note that we might receive this event after notifications
                 // have already left the system, e.g. after dismissing from the
                 // shade. Hence not finding notifications in
                 // mNotificationsByKey is not an exceptional condition.
-                for (String key : noLongerVisibleKeys) {
-                    NotificationRecord r = mNotificationsByKey.get(key);
+                for (NotificationVisibility nv : noLongerVisibleKeys) {
+                    NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
-                    r.setVisibility(false);
+                    r.setVisibility(false, nv.rank);
+                    nv.recycle();
                 }
             }
         }

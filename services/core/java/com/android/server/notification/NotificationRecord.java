@@ -314,13 +314,15 @@ public final class NotificationRecord {
     /**
      * Set the visibility of the notification.
      */
-    public void setVisibility(boolean visible) {
+    public void setVisibility(boolean visible, int rank) {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
         EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
                 (int) (now - mCreationTimeMs),
-                (int) (now - mUpdateTimeMs));
+                (int) (now - mUpdateTimeMs),
+                0, // exposure time
+                rank);
     }
 
     /**
