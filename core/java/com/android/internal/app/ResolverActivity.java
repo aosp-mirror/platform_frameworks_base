@@ -16,10 +16,17 @@
 
 package com.android.internal.app;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.VoiceInteractor;
+import android.app.VoiceInteractor.PickOptionRequest;
+import android.app.VoiceInteractor.PickOptionRequest.Option;
+import android.app.VoiceInteractor.Prompt;
+import android.app.VoiceInteractor.Request;
 import android.os.AsyncTask;
 import android.provider.Settings;
+import android.service.chooser.ChooserTarget;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.widget.AbsListView;
@@ -96,6 +103,7 @@ public class ResolverActivity extends Activity {
     private int mProfileSwitchMessageId = -1;
     private final ArrayList<Intent> mIntents = new ArrayList<>();
     private ResolverComparator mResolverComparator;
+    private PickTargetOptionRequest mPickOptionRequest;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -242,6 +250,9 @@ public class ResolverActivity extends Activity {
                     finish();
                 }
             });
+            if (isVoiceInteraction()) {
+                rdl.setCollapsed(false);
+            }
         }
 
         if (title == null) {
@@ -313,6 +324,39 @@ public class ResolverActivity extends Activity {
             });
             bindProfileView();
         }
+
+        if (isVoiceInteraction()) {
+            onSetupVoiceInteraction();
+        }
+    }
+
+    /**
+     * Perform any initialization needed for voice interaction.
+     */
+    void onSetupVoiceInteraction() {
+        // Do it right now. Subclasses may delay this and send it later.
+        sendVoiceChoicesIfNeeded();
+    }
+
+    void sendVoiceChoicesIfNeeded() {
+        if (!isVoiceInteraction()) {
+            // Clearly not needed.
+            return;
+        }
+
+
+        final Option[] options = new Option[mAdapter.getCount()];
+        for (int i = 0, N = options.length; i < N; i++) {
+            options[i] = optionForChooserTarget(mAdapter.getItem(i), i);
+        }
+
+        mPickOptionRequest = new PickTargetOptionRequest(
+                new Prompt(getTitle()), options, null);
+        getVoiceInteractor().submitRequest(mPickOptionRequest);
+    }
+
+    Option optionForChooserTarget(TargetInfo target, int index) {
+        return new Option(target.getDisplayLabel(), index);
     }
 
     protected final void setAdditionalTargets(Intent[] intents) {
@@ -473,6 +517,14 @@ public class ResolverActivity extends Activity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!isChangingConfigurations() && mPickOptionRequest != null) {
+            mPickOptionRequest.cancel();
+        }
+    }
+
+    @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (mAlwaysUseOption) {
@@ -510,14 +562,10 @@ public class ResolverActivity extends Activity {
         try {
             ApplicationInfo appInfo = getPackageManager().getApplicationInfo(
                     resolveInfo.activityInfo.packageName, 0 /* default flags */);
-            return versionNumberAtLeastL(appInfo.targetSdkVersion);
+            return appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP;
         } catch (NameNotFoundException e) {
             return false;
         }
-    }
-
-    private boolean versionNumberAtLeastL(int versionNumber) {
-        return versionNumber >= Build.VERSION_CODES.LOLLIPOP;
     }
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
@@ -1644,4 +1692,39 @@ public class ResolverActivity extends Activity {
                 && match <= IntentFilter.MATCH_CATEGORY_PATH;
     }
 
+    static class PickTargetOptionRequest extends PickOptionRequest {
+        public PickTargetOptionRequest(@Nullable Prompt prompt, Option[] options,
+                @Nullable Bundle extras) {
+            super(prompt, options, extras);
+        }
+
+        @Override
+        public void onCancel() {
+            super.onCancel();
+            final ResolverActivity ra = (ResolverActivity) getActivity();
+            if (ra != null) {
+                ra.mPickOptionRequest = null;
+                ra.finish();
+            }
+        }
+
+        @Override
+        public void onPickOptionResult(boolean finished, Option[] selections, Bundle result) {
+            super.onPickOptionResult(finished, selections, result);
+            if (selections.length != 1) {
+                // TODO In a better world we would filter the UI presented here and let the
+                // user refine. Maybe later.
+                return;
+            }
+
+            final ResolverActivity ra = (ResolverActivity) getActivity();
+            if (ra != null) {
+                final TargetInfo ti = ra.mAdapter.getItem(selections[0].getIndex());
+                if (ra.onTargetSelected(ti, false)) {
+                    ra.mPickOptionRequest = null;
+                    ra.finish();
+                }
+            }
+        }
+    }
 }
