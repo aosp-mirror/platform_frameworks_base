@@ -78,19 +78,19 @@ can now sync that data with each of the user’s contacts, providing items in a
 stream along with photos for each.</p>
 
 <p>The database table that contains an individual contact’s social stream is
-defined by android.provider.ContactsContract.StreamItems, the Uri for
+defined by {@link android.provider.ContactsContract.StreamItems}, the Uri for
 which is nested within the {@link android.provider.ContactsContract.RawContacts}
 directory to which the stream items belong. Each social stream table includes
 several columns for metadata about each stream item, such as an icon
 representing the source (an avatar), a label for the item, the primary text
 content, comments about the item (such as responses from other people), and
 more. Photos associated with a stream are stored in another table, defined by
-android.provider.ContactsContract.StreamItemPhotos, which is available
-as a sub-directory of the android.provider.ContactsContract.StreamItems
+{@link android.provider.ContactsContract.StreamItemPhotos}, which is available
+as a sub-directory of the {@link android.provider.ContactsContract.StreamItems}
 Uri.</p>
 
-<p>See android.provider.ContactsContract.StreamItems and
-android.provider.ContactsContract.StreamItemPhotos for more information.</p>
+<p>See {@link android.provider.ContactsContract.StreamItems} and
+{@link android.provider.ContactsContract.StreamItemPhotos} for more information.</p>
 
 <p>To read or write social stream items for a contact, an application must
 request permission from the user by declaring <code>&lt;uses-permission
@@ -272,8 +272,8 @@ let you check and manage video stabilization for a {@link android.hardware.Camer
 
 <p>The following are new permissions:</p>
 <ul>
-<li>android.Manifest.permission#READ_SOCIAL_STREAM and
-android.Manifest.permission#WRITE_SOCIAL_STREAM: Allow a sync
+<li>{@link android.Manifest.permission#READ_SOCIAL_STREAM} and 
+{@link android.Manifest.permission#WRITE_SOCIAL_STREAM}: Allow a sync
 adapter to read and write social stream data to a contact in the shared
 Contacts Provider.</li>
 </ul>
