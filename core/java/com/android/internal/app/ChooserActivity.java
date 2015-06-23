@@ -100,6 +100,10 @@ public class ChooserActivity extends ResolverActivity {
                     mChooserListAdapter.addServiceResults(sri.originalTarget, sri.resultTargets);
                     unbindService(sri.connection);
                     mServiceConnections.remove(sri.connection);
+                    if (mServiceConnections.isEmpty()) {
+                        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+                        sendVoiceChoicesIfNeeded();
+                    }
                     break;
 
                 case CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT:
@@ -107,6 +111,7 @@ public class ChooserActivity extends ResolverActivity {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
                     unbindRemainingServices();
+                    sendVoiceChoicesIfNeeded();
                     break;
 
                 default:
@@ -384,6 +389,8 @@ public class ChooserActivity extends ResolverActivity {
                     + WATCHDOG_TIMEOUT_MILLIS + "ms");
             mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
                     WATCHDOG_TIMEOUT_MILLIS);
+        } else {
+            sendVoiceChoicesIfNeeded();
         }
     }
 
@@ -416,6 +423,10 @@ public class ChooserActivity extends ResolverActivity {
         }
         mServiceConnections.clear();
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+    }
+
+    void onSetupVoiceInteraction() {
+        // Do nothing. We'll send the voice stuff ourselves.
     }
 
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
@@ -956,6 +967,10 @@ public class ChooserActivity extends ResolverActivity {
             if (DEBUG) Log.d(TAG, "onServiceDisconnected: " + name);
             unbindService(this);
             mServiceConnections.remove(this);
+            if (mServiceConnections.isEmpty()) {
+                mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+                sendVoiceChoicesIfNeeded();
+            }
         }
 
         @Override
