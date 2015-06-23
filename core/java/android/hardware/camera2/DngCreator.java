@@ -284,6 +284,8 @@ public final class DngCreator implements AutoCloseable {
      * {@code offset + 2 * width * height)} bytes.  The width and height of
      * the input are taken from the width and height set in the {@link DngCreator} metadata tags,
      * and will typically be equal to the width and height of
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE}.  Prior to
+     * API level 23, this was always the same as
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}.
      * The pixel layout in the input is determined from the reported color filter arrangement (CFA)
      * set in {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT}.  If insufficient
@@ -332,6 +334,8 @@ public final class DngCreator implements AutoCloseable {
      * {@code offset + 2 * width * height)} bytes.  The width and height of
      * the input are taken from the width and height set in the {@link DngCreator} metadata tags,
      * and will typically be equal to the width and height of
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE}.  Prior to
+     * API level 23, this was always the same as
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}.
      * The pixel layout in the input is determined from the reported color filter arrangement (CFA)
      * set in {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT}.  If insufficient
