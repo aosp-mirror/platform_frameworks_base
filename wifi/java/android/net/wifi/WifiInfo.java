@@ -167,15 +167,24 @@ public class WifiInfo implements Parcelable {
             long txbad = stats.lostmpdu_be + stats.lostmpdu_bk
                     + stats.lostmpdu_vi + stats.lostmpdu_vo;
 
-            txBadRate = (txBadRate * 0.5)
-                + ((double) (txbad - txBad) * 0.5);
-            txSuccessRate = (txSuccessRate * 0.5)
-                + ((double) (txgood - txSuccess) * 0.5);
-            rxSuccessRate = (rxSuccessRate * 0.5)
-                + ((double) (rxgood - rxSuccess) * 0.5);
-            txRetriesRate = (txRetriesRate * 0.5)
-                + ((double) (txretries - txRetries) * 0.5);
-
+            if (txBad <= txbad
+                    && txSuccess <= txgood
+                    && rxSuccess <= rxgood
+                    && txRetries <= txretries) {
+                txBadRate = (txBadRate * 0.5)
+                        + ((double) (txbad - txBad) * 0.5);
+                txSuccessRate = (txSuccessRate * 0.5)
+                        + ((double) (txgood - txSuccess) * 0.5);
+                rxSuccessRate = (rxSuccessRate * 0.5)
+                        + ((double) (rxgood - rxSuccess) * 0.5);
+                txRetriesRate = (txRetriesRate * 0.5)
+                        + ((double) (txretries - txRetries) * 0.5);
+            } else {
+                txBadRate = 0;
+                txSuccessRate = 0;
+                rxSuccessRate = 0;
+                txRetriesRate = 0;
+            }
             txBad = txbad;
             txSuccess = txgood;
             rxSuccess = rxgood;
@@ -204,11 +213,15 @@ public class WifiInfo implements Parcelable {
         txRetries = 0;
         txBadRate = 0;
         txRetriesRate = 0;
-
-        txSuccessRate = (txSuccessRate * 0.5)
-                + ((double) (txPackets - txSuccess) * 0.5);
-        rxSuccessRate = (rxSuccessRate * 0.5)
-                + ((double) (rxPackets - rxSuccess) * 0.5);
+        if (txSuccess <= txPackets && rxSuccess <= rxPackets) {
+            txSuccessRate = (txSuccessRate * 0.5)
+                    + ((double) (txPackets - txSuccess) * 0.5);
+            rxSuccessRate = (rxSuccessRate * 0.5)
+                    + ((double) (rxPackets - rxSuccess) * 0.5);
+        } else {
+            txBadRate = 0;
+            txRetriesRate = 0;
+        }
         txSuccess = txPackets;
         rxSuccess = rxPackets;
     }
