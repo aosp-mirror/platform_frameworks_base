@@ -150,6 +150,25 @@ public class CamcorderProfile
 
     /**
      * High speed ( >= 100fps) quality level corresponding to the lowest available resolution.
+     * <p>
+     * For all the high speed profiles defined below ((from {@link #QUALITY_HIGH_SPEED_LOW} to
+     * {@link #QUALITY_HIGH_SPEED_2160P}), they are similar as normal recording profiles, with just
+     * higher output frame rate and bit rate. Therefore, setting these profiles with
+     * {@link MediaRecorder#setProfile} without specifying any other encoding parameters will
+     * produce high speed videos rather than slow motion videos that have different capture and
+     * output (playback) frame rates. To record slow motion videos, the application must set video
+     * output (playback) frame rate and bit rate appropriately via
+     * {@link MediaRecorder#setVideoFrameRate} and {@link MediaRecorder#setVideoEncodingBitRate}
+     * based on the slow motion factor. If the application intends to do the video recording with
+     * {@link MediaCodec} encoder, it must set each individual field of {@link MediaFormat}
+     * similarly according to this CamcorderProfile.
+     * </p>
+     *
+     * @see #videoBitRate
+     * @see #videoFrameRate
+     * @see MediaRecorder
+     * @see MediaCodec
+     * @see MediaFormat
      */
     public static final int QUALITY_HIGH_SPEED_LOW = 2000;
 
@@ -212,11 +231,56 @@ public class CamcorderProfile
 
     /**
      * The target video output bit rate in bits per second
+     * <p>
+     * This is the target recorded video output bit rate if the application configures the video
+     * recording via {@link MediaRecorder#setProfile} without specifying any other
+     * {@link MediaRecorder} encoding parameters. For example, for high speed quality profiles (from
+     * {@link #QUALITY_HIGH_SPEED_LOW} to {@link #QUALITY_HIGH_SPEED_2160P}), this is the bit rate
+     * where the video is recorded with. If the application intends to record slow motion videos
+     * with the high speed quality profiles, it must set a different video bit rate that is
+     * corresponding to the desired recording output bit rate (i.e., the encoded video bit rate
+     * during normal playback) via {@link MediaRecorder#setVideoEncodingBitRate}. For example, if
+     * {@link #QUALITY_HIGH_SPEED_720P} advertises 240fps {@link #videoFrameRate} and 64Mbps
+     * {@link #videoBitRate} in the high speed CamcorderProfile, and the application intends to
+     * record 1/8 factor slow motion recording videos, the application must set 30fps via
+     * {@link MediaRecorder#setVideoFrameRate} and 8Mbps ( {@link #videoBitRate} * slow motion
+     * factor) via {@link MediaRecorder#setVideoEncodingBitRate}. Failing to do so will result in
+     * videos with unexpected frame rate and bit rate, or {@link MediaRecorder} error if the output
+     * bit rate exceeds the encoder limit. If the application intends to do the video recording with
+     * {@link MediaCodec} encoder, it must set each individual field of {@link MediaFormat}
+     * similarly according to this CamcorderProfile.
+     * </p>
+     *
+     * @see #videoFrameRate
+     * @see MediaRecorder
+     * @see MediaCodec
+     * @see MediaFormat
      */
     public int videoBitRate;
 
     /**
-     * The target video frame rate in frames per second
+     * The target video frame rate in frames per second.
+     * <p>
+     * This is the target recorded video output frame rate per second if the application configures
+     * the video recording via {@link MediaRecorder#setProfile} without specifying any other
+     * {@link MediaRecorder} encoding parameters. For example, for high speed quality profiles (from
+     * {@link #QUALITY_HIGH_SPEED_LOW} to {@link #QUALITY_HIGH_SPEED_2160P}), this is the frame rate
+     * where the video is recorded and played back with. If the application intends to create slow
+     * motion use case with the high speed quality profiles, it must set a different video frame
+     * rate that is corresponding to the desired output (playback) frame rate via
+     * {@link MediaRecorder#setVideoFrameRate}. For example, if {@link #QUALITY_HIGH_SPEED_720P}
+     * advertises 240fps {@link #videoFrameRate} in the CamcorderProfile, and the application
+     * intends to create 1/8 factor slow motion recording videos, the application must set 30fps via
+     * {@link MediaRecorder#setVideoFrameRate}. Failing to do so will result in high speed videos
+     * with normal speed playback frame rate (240fps for above example). If the application intends
+     * to do the video recording with {@link MediaCodec} encoder, it must set each individual field
+     * of {@link MediaFormat} similarly according to this CamcorderProfile.
+     * </p>
+     *
+     * @see #videoBitRate
+     * @see MediaRecorder
+     * @see MediaCodec
+     * @see MediaFormat
      */
     public int videoFrameRate;
 
