@@ -68,7 +68,6 @@ public class NotificationUsageStats {
     private final SQLiteLog mSQLiteLog;
     private final Context mContext;
     private final Handler mHandler;
-    private final Handler mHandler;
     private long mLastEmitTime;
 
     public NotificationUsageStats(Context context) {
