@@ -16,7 +16,10 @@
 package com.android.server.camera;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
@@ -67,6 +70,32 @@ public class CameraService extends SystemService implements Handler.Callback {
 
     private final Object mLock = new Object();
     private Set<Integer> mEnabledCameraUsers;
+    private int mLastUser;
+
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action == null) return;
+
+            switch (action) {
+                case Intent.ACTION_USER_ADDED:
+                case Intent.ACTION_USER_REMOVED:
+                case Intent.ACTION_USER_INFO_CHANGED:
+                case Intent.ACTION_MANAGED_PROFILE_ADDED:
+                case Intent.ACTION_MANAGED_PROFILE_REMOVED:
+                    synchronized(mLock) {
+                        // Return immediately if we haven't seen any users start yet
+                        if (mEnabledCameraUsers == null) return;
+                        switchUserLocked(mLastUser);
+                    }
+                    break;
+                default:
+                    break; // do nothing
+            }
+
+        }
+    };
 
     private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
         @Override
@@ -103,6 +132,15 @@ public class CameraService extends SystemService implements Handler.Callback {
             // Should never see this unless someone messes up the SystemServer service boot order.
             throw new IllegalStateException("UserManagerService must start before CameraService!");
         }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        mContext.registerReceiver(mIntentReceiver, filter);
+
         publishBinderService(CAMERA_SERVICE_PROXY_BINDER_NAME, mCameraServiceProxy);
     }
 
@@ -125,6 +163,7 @@ public class CameraService extends SystemService implements Handler.Callback {
 
     private void switchUserLocked(int userHandle) {
         Set<Integer> currentUserHandles = getEnabledUserHandles(userHandle);
+        mLastUser = userHandle;
         if (mEnabledCameraUsers == null || !mEnabledCameraUsers.equals(currentUserHandles)) {
             // Some user handles have been added or removed, update mediaserver.
             mEnabledCameraUsers = currentUserHandles;
