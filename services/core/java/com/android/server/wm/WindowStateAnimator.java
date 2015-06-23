@@ -658,6 +658,11 @@ class WindowStateAnimator {
         }
 
         @Override
+        public void setSecure(boolean isSecure) {
+            super.setSecure(isSecure);
+        }
+
+        @Override
         public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
             if (dsdx != mDsdx || dtdx != mDtdx || dsdy != mDsdy || dtdy != mDtdy) {
                 if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setMatrix(" + dsdx + "," + dtdx + ","
@@ -1660,6 +1665,22 @@ class WindowStateAnimator {
         } finally {
             SurfaceControl.closeTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
+        }
+    }
+
+    void setSecureLocked(boolean isSecure) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setSecureLocked");
+        SurfaceControl.openTransaction();
+        try {
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "isSecure=" + isSecure,
+                    null);
+            mSurfaceControl.setSecure(isSecure);
+        } finally {
+            SurfaceControl.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
         }
     }
 
