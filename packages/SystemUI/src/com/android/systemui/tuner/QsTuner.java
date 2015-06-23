@@ -150,13 +150,23 @@ public class QsTuner extends Fragment implements Callback {
     }
 
     public void onStartDrag() {
-        mDropTarget.setVisibility(View.VISIBLE);
-        mAddTarget.setVisibility(View.GONE);
+        mDropTarget.post(new Runnable() {
+            @Override
+            public void run() {
+                mDropTarget.setVisibility(View.VISIBLE);
+                mAddTarget.setVisibility(View.GONE);
+            }
+        });
     }
 
     public void stopDrag() {
-        mDropTarget.setVisibility(View.GONE);
-        mAddTarget.setVisibility(View.VISIBLE);
+        mDropTarget.post(new Runnable() {
+            @Override
+            public void run() {
+                mDropTarget.setVisibility(View.GONE);
+                mAddTarget.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
@@ -230,9 +240,16 @@ public class QsTuner extends Fragment implements Callback {
 
         public void showAddDialog() {
             List<String> tiles = mTileSpecs;
+            int numBroadcast = 0;
+            for (int i = 0; i < tiles.size(); i++) {
+                if (tiles.get(i).startsWith(IntentTile.PREFIX)) {
+                    numBroadcast++;
+                }
+            }
             String[] defaults =
                 getContext().getString(R.string.quick_settings_tiles_default).split(",");
-            final String[] available = new String[defaults.length + 1 - tiles.size()];
+            final String[] available = new String[defaults.length + 1
+                                                  - (tiles.size() - numBroadcast)];
             final String[] availableTiles = new String[available.length];
             int index = 0;
             for (int i = 0; i < defaults.length; i++) {
