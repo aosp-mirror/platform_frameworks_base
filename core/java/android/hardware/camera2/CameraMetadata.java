@@ -531,37 +531,32 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5;
 
     /**
-     * <p>The camera device supports capturing maximum-resolution
-     * images at &gt;= 20 frames per second, in at least the
-     * uncompressed YUV format, when post-processing settings
-     * are set to FAST.</p>
-     * <p>More specifically, this means that a size matching the
-     * camera device's active array size is listed as a
-     * supported size for the YUV_420_888 format in
-     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, the minimum frame
-     * duration for that format and size is &lt;= 1/20 s, and
-     * the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
-     * lists at least one FPS range where the minimum FPS is</p>
-     * <blockquote>
-     * <p>= 1 / minimumFrameDuration for the maximum-size
-     * YUV_420_888 format.</p>
-     * </blockquote>
-     * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
-     * guaranted to have a value between 0 and 4, inclusive.
-     * {@link CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE android.control.aeLockAvailable} and
-     * {@link CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE android.control.awbLockAvailable} are also guaranteed
-     * to be <code>true</code> so burst capture with these two locks ON
-     * yields consistent image output.</p>
-     * <p>On a camera device that reports the HIGH_RESOLUTION hardware
-     * level, meaning the device supports very large capture sizes,
-     * BURST_CAPTURE means that at least 8-megapixel images can be
-     * captured at <code>&gt;=</code> 20 fps, and maximum-resolution images can be
-     * captured at <code>&gt;=</code> 10 fps.</p>
+     * <p>The camera device supports capturing high-resolution images at &gt;= 20 frames per
+     * second, in at least the uncompressed YUV format, when post-processing settings are set
+     * to FAST. Additionally, maximum-resolution images can be captured at &gt;= 10 frames
+     * per second.  Here, 'high resolution' means at least 8 megapixels, or the maximum
+     * resolution of the device, whichever is smaller.</p>
+     * <p>More specifically, this means that a size matching the camera device's active array
+     * size is listed as a supported size for the {@link android.graphics.ImageFormat#YUV_420_888 } format in either {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } or {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
+     * with a minimum frame duration for that format and size of either &lt;= 1/20 s, or
+     * &lt;= 1/10 s, respectively; and the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
+     * lists at least one FPS range where the minimum FPS is &gt;= 1 / minimumFrameDuration
+     * for the maximum-size YUV_420_888 format.  If that maximum size is listed in {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
+     * then the list of resolutions for YUV_420_888 from {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } contains at
+     * least one resolution &gt;= 8 megapixels, with a minimum frame duration of &lt;= 1/20
+     * s.</p>
+     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, then those can also be captured at the same rate
+     * as the maximum-size YUV_420_888 resolution is.</p>
+     * <p>If the device supports the PRIVATE_REPROCESSING capability, then the same guarantees
+     * as for the YUV_420_888 format also apply to the {@link android.graphics.ImageFormat#PRIVATE } format.</p>
+     * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is guaranted to have a value between 0
+     * and 4, inclusive. {@link CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE android.control.aeLockAvailable} and {@link CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE android.control.awbLockAvailable}
+     * are also guaranteed to be <code>true</code> so burst capture with these two locks ON yields
+     * consistent image output.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
      * @see CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE
      * @see CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE
-     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
@@ -953,13 +948,6 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2;
-
-    /**
-     * <p>This camera device is capable of supporting advanced imaging applications at full rate,
-     * and additional high-resolution outputs at lower rates.</p>
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
-     */
-    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION = 3;
 
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
