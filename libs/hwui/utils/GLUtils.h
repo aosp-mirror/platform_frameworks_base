@@ -20,12 +20,11 @@ namespace android {
 namespace uirenderer {
 
 class GLUtils {
-private:
 public:
     /**
-     * Print out any GL errors with ALOGE
+     * Print out any GL errors with ALOGE, returns true if any errors were found.
      */
-    static void dumpGLErrors();
+    static bool dumpGLErrors();
 
 }; // class GLUtils
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -26,9 +24,11 @@
 namespace android {
 namespace uirenderer {
 
-void GLUtils::dumpGLErrors() {
+bool GLUtils::dumpGLErrors() {
+    bool errorObserved = false;
     GLenum status = GL_NO_ERROR;
     while ((status = glGetError()) != GL_NO_ERROR) {
+        errorObserved = true;
         switch (status) {
         case GL_INVALID_ENUM:
             ALOGE("GL error:  GL_INVALID_ENUM");
@@ -46,6 +46,7 @@ void GLUtils::dumpGLErrors() {
             ALOGE("GL error: 0x%x", status);
         }
     }
+    return errorObserved;
 }
 
 }; // namespace uirenderer
