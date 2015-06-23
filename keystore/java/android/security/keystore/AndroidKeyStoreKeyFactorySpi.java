@@ -113,7 +113,7 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
                 return result;
             } else {
                 throw new InvalidKeySpecException(
-                        "Obtaining RSAPublicKeySpec not supported for " + key.getAlgorithm() + " "
+                        "Obtaining ECPublicKeySpec not supported for " + key.getAlgorithm() + " "
                         + ((key instanceof AndroidKeyStorePrivateKey) ? "private" : "public")
                         + " key");
             }
