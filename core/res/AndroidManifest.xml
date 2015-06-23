@@ -2468,6 +2468,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.IntentForwarderActivity"
