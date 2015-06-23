@@ -19,6 +19,7 @@ package com.android.internal.statusbar;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.statusbar.NotificationVisibility;
 import android.service.notification.StatusBarNotification;
 
 /** @hide */
@@ -53,8 +54,8 @@ interface IStatusBarService
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
     void onNotificationClear(String pkg, String tag, int id, int userId);
-    void onNotificationVisibilityChanged(
-            in String[] newlyVisibleKeys, in String[] noLongerVisibleKeys);
+    void onNotificationVisibilityChanged( in NotificationVisibility[] newlyVisibleKeys,
+            in NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
     void setSystemUiVisibility(int vis, int mask, String cause);
     void setWindowState(int window, int state);
