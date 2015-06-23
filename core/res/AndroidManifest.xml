@@ -349,20 +349,6 @@
         android:description="@string/permdesc_writeContacts"
         android:protectionLevel="dangerous" />
 
-    <!-- @deprecated No longer enforced. This was last enforced in API version 22. -->
-    <permission android:name="android.permission.READ_PROFILE"
-        android:permissionGroup="android.permission-group.CONTACTS"
-        android:label="@string/permlab_readProfile"
-        android:description="@string/permdesc_readProfile"
-        android:protectionLevel="dangerous" />
-
-    <!-- @deprecated No longer enforced. This was last enforced in API version 22. -->
-    <permission android:name="android.permission.WRITE_PROFILE"
-        android:permissionGroup="android.permission-group.CONTACTS"
-        android:label="@string/permlab_writeProfile"
-        android:description="@string/permdesc_writeProfile"
-        android:protectionLevel="dangerous" />
-
     <!-- ====================================================================== -->
     <!-- Permissions for accessing user's calendar                              -->
     <!-- ====================================================================== -->
@@ -510,42 +496,6 @@
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
         android:protectionLevel="dangerous" />
-
-    <!-- =============================================================== -->
-    <!-- Permissions for accessing social info                           -->
-    <!-- =============================================================== -->
-    <eat-comment />
-
-    <!-- Used for permissions that provide access to the user's social connections,
-         such as contacts, call logs, social stream, etc.  This includes
-         both reading and writing of this data (which should generally be
-         expressed as two distinct permissions). -->
-
-    <permission-group android:name="android.permission-group.SOCIAL_INFO"
-        android:label="@string/permgrouplab_socialInfo"
-        android:icon="@drawable/perm_group_social_info"
-        android:description="@string/permgroupdesc_socialInfo"
-        android:permissionGroupFlags="personalInfo"
-        android:priority="1200" />
-
-    <!-- Allows an application to read from the user's social stream.
-         @deprecated This functionality will be unsupported in the future; cursors returned
-         will be empty. Please do not use. -->
-    <permission android:name="android.permission.READ_SOCIAL_STREAM"
-        android:permissionGroup="android.permission-group.SOCIAL_INFO"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_readSocialStream"
-        android:description="@string/permdesc_readSocialStream" />
-
-    <!-- Allows an application to write (but not read) the user's
-         social stream data.
-         @deprecated This functionality will be unsupported in the future; cursors returned
-         will be empty. Please do not use. -->
-    <permission android:name="android.permission.WRITE_SOCIAL_STREAM"
-        android:permissionGroup="android.permission-group.SOCIAL_INFO"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_writeSocialStream"
-        android:description="@string/permdesc_writeSocialStream" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device location                          -->

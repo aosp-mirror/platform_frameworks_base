@@ -554,11 +554,6 @@
     <string name="permgroupdesc_location">access this device\'s location</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_socialInfo">Your social information</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_socialInfo">Direct access to information about your contacts and social connections.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_calendar">access your calendar</string>
@@ -901,46 +896,12 @@
     <string name="permdesc_writeCallLog" product="default">Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls.
         Malicious apps may use this to erase or modify your call log.</string>
 
-
-    <!-- Title of the read profile permission, listed so the user can decide whether to allow the application to read the user's personal profile data. [CHAR LIMIT=30] -->
-    <string name="permlab_readProfile">read your own contact card</string>
-    <!-- Description of the read profile permission, listed so the user can decide whether to allow the application to read the user's personal profile data. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_readProfile" product="default">Allows the app to read
-     personal profile information stored on your device, such as your name and
-     contact information. This means the app can identify you and may send your
-     profile information to others.</string>
-
-    <!-- Title of the write profile permission, listed so the user can decide whether to allow the application to write to the user's personal profile data. [CHAR LIMIT=30] -->
-    <string name="permlab_writeProfile">modify your own contact card</string>
-    <!-- Description of the write profile permission, listed so the user can decide whether to allow the application to write to the user's personal profile data. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_writeProfile" product="default">Allows the app to
-      change or add to personal profile information stored on your device, such
-      as your name and contact information.  This means the app can identify you
-      and may send your profile information to others.</string>
-
     <!-- Title of the body sensors permission, listed so the user can decide whether to allow the application to access body sensor data. [CHAR LIMIT=30] -->
     <string name="permlab_bodySensors">body sensors (like heart rate monitors)
     </string>
     <!-- Description of the body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
     <string name="permdesc_bodySensors" product="default">Allows the app to access data from sensors
     that monitor your physical condition, such as your heart rate.</string>
-
-    <!-- Title of the read social stream permission, listed so the user can decide whether to allow the application to read information from the user's social stream. [CHAR LIMIT=30] -->
-    <string name="permlab_readSocialStream" product="default">read your social stream</string>
-    <string name="permdesc_readSocialStream" product="default">Allows the app
-      to access and sync social updates from you and your friends. Be careful
-      when sharing information -- this allows the app to read communications
-      between you and your friends on social networks, regardless of
-      confidentiality. Note: this permission may not be enforced on all social
-      networks.</string>
-
-    <!-- Title of the write social stream permission, listed so the user can decide whether to allow the application to write information to the user's social stream. [CHAR LIMIT=30] -->
-    <string name="permlab_writeSocialStream" product="default">write to your social stream</string>
-    <string name="permdesc_writeSocialStream" product="default">Allows the app to
-     display social updates from your friends.  Be careful when sharing
-     information -- this allows the app to produce messages that may appear to
-     come from a friend. Note: this permission may not be enforced on all social
-     networks.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events plus confidential information</string>
