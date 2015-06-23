@@ -18354,6 +18354,7 @@ package android.net {
     method public boolean hasTransport(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.NetworkCapabilities> CREATOR;
+    field public static final int NET_CAPABILITY_CAPTIVE_PORTAL = 17; // 0x11
     field public static final int NET_CAPABILITY_CBS = 5; // 0x5
     field public static final int NET_CAPABILITY_DUN = 2; // 0x2
     field public static final int NET_CAPABILITY_EIMS = 10; // 0xa
