@@ -28633,6 +28633,7 @@ package android.provider {
     field public static final java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
     field public static final java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
     field public static final java.lang.String WAIT_FOR_DEBUGGER = "wait_for_debugger";
+    field public static final java.lang.String WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN = "wifi_device_owner_configs_lockdown";
     field public static final java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
     field public static final java.lang.String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS = "wifi_mobile_data_transition_wakelock_timeout_ms";
     field public static final java.lang.String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON = "wifi_networks_available_notification_on";
