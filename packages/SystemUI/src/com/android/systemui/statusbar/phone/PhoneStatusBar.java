@@ -96,6 +96,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.ViewMediatorCallback;
@@ -457,7 +458,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mDisabledUnmodified2;
 
     /** Keys of notifications currently visible to the user. */
-    private final ArraySet<String> mCurrentlyVisibleNotifications = new ArraySet<String>();
+    private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
+            new ArraySet<>();
     private long mLastVisibilityReportUptimeMs;
 
     private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
@@ -498,12 +500,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // Tracks notifications currently visible in mNotificationStackScroller and
     // emits visibility events via NoMan on changes.
     private final Runnable mVisibilityReporter = new Runnable() {
-        private final ArrayList<String> mTmpNewlyVisibleNotifications = new ArrayList<String>();
-        private final ArrayList<String> mTmpCurrentlyVisibleNotifications = new ArrayList<String>();
+        private final ArraySet<NotificationVisibility> mTmpNewlyVisibleNotifications =
+                new ArraySet<>();
+        private final ArraySet<NotificationVisibility> mTmpCurrentlyVisibleNotifications =
+                new ArraySet<>();
+        private final ArraySet<NotificationVisibility> mTmpNoLongerVisibleNotifications =
+                new ArraySet<>();
 
         @Override
         public void run() {
             mLastVisibilityReportUptimeMs = SystemClock.uptimeMillis();
+            final String mediaKey = getCurrentMediaNotificationKey();
 
             // 1. Loop over mNotificationData entries:
             //   A. Keep list of visible notifications.
@@ -518,30 +525,44 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             for (int i = 0; i < N; i++) {
                 Entry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
-                boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(key);
-                boolean currentlyVisible =
+                boolean isVisible =
                         (mStackScroller.getChildLocation(entry.row) & VISIBLE_LOCATIONS) != 0;
-                if (currentlyVisible) {
+                NotificationVisibility visObj = NotificationVisibility.obtain(key, i, isVisible);
+                boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(visObj);
+                if (isVisible) {
                     // Build new set of visible notifications.
-                    mTmpCurrentlyVisibleNotifications.add(key);
-                }
-                if (!previouslyVisible && currentlyVisible) {
-                    mTmpNewlyVisibleNotifications.add(key);
+                    mTmpCurrentlyVisibleNotifications.add(visObj);
+                    if (!previouslyVisible) {
+                        mTmpNewlyVisibleNotifications.add(visObj);
+                    }
+                } else {
+                    // release object
+                    visObj.recycle();
                 }
             }
-            ArraySet<String> noLongerVisibleNotifications = mCurrentlyVisibleNotifications;
-            noLongerVisibleNotifications.removeAll(mTmpCurrentlyVisibleNotifications);
+            mTmpNoLongerVisibleNotifications.addAll(mCurrentlyVisibleNotifications);
+            mTmpNoLongerVisibleNotifications.removeAll(mTmpCurrentlyVisibleNotifications);
 
             logNotificationVisibilityChanges(
-                    mTmpNewlyVisibleNotifications, noLongerVisibleNotifications);
+                    mTmpNewlyVisibleNotifications, mTmpNoLongerVisibleNotifications);
 
-            mCurrentlyVisibleNotifications.clear();
+            recycleAllVisibilityObjects(mCurrentlyVisibleNotifications);
             mCurrentlyVisibleNotifications.addAll(mTmpCurrentlyVisibleNotifications);
 
-            mTmpNewlyVisibleNotifications.clear();
+            recycleAllVisibilityObjects(mTmpNoLongerVisibleNotifications);
             mTmpCurrentlyVisibleNotifications.clear();
+            mTmpNewlyVisibleNotifications.clear();
+            mTmpNoLongerVisibleNotifications.clear();
         }
     };
+
+    private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
+        final int N = array.size();
+        for (int i = 0 ; i < N; i++) {
+            array.valueAt(i).recycle();
+        }
+        array.clear();
+    }
 
     private final View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
         @Override
@@ -2987,9 +3008,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Report all notifications as invisible and turn down the
         // reporter.
         if (!mCurrentlyVisibleNotifications.isEmpty()) {
-            logNotificationVisibilityChanges(
-                    Collections.<String>emptyList(), mCurrentlyVisibleNotifications);
-            mCurrentlyVisibleNotifications.clear();
+            logNotificationVisibilityChanges(Collections.<NotificationVisibility>emptyList(),
+                    mCurrentlyVisibleNotifications);
+            recycleAllVisibilityObjects(mCurrentlyVisibleNotifications);
         }
         mHandler.removeCallbacks(mVisibilityReporter);
         mStackScroller.setChildLocationsChangedListener(null);
@@ -3007,18 +3028,27 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void logNotificationVisibilityChanges(
-            Collection<String> newlyVisible, Collection<String> noLongerVisible) {
+            Collection<NotificationVisibility> newlyVisible,
+            Collection<NotificationVisibility> noLongerVisible) {
         if (newlyVisible.isEmpty() && noLongerVisible.isEmpty()) {
             return;
         }
-        String[] newlyVisibleAr = newlyVisible.toArray(new String[newlyVisible.size()]);
-        String[] noLongerVisibleAr = noLongerVisible.toArray(new String[noLongerVisible.size()]);
+        NotificationVisibility[] newlyVisibleAr =
+                newlyVisible.toArray(new NotificationVisibility[newlyVisible.size()]);
+        NotificationVisibility[] noLongerVisibleAr =
+                noLongerVisible.toArray(new NotificationVisibility[noLongerVisible.size()]);
         try {
             mBarService.onNotificationVisibilityChanged(newlyVisibleAr, noLongerVisibleAr);
         } catch (RemoteException e) {
             // Ignore.
         }
-        setNotificationsShown(newlyVisibleAr);
+
+        final int N = newlyVisible.size();
+        String[] newlyVisibleKeyAr = new String[N];
+        for (int i = 0; i < N; i++) {
+            newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
+        }
+        setNotificationsShown(newlyVisibleKeyAr);
     }
 
     // State logging
