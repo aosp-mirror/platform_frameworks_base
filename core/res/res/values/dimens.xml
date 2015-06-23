@@ -385,21 +385,24 @@
     <item type="dimen" format="float" name="ambient_shadow_alpha">0.039</item>
     <item type="dimen" format="float" name="spot_shadow_alpha">0.19</item>
 
-     <!-- Floating toolbar dimensions -->
-     <dimen name="floating_toolbar_height">48dp</dimen>
-     <dimen name="floating_toolbar_menu_image_button_width">56dp</dimen>
-     <dimen name="floating_toolbar_menu_image_button_vertical_padding">12dp</dimen>
-     <dimen name="floating_toolbar_menu_button_side_padding">16dp</dimen>
-     <dimen name="floating_toolbar_overflow_image_button_width">60dp</dimen>
-     <dimen name="floating_toolbar_overflow_side_padding">18dp</dimen>
-     <dimen name="floating_toolbar_text_size">14sp</dimen>
-     <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
-     <dimen name="floating_toolbar_preferred_width">328dp</dimen>
-     <dimen name="floating_toolbar_minimum_overflow_height">96dp</dimen>
-     <dimen name="floating_toolbar_maximum_overflow_height">192dp</dimen>
-     <dimen name="floating_toolbar_horizontal_margin">16dp</dimen>
-     <dimen name="floating_toolbar_vertical_margin">8dp</dimen>
-     <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
+    <!-- Floating toolbar dimensions -->
+    <dimen name="floating_toolbar_height">48dp</dimen>
+    <dimen name="floating_toolbar_menu_image_button_width">56dp</dimen>
+    <dimen name="floating_toolbar_menu_image_button_vertical_padding">12dp</dimen>
+    <dimen name="floating_toolbar_menu_button_side_padding">16dp</dimen>
+    <dimen name="floating_toolbar_overflow_image_button_width">60dp</dimen>
+    <dimen name="floating_toolbar_overflow_side_padding">18dp</dimen>
+    <dimen name="floating_toolbar_text_size">14sp</dimen>
+    <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
+    <dimen name="floating_toolbar_preferred_width">328dp</dimen>
+    <dimen name="floating_toolbar_minimum_overflow_height">96dp</dimen>
+    <dimen name="floating_toolbar_maximum_overflow_height">192dp</dimen>
+    <dimen name="floating_toolbar_horizontal_margin">16dp</dimen>
+    <dimen name="floating_toolbar_vertical_margin">8dp</dimen>
+    <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
 
-     <dimen name="chooser_grid_padding">0dp</dimen>
+    <dimen name="chooser_grid_padding">0dp</dimen>
+
+    <item type="dimen" format="integer" name="time_picker_column_start_material">0</item>
+    <item type="dimen" format="integer" name="time_picker_column_end_material">1</item>
 </resources>
