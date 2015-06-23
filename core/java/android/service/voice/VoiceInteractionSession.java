@@ -1146,20 +1146,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mContentFrame.requestApplyInsets();
     }
 
-    /** @hide */
-    public void onHandleAssist(Bundle assistBundle) {
-    }
-
     public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
-        if (data != null) {
-            Bundle assistContext = data.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
-            if (assistContext != null) {
-                assistContext.putParcelable(AssistStructure.ASSIST_KEY, structure);
-                assistContext.putParcelable(AssistContent.ASSIST_KEY, content);
-                data.putBundle(Intent.EXTRA_ASSIST_CONTEXT, assistContext);
-            }
-        }
-        onHandleAssist(data);
     }
 
     public void onHandleScreenshot(Bitmap screenshot) {

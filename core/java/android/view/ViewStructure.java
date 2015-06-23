@@ -150,7 +150,7 @@ public abstract class ViewStructure {
      * @param size The size, in pixels, of the text.
      * @param fgColor The foreground color, packed as 0xAARRGGBB.
      * @param bgColor The background color, packed as 0xAARRGGBB.
-     * @param style Style flags, as defined by {@link android.app.AssistStructure.ViewNode}.
+     * @param style Style flags, as defined by {@link android.app.assist.AssistStructure.ViewNode}.
      */
     public abstract void setTextStyle(float size, int fgColor, int bgColor, int style);
 

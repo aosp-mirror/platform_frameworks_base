@@ -4116,79 +4116,6 @@ package android.app {
     field public java.lang.String serviceDetails;
   }
 
-  public deprecated class AssistContent {
-    ctor public AssistContent();
-    method public android.content.ClipData getClipData();
-    method public android.os.Bundle getExtras();
-    method public java.lang.String getStructuredData();
-    method public android.net.Uri getWebUri();
-    method public boolean isAppProvidedIntent();
-    method public void setClipData(android.content.ClipData);
-    method public void setIntent(android.content.Intent);
-    method public void setStructuredData(java.lang.String);
-    method public void setWebUri(android.net.Uri);
-  }
-
-  public deprecated class AssistStructure {
-    ctor public AssistStructure();
-    method public android.content.ComponentName getActivityComponent();
-    method public int getWindowNodeCount();
-  }
-
-  public static class AssistStructure.ViewNode {
-    method public android.app.AssistStructure.ViewNode getChildAt(int);
-    method public int getChildCount();
-    method public java.lang.String getClassName();
-    method public java.lang.CharSequence getContentDescription();
-    method public android.os.Bundle getExtras();
-    method public int getHeight();
-    method public java.lang.String getHint();
-    method public int getId();
-    method public java.lang.String getIdEntry();
-    method public java.lang.String getIdPackage();
-    method public java.lang.String getIdType();
-    method public int getLeft();
-    method public int getScrollX();
-    method public int getScrollY();
-    method public java.lang.CharSequence getText();
-    method public int getTextBackgroundColor();
-    method public int getTextColor();
-    method public int getTextSelectionEnd();
-    method public int getTextSelectionStart();
-    method public float getTextSize();
-    method public int getTextStyle();
-    method public int getTop();
-    method public int getVisibility();
-    method public int getWidth();
-    method public boolean isAccessibilityFocused();
-    method public boolean isActivated();
-    method public boolean isAssistBlocked();
-    method public boolean isCheckable();
-    method public boolean isChecked();
-    method public boolean isClickable();
-    method public boolean isContextClickable();
-    method public boolean isEnabled();
-    method public boolean isFocusable();
-    method public boolean isFocused();
-    method public boolean isLongClickable();
-    method public boolean isSelected();
-    field public static final int TEXT_COLOR_UNDEFINED = 1; // 0x1
-    field public static final int TEXT_STYLE_BOLD = 1; // 0x1
-    field public static final int TEXT_STYLE_ITALIC = 2; // 0x2
-    field public static final int TEXT_STYLE_STRIKE_THRU = 8; // 0x8
-    field public static final int TEXT_STYLE_UNDERLINE = 4; // 0x4
-  }
-
-  public static class AssistStructure.WindowNode {
-    method public int getDisplayId();
-    method public int getHeight();
-    method public int getLeft();
-    method public android.app.AssistStructure.ViewNode getRootViewNode();
-    method public java.lang.CharSequence getTitle();
-    method public int getTop();
-    method public int getWidth();
-  }
-
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method public void setTemporaryAppWhitelistDuration(long);
@@ -6022,20 +5949,85 @@ package android.app.admin {
 
 package android.app.assist {
 
-  public final class AssistContent extends android.app.AssistContent implements android.os.Parcelable {
-    ctor public AssistContent(android.os.Parcel);
+  public deprecated class AssistContent implements android.os.Parcelable {
+    ctor public AssistContent();
     method public int describeContents();
+    method public android.content.ClipData getClipData();
+    method public android.os.Bundle getExtras();
     method public android.content.Intent getIntent();
+    method public java.lang.String getStructuredData();
+    method public android.net.Uri getWebUri();
+    method public boolean isAppProvidedIntent();
+    method public void setClipData(android.content.ClipData);
+    method public void setIntent(android.content.Intent);
+    method public void setStructuredData(java.lang.String);
+    method public void setWebUri(android.net.Uri);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.assist.AssistContent> CREATOR;
   }
 
-  public final class AssistStructure extends android.app.AssistStructure implements android.os.Parcelable {
+  public class AssistStructure implements android.os.Parcelable {
     ctor public AssistStructure();
     method public int describeContents();
-    method public android.app.AssistStructure.WindowNode getWindowNodeAt(int);
+    method public android.content.ComponentName getActivityComponent();
+    method public android.app.assist.AssistStructure.WindowNode getWindowNodeAt(int);
+    method public int getWindowNodeCount();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.assist.AssistStructure> CREATOR;
+  }
+
+  public static class AssistStructure.ViewNode {
+    method public android.app.assist.AssistStructure.ViewNode getChildAt(int);
+    method public int getChildCount();
+    method public java.lang.String getClassName();
+    method public java.lang.CharSequence getContentDescription();
+    method public android.os.Bundle getExtras();
+    method public int getHeight();
+    method public java.lang.String getHint();
+    method public int getId();
+    method public java.lang.String getIdEntry();
+    method public java.lang.String getIdPackage();
+    method public java.lang.String getIdType();
+    method public int getLeft();
+    method public int getScrollX();
+    method public int getScrollY();
+    method public java.lang.CharSequence getText();
+    method public int getTextBackgroundColor();
+    method public int getTextColor();
+    method public int getTextSelectionEnd();
+    method public int getTextSelectionStart();
+    method public float getTextSize();
+    method public int getTextStyle();
+    method public int getTop();
+    method public int getVisibility();
+    method public int getWidth();
+    method public boolean isAccessibilityFocused();
+    method public boolean isActivated();
+    method public boolean isAssistBlocked();
+    method public boolean isCheckable();
+    method public boolean isChecked();
+    method public boolean isClickable();
+    method public boolean isContextClickable();
+    method public boolean isEnabled();
+    method public boolean isFocusable();
+    method public boolean isFocused();
+    method public boolean isLongClickable();
+    method public boolean isSelected();
+    field public static final int TEXT_COLOR_UNDEFINED = 1; // 0x1
+    field public static final int TEXT_STYLE_BOLD = 1; // 0x1
+    field public static final int TEXT_STYLE_ITALIC = 2; // 0x2
+    field public static final int TEXT_STYLE_STRIKE_THRU = 8; // 0x8
+    field public static final int TEXT_STYLE_UNDERLINE = 4; // 0x4
+  }
+
+  public static class AssistStructure.WindowNode {
+    method public int getDisplayId();
+    method public int getHeight();
+    method public int getLeft();
+    method public android.app.assist.AssistStructure.ViewNode getRootViewNode();
+    method public java.lang.CharSequence getTitle();
+    method public int getTop();
+    method public int getWidth();
   }
 
 }
