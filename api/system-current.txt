@@ -19712,7 +19712,6 @@ package android.net {
     method public void onLinkPropertiesChanged(android.net.Network, android.net.LinkProperties);
     method public void onLosing(android.net.Network, int);
     method public void onLost(android.net.Network);
-    method public void onPreCheck(android.net.Network);
   }
 
   public static abstract interface ConnectivityManager.OnNetworkActiveListener {
@@ -19877,6 +19876,7 @@ package android.net {
     field public static final int NET_CAPABILITY_RCS = 8; // 0x8
     field public static final int NET_CAPABILITY_SUPL = 1; // 0x1
     field public static final int NET_CAPABILITY_TRUSTED = 14; // 0xe
+    field public static final int NET_CAPABILITY_VALIDATED = 16; // 0x10
     field public static final int NET_CAPABILITY_WIFI_P2P = 6; // 0x6
     field public static final int NET_CAPABILITY_XCAP = 9; // 0x9
     field public static final int TRANSPORT_BLUETOOTH = 2; // 0x2
