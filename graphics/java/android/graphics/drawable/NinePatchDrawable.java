@@ -374,11 +374,6 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public boolean isDither() {
-        return mPaint == null ? DEFAULT_DITHER : mPaint.isDither();
-    }
-
-    @Override
     public void setAutoMirrored(boolean mirrored) {
         mNinePatchState.mAutoMirrored = mirrored;
     }

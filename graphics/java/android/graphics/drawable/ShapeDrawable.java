@@ -328,11 +328,6 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public boolean isDither() {
-        return mShapeState.mPaint.isDither();
-    }
-
-    @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
         updateShape();
