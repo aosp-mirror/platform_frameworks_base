@@ -398,7 +398,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCode(mSettings, mSurfaceSet, mUserTag);
+        return HashCodeHelpers.hashCodeGeneric(mSettings, mSurfaceSet, mUserTag);
     }
 
     public static final Parcelable.Creator<CaptureRequest> CREATOR =

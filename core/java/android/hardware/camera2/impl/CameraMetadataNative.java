@@ -842,11 +842,19 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
         ReprocessFormatsMap inputOutputFormatsMap = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP);
-
+        int[] capabilities = getBase(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+        boolean listHighResolution = false;
+        for (int capability : capabilities) {
+            if (capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE) {
+                listHighResolution = true;
+                break;
+            }
+        }
         return new StreamConfigurationMap(
                 configurations, minFrameDurations, stallDurations,
                 depthConfigurations, depthMinFrameDurations, depthStallDurations,
-                highSpeedVideoConfigurations, inputOutputFormatsMap);
+                highSpeedVideoConfigurations, inputOutputFormatsMap,
+                listHighResolution);
     }
 
     private <T> Integer getMaxRegions(Key<T> key) {

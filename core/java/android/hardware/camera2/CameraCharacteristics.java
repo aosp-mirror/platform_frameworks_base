@@ -2679,9 +2679,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Camera devices will come in three flavors: LEGACY, LIMITED and FULL.</p>
      * <p>A FULL device will support below capabilities:</p>
      * <ul>
-     * <li>30fps operation at maximum resolution (== sensor resolution) is preferred, more than
-     *   20fps is required, for at least uncompressed YUV
-     *   output. ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains BURST_CAPTURE)</li>
+     * <li>BURST_CAPTURE capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains BURST_CAPTURE)</li>
      * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
      * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
      * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -2689,7 +2687,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>Arbitrary cropping region ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM)</li>
      * <li>At least 3 processed (but not stalling) format output streams
      *   ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
-     * <li>The required stream configuration defined in android.scaler.availableStreamConfigurations</li>
+     * <li>The required stream configurations defined in android.scaler.availableStreamConfigurations</li>
      * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
      * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
      * </ul>
@@ -2709,23 +2707,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
      * <p>Each higher level supports everything the lower level supports
      * in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.</p>
-     * <p>A HIGH_RESOLUTION device is equivalent to a FULL device, except that:</p>
-     * <ul>
-     * <li>At least one output resolution of 8 megapixels or higher in uncompressed YUV is
-     *   supported at <code>&gt;=</code> 20 fps.</li>
-     * <li>Maximum-size (sensor resolution) uncompressed YUV is supported  at <code>&gt;=</code> 10
-     *   fps.</li>
-     * <li>For devices that list the RAW capability and support either RAW10 or RAW12 output,
-     *   maximum-resolution RAW10 or RAW12 capture will operate at least at the rate of
-     *   maximum-resolution YUV capture, and at least one supported output resolution of
-     *   8 megapixels or higher in RAW10 or RAW12 is supported <code>&gt;=</code> 20 fps.</li>
-     * </ul>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}</li>
-     *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION HIGH_RESOLUTION}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -2743,7 +2729,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
-     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION
      */
     @PublicKey
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
