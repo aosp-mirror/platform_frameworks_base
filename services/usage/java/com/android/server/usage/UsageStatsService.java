@@ -119,6 +119,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_CHECK_PAROLE_TIMEOUT = 6;
     static final int MSG_PAROLE_END_TIMEOUT = 7;
     static final int MSG_REPORT_CONTENT_PROVIDER_USAGE = 8;
+    static final int MSG_PAROLE_STATE_CHANGED = 9;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -313,7 +314,7 @@ public class UsageStatsService extends SystemService implements
                     mLastAppIdleParoledTime = checkAndGetTimeLocked();
                     postNextParoleTimeout();
                 }
-                postCheckIdleStates(UserHandle.USER_ALL);
+                postParoleStateChanged();
             }
         }
     }
@@ -336,6 +337,12 @@ public class UsageStatsService extends SystemService implements
         if (DEBUG) Slog.d(TAG, "Posting MSG_PAROLE_END_TIMEOUT");
         mHandler.removeMessages(MSG_PAROLE_END_TIMEOUT);
         mHandler.sendEmptyMessageDelayed(MSG_PAROLE_END_TIMEOUT, mAppIdleParoleDurationMillis);
+    }
+
+    private void postParoleStateChanged() {
+        if (DEBUG) Slog.d(TAG, "Posting MSG_PAROLE_STATE_CHANGED");
+        mHandler.removeMessages(MSG_PAROLE_STATE_CHANGED);
+        mHandler.sendEmptyMessage(MSG_PAROLE_STATE_CHANGED);
     }
 
     void postCheckIdleStates(int userId) {
@@ -756,6 +763,13 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    boolean isAppIdleFilteredOrParoled(String packageName, int userId, long timeNow) {
+        if (mAppIdleParoled) {
+            return false;
+        }
+        return isAppIdleFiltered(packageName, userId, timeNow);
+    }
+
     boolean isAppIdleFiltered(String packageName, int userId, long timeNow) {
         final UserUsageStatsService userService;
         final long screenOnTime;
@@ -781,13 +795,6 @@ public class UsageStatsService extends SystemService implements
         // If not enabled at all, of course nobody is ever idle.
         if (!mAppIdleEnabled) {
             return false;
-        }
-        synchronized (mLock) {
-            // Temporary exemption, probably due to device charging or occasional allowance to
-            // be allowed to sync, etc.
-            if (mAppIdleParoled) {
-                return false;
-            }
         }
         if (packageName.equals("android")) return false;
         try {
@@ -843,6 +850,12 @@ public class UsageStatsService extends SystemService implements
     void informListeners(String packageName, int userId, boolean isIdle) {
         for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
             listener.onAppIdleStateChanged(packageName, userId, isIdle);
+        }
+    }
+
+    void informParoleStateChanged() {
+        for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+            listener.onParoleStateChanged(mAppIdleParoled);
         }
     }
 
@@ -973,6 +986,11 @@ public class UsageStatsService extends SystemService implements
                             (String) args.arg2, // package name
                             (int) args.arg3); // userId
                     args.recycle();
+                    break;
+
+                case MSG_PAROLE_STATE_CHANGED:
+                    if (DEBUG) Slog.d(TAG, "Parole state changed: " + mAppIdleParoled);
+                    informParoleStateChanged();
                     break;
 
                 default:
@@ -1126,7 +1144,7 @@ public class UsageStatsService extends SystemService implements
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                return UsageStatsService.this.isAppIdleFiltered(packageName, userId, -1);
+                return UsageStatsService.this.isAppIdleFilteredOrParoled(packageName, userId, -1);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1251,6 +1269,11 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public boolean isAppIdleParoleOn() {
+            return mAppIdleParoled;
+        }
+
+        @Override
         public void prepareShutdown() {
             // This method *WILL* do IO work, but we must block until it is finished or else
             // we might not shutdown cleanly. This is ok to do with the 'am' lock held, because
@@ -1261,6 +1284,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void addAppIdleStateChangeListener(AppIdleStateChangeListener listener) {
             UsageStatsService.this.addListener(listener);
+            listener.onParoleStateChanged(isAppIdleParoleOn());
         }
 
         @Override

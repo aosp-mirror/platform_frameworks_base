@@ -19,6 +19,7 @@ package com.android.server.content;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -461,7 +462,7 @@ public class SyncManager {
         mSyncAlarmIntent = PendingIntent.getBroadcast(
                 mContext, 0 /* ignored */, new Intent(ACTION_SYNC_ALARM), 0);
 
-        mAppIdleMonitor = new AppIdleMonitor(this, mContext);
+        mAppIdleMonitor = new AppIdleMonitor(this);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
@@ -1271,7 +1272,7 @@ public class SyncManager {
      * @param userId The user for which the package has become active. Can be USER_ALL if
      * the device just plugged in.
      */
-    void onAppNotIdle(String packageName, int userId) {
+    void onAppNotIdle(@Nullable String packageName, int userId) {
         synchronized (mSyncQueue) {
             // For all sync operations in sync queue, if marked as idle, compare with package name
             // and unmark. And clear backoff for the operation.

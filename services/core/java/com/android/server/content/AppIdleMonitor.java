@@ -18,11 +18,6 @@ package com.android.server.content;
 
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.UserHandle;
 
 import com.android.server.LocalServices;
@@ -31,53 +26,32 @@ import com.android.server.LocalServices;
  * Helper to listen for app idle and charging status changes and restart backed off
  * sync operations.
  */
-class AppIdleMonitor implements AppIdleStateChangeListener {
+class AppIdleMonitor extends AppIdleStateChangeListener {
 
     private final SyncManager mSyncManager;
     private final UsageStatsManagerInternal mUsageStats;
-    final BatteryManager mBatteryManager;
-    /** Is the device currently plugged into power. */
-    private boolean mPluggedIn;
+    private boolean mAppIdleParoleOn;
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            onPluggedIn(mBatteryManager.isCharging());
-        }
-    };
-
-    AppIdleMonitor(SyncManager syncManager, Context context) {
+    AppIdleMonitor(SyncManager syncManager) {
         mSyncManager = syncManager;
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+        mAppIdleParoleOn = mUsageStats.isAppIdleParoleOn();
+
         mUsageStats.addAppIdleStateChangeListener(this);
-        mBatteryManager = context.getSystemService(BatteryManager.class);
-        mPluggedIn = isPowered();
-        registerReceivers(context);
     }
 
-    private void registerReceivers(Context context) {
-        // Monitor battery charging state
-        IntentFilter filter = new IntentFilter(BatteryManager.ACTION_CHARGING);
-        filter.addAction(BatteryManager.ACTION_DISCHARGING);
-        context.registerReceiver(mReceiver, filter);
-    }
-
-    private boolean isPowered() {
-        return mBatteryManager.isCharging();
-    }
-
-    void onPluggedIn(boolean pluggedIn) {
-        if (mPluggedIn == pluggedIn) {
+    void setAppIdleParoleOn(boolean appIdleParoleOn) {
+        if (mAppIdleParoleOn == appIdleParoleOn) {
             return;
         }
-        mPluggedIn = pluggedIn;
-        if (mPluggedIn) {
+        mAppIdleParoleOn = appIdleParoleOn;
+        if (mAppIdleParoleOn) {
             mSyncManager.onAppNotIdle(null, UserHandle.USER_ALL);
         }
     }
 
     boolean isAppIdle(String packageName, int userId) {
-        return !mPluggedIn && mUsageStats.isAppIdle(packageName, userId);
+        return !mAppIdleParoleOn && mUsageStats.isAppIdle(packageName, userId);
     }
 
     @Override
@@ -85,5 +59,10 @@ class AppIdleMonitor implements AppIdleStateChangeListener {
         // Don't care if the app is becoming idle
         if (idle) return;
         mSyncManager.onAppNotIdle(packageName, userId);
+    }
+
+    @Override
+    public void onParoleStateChanged(boolean isParoleOn) {
+        setAppIdleParoleOn(isParoleOn);
     }
 }
