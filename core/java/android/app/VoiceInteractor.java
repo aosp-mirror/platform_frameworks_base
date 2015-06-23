@@ -225,6 +225,9 @@ public final class VoiceInteractor {
          * Cancel this active request.
          */
         public void cancel() {
+            if (mRequestInterface == null) {
+                throw new IllegalStateException("Request " + this + " is no longer active");
+            }
             try {
                 mRequestInterface.cancel();
             } catch (RemoteException e) {
