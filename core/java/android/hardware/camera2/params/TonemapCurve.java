@@ -277,7 +277,7 @@ public final class TonemapCurve {
             return mHashCode;
         }
 
-        mHashCode = HashCodeHelpers.hashCode(mRed, mGreen, mBlue);
+        mHashCode = HashCodeHelpers.hashCodeGeneric(mRed, mGreen, mBlue);
         mHashCalculated = true;
 
         return mHashCode;
