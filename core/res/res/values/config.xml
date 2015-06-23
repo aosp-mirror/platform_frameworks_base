@@ -1840,6 +1840,17 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
+    <!-- The list of carrier applications which should be disabled until used.
+         This function suppresses update notifications for these pre-installed apps.
+         In SubscriptionInfoUpdater, the listed applications are disabled until used when all of the
+         following conditions are met.
+         1. Not currently carrier-privileged according to the inserted SIM
+         2. Pre-installed
+         3. In the default state (enabled but not explicitly)
+         And SubscriptionInfoUpdater undoes this and marks the app enabled when a SIM is inserted
+         that marks the app as carrier privileged. -->
+    <string-array name="config_disabledUntilUsedPreinstalledCarrierApps" translatable="false" />
+
     <!-- The list of classes that should be added to the notification ranking pipline.
      See {@link com.android.server.notification.NotificationSignalExtractor} -->
     <string-array name="config_notificationSignalExtractors">
