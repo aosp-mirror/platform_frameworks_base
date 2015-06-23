@@ -1743,9 +1743,6 @@ public final class ContactsContract {
          *
          * @deprecated - Do not use. This will not be supported in the future. In the future,
          * cursors returned from related queries will be empty.
-         *
-         * @hide
-         * @removed
          */
         @Deprecated
         public static final class StreamItems implements StreamItemsColumns {
@@ -2834,9 +2831,6 @@ public final class ContactsContract {
          *
          * @deprecated - Do not use. This will not be supported in the future. In the future,
          * cursors returned from related queries will be empty.
-         *
-         * @hide
-         * @removed
          */
         @Deprecated
         public static final class StreamItems implements BaseColumns, StreamItemsColumns {
@@ -3273,9 +3267,6 @@ public final class ContactsContract {
      *
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
-     *
-     * @hide
-     * @removed
      */
     @Deprecated
     public static final class StreamItems implements BaseColumns, StreamItemsColumns {
@@ -3374,9 +3365,6 @@ public final class ContactsContract {
          *
          * @deprecated - Do not use. This will not be supported in the future. In the future,
          * cursors returned from related queries will be empty.
-         *
-         * @hide
-         * @removed
          */
         @Deprecated
         public static final class StreamItemPhotos
@@ -3427,9 +3415,6 @@ public final class ContactsContract {
      * @see ContactsContract.StreamItems
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
-     *
-     * @hide
-     * @removed
      */
     @Deprecated
     protected interface StreamItemsColumns {
@@ -3820,9 +3805,6 @@ public final class ContactsContract {
      *
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
-     *
-     * @hide
-     * @removed
      */
     @Deprecated
     public static final class StreamItemPhotos implements BaseColumns, StreamItemPhotosColumns {
@@ -3861,9 +3843,6 @@ public final class ContactsContract {
      * @see ContactsContract.StreamItemPhotos
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
-     *
-     * @hide
-     * @removed
      */
     @Deprecated
     protected interface StreamItemPhotosColumns {
