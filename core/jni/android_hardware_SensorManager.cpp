@@ -257,6 +257,8 @@ private:
                     case SENSOR_TYPE_MAGNETIC_FIELD:
                     case SENSOR_TYPE_ACCELEROMETER:
                     case SENSOR_TYPE_GYROSCOPE:
+                    case SENSOR_TYPE_GRAVITY:
+                    case SENSOR_TYPE_LINEAR_ACCELERATION:
                         status = buffer[i].vector.status;
                         break;
                     case SENSOR_TYPE_HEART_RATE:
