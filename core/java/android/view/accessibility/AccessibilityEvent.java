@@ -1115,7 +1115,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mParcelableData = parcel.readParcelable(null);
         parcel.readList(record.mText, null);
         record.mSourceWindowId = parcel.readInt();
-        record.mSourceNodeId = parcel.readLong();
+        record.mSourceNode = parcel.readParcelable(null);
         record.mSealed = (parcel.readInt() == 1);
     }
 
@@ -1167,7 +1167,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeParcelable(record.mParcelableData, flags);
         parcel.writeList(record.mText);
         parcel.writeInt(record.mSourceWindowId);
-        parcel.writeLong(record.mSourceNodeId);
+        // create copy of the node here because the node would be recycled just after it is written
+        // to parcel
+        parcel.writeParcelable(record.mSourceNode != null ?
+                AccessibilityNodeInfo.obtain(record.mSourceNode) : null, flags);
         parcel.writeInt(record.mSealed ? 1 : 0);
     }
 
@@ -1191,7 +1194,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             builder.append("\n");
             builder.append("; ContentChangeTypes: ").append(mContentChangeTypes);
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
-            builder.append("; mSourceNodeId: ").append(mSourceNodeId);
+            if (mSourceNode != null) {
+                builder.append("; mSourceNodeId: ").append(mSourceNode.getSourceNodeId());
+            }
             for (int i = 0; i < getRecordCount(); i++) {
                 final AccessibilityRecord record = getRecord(i);
                 builder.append("  Record ");
