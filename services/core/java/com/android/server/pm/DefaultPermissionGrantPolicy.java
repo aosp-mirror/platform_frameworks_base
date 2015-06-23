@@ -106,7 +106,7 @@ final class DefaultPermissionGrantPolicy {
 
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
-//        STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
