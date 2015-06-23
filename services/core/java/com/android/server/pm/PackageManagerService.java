@@ -9079,6 +9079,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String installerPackageName, int installerUid, UserHandle user) {
         final VerificationParams verifParams = new VerificationParams(null, params.originatingUri,
                 params.referrerUri, installerUid, null);
+        verifParams.setInstallerUid(installerUid);
 
         final OriginInfo origin;
         if (stagedDir != null) {
