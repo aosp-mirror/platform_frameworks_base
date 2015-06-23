@@ -108,9 +108,9 @@ android.provider.ContactsContract.RawContacts} Uri; instead, you must add a prof
 the table at {@link android.provider.ContactsContract.Profile#CONTENT_RAW_CONTACTS_URI}. Raw
 contacts in this table are then aggregated into the single user-visible profile labeled "Me".</p>
 
-<p>Adding a new raw contact for the profile requires the
-android.Manifest.permission#WRITE_PROFILE permission. Likewise, in order to read from the profile
-table, you must request the android.Manifest.permission#READ_PROFILE permission. However,
+<p>Adding a new raw contact for the profile requires the {@link
+android.Manifest.permission#WRITE_PROFILE} permission. Likewise, in order to read from the profile
+table, you must request the {@link android.Manifest.permission#READ_PROFILE} permission. However,
 most apps should not need to read the user profile, even when contributing data to the
 profile. Reading the user profile is a sensitive permission and you should expect users to be
 skeptical of apps that request it.</p>
@@ -1638,9 +1638,9 @@ messages to the device.</li>
 android.service.textservice.SpellCheckerService} must require this permission for itself.</li>
 <li>{@link android.Manifest.permission#BIND_VPN_SERVICE}: A service that implements {@link
 android.net.VpnService} must require this permission for itself.</li>
-<li>android.Manifest.permission#READ_PROFILE: Provides read access to the {@link
+<li>{@link android.Manifest.permission#READ_PROFILE}: Provides read access to the {@link
 android.provider.ContactsContract.Profile} provider.</li>
-<li>android.Manifest.permission#WRITE_PROFILE: Provides write access to the {@link
+<li>{@link android.Manifest.permission#WRITE_PROFILE}: Provides write access to the {@link
 android.provider.ContactsContract.Profile} provider.</li>
 </ul>
 
