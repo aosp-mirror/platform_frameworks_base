@@ -71,6 +71,8 @@ import javax.security.auth.x500.X500Principal;
  * <li>{@link KeyProperties#PURPOSE_SIGN},</li>
  * <li>operation without requiring the user to be authenticated (see
  * {@link Builder#setUserAuthenticationRequired(boolean)}),</li>
+ * <li>signing/origination at this moment in time (see {@link Builder#setKeyValidityStart(Date)}
+ * and {@link Builder#setKeyValidityForOriginationEnd(Date)}),</li>
  * <li>suitable digest or {@link KeyProperties#DIGEST_NONE},</li>
  * <li>(RSA keys only) padding scheme {@link KeyProperties#SIGNATURE_PADDING_RSA_PKCS1} or
  * {@link KeyProperties#ENCRYPTION_PADDING_NONE}.</li>
