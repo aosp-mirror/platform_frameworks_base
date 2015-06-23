@@ -144,6 +144,14 @@ public class ResolverDrawerLayout extends ViewGroup {
         return mCollapseOffset > 0;
     }
 
+    public void setCollapsed(boolean collapsed) {
+        if (!isLaidOut()) {
+            mOpenOnLayout = collapsed;
+        } else {
+            smoothScrollTo(collapsed ? mCollapsibleHeight : 0, 0);
+        }
+    }
+
     private boolean isMoving() {
         return mIsDragging || !mScroller.isFinished();
     }
@@ -575,7 +583,13 @@ public class ResolverDrawerLayout extends ViewGroup {
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         if (!consumed && Math.abs(velocityY) > mMinFlingVelocity) {
-            smoothScrollTo(velocityY > 0 ? 0 : mCollapsibleHeight, velocityY);
+            if (mOnDismissedListener != null
+                    && velocityY < 0 && mCollapseOffset > mCollapsibleHeight) {
+                smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, velocityY);
+                mDismissOnScrollerFinished = true;
+            } else {
+                smoothScrollTo(velocityY > 0 ? 0 : mCollapsibleHeight, velocityY);
+            }
             return true;
         }
         return false;
