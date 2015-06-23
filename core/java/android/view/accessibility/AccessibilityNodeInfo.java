@@ -2867,7 +2867,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param parcel A parcel containing the state of a {@link AccessibilityNodeInfo}.
      */
     private void initFromParcel(Parcel parcel) {
-        mSealed = (parcel.readInt()  == 1);
+        final boolean sealed = (parcel.readInt()  == 1);
         mSourceNodeId = parcel.readLong();
         mWindowId = parcel.readInt();
         mParentNodeId = parcel.readLong();
@@ -2957,6 +2957,8 @@ public class AccessibilityNodeInfo implements Parcelable {
                     parcel.readInt() == 1,
                     parcel.readInt() == 1);
         }
+
+        mSealed = sealed;
     }
 
     /**
