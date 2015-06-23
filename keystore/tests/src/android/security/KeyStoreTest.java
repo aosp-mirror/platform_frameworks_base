@@ -702,14 +702,13 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     private KeyCharacteristics generateRsaKey(String name) throws Exception {
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
-                RSAKeyGenParameterSpec.F4.longValue());
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, RSAKeyGenParameterSpec.F4);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
@@ -726,14 +725,13 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         byte[] entropy = new byte[] {1,2,3,4,5};
         String name = "test";
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
-                RSAKeyGenParameterSpec.F4.longValue());
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, RSAKeyGenParameterSpec.F4);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, entropy, 0, outCharacteristics);
@@ -759,16 +757,15 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         String name = "test";
         byte[] id = new byte[] {0x01, 0x02, 0x03};
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
-        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
-                RSAKeyGenParameterSpec.F4.longValue());
+        args.addBytes(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, RSAKeyGenParameterSpec.F4);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
@@ -795,12 +792,12 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testAesGcmEncryptSuccess() throws Exception {
         String name = "test";
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
@@ -808,10 +805,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
         args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 128);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 128);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, null);
         IBinder token = result.token;
@@ -832,12 +829,12 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     private int importAesKey(String name, byte[] key, int size, int mode) {
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mode);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, size);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, mode);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, size);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         return mKeyStore.importKey(name, args, KeymasterDefs.KM_KEY_FORMAT_RAW, key, 0,
                 new KeyCharacteristics());
@@ -877,9 +874,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
             hexToBytes("b6ed21b99ca6f4f9f153e7b1beafed1d"),
             hexToBytes("23304b7a39f9f3ff067d8d8f9e24ecc7")};
         KeymasterArguments beginArgs = new KeymasterArguments();
-        beginArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        beginArgs.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
-        beginArgs.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        beginArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        beginArgs.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        beginArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         for (int i = 0; i < testVectors.length; i++) {
             byte[] cipherText = doOperation(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, testVectors[i],
                     beginArgs);
@@ -897,12 +894,12 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testOperationPruning() throws Exception {
         String name = "test";
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
         args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
@@ -910,9 +907,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
         args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, null);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
@@ -930,13 +927,13 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testAuthNeeded() throws Exception {
         String name = "test";
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_PKCS7);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
-        args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 1);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_PKCS7);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 1);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);

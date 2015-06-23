@@ -89,11 +89,13 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         if (errorCode != KeyStore.NO_ERROR) {
             throw getKeyStore().getInvalidKeyException(key.getAlias(), errorCode);
         }
-        int keySizeBits = keyCharacteristics.getInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
+        long keySizeBits = keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
         if (keySizeBits == -1) {
             throw new InvalidKeyException("Size of key not known");
+        } else if (keySizeBits > Integer.MAX_VALUE) {
+            throw new InvalidKeyException("Key too large: " + keySizeBits + " bits");
         }
-        mGroupSizeBytes = (keySizeBits + 7) / 8;
+        mGroupSizeBytes = (int) ((keySizeBits + 7) / 8);
 
         super.initKey(key);
     }
@@ -112,8 +114,8 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
     @Override
     protected void addAlgorithmSpecificParametersToBegin(
             @NonNull KeymasterArguments keymasterArgs) {
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_EC);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_EC);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
     }
 
     @Override

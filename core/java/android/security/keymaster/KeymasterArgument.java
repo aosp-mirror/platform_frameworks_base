@@ -32,6 +32,7 @@ abstract class KeymasterArgument implements Parcelable {
 
     public static final Parcelable.Creator<KeymasterArgument> CREATOR = new
             Parcelable.Creator<KeymasterArgument>() {
+                @Override
                 public KeymasterArgument createFromParcel(Parcel in) {
                     final int pos = in.dataPosition();
                     final int tag = in.readInt();
@@ -55,6 +56,8 @@ abstract class KeymasterArgument implements Parcelable {
                             throw new ParcelFormatException("Bad tag: " + tag + " at " + pos);
                     }
                 }
+
+                @Override
                 public KeymasterArgument[] newArray(int size) {
                     return new KeymasterArgument[size];
                 }

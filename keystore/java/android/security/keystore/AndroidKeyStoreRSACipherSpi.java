@@ -374,7 +374,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         protected final void addAlgorithmSpecificParametersToBegin(
                 KeymasterArguments keymasterArgs) {
             super.addAlgorithmSpecificParametersToBegin(keymasterArgs);
-            keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+            keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
         }
 
         @Override
@@ -500,11 +500,13 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         if (errorCode != KeyStore.NO_ERROR) {
             throw getKeyStore().getInvalidKeyException(keystoreKey.getAlias(), errorCode);
         }
-        int keySizeBits = keyCharacteristics.getInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
+        long keySizeBits = keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
         if (keySizeBits == -1) {
             throw new InvalidKeyException("Size of key not known");
+        } else if (keySizeBits > Integer.MAX_VALUE) {
+            throw new InvalidKeyException("Key too large: " + keySizeBits + " bits");
         }
-        mModulusSizeBytes = (keySizeBits + 7) / 8;
+        mModulusSizeBytes = (int) ((keySizeBits + 7) / 8);
 
         setKey(keystoreKey);
     }
@@ -527,14 +529,14 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
     @Override
     protected void addAlgorithmSpecificParametersToBegin(
             @NonNull KeymasterArguments keymasterArgs) {
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
         int purposeOverride = getKeymasterPurposeOverride();
         if ((purposeOverride != -1)
                 && ((purposeOverride == KeymasterDefs.KM_PURPOSE_SIGN)
                 || (purposeOverride == KeymasterDefs.KM_PURPOSE_VERIFY))) {
             // Keymaster sign/verify requires digest to be specified. For raw sign/verify it's NONE.
-            keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
+            keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
         }
     }
 
