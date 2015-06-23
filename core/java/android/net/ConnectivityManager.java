@@ -2110,6 +2110,8 @@ public class ConnectivityManager {
          * can automatically log in to a captive portal without user intervention.
          *
          * @param network The {@link Network} of the network that is being evaluated.
+         *
+         * @hide
          */
         public void onPreCheck(Network network) {}
 
