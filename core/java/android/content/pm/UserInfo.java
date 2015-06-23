@@ -37,8 +37,8 @@ public class UserInfo implements Parcelable {
      */
 
     /**
-     * Primary user. Only one user can have this flag set. Meaning of this
-     * flag TBD.
+     * Primary user. Only one user can have this flag set. It identifies the first human user
+     * on a device.
      */
     public static final int FLAG_PRIMARY = 0x00000001;
 
