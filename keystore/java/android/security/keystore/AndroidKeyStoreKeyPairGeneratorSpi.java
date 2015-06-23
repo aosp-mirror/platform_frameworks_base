@@ -415,15 +415,11 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         KeymasterUtils.addUserAuthArgs(args,
                 mSpec.isUserAuthenticationRequired(),
                 mSpec.getUserAuthenticationValidityDurationSeconds());
-        args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
-                (mSpec.getKeyValidityStart() != null)
-                ? mSpec.getKeyValidityStart() : new Date(0));
-        args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                (mSpec.getKeyValidityForOriginationEnd() != null)
-                ? mSpec.getKeyValidityForOriginationEnd() : new Date(Long.MAX_VALUE));
-        args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                (mSpec.getKeyValidityForConsumptionEnd() != null)
-                ? mSpec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, mSpec.getKeyValidityStart());
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                mSpec.getKeyValidityForOriginationEnd());
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                mSpec.getKeyValidityForConsumptionEnd());
         addAlgorithmSpecificParameters(args);
 
         byte[] additionalEntropy =
