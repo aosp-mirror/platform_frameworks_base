@@ -23,6 +23,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.UserHandle;
@@ -2216,6 +2218,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private OnPreDrawListener mFloatingToolbarPreDrawListener;
         private View mFloatingActionModeOriginatingView;
         private FloatingToolbar mFloatingToolbar;
+        private ObjectAnimator mFadeAnim;
 
         // View added at runtime to draw under the status bar area
         private View mStatusGuard;
@@ -3346,6 +3349,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private ActionMode createStandaloneActionMode(ActionMode.Callback callback) {
+            endOnGoingFadeAnimation();
             cleanupPrimaryActionMode();
             if (mPrimaryActionModeView == null) {
                 if (isFloating()) {
@@ -3385,6 +3389,32 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             mPrimaryActionModePopup.showAtLocation(
                                     mPrimaryActionModeView.getApplicationWindowToken(),
                                     Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
+                            endOnGoingFadeAnimation();
+                            mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA,
+                                    0f, 1f);
+                            mFadeAnim.addListener(new Animator.AnimatorListener() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    mPrimaryActionModeView.setVisibility(VISIBLE);
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    mPrimaryActionModeView.setAlpha(1f);
+                                    mFadeAnim = null;
+                                }
+
+                                @Override
+                                public void onAnimationCancel(Animator animation) {
+
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animator animation) {
+
+                                }
+                            });
+                            mFadeAnim.start();
                         }
                     };
                 } else {
@@ -3405,13 +3435,44 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return null;
         }
 
+        private void endOnGoingFadeAnimation() {
+            if (mFadeAnim != null) {
+                mFadeAnim.end();
+            }
+        }
+
         private void setHandledPrimaryActionMode(ActionMode mode) {
+            endOnGoingFadeAnimation();
             mPrimaryActionMode = mode;
             mPrimaryActionMode.invalidate();
             mPrimaryActionModeView.initForMode(mPrimaryActionMode);
-            mPrimaryActionModeView.setVisibility(View.VISIBLE);
             if (mPrimaryActionModePopup != null) {
                 post(mShowPrimaryActionModePopup);
+            } else {
+                mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA, 0f, 1f);
+                mFadeAnim.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        mPrimaryActionModeView.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mPrimaryActionModeView.setAlpha(1f);
+                        mFadeAnim = null;
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                mFadeAnim.start();
             }
             mPrimaryActionModeView.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
@@ -3475,13 +3536,40 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mode == mPrimaryActionMode) {
                     if (mPrimaryActionModePopup != null) {
                         removeCallbacks(mShowPrimaryActionModePopup);
-                        mPrimaryActionModePopup.dismiss();
-                    } else if (mPrimaryActionModeView != null) {
-                        mPrimaryActionModeView.setVisibility(GONE);
                     }
                     if (mPrimaryActionModeView != null) {
-                        mPrimaryActionModeView.removeAllViews();
+                        endOnGoingFadeAnimation();
+                        mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA,
+                                1f, 0f);
+                        mFadeAnim.addListener(new Animator.AnimatorListener() {
+                                    @Override
+                                    public void onAnimationStart(Animator animation) {
+
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        mPrimaryActionModeView.setVisibility(GONE);
+                                        if (mPrimaryActionModePopup != null) {
+                                            mPrimaryActionModePopup.dismiss();
+                                        }
+                                        mPrimaryActionModeView.removeAllViews();
+                                        mFadeAnim = null;
+                                    }
+
+                                    @Override
+                                    public void onAnimationCancel(Animator animation) {
+
+                                    }
+
+                                    @Override
+                                    public void onAnimationRepeat(Animator animation) {
+
+                                    }
+                                });
+                        mFadeAnim.start();
                     }
+
                     mPrimaryActionMode = null;
                 } else if (mode == mFloatingActionMode) {
                     cleanupFloatingActionModeViews();
