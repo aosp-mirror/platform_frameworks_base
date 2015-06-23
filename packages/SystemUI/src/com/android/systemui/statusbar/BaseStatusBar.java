@@ -1613,17 +1613,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     /**
      * The LEDs are turned off when the notification panel is shown, even just a little bit.
-     * This was added last-minute and is inconsistent with the way the rest of the notifications
-     * are handled, because the notification isn't really cancelled.  The lights are just
-     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
-     * this is what he wants. (see bug 1131461)
      */
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         try {
             if (visibleToUser) {
-                // Only stop blinking, vibrating, ringing when the user went into the shade
-                // manually (SHADE or SHADE_LOCKED).
-                boolean clearNotificationEffects =
+                boolean clearNotificationEffects = mShowLockscreenNotifications ||
                         (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
                 mBarService.onPanelRevealed(clearNotificationEffects);
             } else {
