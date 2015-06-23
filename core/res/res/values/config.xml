@@ -1851,7 +1851,9 @@
          2. Pre-installed
          3. In the default state (enabled but not explicitly)
          And SubscriptionInfoUpdater undoes this and marks the app enabled when a SIM is inserted
-         that marks the app as carrier privileged. -->
+         that marks the app as carrier privileged. It also grants the app default permissions
+         for Phone and Location. As such, apps MUST only ever be added to this list if they
+         obtain user consent to access their location through other means. -->
     <string-array name="config_disabledUntilUsedPreinstalledCarrierApps" translatable="false" />
 
     <!-- The list of classes that should be added to the notification ranking pipline.
