@@ -31,7 +31,6 @@ import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Arrays;
-import java.util.Date;
 
 import javax.crypto.KeyGeneratorSpi;
 import javax.crypto.SecretKey;
@@ -278,15 +277,11 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         KeymasterUtils.addUserAuthArgs(args,
                 spec.isUserAuthenticationRequired(),
                 spec.getUserAuthenticationValidityDurationSeconds());
-        args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
-                (spec.getKeyValidityStart() != null)
-                ? spec.getKeyValidityStart() : new Date(0));
-        args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                (spec.getKeyValidityForOriginationEnd() != null)
-                ? spec.getKeyValidityForOriginationEnd() : new Date(Long.MAX_VALUE));
-        args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                (spec.getKeyValidityForConsumptionEnd() != null)
-                ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, spec.getKeyValidityStart());
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                spec.getKeyValidityForOriginationEnd());
+        args.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                spec.getKeyValidityForConsumptionEnd());
 
         if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!spec.isRandomizedEncryptionRequired())) {
