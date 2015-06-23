@@ -174,6 +174,8 @@ final class Settings {
             "crossProfile-intent-filters";
     public static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
     public static final String TAG_DEFAULT_APPS= "default-apps";
+    public static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
+            "all-intent-filter-verifications";
     public static final String TAG_DEFAULT_BROWSER= "default-browser";
 
     private static final String ATTR_NAME = "name";
@@ -206,9 +208,14 @@ final class Settings {
 
     final ArrayMap<String, PackageSetting> mPackages =
             new ArrayMap<String, PackageSetting>();
+
     // List of replaced system applications
     private final ArrayMap<String, PackageSetting> mDisabledSysPackages =
         new ArrayMap<String, PackageSetting>();
+
+    // Set of restored intent-filter verification states
+    private final ArrayMap<String, IntentFilterVerificationInfo> mRestoredIntentFilterVerifications =
+            new ArrayMap<String, IntentFilterVerificationInfo>();
 
     private static int mFirstAvailableUid = 0;
 
@@ -753,7 +760,8 @@ final class Settings {
     }
 
     // Utility method that adds a PackageSetting to mPackages and
-    // completes updating the shared user attributes
+    // completes updating the shared user attributes and any restored
+    // app link verification state
     private void addPackageSettingLPw(PackageSetting p, String name,
             SharedUserSetting sharedUser) {
         mPackages.put(name, p);
@@ -775,6 +783,14 @@ final class Settings {
             sharedUser.addPackage(p);
             p.sharedUser = sharedUser;
             p.appId = sharedUser.userId;
+        }
+        IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.get(name);
+        if (ivi != null) {
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.i(TAG, "Applying restored IVI for " + name + " : " + ivi.getStatusString());
+            }
+            mRestoredIntentFilterVerifications.remove(name);
+            p.setIntentFilterVerificationInfo(ivi);
         }
     }
 
@@ -1259,13 +1275,13 @@ final class Settings {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
-            String tagName = parser.getName();
+            final String tagName = parser.getName();
             if (tagName.equals(TAG_ITEM)) {
                 CrossProfileIntentFilter cpif = new CrossProfileIntentFilter(parser);
                 editCrossProfileIntentResolverLPw(userId).addFilter(cpif);
             } else {
                 String msg = "Unknown element under " +  TAG_CROSS_PROFILE_INTENT_FILTERS + ": " +
-                        parser.getName();
+                        tagName;
                 PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                 XmlUtils.skipCurrentTag(parser);
             }
@@ -1279,7 +1295,31 @@ final class Settings {
         Log.d(TAG, "Read domain verification for package:" + ivi.getPackageName());
     }
 
-    private void readDefaultAppsLPw(XmlPullParser parser, int userId)
+    private void readRestoredIntentFilterVerifications(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            final String tagName = parser.getName();
+            if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
+                IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
+                if (DEBUG_DOMAIN_VERIFICATION) {
+                    Slog.i(TAG, "Restored IVI for " + ivi.getPackageName()
+                            + " status=" + ivi.getStatusString());
+                }
+                mRestoredIntentFilterVerifications.put(ivi.getPackageName(), ivi);
+            } else {
+                Slog.w(TAG, "Unknown element: " + tagName);
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+    }
+
+    void readDefaultAppsLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1560,6 +1600,62 @@ final class Settings {
                         + verificationInfo.getPackageName());
             }
             serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
+        }
+    }
+
+    // Specifically for backup/restore
+    void writeAllDomainVerificationsLPr(XmlSerializer serializer, int userId)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
+        final int N = mPackages.size();
+        for (int i = 0; i < N; i++) {
+            PackageSetting ps = mPackages.valueAt(i);
+            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+            if (ivi != null) {
+                writeDomainVerificationsLPr(serializer, ivi);
+            }
+        }
+        serializer.endTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
+    }
+
+    // Specifically for backup/restore
+    void readAllDomainVerificationsLPr(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        mRestoredIntentFilterVerifications.clear();
+
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
+                IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
+                final String pkgName = ivi.getPackageName();
+                final PackageSetting ps = mPackages.get(pkgName);
+                if (ps != null) {
+                    // known/existing package; update in place
+                    ps.setIntentFilterVerificationInfo(ivi);
+                    if (DEBUG_DOMAIN_VERIFICATION) {
+                        Slog.d(TAG, "Restored IVI for existing app " + pkgName
+                                + " status=" + ivi.getStatusString());
+                    }
+                } else {
+                    mRestoredIntentFilterVerifications.put(pkgName, ivi);
+                    if (DEBUG_DOMAIN_VERIFICATION) {
+                        Slog.d(TAG, "Restored IVI for pending app " + pkgName
+                                + " status=" + ivi.getStatusString());
+                    }
+                }
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Unknown element under <all-intent-filter-verification>: "
+                        + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
         }
     }
 
@@ -2012,6 +2108,23 @@ final class Settings {
                 }
             }
 
+            final int numIVIs = mRestoredIntentFilterVerifications.size();
+            if (numIVIs > 0) {
+                if (DEBUG_DOMAIN_VERIFICATION) {
+                    Slog.i(TAG, "Writing restored-ivi entries to packages.xml");
+                }
+                serializer.startTag(null, "restored-ivi");
+                for (int i = 0; i < numIVIs; i++) {
+                    IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.valueAt(i);
+                    writeDomainVerificationsLPr(serializer, ivi);
+                }
+                serializer.endTag(null, "restored-ivi");
+            } else {
+                if (DEBUG_DOMAIN_VERIFICATION) {
+                    Slog.i(TAG, "  no restored IVI entries to write");
+                }
+            }
+
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
             serializer.endTag(null, "packages");
@@ -2441,6 +2554,8 @@ final class Settings {
                     if (nname != null && oname != null) {
                         mRenamedPackages.put(nname, oname);
                     }
+                } else if (tagName.equals("restored-ivi")) {
+                    readRestoredIntentFilterVerifications(parser);
                 } else if (tagName.equals("last-platform-version")) {
                     mInternalSdkPlatform = mExternalSdkPlatform = 0;
                     try {
