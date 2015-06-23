@@ -38,6 +38,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -629,7 +630,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         // Collect data now for the past activity.
         synchronized (mStats) {
             if (mStats.isOnBattery()) {
-                mHandler.scheduleWifiSync("wifi-data");
+                final String type = (powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH ||
+                        powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM) ? "active"
+                        : "inactive";
+                mHandler.scheduleWifiSync("wifi-data: " + type);
             }
             mStats.noteWifiRadioPowerState(powerState, tsNanos);
         }
