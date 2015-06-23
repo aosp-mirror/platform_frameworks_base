@@ -20,6 +20,7 @@ import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -484,31 +485,35 @@ public final class StreamConfigurationMap {
 
     /**
      * Get a list of supported high speed video recording sizes.
-     *
-     * <p> When HIGH_SPEED_VIDEO is supported in
-     * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES available scene modes}, this
-     * method will list the supported high speed video size configurations. All the sizes listed
-     * will be a subset of the sizes reported by {@link #getOutputSizes} for processed non-stalling
-     * formats (typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12)</p>
-     *
-     * <p> To enable high speed video recording, application must set
-     * {@link CaptureRequest#CONTROL_SCENE_MODE} to
-     * {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO} in capture
-     * requests and select the video size from this method and
+     * <p>
+     * When {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO} is
+     * supported in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}, this method will
+     * list the supported high speed video size configurations. All the sizes listed will be a
+     * subset of the sizes reported by {@link #getOutputSizes} for processed non-stalling formats
+     * (typically {@link ImageFormat#PRIVATE} {@link ImageFormat#YUV_420_888}, etc.)
+     * </p>
+     * <p>
+     * To enable high speed video recording, application must create a constrained create high speed
+     * capture session via {@link CameraDevice#createConstrainedHighSpeedCaptureSession}, and submit
+     * a CaptureRequest list created by {@link CameraDevice#createConstrainedHighSpeedRequestList}
+     * to this session. The application must select the video size from this method and
      * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE FPS range} from
-     * {@link #getHighSpeedVideoFpsRangesFor} to configure the recording and preview streams and
-     * setup the recording requests. For example, if the application intends to do high speed
-     * recording, it can select the maximum size reported by this method to configure output
-     * streams. Note that for the use case of multiple output streams, application must select one
-     * unique size from this method to use. Otherwise a request error might occur. Once the size is
+     * {@link #getHighSpeedVideoFpsRangesFor} to configure the constrained high speed session and
+     * generate the high speed request list. For example, if the application intends to do high
+     * speed recording, it can select the maximum size reported by this method to create high speed
+     * capture session. Note that for the use case of multiple output streams, application must
+     * select one unique size from this method to use (e.g., preview and recording streams must have
+     * the same size). Otherwise, the high speed session creation will fail. Once the size is
      * selected, application can get the supported FPS ranges by
      * {@link #getHighSpeedVideoFpsRangesFor}, and use these FPS ranges to setup the recording
-     * requests.</p>
+     * request lists via {@link CameraDevice#createConstrainedHighSpeedRequestList}.
+     * </p>
      *
-     * @return
-     *          an array of supported high speed video recording sizes
-     *
+     * @return an array of supported high speed video recording sizes
      * @see #getHighSpeedVideoFpsRangesFor(Size)
+     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
+     * @see CameraDevice#createConstrainedHighSpeedCaptureSession
+     * @see CameraDevice#createConstrainedHighSpeedRequestList
      */
     public Size[] getHighSpeedVideoSizes() {
         Set<Size> keySet = mHighSpeedVideoSizeMap.keySet();
@@ -517,26 +522,25 @@ public final class StreamConfigurationMap {
 
     /**
      * Get the frame per second ranges (fpsMin, fpsMax) for input high speed video size.
-     *
-     * <p> See {@link #getHighSpeedVideoSizes} for how to enable high speed recording.</p>
-     *
-     * <p> For normal video recording use case, where some application will NOT set
-     * {@link CaptureRequest#CONTROL_SCENE_MODE} to
-     * {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO} in capture
-     * requests, the {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE FPS ranges} reported in
-     * this method must not be used to setup capture requests, or it will cause request error.</p>
+     * <p>
+     * See {@link #getHighSpeedVideoFpsRanges} for how to enable high speed recording.
+     * </p>
+     * <p>
+     * The {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE FPS ranges} reported in this method
+     * must not be used to setup capture requests that are submitted to unconstrained capture
+     * sessions, or it will result in {@link IllegalArgumentException IllegalArgumentExceptions}.
+     * </p>
+     * <p>
+     * See {@link #getHighSpeedVideoFpsRanges} for the characteristics of the returned FPS ranges.
+     * </p>
      *
      * @param size one of the sizes returned by {@link #getHighSpeedVideoSizes()}
-     * @return
-     *          An array of FPS range to use with
-     *          {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE TARGET_FPS_RANGE} when using
-     *          {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO} scene
-     *          mode.
-     *          The upper bound of returned ranges is guaranteed to be larger or equal to 60.
-     *
+     * @return an array of supported high speed video recording FPS ranges The upper bound of
+     *         returned ranges is guaranteed to be greater than or equal to 120.
      * @throws IllegalArgumentException if input size does not exist in the return value of
-     *         getHighSpeedVideoSizes
+     *             getHighSpeedVideoSizes
      * @see #getHighSpeedVideoSizes()
+     * @see #getHighSpeedVideoFpsRanges()
      */
     public Range<Integer>[] getHighSpeedVideoFpsRangesFor(Size size) {
         Integer fpsRangeCount = mHighSpeedVideoSizeMap.get(size);
@@ -558,34 +562,46 @@ public final class StreamConfigurationMap {
 
     /**
      * Get a list of supported high speed video recording FPS ranges.
-     *
-     * <p> When HIGH_SPEED_VIDEO is supported in
-     * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES available scene modes}, this
-     * method will list the supported high speed video FPS range configurations. Application can
-     * then use {@link #getHighSpeedVideoSizesFor} to query available sizes for one of returned
-     * FPS range.</p>
-     *
-     * <p> To enable high speed video recording, application must set
-     * {@link CaptureRequest#CONTROL_SCENE_MODE} to
-     * {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO} in capture
-     * requests and select the video size from {@link #getHighSpeedVideoSizesFor} and
+     * <p>
+     * When {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO} is
+     * supported in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}, this method will
+     * list the supported high speed video FPS range configurations. Application can then use
+     * {@link #getHighSpeedVideoSizesFor} to query available sizes for one of returned FPS range.
+     * </p>
+     * <p>
+     * To enable high speed video recording, application must create a constrained create high speed
+     * capture session via {@link CameraDevice#createConstrainedHighSpeedCaptureSession}, and submit
+     * a CaptureRequest list created by {@link CameraDevice#createConstrainedHighSpeedRequestList}
+     * to this session. The application must select the video size from this method and
      * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE FPS range} from
-     * this method to configure the recording and preview streams and setup the recording requests.
-     * For example, if the application intends to do high speed recording, it can select one FPS
-     * range reported by this method, query the video sizes corresponding to this FPS range  by
-     * {@link #getHighSpeedVideoSizesFor} and select one of reported sizes to configure output
-     * streams. Note that for the use case of multiple output streams, application must select one
-     * unique size from {@link #getHighSpeedVideoSizesFor}, and use it for all output streams.
-     * Otherwise a request error might occur when attempting to enable
-     * {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO}.
-     * Once the stream is configured, application can set the FPS range in the recording requests.
+     * {@link #getHighSpeedVideoFpsRangesFor} to configure the constrained high speed session and
+     * generate the high speed request list. For example, if the application intends to do high
+     * speed recording, it can select one FPS range reported by this method, query the video sizes
+     * corresponding to this FPS range by {@link #getHighSpeedVideoSizesFor} and use one of reported
+     * sizes to create a high speed capture session. Note that for the use case of multiple output
+     * streams, application must select one unique size from this method to use (e.g., preview and
+     * recording streams must have the same size). Otherwise, the high speed session creation will
+     * fail. Once the high speed capture session is created, the application can set the FPS range
+     * in the recording request lists via
+     * {@link CameraDevice#createConstrainedHighSpeedRequestList}.
+     * </p>
+     * <p>
+     * The FPS ranges reported by this method will have below characteristics:
+     * <li>The fpsMin and fpsMax will be a multiple 30fps.</li>
+     * <li>The fpsMin will be no less than 30fps, the fpsMax will be no less than 120fps.</li>
+     * <li>At least one range will be a fixed FPS range where fpsMin == fpsMax.</li>
+     * <li>For each fixed FPS range, there will be one corresponding variable FPS range [30,
+     * fps_max]. These kinds of FPS ranges are suitable for preview-only use cases where the
+     * application doesn't want the camera device always produce higher frame rate than the display
+     * refresh rate.</li>
      * </p>
      *
-     * @return
-     *          an array of supported high speed video recording FPS ranges
-     *          The upper bound of returned ranges is guaranteed to be larger or equal to 60.
-     *
+     * @return an array of supported high speed video recording FPS ranges The upper bound of
+     *         returned ranges is guaranteed to be larger or equal to 120.
      * @see #getHighSpeedVideoSizesFor
+     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
+     * @see CameraDevice#createConstrainedHighSpeedCaptureSession
+     * @see CameraDevice#createConstrainedHighSpeedRequestList
      */
     @SuppressWarnings("unchecked")
     public Range<Integer>[] getHighSpeedVideoFpsRanges() {
@@ -594,21 +610,13 @@ public final class StreamConfigurationMap {
     }
 
     /**
-     * Get the supported video sizes for input FPS range.
+     * Get the supported video sizes for an input high speed FPS range.
      *
-     * <p> See {@link #getHighSpeedVideoFpsRanges} for how to enable high speed recording.</p>
-     *
-     * <p> For normal video recording use case, where the application will NOT set
-     * {@link CaptureRequest#CONTROL_SCENE_MODE} to
-     * {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO} in capture
-     * requests, the {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE FPS ranges} reported in
-     * this method must not be used to setup capture requests, or it will cause request error.</p>
+     * <p> See {@link #getHighSpeedVideoSizes} for how to enable high speed recording.</p>
      *
      * @param fpsRange one of the FPS range returned by {@link #getHighSpeedVideoFpsRanges()}
-     * @return
-     *          An array of video sizes to configure output stream when using
-     *          {@link CaptureRequest#CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO} scene
-     *          mode.
+     * @return An array of video sizes to create high speed capture sessions for high speed streaming
+     *         use cases.
      *
      * @throws IllegalArgumentException if input FPS range does not exist in the return value of
      *         getHighSpeedVideoFpsRanges
