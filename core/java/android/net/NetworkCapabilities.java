@@ -176,8 +176,14 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_VALIDATED      = 16;
 
+    /**
+     * Indicates that this network was found to have a captive portal in place last time it was
+     * probed.
+     */
+    public static final int NET_CAPABILITY_CAPTIVE_PORTAL = 17;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_VALIDATED;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_CAPTIVE_PORTAL;
 
     /**
      * Adds the given capability to this {@code NetworkCapability} instance.
