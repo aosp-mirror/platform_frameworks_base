@@ -9443,10 +9443,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
 
-        mTextDir = getTextDirectionHeuristic();
-
-        if (mLayout != null) {
-            checkForRelayout();
+        final TextDirectionHeuristic newTextDir = getTextDirectionHeuristic();
+        if (mTextDir != newTextDir) {
+            mTextDir = newTextDir;
+            if (mLayout != null) {
+                checkForRelayout();
+            }
         }
     }
 
