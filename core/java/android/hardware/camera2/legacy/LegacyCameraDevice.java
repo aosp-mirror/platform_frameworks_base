@@ -605,6 +605,14 @@ public class LegacyCameraDevice implements AutoCloseable {
         return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceType(surface));
     }
 
+    /**
+     * Query the surface for its currently configured dataspace
+     */
+    public static int detectSurfaceDataspace(Surface surface) throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceDataspace(surface));
+    }
+
     static void configureSurface(Surface surface, int width, int height,
                                  int pixelFormat) throws BufferQueueAbandonedException {
         checkNotNull(surface);
@@ -701,6 +709,8 @@ public class LegacyCameraDevice implements AutoCloseable {
 
 
     private static native int nativeDetectSurfaceType(Surface surface);
+
+    private static native int nativeDetectSurfaceDataspace(Surface surface);
 
     private static native int nativeDetectSurfaceDimens(Surface surface,
             /*out*/int[/*2*/] dimens);
