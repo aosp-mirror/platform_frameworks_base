@@ -2671,6 +2671,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             mScreenCaptureDisabled.put(userId, disabled);
+            // Update secure surface for all windows belonging to this user.
+            for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+                WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                    final WindowState win = windows.get(winNdx);
+                    if (win.mHasSurface && userId == UserHandle.getUserId(win.mOwnerUid)) {
+                        win.mWinAnimator.setSecureLocked(disabled);
+                    }
+                }
+            }
         }
     }
 
