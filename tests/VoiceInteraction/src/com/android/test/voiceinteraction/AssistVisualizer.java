@@ -17,7 +17,7 @@
 package com.android.test.voiceinteraction;
 
 import android.annotation.Nullable;
-import android.app.AssistStructure;
+import android.app.assist.AssistStructure;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
