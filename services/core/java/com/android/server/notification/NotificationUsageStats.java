@@ -16,11 +16,13 @@
 
 package com.android.server.notification;
 
+import android.app.Notification;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -57,14 +59,15 @@ public class NotificationUsageStats {
 
     private static final boolean DEBUG = false;
     public static final int TEN_SECONDS = 1000 * 10;
-    public static final int ONE_HOUR = 1000 * 60 * 60;
-    private static final long EMIT_PERIOD = DEBUG ? TEN_SECONDS : ONE_HOUR;
+    public static final int FOUR_HOURS = 1000 * 60 * 60 * 4;
+    private static final long EMIT_PERIOD = DEBUG ? TEN_SECONDS : FOUR_HOURS;
 
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<>();
     private final ArrayDeque<AggregatedStats[]> mStatsArrays = new ArrayDeque<>();
     private final SQLiteLog mSQLiteLog;
     private final Context mContext;
+    private final Handler mHandler;
     private final Handler mHandler;
     private long mLastEmitTime;
 
@@ -98,6 +101,7 @@ public class NotificationUsageStats {
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numPostedByApp++;
+            stats.countApiUse(notification);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
         if (ENABLE_SQLITE_LOG) {
@@ -113,6 +117,7 @@ public class NotificationUsageStats {
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numUpdatedByApp++;
+            stats.countApiUse(notification);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
     }
@@ -246,6 +251,7 @@ public class NotificationUsageStats {
 
         private final Context mContext;
         public final String key;
+        private AggregatedStats mPrevious;
 
         // ---- Updated as the respective events occur.
         public int numPostedByApp;
@@ -256,12 +262,101 @@ public class NotificationUsageStats {
         public int numWithStaredPeople;
         public int numWithValidPeople;
         public int numBlocked;
-
-        private AggregatedStats mPrevious;
+        public int numWithActions;
+        public int numPrivate;
+        public int numSecret;
+        public int numPriorityMax;
+        public int numPriorityHigh;
+        public int numPriorityLow;
+        public int numPriorityMin;
+        public int numWithBigText;
+        public int numWithBigPicture;
+        public int numForegroundService;
+        public int numOngoing;
+        public int numAutoCancel;
+        public int numWithLargeIcon;
+        public int numWithInbox;
+        public int numWithMediaSession;
+        public int numWithTitle;
+        public int numWithText;
+        public int numWithSubText;
+        public int numWithInfoText;
+        public int numInterrupt;
 
         public AggregatedStats(Context context, String key) {
             this.key = key;
             mContext = context;
+        }
+
+        public void countApiUse(NotificationRecord record) {
+            final Notification n = record.getNotification();
+            if (n.actions != null) {
+                numWithActions++;
+            }
+
+            if ((n.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                numForegroundService++;
+            }
+
+            if ((n.flags & Notification.FLAG_ONGOING_EVENT) != 0) {
+                numOngoing++;
+            }
+
+            if ((n.flags & Notification.FLAG_AUTO_CANCEL) != 0) {
+                numAutoCancel++;
+            }
+
+            if ((n.defaults & Notification.DEFAULT_SOUND) != 0 ||
+                    (n.defaults & Notification.DEFAULT_VIBRATE) != 0 ||
+                    n.sound != null || n.vibrate != null) {
+                numInterrupt++;
+            }
+
+            switch (n.visibility) {
+                case Notification.VISIBILITY_PRIVATE:
+                    numPrivate++;
+                    break;
+                case Notification.VISIBILITY_SECRET:
+                    numSecret++;
+                    break;
+            }
+
+            switch (n.priority) {
+                case Notification.PRIORITY_MAX:
+                    numPriorityMax++;
+                    break;
+                case Notification.PRIORITY_HIGH:
+                    numPriorityHigh++;
+                    break;
+                case Notification.PRIORITY_LOW:
+                    numPriorityLow++;
+                    break;
+                case Notification.PRIORITY_MIN:
+                    numPriorityMin++;
+                    break;
+            }
+
+            for (String Key : n.extras.keySet()) {
+                if (Notification.EXTRA_BIG_TEXT.equals(key)) {
+                    numWithBigText++;
+                } else if (Notification.EXTRA_PICTURE.equals(key)) {
+                    numWithBigPicture++;
+                } else if (Notification.EXTRA_LARGE_ICON.equals(key)) {
+                    numWithLargeIcon++;
+                } else if (Notification.EXTRA_TEXT_LINES.equals(key)) {
+                    numWithInbox++;
+                } else if (Notification.EXTRA_MEDIA_SESSION.equals(key)) {
+                    numWithMediaSession++;
+                } else if (Notification.EXTRA_TITLE.equals(key)) {
+                    numWithTitle++;
+                } else if (Notification.EXTRA_TEXT.equals(key)) {
+                    numWithText++;
+                } else if (Notification.EXTRA_SUB_TEXT.equals(key)) {
+                    numWithSubText++;
+                } else if (Notification.EXTRA_INFO_TEXT.equals(key)) {
+                    numWithInfoText++;
+                }
+            }
         }
 
         public void emit() {
@@ -277,6 +372,26 @@ public class NotificationUsageStats {
             maybeCount("people_cache_hit", (numPeopleCacheHit - mPrevious.numPeopleCacheHit));
             maybeCount("people_cache_miss", (numPeopleCacheMiss - mPrevious.numPeopleCacheMiss));
             maybeCount("note_blocked", (numBlocked - mPrevious.numBlocked));
+            maybeCount("note_with_actions", (numWithActions - mPrevious.numWithActions));
+            maybeCount("note_private", (numPrivate - mPrevious.numPrivate));
+            maybeCount("note_secret", (numSecret - mPrevious.numSecret));
+            maybeCount("note_prio_max", (numPriorityMax - mPrevious.numPriorityMax));
+            maybeCount("note_prio_high", (numPriorityHigh - mPrevious.numPriorityHigh));
+            maybeCount("note_prio_low", (numPriorityLow - mPrevious.numPriorityLow));
+            maybeCount("note_prio_min", (numPriorityMin - mPrevious.numPriorityMin));
+            maybeCount("note_interupt", (numInterrupt - mPrevious.numInterrupt));
+            maybeCount("note_big_text", (numWithBigText - mPrevious.numWithBigText));
+            maybeCount("note_big_pic", (numWithBigPicture - mPrevious.numWithBigPicture));
+            maybeCount("note_fg", (numForegroundService - mPrevious.numForegroundService));
+            maybeCount("note_ongoing", (numOngoing - mPrevious.numOngoing));
+            maybeCount("note_auto", (numAutoCancel - mPrevious.numAutoCancel));
+            maybeCount("note_large_icon", (numWithLargeIcon - mPrevious.numWithLargeIcon));
+            maybeCount("note_inbox", (numWithInbox - mPrevious.numWithInbox));
+            maybeCount("note_media", (numWithMediaSession - mPrevious.numWithMediaSession));
+            maybeCount("note_title", (numWithTitle - mPrevious.numWithTitle));
+            maybeCount("note_text", (numWithText - mPrevious.numWithText));
+            maybeCount("note_sub_text", (numWithSubText - mPrevious.numWithSubText));
+            maybeCount("note_info_text", (numWithInfoText - mPrevious.numWithInfoText));
 
             mPrevious.numPostedByApp = numPostedByApp;
             mPrevious.numUpdatedByApp = numUpdatedByApp;
@@ -286,6 +401,26 @@ public class NotificationUsageStats {
             mPrevious.numWithStaredPeople = numWithStaredPeople;
             mPrevious.numWithValidPeople = numWithValidPeople;
             mPrevious.numBlocked = numBlocked;
+            mPrevious.numWithActions = numWithActions;
+            mPrevious.numPrivate = numPrivate;
+            mPrevious.numSecret = numSecret;
+            mPrevious.numPriorityMax = numPriorityMax;
+            mPrevious.numPriorityHigh = numPriorityHigh;
+            mPrevious.numPriorityLow = numPriorityLow;
+            mPrevious.numPriorityMin = numPriorityMin;
+            mPrevious.numInterrupt = numInterrupt;
+            mPrevious.numWithBigText = numWithBigText;
+            mPrevious.numWithBigPicture = numWithBigPicture;
+            mPrevious.numForegroundService = numForegroundService;
+            mPrevious.numOngoing = numOngoing;
+            mPrevious.numAutoCancel = numAutoCancel;
+            mPrevious.numWithLargeIcon = numWithLargeIcon;
+            mPrevious.numWithInbox = numWithInbox;
+            mPrevious.numWithMediaSession = numWithMediaSession;
+            mPrevious.numWithTitle = numWithTitle;
+            mPrevious.numWithText = numWithText;
+            mPrevious.numWithSubText = numWithSubText;
+            mPrevious.numWithInfoText = numWithInfoText;
         }
 
         void maybeCount(String name, int value) {
