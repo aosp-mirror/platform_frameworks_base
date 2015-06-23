@@ -16,6 +16,7 @@
 
 package android.text.format;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.NetworkUtils;
@@ -52,7 +53,10 @@ public final class Formatter {
      * @param sizeBytes size value to be formatted, in bytes
      * @return formatted string with the number
      */
-    public static String formatFileSize(Context context, long sizeBytes) {
+    public static String formatFileSize(@Nullable Context context, long sizeBytes) {
+        if (context == null) {
+            return "";
+        }
         final BytesResult res = formatBytes(context.getResources(), sizeBytes, 0);
         return context.getString(com.android.internal.R.string.fileSizeSuffix,
                 res.value, res.units);
@@ -62,7 +66,10 @@ public final class Formatter {
      * Like {@link #formatFileSize}, but trying to generate shorter numbers
      * (showing fewer digits of precision).
      */
-    public static String formatShortFileSize(Context context, long sizeBytes) {
+    public static String formatShortFileSize(@Nullable Context context, long sizeBytes) {
+        if (context == null) {
+            return "";
+        }
         final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SHORTER);
         return context.getString(com.android.internal.R.string.fileSizeSuffix,
                 res.value, res.units);
