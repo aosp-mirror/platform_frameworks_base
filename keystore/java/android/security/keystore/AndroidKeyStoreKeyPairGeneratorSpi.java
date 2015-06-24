@@ -160,7 +160,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private int[] mKeymasterSignaturePaddings;
     private int[] mKeymasterDigests;
 
-    private long mRSAPublicExponent;
+    private BigInteger mRSAPublicExponent;
 
     protected AndroidKeyStoreKeyPairGeneratorSpi(int keymasterAlgorithm) {
         mOriginalKeymasterAlgorithm = keymasterAlgorithm;
@@ -320,7 +320,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         mKeymasterDigests = null;
         mKeySizeBits = 0;
         mSpec = null;
-        mRSAPublicExponent = -1;
+        mRSAPublicExponent = null;
         mEncryptionAtRestRequired = false;
         mRng = null;
         mKeyStore = null;
@@ -353,12 +353,12 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     throw new InvalidAlgorithmParameterException(
                             "RSA public exponent must be positive: " + publicExponent);
                 }
-                if (publicExponent.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0) {
+                if (publicExponent.compareTo(KeymasterArguments.UINT64_MAX_VALUE) > 0) {
                     throw new InvalidAlgorithmParameterException(
                             "Unsupported RSA public exponent: " + publicExponent
-                            + ". Only exponents <= " + Long.MAX_VALUE + " supported");
+                            + ". Maximum supported value: " + KeymasterArguments.UINT64_MAX_VALUE);
                 }
-                mRSAPublicExponent = publicExponent.longValue();
+                mRSAPublicExponent = publicExponent;
                 break;
             }
             case KeymasterDefs.KM_ALGORITHM_EC:
@@ -404,13 +404,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
 
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
-        args.addInts(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
-        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
-        args.addInts(KeymasterDefs.KM_TAG_PADDING, mKeymasterEncryptionPaddings);
-        args.addInts(KeymasterDefs.KM_TAG_PADDING, mKeymasterSignaturePaddings);
-        args.addInts(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
+        args.addEnums(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
+        args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
+        args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterEncryptionPaddings);
+        args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterSignaturePaddings);
+        args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
 
         KeymasterUtils.addUserAuthArgs(args,
                 mSpec.isUserAuthenticationRequired(),
@@ -493,7 +493,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private void addAlgorithmSpecificParameters(KeymasterArguments keymasterArgs) {
         switch (mKeymasterAlgorithm) {
             case KeymasterDefs.KM_ALGORITHM_RSA:
-                keymasterArgs.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, mRSAPublicExponent);
+                keymasterArgs.addUnsignedLong(
+                        KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, mRSAPublicExponent);
                 break;
             case KeymasterDefs.KM_ALGORITHM_EC:
                 break;

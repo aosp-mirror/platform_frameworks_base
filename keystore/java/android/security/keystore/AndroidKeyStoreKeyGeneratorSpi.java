@@ -268,12 +268,12 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
 
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
-        args.addInts(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
-        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
-        args.addInts(KeymasterDefs.KM_TAG_PADDING, mKeymasterPaddings);
-        args.addInts(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
+        args.addEnums(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
+        args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
+        args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterPaddings);
+        args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
         KeymasterUtils.addUserAuthArgs(args,
                 spec.isUserAuthenticationRequired(),
                 spec.getUserAuthenticationValidityDurationSeconds());

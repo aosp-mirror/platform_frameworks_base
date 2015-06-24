@@ -226,8 +226,8 @@ public class AndroidKeyStoreProvider extends Provider {
         }
         final byte[] x509EncodedPublicKey = exportResult.exportData;
 
-        int keymasterAlgorithm = keyCharacteristics.getInt(KeymasterDefs.KM_TAG_ALGORITHM, -1);
-        if (keymasterAlgorithm == -1) {
+        Integer keymasterAlgorithm = keyCharacteristics.getEnum(KeymasterDefs.KM_TAG_ALGORITHM);
+        if (keymasterAlgorithm == null) {
             throw new UnrecoverableKeyException("Key algorithm unknown");
         }
 
@@ -277,13 +277,12 @@ public class AndroidKeyStoreProvider extends Provider {
                             .initCause(KeyStore.getKeyStoreException(errorCode));
         }
 
-        int keymasterAlgorithm = keyCharacteristics.getInt(KeymasterDefs.KM_TAG_ALGORITHM, -1);
-        if (keymasterAlgorithm == -1) {
+        Integer keymasterAlgorithm = keyCharacteristics.getEnum(KeymasterDefs.KM_TAG_ALGORITHM);
+        if (keymasterAlgorithm == null) {
             throw new UnrecoverableKeyException("Key algorithm unknown");
         }
 
-        List<Integer> keymasterDigests =
-                keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST);
+        List<Integer> keymasterDigests = keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_DIGEST);
         int keymasterDigest;
         if (keymasterDigests.isEmpty()) {
             keymasterDigest = -1;

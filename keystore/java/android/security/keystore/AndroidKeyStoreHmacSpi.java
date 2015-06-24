@@ -159,9 +159,9 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
         }
 
         KeymasterArguments keymasterArgs = new KeymasterArguments();
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_HMAC);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mMacSizeBits);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_HMAC);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+        keymasterArgs.addUnsignedInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mMacSizeBits);
 
         OperationResult opResult = mKeyStore.begin(
                 mKey.getAlias(),
