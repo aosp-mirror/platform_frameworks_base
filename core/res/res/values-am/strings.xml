@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"የእርስዎ እውቂያዎች ላይ ይድረሱባቸው"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"መገኛ አካባቢ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"የዚህን መሣሪያ አካባቢ ይድረሱበት"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ማህበራዊ መረጃዎ"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ወደ የእውቂያዎችህና የማህበራዊ ግንኙነቶችህ መረጃ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ቀን መቁጠሪያ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ማከማቻ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"በመሳሪያዎ ላይ ያሉ ፎቶዎችን፣ ማህደረመረጃን እና ፋይሎችን ይድረሱ"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"የተጠቃሚ መዝገበ ቃላት"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"በተጠቃሚ መዝገበቃላት ላይ ቃሎችን አንብብ ወይም ጻፍ።"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ዕልባቶች እና ታሪክ"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ወደ ዕልባቶችና የአሳሽ ታሪክ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ኦዲዮ ይቅዱ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ካሜራ"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያለ ውሂብም ጨምሮ የቴሌቪዥንዎ ምዝግብ ማስታወሻ እንዲይቀርይ ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ይህን ተጠቅመው የስልክዎን ምዝግብ ማስታወሻ ሊደመስሱ ወይም ሊቀይሩ ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"የራስዎን የዕውቂያ ካርድ ያንብቡ"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"መተግበሪያው ልክ እንደ ስምዎ እና የእውቂያ መረጃዎ ያሉ በመሳሪያዎ ላይ የተከማቹ የግል መገለጫ መረጃዎችን እንዲያነብ ይፈቅድለታል። ይህም ማለት መተግበሪያው ለይቶ ሊያውቁዎ እና የመገለጫ መረጃዎን ለሌሎች ሊልክ ይችላል።"</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"የራስዎን የዕውቂያ ካርድ ያስተካክሉ"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"መተግበሪያው ልክ እንደ ስምዎ እና የእውቂያ መረጃዎ ያሉ በመሳሪያዎ ላይ የተከማቹ የግል መገለጫ መረጃዎችን እንዲቀይር ወይም እንዲያክልባቸው ይፈቅድለታል። ይህም ማለት መተግበሪያው ለይቶ ሊያውቅዎ እና የመገለጫ መረጃዎን ለሌሎች ሊልክ ይችላል።"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"የሰውነት መመርመሪያዎች (እንደ የልብ ምት መቆጣጠሪያዎች)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"እንደ የእርስዎ የልብ ምት የመሳሰሉ ያሉበትን አካላዊ ሁኔታ ከሚቆጣጠሩ ሰውነት ዳሳሾች ውሂብ ላይ እንዲደርስ ለመተግበሪያው ይፈቅደለታል።"</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"የእርስዎን ማህበራዊ የውይይት ክፍሎች ያንብቡ"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"መተግበሪያው የአንተንና የጓኞችህን ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስላቸው ይፈቅድለታል። መረጃ ስታጋራ ተጠንቀቅ -- ይህ መተግበሪያው ሚስጥራዊነትን ከግምት ሳያስገባ በማህበራዊ አውታረ መረቦች በአንተ እና በጓደኞችህ መካከል የሚደረጉ ግንኙነቶችን እንዲያነብ ይፈቅድለታል። ማስታወሻ፦ ይህ ፈቃድ ለሁሉም ማህበራዊ አውታር መረቦች ላይ ላይፈጸም ይችላል።"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ የእርስዎ ማህበራዊ የውይይት ክፍሎች ይጻፉ"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"መተግበሪያው ከጓኞችህን ማህበራዊ ዝማኔዎችን እንዲያሳይ ይፈቅድለታል። መረጃ ስታጋራ ተጠንቀቅ -- ይህ መተግበሪያው ከጓደኛ የመጡ የሚመስሉ መልዕክቶችን እንዲያዘጋጅ ይፈቅድለታል። ማስታወሻ፦ ይህ ፈቃድ በሁሉም ማህበራዊ አውታረ መረቦች ላይ ላይፈጸም ይችላል።"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"መተግበሪያው የጓደኞችን ወይም የስራ ባልደረቦችን ጨምሮ ሁሉንም በጡባዊ ቱኮህ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶች እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው የቀን መቁጠሪያ ውሂብህን ሚስጥራዊቱን ከግምት ሳያስገባ እንዲያጋራ ወይም እንዲያስቀምጥ ሊፈቅድለት ይችላል።"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"መተግበሪያው የጓደኛዎች ወይም የስራ ባልደረባዎችም ጨምሮ በእርስዎ ቴሌቪዥን ላይ የተከማቹ ሁሉንም የቀን መቁጠሪያ ክስተቶች እንዲያነብ ያስችለዋል። ይሄ ሚስጥራዊነት ወይም ጥንቃቄ ፈላጊነት ከግምት ውስጥ ሳይገባ መተግበሪያው የቀን መቁጠሪያዎ ውሂብ እንዲያጋራ ወይም እንዲያስቀምጥ ሊፈቅድለት ይችላል።"</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"መተግበሪያው የመለያ ማመሳሰል ቅንብሮችን እንዲያስተካክል ይፈቅድለታል። ለምሳሌ ይህ የሰዎች መተግበሪያን ከመለያ መመሳሰልን ለማንቃት ጥቅም ላይ ሊውል ይችላል።"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"የሥምሪያ ስታስቲክስ አንብብ"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"መተግበሪያው የማመሳሰል ክስተቶችን ታሪክ እና የተመሳሰለውን የውሂብ መጠን ጨምሮ የመለያን የማመሳሰል ስታትስቲክስ እንዲያነብ ይፈቅድለታል።"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"መዝገበ ቃላቱ ላይ ያከልካቸውን ቃላት አንብብ"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"መተግበሪያው ተጠቃሚው በተጠቃሚው መዝገበ-ቃላት አከማችቷቸው ሊሆኑ የሚችሉ ሁሉንም ቃላት፣ ስሞችና ሐረጋት እንዲያነባቸው ይፈቅድለታል።"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"በተጠቃሚ በተገለጸ መዝገበ ቃላት ላይ ቃላትን ያክላል"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"በተጠቃሚ መዝገበ ቃላት ውስጥ አዲስ ቃል እንዲጽፍ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"የUSB ማከማቻዎን ይዘቶች ያንብቡ"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"የSD ካርድህን ይዘቶች አንብብ"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"መተግበሪያው የእርስዎ USB ማከማቻ ይዘቶችን እንዲያነብ ያስችለዋል።"</string>

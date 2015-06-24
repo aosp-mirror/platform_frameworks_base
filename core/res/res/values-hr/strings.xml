@@ -231,18 +231,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pristupati vašim kontaktima"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupiti lokaciji ovog uređaja"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informacije o vašoj društvenoj aktivnosti"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Izravan pristup informacijama o kontaktima i društvenim vezama."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupati kalendaru"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"slati i pregledavati SMS poruke"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za pohranu"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupiti fotografijama, medijima i datotekama na vašem uređaju"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Korisnički rječnik"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Čitanje ili pisanje riječi u korisničkom rječniku."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Oznake i povijest"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Izravan pristup oznakama i povijest preglednika."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snimati zvuk"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparat"</string>
@@ -333,16 +327,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Aplikaciji omogućuje izmjenu zapisnika poziva vašeg televizora zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"čitanje vaše kontaktne kartice"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Aplikaciji omogućuje čitanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime ili kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"izmjena vaše kontaktne kartice"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Aplikaciji omogućuje promjenu ili dodavanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime i kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"senzori tjelesnih funkcija (npr. monitori otkucaja srca)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Omogućuje aplikaciji pristup podacima sa senzora koji nadziru vaše fizičko stanje, na primjer, broj otkucaja srca."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čitanje društvenog streama"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogućuje pristup vašim ažuriranjima na društvenim mrežama i ažuriranjima vaših prijatelja, kao i sinkronizaciju tih ažuriranja. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje čitanje poruka između vas i vaših prijatelja na društvenim mrežama, neovisno o povjerljivosti. Napomena: ta se dozvola možda ne primjenjuje na svim društvenim mrežama."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje društvenog streama"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Aplikaciji omogućuje prikazivanje ažuriranja vaših prijatelja na društvenim mrežama. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje stvaranje poruka koje mogu izgledati kao da dolaze od prijatelja. Napomena: ta se dozvola možda ne primjenjuje na svim društvenim mrežama."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čitajte kalendarske događaje i povjerljive informacije"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Aplikaciji omogućuje čitanje svih događaja u kalendaru pohranjenih na vašem tabletnom računalu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti dijeljenje ili spremanje vaših podataka kalendara, neovisno o povjerljivosti ili osjetljivosti."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Aplikaciji omogućuje čitanje svih kalendarskih događaja pohranjenih na televizoru, uključujući događaje koji pripadaju vašim prijateljima i suradnicima. Aplikacija tako može dijeliti ili spremati vaše kalendarske podatke, bez obzira na povjerljivost i osjetljivost."</string>
@@ -455,10 +441,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Aplikaciji omogućuje izmjenu postavki sinkronizacije za račun. Na primjer, to se može upotrijebiti za omogućavanje sinkronizacije aplikacije Osobe s računom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čitanje statistike o sinkronizaciji"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Aplikaciji omogućuje čitanje statistika sinkronizacije za račun, uključujući povijest sinkronizacije te količinu sinkroniziranih podataka."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"čitanje pojmova koje ste dodali u rječnik"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Aplikaciji omogućuje čitanje svih riječi, imena i fraza koje je korisnik pohranio u korisničkom rječniku."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"dodavanje riječi u rječnik koji je izradio korisnik"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Aplikaciji omogućuje pisanje novih riječi u korisnički rječnik."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čitanje sadržaja USB pohrane"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čitanje sadržaja SD kartice"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Aplikaciji omogućuje čitanje sadržaja vaše USB pohrane."</string>

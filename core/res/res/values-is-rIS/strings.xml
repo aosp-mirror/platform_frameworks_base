@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"fá aðgang að tengiliðunum þínum"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Staðsetning"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"fá aðgang að staðsetningu þessa tækis"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Samfélagsupplýsingarnar þínar"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Beinn aðgangur að upplýsingum um tengiliði og samfélagstengingar."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Dagatal"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"fá aðgang að dagatalinu þínu"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"senda og skoða SMS-skilaboð"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Geymslurými"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"fá aðgang að myndum, efni og skrám í tækinu"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Orðabók notanda"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lesa eða skrifa orð í orðabók notanda."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bókamerki og ferill"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Beinn aðgangur að bókamerkjum og vafraferli."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Hljóðnemi"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"taka upp hljóð"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Myndavél"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Leyfir forriti að breyta símtalaskrá spjaldtölvunnar, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Leyfir forriti að breyta símtalaskrá sjónvarpsins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Leyfir forriti að breyta símtalaskrá símans, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"lesa tengiliðaspjaldið þitt"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Leyfir forriti að lesa persónulegar prófílupplýsingar sem vistaðar eru í tækinu, t.d. nafn og samskiptaupplýsingar. Þetta þýðir að forritið veit hver þú ert og getur sent prófílupplýsingarnar þínar til annarra."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"breyta tengiliðaspjaldinu þínu"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Leyfir forriti að breyta eða bæta við persónulegum prófílupplýsingum sem vistaðar eru í tækinu, t.d. nafni og samskiptaupplýsingum. Þetta þýðir að forritið veit hver þú ert og getur sent prófílupplýsingarnar þínar til annarra."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"líkamsskynjarar (s.s. hjartsláttarmælar)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Veitir forritinu aðgang að gögnum frá skynjurum sem fylgjast með líkamsstarfsemi þinni, svo sem hjartslætti."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lesa samfélagsstrauminn þinn"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Leyfir forriti að fá aðgang að og samstilla samfélagsuppfærslur þínar og vina þinna. Sýndu aðgát þegar þú deilir upplýsingum; þetta gerir forritinu kleift að lesa samskipti þín og vina þinna í netsamfélögum. Athugaðu: Ekki er víst að þessi heimild sé virt í öllum netsamfélögum."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrifa í samfélagsstrauminn þinn"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Leyfir forriti að birta samfélagsuppfærslur frá vinum þínum. Sýndu aðgát þegar þú deilir upplýsingum; þetta gerir forritinu kleift að útbúa skilaboð sem geta virst koma frá vini. Athugaðu: Ekki er víst að þessi heimild sé virt í öllum netsamfélögum."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lesa dagatalsviðburði og trúnaðarupplýsingar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Leyfir forriti að lesa alla dagatalsviðburði sem vistaðir eru í spjaldtölvunni, þ. á m. þá sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að deila dagatalsgögnunum þínum burtséð frá því hvort þau innihalda trúnaðargögn eða viðkvæmar upplýsingar."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Leyfir forriti að lesa alla dagatalsviðburði sem vistaðir eru í sjónvarpinu, þ. á m. þá sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að deila dagatalsgögnunum þínum burtséð frá því hvort þau innihalda trúnaðargögn eða viðkvæmar upplýsingar."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Leyfir forriti að breyta kostum samstillingar fyrir reikning. Þetta er til dæmis hægt að nota til að kveikja á samstillingu forritsins Fólk við reikning."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lesa talnagögn um samstillingu"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Leyfir forriti að lesa talnagögn samstillingar fyrir reikning, þ. á m. feril samstillingaratvika og samstillt gagnamagn."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"lesa hugtök sem þú hefur bætt við orðabókina"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Leyfir forriti að lesa öll orð, nöfn og setningar sem notandinn kann að hafa vistað í orðabók notanda."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"bæta orðum við orðabók notanda"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Leyfir forriti að skrifa ný orð inn í orðabók notanda."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lesa innihald USB-geymslunnar"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lesa innihald SD-kortsins"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Leyfir forriti að lesa innihald USB-geymslunnar."</string>

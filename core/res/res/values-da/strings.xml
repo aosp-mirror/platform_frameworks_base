@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"have adgang til dine kontaktpersoner"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"adgang til enhedens placering"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Dine sociale oplysninger"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte adgang til oplysninger om dine kontaktpersoner og sociale forbindelser."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"have adgang til din kalender"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"Send og se sms-beskeder"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"Få adgang til billeder, medier og filer på din enhed"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Brugerordbog"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Læse eller skrive ord i brugerordbogen."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bogmærker og historik"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte adgang til bogmærker og browserhistorik."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"optage lyd"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tillader, at appen ændrer din tablets opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Giver appen lov til at ændre opkaldslisten på dit tv, herunder data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tillader, at appen ændrer telefonens opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"læse dit eget kontaktkort"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Tillader, at appen kan læse de personlige profiloplysninger, der er gemt på din enhed, f.eks. dit navn og dine kontaktoplysninger. Det betyder, at appen kan identificere dig og sende dine profiloplysninger til andre."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"ændre dit eget kontaktkort"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Tillader, at appen kan ændre eller tilføje oplysninger i din personlige profil, der er gemt på din enhed, f.eks. dit navn eller dine kontaktoplysninger. Dette betyder, at andre apps kan identificere dig og sende profiloplysninger til andre."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kropssensorer (f.eks. pulsmålere)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Giver appen adgang til data fra sensorer, der overvåger din fysiske tilstand, f.eks. din puls."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"læse din sociale strøm"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tillader, at appen kan få adgang til og synkronisere sociale opdateringer fra dig og dine venner. Vær forsigtig, når du deler oplysninger – med denne tilladelse kan appen læse kommunikation mellem dig og dine venner på sociale netværk, uanset fortrolighed. Bemærk! Denne tilladelse håndhæves muligvis ikke på alle sociale netværk."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrive i din sociale strøm"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Tillader, at appen kan vise sociale opdateringer fra dine venner. Vær forsigtig, når du deler oplysninger – med denne tilladelse kan appen producere meddelelser, der kan synes at komme fra en ven. Bemærk! Denne tilladelse håndhæves muligvis ikke på alle sociale netværk."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"læse kalenderbegivenheder og fortrolige oplysninger"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din tablet, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Giver appen lov til at læse alle kalenderbegivenheder, der er gemt på dit tv, herunder begivenheder tilhørende venner og kolleger. Dette kan give appen lov til at dele eller gemme dine kalenderdata, uanset om de er fortrolige eller følsomme."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Tillader, at en app kan ændre synkroniseringsindstillingerne for en konto. Denne tilladelse kan f.eks. anvendes til at aktivere synkronisering af appen Personer med en konto."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"læse synkroniseringsstatistikker"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Tillader, at en app kan læse synkroniseringsstatistikkerne for en konto, f.eks. historikken for synkroniserede begivenheder og hvor meget data der synkroniseres."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"læse termer, som du har føjet til ordbogen"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Tillader, at appen kan læse alle ord, navne og sætninger, som brugeren har gemt i brugerordbogen."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"føj ord til den brugerdefinerede ordbog"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillader, at appen kan skrive nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"læse USB-lagerets indhold"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"læse indholdet af dit SD-kort"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Tillader, at appen læser indholdet på dit USB-lager."</string>

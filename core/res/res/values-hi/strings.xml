@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"अपने संपर्कों को ऐक्सेस करें"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"इस डिवाइस के स्थान को ऐक्सेस करें"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"आपकी सामाजिक जानकारी"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"अपने संपर्कों और सामाजिक कनेक्‍शन के बारे में जानकारी पर सीधी पहुंच."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कैलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"अपने कैलेंडर को ऐक्सेस करें"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS संदेश भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"मेमोरी"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया और फ़ाइलें ऐक्सेस करें"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"उपयोगकर्ता शब्दकोश"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"उपयोगकर्ता डिक्‍शनरी में शब्‍द पढ़ें या लिखें."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"बुकमार्क और इतिहास"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"बुकमार्क और ब्राउज़र इतिहास पर सीधी पहुंच."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफ़ोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडियो रिकॉर्ड करें"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कैमरा"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ऐप्स को इनकमिंग और आउटगोइंग कॉल के डेटा सहित, आपके टेबलेट का कॉल लॉग संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स आपके कॉल लॉग को मिटाने या संशोधित करने के लिए इसका उपयोग कर सकते हैं."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ऐप को इनकमिंग और आउटगोइंग कॉल के डेटा सहित, आपके टैबलेट के कॉल लॉग में बदलाव करने देती है. दुर्भावनापूर्ण ऐप्‍स आपके कॉल लॉग को मिटाने या संशोधित करने के लिए उसका उपयोग कर सकते हैं."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ऐप्स को इनकमिंग और आउटगोइंग कॉल के डेटा सहित, आपके फ़ोन का कॉल लॉग संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स आपके कॉल लॉग को मिटाने या संशोधित करने के लिए इसका उपयोग कर सकते हैं."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"स्‍वयं का संपर्क कार्ड पढ़ें"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"ऐप्स  को आपके डिवाइस में संग्रहीत व्यक्तिगत प्रोफ़ाइल जानकारी, जैसे आपका नाम और संपर्क जानकारी, पढ़ने देता है. इसका अर्थ है कि ऐप्स  आपको पहचान सकता है और आपकी प्रोफ़ाइल जानकारी अन्य लोगों को भेज सकता है."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"स्‍वयं का संपर्क कार्ड बदलें"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ऐप्स  को आपके डिवाइस में संग्रहीत निजी प्रोफ़ाइल जानकारी, जैसे आपका नाम और संपर्क जानकारी को बदलने या उसमें कुछ जोड़ने देता है. इसका अर्थ है कि ऐप्स  आपको पहचान सकता है और आपकी प्रोफ़ाइल जानकारी अन्य लोगों को भेज सकता है."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"बॉडी सेंसर (जैसे हृदय गति मॉनीटर)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ऐप को आपकी शारीरिक स्‍थिति, जैसे आपकी हृदय गति पर नज़र रखने वाले संवेदकों का डेटा एक्‍सेस करने देती है."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"अपनी सामाजिक स्‍ट्रीम पढ़ें"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"एप को आपके और आपके मित्रों की नई सामाजिक जानकारी तक पहुंचने और उन्हें समन्‍वयित करने देता है. जानकारी साझा करते समय सावधान रहें - इससे गोपनीयता पर ध्यान दिए बिना, एप सामाजिक नेटवर्क पर आपके और आपके मित्रों के बीच संचारों को पढ़ सकता है. ध्‍यान दें: यह अनुमति सभी सामाजिक नेटवर्क पर लागू नहीं की जा सकती."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"सामाजिक स्‍ट्रीम में लिखें"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"एप को आपके मित्रों की नई सामाजिक जानकारी प्रदर्शित करने देता है. जानकारी साझा करते समय सावधान रहें - इससे ऐप्स  ऐसे संदेश बना सकता है जो किसी मित्र की ओर से आते दिखाई देते हैं. ध्‍यान दें: यह अनुमति सभी सामाजिक नेटवर्क पर लागू नहीं की जा सकती."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"केलैंडर ईवेंट के साथ-साथ गोपनीय जानकारी पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ऐप्स  को मित्रों या सहकर्मियों के कैलेंडर इवेंट सहित, आपके टेबलेट पर संग्रहीत कैलेंडर इवेंट पढ़ने देता है. इससे गोपनीयता या संवेदनशीलता पर ध्यान दिए बिना, ऐप्स  आपके कैलेंडर डेटा को साझा कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"ऐप को, मित्रों और सहकर्मियों के कैलेंडर ईवेंट सहित, आपके टीवी पर संग्रहीत सभी कैलेंडर ईवेंट पढ़ने देती है. इससे ऐप को गोपनीयता या संवेदनशीलता पर ध्‍यान दिए बिना, आपका कैलेडर डेटा साझा करने या सहेजने की अनुमति मिल जाती है."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ऐप्स  को किसी खाते की समन्वयन सेटिंग संशोधित करने देता है. उदाहरण के लिए, इसका उपयोग लोग ऐप्स  का समन्‍वयन किसी खाते से सक्षम करने में हो सकता है."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"समन्वयन आंकड़े पढ़ें"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ऐप्स  को किसी खाते के समन्वयन आंकड़े, साथ ही समन्‍वयित ईवेंट का इतिहास और समन्‍वयित डेटा की मात्रा पढ़ने देता है."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"शब्दकोश में आपके द्वारा जोड़े गए शब्‍दों को पढ़ें"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"ऐप्स को ऐसे सभी शब्‍दों, नामों और वाक्यांशों को पढ़ने देता है जो संभवत: उपयोगकर्ता द्वारा उपयोगकर्ता ‍शब्दकोश में संग्रहीत किए गए हों."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"उपयोगकर्ता द्वारा परिभाषित शब्दकोश में शब्द जोड़ें"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"ऐप्स  को उपयोगकर्ता शब्दकोश में नए शब्द लिखने देता है."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"अपने USB मेमोरी की सामग्री पढ़ें"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"अपने SD कार्ड की सामग्री पढ़ें"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"एप्‍लिकेशन को आपके USB मेमोरी की सामग्री पढ़ने की अनुमति देता है."</string>

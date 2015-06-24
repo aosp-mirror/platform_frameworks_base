@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"mengakses kontak"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"mengakses lokasi perangkat ini"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informasi sosial Anda"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Akses langsung ke informasi tentang kontak dan hubungan sosial Anda."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"mengakses kalender"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"mengirim dan melihat pesan SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Penyimpanan"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"mengakses foto, media, dan file di perangkat"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Kamus Pengguna"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Membaca atau menulis kata dalam kamus pengguna."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmark dan Riwayat"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Akses langsung ke bookmark dan riwayat browser."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"rekam audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Memungkinkan apl memodifikasi log panggilan tablet Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk menghapus atau memodifikasi log panggilan Anda."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Mengizinkan aplikasi untuk memodifikasi log panggilan TV, termasuk data tentang panggilan masuk dan keluar. Aplikasi berbahaya mungkin menggunakan ini untuk menghapus atau memodifikasi log panggilan."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Memungkinkan apl memodifikasi log panggilan ponsel Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk menghapus atau memodifikasi log panggilan Anda."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"baca kartu kontak Anda"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Memungkinkan aplikasi membaca informasi profil pribadi yang tersimpan di perangkat Anda, misalnya nama dan informasi kontak Anda. Ini artinya aplikasi dapat mengenali dan mengirim informasi profil Anda ke orang lain."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"ubah kartu kontak Anda"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Memungkinkan aplikasi mengubah atau menambah informasi profil pribadi yang tersimpan di perangkat Anda, seperti nama dan informasi kontak. Ini berarti aplikasi tersebut dapat mengenali Anda dan mengirim informasi profil Anda ke orang lain."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"sensor tubuh (misal: monitor detak jantung)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Mengizinkan aplikasi untuk mengakses data dari sensor yang memantau kondisi fisik Anda, seperti denyut jantung."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"membaca aliran sosial Anda"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Memungkinkan aplikasi mengakses dan menyinkronkan pembaruan sosial dari Anda dan teman. Hati-hati ketika berbagi informasi -- izin ini memungkinkan aplikasi membaca komunikasi antara Anda dan teman di jejaring sosial, terlepas dari kerahasiaan. Catatan: izin ini tidak dapat diberlakukan di semua jejaring sosial."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"menulis ke aliran sosial Anda"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Memungkinkan aplikasi menampilkan pembaruan sosial dari teman Anda. Berhati-hatilah saat berbagi informasi -- izin ini memungkinkan aplikasi menghasilkan pesan yang mungkin kelihatannya berasal dari seorang teman. Catatan: izin ini tidak dapat diberlakukan di semua jejaring sosial."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalender serta informasi rahasia"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Memungkinkan aplikasi membaca semua acara kalender yang tersimpan di tablet Anda, termasuk milik teman atau rekan kerja. Izin ini memungkinkan aplikasi berbagi atau menyimpan data kalender Anda, terlepas dari kerahasiaan atau sensitivitas."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Mengizinkan aplikasi untuk membaca semua acara kalender yang disimpan di TV, termasuk milik teman atau rekan kerja. Izin ini memungkinkan aplikasi untuk membagikan atau menyimpan data kalender, meski data tersebut bersifat rahasia atau sensitif."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Memungkinkan aplikasi mengubah setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat digunakan untuk mengaktifkan sinkronisasi dari aplikasi Orang dengan sebuah akun."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"statistika baca sinkron"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Memungkinkan aplikasi membaca statistik sinkronisasi untuk sebuah akun, termasuk riwayat kejadian sinkronisasi dan berapa banyak data yang disinkronkan."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"baca istilah yang Anda tambahkan ke kamus"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Memungkinkan aplikasi membaca semua kata, nama, dan frasa yang mungkin disimpan oleh pengguna di kamus pengguna."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"Menambahkan kata ke kamus yang ditentukan pengguna"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Mengizinkan apl menulis kata-kata baru ke dalam kamus pengguna."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"baca konten simpanan USB Anda"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"baca konten kartu SD Anda"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Mengizinkan aplikasi membaca konten penyimpanan USB Anda."</string>
