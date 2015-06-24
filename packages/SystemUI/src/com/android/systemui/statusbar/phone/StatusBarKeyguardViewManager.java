@@ -100,6 +100,7 @@ public class StatusBarKeyguardViewManager {
     public void show(Bundle options) {
         mShowing = true;
         mStatusBarWindowManager.setKeyguardShowing(true);
+        mScrimController.abortKeyguardFadingOut();
         reset();
     }
 
