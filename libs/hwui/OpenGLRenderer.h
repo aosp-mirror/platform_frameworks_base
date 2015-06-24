@@ -535,7 +535,13 @@ protected:
     RenderState& mRenderState;
 
 private:
-    void renderGlop(const Glop& glop, bool clearLayer = true);
+    enum class GlopRenderType {
+        Standard,
+        Multi,
+        LayerClear
+    };
+
+    void renderGlop(const Glop& glop, GlopRenderType type = GlopRenderType::Standard);
 
     /**
      * Discards the content of the framebuffer if supported by the driver.
