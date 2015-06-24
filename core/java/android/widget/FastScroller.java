@@ -660,7 +660,7 @@ class FastScroller {
             maxWidth = containerWidth - adjacent.getRight();
         }
 
-        final int adjMaxWidth = maxWidth - marginLeft - marginRight;
+        final int adjMaxWidth = Math.max(0, maxWidth - marginLeft - marginRight);
         final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(adjMaxWidth, MeasureSpec.AT_MOST);
         final int heightMeasureSpec = MeasureSpec.makeSafeMeasureSpec(container.height(),
                 MeasureSpec.UNSPECIFIED);
