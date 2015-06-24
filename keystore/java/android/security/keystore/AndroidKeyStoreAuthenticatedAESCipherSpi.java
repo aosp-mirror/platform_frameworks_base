@@ -207,7 +207,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         protected final void addAlgorithmSpecificParametersToBegin(
                 @NonNull KeymasterArguments keymasterArgs) {
             super.addAlgorithmSpecificParametersToBegin(keymasterArgs);
-            keymasterArgs.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mTagLengthBits);
+            keymasterArgs.addUnsignedInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mTagLengthBits);
         }
 
         protected final int getTagLengthBits() {
@@ -288,11 +288,11 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
                     + " practices.");
         }
 
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
         if (mIv != null) {
-            keymasterArgs.addBlob(KeymasterDefs.KM_TAG_NONCE, mIv);
+            keymasterArgs.addBytes(KeymasterDefs.KM_TAG_NONCE, mIv);
         }
     }
 
@@ -302,7 +302,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         mIvHasBeenUsed = true;
 
         // NOTE: Keymaster doesn't always return an IV, even if it's used.
-        byte[] returnedIv = keymasterArgs.getBlob(KeymasterDefs.KM_TAG_NONCE, null);
+        byte[] returnedIv = keymasterArgs.getBytes(KeymasterDefs.KM_TAG_NONCE, null);
         if ((returnedIv != null) && (returnedIv.length == 0)) {
             returnedIv = null;
         }
@@ -406,7 +406,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         @Override
         public OperationResult update(byte[] input) {
             KeymasterArguments keymasterArgs = new KeymasterArguments();
-            keymasterArgs.addBlob(KeymasterDefs.KM_TAG_ASSOCIATED_DATA, input);
+            keymasterArgs.addBytes(KeymasterDefs.KM_TAG_ASSOCIATED_DATA, input);
 
             // KeyStore does not reflect AAD in inputConsumed, but users of Stream rely on this
             // field. We fix this discrepancy here. KeyStore.update contract is that all of AAD
