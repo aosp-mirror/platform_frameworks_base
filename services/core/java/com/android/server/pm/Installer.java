@@ -41,7 +41,7 @@ public final class Installer extends SystemService {
     @Override
     public void onStart() {
         Slog.i(TAG, "Waiting for installd to be ready.");
-        ping();
+        mInstaller.waitForConnection();
     }
 
     private static String escapeNull(String arg) {
@@ -308,14 +308,6 @@ public final class Installer extends SystemService {
         builder.append(' ');
         builder.append(instructionSet);
         return mInstaller.execute(builder.toString());
-    }
-
-    public boolean ping() {
-        if (mInstaller.execute("ping") < 0) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     @Deprecated
