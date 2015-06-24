@@ -137,6 +137,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         scheduleUpdate();
     }
 
+    public void abortKeyguardFadingOut() {
+        if (mAnimateKeyguardFadingOut) {
+            endAnimateKeyguardFadingOut();
+        }
+    }
+
     public void animateGoingToFullShade(long delay, long duration) {
         mDurationOverride = duration;
         mAnimationDelay = delay;
@@ -321,17 +327,21 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mScrimBehind.getViewTreeObserver().removeOnPreDrawListener(this);
         mUpdatePending = false;
         updateScrims();
-        mAnimateKeyguardFadingOut = false;
         mDurationOverride = -1;
         mAnimationDelay = 0;
 
         // Make sure that we always call the listener even if we didn't start an animation.
+        endAnimateKeyguardFadingOut();
+        mAnimationStarted = false;
+        return true;
+    }
+
+    private void endAnimateKeyguardFadingOut() {
+        mAnimateKeyguardFadingOut = false;
         if (!mAnimationStarted && mOnAnimationFinished != null) {
             mOnAnimationFinished.run();
             mOnAnimationFinished = null;
         }
-        mAnimationStarted = false;
-        return true;
     }
 
     public void setBackDropView(BackDropView backDropView) {
