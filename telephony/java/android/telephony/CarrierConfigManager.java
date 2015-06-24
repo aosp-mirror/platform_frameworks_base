@@ -218,18 +218,32 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VOLTE_AVAILABLE_BOOL = "carrier_volte_available_bool";
 
     /**
+     * Flag specifying whether video telephony is available for carrier. If false: hard disabled.
+     * If true: then depends on carrier provisioning, availability, etc.
+     */
+    public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
+
+    /**
      * Flag specifying whether WFC over IMS should be available for carrier: independent of
      * carrier provisioning. If false: hard disabled. If true: then depends on carrier
      * provisioning, availability etc.
      */
     public static final String KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL = "carrier_wfc_ims_available_bool";
 
-    /** Flag specifying whether VoLTE availability is based on provisioning. */
-    public static final String KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
+    /** Flag specifying whether provisioning is required for VOLTE. */
+    public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
+            = "carrier_volte_provisioning_required_bool";
 
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
+
+    /**
+     * Flag specifying whether IMS service can be turned off. If false then the service will not be
+     * turned-off completely, but individual features can be disabled.
+     */
+    public static final String KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL
+            = "carrier_allow_turnoff_ims_bool";
 
     /**
      * If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or RIL_RADIO_TECHNOLOGY_UNKNOWN:0
@@ -352,9 +366,11 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_AUTO_RETRY_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
-        sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
         sDefaults.putBoolean(KEY_DTMF_TYPE_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);
