@@ -1,0 +1,898 @@
+page.title=ADB Shell Commands
+parent.title=Tools
+parent.link=index.html
+page.tags=shell,adb,am,pm,screenrecord,screencap
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+<ol>
+  <li><a href="#shellcommands">Issuing Shell Commands</a>
+  <li><a href="#am">Using activity manager (am)</a></li>
+  <li><a href="#pm">Using package manager (pm)</a></li>
+  <li><a href="#screencap">Taking a device screenshot</a></li>
+  <li><a href="#screenrecord">Recording a device screen</a></li>
+  <li><a href="#othershellcommands">Other shell commands</a></li>
+  </li>
+</ol>
+
+</div>
+</div>
+
+<p>The <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) provides a Unix shell
+that you can use to run a variety of commands on an emulator or connected device. The command
+binaries are stored in the file system of the emulator or device, at <code>/system/bin/...</code>
+</p>
+
+<h2 id="shellcommands">Issuing Shell Commands</h2>
+
+<p>You can use the <code>shell</code> command to issue commands, with or without entering
+the adb remote shell on the emulator/device. To issue a single command without entering a
+remote shell, use the <code>shell</code> command like this: </p>
+
+  <pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell &lt;shell_command&gt;</pre>
+
+<p>Or enter a remote shell on an emulator/device like this:</p>
+
+  <pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell</pre>
+
+<p>When you are ready to exit the remote shell, press CTRL+D or type
+<code>exit</code>. </p>
+
+
+
+
+
+<h2 id="am">Using activity manager (am)</h2>
+
+<p>Within an adb shell, you can issue commands with the activity manager ({@code am}) tool to
+perform various system actions, such as start an activity, force-stop a process,
+broadcast an intent, modify the device screen properties, and more. While in a shell,
+the syntax is:</p>
+<pre class="no-pretty-print">
+am &lt;command>
+</pre>
+
+<p>You can also issue an activity manager command directly from adb
+without entering a remote shell. For example:</p>
+<pre class="no-pretty-print">
+adb shell am start -a android.intent.action.VIEW
+</pre>
+
+
+<p class="table-caption"><strong>Table 2.</strong> Available activity manager commands</p>
+<table>
+<tr>
+  <th>Command</th>
+  <th>Description</th>
+</tr>
+
+<tr>
+<td><code>
+start [options] &lt;INTENT>
+</code></td>
+<td>Start an {@link android.app.Activity} specified by {@code &lt;INTENT>}. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+<p>Options are:
+<ul>
+    <li>{@code -D}: Enable debugging.
+    <li>{@code -W}: Wait for launch to complete.
+    <li>{@code --start-profiler &lt;FILE>}: Start profiler and send results to {@code &lt;FILE>}.
+    <li>{@code -P &lt;FILE>}: Like <code>--start-profiler</code>,
+        but profiling stops when the app goes idle.
+    <li>{@code -R}: Repeat the activity launch {@code &lt;COUNT>} times.  Prior to each repeat,
+        the top activity will be finished.
+    <li>{@code -S}: Force stop the target app before starting the activity.
+    <li>{@code --opengl-trace}: Enable tracing of OpenGL functions.
+    <li>{@code --user &lt;USER_ID> | current}: Specify which user to run as; if not
+        specified, then run as the current user.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+startservice [options] &lt;INTENT>
+</code></td>
+<td>Start the {@link android.app.Service} specified by {@code &lt;INTENT>}. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+<p>Options are:
+<ul>
+    <li>{@code --user &lt;USER_ID> | current}: Specify which user to run as; if not
+        specified, then run as the current user.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+force-stop &lt;PACKAGE>
+</code></td>
+<td>Force stop everything associated with {@code &lt;PACKAGE>} (the app's package name).
+</td>
+</tr>
+
+<tr>
+<td><code>
+kill  [options] &lt;PACKAGE>
+</code></td>
+<td> Kill all processes associated with {@code &lt;PACKAGE>}
+  (the app's package name).  This command kills only
+  processes that are safe to kill and that will not impact the user
+  experience.
+  <p>Options are:
+  <ul>
+      <li>{@code --user &lt;USER_ID> | all | current}: Specify user whose processes to kill;
+        all users if not specified.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+kill-all
+</code></td>
+<td>Kill all background processes.
+</td>
+</tr>
+
+<tr>
+<td><code>
+broadcast [options] &lt;INTENT>
+</code></td>
+<td>Issue a broadcast intent. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+<p>Options are:
+<ul>
+    <li>{@code [--user &lt;USER_ID> | all | current]}: Specify which user to send to; if not
+        specified then send to all users.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+instrument [options] &lt;COMPONENT>
+</code></td>
+<td>Start monitoring with an {@link android.app.Instrumentation} instance.
+  Typically the target {@code &lt;COMPONENT>}
+  is the form {@code &lt;TEST_PACKAGE>/&lt;RUNNER_CLASS>}.  <p>Options are:
+<ul>
+    <li>{@code -r}: Print raw results (otherwise decode
+        {@code &lt;REPORT_KEY_STREAMRESULT>}).  Use with
+        {@code [-e perf true]} to generate raw output for performance measurements.
+
+    <li>{@code -e &lt;NAME> &lt;VALUE>}: Set argument {@code &lt;NAME>} to {@code &lt;VALUE>}.
+        For test runners a common form is {@code
+        -e &lt;testrunner_flag> &lt;value>[,&lt;value>...]}.
+
+    <li>{@code -p &lt;FILE>}: Write profiling data to {@code &lt;FILE>}.
+
+    <li>{@code -w}: Wait for instrumentation to finish before returning.  Required for
+        test runners.
+
+    <li>{@code --no-window-animation}: Turn off window animations while running.
+    <li>{@code --user &lt;USER_ID> | current}: Specify which user instrumentation runs in;
+        current user if not specified.
+</ul>
+
+</td>
+</tr>
+
+<tr>
+<td><code>
+profile start &lt;PROCESS> &lt;FILE>
+</code></td>
+<td>Start profiler on {@code &lt;PROCESS>}, write results to {@code &lt;FILE>}.
+</td>
+</tr>
+
+<tr>
+<td><code>
+profile stop &lt;PROCESS>
+</code></td>
+<td>Stop profiler on {@code &lt;PROCESS>}.
+</td>
+</tr>
+
+<tr>
+<td style="white-space:nowrap"><code>
+dumpheap [options] &lt;PROCESS> &lt;FILE>
+</code></td>
+<td>Dump the heap of {@code &lt;PROCESS>}, write to {@code &lt;FILE>}. <p>Options are:
+<ul>
+    <li>{@code --user [&lt;USER_ID>|current]}: When supplying a process name,
+        specify user of process to dump; uses current user if not specified.
+    <li>{@code -n}: Dump native heap instead of managed heap.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+set-debug-app [options] &lt;PACKAGE>
+</code></td>
+<td>Set application {@code &lt;PACKAGE>} to debug.  <p>Options are:
+<ul>
+    <li>{@code -w}: Wait for debugger when application starts.
+    <li>{@code --persistent}: Retain this value.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+clear-debug-app
+</code></td>
+<td>Clear the package previous set for debugging with {@code set-debug-app}.
+</td>
+</tr>
+
+<tr>
+<td><code>
+monitor [options]
+</code></td>
+<td>Start monitoring for crashes or ANRs.  <p>Options are:
+<ul>
+    <li>{@code --gdb}: Start gdbserv on the given port at crash/ANR.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+screen-compat [on|off] &lt;PACKAGE>
+</code></td>
+<td>Control <a href="{@docRoot}guide/practices/screen-compat-mode.html">screen
+compatibility</a> mode of {@code &lt;PACKAGE>}.</p>
+</td>
+</tr>
+
+<tr>
+<td><code>
+display-size [reset|&lt;WxH>]
+</code></td>
+<td>Override emulator/device display size.
+This command is helpful for testing your app across different screen sizes by mimicking a small
+screen resolution using a device with a large screen, and vice versa.
+<p>Example:<br><code>am display-size 1280x800</code>
+</td>
+</tr>
+
+<tr>
+<td><code>
+display-density &lt;dpi>
+</code></td>
+<td>Override emulator/device display density.
+This command is helpful for testing your app across different screen densities on high-density
+screen environment using a low density screen, and vice versa.
+<p>Example:<br><code>am display-density 480</code>
+</td>
+</tr>
+
+<tr>
+<td><code>
+to-uri &lt;INTENT>
+</code></td>
+<td>Print the given intent specification as a URI. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+</td>
+</tr>
+
+<tr>
+<td><code>
+to-intent-uri &lt;INTENT>
+</code></td>
+<td>Print the given intent specification as an {@code intent:} URI. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+</td>
+</tr>
+</table>
+
+
+
+
+
+<h3 id="IntentSpec">
+  <a href="" class="expandable" onclick="toggleExpandable(this,'.intents');
+return false">Specification for &lt;INTENT> arguments</a></h3>
+
+<div class="intents" style="display:none">
+
+<p>For activity manager commands that take a {@code &lt;INTENT>} argument, you can
+specify the intent with the following options:</p>
+
+<dl>
+  <dt>{@code -a &lt;ACTION>}</dt>
+      <dd>Specify the intent action, such as "android.intent.action.VIEW".
+      You can declare this only once.
+
+  <dt>{@code -d &lt;DATA_URI>}</dt>
+      <dd>Specify the intent data URI, such as "content://contacts/people/1".
+      You can declare this only once.
+
+  <dt>{@code -t &lt;MIME_TYPE>}</dt>
+      <dd>Specify the intent MIME type, such as "image/png".
+      You can declare this only once.
+
+  <dt>{@code -c &lt;CATEGORY>}</dt>
+      <dd>Specify an intent category, such as "android.intent.category.APP_CONTACTS".
+
+  <dt>{@code -n &lt;COMPONENT>}</dt>
+      <dd>Specify the component name with package name prefix to create an explicit intent, such
+      as "com.example.app/.ExampleActivity".
+
+  <dt>{@code -f &lt;FLAGS>}</dt>
+      <dd>Add flags to the intent, as supported by {@link
+        android.content.Intent#setFlags setFlags()}.
+
+  <dt>{@code --esn &lt;EXTRA_KEY>}</dt>
+      <dd>Add a null extra. This option is not supported for URI intents.
+
+  <dt>{@code -e|--es &lt;EXTRA_KEY> &lt;EXTRA_STRING_VALUE>}</dt>
+      <dd>Add string data as a key-value pair.
+
+  <dt>{@code --ez &lt;EXTRA_KEY> &lt;EXTRA_BOOLEAN_VALUE>}</dt>
+      <dd>Add boolean data as a key-value pair.
+
+  <dt>{@code --ei &lt;EXTRA_KEY> &lt;EXTRA_INT_VALUE>}</dt>
+      <dd>Add integer data as a key-value pair.
+
+  <dt>{@code --el &lt;EXTRA_KEY> &lt;EXTRA_LONG_VALUE>}</dt>
+      <dd>Add long data as a key-value pair.
+
+  <dt>{@code --ef &lt;EXTRA_KEY> &lt;EXTRA_FLOAT_VALUE>}</dt>
+      <dd>Add float data as a key-value pair.
+
+  <dt>{@code --eu &lt;EXTRA_KEY> &lt;EXTRA_URI_VALUE>}</dt>
+      <dd>Add URI data as a key-value pair.
+
+  <dt>{@code --ecn &lt;EXTRA_KEY> &lt;EXTRA_COMPONENT_NAME_VALUE>}</dt>
+      <dd>Add a component name, which is converted and passed as
+      a {@link android.content.ComponentName} object.
+
+  <dt>{@code --eia &lt;EXTRA_KEY> &lt;EXTRA_INT_VALUE>[,&lt;EXTRA_INT_VALUE...]}</dt>
+      <dd>Add an array of integers.
+
+  <dt>{@code --ela &lt;EXTRA_KEY> &lt;EXTRA_LONG_VALUE>[,&lt;EXTRA_LONG_VALUE...]}</dt>
+      <dd>Add an array of longs.
+
+  <dt>{@code --efa &lt;EXTRA_KEY> &lt;EXTRA_FLOAT_VALUE>[,&lt;EXTRA_FLOAT_VALUE...]}</dt>
+      <dd>Add an array of floats.
+
+  <dt>{@code --grant-read-uri-permission}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}.
+
+  <dt>{@code --grant-write-uri-permission}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+
+  <dt>{@code --debug-log-resolution}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_DEBUG_LOG_RESOLUTION}.
+
+  <dt>{@code --exclude-stopped-packages}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_EXCLUDE_STOPPED_PACKAGES}.
+
+  <dt>{@code --include-stopped-packages}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES}.
+
+  <dt>{@code --activity-brought-to-front}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_BROUGHT_TO_FRONT}.
+
+  <dt>{@code --activity-clear-top}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}.
+
+  <dt>{@code --activity-clear-when-task-reset}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET}.
+
+  <dt>{@code --activity-exclude-from-recents}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS}.
+
+  <dt>{@code --activity-launched-from-history}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY}.
+
+  <dt>{@code --activity-multiple-task}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}.
+
+  <dt>{@code --activity-no-animation}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_NO_ANIMATION}.
+
+  <dt>{@code --activity-no-history}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_NO_HISTORY}.
+
+  <dt>{@code --activity-no-user-action}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_NO_USER_ACTION}.
+
+  <dt>{@code --activity-previous-is-top}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_PREVIOUS_IS_TOP}.
+
+  <dt>{@code --activity-reorder-to-front}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_REORDER_TO_FRONT}.
+
+  <dt>{@code --activity-reset-task-if-needed}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_RESET_TASK_IF_NEEDED}.
+
+  <dt>{@code --activity-single-top}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}.
+
+  <dt>{@code --activity-clear-task}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK}.
+
+  <dt>{@code --activity-task-on-home}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_TASK_ON_HOME}.
+
+  <dt>{@code --receiver-registered-only}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
+
+  <dt>{@code --receiver-replace-pending}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_RECEIVER_REPLACE_PENDING}.
+
+  <dt>{@code --selector}</dt>
+      <dd>Requires the use of {@code -d} and {@code -t} options to set the intent data and type.
+
+  <dt>{@code &lt;URI> &lt;COMPONENT> &lt;PACKAGE>}</dt>
+      <dd>You can directly specify a URI, package name, and component name when not qualified
+      by one of the above options. When an argument is unqualified, the tool assumes the argument
+      is a URI if it contains a ":" (colon); it assumes the argument is a component name if it
+      contains a "/" (forward-slash); otherwise it assumes the argument is a package name.
+
+</dl>
+</div><!-- end 'intents' -->
+<script>
+  $(window).hashchange( function(){
+    if ((location.hash == "#IntentSpec") && !($("#IntentSpec a").hasClass("expanded"))) {
+      $("#IntentSpec a").click();
+    }
+  });
+</script>
+
+
+
+<h2 id="pm">Using package manager (pm)</h2>
+
+<p>Within an adb shell, you can issue commands with the package manager ({@code pm}) tool to
+perform actions and queries on application packages installed on the device. While in a shell,
+the syntax is:</p>
+<pre class="no-pretty-print">
+pm &lt;command>
+</pre>
+
+<p>You can also issue a package manager command directly from adb
+without entering a remote shell. For example:</p>
+<pre class="no-pretty-print">
+adb shell pm uninstall com.example.MyApp
+</pre>
+
+<p class="table-caption"><strong>Table 3.</strong> Available package manager commands.</p>
+<table>
+<tr>
+  <th>Command</th>
+  <th>Description</th>
+</tr>
+
+<tr>
+<td><code>
+list packages [options] &lt;FILTER>
+</code></td>
+<td>Prints all packages, optionally only
+  those whose package name contains the text in {@code &lt;FILTER>}.  <p>Options:
+<ul>
+    <li>{@code -f}: See their associated file.
+    <li>{@code -d}: Filter to only show disabled packages.
+    <li>{@code -e}: Filter to only show enabled packages.
+    <li>{@code -s}: Filter to only show system packages.
+    <li>{@code -3}: Filter to only show third party packages.
+    <li>{@code -i}: See the installer for the packages.
+    <li>{@code -u}: Also include uninstalled packages.
+    <li>{@code --user &lt;USER_ID>}: The user space to query.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+list permission-groups
+</code></td>
+<td>Prints all known permission groups.
+</td>
+</tr>
+
+<tr>
+<td><code>
+list permissions [options] &lt;GROUP>
+</code></td>
+<td>Prints all known permissions, optionally only
+  those in {@code &lt;GROUP>}.  <p>Options:
+<ul>
+    <li>{@code -g}: Organize by group.
+    <li>{@code -f}: Print all information.
+    <li>{@code -s}: Short summary.
+    <li>{@code -d}: Only list dangerous permissions.
+    <li>{@code -u}: List only the permissions users will see.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+list instrumentation
+</code></td>
+<td>List all test packages.  <p>Options:
+  <ul>
+    <li>{@code -f}: List the APK file for the test package.
+    <li>{@code &lt;TARGET_PACKAGE>}: List test packages for only this app.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+list features
+</code></td>
+<td>Prints all features of the system.
+</td>
+</tr>
+
+<tr>
+<td><code>
+list libraries
+</code></td>
+<td>Prints all the libraries supported by the current device.
+</td>
+</tr>
+
+<tr>
+<td><code>
+list users
+</code></td>
+<td>Prints all users on the system.
+</td>
+</tr>
+
+<tr>
+<td><code>
+path &lt;PACKAGE>
+</code></td>
+<td>Print the path to the APK of the given {@code &lt;PACKAGE>}.
+</td>
+</tr>
+
+<tr>
+<td><code>
+install [options]  &lt;PATH>
+</code></td>
+<td>Installs a package (specified by {@code &lt;PATH>}) to the system.  <p>Options:
+  <ul>
+    <li>{@code -l}: Install the package with forward lock.
+    <li>{@code -r}: Reinstall an exisiting app, keeping its data.
+    <li>{@code -t}: Allow test APKs to be installed.
+    <li>{@code -i &lt;INSTALLER_PACKAGE_NAME>}: Specify the installer package name.
+    <li>{@code -s}: Install package on the shared mass storage (such as sdcard).
+    <li>{@code -f}: Install package on the internal system memory.
+    <li>{@code -d}: Allow version code downgrade.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+uninstall [options] &lt;PACKAGE>
+</code></td>
+<td>Removes a package from the system. <p>Options:
+  <ul>
+    <li>{@code -k}: Keep the data and cache directories around after package removal.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+clear &lt;PACKAGE>
+</code></td>
+<td>Deletes all data associated with a package.
+</td>
+</tr>
+
+<tr>
+<td><code>
+enable &lt;PACKAGE_OR_COMPONENT>
+</code></td>
+<td>Enable the given package or component (written as "package/class").
+</td>
+</tr>
+
+<tr>
+<td><code>
+disable &lt;PACKAGE_OR_COMPONENT>
+</code></td>
+<td>Disable the given package or component (written as "package/class").
+</td>
+</tr>
+
+<tr>
+<td style="white-space:nowrap"><code>
+disable-user [options] &lt;PACKAGE_OR_COMPONENT>
+</code></td>
+<td><p>Options:
+  <ul>
+    <li>{@code --user &lt;USER_ID>}: The user to disable.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+grant &lt;PACKAGE_PERMISSION>
+</code></td>
+<td>Grant permissions
+  to applications.  Only optional permissions the application has
+  declared can be granted.
+</td>
+</tr>
+
+<tr>
+<td><code>
+revoke &lt;PACKAGE_PERMISSION>
+</code></td>
+<td>Revoke permissions
+  to applications.  Only optional permissions the application has
+  declared can be revoked.
+</td>
+</tr>
+
+<tr>
+<td><code>
+set-install-location &lt;LOCATION>
+</code></td>
+<td>Changes the default install location. Location values:
+<ul>
+    <li>{@code 0}: Auto&mdash;Let system decide the best location.
+    <li>{@code 1}: Internal&mdash;install on internal device storage.
+    <li>{@code 2}: External&mdash;install on external media.
+</ul>
+<p class="note"><strong>Note:</strong> This is only intended for debugging; using this can cause
+  applications to break and other undesireable behavior.</p>
+</td>
+</tr>
+
+<tr>
+<td><code>
+get-install-location
+</code></td>
+<td>Returns the current install location. Return values:
+<ul>
+  <li>{@code 0 [auto]}: Lets system decide the best location
+  <li>{@code 1 [internal]}: Installs on internal device storage
+  <li>{@code 2 [external]}: Installs on external media
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+set-permission-enforced &lt;PERMISSION> [true|false]
+</code></td>
+<td>Specifies whether the given permission should be enforced.
+</td>
+</tr>
+
+<tr>
+<td><code>
+trim-caches &lt;DESIRED_FREE_SPACE>
+</code></td>
+<td>Trim cache files to reach the given free space.
+</td>
+</tr>
+
+<tr>
+<td><code>
+create-user &lt;USER_NAME>
+</code></td>
+<td>Create a new user with the given {@code &lt;USER_NAME>},
+  printing the new user identifier of the user.
+</td>
+</tr>
+
+<tr>
+<td><code>
+remove-user &lt;USER_ID>
+</code></td>
+<td>Remove the user with the given {@code &lt;USER_IDENTIFIER>},
+  deleting all data associated with that user
+</td>
+</tr>
+
+<tr>
+<td><code>
+get-max-users
+</code></td>
+<td>Prints the maximum number of users supported by the device.
+</td>
+</tr>
+
+</table>
+
+
+<h2 id="screencap">Taking a device screenshot</h2>
+
+<p>The {@code screencap} command is a shell utility for taking a screenshot of a device display.
+While in a shell, the syntax is:
+</p>
+
+<pre class="no-pretty-print">
+screencap &lt;filename>
+</pre>
+
+
+<p>To use the {@code screencap} from the command line, type the following:
+
+<pre>
+$ adb shell screencap /sdcard/screen.png
+</pre>
+
+<p>Here's an example screenshot session, using the adb shell to capture the screenshot and the
+{@code pull} command to download the file from the device:<p>
+
+<pre>
+$ adb shell
+shell@ $ screencap /sdcard/screen.png
+shell@ $ exit
+$ adb pull /sdcard/screen.png
+</pre>
+
+
+<h2 id="screenrecord">Recording a device screen</h2>
+
+<p>The {@code screenrecord} command is a shell utility for recording the display of devices
+  running Android 4.4 (API level 19) and higher. The utility records screen activity to an MPEG-4
+  file.</p>
+
+<p class="note"><strong>Note:</strong> Audio is not recorded with the video file.</p>
+
+<p>A developer can use this file to create promotional or training videos. While in a shell, the syntax is:</p>
+
+<pre class="no-pretty-print">
+screenrecord [options] &lt;filename>
+</pre>
+
+<p>To use {@code screenrecord} from the command line, type the following:
+
+<pre>
+$ adb shell screenrecord /sdcard/demo.mp4
+</pre>
+
+<p>Stop the screen recording by pressing Ctrl-C, otherwise the recording stops automatically
+at three minutes or the time limit set by {@code --time-limit}.</p>
+
+<p>To begin recording your device screen, run the {@code screenrecord} command to record
+the video. Then, run the {@code pull} command to download the video from the device to the host
+computer. Here's an example recording session:<p>
+
+<pre>
+$ adb shell
+shell@ $ screenrecord --verbose /sdcard/demo.mp4
+(press Ctrl-C to stop)
+shell@ $ exit
+$ adb pull /sdcard/demo.mp4
+</pre>
+
+<p>The {@code screenrecord} utility can record at any supported resolution and bit rate you
+  request, while retaining the aspect ratio of the device display. The utility records at the native
+  display resolution and orientation by default, with a maximum length of three minutes.</p>
+
+<p>There are some known limitations of the {@code screenrecord} utility that you should be aware
+  of when using it:</p>
+
+<ul>
+  <li>Some devices may not be able to record at their native display resolution.
+    If you encounter problems with screen recording, try using a lower screen resolution.</li>
+  <li>Rotation of the screen during recording is not supported. If the screen does rotate during
+    recording, some of the screen is cut off in the recording.</li>
+</ul>
+
+
+<p class="table-caption"><strong>Table 4.</strong> {@code screenrecord} options</p>
+
+<table>
+  <tr>
+    <th>Options</th>
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><code>--help</code>
+    </td>
+    <td>Displays command syntax and options</td>
+  </tr>
+
+  <tr>
+    <td style="white-space:nowrap">
+      <code>--size &lt;WIDTHxHEIGHT&gt;</code>
+    </td>
+    <td>Sets the video size: {@code 1280x720}. The default value is the device's native
+      display resolution (if supported), 1280x720 if not. For best results, use a size supported
+      by your device's Advanced Video Coding (AVC) encoder.</td>
+  </tr>
+
+  <tr>
+    <td><code>--bit-rate &lt;RATE&gt;</code></td>
+    <td>Sets the video bit rate for the video, in megabits per second. The default value is 4Mbps.
+      You can increase the bit rate to improve video quality, but doing so results in larger movie
+      files. The following example sets the recording bit rate to 6Mbps:
+      <pre>screenrecord --bit-rate 6000000 &#47;sdcard&#47;demo.mp4</pre>
+      </td>
+  </tr>
+
+  <tr>
+    <td><code>--time-limit &lt;TIME&gt;</code></td>
+    <td>Sets the maximum recording time, in seconds. The default and maximum value is 180
+      (3 minutes).</td>
+  </tr>
+
+  <tr>
+    <td><code>--rotate</code></td>
+    <td>Rotates the output 90 degrees. This feature is experimental.</td>
+  </tr>
+
+  <tr>
+    <td><code>--verbose</code></td>
+    <td>Displays log information on the command-line screen. If you do not set this option,
+      the utility does not display any information while running.</td>
+  </tr>
+
+</table>
+
+
+<h2 id="othershellcommands">Other shell commands</h2>
+
+<p>For a list of all the available shell programs, use the following command:</p>
+
+<pre class="no-pretty-print">adb shell ls /system/bin</pre>
+
+<p>Help is available for most of the commands. </p>
+
+<p>Table 5 lists some of the more common adb shell commands.</p>
+
+<p class="table-caption"><strong>Table 5.</strong> Some other adb shell commands</p>
+<table>
+<tr>
+  <th>Shell Command</th>
+  <th>Description</th>
+  <th>Comments</th>
+</tr>
+
+<tr>
+<td><code>dumpsys</code></td>
+<td>Dumps system data to the screen.</td>
+<td rowspan=4">The <a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor Server</a>
+(DDMS) tool offers integrated debug environment that you may find easier to use.</td>
+</tr>
+
+<tr>
+<td><code>dumpstate</code></td>
+<td>Dumps state to a file.</td>
+</tr>
+
+<tr>
+<td><code>logcat&nbsp;[option]...&nbsp;[filter-spec]...</code></td>
+<td>Enables system and app logging and prints output to the screen. </td>
+</tr>
+
+<tr>
+<td><code>dmesg</code></td>
+<td>Prints kernel debugging messages to the screen. </td>
+</tr>
+
+<tr>
+<td><code>start</code></td>
+<td>Starts (restarts) an emulator/device instance.</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td><code>stop</code></td>
+<td>Stops execution of an emulator/device instance.</td>
+<td>&nbsp;</td>
+</tr>
+
+</table>
