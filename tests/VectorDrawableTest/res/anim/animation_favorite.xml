@@ -45,12 +45,6 @@
         android:valueTo="#FF00FF00" />
     <objectAnimator
         android:duration="8000"
-        android:propertyName="strokeWidth"
-        android:repeatCount="-1"
-        android:valueFrom="5"
-        android:valueTo="20" />
-    <objectAnimator
-        android:duration="8000"
         android:propertyName="fillColor"
         android:repeatCount="-1"
         android:valueFrom="#FFFF0000"
