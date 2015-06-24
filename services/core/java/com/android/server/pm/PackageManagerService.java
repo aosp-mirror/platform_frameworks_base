@@ -2191,7 +2191,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // If this is the first boot, and it is a normal boot, then
             // we need to initialize the default preferred apps.
             if (!mRestoredSettings && !onlyCore) {
-                mSettings.readDefaultPreferredAppsLPw(this, 0);
+                mSettings.applyDefaultPreferredAppsLPw(this, UserHandle.USER_OWNER);
+                applyFactoryDefaultBrowserLPw(UserHandle.USER_OWNER);
             }
 
             // If this is first boot after an OTA, and a normal boot, then
@@ -2375,13 +2376,72 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "End priming domain verifications");
     }
 
+    private void applyFactoryDefaultBrowserLPw(int userId) {
+        // The default browser app's package name is stored in a string resource,
+        // with a product-specific overlay used for vendor customization.
+        String browserPkg = mContext.getResources().getString(
+                com.android.internal.R.string.default_browser);
+        if (browserPkg != null) {
+            // non-empty string => required to be a known package
+            PackageSetting ps = mSettings.mPackages.get(browserPkg);
+            if (ps == null) {
+                Slog.e(TAG, "Product default browser app does not exist: " + browserPkg);
+                browserPkg = null;
+            } else {
+                mSettings.setDefaultBrowserPackageNameLPw(browserPkg, userId);
+            }
+        }
+
+        // Nothing valid explicitly set? Make the factory-installed browser the explicit
+        // default.  If there's more than one, just leave everything alone.
+        if (browserPkg == null) {
+            calculateDefaultBrowserLPw(userId);
+        }
+    }
+
+    private void calculateDefaultBrowserLPw(int userId) {
+        List<String> allBrowsers = resolveAllBrowserApps(userId);
+        final String browserPkg = (allBrowsers.size() == 1) ? allBrowsers.get(0) : null;
+        mSettings.setDefaultBrowserPackageNameLPw(browserPkg, userId);
+    }
+
+    private List<String> resolveAllBrowserApps(int userId) {
+        // Match all generic http: browser apps
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        intent.setData(Uri.parse("http:"));
+
+        // Resolve that intent and check that the handleAllWebDataURI boolean is set
+        List<ResolveInfo> list = queryIntentActivities(intent, null, 0, userId);
+
+        final int count = list.size();
+        List<String> result = new ArrayList<String>(count);
+        for (int i=0; i<count; i++) {
+            ResolveInfo info = list.get(i);
+            if (info.activityInfo == null
+                    || !info.handleAllWebDataURI
+                    || (info.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
+                    || result.contains(info.activityInfo.packageName)) {
+                continue;
+            }
+            result.add(info.activityInfo.packageName);
+        }
+
+        return result;
+    }
+
     private void checkDefaultBrowser() {
         final int myUserId = UserHandle.myUserId();
         final String packageName = getDefaultBrowserPackageName(myUserId);
-        PackageInfo info = getPackageInfo(packageName, 0, myUserId);
-        if (info == null) {
-            Slog.w(TAG, "Default browser no longer installed: " + packageName);
-            setDefaultBrowserPackageName(null, myUserId);
+        if (packageName != null) {
+            PackageInfo info = getPackageInfo(packageName, 0, myUserId);
+            if (info == null) {
+                Slog.w(TAG, "Default browser no longer installed: " + packageName);
+                synchronized (mPackages) {
+                    applyFactoryDefaultBrowserLPw(myUserId);    // leaves ambiguous when > 1
+                }
+            }
         }
     }
 
@@ -4443,7 +4503,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mPackages) {
             final int count = candidates.size();
-            // First, try to use the domain prefered App. Partition the candidates into four lists:
+            // First, try to use the domain preferred app. Partition the candidates into four lists:
             // one for the final results, one for the "do not use ever", one for "undefined status"
             // and finally one for "Browser App type".
             for (int n=0; n<count; n++) {
@@ -9577,6 +9637,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+
         boolean result = false;
         synchronized (mPackages) {
             result = mSettings.updateIntentFilterVerificationStatusLPw(packageName, status, userId);
@@ -9618,8 +9681,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+
         synchronized (mPackages) {
-            boolean result = mSettings.setDefaultBrowserPackageNameLPr(packageName, userId);
+            boolean result = mSettings.setDefaultBrowserPackageNameLPw(packageName, userId);
             if (packageName != null) {
                 result |= updateIntentVerificationStatus(packageName,
                         PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
@@ -13379,15 +13445,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void resetPreferredActivities(int userId) {
-        /* TODO: Actually use userId. Why is it being passed in? */
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
         // writer
         synchronized (mPackages) {
-            int user = UserHandle.getCallingUserId();
-            clearPackagePreferredActivitiesLPw(null, user);
-            mSettings.readDefaultPreferredAppsLPw(this, user);
-            scheduleWritePackageRestrictionsLocked(user);
+            clearPackagePreferredActivitiesLPw(null, userId);
+            mSettings.applyDefaultPreferredAppsLPw(this, userId);
+            applyFactoryDefaultBrowserLPw(userId);
+
+            scheduleWritePackageRestrictionsLocked(userId);
         }
     }
 
@@ -15449,6 +15515,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (mInstaller != null) {
             mInstaller.createUserConfig(userHandle);
             mSettings.createNewUserLILPw(this, mInstaller, userHandle, path);
+            applyFactoryDefaultBrowserLPw(userHandle);
         }
     }
 
