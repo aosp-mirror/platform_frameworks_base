@@ -250,14 +250,14 @@ href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) shell
 support the <code>--user</code> flag, which lets you specify which user to run
 as. By specifying a user, you can choose whether to run as the unmanaged or
 managed profile. For
-more information, see <a href="{@docRoot}tools/help/adb.html#am">Android Debug
-Bridge: Using activity manager (am)</a>.</li>
+more information, see <a href="{@docRoot}tools/help/shell.html#am">ADB
+Shell Commands</a>.</li>
 
 <li>To find the active users on a device, use the adb package manager's
 <code>list users</code> command. The first number in the output string is the
 user ID, which you can use with the <code>--user</code> flag.  For more
-information, see <a href="{@docRoot}tools/help/adb.html#pm">Android Debug
-Bridge: Using package manager (pm)</a>.</li>
+information, see <a href="{@docRoot}tools/help/shell.html#pm">ADB Shell
+Commands</a>.</li>
 
 </ul>
 
