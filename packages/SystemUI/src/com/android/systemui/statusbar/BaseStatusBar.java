@@ -1720,8 +1720,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         try {
             if (visibleToUser) {
-                boolean clearNotificationEffects = mShowLockscreenNotifications ||
-                        (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
+                boolean clearNotificationEffects = !isPanelFullyCollapsed() &&
+                    (mShowLockscreenNotifications ||
+                        (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED));
                 mBarService.onPanelRevealed(clearNotificationEffects);
             } else {
                 mBarService.onPanelHidden();
@@ -1730,6 +1731,19 @@ public abstract class BaseStatusBar extends SystemUI implements
             // Won't fail unless the world has ended.
         }
     }
+
+    /**
+     * Clear Buzz/Beep/Blink.
+     */
+    public void clearNotificationEffects() {
+        try {
+            mBarService.clearNotificationEffects();
+        } catch (RemoteException e) {
+            // Won't fail unless the world has ended.
+        }
+    }
+
+    protected abstract boolean isPanelFullyCollapsed();
 
     /**
      * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService

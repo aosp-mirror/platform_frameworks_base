@@ -2340,4 +2340,8 @@ public class NotificationPanelView extends PanelView implements
     public void setPanelScrimMinFraction(float minFraction) {
         mBar.panelScrimMinFractionChanged(minFraction);
     }
+
+    public void clearNotificattonEffects() {
+        mStatusBar.clearNotificationEffects();
+    }
 }
