@@ -575,7 +575,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             }
         }
 
-        private void mutate() {
+        void mutate() {
             mTransitions = mTransitions.clone();
             mStateIds = mStateIds.clone();
         }
