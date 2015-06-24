@@ -16,13 +16,16 @@
 
 package android.graphics.drawable;
 
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.content.res.ColorStateList;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -66,6 +69,10 @@ public final class Icon implements Parcelable {
     private static final int VERSION_STREAM_SERIALIZER = 1;
 
     private final int mType;
+
+    private ColorStateList mTintList;
+    static final PorterDuff.Mode DEFAULT_TINT_MODE = Drawable.DEFAULT_TINT_MODE; // SRC_IN
+    private PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
 
     // To avoid adding unnecessary overhead, we have a few basic objects that get repurposed
     // based on the value of mType.
@@ -258,6 +265,19 @@ public final class Icon implements Parcelable {
      * @return A fresh instance of a drawable for this image, yours to keep.
      */
     public Drawable loadDrawable(Context context) {
+        final Drawable result = loadDrawableInner(context);
+        if (result != null && (mTintList != null || mTintMode != DEFAULT_TINT_MODE)) {
+            result.mutate();
+            result.setTintList(mTintList);
+            result.setTintMode(mTintMode);
+        }
+        return result;
+    }
+
+    /**
+     * Do the heavy lifting of loading the drawable, but stop short of applying any tint.
+     */
+    private Drawable loadDrawableInner(Context context) {
         switch (mType) {
             case TYPE_BITMAP:
                 return new BitmapDrawable(context.getResources(), getBitmap());
@@ -532,6 +552,38 @@ public final class Icon implements Parcelable {
     }
 
     /**
+     * Store a color to use whenever this Icon is drawn.
+     *
+     * @param tint a color, as in {@link Drawable#setTint(int)}
+     * @return this same object, for use in chained construction
+     */
+    public Icon setTint(@ColorInt int tint) {
+        return setTintList(ColorStateList.valueOf(tint));
+    }
+
+    /**
+     * Store a color to use whenever this Icon is drawn.
+     *
+     * @param tintList as in {@link Drawable#setTintList(ColorStateList)}, null to remove tint
+     * @return this same object, for use in chained construction
+     */
+    public Icon setTintList(ColorStateList tintList) {
+        mTintList = tintList;
+        return this;
+    }
+
+    /**
+     * Store a blending mode to use whenever this Icon is drawn.
+     *
+     * @param mode a blending mode, as in {@link Drawable#setTintMode(PorterDuff.Mode)}, may be null
+     * @return this same object, for use in chained construction
+     */
+    public Icon setTintMode(PorterDuff.Mode mode) {
+        mTintMode = mode;
+        return this;
+    }
+
+    /**
      * Create an Icon pointing to an image file specified by path.
      *
      * @param path A path to a file that contains compressed bitmap data of
@@ -572,6 +624,15 @@ public final class Icon implements Parcelable {
                 sb.append(" uri=").append(getUriString());
                 break;
         }
+        if (mTintList != null) {
+            sb.append(" tint=");
+            String sep = "";
+            for (int c : mTintList.getColors()) {
+                sb.append(String.format("%s0x%08x", sep, c));
+                sep = "|";
+            }
+        }
+        if (mTintMode != DEFAULT_TINT_MODE) sb.append(" mode=").append(mTintMode);
         sb.append(")");
         return sb.toString();
     }
@@ -617,31 +678,39 @@ public final class Icon implements Parcelable {
                 throw new RuntimeException("invalid "
                         + this.getClass().getSimpleName() + " type in parcel: " + mType);
         }
+        if (in.readInt() == 1) {
+            mTintList = ColorStateList.CREATOR.createFromParcel(in);
+        }
+        mTintMode = PorterDuff.intToMode(in.readInt());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mType);
         switch (mType) {
             case TYPE_BITMAP:
                 final Bitmap bits = getBitmap();
-                dest.writeInt(TYPE_BITMAP);
                 getBitmap().writeToParcel(dest, flags);
                 break;
             case TYPE_RESOURCE:
-                dest.writeInt(TYPE_RESOURCE);
                 dest.writeString(getResPackage());
                 dest.writeInt(getResId());
                 break;
             case TYPE_DATA:
-                dest.writeInt(TYPE_DATA);
                 dest.writeInt(getDataLength());
                 dest.writeBlob(getDataBytes(), getDataOffset(), getDataLength());
                 break;
             case TYPE_URI:
-                dest.writeInt(TYPE_URI);
                 dest.writeString(getUriString());
                 break;
         }
+        if (mTintList == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            mTintList.writeToParcel(dest, flags);
+        }
+        dest.writeInt(PorterDuff.modeToInt(mTintMode));
     }
 
     public static final Parcelable.Creator<Icon> CREATOR
