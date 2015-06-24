@@ -18,7 +18,9 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -3209,13 +3211,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             int uid = app.uid;
             int[] gids = null;
-            int mountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
+            int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
             if (!app.isolated) {
                 int[] permGids = null;
                 try {
                     checkTime(startTime, "startProcess: getting gids from package manager");
-                    permGids = AppGlobals.getPackageManager().getPackageGids(app.info.packageName,
-                            app.userId);
+                    final IPackageManager pm = AppGlobals.getPackageManager();
+                    permGids = pm.getPackageGids(app.info.packageName, app.userId);
+                    mountExternal = pm.getMountExternalMode(uid);
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
