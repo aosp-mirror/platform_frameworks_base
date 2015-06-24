@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"Atzitu kontaktuak"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Kokapena"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"Atzitu gailuaren kokapena"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sare sozialetako zure informazioa"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Zure kontaktuei eta konexio sozialei buruzko informaziorako sarbide zuzena."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Atzitu egutegia"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS mezuak"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"Bidali eta ikusi SMS mezuak"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"Atzitu gailuko argazkiak, multimedia-elementuak eta fitxategiak"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Erabiltzailearen hiztegia"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Irakurri edo idatzi hitzak erabiltzaileek hiztegian."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Laster-markak eta historia"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Laster-marketarako eta arakatzailearen historiarako sarbide zuzena."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonoa"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"Grabatu audioa"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tabletaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Telebistako deien erregistroa aldatzea baimentzen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Telefonoaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"zeure kontaktu-txartela irakurtzea"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Gailuan gordetako profil pertsonalaren informazioa irakurtzeko baimena ematen die aplikazioei; esaterako, zure izena eta harremanetan jartzeko informazioa. Horrek esan nahi du aplikazioek identifikatu egin zaitzaketela eta zure profil-informazioa besteei bidal diezaieketela."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"zeure kontaktu-txartela aldatzea"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Gailuan gordetako profil pertsonalaren informazioa aldatzeko baimena ematen dio; esaterako, zure izena eta harremanetan jartzeko informazioa. Horrek esan nahi du aplikazioak identifikatu egin zaitzakeela eta zure profil-informazioa besteei bidal diezaiekeela."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"Gorputzaren sentsoreak (adibidez, bihotz-erritmoaren monitoreak)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Zure egoera fisikoa kontrolatzen duten sentsoreetako datuak (adibidez, bihotz-maiztasuna) atzitzea baimentzen die aplikazioei."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"irakurri sare sozialetako korronteak"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Zure eta zure lagunen sare sozialetako eguneratzeak atzitzeko baimena ematen die aplikazioei. Kontuz partekatu informazioa; baimen honekin aplikazioak zure eta zure lagunen arteko sare sozialetako komunikazioak irakur ditzake, isilpekotasuna kontuan izan gabe. Oharra: baliteke baimen hori sare sozial guztiek ez aplikatzea."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"idatzi sare sozialetako korronteetan"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Zure lagunen sare sozialetako eguneratzeak bistaratzeko baimena ematen die aplikazioei. Kontuz partekatu informazioa; baimen honekin aplikazioak zure lagunenak direla diruditen mezuak sor ditzake. Oharra: baliteke baimen hori sare sozial guztiek ez aplikatzea."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"irakurri egutegiko gertaerak eta isilpeko informazioa"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tabletan gordetako egunkari-gertaera guztiak irakurtzeko baimena ematen die aplikazioei, lagunenak eta lankideenak barne. Horrela, aplikazioak egutegiko datuak parteka edo gorde ditzake, isilpekotasuna edo konfidentzialtasuna kontuan izan gabe."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Telebistan gordetako egutegiko gertaera guztiak irakurtzea baimentzen die aplikazioei, lagunenak eta lankideenak barne. Horrela, aplikazioek egutegiko datuak parteka edo gorde ditzakete, isilpekotasuna edo konfidentzialtasuna kontuan izan gabe."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Kontu baten sinkronizazio-ezarpenak aldatzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa kontu batekin sinkronizatzeko erabil daiteke."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"irakurri sinkronizazio-estatistikak"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"hiztegian gehitutako terminoak irakurtzea"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Erabiltzaile-hiztegian erabiltzaileak gordetako hitzak, izenak eta esaldiak irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"erabiltzaileak definitutako hiztegian hitzak gehitzea"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Erabiltzailearen hiztegian hitz berriak idaztea baimentzen die aplikazioei."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB memoriako edukia irakurtzea"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD txarteleko edukia irakurtzea"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"USB memoriako edukia irakurtzeko aukera ematen die aplikazioei."</string>

@@ -232,18 +232,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"přístup ke kontaktům"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"přístup k poloze tohoto zařízení"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informace o vašich kontaktech a sociálních sítích"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Přímý přístup k informacím o vašich kontaktech a sociálních propojeních"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendář"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"přístup ke kalendáři"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"odesílání a zobrazení zpráv SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložiště"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"přístup k fotkám, médiím a souborům na zařízení"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Uživatelský slovník"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Čtení a zápis slov v uživatelském slovníku"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Záložky a historie"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Přímý přístup k záložkám a historii prohlížení"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nahrávání zvuku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
@@ -334,16 +328,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Umožňuje aplikaci upravovat seznam hovorů vašeho tabletu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Umožňuje aplikaci upravovat seznam hovorů vaší televize včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikaci upravovat seznam hovorů vašeho telefonu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"čtení vaší vlastní vizitky"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Umožňuje aplikaci číst údaje v osobním profilu uložené v zařízení, například jméno nebo kontaktní údaje. Znamená to, že vás aplikace může identifikovat a odeslat údaje z profilu dalším aplikacím."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"úprava vaší vlastní vizitky"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Umožňuje aplikaci změnit nebo přidat údaje osobního profilu uložené v zařízení, například jméno nebo kontaktní údaje. Znamená to, že vás aplikace může identifikovat a odeslat údaje z profilu dalším aplikacím."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"tělesné senzory (například snímače tepu)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikaci používat data ze senzorů, které sledují vaši fyzickou kondici, například tepovou frekvenci."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čtení vašeho sociálního streamu"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikaci získat přístup k sociálním aktualizacím od vašich přátel a synchronizaci těchto aktualizací. Při sdílení informací buďte opatrní – toto oprávnění umožňuje aplikaci číst komunikaci mezi vámi a vašimi přáteli v sociálních sítích bez ohledu na její důvěrnost. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zápis do sociálního streamu"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Umožňuje aplikaci zobrazit sociální aktualizace od vašich přátel. Při sdílení informací buďte opatrní – aplikace s tímto oprávněním může vytvářet zprávy, které zdánlivě pochází od vašich přátel. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čtení událostí kalendáře a důvěrné informace"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu, včetně událostí přátel nebo spolupracovníků. Aplikace s tímto oprávněním může sdílet nebo ukládat údaje v kalendáři bez ohledu na důvěrnost nebo citlivost těchto údajů."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Umožňuje aplikaci číst veškeré události v kalendáři uložené v televizi, a to včetně událostí přátel a spolupracovníků. Aplikaci to může umožnit sdílet nebo ukládat data kalendáře bez ohledu na jejich důvěrnost či citlivost."</string>
@@ -456,10 +442,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Umožňuje aplikaci změnit nastavení synchronizace v účtu. Pomocí tohoto oprávnění lze například zapnout synchronizaci aplikace Lidé s účtem."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čtení statistických údajů o synchronizaci"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Umožňuje aplikaci číst statistické informace o synchronizaci v účtu, včetně historie uskutečněných synchronizací a informací o množství synchronizovaných dat."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"čtení výrazů přidaných do slovníku"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Umožňuje aplikaci číst slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"přidávání slov do slovníku definovaného uživatelem"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Umožňuje aplikaci zapisovat nová slova do uživatelského slovníku."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čtení obsahu v úložišti USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čtení obsahu na kartě SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Umožňuje aplikaci čtení obsahu USB."</string>

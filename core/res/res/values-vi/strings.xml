@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"truy cập vào danh bạ của bạn"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vị trí"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"truy cập vị trí của thiết bị này"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Thông tin xã hội của bạn"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Truy cập trực tiếp vào thông tin về các địa chỉ liên hệ và các kết nối xã hội của bạn."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Lịch"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"truy cập lịch của bạn"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Tin nhắn SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"gửi và xem tin nhắn SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Bộ nhớ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"truy cập ảnh, phương tiện và tệp trên thiết bị của bạn"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Từ điển người dùng"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Đọc hoặc viết các từ trong từ điển người dùng."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Dấu trang và lịch sử"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Truy cập trực tiếp vào dấu trang và lịch sử trình duyệt."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrô"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ghi âm"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Máy ảnh"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên máy tính bảng của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên TV của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"đọc thẻ liên hệ của riêng bạn"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Cho phép ứng dụng đọc thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"sửa đổi thẻ liên hệ của riêng bạn"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Cho phép ứng dụng thay đổi hoặc thêm vào thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"cảm biến cơ thể (như máy đo nhịp tim)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Cho phép ứng dụng truy cập dữ liệu từ bộ cảm biến giám sát tình trạng sức khỏe của bạn, ví dụ như nhịp tim."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"đọc luồng xã hội của bạn"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Cho phép ứng dụng truy cập và đồng bộ hóa các cập nhật xã hội của bạn và bạn bè bạn. Hãy cẩn trọng khi chia sẻ thông tin -- việc này có thể cho phép ứng dụng đọc thông tin liên lạc giữa bạn và bạn bè bạn trên các mạng xã hội, bất kể tính bí mật là gì. Lưu ý: quyền này có thể không được thực thi trên tất cả các mạng xã hội."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ghi luồng xã hội của bạn"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Cho phép ứng dụng hiển thị các cập nhật xã hội từ bạn bè của bạn. Hãy cẩn trọng khi chia sẻ thông tin -- việc này có thể cho phép ứng dụng tạo tin nhắn dường như đến từ một người bạn. Lưu ý: quyền này có thể không được thực thi trên tất cả các mạng xã hội."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"đọc các sự kiện lịch và thông tin bí mật"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Cho phép ứng dụng đọc tất cả các sự kiện trên lịch được lưu trữ trên máy tính bảng của bạn, bao gồm các sự kiện trên lịch của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng chia sẻ hoặc lưu dữ liệu lịch của bạn, bất kể tính bí mật hay tính nhạy cảm là gì."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Cho phép ứng dụng đọc tất cả các sự kiện trên lịch được lưu trữ trên TV của bạn, bao gồm các sự kiện trên lịch của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng chia sẻ hoặc lưu dữ liệu lịch của bạn, bất kể mức độ bảo mật hay mức độ nhạy cảm."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Cho phép ứng dụng sửa đổi cài đặt đồng bộ hóa cho tài khoản. Ví dụ: ứng dụng có thể được sử dụng để cho phép đồng bộ hóa ứng dụng Mọi người với tài khoản."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"đọc thống kê đồng bộ hóa"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Cho phép ứng dụng đọc thống kê đồng bộ hóa cho tài khoản, bao gồm lịch sử của các sự kiện đồng bộ hóa và lượng dữ liệu được đồng bộ hóa."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"đọc cụm từ bạn đã thêm vào từ điển"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Cho phép ứng dụng đọc tất cả các từ, tên và cụm từ mà người dùng có thể đã lưu trữ trong từ điển của người dùng."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"thêm từ vào từ điển do người dùng xác định"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Cho phép ứng dụng ghi từ mới vào từ điển của người dùng."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"đọc nội dung của bộ lưu trữ USB của bạn"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"đọc nội dung của thẻ SD của bạn"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Cho phép ứng dụng đọc nội dung của bộ lưu trữ USB."</string>

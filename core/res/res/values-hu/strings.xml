@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"hozzáférés a névjegyekhez"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Helyadatok"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"hozzáférés az eszköz földrajzi helyéhez"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Az Ön közösségi adatai"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Közvetlen hozzáférés a névjegyekre és közösségi kapcsolatokra vonatkozó információkhoz"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Naptár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"hozzáférés a naptárhoz"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS-ek küldése és megtekintése"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Tárhely"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"az eszközön lévő fotók, médiatartalmak és fájlok elérése"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Felhasználói szótár"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Szavak olvasása vagy írása a felhasználói szótárban."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Könyvjelzők és előzmények"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Közvetlen hozzáférés a könyvjelzőkhöz és a böngészési előzményekhez"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"hanganyag rögzítése"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fényképezőgép"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lehetővé teszi, hogy az alkalmazás módosítsa a táblagép híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Lehetővé teszi, hogy az alkalmazás módosítsa a tévé hívásnaplóját, így például a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt hívásnaplója törlésére vagy módosítására használhatják."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lehetővé teszi, hogy az alkalmazás módosítsa a telefon híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"saját névjegykártya olvasása"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Lehetővé teszi az alkalmazás számára, hogy hozzáférést biztosítson az eszközön tárolt személyes profiladatokhoz, például a névhez és az elérhetőségekhez. Ez azt jelenti, hogy az alkalmazás azonosíthatja Önt, és elküldheti másoknak profiladatait."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"saját névjegykártya módosítása"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Lehetővé teszi az alkalmazás számára az eszközön tárolt személyes profiladatok, például a név és az elérhetőségek módosítását vagy hozzáadását. Ez azt jelenti, hogy az alkalmazás azonosíthatja Önt, és elküldheti másoknak profiladatait."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"testérzékelők (pl. pulzusmérő)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Engedélyezi az alkalmazásnak, hogy hozzáférjen az Ön fizikai állapotát – például a pulzusszámát – figyelő érzékelők adataihoz."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"közösségi adatfolyam olvasása"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az Ön és ismerősei közösségi oldalakon szereplő frissítéseihez. Legyen elővigyázatos, amikor információt tesz közzé -- így az alkalmazás hozzáférhet az ismerőseivel a közösségi hálózatokon folytatott magánbeszélgetésekhez, a tartalom titkos jellegétől függetlenül. Megjegyzés: előfordulhat, hogy ez nincs minden közösségi hálózaton engedélyezve."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"írás a közösség adatfolyamra"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Lehetővé teszi az alkalmazás számára, hogy megjelenítse ismerősei közösségi oldalakon szereplő frissítéseit. Legyen elővigyázatos, amikor információt tesz közzé -- így az alkalmazás olyan üzeneteket hozhat létre, amelyek látszólag egy ismerőstől érkeztek. Megjegyzés: előfordulhat, hogy ez nincs minden közösségi hálózaton engedélyezve."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"naptári események és bizalmas információk beolvasása"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Lehetővé teszi az alkalmazás számára a táblagépén tárolt összes naptári esemény beolvasását, beleértve az ismerősök vagy munkatársak eseményeit is. Az alkalmazás így megoszthatja vagy elmentheti az Ön naptáradatait azok titkos vagy bizalmas jellegétől függetlenül."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Lehetővé teszi az alkalmazás számára a tévéjén tárolt összes naptáresemény elolvasását, beleértve az ismerősök vagy munkatársak eseményeit is. Ezáltal az alkalmazás megoszthatja vagy mentheti az Ön naptáradatait, az adatok titkosságára vagy érzékeny jellegére való tekintet nélkül."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Lehetővé teszi az alkalmazás számára egy fiók szinkronizálási beállításainak módosítását. Például ezzel engedélyezni lehet a Személyek alkalmazás szinkronizálását egy fióknál."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"szinkronizálási statisztikák olvasása"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Lehetővé teszi az alkalmazás számára egy fiók szinkronizálási statisztikáinak a beolvasását, beleértve a szinkronizálási események előzményeit, valamint a szinkronizált adatok mennyiségét."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"szótárhoz adott kifejezések olvasása"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Lehetővé teszi az alkalmazás számára, hogy beolvassa a felhasználói szótárban tárolt összes szót, nevet és kifejezést."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"szavak hozzáadása a felhasználó által definiált szótárhoz"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lehetővé teszi az alkalmazás számára, hogy új szavakat írjon a felhasználói szótárba."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB-tár tartalmának olvasása"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD-kártya tartalmának olvasása"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Beolvashat USB-tárakat."</string>

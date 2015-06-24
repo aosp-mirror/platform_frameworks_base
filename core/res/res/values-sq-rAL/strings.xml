@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"qasu te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"qasu te vendndodhja e kësaj pajisjeje"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informacionet e tua sociale"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Qasje e drejtpërdrejtë në informacionin e kontakteve të tua dhe lidhjeve sociale."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasu te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, media dhe skedarët në pajisje"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Fjalori i përdoruesit"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Të lexojë ose të shkruajë fjalë në fjalorin e përdoruesit."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Faqeshënuesit dhe historiku"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Qasje të drejtpërdrejtë në faqet e ruajtura si dhe historinë e shfletuesit."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lejon aplikacionin të modifikojë ditarin e telefonatave të tabletit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Aplikacione keqdashëse mund ta përdorin këtë leje për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Lejon aplikacionin të modifikojë ditarin e telefonatave të televizorit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Aplikacione keqdashëse mund ta përdorin këtë leje për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lejon aplikacionin të modifikojë ditarin e telefonatave të telefonit tënd, përfshirë të dhënat rreth telefonatave hyrëse dhe dalëse. Aplikacionet keqdashëse mund ta përdorin këtë për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"lexo kartën tënde të kontakteve"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Lejon aplikacionin të lexojë informacionin personal të profilit të ruajtur në pajisjen tënde, siç është emri yt dhe informacioni i kontaktit. Kjo do të thotë se aplikacioni mund të të identifikojë dhe t\'u dërgojë të tjerëve informacionin e profilit tënd."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"modifiko kartën tënde të kontaktit"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Lejon aplikacionin të ndryshojë ose shtojë informacionin personal të profilit të ruajtur në pajisjen tënde, siç është emri yt dhe informacioni i kontaktit. Kjo do të thotë se aplikacioni mund të të identifikojë dhe t\'u dërgojë të tjerëve informacionin e profilit tënd."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ndjesorët e trupit (si monitorimet e rrahjeve të zemrës)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Lejon aplikacionin të ketë qasje në të dhënat nga ndjesorë që monitorojnë gjendjen tënde fizike, siç janë rrahjet e zemrës."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lexo transmetimin tënd social"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Lejon aplikacionin të ketë qasje dhe të sinkronizojë përditësime shoqërore nga ty dhe miqtë e tu. Ki kujdes kur ndan informacione - kjo e lejon aplikacionin të lexojë komunikime mes teje dhe miqve të tu në rrjetet sociale, pavarësisht privatësisë. Shënim. Kjo leje nuk mund të zbatohet në të gjitha rrjetet sociale."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"shkruaj në transmetimin tënd social"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Lejon aplikacionin të shfaqë përditësime shoqërore nga miqtë. Ki kujdes kur ndan informacione - kjo e lejon aplikacionin të prodhojë mesazhe që mund të duken se vijnë nga një mik. Shënim. Kjo leje mund të mos zbatohet në të gjithë rrjetet sociale."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lexo ngjarjet kalendarike si dhe informacionin e privatësisë së tyre"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Lejon aplikacionin të lexojë të gjitha ngjarjet kalendarike të ruajtura në tabletin tënd, përfshirë ato të miqve ose kolegëve. Kjo mund ta lejojë aplikacionin të ndajë ose ruajë të dhënat e tua të kalendarit, pavarësisht privatësisë ose ndjeshmërisë së tyre."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Lejon aplikacionin të lexojë të gjitha ngjarjet kalendarike të ruajtura në televizorin tënd, përfshi ato të miqve apo kolegëve të tu. Kjo mund ta lejojë aplikacionin të ndajë ose ruajë të dhënat kalendarike, pavarësisht privatësisë ose ndjeshmërisë së tyre."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Lejon një aplikacion të modifikojë cilësimet e sinkronizimit për një llogari. Për shembull, kjo mund të përdoret për të mundësuar sinkronizimin e aplikacionit \"Kontaktet\" me një llogari."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lexo statistikat e sinkronizimit"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Lejon një aplikacion të lexojë statistikat e sinkronizimit për një llogari, përfshirë historikun e ngjarjeve të sinkronizimit dhe se sa të dhëna janë sinkronizuar."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"lexo termat që ke shtuar në fjalor"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Lejon aplikacionin të lexojë të gjitha fjalët, emrat dhe frazat që përdoruesi mund të ketë ruajtur në fjalorin e përdoruesit."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"shto fjalë në fjalorin e përcaktuar nga përdoruesi"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lejon aplikacionin të shkruajë fjalë të reja në fjalorin e përdoruesit."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lexo përmbajtjet e USB-së"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lexo përmbajtjet e kartës tënde SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Lejon aplikacionin të lexojë përmbajtjet e USB-së tënde."</string>

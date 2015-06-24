@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"access your contacts"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Location"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"access this device\'s location"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Your social information"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direct access to information about your contacts and social connections."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"access your calendar"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"send and view SMS messages"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Storage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"access photos, media and files on your device"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"User Dictionary"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Read or write words in user dictionary."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmarks and History"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direct access to bookmarks and browser history."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"record audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Allows the app to modify your tablet\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Allows the app to modify your TV\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"read your own contact card"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Allows the app to read personal profile information stored on your device, such as your name and contact information. This means that the app can identify you and may send your profile information to others."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"modify your own contact card"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Allows the app to change or add to personal profile information stored on your device, such as your name and contact information. This means that the app can identify you and may send your profile information to others."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"body sensors (like heart rate monitors)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Allows the app to access data from sensors that monitor your physical condition, such as your heart rate."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"read your social stream"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Allows the app to access and sync social updates from you and your friends. Be careful when sharing information - this allows the app to read communications between you and your friends on social networks, regardless of confidentiality. Note: this permission may not be enforced on all social networks."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"write to your social stream"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Allows the app to display social updates from your friends. Be careful when sharing information - this allows the app to produce messages that may appear to come from a friend. Note: this permission may not be enforced on all social networks."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"read calendar events plus confidential information"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Allows the app to read all calendar events stored on your tablet, including those of friends or co-workers. This may allow the app to share or save your calendar data, regardless of confidentiality or sensitivity."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Allows the app to read all calendar events stored on your TV, including those of friends or co-workers. This may allow the app to share or save your calendar data, regardless of confidentiality or sensitivity."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Allows an app to modify the sync settings for an account. For example, this can be used to enable syncing of the People app with an account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"read sync statistics"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"read terms you added to the dictionary"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Allows the app to read all words, names and phrases that the user may have stored in the user dictionary."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"add words to user-defined dictionary"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Allows the app to write new words into the user dictionary."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"read the contents of your USB storage"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"read the contents of your SD card"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Allows the app to read the contents of your USB storage."</string>
