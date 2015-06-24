@@ -240,11 +240,11 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
                     + " practices.");
         }
 
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
         if ((mIvRequired) && (mIv != null)) {
-            keymasterArgs.addBlob(KeymasterDefs.KM_TAG_NONCE, mIv);
+            keymasterArgs.addBytes(KeymasterDefs.KM_TAG_NONCE, mIv);
         }
     }
 
@@ -254,7 +254,7 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
         mIvHasBeenUsed = true;
 
         // NOTE: Keymaster doesn't always return an IV, even if it's used.
-        byte[] returnedIv = keymasterArgs.getBlob(KeymasterDefs.KM_TAG_NONCE, null);
+        byte[] returnedIv = keymasterArgs.getBytes(KeymasterDefs.KM_TAG_NONCE, null);
         if ((returnedIv != null) && (returnedIv.length == 0)) {
             returnedIv = null;
         }

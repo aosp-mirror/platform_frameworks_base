@@ -40,6 +40,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Locale;
@@ -663,14 +664,14 @@ public class KeyStore {
                             "Failed to obtained key characteristics",
                             getKeyStoreException(getKeyCharacteristicsErrorCode));
                 }
-                List<Long> keySids =
-                        keyCharacteristics.getLongs(KeymasterDefs.KM_TAG_USER_SECURE_ID);
+                List<BigInteger> keySids =
+                        keyCharacteristics.getUnsignedLongs(KeymasterDefs.KM_TAG_USER_SECURE_ID);
                 if (keySids.isEmpty()) {
                     // Key is not bound to any SIDs -- no amount of authentication will help here.
                     return new KeyPermanentlyInvalidatedException();
                 }
                 long rootSid = GateKeeper.getSecureUserId();
-                if ((rootSid != 0) && (keySids.contains(Long.valueOf(rootSid)))) {
+                if ((rootSid != 0) && (keySids.contains(KeymasterArguments.toUint64(rootSid)))) {
                     // One of the key's SIDs is the current root SID -- user can be authenticated
                     // against that SID.
                     return new UserNotAuthenticatedException();
@@ -678,7 +679,7 @@ public class KeyStore {
 
                 long fingerprintOnlySid = getFingerprintOnlySid();
                 if ((fingerprintOnlySid != 0)
-                        && (keySids.contains(Long.valueOf(fingerprintOnlySid)))) {
+                        && (keySids.contains(KeymasterArguments.toUint64(fingerprintOnlySid)))) {
                     // One of the key's SIDs is the current fingerprint SID -- user can be
                     // authenticated against that SID.
                     return new UserNotAuthenticatedException();

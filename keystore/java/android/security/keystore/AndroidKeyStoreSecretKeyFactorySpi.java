@@ -93,26 +93,29 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 insideSecureHardware = true;
                 origin = KeyProperties.Origin.fromKeymaster(
-                        keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
+                        keyCharacteristics.hwEnforced.getEnum(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else if (keyCharacteristics.swEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 insideSecureHardware = false;
                 origin = KeyProperties.Origin.fromKeymaster(
-                        keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
+                        keyCharacteristics.swEnforced.getEnum(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else {
                 throw new ProviderException("Key origin not available");
             }
-            Integer keySizeInteger = keyCharacteristics.getInteger(KeymasterDefs.KM_TAG_KEY_SIZE);
-            if (keySizeInteger == null) {
+            long keySizeUnsigned =
+                    keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
+            if (keySizeUnsigned == -1) {
                 throw new ProviderException("Key size not available");
+            } else if (keySizeUnsigned > Integer.MAX_VALUE) {
+                throw new ProviderException("Key too large: " + keySizeUnsigned + " bits");
             }
-            keySize = keySizeInteger;
+            keySize = (int) keySizeUnsigned;
             purposes = KeyProperties.Purpose.allFromKeymaster(
-                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PURPOSE));
+                    keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_PURPOSE));
 
             List<String> encryptionPaddingsList = new ArrayList<String>();
             List<String> signaturePaddingsList = new ArrayList<String>();
             // Keymaster stores both types of paddings in the same array -- we split it into two.
-            for (int keymasterPadding : keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PADDING)) {
+            for (int keymasterPadding : keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_PADDING)) {
                 try {
                     @KeyProperties.EncryptionPaddingEnum String jcaPadding =
                             KeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
@@ -135,13 +138,13 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     signaturePaddingsList.toArray(new String[signaturePaddingsList.size()]);
 
             digests = KeyProperties.Digest.allFromKeymaster(
-                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST));
+                    keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_DIGEST));
             blockModes = KeyProperties.BlockMode.allFromKeymaster(
-                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_BLOCK_MODE));
+                    keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_BLOCK_MODE));
             keymasterSwEnforcedUserAuthenticators =
-                    keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
+                    keyCharacteristics.swEnforced.getEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
             keymasterHwEnforcedUserAuthenticators =
-                    keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
+                    keyCharacteristics.hwEnforced.getEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
         } catch (IllegalArgumentException e) {
             throw new ProviderException("Unsupported key characteristic", e);
         }
@@ -153,8 +156,12 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 keyCharacteristics.getDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME);
         boolean userAuthenticationRequired =
                 !keyCharacteristics.getBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        int userAuthenticationValidityDurationSeconds =
-                keyCharacteristics.getInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, -1);
+        long userAuthenticationValidityDurationSeconds =
+                keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, -1);
+        if (userAuthenticationValidityDurationSeconds > Integer.MAX_VALUE) {
+            throw new ProviderException("User authentication timeout validity too long: "
+                    + userAuthenticationValidityDurationSeconds + " seconds");
+        }
         boolean userAuthenticationRequirementEnforcedBySecureHardware = (userAuthenticationRequired)
                 && (keymasterHwEnforcedUserAuthenticators != 0)
                 && (keymasterSwEnforcedUserAuthenticators == 0);
@@ -172,7 +179,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 digests,
                 blockModes,
                 userAuthenticationRequired,
-                userAuthenticationValidityDurationSeconds,
+                (int) userAuthenticationValidityDurationSeconds,
                 userAuthenticationRequirementEnforcedBySecureHardware);
     }
 
