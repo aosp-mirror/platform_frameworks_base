@@ -714,6 +714,16 @@
         android:protectionLevel="normal"
         android:permissionFlags="hide"/>
 
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.READ_USER_DICTIONARY"
+        android:protectionLevel="normal"
+        android:permissionFlags="hide"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.WRITE_USER_DICTIONARY"
+        android:protectionLevel="normal"
+        android:permissionFlags="hide"/>
+
     <!-- ====================================================================== -->
     <!-- INSTALL PERMISSIONS                                                    -->
     <!-- ====================================================================== -->
@@ -752,36 +762,6 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.BIND_DIRECTORY_SEARCH"
         android:protectionLevel="signature|system" />
-
-    <!-- =============================================================== -->
-    <!-- Permissions for accessing the user dictionary-->
-    <!-- =============================================================== -->
-    <eat-comment />
-
-    <!-- Used for permissions that provide access to the user
-         calendar to create / view events.-->
-    <permission-group android:name="android.permission-group.USER_DICTIONARY"
-        android:label="@string/permgrouplab_dictionary"
-        android:icon="@drawable/perm_group_user_dictionary"
-        android:description="@string/permgroupdesc_dictionary"
-        android:permissionGroupFlags="personalInfo"
-        android:priority="1100" />
-
-    <!-- Allows an application to read the user dictionary. This should
-         really only be required by an IME, or a dictionary editor like
-         the Settings app. -->
-    <permission android:name="android.permission.READ_USER_DICTIONARY"
-        android:permissionGroup="android.permission-group.USER_DICTIONARY"
-        android:label="@string/permlab_readDictionary"
-        android:description="@string/permdesc_readDictionary"
-        android:protectionLevel="dangerous"/>
-
-    <!-- Allows an application to write to the user dictionary. -->
-    <permission android:name="android.permission.WRITE_USER_DICTIONARY"
-        android:permissionGroup="android.permission-group.USER_DICTIONARY"
-        android:label="@string/permlab_writeDictionary"
-        android:description="@string/permdesc_writeDictionary"
-        android:protectionLevel="normal"/>
 
     <!-- =============================================================== -->
     <!-- Permissions for setting the device alarm                        -->
