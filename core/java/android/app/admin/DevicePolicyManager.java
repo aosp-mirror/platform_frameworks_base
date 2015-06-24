@@ -4332,7 +4332,7 @@ public class DevicePolicyManager {
      * @param admin Which profile or device owner this request is associated with.
      * @return the current policy for future permission requests.
      */
-    public int getPermissionPolicy(@NonNull ComponentName admin) {
+    public int getPermissionPolicy(ComponentName admin) {
         try {
             return mService.getPermissionPolicy(admin);
         } catch (RemoteException re) {
