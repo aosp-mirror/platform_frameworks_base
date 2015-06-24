@@ -2539,7 +2539,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case GET_PACKAGE_PROCESS_STATE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
-            int res = getPackageProcessState(pkg);
+            String callingPackage = data.readString();
+            int res = getPackageProcessState(pkg, callingPackage);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -5916,11 +5917,13 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public int getPackageProcessState(String packageName) throws RemoteException {
+    public int getPackageProcessState(String packageName, String callingPackage)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
+        data.writeString(callingPackage);
         mRemote.transact(GET_PACKAGE_PROCESS_STATE_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();

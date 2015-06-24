@@ -503,7 +503,8 @@ public interface IActivityManager extends IInterface {
     public void updateLockTaskPackages(int userId, String[] packages) throws RemoteException;
     public void updateDeviceOwner(String packageName) throws RemoteException;
 
-    public int getPackageProcessState(String packageName) throws RemoteException;
+    public int getPackageProcessState(String packageName, String callingPackage)
+            throws RemoteException;
 
     public boolean setProcessMemoryTrimLevel(String process, int uid, int level)
             throws RemoteException;

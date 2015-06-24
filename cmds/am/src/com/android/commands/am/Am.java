@@ -1751,7 +1751,7 @@ public class Am extends BaseCommand {
     private void runPackageImportance() throws Exception {
         String packageName = nextArgRequired();
         try {
-            int procState = mAm.getPackageProcessState(packageName);
+            int procState = mAm.getPackageProcessState(packageName, "com.android.shell");
             System.out.println(
                     ActivityManager.RunningAppProcessInfo.procStateToImportance(procState));
         } catch (RemoteException e) {
