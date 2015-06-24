@@ -99,6 +99,14 @@ SkCanvas* DisplayListCanvas::asSkCanvas() {
     if (!mSkiaCanvasProxy) {
         mSkiaCanvasProxy.reset(new SkiaCanvasProxy(this));
     }
+
+    // SkCanvas instances default to identity transform, but should inherit
+    // the state of this Canvas; if this code was in the SkiaCanvasProxy
+    // constructor, we couldn't cache mSkiaCanvasProxy.
+    SkMatrix parentTransform;
+    getMatrix(&parentTransform);
+    mSkiaCanvasProxy.get()->setMatrix(parentTransform);
+
     return mSkiaCanvasProxy.get();
 }
 
