@@ -232,18 +232,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"отримувати доступ до контактів"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Геодані"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"доступ до геоданих пристрою"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Соціальна інформація"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Безпосередній доступ до інформації про ваші контакти та соціальні зв’язки."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"отримувати доступ до календаря"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"надсилати та переглядати SMS-повідомлення"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Зберігання"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"отримувати доступ до фотографій, мультимедійного вмісту та файлів на вашому пристрої"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Словник користувача"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Переглядати або додавати слова в словнику користувача."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Закладки й історія"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Безпосередній доступ до закладок та історії веб-переглядача."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записувати аудіо"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
@@ -334,16 +328,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дозволяє програмі змінювати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Додаток може змінювати журнал викликів телевізора, зокрема дані про вхідні та вихідні дзвінки. Шкідливі додатки можуть використовувати це, щоб стирати чи змінювати ваш журнал викликів."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дозволяє програмі змінювати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"читати картки контактів"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Дозволяє програмі читати особисту інформацію профілю, збережену на пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що програма може ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"змінювати картки контактів"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Дозволяє програмі змінювати чи додавати особисту інформацію профілю, збережену на пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що програма може ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"датчики на тілі (як-от пульсометр)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Додаток має доступ до даних із датчиків, які відстежують фізичний стан, зокрема пульс."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читати ваш соціальний потік"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Дозволяє програмі отримувати доступ до оновлень із соціальних мереж від вас і ваших друзів та синхронізувати їх. Будьте обережні, надаючи доступ до інформації – це дозволяє програмі читати повідомлення, якими ви та ваші друзі обмінювалися в соціальних мережах, незалежно від конфіденційності. Зауважте: цей дозвіл не можна застосовувати в усіх соціальних мережах."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"писати у ваш соціальний потік"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Дозволяє програмі відображати оновлення із соціальних мереж від ваших друзів. Будьте обережні, надаючи доступ до інформації – це дозволяє програмі створювати повідомлення, які надходять ніби від друга. Зауважте: цей дозвіл не можна застосовувати в усіх соціальних мережах."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"читати події календаря, а також конфіденційну інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Дозволяє програмі читати всі події календаря, збережені в планшетному ПК, включно з подіями друзів або співробітників. Це може дозволити програмі надсилати або зберігати дані календаря, незалежно від конфіденційності або закритості."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Додаток може читати всі події календаря, збережені в телевізорі, зокрема події друзів або співробітників. Завдяки цьому додаток може надсилати або зберігати дані календаря, незалежно від їх конфіденційності або закритості."</string>
@@ -456,10 +442,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Дозволяє програмі змінювати налаштування синхронізації для облікового запису, наприклад, вмикати синхронізацію програми Люди з обліковим записом."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Перегляд статистики синхронізації"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Дозволяє програмі читати статистику синхронізації облікового запису, зокрема історію синхронізацій і обсяг синхронізованих даних."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"читати додані в словник терміни"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Дозволяє програмі читати всі слова, назви та фрази, які користувач міг зберегти у своєму словнику."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"додавати слова у вказаний користувачем словник"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозволяє програмі писати нові слова в словник користувача."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"читати вміст носія USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"читати вміст карти SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Дозволяє програмі читати вміст носія USB."</string>

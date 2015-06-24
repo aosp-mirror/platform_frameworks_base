@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"käyttää yhteystietoja"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Sijainti"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"käyttää laitteen sijaintia"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sosiaaliset tietosi"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kontaktiesi ja internet-kontaktiesi tietojen käyttöoikeus."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenteri"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"käyttää kalenteria"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Tekstiviestit"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"lähettää ja tarkastella tekstiviestejä"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Tallennustila"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"käyttää laitteellesi tallennettuja valokuvia, mediatiedostoja ja muita tiedostoja"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Käyttäjän sanakirja"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lue tai kirjoita sanoja käyttäjän sanakirjaan."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Kirjanmerkit ja historia"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Kirjanmerkkien ja selaimen historian käyttöoikeus."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"tallentaa ääntä"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Antaa sovelluksen muokata television puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"lue omia yhteystietoja"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Antaa sovelluksen lukea laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimen ja yhteystietoja. Sovellus voi tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"muokkaa omia yhteystietoja"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Antaa sovelluksen muuttaa laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimeä ja yhteystietoja, tai lisätä niitä. Sovellus voi tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kehon anturit (kuten sykemittarit)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Antaa sovelluksen käyttää kehosi tilaa seuraavien anturien tietoja, esimerkiksi sykettä."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lue sosiaalista streamia"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Antaa sovelluksen käyttää ja synkronoida sinun tai kavereidesi päivityksiä sosiaalisista palveluista. Mieti tarkkaan ennen tietojen jakamista: tämän luvan saaneet sovellukset voivat lukea sinun ja kavereidesi välisiä viestejä sosiaalisissa verkkopalveluissa huolimatta viestien arkaluonteisuudesta. Huom: tätä lupaa ei saa ottaa käyttöön kaikissa sosiaalisissa verkkopalveluissa."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"kirjoita sosiaaliseen streamiin"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Antaa sovelluksen näyttää kavereidesi päivityksiä sosiaalisista palveluista. Mieti tarkkaan ennen tietojen jakamista: tämän luvan saaneet sovellukset voivat luoda viestejä, jotka vaikuttavat kavereidesi lähettämiltä. Huom: tätä lupaa ei saa ottaa käyttöön kaikissa sosiaalisissa verkkopalveluissa."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lue kalenteritapahtumia ja luottamuksellisia tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Antaa sovelluksen lukea tablet-laitteelle tallennettuja kalenteritapahtumia, myös kavereiden tai työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietojasi niiden arkaluonteisuudesta huolimatta."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Antaa sovelluksen lukea kaikkia televisioon tallennettuja kalenteritapahtumia, myös kavereiden ja työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietoja niiden arkaluonteisuudesta huolimatta."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Antaa sovelluksen muokata tilin synkronointiasetuksia. Sovellus voi esimerkiksi ottaa Ihmiset-sovelluksen synkronoinnin käyttöön tilissä."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lue synkronointitilastoja"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Antaa sovelluksen lukea tilien synkronoinnin tilan sekä synkronoitujen tapahtumien historian ja kuinka paljon tietoja on synkronoitu."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"lue sanakirjaan lisättyjä termejä"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Antaa sovelluksen lukea sanoja, nimiä tai ilmauksia, joita käyttäjä on voinut tallentaa käyttäjän sanakirjaan."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"lisää sanoja käyttäjän sanakirjaan"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Antaa sovelluksen kirjoittaa uusia sanoja käyttäjän sanakirjaan."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lue USB-tallennustilan sis."</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lue SD-kortin sisältöä"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Antaa sovelluksen lukea USB-tallennuslaitteen sisällön."</string>

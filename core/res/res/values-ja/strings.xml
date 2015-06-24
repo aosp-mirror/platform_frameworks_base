@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置情報"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"この端末の位置情報にアクセス"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ソーシャル情報"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"連絡先とソーシャルコネクションに関する情報に直接アクセスします。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"カレンダー"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"カレンダーへのアクセス"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMSメッセージの送信と表示"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"端末上の写真、メディア、ファイルへのアクセス"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"単語リスト"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"単語リストの語句の読み取りまたは書き込みを行います"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ブックマークと履歴"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ブックマークとブラウザの履歴に直接アクセスします。"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"テレビの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"携帯端末の通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"自分の連絡先カードの読み取り"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の読み取りをアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"自分の連絡先カードの変更"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の変更と追加をアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ボディーセンサー（心拍数モニターなど）"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"心拍数など、身体状態を監視するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ソーシャルストリームを読む"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"友だちのソーシャル更新情報の表示をアプリに許可します。情報の共有は慎重に行ってください。これによりアプリは、友だちから発信されたかのようなメッセージを作成できるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報の読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"テレビに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"アカウントの同期設定の変更をアプリに許可します。たとえば、連絡帳アプリとアカウントの同期を有効にするために使用できます。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"同期統計の読み取り"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"アカウントの同期ステータス（同期イベントの履歴、同期されたデータの量など）の読み取りをアプリに許可します。"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"辞書に追加された語句の読み取り"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"単語リストに登録されているすべての語句や名前を読み取ることをアプリに許可します。"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"単語リストへの語句の追加"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"単語リストに新しい語句を書き込むことをアプリに許可します。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USBストレージの読み取り"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SDカードのコンテンツの読み取り"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"USBストレージのコンテンツの読み取りをアプリに許可します。"</string>

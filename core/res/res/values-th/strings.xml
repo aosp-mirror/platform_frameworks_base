@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"เข้าถึงรายชื่อติดต่อ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ตำแหน่ง"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"เข้าถึงตำแหน่งของอุปกรณ์นี้"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ข้อมูลทางสังคมของคุณ"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"เข้าถึงข้อมูลเกี่ยวกับผู้ติดต่อและเครือข่ายสังคมของคุณโดยตรง"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ปฏิทิน"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ส่งและดูข้อความ SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"พื้นที่เก็บข้อมูล"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"เข้าถึงรูปภาพ สื่อ และไฟล์บนอุปกรณ์ของคุณ"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"พจนานุกรมผู้ใช้"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"อ่านหรือเขียนคำในพจนานุกรมผู้ใช้"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"บุ๊กมาร์กและประวัติ"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"เข้าถึงบุ๊กมาร์กและประวัติของเบราว์เซอร์โดยตรง"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"บันทึกเสียง"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"อนุญาตให้แอปแก้ไขประวัติการโทรของทีวี รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขประวัติการโทรได้"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"อ่านบัตรผู้ติดต่อของคุณเอง"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลส่วนตัวในโปรไฟล์ที่จัดเก็บไว้ในอุปกรณ์ของคุณ เช่น ชื่อและข้อมูลติดต่อของคุณ ซึ่งหมายความว่าแอปพลิเคชันสามารถระบุตัวคุณและอาจส่งข้อมูลโปรไฟล์ของคุณให้ผู้อื่น"</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"แก้ไขบัตรผู้ติดต่อของคุณเอง"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงหรือเพิ่มข้อมูลโปรไฟล์ส่วนตัวที่จัดเก็บไว้บนอุปกรณ์ของคุณ เช่น ชื่อและข้อมูลติดต่อ ซึ่งหมายความว่าแอปพลิเคชันจะสามารถระบุตัวตนของคุณและส่งข้อมูลโปรไฟล์ของคุณให้แก่ผู้อื่นได้"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"เซ็นเซอร์ร่างกาย (เช่น วัดอัตราการเต้นของหัวใจ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"อ่านสตรีมเครือข่ายสังคม"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"อนุญาตให้แอปพลิเคชันเข้าถึงและซิงค์การอัปเดตทางสังคมจากคุณและเพื่อน โปรดแชร์ข้อมูลอย่างระมัดระวังเนื่องจากการอนุญาตนี้ทำให้แอปพลิเคชันสามารถอ่านการติดต่อระหว่างคุณและเพื่อนในเครือข่ายสังคมได้ ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับแบบใดก็ตาม หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับทุกเครือข่ายสังคม"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"เขียนในสตรีมเครือข่ายสังคม"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"อนุญาตให้แอปพลิเคชันแสดงการอัปเดตทางสังคมจากเพื่อนของคุณ โปรดแชร์ข้อมูลอย่างระมัดระวังเนื่องจากการอนุญาตนี้ทำให้แอปพลิเคชันสามารถสร้างข้อความที่ดูเหมือนมาจากเพื่อนได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้ได้กับทุกเครือข่ายสังคม"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"อ่านกิจกรรมบนปฏิทินรวมถึงข้อมูลที่เป็นความลับ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในแท็บเล็ตของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"อนุญาตให้แอปอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในทีวี รวมถึงกิจกรรมของเพื่อนๆ หรือเพื่อนร่วมงาน โดยอาจอนุญาตให้แอปแชร์หรือบันทึกข้อมูลปฏิทิน แม้ว่าจะเป็นข้อมูลลับหรือข้อมูลละเอียดอ่อน"</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น สามารถใช้การอนุญาตเปิดใช้งานการซิงค์แอปพลิเคชัน People กับบัญชี"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"อ่านสถิติการซิงค์"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"อนุญาตให้แอปพลิเคชันอ่านสถานะการซิงค์ของบัญชี ซึ่งรวมถึงประวัติกิจกรรมการซิงค์และปริมาณข้อมูลที่ซิงค์"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"อ่านคำที่คุณเพิ่มลงในพจนานุกรม"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"อนุญาตให้แอปพลิเคชันอ่านคำ ชื่อ และวลีทั้งหมดที่ผู้ใช้ได้จัดเก็บไว้ในพจนานุกรมผู้ใช้"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"เพิ่มคำลงในพจนานุกรมที่ผู้ใช้กำหนด"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"อนุญาตให้แอปพลิเคชันเขียนคำใหม่ลงในพจนานุกรมผู้ใช้"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"อ่านเนื้อหาในที่จัดเก็บ USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"อ่านเนื้อหาในการ์ด SD ของคุณ"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"อนุญาตให้แอปอ่านเนื้อหาในที่จัดเก็บข้อมูล USB"</string>

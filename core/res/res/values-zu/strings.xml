@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"finyelela koxhumana nabo"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Indawo"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"finyelela kundawo yale divayisi"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ulwazi lakho lomphakathi"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Ukufinyelela okuqondile kulwazi mayelana noxhumana nabo bomphakathi."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Ikhalenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"finyelela kukhalenda yakho"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"I-SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"thumela uphinde ubuke imilayezo ye-SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Isitoreji"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"finyelela kuzithombe, imidiya, namafayela kudivayisi yakho"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Isichazamazwi somsebenzisi"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Funda noma bhala amagama kusichazamazwi somsebenzisi."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Amabhukhimakhi nomlando"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Ukufinyelela okuqondile kumlando wamabhukimakhi nesiphequluli."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"I-Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"rekhoda ividiyo"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Ikhamela"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ivumela uhlelo lokusebenza ukushintsha ilogi yekholi yethebulethi yakho, kufaka phakathi idatha mayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukusula noma ukushintsha irekhodi lwamakholi wakho."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ivumela uhlelo lokusebenza ukuthi liguqule ilogi yekholi yakho ye-TV, okufaka idatha emayelana namakholi angenayo naphumayo. Izinhlelo zokusebenza ezinobungozi zingasebenzisa lokhu ukususa noma ukuguqula ilogi yakho yekholi."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ivumela uhlelo lokusebenza ukushintsha irekhodi lamakholi efoni yakho, kufaka phakathi idatha emayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukusula noma ukushintsha irekhodi lwamakholi wakho."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"funda ikhadi lakho lokuxhumana"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Ivumela uhlelo lokusebenza ukuthi lifunde ulwazi lephrofayela lomuntu siqu olugcinwe kudivayisi yakho njengegama lakho kanye nolwazi lokuxhumana. Lokhu kuchaza ukuthi uhlelo lokusebenza lingakuhlonza bese lithumelela abanye ulwazi lakho lephrofayela."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"guqula ikhadi lakho lokuxhumana"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Ivumela uhlelo lokusebenza ukushintsha noma ingeze ulwazi lomuntu siqu lwephrofayela olulondolozwe kudivayisi yakho, njengegama lakho kanye nolwazi lokuxhumana. Lokhu kuchaza ukuthi ezinye izinhlelo zokusebenza zingakuhlonza bese zithumelela abanye ulwazi lephrofayela yakho."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"izinzwa zomzimba (njengeziqaphi zokulinganisela inhliziyo)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ivumela uhlelo lokusebenza ukuthi lufinyelele kudatha kusukela kuzinzwa eziqapha isimo sakho somzimba, esifana nesilinganiso senhliziyo yakho."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"funda ngezindlela zakho zokuxhumana nabanye abantu"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Ivumela uhlelo lokusebenza ukufinyelela nokuvumelanisa izibuyekezo zomphakathi ezivela kuwe nakubangani bakho. Qaphela uma waba ulwazi -- lokhu kuvumela uhlelo lokusebenza ukufunda ukuxhumana phakathi kwakho nabangani bakho kumanethiwekhi omphakathi, ngaphandle kokugcinwa kuyimfihlo. Qaphela: le mvume ingaphoqelelwa kuwo onke amanethiwekhi omphakathi."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"bhala indlela yakho yokuxhumana nabantu"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Ivumela uhlelo lokusebenza ukubonisa izibuyekezo zomphakathi ezivela kubangani bakho. Qaphela uma wabelana ngolwazi -- lokhu kuvumela uhlelo lokusebenza ukukhiqiza imilayezo engabonakala sengathi ivela kumngani. Qaphela: le mvume kungenzeka ingaphoqelelwa kuwo onke amanethiwekhi omphakathi."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"funda imicimbi yekhalenda kanye nokwaziswa okuyimfihlo"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Ivumela uhlelo lokusebenza ukufunda zonke izehlakalo zekhalenda ezilondolozwe kuthebhulethi yakho, kufaka phakathi lezo zabangani noma osebenza nabo. Lokhu kungavumela uhlelo lokusebenza ukwabelana noma ukulondoloza idatha yakho yekhalenda, ngaphandle kokugcinwa kuyimfihlo noma ukuzwela."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Ivumela uhlelo lokusebenza ukuthi lifunde yonke imicimbi yekhalenda egcinwe ku-TV yakho, efaka leyo yabangani noma osebenza nabo. Lokhu kungavumela uhlelo lokusebenza ukuthi labelane noma lilondoloze idatha yekhalenda yakho, ngokunganaki ubumfihlo noma ukuzwela."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Ivumela uhlelo lokusebenza ukushintsha izilungiselelo zokuvumelanisa ze-akhawunti. Isibonelo, lokhu kungasetshenziswa ukunika amandla ukuvumelanisa kohlelo lokusebenza le-People ne-akhawunti."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"funda izibalo zokuvumelanisa"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Ivumela uhlelo lokusebenza ukufunda izibalo zokuvumelanisa ze-akhawunti, kufaka phakathi umlando wezehlakalo ezivumelanisiwe nokuthi ingakanani idatha evumelanisiwe."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"funda imibandela oyengezile esichazimazwini"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Ivumela uhlelo lokusebenza ukufunda onke amabizo, amagama, namatemu umsebenzisi awalondolozile kusichazamazwi somsebenzisi."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"engeza amagama kusichazamazwi ezichazwe umsebenzisi"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ivumela uhlelo lokusebenza ukuthi ibhale amagama amasha esichazinimazwi."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"funda okuqukethwe kokugciniwe kwakho okufinyeleleka nge-USD"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"funda okuqukethwe ekhadini lakho le-SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Ivumela uhlelo lokusebenza ukufunda okuqukethwe kwesitoreji sakho se-USB."</string>

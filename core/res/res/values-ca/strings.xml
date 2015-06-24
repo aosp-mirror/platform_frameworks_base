@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ubicació"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedeix a la ubicació del dispositiu"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informació social"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accés directe a informació sobre els teus contactes i sobre les teves connexions socials."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedir al calendari"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"enviar i llegir missatges SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Emmagatzematge"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Diccionari de l\'usuari"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Llegir o escriure paraules al diccionari de l\'usuari."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcadors i historial"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Accés directe a l\'historial de marcadors i de navegació."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micròfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrar àudio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permet que l\'aplicació modifiqui el registre de trucades de la teva tauleta, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permet que l\'aplicació modifiqui el registre de trucades del televisor, com ara les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses l\'utilitzin per esborrar o modificar les dades del registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permet que l\'aplicació modifiqui el registre de trucades del teu telèfon, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"lectura targeta de contacte"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Permet que l\'aplicació pugui llegir informació del perfil personal emmagatzemada al dispositiu, com ara el teu nom i la teva informació de contacte. Això significa que l\'aplicació et pot identificar i enviar la informació del teu perfil a altres persones."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"modificació targeta contacte"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permet que l\'aplicació pugui canviar o afegir informació del perfil personal emmagatzemada al dispositiu, com ara el teu nom i la teva informació de contacte. Això significa que l\'aplicació et pot identificar i enviar la informació del teu perfil a altres persones."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"sensors corp. (monitors freq. cardíaca)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permet que l\'aplicació accedeixi a les dades dels sensors que supervisen el teu estat físic, com ara la freqüència cardíaca."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"llegeix el teu tauler d\'activitat social"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permet que l\'aplicació accedeixi i sincronitzi actualitzacions socials teves i dels teus amics. Vés amb compte en compartir informació: això permet que l\'aplicació llegeixi comunicacions entre tu i els teus amics a les xarxes socials, independentment de la confidencialitat. Nota: És possible que aquest permís no s\'apliqui a totes les xarxes socials."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"escriu al tauler d\'activitat social"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Permet que l\'aplicació mostri actualitzacions socials dels teus amics. Vés amb compte en compartir informació: això permet que l\'aplicació produeixi missatges que pot semblar que provinguin d\'un amic. Nota: És possible que aquest permís no s\'apliqui a totes les xarxes socials."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"llegeix els esdeveniments del calendari més informació confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permet que l\'aplicació llegeixi tots els esdeveniments del calendari emmagatzemats a la tauleta, inclosos els dels amics o dels companys de feina. Aquesta acció pot permetre que l\'aplicació comparteixi o desi les dades del teu calendari, sense tenir en compte la confidencialitat."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Permet que l\'aplicació llegeixi tots els esdeveniments del calendari emmagatzemats al televisor, com ara els dels amics o els dels companys de feina. Amb aquesta acció, l\'aplicació pot compartir o desar les dades del teu calendari sense tenir en compte la confidencialitat o la sensibilitat."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet que una aplicació modifiqui la configuració de sincronització d\'un compte. Per exemple, aquesta acció es pot fer servir per activar la sincronització de l\'aplicació Persones amb un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"llegir les estadístiques de sincronització"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permet que una aplicació llegeixi les estadístiques de sincronització d\'un compte, inclòs l\'historial d\'esdeveniments sincronitzats i quantes dades se sincronitzen."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"lectura dels termes que afegeixes al diccionari"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet que l\'aplicació llegeixi les paraules, els noms i les frases que l\'usuari pot haver emmagatzemat al seu diccionari."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"afegeix paraules al diccionari definit per l\'usuari"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet que l\'aplicació escrigui paraules noves al diccionari de l\'usuari."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"consultar contingut emmagatzematge USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lectura del contingut de la targeta SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permet que l\'aplicació llegeixi el contingut de l\'emmagatzematge USB."</string>

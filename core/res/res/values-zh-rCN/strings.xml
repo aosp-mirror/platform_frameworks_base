@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"使用您的通讯录"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"使用此设备的位置信息"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交信息"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接访问与您的联系人和社交人脉相关的信息。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"短信"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"发送和查看短信"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储空间"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"访问您设备上的照片、媒体内容和文件"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"用户字典"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"读取用户字典中的字词或写入新字词。"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接访问书签和浏览器历史记录。"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"录制音频"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相机"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允许该应用修改平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允许应用修改电视的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允许该应用修改手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"读取您自己的名片"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"允许该应用读取您设备上存储的个人资料信息，例如您的姓名和联系信息。这意味着该应用可以识别您的身份，并可能将您的个人资料信息发送给他人。"</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"修改您自己的名片"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允许该应用更改或添加您设备上存储的个人资料信息，例如您的姓名和联系信息。这意味着该应用可以识别您的身份，并可能将您的个人资料信息发送给他人。"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"人体传感器（如心跳速率检测器）"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允许该应用存取监测您身体状况的传感器所收集的数据，例如您的心率。"</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"读取您的社交信息流"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允许该应用访问并同步您和朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用读取您与社交网络上的朋友之间的交流信息。"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"写入您的社交信息流"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"允许该应用显示您朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用冒充某个朋友编写消息。请注意：此权限可能不适用于所有社交网络。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"读取日历活动和机密信息"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"允许该应用读取您平板电脑上存储的所有日历活动，包括朋友或同事的活动。此权限可让该应用分享或保存您的日历数据，而不论这些数据是否属于机密或敏感内容。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"允许应用读取您的电视上存储的所有日历活动，包括朋友或同事的活动。此权限可让应用分享或保存您的日历数据，而不论这些数据是否属于机密或敏感内容。"</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许该应用修改某个帐户的同步设置。例如，此权限可用于在“联系人”应用与某个帐户之间启用同步。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"读取同步统计信息"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许该应用读取某个帐户的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到字典的字词"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户字典中存储的所有字词、名称和词组。"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的字典添加字词"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户字典中写入新词。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"读取您的USB存储设备中的内容"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"读取您的SD卡中的内容"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允许应用读取您USB存储设备中的内容。"</string>

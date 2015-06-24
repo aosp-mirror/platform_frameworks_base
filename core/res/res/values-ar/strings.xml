@@ -234,18 +234,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"المعلومات الاجتماعية"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"الدخول المباشر إلى معلومات عن جهات الاتصال والاتصالات الاجتماعية."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"الوصول تقويمك"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"التخزين"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"قاموس المستخدم"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"قراءة الكلمات وكتابتها في قاموس المستخدم."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"الإشارات المرجعية والسجل"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"الدخول المباشر إلى الإشارات المرجعية وسجل المتصفح."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
@@ -336,16 +330,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"للسماح للتطبيق بتعديل سجل مكالمات الجهاز اللوحي، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"يتيح للتطبيق تعديل سجل مكالمات التلفزيون، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"قراءة بطاقة الاتصال الخاصة"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"للسماح للتطبيق بقراءة المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"تعديل بطاقة جهة الاتصال الخاصة"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"للسماح للتطبيق بتغيير المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز أو الإضافة إليها، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"للسماح للتطبيق بالدخول إلى البيانات من المستشعرات التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"قراءة المشاركات الاجتماعية"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"للسماح للتطبيق بالدخول إلى التحديثات الاجتماعية منك ومن أصدقائك ومزامنتها. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق قراءة عمليات التواصل بينك وبين أصدقائك على الشبكات الاجتماعية، بغض النظر عن مدى السرية. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"كتابة إلى المشاركات الاجتماعية"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"للسماح للتطبيق بعرض التحديثات الاجتماعية منك ومن أصدقائك. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق إنشاء رسائل يبدو أنها واردة من صديق. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"قراءة أحداث التقويم بالإضافة إلى المعلومات السرية"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"للسماح للتطبيق بقراءة جميع أحداث التقويم المخزنة على الجهاز اللوحي، بما في ذلك أحداث التقويم التابعة للأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق مشاركة بيانات التقويم أو حفظها، بغض النظر عن مدى سرية البيانات أو حساسيتها."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"يتيح للتطبيق قراءة جميع أحداث التقويم المخزنة على التلفزيون، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق مشاركة بيانات التقويم أو حفظها، بغض النظر عن مدى السرية أو الحساسية."</string>
@@ -458,10 +444,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتمكين مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"قراءة إحصاءات المزامنة"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"قراءة المصطلحات التي أضفتها إلى القاموس"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"للسماح للتطبيق بقراءة جميع الكلمات والأسماء والعبارات التي ربما يكون المستخدم قد خزنها في قاموس المستخدم."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"إضافة كلمات إلى القاموس المعرّف بواسطة المستخدم"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"للسماح للتطبيق بكتابة كلمات جديدة في قاموس المستخدم."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"‏قراءة محتويات وحدة تخزين USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"‏قراءة محتويات بطاقة SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"‏للسماح للتطبيق بقراءة محتويات وحدة تخزين USB."</string>

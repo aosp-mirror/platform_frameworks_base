@@ -232,18 +232,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"גישה אל אנשי הקשר"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"מיקום"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"גישה אל מיקום המכשיר הזה"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"מידע על הקשרים החברתיים שלך"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"גישה ישירה למידע על אנשי קשר וקשרים חברתיים שלך."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"יומן"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"גישה אל היומן"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏שליחה והצגה של הודעות SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"אחסון"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"גישה אל תמונות, מדיה וקבצים במכשיר שלך"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"מילון משתמש"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"קריאה או כתיבה של מילים במילון המשתמש."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"סימניות והיסטוריה"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"גישה ישירה אל סימניות והיסטוריית דפדפן."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"מיקרופון"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"הקלטת אודיו"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
@@ -334,16 +328,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"מאפשר לאפליקציה לשנות את יומן השיחות של הטאבלט, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"מאפשרת לאפליקציה לשנות את יומן השיחות של הטלוויזיה, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות להשתמש בהרשאה זו כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"מאפשר לאפליקציה לשנות את יומן השיחות של הטלפון, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"קריאת כרטיס איש הקשר שלך"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"מאפשר לאפליקציה לקרוא פרטים מהפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי אנשי הקשר שלך. משמעות הדבר שהאפליקציה תוכל לזהות אותך ולשלוח את פרטי הפרופיל שלך לאנשים אחרים."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"שינוי כרטיס איש הקשר שלך"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"מאפשר לאפליקציה לשנות או להוסיף נתונים לפרטי הפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי הקשר שלך. משמעות הדבר שהאפליקציה יכולה לזהות אותך ועשוי לשלוח את פרטי הפרופיל שלך לאנשים אחרים."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"חיישני גוף (כמו מוניטורים עבור קצב לב)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"מאפשר לאפליקציה לגשת אל נתוני חיישנים העוקבים אחר מצבך הגופני, כמו קצב הלב."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"קריאת הזרם החברתי שלך"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"מאפשר לאפליקציה גישה ויכולת סנכרון של עדכונים חברתיים שאתה וחבריך מבצעים. היזהר בעת שיתוף מידע -- הדבר מתיר לאפליקציה לקרוא התכתבויות בינך ובין חבריך ברשתות חברתיות, ללא התחשבות בסודיות. שים לב: ייתכן שאישור זה לא נאכף בכל הרשתות החברתיות."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"כתיבה בזרם החברתי שלך"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"מאפשר לאפליקציה להציג עדכונים חברתיים מהחברים שלך. היזהר בעת שיתוף מידע -- הדבר מאפשר לאפליקציה ליצור הודעות שעשויות להיראות כאילו שנשלחו מחבר. שים לב: ייתכן אישור זה לא נאכף בכל הרשתות החברתיות."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי יומן וגם מידע סודי"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"מאפשר לאפליקציה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני היומן שלך, ללא התחשבות בסודיות או ברגישות."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"מאפשרת לאפליקציה לקרוא את כל אירועי היומן השמורים בטלוויזיה שלך, כולל אירועים של חברים ועמיתים. הרשאה זו עשויה לאפשר לאפליקציה לשתף או לשמור נתונים מהיומן שלך, בלי קשר לסודיות או לרגישות הנתונים."</string>
@@ -456,10 +442,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"מאפשר לאפליקציה לשנות את הגדרות הסנכרון של חשבון. לדוגמה, ניתן להשתמש בכך על מנת להפעיל סנכרון של האפליקציה \'אנשים\' עם חשבון כלשהו."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"קרא את הנתונים הסטטיסטיים של הסינכרון"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"מאפשר לאפליקציה לקרוא את סטטיסטיקת הסנכרון של חשבון, כולל היסטוריית אירועי הסנכרון וכמות הנתונים שסונכרנה."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"קריאת מונחים שהוספת למילון"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"מאפשר לאפליקציה לקרוא את כל המילים, השמות והביטויים שהמשתמש אחסן במילון המשתמש."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"הוספת מילים למילון מוגדר-משתמש"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"מאפשר לאפליקציה לכתוב מילים חדשות במילון המשתמש."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"‏קריאת התוכן של אחסון ה-USB שלך"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"‏קריאת התוכן של כרטיס ה-SD שלך"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"‏מאפשר לאפליקציה לקרוא את תוכן אחסון ה-USB שלך."</string>

@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktlarınıza daxil olun"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Yer"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"bu cihazın məkanını əldə edin"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sosial məlumatınız"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kontaktlarınız və sosial əlaqələriniz haqqında məlumata birbaşa giriş."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Təqvim"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"təqvimə daxil olun"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"göndərin və SMS mesajlarına baxın"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Yaddaş"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"cihazınızda foto, media və fayllara daxil olun"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"İstifadəçi Sözlüyü"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"İstifadəçi lüğətində sözləri oxuyun və ya yazın."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Əlfəcinlər və Tarixçə"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Əlfəcinlərə və brauzer tarixinə birbaşa icazə."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"səsi qeydə alın"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tətbiqə planşetinizdəki zəng jurnalını, həmçinin gedən və gələn zənglərin siyahısını dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək, zəng jurnalınıza dəyişiklik edə bilər."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Proqrama TV-nizin zəng jurnalını, o cümlədən daxil olan və çıxan zənglərlə bağlı məlumatları dəyişdirmək imkanı verə bilər. Zərərli proqramlar zəng jurnalınızı silmək və ya dəyişdirmək üçün bundan istifadə edə bilər."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tətbiqə sizin daxil olan və gedən zənglər daxil olmaqla telefon zəngi loqlarınızı redaktə etmək icazəsi verir. Zərərli tətbiqlər bundan telefon loqlarınızı silmək və ya redaktə etmək üçün istifadə edə bilər."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"öz kontakt kartınızı oxuyun"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Tətbiqə cihazınızda yerləşən adınız və kontakt məlumatlarınız kimi şəxsi profil məlumatlarını oxuma icazəsi verir. Bu o deməkdir ki, tətbiq sizi tanıya və sizin profil məlumatlarınızı başqalarına göndərə bilər."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"sizin kontakt kartınızda dəyişiklik etmək"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Tətbiqə cihazınızda yerləşən adınız və kontakt məlumatlarınız kimi şəxsi profil məlumatlarını dəyişmək və ya əlavə etmək icazəsi verir. Bu o deməkdir ki, tətbiq sizi tanıya və sizin profil məlumatlarınızı başqalarına göndərə bilər."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"bədən sensorları (ürək döyüntüsü sayı kimi)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Tətbiqə ürək döyüntüsü kimi fiziki durumunuzu izləməyən sensorların datasına daxil olmağa icazə verir."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"sosial lentinizi oxuyur"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tətbiqə Sizin və dostlarınızın sosial güncəllərini əldə etmək və sinxronizə etmək icazəsi verir. Məlumat paylaşarkən diqqətli olun - konfidensiallıqdan asılı olmayaraq bu, Siz və dostlarınız arasında sosial şəbəkələrdəki danışığı oxumaq imkanı verir. Qeyd: bu icazə bütün sosial şəbəkələrdə icra edilə bilməz."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"sosial axınınıza yazır"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Tətbiqə dostlarınızdan sosial yenilənmələri göstərmə icazəsi verir. Məlumat paylaşarkən diqqətli olun - bu dostlarınızdan gələn mesajı emal etməyə izn verir. Qeyd: bu icazə bütün sosial şəbəkələrə şamil olunmaya bilər."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"təqvim tədbirlərini və konfidensial məlumatları oxuyur"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tətbiqə dostlarınızın və əməkdaşlarınızın planşetinizdə yerləşən kalendar tədbirlərini oxumağa icazə verir. Bu tətbiqə konfidensiallıq və ya həssaslıqdan asılı olmayaraq sizin kalendar məlumatlarınızı paylaşmaq və ya saxlamağa imkan yaradır."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Proqrama TV-də saxlanan, o cümlədən dostlar və həmkarların bütün təqvim hadisələrini oxumaq imkanı verir. Bu, proqrama məxfilik və ya həssaslıqdan asılı olmayaraq təqvim məlumatlarınızı paylaşmaq və ya saxlamaq icazəsi verə bilər."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Tətbiqə hesab üçün sinxronizasiya nizamlarını dəyişməyə icazə verir. Məsələn, bu istifadəçi hesablı Şəxslər tətbiqinin sinxronizasiyasını başlamaq üçün istifadə edilə bilər."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"sinxronizasiya statistikasını oxumaq"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Tətbiqə sync tədbirlərinin tarixçəsi və nə qədər datanın sinx olduğu da daxil olmaqla bərabər, hər hansı bir hesab üçün olan sinx statlarını oxumağa imkan verir."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"lüğətə əlavə etdiyiniz şərtləri oxumaq"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Tətbiqə istifadəçinin lüğətdə saxladığı bütün sözləri, adları və frazaları oxumaq icazəsi verir."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"istifadəçi lüğətinə sözlər əlavə etmək"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tətbiqə istifadəçi lüğətinə yeni sözlər yazmağa imkan verir."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB yaddaşınızın kontentini oxuyun"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD kartınızın kontentini oxuyun"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Tətbiqə USB yaddaşdan kontent oxuma icazəsi verir."</string>

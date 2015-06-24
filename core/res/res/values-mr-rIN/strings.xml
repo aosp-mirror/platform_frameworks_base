@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"आपल्या संपर्कांवर प्रवेश करा"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"या डिव्हाइसच्या स्थानावर प्रवेश करा"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"आपली सामाजिक माहिती"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"आपले संपर्क आणि सामाजिक कनेक्शनविषयीच्या माहितीवर प्रत्यक्ष प्रवेश करेल."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"आपल्या कॅलेंडरवर प्रवेश करा"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS संदेश पाठवा आणि पहा"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"संचयन"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"आपल्‍या डिव्‍हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये प्रवेश करा"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"वापरकर्ता शब्दकोश"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"वापरकर्ता शब्दकोशामध्‍ये शब्द वाचा किंवा लिहा."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"बुकमार्क आणि इतिहास"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"बुकमार्कवर आणि ब्राउझर इतिहासावर प्रत्यक्ष प्रवेश करेल."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडिओ रेकॉर्ड करा"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टीव्हीचा कॉल लॉग सुधारित करण्यासाठी अॅपला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"आपले स्वतःचे संपर्क कार्ड वाचा"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"आपले नाव आणि संपर्क माहिती यासारखी, आपल्या डिव्हाइसवर संचयित केलेली वैयक्तिक प्रोफाईल माहिती वाचण्यासाठी अॅप ला अनुमती देते. म्हणजेच आपल्याला अॅप ओळखू शकतो आणि इतरांना आपली प्रोफाईल माहिती पाठवू शकतो."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"आपल्या स्वतःचे संपर्क कार्ड सुधारित करा"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"आपल्या डिव्हाइसवर संचयित केलेली वैयक्तिक माहिती बदलण्यासाठी किंवा जोडण्यासाठी अॅप ला अनुमती देते. म्हणजेच अॅप आपल्याला ओळखू शकतो आणि इतरांना आपली प्रोफाईल माहिती पाठवू शकतो."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"(हृदय गती मॉनिटरसारखे) शरीर सेन्सर"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"आपला सामाजिक प्रवाह वाचा"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"आपल्याकडील आणि आपल्या मित्रांकडील सामाजिक अद्यतनांवर प्रवेश करण्यास आणि त्यांचे संकालन करण्यास अॅप ला अनुमती देते. माहिती सामायिक करताना सावधगिरी बाळगा --  हे गोपनीयतेकडे दुर्लक्ष करून, आपण आणि सामाजिक नेटवर्कवरील आपल्या मित्रांमधील संप्रेषणे वाचण्यास अॅप ला अनुमती देते. टीप: या परवानगीची अंमलबजावणी सर्व सामाजिक नेटवर्कवर होऊ शकत नाही."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"आपल्या सामाजिक प्रवाहावर लिहा"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"आपल्या मित्रांकडील सामाजिक अद्यतने प्रदर्शित करण्यासाठी अॅप ला अनुमती देते. माहिती सामायिक करताना सावधगिरी बाळगा -- हे मित्राकडून येत असल्याचे दिसू शकणारे संदेश उत्पन्न करण्यासाठी अॅप ला अनुमती देते. टीप: या परवानगीची अंमलबजावणी सर्व सामाजिक नेटवर्कवर केली जाऊ शकत नाही."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"कॅलेंडर इव्हेंट तसेच गोपनीय माहिती वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"मित्र किंवा सहकर्मींसह, आपल्या टॅब्लेटवर संचयित केलेले सर्व कॅलेंडर इव्हेंट वाचण्यासाठी अॅप ला अनुमती देते. यामुळे गोपनीयता किंवा संवेदनशीलता याकडे दुर्लक्ष करून, आपला कॅलेंडर डेटा सामायिक किंवा जतन करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"आपल्या टीव्हीवर संचयित केलेले सर्व कॅलेंडर इव्हेंट, या मित्रांसह किंवा सह-कर्मींसह, वाचण्याची अॅपला अनुमती देते. हे गोपनीयतेकडे किंवा संवेदनशीलतेकडे दुर्लक्ष करून, आपला कॅलेंडर डेटा सामायिक करण्यासाठी किंवा जतन करण्यासाठी अॅपला अनुमती देऊ शकते."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"खात्यासाठी संकालन सेटिंग्ज सुधारित करण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, हे खात्यासह लोकांच्या अॅप चे संकालन सक्षम करण्यासाठी वापरले जाऊ शकते."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"संकालन आकडेवारी वाचा"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"संकालन इव्हेंटचा इतिहास आणि किती डेटाचे संकालन केले आहे यासह, खात्याची संकालन स्थिती वाचण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"आपण शब्दकोशात जोडलेल्या अटी वाचा"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"वापरकर्ता शब्दकोशात वापरकर्ता संचयित करू शकतो असे सर्व शब्द, नावे आणि वाक्यांश वाचण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"वापरकर्ता-परिभाषित शब्दकोशामध्ये शब्द जोडा"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"वापरकर्ता शब्दकोशात नवीन शब्द लिहिण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"आपल्या USB संचयनाची सामग्री वाचा"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"आपल्या SD कार्डची सामग्री वाचा"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"अ‍ॅपला आपल्‍या USB संचयनाची सामग्री वाचण्‍याची अनुमती देते."</string>

@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"તમારા સંપર્કોને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરો"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"તમારી સામાજિક માહિતી"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"તમારા સંપર્કો અને સામાજિક કનેક્શન્સ વિશેની માહિતીની સીધી ઍક્સેસ."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS સંદેશા મોકલો અને જુઓ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"સ્ટોરેજ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"તમારા ઉપકરણ પર ફોટા, મીડિયા અને ફાઇલો ઍક્સેસ કરો"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"વપરાશકર્તા શબ્દકોશ"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"વપરાશકર્તા શબ્દકોશમાં શબ્દો વાંચો અથવા લખો."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"બુકમાર્ક્સ અને ઇતિહાસ"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"બુકમાર્ક્સ અને બ્રાઉઝર ઇતિહાસની સીધી ઍક્સેસ."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"માઇક્રોફોન"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ઑડિઓ રેકોર્ડ કરો"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"કૅમેરો"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"એપ્લિકેશનને ઇનકમિંગ અને આઉટગોઇંગ કૉલ્સ વિશેનાં ડેટા સહિત, તમારા ટેબ્લેટના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ એપ્લિકેશન્સ આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત માટે કરી શકે છે."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"એપ્લિકેશનને ઇનકમિંગ અને આઉટગોઇંગ કૉલ્સ વિશેનાં ડેટા સહિત, તમારા TV ના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ એપ્લિકેશન્સ આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત માટે કરી શકે છે."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"એપ્લિકેશનને ઇનકમિંગ અને આઉટગોઇંગ કૉલ્સ વિશેનાં ડેટા સહિત, તમારા ફોનના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ એપ્લિકેશન્સ આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત માટે કરી શકે છે."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"તમારું પોતાનું સંપર્ક કાર્ડ વાંચો"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"એપ્લિકેશનને તમારા નામ અને સંપર્ક માહિતી જેવી તમારા ઉપકરણ પર સંગ્રહિત વ્યક્તિગત પ્રોફાઇલ માહિતીને વાંચવાની મંજૂરી આપે છે. આનો અર્થ છે કે એપ્લિકેશન તમને ઓળખી શકે છે અને અન્ય લોકોને તમારી પ્રોફાઇલ માહિતી મોકલી શકે છે."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"તમારું પોતાનું સંપર્ક કાર્ડ સંશોધિત કરો"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"એપ્લિકેશનને તમારા નામ અને સંપર્ક માહિતી જેવી તમારા ઉપકરણ પર સંગ્રહિત વ્યક્તિગત પ્રોફાઇલ માહિતીને બદલા અથવા ઉમેરવાની મંજૂરી આપે છે. આનો અર્થ છે કે એપ્લિકેશન તમને ઓળખી શકે છે અને અન્ય લોકોને તમારી પ્રોફાઇલ માહિતી મોકલી શકે છે."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"બૉડી સેન્સર્સ (જેમ કે હાર્ટ રેટ મૉનિટર્સ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"એપ્લિકેશનને તમારી હૃદય ગતિ જેવી તમારી શારીરિક સ્થિતિને મૉનિટર કરતાં સેન્સર્સથી ડેટા ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"તમારી સામાજિક સ્ટ્રીમ વાંચો"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"એપ્લિકેશનને તમારા અને તમારા મિત્રોના સામાજિક અપડેટ્સ ઍક્સેસ કરવા અને સમન્વયિત કરવાની મંજૂરી આપે છે. માહિતી શેર કરતી વખતે સાવચેત રહો -- આ એપ્લિકેશનને સામાજિક નેટવર્ક્સ પર તમારી અને તમારા મિત્રોની વચ્ચેના સંચારને વાંચવાની મંજૂરી આપે છે, પછી ભલેને ગોપનીયતા કોઈપણ હોય. નોંધ: આ પરવાનગી બધા સામાજિક નેટવર્ક્સ પર લાગુ કરી શકાશે નહીં."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"તમારા સામાજિક સ્ટ્રીમ પર લખો"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"એપ્લિકેશનને તમારા મિત્રોના સામાજિક અપડેટ્સ પ્રદર્શિત કરવાની મંજૂરી આપે છે. માહિતી શેર કરતી વખતે સાવચેત રહો -- આ એપ્લિકેશનને મિત્ર તરફથી આવતું દેખાઈ શકે તેવા સંદેશા નિર્મિત કરવાની મંજૂરી આપે છે. નોંધ: આ પરવાનગી બધા સામાજિક નેટવર્ક્સ પર લાગુ કરી શકાશે નહીં."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"કૅલેન્ડર ઇવેન્ટ્સ વત્તા ગોપનીયતા માહિતી વાંચો"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"એપ્લિકેશનને મિત્રોના અથવા સહકાર્યકરો સહિત તમારા ટેબ્લેટ પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સ વાંચવાની મંજૂરી આપે છે. આ એપ્લિકેશનને તમારા કૅલેન્ડર ડેટાને શેર કરવા કે સાચવવાની મંજૂરી આપી શકે છે, પછી ભલે ગોપનીયતા અથવા સંવેદિતા કોઈપણ હોય."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"એપ્લિકેશનને મિત્રોના અથવા સહકાર્યકરો સહિત તમારા ટીવી પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સ વાંચવાની મંજૂરી આપે છે. આ એપ્લિકેશનને તમારા કૅલેન્ડર ડેટાને શેર કરવા કે સાચવવાની મંજૂરી આપી શકે છે, પછી ભલે ગોપનીયતા અથવા સંવેદિતા કોઈપણ હોય."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"એપ્લિકેશનને એકાઉન્ટ માટે સમન્વયન સેટિંગ્સ સંશોધિત કરવાની મંજૂરી આપે છે. ઉદાહરણ તરીકે, આનો ઉપયોગ એકાઉન્ટ સાથે લોકો એપ્લિકેશનના સમન્વયનને સક્ષમ કરવા માટે થઈ શકે છે."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"સમન્વયન આંકડા વાંચો"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"એપ્લિકેશનને સમન્વયન ઇવેન્ટ્સનો ઇતિહાસ અને કેટલો ડેટા સમન્વયિત થયો છે તે સહિત કોઈ એકાઉન્ટ માટેનાં સમન્વયન આંકડા વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"તમે શબ્દકોશમાં ઉમેરેલ શબ્દો વાંચો"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"એપ્લિકેશનને વપરાશકર્તાએ વપરાશકર્તા શબ્દકોશમાં સંગ્રહિત કર્યા હોઈ શકે છે તે તમામ શબ્દો, નામો અને શબ્દસમૂહોને વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"વપરાશકર્તા દ્વારા વ્યાખ્યાયિત શબ્દકોશમાં શબ્દો ઉમેરો"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"એપ્લિકેશનને વપરાશકર્તા શબ્દકોશ પર નવા શબ્દો લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"તમારા USB સંગ્રહની સામગ્રીઓ વાંચો"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"તમારા SD કાર્ડની સામગ્રીઓ વાંચો"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"એપ્લિકેશનને તમારા USB સંગ્રહની સામગ્રીઓ વાંચવાની મંજૂરી આપે છે."</string>

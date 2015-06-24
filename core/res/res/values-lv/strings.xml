@@ -231,18 +231,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"piekļūt jūsu kontaktpersonu datiem"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Atrašanās vieta"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"piekļūt ierīces atrašanās vietas informācijai"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Jūsu sociālo tīklu informācija"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Tieša piekļuve informācijai par jūsu kontaktpersonām un sociālajiem savienojumiem."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendārs"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"piekļūt jūsu kalendāram"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Īsziņas"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sūtīt un skatīt īsziņas"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Krātuve"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"piekļūt fotoattēliem, multividei un failiem jūsu ierīcē"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Lietotāja vārdnīca"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lasīt vai rakstīt vārdus lietotāja vārdnīcā."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Grāmatzīmes un vēsture"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Tieša piekļuve grāmatzīmēm un pārlūkprogrammas vēsturei."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofons"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ierakstīt audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -333,16 +327,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ļauj lietotnei pārveidot planšetdatora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu savu zvanu žurnālu."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ļauj lietotnei pārveidot televizora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu zvanu žurnālu."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ļauj lietotnei pārveidot tālruņa zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu savu zvanu žurnālu."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"lasīt manu vizītkarti"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Ļauj lietotnei lasīt ierīcē saglabāto personīgā profila informāciju, piemēram, jūsu vārdu un kontaktinformāciju. Tas nozīmē, ka lietotne var jūs identificēt un var nosūtīt jūsu profila informāciju citām personām."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"mainīt manu vizītkarti"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Ļauj lietotnei mainīt ierīcē saglabāto personīgā profila informāciju, piemēram, jūsu vārdu un kontaktinformāciju, vai pievienot tai citu informāciju. Tas nozīmē, ka lietotne var jūs identificēt un var nosūtīt jūsu profila informāciju citām personām."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ķermeņa sensori (piemēram, sirdsdarbības monitori)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ļauj lietotnei piekļūt to sensoru datiem, kuri pārrauga jūsu fizisko stāvokli (piemēram, sirdsdarbības ātrumu)."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lasīt jūsu soc. tīklu straumi"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Ļauj lietotnei piekļūt sociālajiem atjauninājumiem no jums un jūsu draugiem un sinhronizēt tos. Esiet piesardzīgs, kad kopīgojat informāciju, — šādi lietotne var lasīt sociālajos tīklos ar draugiem veikto saziņu, neraugoties uz konfidencialitāti. Piezīme: šo atļauju nedrīkst piemērot visiem sociālajiem tīkliem."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"rakstīt sociālo tīklu straumē"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Ļauj lietotnei parādīt jūsu draugu atjauninājumus sociālajos tīklos. Esiet piesardzīgs, kad kopīgojat informāciju, — šādi lietotne var veidot ziņojumus, kas šķietami saņemti no drauga. Piezīme: šo atļauju nevar piemērot visiem sociālajiem tīkliem."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lasīt kalendāra pasākumus un konfidenciālu informāciju"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Ļauj lietotnei lasīt visus planšetdatorā saglabātos kalendāra notikumus, tostarp draugu vai kolēģu notikumus. Tas var ļaut lietotnei kopīgot vai saglabāt jūsu kalendāra datus, neraugoties uz to konfidencialitāti vai sensitivitāti."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Ļauj lietotnei nolasīt visus kalendāra pasākumus, kas saglabāti televizorā, tostarp jūsu draugu un kolēģu pasākumus. Tādējādi lietotne var kopīgot vai saglabāt jūsu kalendāru datus, neņemot vērā konfidencialitāti vai sensitivitāti."</string>
@@ -455,10 +441,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Ļauj lietotnei pārveidot konta sinhronizācijas iestatījumus. Piemēram, to var izmantot, lai iespējotu lietotnes Personas sinhronizēšanu ar kontu."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lasīt sinhronizācijas statistiku"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Ļauj lietotnei lasīt konta sinhronizācijas statistiku, tostarp sinhronizācijas notikumu vēsturi un sinhronizēto datu apjomu."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"lasīt vārdnīcai pievienotos vārdus"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Ļauj lietotnei lasīt visus vārdus, nosaukumus un frāzes, ko lietotājs ir saglabājis lietotāja vārdnīcā."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"vārdu pievienošana lietotāja noteiktai vārdnīcai"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ļauj lietotnei rakstīt jaunus vārdus lietotāja vārdnīcā."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lasīt USB atmiņas saturu"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lasīt SD kartes saturu"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Ļauj liet. lasīt USB atm. sat."</string>

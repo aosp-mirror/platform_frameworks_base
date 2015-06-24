@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ස්ථානය"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"මෙම උපාංගයේ ස්ථානය ප්‍රවේශ කිරීම"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ඔබගේ සමාජයීය තොරතුරු"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ඔබගේ සම්බන්ධතා සහ සාමාජ සම්බන්ධයන් ගැන තොරතුරු වෙත ඍජු ප්‍රවේශය."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"දින දර්ශනය"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"කෙටි පණිවිඩ"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ආචයනය"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ඔබේ උපාංගයේ ඇති ඡායාරූප, මාධ්‍ය සහ ගොනුවලට පිවිසීම"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"පරිශීලක ශබ්ද කෝෂය"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"පරිශීලක ශබ්ද කෝෂයේ වචන කියවීම සහ ලිවිම."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"පිටුසන් සහ ඉතිහාසය"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"පිටුසන් සහ බ්‍රව්සර ඉතිහාසය වෙත ඍජු ප්‍රවේශය."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"මයික්‍රොෆෝනය"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ශ්‍රව්‍ය පටිගත කරන්න"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"කැමරාව"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"ඔබගේ සම්බන්ධතා පත කියවන්න"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"ඔබගේ නම සම්බන්ධතා තොරතුරු ආදී ඔබගේ උපාංගයේ ගබඩා වී ඇති පුද්ගලික පැතිකඩ තොරතුරු කියවීමට යෙදුමට අවසර දෙන්න. මෙහි තේරුම යෙදුමට ඔබව හඳුනා ගැනීමට හැකි වන බව සහ ඔබගේ පුද්ගලික තොරතුරු අනෙක් අයට යැවීමට ද හැකි වීමයි."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"ඔබගේ සම්බන්ධතා පත වෙනස් කිරීම"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ඔබගේ නම සහ සම්බන්ධතා තොරතුරු වැනි ඔබගේ උපාංගයේ ආචයනය කරන ලද පුද්ගලික පැතිකඩ තොරතුරු වෙනස් කිරීමට හෝ එකතු කිරීමට යෙදුමට අවසර දෙන්න. මෙමගින් යෙදුමට ඔබව හඳුනා ගත හැකි අතර අනෙක් අයට ඔබගේ පැතිකඩ තොරතුරු යැවිය හැකි බව කියවෙයි."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"සිරුර සංවේදකයන් (හෘද ස්පන්දන වේගය නිරීක්ෂණය කිරීම වැනි)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ඔබගේ සමාජ ප්‍රවාහය කියවන්න"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"ඔබගේ සහ ඔබගේ යහළුවන්ගේ සමාජ යාවත්කාලීනයන් වෙත පිවිසීමට හෝ සමමුහුර්ත කිරීමට යෙදුමට අවසර දෙන්න. තොරතුරු බෙදා ගැනීමේ දී සැලකිලිමත් වන්න -- විශ්වාසයකින් තොරව සමාජ ජාලවල ඔබගේ සහ ඔබගේ යහළුවන් අතර සන්නිවේදන කියවීමට මෙමගින් යෙදුමට අවසර දෙයි. සටහන: සියලු සමාජ ජාලවල මෙම අවසරය බල නොකරයි."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ඔබගේ සමාජ ප්‍රවාහය වෙත ලිවීම"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"ඔබගේ යහළුවන්ගේ සමාජ යාවත්කාලීනයන් පෙන්වීමට යෙදුමට අවසර දෙන්න. තොරතුරු බෙදා ගැනීමේදී සැලකිලිමත් වන්න -- යහළුවෙක්ගෙන් පැමිණෙන ලෙස පණිවිඩ නිපදවීමට මෙමඟින් යෙදුමට අවසර දෙන්න. සටහන : සියලු සමාජ ජාල සඳහා මෙම අවසරය බල නොදෙයි."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"දින දර්ශනයේ සිදුවීම් සහ රහසිගත තොරතුරු කියවීම"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ඔබගේ ටැබ්ලටය තුල ගබඩා  කර ඇති මිතුරන්ගේ සහ එක්ව ක්‍රියාකරන්නන්ගේ ද ඇතුළුව සියලුම දින දර්ශන සිද්ධි කියවීමට යෙදුමට අවසර දෙන්න. මෙය රහස්‍යභාවය හෝ සංවේදීතාවය නොසලකා ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"ඔබගේ රූපවාහිනියේ ගබඩා කර ඇති මිතුරන්ගේ සහ එකට වැඩ කරන්නන්ගේ  සියළුම දින දර්ශනය සිදුවීම් කියවීමට යෙදුම ඉඩ දෙන්න. නොසලකන හෝ රහසිගත සියළුම දින දර්ශන දත්ත බෙදාගැනීමට හෝ සුරැකීමට යෙදුමට මෙයින් අවසර ලැබේ."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුම සමඟ පුද්ගල යෙදුම සමමුහුර්ත කිරීම සක්‍රිය කිරීමට භාවිත කල හැක."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීම"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"සමමුහුර්ත කිරීමේ සිදුවීම් ඉතිහාසය සහ කෙතරම් දත්ත සමමුහුර්ත වී ඇතිදැයි ඇතුලත් ගිණුම සඳහා සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"ඔබ විසින් ශබ්දකෝෂයට ඇතුළත්කොට ඇති කොන්දේසි කියවීම"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"පරිශීලක ශබ්ද කෝෂයේ පරිශීලකයන් විසින් ගබඩා කර තිබිය හැකි වචන, නම්, වාක්‍යංශ කියවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"පරිශීලකයින් අර්ථ දැක්වූ ශබ්ද කෝෂයට වචන එකතු කිරීම"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"පරිශීලක ශබ්දකෝෂය තුළට අලුත් වචන ලිවීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ඔබගේ USB ආචයනය හි අන්තර්ගතය කියවන්න"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ඔබගේ SD කාඩ් පතෙහි අන්තර්ගතය කියවන්න"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"යෙදුමට ඔබගේ USB ආචයනය අන්තර්ගතය කියවීමට අවසර දෙන්න."</string>
