@@ -372,7 +372,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #getParcelableData()} - The posted {@link android.app.Notification}.</li>
  *   <li>{@link #getText()} - Text for providing more context.</li>
  * </ul>
