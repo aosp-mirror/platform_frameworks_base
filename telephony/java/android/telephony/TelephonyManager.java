@@ -274,6 +274,13 @@ public class TelephonyManager {
             "android.telephony.action.EMERGENCY_ASSISTANCE";
 
     /**
+     * Open the voicemail settings activity to make changes to voicemail configuration.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONFIGURE_VOICEMAIL =
+            "android.telephony.action.CONFIGURE_VOICEMAIL";
+
+    /**
      * @hide
      */
     public static final boolean EMERGENCY_ASSISTANCE_ENABLED = false;
