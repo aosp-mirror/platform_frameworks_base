@@ -51,7 +51,7 @@ public class KernelUidCpuTimeReader {
 
     private SparseLongArray mLastUserTimeUs = new SparseLongArray();
     private SparseLongArray mLastSystemTimeUs = new SparseLongArray();
-    private long mLastTimeRead = 0;
+    private long mLastTimeReadUs = 0;
 
     /**
      * Reads the proc file, calling into the callback with a delta of time for each UID.
@@ -60,7 +60,7 @@ public class KernelUidCpuTimeReader {
      *                 a fresh delta.
      */
     public void readDelta(@Nullable Callback callback) {
-        long now = SystemClock.elapsedRealtime();
+        long nowUs = SystemClock.elapsedRealtime() * 1000;
         try (BufferedReader reader = new BufferedReader(new FileReader(sProcFile))) {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
             String line;
@@ -79,12 +79,12 @@ public class KernelUidCpuTimeReader {
                         userTimeDeltaUs -= mLastUserTimeUs.valueAt(index);
                         systemTimeDeltaUs -= mLastSystemTimeUs.valueAt(index);
 
-                        final long timeDiffMs = (now - mLastTimeRead) * 1000;
+                        final long timeDiffUs = nowUs - mLastTimeReadUs;
                         if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0 ||
-                                userTimeDeltaUs > timeDiffMs || systemTimeDeltaUs > timeDiffMs ) {
+                                userTimeDeltaUs > timeDiffUs || systemTimeDeltaUs > timeDiffUs) {
                             StringBuilder sb = new StringBuilder("Malformed cpu data!\n");
                             sb.append("Time between reads: ");
-                            TimeUtils.formatDuration(timeDiffMs, sb);
+                            TimeUtils.formatDuration(timeDiffUs / 1000, sb);
                             sb.append("ms\n");
                             sb.append("Previous times: u=");
                             TimeUtils.formatDuration(mLastUserTimeUs.valueAt(index) / 1000, sb);
@@ -118,7 +118,7 @@ public class KernelUidCpuTimeReader {
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read uid_cputime", e);
         }
-        mLastTimeRead = now;
+        mLastTimeReadUs = nowUs;
     }
 
     /**
