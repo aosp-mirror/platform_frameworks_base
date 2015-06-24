@@ -1913,7 +1913,7 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p
 
         // Mask the ripple path by the projection mask, now that it's
         // in local space. Note that this can create CCW paths.
-        Op(path, maskPath, kIntersect_PathOp, &path);
+        Op(path, maskPath, kIntersect_SkPathOp, &path);
     }
     drawConvexPath(path, p);
 }

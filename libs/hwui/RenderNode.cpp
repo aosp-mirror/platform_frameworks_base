@@ -692,7 +692,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     if (revealClipPath) {
         frameAllocatedPath = handler.allocPathForFrame();
 
-        Op(*outlinePath, *revealClipPath, kIntersect_PathOp, frameAllocatedPath);
+        Op(*outlinePath, *revealClipPath, kIntersect_SkPathOp, frameAllocatedPath);
         outlinePath = frameAllocatedPath;
     }
 
@@ -708,7 +708,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
         clipBoundsPath.addRect(clipBounds.left, clipBounds.top,
                 clipBounds.right, clipBounds.bottom);
 
-        Op(*outlinePath, clipBoundsPath, kIntersect_PathOp, frameAllocatedPath);
+        Op(*outlinePath, clipBoundsPath, kIntersect_SkPathOp, frameAllocatedPath);
         outlinePath = frameAllocatedPath;
     }
 
