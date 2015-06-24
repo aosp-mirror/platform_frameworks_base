@@ -230,9 +230,11 @@ static void android_os_Parcel_writeBlob(JNIEnv* env, jclass clazz, jlong nativeP
 
 static void android_os_Parcel_writeInt(JNIEnv* env, jclass clazz, jlong nativePtr, jint val) {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    const status_t err = parcel->writeInt32(val);
-    if (err != NO_ERROR) {
-        signalExceptionForError(env, clazz, err);
+    if (parcel != NULL) {
+        const status_t err = parcel->writeInt32(val);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+        }
     }
 }
 
