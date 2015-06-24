@@ -17,11 +17,16 @@
 package android.security.keystore;
 
 import android.annotation.NonNull;
+import android.os.IBinder;
 import android.security.KeyStore;
+import android.security.KeyStoreException;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 
+import libcore.util.EmptyArray;
+
+import java.io.ByteArrayOutputStream;
 import java.security.InvalidKeyException;
 import java.security.SignatureSpi;
 
@@ -35,6 +40,71 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
     public final static class NONE extends AndroidKeyStoreECDSASignatureSpi {
         public NONE() {
             super(KeymasterDefs.KM_DIGEST_NONE);
+        }
+
+        @Override
+        protected KeyStoreCryptoOperationStreamer createMainDataStreamer(KeyStore keyStore,
+                IBinder operationToken) {
+            return new TruncateToFieldSizeMessageStreamer(
+                    super.createMainDataStreamer(keyStore, operationToken),
+                    getGroupSizeBits());
+        }
+
+        /**
+         * Streamer which buffers all input, then truncates it to field size, and then sends it into
+         * KeyStore via the provided delegate streamer.
+         */
+        private static class TruncateToFieldSizeMessageStreamer
+                implements KeyStoreCryptoOperationStreamer {
+
+            private final KeyStoreCryptoOperationStreamer mDelegate;
+            private final int mGroupSizeBits;
+            private final ByteArrayOutputStream mInputBuffer = new ByteArrayOutputStream();
+            private long mConsumedInputSizeBytes;
+
+            private TruncateToFieldSizeMessageStreamer(
+                    KeyStoreCryptoOperationStreamer delegate,
+                    int groupSizeBits) {
+                mDelegate = delegate;
+                mGroupSizeBits = groupSizeBits;
+            }
+
+            @Override
+            public byte[] update(byte[] input, int inputOffset, int inputLength)
+                    throws KeyStoreException {
+                if (inputLength > 0) {
+                    mInputBuffer.write(input, inputOffset, inputLength);
+                    mConsumedInputSizeBytes += inputLength;
+                }
+                return EmptyArray.BYTE;
+            }
+
+            @Override
+            public byte[] doFinal(byte[] input, int inputOffset, int inputLength, byte[] signature,
+                    byte[] additionalEntropy) throws KeyStoreException {
+                if (inputLength > 0) {
+                    mConsumedInputSizeBytes += inputLength;
+                    mInputBuffer.write(input, inputOffset, inputLength);
+                }
+
+                byte[] bufferedInput = mInputBuffer.toByteArray();
+                mInputBuffer.reset();
+                // Truncate input at field size (bytes)
+                return mDelegate.doFinal(bufferedInput,
+                        0,
+                        Math.min(bufferedInput.length, ((mGroupSizeBits + 7) / 8)),
+                        signature, additionalEntropy);
+            }
+
+            @Override
+            public long getConsumedInputSizeBytes() {
+                return mConsumedInputSizeBytes;
+            }
+
+            @Override
+            public long getProducedOutputSizeBytes() {
+                return mDelegate.getProducedOutputSizeBytes();
+            }
         }
     }
 
@@ -70,7 +140,7 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
 
     private final int mKeymasterDigest;
 
-    private int mGroupSizeBytes = -1;
+    private int mGroupSizeBits = -1;
 
     AndroidKeyStoreECDSASignatureSpi(int keymasterDigest) {
         mKeymasterDigest = keymasterDigest;
@@ -95,14 +165,14 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         } else if (keySizeBits > Integer.MAX_VALUE) {
             throw new InvalidKeyException("Key too large: " + keySizeBits + " bits");
         }
-        mGroupSizeBytes = (int) ((keySizeBits + 7) / 8);
+        mGroupSizeBits = (int) keySizeBits;
 
         super.initKey(key);
     }
 
     @Override
     protected final void resetAll() {
-        mGroupSizeBytes = -1;
+        mGroupSizeBits = -1;
         super.resetAll();
     }
 
@@ -112,14 +182,21 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
     }
 
     @Override
-    protected void addAlgorithmSpecificParametersToBegin(
+    protected final void addAlgorithmSpecificParametersToBegin(
             @NonNull KeymasterArguments keymasterArgs) {
         keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_EC);
         keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
     }
 
     @Override
-    protected int getAdditionalEntropyAmountForSign() {
-        return mGroupSizeBytes;
+    protected final int getAdditionalEntropyAmountForSign() {
+        return (mGroupSizeBits + 7) / 8;
+    }
+
+    protected final int getGroupSizeBits() {
+        if (mGroupSizeBits == -1) {
+            throw new IllegalStateException("Not initialized");
+        }
+        return mGroupSizeBits;
     }
 }
