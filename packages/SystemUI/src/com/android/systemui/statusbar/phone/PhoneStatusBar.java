@@ -3290,6 +3290,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mState;
     }
 
+    @Override
+    protected boolean isPanelFullyCollapsed() {
+        return mNotificationPanel.isFullyCollapsed();
+    }
+
     public void showKeyguard() {
         if (mLaunchTransitionFadingAway) {
             mNotificationPanel.animate().cancel();
