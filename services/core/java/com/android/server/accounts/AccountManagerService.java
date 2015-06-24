@@ -1591,13 +1591,6 @@ public class AccountManagerService
             try {
                 final ContentValues values = new ContentValues();
                 values.put(ACCOUNTS_PASSWORD, password);
-                long time = 0;
-                // Only set current time, if it is a valid password. For clear password case, it
-                // should not be set.
-                if (password != null) {
-                    time = System.currentTimeMillis();
-                }
-                values.put(ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS, time);
                 final long accountId = getAccountIdLocked(db, account);
                 if (accountId >= 0) {
                     final String[] argsAccountId = {String.valueOf(accountId)};
@@ -2130,7 +2123,7 @@ public class AccountManagerService
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
-                    false /* authDetailsRequired */) {
+                    false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
@@ -2207,7 +2200,7 @@ public class AccountManagerService
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
-                    false /* authDetailsRequired */) {
+                    false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
@@ -2940,14 +2933,14 @@ public class AccountManagerService
             if (result != null) {
                 boolean isSuccessfulConfirmCreds = result.getBoolean(
                         AccountManager.KEY_BOOLEAN_RESULT, false);
-                boolean isSuccessfulUpdateCreds =
+                boolean isSuccessfulUpdateCredsOrAddAccount =
                         result.containsKey(AccountManager.KEY_ACCOUNT_NAME)
                         && result.containsKey(AccountManager.KEY_ACCOUNT_TYPE);
                 // We should only update lastAuthenticated time, if
                 // mUpdateLastAuthenticatedTime is true and the confirmRequest
                 // or updateRequest was successful
                 boolean needUpdate = mUpdateLastAuthenticatedTime
-                        && (isSuccessfulConfirmCreds || isSuccessfulUpdateCreds);
+                        && (isSuccessfulConfirmCreds || isSuccessfulUpdateCredsOrAddAccount);
                 if (needUpdate || mAuthDetailsRequired) {
                     boolean accountPresent = isAccountPresentForCaller(mAccountName, mAccountType);
                     if (needUpdate && accountPresent) {
