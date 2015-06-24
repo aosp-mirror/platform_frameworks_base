@@ -284,6 +284,7 @@ public abstract class ApplicationThreadNative extends Binder
                     IUiAutomationConnection.Stub.asInterface(binder);
             int testMode = data.readInt();
             boolean openGlTrace = data.readInt() != 0;
+            boolean trackAllocation = data.readInt() != 0;
             boolean restrictedBackupMode = (data.readInt() != 0);
             boolean persistent = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
@@ -291,7 +292,7 @@ public abstract class ApplicationThreadNative extends Binder
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info, providers, testName, profilerInfo, testArgs,
-                    testWatcher, uiAutomationConnection, testMode, openGlTrace,
+                    testWatcher, uiAutomationConnection, testMode, openGlTrace, trackAllocation,
                     restrictedBackupMode, persistent, config, compatInfo, services, coreSettings);
             return true;
         }
@@ -961,13 +962,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
+    @Override
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName, ProfilerInfo profilerInfo,
             Bundle testArgs, IInstrumentationWatcher testWatcher,
             IUiAutomationConnection uiAutomationConnection, int debugMode,
-            boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
-            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-            Bundle coreSettings) throws RemoteException {
+            boolean openGlTrace, boolean trackAllocation, boolean restrictedBackupMode,
+            boolean persistent, Configuration config, CompatibilityInfo compatInfo,
+            Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -990,6 +992,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongInterface(uiAutomationConnection);
         data.writeInt(debugMode);
         data.writeInt(openGlTrace ? 1 : 0);
+        data.writeInt(trackAllocation ? 1 : 0);
         data.writeInt(restrictedBackupMode ? 1 : 0);
         data.writeInt(persistent ? 1 : 0);
         config.writeToParcel(data, 0);
