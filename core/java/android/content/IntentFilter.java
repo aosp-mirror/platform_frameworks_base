@@ -16,7 +16,6 @@
 
 package android.content;
 
-import android.content.pm.PackageParser;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -534,13 +533,15 @@ public class IntentFilter implements Parcelable {
      */
     public final boolean handleAllWebDataURI() {
         return hasCategory(Intent.CATEGORY_APP_BROWSER) ||
-                (hasWebDataURI() && countDataAuthorities() == 0);
+                (hasOnlyWebDataURI() && countDataAuthorities() == 0);
     }
 
     /**
-     * Return if this filter has any HTTP or HTTPS data URI or not.
+     * Return if this filter handles only HTTP or HTTPS data URIs.
      *
-     * @return True if the filter has any HTTP or HTTPS data URI. False otherwise.
+     * @return True if the filter handles ACTION_VIEW/CATEGORY_BROWSABLE,
+     * has at least one HTTP or HTTPS data URI pattern defined, and does not
+     * define any non-http/https data URI patterns.
      *
      * This will check if if the Intent action is {@link android.content.Intent#ACTION_VIEW} and
      * the Intent category is {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent
@@ -548,10 +549,26 @@ public class IntentFilter implements Parcelable {
      *
      * @hide
      */
-    public final boolean hasWebDataURI() {
-        return hasAction(Intent.ACTION_VIEW) &&
-                hasCategory(Intent.CATEGORY_BROWSABLE) &&
-                (hasDataScheme(SCHEME_HTTP) || hasDataScheme(SCHEME_HTTPS));
+    public final boolean hasOnlyWebDataURI() {
+        // Require ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme
+        if (!hasAction(Intent.ACTION_VIEW)
+            || !hasCategory(Intent.CATEGORY_BROWSABLE)
+            || mDataSchemes == null
+            || mDataSchemes.size() == 0) {
+            return false;
+        }
+
+        // Now allow only the schemes "http" and "https"
+        final int N = mDataSchemes.size();
+        for (int i = 0; i < N; i++) {
+            final String scheme = mDataSchemes.get(i);
+            if (!SCHEME_HTTP.equals(scheme) && !SCHEME_HTTPS.equals(scheme)) {
+                return false;
+            }
+        }
+
+        // Everything passed, so it's an only-web-URIs filter
+        return true;
     }
 
     /**
@@ -568,7 +585,7 @@ public class IntentFilter implements Parcelable {
      * @hide
      */
     public final boolean needsVerification() {
-        return hasWebDataURI() && getAutoVerify();
+        return getAutoVerify() && hasOnlyWebDataURI();
     }
 
     /**
