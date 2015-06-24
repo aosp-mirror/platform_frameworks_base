@@ -59,21 +59,9 @@ import android.util.StateSet;
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class StateListDrawable extends DrawableContainer {
-    private static final String TAG = StateListDrawable.class.getSimpleName();
+    private static final String TAG = "StateListDrawable";
 
     private static final boolean DEBUG = false;
-
-    /**
-     * To be proper, we should have a getter for dither (and alpha, etc.)
-     * so that proxy classes like this can save/restore their delegates'
-     * values, but we don't have getters. Since we do have setters
-     * (e.g. setDither), which this proxy forwards on, we have to have some
-     * default/initial setting.
-     *
-     * The initial setting for dither is now true, since it almost always seems
-     * to improve the quality at negligible cost.
-     */
-    private static final boolean DEFAULT_DITHER = true;
 
     private StateListState mStateListState;
     private boolean mMutated;
@@ -104,16 +92,16 @@ public class StateListDrawable extends DrawableContainer {
 
     @Override
     protected boolean onStateChange(int[] stateSet) {
+        final boolean changed = super.onStateChange(stateSet);
+
         int idx = mStateListState.indexOfStateSet(stateSet);
         if (DEBUG) android.util.Log.i(TAG, "onStateChange " + this + " states "
                 + Arrays.toString(stateSet) + " found " + idx);
         if (idx < 0) {
             idx = mStateListState.indexOfStateSet(StateSet.WILD_CARD);
         }
-        if (selectDrawable(idx)) {
-            return true;
-        }
-        return super.onStateChange(stateSet);
+
+        return selectDrawable(idx) || changed;
     }
 
     @Override
@@ -326,13 +314,14 @@ public class StateListDrawable extends DrawableContainer {
             }
         }
 
-        private void mutate() {
+        void mutate() {
             mThemeAttrs = mThemeAttrs != null ? mThemeAttrs.clone() : null;
 
             final int[][] stateSets = new int[mStateSets.length][];
             for (int i = mStateSets.length - 1; i >= 0; i--) {
                 stateSets[i] = mStateSets[i] != null ? mStateSets[i].clone() : null;
             }
+            mStateSets = stateSets;
         }
 
         int addStateSet(int[] stateSet, Drawable drawable) {
