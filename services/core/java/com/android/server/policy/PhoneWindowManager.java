@@ -5381,8 +5381,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode) {
-        if (!wakeInTheaterMode && isTheaterModeEnabled()) {
+        final boolean theaterModeEnabled = isTheaterModeEnabled();
+        if (!wakeInTheaterMode && theaterModeEnabled) {
             return false;
+        }
+
+        if (theaterModeEnabled) {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.THEATER_MODE_ON, 0);
         }
 
         mPowerManager.wakeUp(wakeTime);
