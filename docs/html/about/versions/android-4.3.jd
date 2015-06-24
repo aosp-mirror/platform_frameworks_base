@@ -1029,7 +1029,7 @@ APIs allow you to inspect the screen content and inject arbitrary keyboard and t
 android.app.Instrumentation#getUiAutomation Instrumentation.getUiAutomation()}. In order
 for this to work, you must supply the {@code -w} option with the {@code instrument} command
 when running your {@link android.test.InstrumentationTestCase} from <a
-href="{@docRoot}tools/help/adb.html#am">{@code adb shell}</a>.</p>
+href="{@docRoot}tools/help/shell.html#am">{@code adb shell}</a>.</p>
 
 <p>With the {@link android.app.UiAutomation} instance, you can execute arbitrary events to test
 your app by calling {@link android.app.UiAutomation#executeAndWaitForEvent
