@@ -219,6 +219,22 @@ public final class PermissionsState {
     }
 
     /**
+     * Returns whether the state has any known request for the given permission name,
+     * whether or not it has been granted.
+     */
+    public boolean hasRequestedPermission(ArraySet<String> names) {
+        if (mPermissions == null) {
+            return false;
+        }
+        for (int i=names.size()-1; i>=0; i--) {
+            if (mPermissions.get(names.valueAt(i)) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets all permissions for a given device user id regardless if they
      * are install time or runtime permissions.
      *
@@ -446,7 +462,7 @@ public final class PermissionsState {
             }
         }
 
-        return  permissionStates;
+        return permissionStates;
     }
 
     private int grantPermission(BasePermission permission, int userId) {

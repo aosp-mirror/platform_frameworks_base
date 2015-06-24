@@ -102,6 +102,8 @@ interface IPackageManager {
 
     void revokeRuntimePermission(String packageName, String permissionName, int userId);
 
+    void resetRuntimePermissions();
+
     int getPermissionFlags(String permissionName, String packageName, int userId);
 
     void updatePermissionFlags(String permissionName, String packageName, int flagMask,

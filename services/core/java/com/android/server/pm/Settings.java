@@ -3881,8 +3881,9 @@ final class Settings {
         ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
     };
 
-    void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag, PackageSetting ps,
-            SimpleDateFormat sdf, Date date, List<UserInfo> users) {
+    void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
+            ArraySet<String> permissionNames, PackageSetting ps, SimpleDateFormat sdf,
+            Date date, List<UserInfo> users) {
         if (checkinTag != null) {
             pw.print(checkinTag);
             pw.print(",");
@@ -3953,10 +3954,13 @@ final class Settings {
         }
         pw.print(prefix); pw.print("  pkg="); pw.println(ps.pkg);
         pw.print(prefix); pw.print("  codePath="); pw.println(ps.codePathString);
-        pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.resourcePathString);
-        pw.print(prefix); pw.print("  legacyNativeLibraryDir="); pw.println(ps.legacyNativeLibraryPathString);
-        pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.primaryCpuAbiString);
-        pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.secondaryCpuAbiString);
+        if (permissionNames == null) {
+            pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.resourcePathString);
+            pw.print(prefix); pw.print("  legacyNativeLibraryDir=");
+            pw.println(ps.legacyNativeLibraryPathString);
+            pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.primaryCpuAbiString);
+            pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.secondaryCpuAbiString);
+        }
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
         if (ps.pkg != null) {
             pw.print(" targetSdk="); pw.print(ps.pkg.applicationInfo.targetSdkVersion);
@@ -3969,8 +3973,10 @@ final class Settings {
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
                     FLAG_DUMP_SPEC); pw.println();
-            pw.print(prefix); pw.print("  priavateFlags="); printFlags(pw,
-                    ps.pkg.applicationInfo.privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
+            if (ps.pkg.applicationInfo.privateFlags != 0) {
+                pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
+                        ps.pkg.applicationInfo.privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
+            }
             pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
@@ -4063,9 +4069,9 @@ final class Settings {
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
                 pw.println();
 
-        if (ps.sharedUser == null) {
+        if (ps.sharedUser == null || permissionNames != null) {
             PermissionsState permissionsState = ps.getPermissionsState();
-            dumpInstallPermissionsLPr(pw, prefix + "  ", permissionsState);
+            dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState);
         }
 
         for (UserInfo user : users) {
@@ -4089,28 +4095,31 @@ final class Settings {
             if (ps.sharedUser == null) {
                 PermissionsState permissionsState = ps.getPermissionsState();
                 dumpGidsLPr(pw, prefix + "    ", permissionsState.computeGids(user.id));
-                dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionsState
+                dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
                         .getRuntimePermissionStates(user.id));
             }
 
-            ArraySet<String> cmp = ps.getDisabledComponents(user.id);
-            if (cmp != null && cmp.size() > 0) {
-                pw.print(prefix); pw.println("    disabledComponents:");
-                for (String s : cmp) {
-                    pw.print(prefix); pw.print("    "); pw.println(s);
+            if (permissionNames == null) {
+                ArraySet<String> cmp = ps.getDisabledComponents(user.id);
+                if (cmp != null && cmp.size() > 0) {
+                    pw.print(prefix); pw.println("    disabledComponents:");
+                    for (String s : cmp) {
+                        pw.print(prefix); pw.print("    "); pw.println(s);
+                    }
                 }
-            }
-            cmp = ps.getEnabledComponents(user.id);
-            if (cmp != null && cmp.size() > 0) {
-                pw.print(prefix); pw.println("    enabledComponents:");
-                for (String s : cmp) {
-                    pw.print(prefix); pw.print("    "); pw.println(s);
+                cmp = ps.getEnabledComponents(user.id);
+                if (cmp != null && cmp.size() > 0) {
+                    pw.print(prefix); pw.println("    enabledComponents:");
+                    for (String s : cmp) {
+                        pw.print(prefix); pw.print("    "); pw.println(s);
+                    }
                 }
             }
         }
     }
 
-    void dumpPackagesLPr(PrintWriter pw, String packageName, DumpState dumpState, boolean checkin) {
+    void dumpPackagesLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
+            DumpState dumpState, boolean checkin) {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final Date date = new Date();
         boolean printedSomething = false;
@@ -4118,6 +4127,10 @@ final class Settings {
         for (final PackageSetting ps : mPackages.values()) {
             if (packageName != null && !packageName.equals(ps.realName)
                     && !packageName.equals(ps.name)) {
+                continue;
+            }
+            if (permissionNames != null
+                    && !ps.getPermissionsState().hasRequestedPermission(permissionNames)) {
                 continue;
             }
 
@@ -4131,11 +4144,11 @@ final class Settings {
                 pw.println("Packages:");
                 printedSomething = true;
             }
-            dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, ps, sdf, date, users);
+            dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, permissionNames, ps, sdf, date, users);
         }
 
         printedSomething = false;
-        if (!checkin && mRenamedPackages.size() > 0) {
+        if (!checkin && mRenamedPackages.size() > 0 && permissionNames == null) {
             for (final Map.Entry<String, String> e : mRenamedPackages.entrySet()) {
                 if (packageName != null && !packageName.equals(e.getKey())
                         && !packageName.equals(e.getValue())) {
@@ -4159,7 +4172,7 @@ final class Settings {
         }
 
         printedSomething = false;
-        if (mDisabledSysPackages.size() > 0) {
+        if (mDisabledSysPackages.size() > 0 && permissionNames == null) {
             for (final PackageSetting ps : mDisabledSysPackages.values()) {
                 if (packageName != null && !packageName.equals(ps.realName)
                         && !packageName.equals(ps.name)) {
@@ -4171,15 +4184,20 @@ final class Settings {
                     pw.println("Hidden system packages:");
                     printedSomething = true;
                 }
-                dumpPackageLPr(pw, "  ", checkin ? "dis" : null, ps, sdf, date, users);
+                dumpPackageLPr(pw, "  ", checkin ? "dis" : null, permissionNames, ps, sdf, date,
+                        users);
             }
         }
     }
 
-    void dumpPermissionsLPr(PrintWriter pw, String packageName, DumpState dumpState) {
+    void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
+            DumpState dumpState) {
         boolean printedSomething = false;
         for (BasePermission p : mPermissions.values()) {
             if (packageName != null && !packageName.equals(p.sourcePackage)) {
+                continue;
+            }
+            if (permissionNames != null && !permissionNames.contains(p.name)) {
                 continue;
             }
             if (!printedSomething) {
@@ -4211,11 +4229,15 @@ final class Settings {
         }
     }
 
-    void dumpSharedUsersLPr(PrintWriter pw, String packageName, DumpState dumpState,
-            boolean checkin) {
+    void dumpSharedUsersLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
+            DumpState dumpState, boolean checkin) {
         boolean printedSomething = false;
         for (SharedUserSetting su : mSharedUsers.values()) {
             if (packageName != null && su != dumpState.getSharedUser()) {
+                continue;
+            }
+            if (permissionNames != null
+                    && !su.getPermissionsState().hasRequestedPermission(permissionNames)) {
                 continue;
             }
             if (!checkin) {
@@ -4235,7 +4257,7 @@ final class Settings {
                 pw.print(prefix); pw.print("userId="); pw.println(su.userId);
 
                 PermissionsState permissionsState = su.getPermissionsState();
-                dumpInstallPermissionsLPr(pw, prefix, permissionsState);
+                dumpInstallPermissionsLPr(pw, prefix, permissionNames, permissionsState);
 
                 for (int userId : UserManagerService.getInstance().getUserIds()) {
                     final int[] gids = permissionsState.computeGids(userId);
@@ -4244,7 +4266,7 @@ final class Settings {
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
                         pw.print(prefix); pw.print("User "); pw.print(userId); pw.println(": ");
                         dumpGidsLPr(pw, prefix + "  ", gids);
-                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissions);
+                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames, permissions);
                     }
                 }
             } else {
@@ -4289,11 +4311,15 @@ final class Settings {
         }
     }
 
-    void dumpRuntimePermissionsLPr(PrintWriter pw, String prefix,
+    void dumpRuntimePermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
             List<PermissionState> permissionStates) {
         if (!permissionStates.isEmpty()) {
             pw.print(prefix); pw.println("runtime permissions:");
             for (PermissionState permissionState : permissionStates) {
+                if (permissionNames != null
+                        && !permissionNames.contains(permissionState.getName())) {
+                    continue;
+                }
                 pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
                 pw.print(", granted="); pw.print(permissionState.isGranted());
                     pw.print(", flags=0x"); pw.println(Integer.toHexString(
@@ -4302,12 +4328,16 @@ final class Settings {
         }
     }
 
-    void dumpInstallPermissionsLPr(PrintWriter pw, String prefix,
+    void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
             PermissionsState permissionsState) {
         List<PermissionState> permissionStates = permissionsState.getInstallPermissionStates();
         if (!permissionStates.isEmpty()) {
             pw.print(prefix); pw.println("install permissions:");
             for (PermissionState permissionState : permissionStates) {
+                if (permissionNames != null
+                        && !permissionNames.contains(permissionState.getName())) {
+                    continue;
+                }
                 pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
                     pw.print(", granted="); pw.print(permissionState.isGranted());
                     pw.print(", flags=0x"); pw.println(Integer.toHexString(
