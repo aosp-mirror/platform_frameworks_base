@@ -47,6 +47,10 @@ public:
      *  It is useful for testing and clients (e.g. Picture/Movie) that expect to
      *  draw their contents into an SkCanvas.
      *
+     *  The SkCanvas returned is *only* valid until another Canvas call is made
+     *  that would change state (e.g. matrix or clip). Clients of asSkCanvas()
+     *  are responsible for *not* persisting this pointer.
+     *
      *  Further, the returned SkCanvas should NOT be unref'd and is valid until
      *  this canvas is destroyed or a new bitmap is set.
      */
