@@ -4214,20 +4214,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new SecurityException("clearDeviceOwner can only be called by the device owner");
         }
         synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                clearUserRestrictions(new UserHandle(UserHandle.USER_OWNER));
-                AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
-                        PackageManager.FLAG_PERMISSION_POLICY_FIXED,
-                        0, UserHandle.USER_OWNER);
-                if (mDeviceOwner != null) {
-                    mDeviceOwner.clearDeviceOwner();
-                    mDeviceOwner.writeOwnerFile();
-                    updateDeviceOwnerLocked();
-                }
-            } catch (RemoteException re) {
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            clearUserPoliciesLocked(new UserHandle(UserHandle.USER_OWNER));
+            if (mDeviceOwner != null) {
+                mDeviceOwner.clearDeviceOwner();
+                mDeviceOwner.writeOwnerFile();
+                updateDeviceOwnerLocked();
             }
         }
     }
@@ -4378,33 +4369,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         UserHandle callingUser = Binder.getCallingUserHandle();
-        int userId = callingUser.getIdentifier();
         // Check if this is the profile owner who is calling
         getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
-            // Reset some of the profile-owner policies
-            DevicePolicyData policy = getUserData(userId);
-            policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
-            policy.mDelegatedCertInstallerPackage = null;
-            policy.mStatusBarDisabled = false;
-            saveSettingsLocked(userId);
-
-            long ident = Binder.clearCallingIdentity();
-            try {
-                clearUserRestrictions(callingUser);
-                AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
-                        PackageManager.FLAG_PERMISSION_POLICY_FIXED,
-                        0, callingUser.getIdentifier());
-                if (mDeviceOwner != null) {
-                    mDeviceOwner.removeProfileOwner(userId);
-                    mDeviceOwner.writeOwnerFile();
-                }
-            } catch (RemoteException re) {
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            clearUserPoliciesLocked(callingUser);
+            if (mDeviceOwner != null) {
+                mDeviceOwner.removeProfileOwner(callingUser.getIdentifier());
+                mDeviceOwner.writeOwnerFile();
             }
         }
     }
+
+    private void clearUserPoliciesLocked(UserHandle userHandle) {
+        int userId = userHandle.getIdentifier();
+        // Reset some of the user-specific policies
+        DevicePolicyData policy = getUserData(userId);
+        policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
+        policy.mDelegatedCertInstallerPackage = null;
+        policy.mStatusBarDisabled = false;
+        saveSettingsLocked(userId);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            clearUserRestrictions(userHandle);
+            AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
+                    PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                    0  /* flagValues */, userHandle.getIdentifier());
+        } catch (RemoteException re) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
 
     private void clearUserRestrictions(UserHandle userHandle) {
         AudioManager audioManager =
