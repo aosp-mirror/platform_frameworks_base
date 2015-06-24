@@ -606,7 +606,9 @@ public:
 
         Layout layout;
         TypefaceImpl* typeface = getNativeTypeface(env, jpaint);
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, start, count, textLength);
+        // Only the substring is used for measurement, so no additional context is passed in. This
+        // behavior is consistent between char[] and String specializations.
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray + start, 0, count, count);
         width = layout.getAdvance();
 
         env->ReleaseStringChars(text, textArray);
