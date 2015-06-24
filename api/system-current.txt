@@ -33388,6 +33388,7 @@ package android.telephony {
     method public int[] supplyPukReportResult(java.lang.String, java.lang.String);
     method public void toggleRadioOnOff();
     method public void updateServiceLocation();
+    field public static final java.lang.String ACTION_CONFIGURE_VOICEMAIL = "android.telephony.action.CONFIGURE_VOICEMAIL";
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
