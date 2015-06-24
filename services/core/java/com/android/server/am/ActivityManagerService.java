@@ -3583,10 +3583,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private boolean hasUsageStatsPermission(String callingPackage) {
+        final int mode = mAppOpsService.checkOperation(AppOpsManager.OP_GET_USAGE_STATS,
+                Binder.getCallingUid(), callingPackage);
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
     @Override
-    public int getPackageProcessState(String packageName) {
-        enforceCallingPermission(android.Manifest.permission.GET_PACKAGE_IMPORTANCE,
-                "getPackageProcessState");
+    public int getPackageProcessState(String packageName, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.GET_PACKAGE_IMPORTANCE,
+                    "getPackageProcessState");
+        }
+
         int procState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         synchronized (this) {
             for (int i=mLruProcesses.size()-1; i>=0; i--) {
