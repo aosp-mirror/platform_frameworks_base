@@ -4517,34 +4517,39 @@ public class Editor {
             final float eventY = event.getY();
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
+                    if (extractedTextModeWillBeStarted()) {
+                        // Prevent duplicating the selection handles until the mode starts.
+                        hide();
+                    } else {
+                        // Remember finger down position, to be able to start selection from there.
+                        mMinTouchOffset = mMaxTouchOffset = mTextView.getOffsetForPosition(
+                                eventX, eventY);
 
-                    // Remember finger down position, to be able to start selection from there.
-                    mMinTouchOffset = mMaxTouchOffset = mTextView.getOffsetForPosition(
-                            eventX, eventY);
+                        // Double tap detection
+                        if (mGestureStayedInTapRegion) {
+                            if (mDoubleTap) {
+                                final float deltaX = eventX - mDownPositionX;
+                                final float deltaY = eventY - mDownPositionY;
+                                final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-                    // Double tap detection
-                    if (mGestureStayedInTapRegion) {
-                        if (mDoubleTap) {
-                            final float deltaX = eventX - mDownPositionX;
-                            final float deltaY = eventY - mDownPositionY;
-                            final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                                ViewConfiguration viewConfiguration = ViewConfiguration.get(
+                                        mTextView.getContext());
+                                int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
+                                boolean stayedInArea =
+                                        distanceSquared < doubleTapSlop * doubleTapSlop;
 
-                            ViewConfiguration viewConfiguration = ViewConfiguration.get(
-                                    mTextView.getContext());
-                            int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
-                            boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
-
-                            if (stayedInArea && isPositionOnText(eventX, eventY)) {
-                                selectCurrentWordAndStartDrag();
-                                mDiscardNextActionUp = true;
+                                if (stayedInArea && isPositionOnText(eventX, eventY)) {
+                                    selectCurrentWordAndStartDrag();
+                                    mDiscardNextActionUp = true;
+                                }
                             }
                         }
-                    }
 
-                    mDownPositionX = eventX;
-                    mDownPositionY = eventY;
-                    mGestureStayedInTapRegion = true;
-                    mHaventMovedEnoughToStartDrag = true;
+                        mDownPositionX = eventX;
+                        mDownPositionY = eventY;
+                        mGestureStayedInTapRegion = true;
+                        mHaventMovedEnoughToStartDrag = true;
+                    }
                     break;
 
                 case MotionEvent.ACTION_POINTER_DOWN:
