@@ -111,6 +111,7 @@ public class VolumeDialog {
     private final Accessibility mAccessibility = new Accessibility();
     private final ColorStateList mActiveSliderTint;
     private final ColorStateList mInactiveSliderTint;
+    private final VolumeDialogMotion mMotion;
 
     private boolean mShowing;
     private boolean mExpanded;
@@ -120,9 +121,12 @@ public class VolumeDialog {
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
     private int mExpandButtonRes;
-    private boolean mExpanding;
+    private boolean mExpandButtonAnimationRunning;
     private SafetyWarningDialog mSafetyWarning;
     private Callback mCallback;
+    private boolean mPendingStateChanged;
+    private boolean mPendingRecheckAll;
+    private long mCollapseTime;
 
     public VolumeDialog(Context context, int windowType, VolumeDialogController controller,
             ZenModeController zenModeController, Callback callback) {
@@ -151,7 +155,6 @@ public class VolumeDialog {
         lp.format = PixelFormat.TRANSLUCENT;
         lp.setTitle(VolumeDialog.class.getSimpleName());
         lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        lp.windowAnimations = R.style.VolumeDialogAnimations;
         lp.y = res.getDimensionPixelSize(R.dimen.volume_offset_top);
         lp.gravity = Gravity.TOP;
         window.setAttributes(lp);
@@ -168,9 +171,22 @@ public class VolumeDialog {
         updateExpandButtonH();
         mLayoutTransition = new LayoutTransition();
         mLayoutTransition.setDuration(new ValueAnimator().getDuration() / 2);
-        mLayoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING);
-        mLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
         mDialogContentView.setLayoutTransition(mLayoutTransition);
+        mMotion = new VolumeDialogMotion(mDialog, mDialogView, mDialogContentView, mExpandButton,
+                new VolumeDialogMotion.Callback() {
+            @Override
+            public void onAnimatingChanged(boolean animating) {
+                if (animating) return;
+                if (mPendingStateChanged) {
+                    mHandler.sendEmptyMessage(H.STATE_CHANGED);
+                    mPendingStateChanged = false;
+                }
+                if (mPendingRecheckAll) {
+                    mHandler.sendEmptyMessage(H.RECHECK_ALL);
+                    mPendingRecheckAll = false;
+                }
+            }
+        });
 
         addRow(AudioManager.STREAM_RING,
                 R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true);
@@ -242,6 +258,7 @@ public class VolumeDialog {
         final VolumeRow row = initRow(stream, iconRes, iconMuteRes, important);
         if (!mRows.isEmpty()) {
             final View v = new View(mContext);
+            v.setId(android.R.id.background);
             final int h = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.volume_slider_interspacing);
             final LinearLayout.LayoutParams lp =
@@ -253,10 +270,11 @@ public class VolumeDialog {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if (D.BUG) Log.d(TAG, "onLayoutChange"
+                final boolean moved = oldLeft != left || oldTop != top;
+                if (D.BUG) Log.d(TAG, "onLayoutChange moved=" + moved
                         + " old=" + new Rect(oldLeft, oldTop, oldRight, oldBottom).toShortString()
                         + " new=" + new Rect(left,top,right,bottom).toShortString());
-                if (oldLeft != left || oldTop != top) {
+                if (moved) {
                     for (int i = 0; i < mDialogContentView.getChildCount(); i++) {
                         final View c = mDialogContentView.getChildAt(i);
                         if (!c.isShown()) continue;
@@ -302,18 +320,21 @@ public class VolumeDialog {
         if (D.BUG) Log.d(TAG, "repositionExpandAnim x=" + x + " y=" + y);
         mExpandButton.setTranslationX(x);
         mExpandButton.setTranslationY(y);
+        mExpandButton.setTag((Integer) y);
     }
 
     public void dump(PrintWriter writer) {
         writer.println(VolumeDialog.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
         writer.print("  mExpanded: "); writer.println(mExpanded);
-        writer.print("  mExpanding: "); writer.println(mExpanding);
+        writer.print("  mExpandButtonAnimationRunning: ");
+        writer.println(mExpandButtonAnimationRunning);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
         writer.print("  mShowHeaders: "); writer.println(mShowHeaders);
         writer.print("  mAutomute: "); writer.println(mAutomute);
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
+        writer.print("  mCollapseTime: "); writer.println(mCollapseTime);
         writer.print("  mAccessibility.mFeedbackEnabled: ");
         writer.println(mAccessibility.mFeedbackEnabled);
     }
@@ -412,12 +433,13 @@ public class VolumeDialog {
     }
 
     private void showH(int reason) {
+        if (D.BUG) Log.d(TAG, "showH r=" + Events.DISMISS_REASONS[reason]);
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
         rescheduleTimeoutH();
         if (mShowing) return;
         mShowing = true;
-        mDialog.show();
+        mMotion.startShow();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);
     }
@@ -434,7 +456,7 @@ public class VolumeDialog {
     private int computeTimeoutH() {
         if (mAccessibility.mFeedbackEnabled) return 20000;
         if (mSafetyWarning != null) return 5000;
-        if (mExpanded || mExpanding) return 5000;
+        if (mExpanded || mExpandButtonAnimationRunning) return 5000;
         if (mActiveStream == AudioManager.STREAM_MUSIC) return 1500;
         return 3000;
     }
@@ -444,9 +466,13 @@ public class VolumeDialog {
         mHandler.removeMessages(H.SHOW);
         if (!mShowing) return;
         mShowing = false;
-        mDialog.dismiss();
+        mMotion.startDismiss(new Runnable() {
+            @Override
+            public void run() {
+                setExpandedH(false);
+            }
+        });
         Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
-        setExpandedH(false);
         mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
             if (mSafetyWarning != null) {
@@ -456,13 +482,40 @@ public class VolumeDialog {
         }
     }
 
+    private void updateDialogBottomMarginH() {
+        final long diff = System.currentTimeMillis() - mCollapseTime;
+        final boolean collapsing = mCollapseTime != 0 && diff < getConservativeCollapseDuration();
+        final ViewGroup.MarginLayoutParams mlp = (MarginLayoutParams) mDialogView.getLayoutParams();
+        final int bottomMargin = collapsing ? mDialogContentView.getHeight() :
+                mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_margin_bottom);
+        if (bottomMargin != mlp.bottomMargin) {
+            if (D.BUG) Log.d(TAG, "bottomMargin " + mlp.bottomMargin + " -> " + bottomMargin);
+            mlp.bottomMargin = bottomMargin;
+            mDialogView.setLayoutParams(mlp);
+        }
+    }
+
+    private long getConservativeCollapseDuration() {
+        return mExpandButtonAnimationDuration * 3;
+    }
+
+    private void prepareForCollapse() {
+        mHandler.removeMessages(H.UPDATE_BOTTOM_MARGIN);
+        mCollapseTime = System.currentTimeMillis();
+        updateDialogBottomMarginH();
+        mHandler.sendEmptyMessageDelayed(H.UPDATE_BOTTOM_MARGIN, getConservativeCollapseDuration());
+    }
+
     private void setExpandedH(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        mExpanding = isAttached();
+        mExpandButtonAnimationRunning = isAttached();
         if (D.BUG) Log.d(TAG, "setExpandedH " + expanded);
+        if (!mExpanded && mExpandButtonAnimationRunning) {
+            prepareForCollapse();
+        }
         updateRowsH();
-        if (mExpanding) {
+        if (mExpandButtonAnimationRunning) {
             final Drawable d = mExpandButton.getDrawable();
             if (d instanceof AnimatedVectorDrawable) {
                 // workaround to reset drawable
@@ -473,7 +526,7 @@ public class VolumeDialog {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mExpanding = false;
+                        mExpandButtonAnimationRunning = false;
                         updateExpandButtonH();
                         rescheduleTimeoutH();
                     }
@@ -484,8 +537,9 @@ public class VolumeDialog {
     }
 
     private void updateExpandButtonH() {
-        mExpandButton.setClickable(!mExpanding);
-        if (mExpanding && isAttached()) return;
+        if (D.BUG) Log.d(TAG, "updateExpandButtonH");
+        mExpandButton.setClickable(!mExpandButtonAnimationRunning);
+        if (mExpandButtonAnimationRunning && isAttached()) return;
         final int res = mExpanded ? R.drawable.ic_volume_collapse_animation
                 : R.drawable.ic_volume_expand_animation;
         if (res == mExpandButtonRes) return;
@@ -502,6 +556,7 @@ public class VolumeDialog {
     }
 
     private void updateRowsH() {
+        if (D.BUG) Log.d(TAG, "updateRowsH");
         final VolumeRow activeRow = getActiveRow();
         updateFooterH();
         updateExpandButtonH();
@@ -531,6 +586,7 @@ public class VolumeDialog {
     }
 
     private void trimObsoleteH() {
+        if (D.BUG) Log.d(TAG, "trimObsoleteH");
         for (int i = mRows.size() -1; i >= 0; i--) {
             final VolumeRow row = mRows.get(i);
             if (row.ss == null || !row.ss.dynamic) continue;
@@ -543,7 +599,13 @@ public class VolumeDialog {
     }
 
     private void onStateChangedH(State state) {
+        final boolean animating = mMotion.isAnimating();
+        if (D.BUG) Log.d(TAG, "onStateChangedH animating=" + animating);
         mState = state;
+        if (animating) {
+            mPendingStateChanged = true;
+            return;
+        }
         mDynamic.clear();
         // add any new dynamic rows
         for (int i = 0; i < state.states.size(); i++) {
@@ -568,11 +630,18 @@ public class VolumeDialog {
     }
 
     private void updateFooterH() {
-        Util.setVisOrGone(mZenFooter, mState.zenMode != Global.ZEN_MODE_OFF);
+        if (D.BUG) Log.d(TAG, "updateFooterH");
+        final boolean wasVisible = mZenFooter.getVisibility() == View.VISIBLE;
+        final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF;
+        if (wasVisible != visible && !visible) {
+            prepareForCollapse();
+        }
+        Util.setVisOrGone(mZenFooter, visible);
         mZenFooter.update();
     }
 
     private void updateVolumeRowH(VolumeRow row) {
+        if (D.BUG) Log.d(TAG, "updateVolumeRowH s=" + row.stream);
         if (mState == null) return;
         final StreamState ss = mState.states.get(row.stream);
         if (ss == null) return;
@@ -841,7 +910,7 @@ public class VolumeDialog {
     private final OnClickListener mClickExpand = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (mExpanding) return;
+            if (mExpandButtonAnimationRunning) return;
             final boolean newExpand = !mExpanded;
             Events.writeEvent(mContext, Events.EVENT_EXPAND, newExpand);
             setExpandedH(newExpand);
@@ -870,6 +939,8 @@ public class VolumeDialog {
         private static final int RECHECK_ALL = 4;
         private static final int SET_STREAM_IMPORTANT = 5;
         private static final int RESCHEDULE_TIMEOUT = 6;
+        private static final int STATE_CHANGED = 7;
+        private static final int UPDATE_BOTTOM_MARGIN = 8;
 
         public H() {
             super(Looper.getMainLooper());
@@ -884,6 +955,8 @@ public class VolumeDialog {
                 case RECHECK_ALL: recheckH(null); break;
                 case SET_STREAM_IMPORTANT: setStreamImportantH(msg.arg1, msg.arg2 != 0); break;
                 case RESCHEDULE_TIMEOUT: rescheduleTimeoutH(); break;
+                case STATE_CHANGED: onStateChangedH(mState); break;
+                case UPDATE_BOTTOM_MARGIN: updateDialogBottomMarginH(); break;
             }
         }
     }
@@ -902,6 +975,12 @@ public class VolumeDialog {
         @Override
         protected void onStop() {
             super.onStop();
+            final boolean animating = mMotion.isAnimating();
+            if (D.BUG) Log.d(TAG, "onStop animating=" + animating);
+            if (animating) {
+                mPendingRecheckAll = true;
+                return;
+            }
             mHandler.sendEmptyMessage(H.RECHECK_ALL);
         }
 
@@ -978,11 +1057,13 @@ public class VolumeDialog {
             mDialogView.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
                 @Override
                 public void onViewDetachedFromWindow(View v) {
+                    if (D.BUG) Log.d(TAG, "onViewDetachedFromWindow");
                     // noop
                 }
 
                 @Override
                 public void onViewAttachedToWindow(View v) {
+                    if (D.BUG) Log.d(TAG, "onViewAttachedToWindow");
                     updateFeedbackEnabled();
                 }
             });
