@@ -3797,6 +3797,9 @@ public class Notification implements Parcelable
             return wip;
         }
 
+        /**
+         * @hide
+         */
         public void purgeResources() {}
 
         // The following methods are split out so we can re-create notification partially.
