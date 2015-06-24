@@ -114,6 +114,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                             / mPanel.getMaxPanelHeight());
                     mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight
                             + mNotificationsTopPadding);
+                    mPanel.clearNotificattonEffects();
                     mHeadsUpManager.unpinAll();
                     return true;
                 }
