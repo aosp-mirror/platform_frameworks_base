@@ -2345,7 +2345,8 @@ public class ActivityManager {
     @SystemApi
     public int getPackageImportance(String packageName) {
         try {
-            int procState = ActivityManagerNative.getDefault().getPackageProcessState(packageName);
+            int procState = ActivityManagerNative.getDefault().getPackageProcessState(packageName,
+                    mContext.getOpPackageName());
             return RunningAppProcessInfo.procStateToImportance(procState);
         } catch (RemoteException e) {
             return RunningAppProcessInfo.IMPORTANCE_GONE;
