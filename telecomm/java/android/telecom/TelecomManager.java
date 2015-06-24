@@ -187,7 +187,7 @@ public class TelecomManager {
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} containing a {@link Bundle}
      * which contains metadata about the call. This {@link Bundle} will be saved into
-     * {@code Call.Details}.
+     * {@code Call.Details} and passed to the {@link ConnectionService} when placing the call.
      */
     public static final String EXTRA_OUTGOING_CALL_EXTRAS =
             "android.telecom.extra.OUTGOING_CALL_EXTRAS";
@@ -1165,6 +1165,14 @@ public class TelecomManager {
      * extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true);
      * telecomManager.placeCall(uri, extras);
      * </pre>
+     *
+     * The following keys are supported in the supplied extras.
+     * <ul>
+     *   <li>{@link #EXTRA_OUTGOING_CALL_EXTRAS}</li>
+     *   <li>{@link #EXTRA_PHONE_ACCOUNT_HANDLE}</li>
+     *   <li>{@link #EXTRA_START_CALL_WITH_SPEAKERPHONE}</li>
+     *   <li>{@link #EXTRA_START_CALL_WITH_VIDEO_STATE}</li>
+     * </ul>
      *
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
