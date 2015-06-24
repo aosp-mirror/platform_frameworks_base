@@ -125,6 +125,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected boolean isPanelFullyCollapsed() {
+        return false;
+    }
+
+    @Override
     protected int getMaxKeyguardNotifications() {
         return 0;
     }

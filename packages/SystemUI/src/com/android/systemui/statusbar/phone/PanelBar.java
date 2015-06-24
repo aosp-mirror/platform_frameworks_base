@@ -28,6 +28,8 @@ import java.util.ArrayList;
 public abstract class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelBar.class.getSimpleName();
+    private static final boolean SPEW = false;
+
     public static final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
         Log.v(TAG, String.format(fmt, args));
@@ -167,7 +169,7 @@ public abstract class PanelBar extends FrameLayout {
     public void panelExpansionChanged(PanelView panel, float frac, boolean expanded) {
         boolean fullyClosed = true;
         PanelView fullyOpenedPanel = null;
-        if (DEBUG) LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
+        if (SPEW) LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
         mPanelExpandedFractionSum = 0f;
         for (PanelView pv : mPanels) {
             pv.setVisibility(expanded ? View.VISIBLE : View.INVISIBLE);
@@ -180,7 +182,7 @@ public abstract class PanelBar extends FrameLayout {
                 fullyClosed = false;
                 final float thisFrac = pv.getExpandedFraction();
                 mPanelExpandedFractionSum += thisFrac;
-                if (DEBUG) LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
+                if (SPEW) LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
                 if (panel == pv) {
                     if (thisFrac == 1f) fullyOpenedPanel = panel;
                 }
@@ -195,7 +197,7 @@ public abstract class PanelBar extends FrameLayout {
             onAllPanelsCollapsed();
         }
 
-        if (DEBUG) LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
+        if (SPEW) LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
                 (fullyOpenedPanel!=null)?" fullyOpened":"", fullyClosed?" fullyClosed":"");
     }
 
@@ -241,7 +243,7 @@ public abstract class PanelBar extends FrameLayout {
     }
 
     public void onExpandingFinished() {
-
+        if (DEBUG) LOG("onExpandingFinished");
     }
 
     public void onClosingFinished() {
