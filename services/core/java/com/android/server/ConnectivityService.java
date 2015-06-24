@@ -2006,15 +2006,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 NascentState.NOT_JUST_VALIDATED);
                     }
                     if (!visible) {
-                        setProvNotificationVisibleIntent(false, netId, null, 0, null, null);
+                        setProvNotificationVisibleIntent(false, netId, null, 0, null, null, false);
                     } else {
                         if (nai == null) {
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
                         setProvNotificationVisibleIntent(true, netId, NotificationType.SIGN_IN,
-                                nai.networkInfo.getType(),nai.networkInfo.getExtraInfo(),
-                                (PendingIntent)msg.obj);
+                                nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(),
+                                (PendingIntent)msg.obj, nai.networkMisc.explicitlySelected);
                     }
                     break;
                 }
@@ -2447,7 +2447,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
         setProvNotificationVisibleIntent(true, nai.network.netId, NotificationType.NO_INTERNET,
-                nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(), pendingIntent);
+                nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(), pendingIntent, true);
     }
 
     private class InternalHandler extends Handler {
@@ -3240,7 +3240,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Concatenate the range of types onto the range of NetIDs.
         int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
         setProvNotificationVisibleIntent(visible, id, NotificationType.SIGN_IN,
-                networkType, null, pendingIntent);
+                networkType, null, pendingIntent, false);
     }
 
     /**
@@ -3259,11 +3259,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *         we concatenate the range of types with the range of NetIDs.
      */
     private void setProvNotificationVisibleIntent(boolean visible, int id,
-            NotificationType notifyType, int networkType, String extraInfo, PendingIntent intent) {
+            NotificationType notifyType, int networkType, String extraInfo, PendingIntent intent,
+            boolean highPriority) {
         if (DBG) {
             log("setProvNotificationVisibleIntent " + notifyType + " visible=" + visible
                     + " networkType=" + getNetworkTypeName(networkType)
-                    + " extraInfo=" + extraInfo);
+                    + " extraInfo=" + extraInfo + " highPriority=" + highPriority);
         }
 
         Resources r = Resources.getSystem();
@@ -3318,6 +3319,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     .setContentTitle(title)
                     .setContentText(details)
                     .setContentIntent(intent)
+                    .setLocalOnly(true)
+                    .setPriority(highPriority ?
+                            Notification.PRIORITY_HIGH :
+                            Notification.PRIORITY_DEFAULT)
+                    .setDefaults(Notification.DEFAULT_ALL)
+                    .setOnlyAlertOnce(true)
                     .build();
 
             try {
