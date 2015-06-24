@@ -1083,6 +1083,7 @@ class MountService extends IMountService.Stub
             case VolumeInfo.STATE_EJECTING:
             case VolumeInfo.STATE_UNMOUNTED:
             case VolumeInfo.STATE_UNMOUNTABLE:
+            case VolumeInfo.STATE_BAD_REMOVAL:
                 break;
             default:
                 return false;
@@ -1119,6 +1120,7 @@ class MountService extends IMountService.Stub
             final Intent intent = new Intent(VolumeInfo.ACTION_VOLUME_STATE_CHANGED);
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_STATE, newState);
+            intent.putExtra(VolumeRecord.EXTRA_FS_UUID, vol.fsUuid);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                     android.Manifest.permission.WRITE_MEDIA_STORAGE);
