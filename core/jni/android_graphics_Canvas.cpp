@@ -175,24 +175,24 @@ static jboolean quickRejectPath(JNIEnv* env, jobject, jlong canvasHandle, jlong 
 static jboolean clipRect(JNIEnv*, jobject, jlong canvasHandle, jfloat l, jfloat t,
                          jfloat r, jfloat b, jint opHandle) {
     SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool emptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b, op);
-    return emptyClip ? JNI_FALSE : JNI_TRUE;
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b, op);
+    return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle,
                          jint opHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool emptyClip = get_canvas(canvasHandle)->clipPath(path, op);
-    return emptyClip ? JNI_FALSE : JNI_TRUE;
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, op);
+    return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong deviceRgnHandle,
                            jint opHandle) {
     SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
     SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool emptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, op);
-    return emptyClip ? JNI_FALSE : JNI_TRUE;
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, op);
+    return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
 static void drawColor(JNIEnv* env, jobject, jlong canvasHandle, jint color, jint modeHandle) {
