@@ -5848,29 +5848,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            boolean isInSelectionMode = mEditor != null && mEditor.mTextActionMode != null;
-
-            if (isInSelectionMode) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.startTracking(event, this);
-                    }
-                    return true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.handleUpEvent(event);
-                    }
-                    if (event.isTracking() && !event.isCanceled()) {
-                        stopTextActionMode();
-                        return true;
-                    }
-                }
-            }
+        // Note: If the IME is in fullscreen mode and IMS#mExtractEditText is in text action mode,
+        // InputMethodService#onKeyDown and InputMethodService#onKeyUp are responsible to call
+        // InputMethodService#mExtractEditText.maybeHandleBackInTextActionMode(event).
+        if (keyCode == KeyEvent.KEYCODE_BACK && handleBackInTextActionModeIfNeeded(event)) {
+            return true;
         }
         return super.onKeyPreIme(keyCode, event);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean handleBackInTextActionModeIfNeeded(KeyEvent event) {
+        // Do nothing unless mEditor is in text action mode.
+        if (mEditor == null || mEditor.mTextActionMode == null) {
+            return false;
+        }
+
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            KeyEvent.DispatcherState state = getKeyDispatcherState();
+            if (state != null) {
+                state.startTracking(event, this);
+            }
+            return true;
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            KeyEvent.DispatcherState state = getKeyDispatcherState();
+            if (state != null) {
+                state.handleUpEvent(event);
+            }
+            if (event.isTracking() && !event.isCanceled()) {
+                stopTextActionMode();
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
