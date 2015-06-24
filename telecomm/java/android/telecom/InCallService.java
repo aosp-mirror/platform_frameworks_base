@@ -39,7 +39,24 @@ import java.util.List;
 /**
  * This service is implemented by any app that wishes to provide the user-interface for managing
  * phone calls. Telecom binds to this service while there exists a live (active or incoming) call,
- * and uses it to notify the in-call app of any live and and recently disconnected calls.
+ * and uses it to notify the in-call app of any live and recently disconnected calls. An app must
+ * first be set as the default phone app (See {@link TelecomManager#getDefaultDialerPackage()})
+ * before the telecom service will bind to its {@code InCallService} implementation.
+ * <p>
+ * Below is an example manifest registration for an {@code InCallService}. The meta-data
+ * ({@link TelecomManager#METADATA_IN_CALL_SERVICE_UI}) indicates that this particular
+ * {@code InCallService} implementation intends to replace the built-in in-call UI.
+ * <pre>
+ * {@code
+ * &lt;service android:name="your.package.YourInCallServiceImplementation"
+ *          android:permission="android.permission.BIND_IN_CALL_SERVICE"&gt;
+ *      &lt;meta-data android:name="android.telecom.IN_CALL_SERVICE_UI" android:value="true" /&gt;
+ *      &lt;intent-filter&gt;
+ *          &lt;action android:name="android.telecom.InCallService"/&gt;
+ *      &lt;/intent-filter&gt;
+ * &lt;/service&gt;
+ * }
+ * </pre>
  */
 public abstract class InCallService extends Service {
 
