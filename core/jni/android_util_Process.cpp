@@ -239,7 +239,8 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         if (t_pri <= ANDROID_PRIORITY_AUDIO) {
             int scheduler = sched_getscheduler(t_pid);
             if ((scheduler == SCHED_FIFO) || (scheduler == SCHED_RR)) {
-                // This task wants to stay in it's current audio group so it can keep it's budget
+                // This task wants to stay in its current audio group so it can keep its budget
+                // don't update its cpuset or cgroup
                 continue;
             }
         }
@@ -247,15 +248,33 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         if (isDefault) {
             if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
                 // This task wants to stay at background
+                // update its cpuset so it doesn't only run on bg core(s)
+#ifdef ENABLE_CPUSETS
+                int err = set_cpuset_policy(t_pid, sp);
+                if (err != NO_ERROR) {
+                    signalExceptionForGroupError(env, -err);
+                    break;
+                }
+#endif
                 continue;
             }
         }
-
-        int err = set_sched_policy(t_pid, sp);
+        int err;
+#ifdef ENABLE_CPUSETS
+        // set both cpuset and cgroup for general threads
+        err = set_cpuset_policy(t_pid, sp);
         if (err != NO_ERROR) {
             signalExceptionForGroupError(env, -err);
             break;
         }
+#endif
+
+        err = set_sched_policy(t_pid, sp);
+        if (err != NO_ERROR) {
+            signalExceptionForGroupError(env, -err);
+            break;
+        }
+
     }
     closedir(d);
 }
