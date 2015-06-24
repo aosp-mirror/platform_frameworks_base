@@ -188,6 +188,9 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (!mState.restored) {
+            // In this case, we set the activity title in AsyncTask.onPostExecute().  To prevent
+            // talkback from reading aloud the default title, we clear it here.
+            setTitle("");
             if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
                 final Uri rootUri = getIntent().getData();
                 new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
