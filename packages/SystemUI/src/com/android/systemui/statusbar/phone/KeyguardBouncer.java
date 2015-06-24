@@ -200,6 +200,7 @@ public class KeyguardBouncer {
      * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
+        ensureView();
         if (mKeyguardView != null) {
             SecurityMode mode = mKeyguardView.getSecurityMode();
             return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
