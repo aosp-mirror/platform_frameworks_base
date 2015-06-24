@@ -68,7 +68,10 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
   <dt><a href="{@docRoot}tools/help/adb.html">adb</a></dt>
     <dd>Android Debug Bridge (adb) is a versatile command line tool that lets you communicate with
         an emulator instance or connected Android-powered device. It also provides access to the
-        device shell for advanced command-line operations.</dd>
+        device shell.</dd>
+
+  <dt><a href="{@docRoot}tools/help/shell.html">ADB Shell Commands</a></dt>
+    <dd>Learn the commands available for advanced command-line operations.</dd>
 
   <dt><a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor
 Server (ddms)</a></dt>
@@ -109,10 +112,8 @@ you can view the file in a profiling tool of your choice.</dd>
 
   <dt><a href="{@docRoot}tools/help/jobb.html">JOBB</a></dt>
     <dd>Allows you to build encrypted and unencrypted
-    <a href="{@docRoot}{@docRoot}google/play/expansion-files.html">APK expansion files</a> in Opaque
+    <a href="{@docRoot}google/play/expansion-files.html">APK expansion files</a> in Opaque
     Binary Blob (OBB) format.</dd>
-
-<a href="{@docRoot}{@docRoot}google/play/expansion-files.html">APK expansion files</a>
 
   <dt><a href="{@docRoot}tools/help/proguard.html">ProGuard</a></dt>
     <dd>Shrinks, optimizes, and obfuscates your code by removing unused code and renaming
