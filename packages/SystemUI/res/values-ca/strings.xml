@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telèfon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Assistència per veu"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloqueja"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Botó de desbloqueig, esperant l\'empremta digital"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloqueja sense utilitzar l\'empremta digital"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloqueja"</string>
     <string name="phone_label" msgid="2320074140205331708">"obre el telèfon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"obre l\'assistència per veu"</string>
@@ -318,10 +316,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels que produeixin les alarmes, els recordatoris, els esdeveniments i les trucades de les persones que especifiquis."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els vídeos, els jocs, les alarmes i la música. Tot i això, encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els vídeos, els jocs, les alarmes i la música."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Torna a tocar per obrir"</string>

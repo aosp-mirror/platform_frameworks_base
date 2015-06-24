@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"දුරකථනය"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"හඬ සහාය"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"අඟුල අරින්න"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"අගුළු ඇරීමේ බොත්තම, ඇඟිලි සලකුණු සඳහා රැඳී සිටිමින්"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ඔබේ ඇඟිලි සලකුණ භාවිත නොකර අගුළු අරින්න"</string>
     <string name="unlock_label" msgid="8779712358041029439">"අඟුල අරින්න"</string>
     <string name="phone_label" msgid="2320074140205331708">"දුරකථනය විවෘත කරන්න"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"විවෘත හඬ සහාය"</string>
@@ -316,10 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> සඳහා වමට සර්පණය කරන්න."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"එලාම, සිහි කැඳවීම්, සිදුවීම් සහ ඔබ සඳහන් කරන අමතන්නන් වෙතින් හැර, වෙනත් ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"අභිරුචිකරණය"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"මෙය සීනු, සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු, සියලු ශබ්ද සහ කම්පන අවහිර කරයි. ඔබට තවමත් දුරකථන ඇමතුම් සිදු කිරීමේ හැකියාව ඇත."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"මෙය සීනු, සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු, සියලු ශබ්ද සහ කම්පන අවහිර කරයි."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"හදිසිය අඩු දැනුම් දීම් පහත"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"විවෘත කිරීමට නැවත ස්පර්ශ කරන්න"</string>

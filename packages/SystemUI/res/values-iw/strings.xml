@@ -89,10 +89,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"טלפון"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"מסייע קולי"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ביטול נעילה"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"לחצן ביטול נעילה, ממתין לטביעת אצבע"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"בטל את הנעילה בלי להשתמש בטביעת האצבע"</string>
     <string name="unlock_label" msgid="8779712358041029439">"בטל את הנעילה"</string>
     <string name="phone_label" msgid="2320074140205331708">"פתח את הטלפון"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"פתח את המסייע הקולי"</string>
@@ -318,10 +316,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"הסט שמאלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"צלילים ורטט לא יופעלו, פרט להתראות, תזכורות, אירועים ומתקשרים שתציין."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"התאם אישית"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"פעולה זו מבטלת את כל הצלילים והרטט, כולל צלילים ורטט שמקורם בהתראות, מוזיקה, סרטונים ומשחקים. תוכל עדיין להתקשר."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"פעולה זו מבטלת את כל הצלילים והרטט, כולל בהתראות, מוזיקה, סרטונים ומשחקים."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"הודעות בדחיפות נמוכה יותר בהמשך"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"גע שוב כדי לפתוח"</string>
