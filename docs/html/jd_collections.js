@@ -1611,7 +1611,8 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "training/enterprise/work-policy-ctrl.html",
-      "samples/BasicManagedProfile/index.html"
+      "samples/BasicManagedProfile/index.html",
+      "https://www.youtube.com/watch?v=j3QC6hcpy90"
     ]
   },
   "tools/performance/rendering": {
