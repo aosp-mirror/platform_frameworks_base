@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ package android.security.keymaster;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,8 +31,8 @@ public class KeyCharacteristics implements Parcelable {
     public KeymasterArguments swEnforced;
     public KeymasterArguments hwEnforced;
 
-    public static final Parcelable.Creator<KeyCharacteristics> CREATOR = new
-            Parcelable.Creator<KeyCharacteristics>() {
+    public static final Parcelable.Creator<KeyCharacteristics> CREATOR =
+            new Parcelable.Creator<KeyCharacteristics>() {
                 @Override
                 public KeyCharacteristics createFromParcel(Parcel in) {
                     return new KeyCharacteristics(in);
@@ -65,73 +66,85 @@ public class KeyCharacteristics implements Parcelable {
         hwEnforced = KeymasterArguments.CREATOR.createFromParcel(in);
     }
 
-    public Integer getInteger(int tag) {
+    /**
+     * Returns the value of the specified enum tag or {@code defaultValue} if the tag is not
+     * present.
+     *
+     * @throws IllegalArgumentException if {@code tag} is not an enum tag.
+     */
+    public Integer getEnum(int tag) {
         if (hwEnforced.containsTag(tag)) {
-            return hwEnforced.getInt(tag, -1);
+            return hwEnforced.getEnum(tag, -1);
         } else if (swEnforced.containsTag(tag)) {
-            return swEnforced.getInt(tag, -1);
+            return swEnforced.getEnum(tag, -1);
         } else {
             return null;
         }
     }
 
-    public int getInt(int tag, int defaultValue) {
-        Integer result = getInteger(tag);
-        return (result != null) ? result : defaultValue;
-    }
-
-    public List<Integer> getInts(int tag) {
+    /**
+     * Returns all values of the specified repeating enum tag.
+     *
+     * throws IllegalArgumentException if {@code tag} is not a repeating enum tag.
+     */
+    public List<Integer> getEnums(int tag) {
         List<Integer> result = new ArrayList<Integer>();
-        result.addAll(hwEnforced.getInts(tag));
-        result.addAll(swEnforced.getInts(tag));
+        result.addAll(hwEnforced.getEnums(tag));
+        result.addAll(swEnforced.getEnums(tag));
         return result;
     }
 
-    public Long getLong(int tag) {
+    /**
+     * Returns the value of the specified unsigned 32-bit int tag or {@code defaultValue} if the tag
+     * is not present.
+     *
+     * @throws IllegalArgumentException if {@code tag} is not an unsigned 32-bit int tag.
+     */
+    public long getUnsignedInt(int tag, long defaultValue) {
         if (hwEnforced.containsTag(tag)) {
-            return hwEnforced.getLong(tag, -1);
-        } else if (swEnforced.containsTag(tag)) {
-            return swEnforced.getLong(tag, -1);
+            return hwEnforced.getUnsignedInt(tag, defaultValue);
         } else {
-            return null;
+            return swEnforced.getUnsignedInt(tag, defaultValue);
         }
     }
 
-    public long getLong(int tag, long defaultValue) {
-        Long result = getLong(tag);
-        return (result != null) ? result : defaultValue;
-    }
-
-    public List<Long> getLongs(int tag) {
-        List<Long> result = new ArrayList<Long>();
-        result.addAll(hwEnforced.getLongs(tag));
-        result.addAll(swEnforced.getLongs(tag));
+    /**
+     * Returns all values of the specified repeating unsigned 64-bit long tag.
+     *
+     * @throws IllegalArgumentException if {@code tag} is not a repeating unsigned 64-bit long tag.
+     */
+    public List<BigInteger> getUnsignedLongs(int tag) {
+        List<BigInteger> result = new ArrayList<BigInteger>();
+        result.addAll(hwEnforced.getUnsignedLongs(tag));
+        result.addAll(swEnforced.getUnsignedLongs(tag));
         return result;
     }
 
+    /**
+     * Returns the value of the specified date tag or {@code null} if the tag is not present.
+     *
+     * @throws IllegalArgumentException if {@code tag} is not a date tag or if the tag's value
+     *         represents a time instant which is after {@code 2^63 - 1} milliseconds since Unix
+     *         epoch.
+     */
     public Date getDate(int tag) {
-        Date result = hwEnforced.getDate(tag, null);
-        if (result == null) {
-            result = swEnforced.getDate(tag, null);
+        Date result = swEnforced.getDate(tag, null);
+        if (result != null) {
+            return result;
         }
-        return result;
+        return hwEnforced.getDate(tag, null);
     }
 
-    public Date getDate(int tag, Date defaultValue) {
-        if (hwEnforced.containsTag(tag)) {
-            return hwEnforced.getDate(tag, null);
-        } else if (hwEnforced.containsTag(tag)) {
-            return swEnforced.getDate(tag, null);
-        } else {
-            return defaultValue;
-        }
-    }
-
+    /**
+     * Returns {@code true} if the provided boolean tag is present, {@code false} if absent.
+     *
+     * @throws IllegalArgumentException if {@code tag} is not a boolean tag.
+     */
     public boolean getBoolean(int tag) {
         if (hwEnforced.containsTag(tag)) {
-            return hwEnforced.getBoolean(tag, false);
+            return hwEnforced.getBoolean(tag);
         } else {
-            return swEnforced.getBoolean(tag, false);
+            return swEnforced.getBoolean(tag);
         }
     }
 }

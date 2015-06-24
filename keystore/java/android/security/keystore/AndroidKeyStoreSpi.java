@@ -398,18 +398,18 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
             importArgs = new KeymasterArguments();
             try {
-                importArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM,
+                importArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM,
                         KeyProperties.KeyAlgorithm.toKeymasterAsymmetricKeyAlgorithm(
                                 key.getAlgorithm()));
                 @KeyProperties.PurposeEnum int purposes = spec.getPurposes();
-                importArgs.addInts(KeymasterDefs.KM_TAG_PURPOSE,
+                importArgs.addEnums(KeymasterDefs.KM_TAG_PURPOSE,
                         KeyProperties.Purpose.allToKeymaster(purposes));
                 if (spec.isDigestsSpecified()) {
-                    importArgs.addInts(KeymasterDefs.KM_TAG_DIGEST,
+                    importArgs.addEnums(KeymasterDefs.KM_TAG_DIGEST,
                             KeyProperties.Digest.allToKeymaster(spec.getDigests()));
                 }
 
-                importArgs.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE,
+                importArgs.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE,
                         KeyProperties.BlockMode.allToKeymaster(spec.getBlockModes()));
                 int[] keymasterEncryptionPaddings =
                         KeyProperties.EncryptionPadding.allToKeymaster(
@@ -429,8 +429,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         }
                     }
                 }
-                importArgs.addInts(KeymasterDefs.KM_TAG_PADDING, keymasterEncryptionPaddings);
-                importArgs.addInts(KeymasterDefs.KM_TAG_PADDING,
+                importArgs.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterEncryptionPaddings);
+                importArgs.addEnums(KeymasterDefs.KM_TAG_PADDING,
                         KeyProperties.SignaturePadding.allToKeymaster(spec.getSignaturePaddings()));
                 KeymasterUtils.addUserAuthArgs(importArgs,
                         spec.isUserAuthenticationRequired(),
@@ -567,7 +567,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, keymasterAlgorithm);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, keymasterAlgorithm);
 
         int[] keymasterDigests;
         if (params.isDigestsSpecified()) {
@@ -606,7 +606,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 keymasterDigests = EmptyArray.INT;
             }
         }
-        args.addInts(KeymasterDefs.KM_TAG_DIGEST, keymasterDigests);
+        args.addEnums(KeymasterDefs.KM_TAG_DIGEST, keymasterDigests);
         if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
             if (keymasterDigests.length == 0) {
                 throw new KeyStoreException("At least one digest algorithm must be specified"
@@ -630,14 +630,14 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 }
             }
         }
-        args.addInts(KeymasterDefs.KM_TAG_PURPOSE, KeyProperties.Purpose.allToKeymaster(purposes));
-        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
+        args.addEnums(KeymasterDefs.KM_TAG_PURPOSE, KeyProperties.Purpose.allToKeymaster(purposes));
+        args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
         if (params.getSignaturePaddings().length > 0) {
             throw new KeyStoreException("Signature paddings not supported for symmetric keys");
         }
         int[] keymasterPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
                 params.getEncryptionPaddings());
-        args.addInts(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
+        args.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
         KeymasterUtils.addUserAuthArgs(args,
                 params.isUserAuthenticationRequired(),
                 params.getUserAuthenticationValidityDurationSeconds());

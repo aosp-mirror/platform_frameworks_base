@@ -110,8 +110,9 @@ public abstract class KeymasterUtils {
                         "At least one fingerprint must be enrolled to create keys requiring user"
                         + " authentication for every use");
             }
-            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, fingerprintOnlySid);
-            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, KeymasterDefs.HW_AUTH_FINGERPRINT);
+            args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
+                    KeymasterArguments.toUint64(fingerprintOnlySid));
+            args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, KeymasterDefs.HW_AUTH_FINGERPRINT);
         } else {
             // The key is authorized for use for the specified amount of time after the user has
             // authenticated. Whatever unlocks the secure lock screen should authorize this key.
@@ -120,10 +121,11 @@ public abstract class KeymasterUtils {
                 throw new IllegalStateException("Secure lock screen must be enabled"
                         + " to create keys requiring user authentication");
             }
-            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, rootSid);
-            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
+            args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
+                    KeymasterArguments.toUint64(rootSid));
+            args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
                     KeymasterDefs.HW_AUTH_PASSWORD | KeymasterDefs.HW_AUTH_FINGERPRINT);
-            args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
+            args.addUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     userAuthenticationValidityDurationSeconds);
         }
     }
