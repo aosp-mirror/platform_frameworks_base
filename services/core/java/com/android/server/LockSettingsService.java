@@ -701,6 +701,15 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
+
+        try {
+            final IGateKeeperService gk = getGateKeeperService();
+            if (gk != null) {
+                    gk.clearSecureUserId(userId);
+            }
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "unable to clear GK secure user id");
+        }
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
