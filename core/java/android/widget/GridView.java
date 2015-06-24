@@ -1869,9 +1869,6 @@ public class GridView extends AbsListView {
         if (moved) {
             playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
             invokeOnItemScrollListener();
-        }
-
-        if (moved) {
             awakenScrollBars();
         }
         
