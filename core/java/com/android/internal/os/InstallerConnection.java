@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.SystemClock;
 import android.util.Slog;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -205,5 +206,15 @@ public class InstallerConnection {
             return false;
         }
         return true;
+    }
+
+    public void waitForConnection() {
+        for (;;) {
+            if (execute("ping") >= 0) {
+                return;
+            }
+            Slog.w(TAG, "installd not ready");
+            SystemClock.sleep(1000);
+        }
     }
 }

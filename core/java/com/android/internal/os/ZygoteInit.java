@@ -468,6 +468,7 @@ public class ZygoteInit {
     private static void performSystemServerDexOpt(String classPath) {
         final String[] classPathElements = classPath.split(":");
         final InstallerConnection installer = new InstallerConnection();
+        installer.waitForConnection();
         final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
 
         try {
