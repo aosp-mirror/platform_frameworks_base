@@ -109,6 +109,10 @@ public final class Icon implements Parcelable {
         return (Bitmap) mObj1;
     }
 
+    private void setBitmap(Bitmap b) {
+        mObj1 = b;
+    }
+
     /**
      * @return The length of the compressed bitmap byte array held by this {@link #TYPE_DATA} Icon.
      * @hide
@@ -347,6 +351,16 @@ public final class Icon implements Parcelable {
     }
 
     /**
+     * Puts the memory used by this instance into Ashmem memory, if possible.
+     * @hide
+     */
+    public void convertToAshmem() {
+        if (mType == TYPE_BITMAP && getBitmap().isMutable()) {
+            setBitmap(getBitmap().createAshmemBitmap());
+        }
+    }
+
+    /**
      * Writes a serialized version of an Icon to the specified stream.
      *
      * @param stream The stream on which to serialize the Icon.
@@ -466,7 +480,7 @@ public final class Icon implements Parcelable {
             throw new IllegalArgumentException("Bitmap must not be null.");
         }
         final Icon rep = new Icon(TYPE_BITMAP);
-        rep.mObj1 = bits;
+        rep.setBitmap(bits);
         return rep;
     }
 
