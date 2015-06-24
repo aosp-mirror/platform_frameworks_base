@@ -35196,6 +35196,10 @@ package android.view {
     field public static final int KEYCODE_STAR = 17; // 0x11
     field public static final int KEYCODE_STB_INPUT = 180; // 0xb4
     field public static final int KEYCODE_STB_POWER = 179; // 0xb3
+    field public static final int KEYCODE_STEM_1 = 265; // 0x109
+    field public static final int KEYCODE_STEM_2 = 266; // 0x10A
+    field public static final int KEYCODE_STEM_3 = 267; // 0x10B
+    field public static final int KEYCODE_STEM_PRIMARY = 264; // 0x108
     field public static final int KEYCODE_SWITCH_CHARSET = 95; // 0x5f
     field public static final int KEYCODE_SYM = 63; // 0x3f
     field public static final int KEYCODE_SYSRQ = 120; // 0x78

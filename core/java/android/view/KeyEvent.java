@@ -761,8 +761,17 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Backs out one level of a navigation hierarchy or collapses the item that currently has 
      * focus. */
     public static final int KEYCODE_NAVIGATE_OUT    = 263;
+    /** Key code constant: Primary stem key for Wear
+     * Main power/reset button on watch. */
+    public static final int KEYCODE_STEM_PRIMARY = 264;
+    /** Key code constant: Generic stem key 1 for Wear */
+    public static final int KEYCODE_STEM_1 = 265;
+    /** Key code constant: Generic stem key 2 for Wear */
+    public static final int KEYCODE_STEM_2 = 266;
+    /** Key code constant: Generic stem key 3 for Wear */
+    public static final int KEYCODE_STEM_3 = 267;
 
-    private static final int LAST_KEYCODE = KEYCODE_NAVIGATE_OUT;
+    private static final int LAST_KEYCODE = KEYCODE_STEM_3;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
