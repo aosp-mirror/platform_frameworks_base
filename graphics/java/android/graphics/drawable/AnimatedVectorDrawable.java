@@ -170,7 +170,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
             mAnimatedVectorState = new AnimatedVectorDrawableState(
-                    mAnimatedVectorState, mCallback, null);
+                    mAnimatedVectorState, mCallback, mRes);
             mMutated = true;
         }
         return this;
