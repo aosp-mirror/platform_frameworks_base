@@ -108,7 +108,6 @@ package android {
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
     field public static final java.lang.String READ_SYNC_SETTINGS = "android.permission.READ_SYNC_SETTINGS";
     field public static final java.lang.String READ_SYNC_STATS = "android.permission.READ_SYNC_STATS";
-    field public static final java.lang.String READ_USER_DICTIONARY = "android.permission.READ_USER_DICTIONARY";
     field public static final java.lang.String READ_VOICEMAIL = "com.android.voicemail.permission.READ_VOICEMAIL";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_BOOT_COMPLETED = "android.permission.RECEIVE_BOOT_COMPLETED";
@@ -153,7 +152,6 @@ package android {
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
     field public static final java.lang.String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
     field public static final java.lang.String WRITE_SYNC_SETTINGS = "android.permission.WRITE_SYNC_SETTINGS";
-    field public static final java.lang.String WRITE_USER_DICTIONARY = "android.permission.WRITE_USER_DICTIONARY";
     field public static final java.lang.String WRITE_VOICEMAIL = "com.android.voicemail.permission.WRITE_VOICEMAIL";
   }
 
@@ -169,7 +167,6 @@ package android {
     field public static final java.lang.String SENSORS = "android.permission-group.SENSORS";
     field public static final java.lang.String SMS = "android.permission-group.SMS";
     field public static final java.lang.String STORAGE = "android.permission-group.STORAGE";
-    field public static final java.lang.String USER_DICTIONARY = "android.permission-group.USER_DICTIONARY";
   }
 
   public final class R {

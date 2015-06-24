@@ -871,7 +871,7 @@ read access using this permission.  If your application already requests write a
 automatically get read access as well.  There is a new developer option to turn on read access
 restriction, for developers to test their applications against how Android will behave in the
 future.</dd>
-  <dt>{@link android.Manifest.permission#READ_USER_DICTIONARY}</dt>
+  <dt>android.Manifest.permission.READ_USER_DICTIONARY</dt>
     <dd>Allows an application to read the user dictionary. This should only be required by an
 IME, or a dictionary editor like the Settings app.</dd>
   <dt>{@link android.Manifest.permission#READ_CALL_LOG}</dt>
@@ -879,7 +879,7 @@ IME, or a dictionary editor like the Settings app.</dd>
       incoming and outgoing calls.</dd>
   <dt>{@link android.Manifest.permission#WRITE_CALL_LOG}</dt>
     <dd>Allows an application to modify the system's call log stored on your phone</dd>
-  <dt>{@link android.Manifest.permission#WRITE_USER_DICTIONARY}</dt>
+  <dt>android.Manifest.permission.WRITE_USER_DICTIONARY</dt>
     <dd>Allows an application to write to the user's word dictionary.</dd>
 </dl>
 
