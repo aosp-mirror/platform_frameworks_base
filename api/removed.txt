@@ -1,3 +1,11 @@
+package android.app {
+
+  public class Notification implements android.os.Parcelable {
+    method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
+  }
+
+}
+
 package android.content.pm {
 
   public class PackageInfo implements android.os.Parcelable {
