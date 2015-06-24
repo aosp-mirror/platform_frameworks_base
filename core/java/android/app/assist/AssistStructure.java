@@ -15,7 +15,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewAssistStructure;
+import android.view.ViewStructure;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -616,7 +616,7 @@ public class AssistStructure implements Parcelable {
         }
     }
 
-    static class ViewNodeBuilder extends ViewAssistStructure {
+    static class ViewNodeBuilder extends ViewStructure {
         final AssistStructure mAssist;
         final ViewNode mNode;
         final boolean mAsync;
@@ -827,14 +827,14 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public ViewAssistStructure newChild(int index) {
+        public ViewStructure newChild(int index) {
             ViewNode node = new ViewNode();
             mNode.mChildren[index] = node;
             return new ViewNodeBuilder(mAssist, node, false);
         }
 
         @Override
-        public ViewAssistStructure asyncNewChild(int index) {
+        public ViewStructure asyncNewChild(int index) {
             synchronized (mAssist) {
                 ViewNode node = new ViewNode();
                 mNode.mChildren[index] = node;
@@ -849,7 +849,7 @@ public class AssistStructure implements Parcelable {
             synchronized (mAssist) {
                 if (!mAsync) {
                     throw new IllegalStateException("Child " + this
-                            + " was not created with ViewAssistStructure.asyncNewChild");
+                            + " was not created with ViewStructure.asyncNewChild");
                 }
                 if (!mAssist.mPendingAsyncChildren.remove(this)) {
                     throw new IllegalStateException("Child " + this + " already committed");

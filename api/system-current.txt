@@ -38869,10 +38869,6 @@ package android.view {
     method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
-  public abstract deprecated class ViewAssistStructure extends android.view.ViewStructure {
-    ctor public ViewAssistStructure();
-  }
-
   public class ViewConfiguration {
     ctor public deprecated ViewConfiguration();
     method public static android.view.ViewConfiguration get(android.content.Context);
@@ -39254,7 +39250,7 @@ package android.view {
     ctor public ViewStructure();
     method public abstract int addChildCount(int);
     method public abstract void asyncCommit();
-    method public abstract android.view.ViewAssistStructure asyncNewChild(int);
+    method public abstract android.view.ViewStructure asyncNewChild(int);
     method public abstract int getChildCount();
     method public abstract android.os.Bundle getExtras();
     method public abstract java.lang.CharSequence getHint();
@@ -39262,7 +39258,7 @@ package android.view {
     method public abstract int getTextSelectionEnd();
     method public abstract int getTextSelectionStart();
     method public abstract boolean hasExtras();
-    method public abstract android.view.ViewAssistStructure newChild(int);
+    method public abstract android.view.ViewStructure newChild(int);
     method public abstract void setAccessibilityFocused(boolean);
     method public abstract void setActivated(boolean);
     method public abstract void setCheckable(boolean);
