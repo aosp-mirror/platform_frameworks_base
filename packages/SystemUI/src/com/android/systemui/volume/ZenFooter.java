@@ -16,6 +16,7 @@
 package com.android.systemui.volume;
 
 import android.animation.LayoutTransition;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
@@ -51,7 +52,9 @@ public class ZenFooter extends LinearLayout {
         super(context, attrs);
         mContext = context;
         mSpTexts = new SpTexts(mContext);
-        setLayoutTransition(new LayoutTransition());
+        final LayoutTransition layoutTransition = new LayoutTransition();
+        layoutTransition.setDuration(new ValueAnimator().getDuration() / 2);
+        setLayoutTransition(layoutTransition);
     }
 
     @Override
