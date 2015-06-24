@@ -34,6 +34,7 @@ import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
@@ -112,8 +113,6 @@ public final class TvInputManagerService extends SystemService {
     private final Context mContext;
     private final TvInputHardwareManager mTvInputHardwareManager;
 
-    private final ContentResolver mContentResolver;
-
     // A global lock.
     private final Object mLock = new Object();
 
@@ -129,9 +128,8 @@ public final class TvInputManagerService extends SystemService {
         super(context);
 
         mContext = context;
-        mContentResolver = context.getContentResolver();
-        mWatchLogHandler = new WatchLogHandler(mContentResolver, IoThread.get().getLooper());
-
+        mWatchLogHandler = new WatchLogHandler(mContext.getContentResolver(),
+                IoThread.get().getLooper());
         mTvInputHardwareManager = new TvInputHardwareManager(context, new HardwareListener());
 
         synchronized (mLock) {
@@ -246,7 +244,8 @@ public final class TvInputManagerService extends SystemService {
 
                 ContentProviderResult[] results = null;
                 try {
-                    results = mContentResolver.applyBatch(TvContract.AUTHORITY, operations);
+                    ContentResolver cr = getContentResolverForUser(getChangingUserId());
+                    results = cr.applyBatch(TvContract.AUTHORITY, operations);
                 } catch (RemoteException | OperationApplicationException e) {
                     Slog.e(TAG, "error in applyBatch", e);
                 }
@@ -400,17 +399,18 @@ public final class TvInputManagerService extends SystemService {
             if (mCurrentUserId == userId) {
                 return;
             }
-            // final int oldUserId = mCurrentUserId;
-            // TODO: Release services and sessions in the old user state, if needed.
-            mCurrentUserId = userId;
+            clearSessionAndServiceStatesLocked(mUserStates.get(mCurrentUserId));
 
+            mCurrentUserId = userId;
             UserState userState = mUserStates.get(userId);
             if (userState == null) {
                 userState = new UserState(mContext, userId);
+                mUserStates.put(userId, userState);
             }
-            mUserStates.put(userId, userState);
             buildTvInputListLocked(userId, null);
             buildTvContentRatingSystemListLocked(userId);
+            mWatchLogHandler.obtainMessage(WatchLogHandler.MSG_SWITCH_CONTENT_RESOLVER,
+                    getContentResolverForUser(userId)).sendToTarget();
         }
     }
 
@@ -420,30 +420,7 @@ public final class TvInputManagerService extends SystemService {
             if (userState == null) {
                 return;
             }
-            // Release created sessions.
-            for (SessionState state : userState.sessionStateMap.values()) {
-                if (state.session != null) {
-                    try {
-                        state.session.release();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in release", e);
-                    }
-                }
-            }
-            userState.sessionStateMap.clear();
-
-            // Unregister all callbacks and unbind all services.
-            for (ServiceState serviceState : userState.serviceStateMap.values()) {
-                if (serviceState.callback != null) {
-                    try {
-                        serviceState.service.unregisterCallback(serviceState.callback);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unregisterCallback", e);
-                    }
-                }
-                mContext.unbindService(serviceState.connection);
-            }
-            userState.serviceStateMap.clear();
+            clearSessionAndServiceStatesLocked(userState);
 
             // Clear everything else.
             userState.inputMap.clear();
@@ -455,6 +432,45 @@ public final class TvInputManagerService extends SystemService {
 
             mUserStates.remove(userId);
         }
+    }
+
+    private void clearSessionAndServiceStatesLocked(UserState userState) {
+        // Release created sessions.
+        for (SessionState state : userState.sessionStateMap.values()) {
+            if (state.session != null) {
+                try {
+                    state.session.release();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in release", e);
+                }
+            }
+        }
+        userState.sessionStateMap.clear();
+
+        // Unregister all callbacks and unbind all services.
+        for (ServiceState serviceState : userState.serviceStateMap.values()) {
+            if (serviceState.callback != null) {
+                try {
+                    serviceState.service.unregisterCallback(serviceState.callback);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in unregisterCallback", e);
+                }
+            }
+            mContext.unbindService(serviceState.connection);
+        }
+        userState.serviceStateMap.clear();
+    }
+
+    private ContentResolver getContentResolverForUser(int userId) {
+        UserHandle user = new UserHandle(userId);
+        Context context;
+        try {
+            context = mContext.createPackageContextAsUser("android", 0, user);
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "failed to create package contenxt as user " + user);
+            context = mContext;
+        }
+        return context.getContentResolver();
     }
 
     private UserState getUserStateLocked(int userId) {
@@ -2384,12 +2400,13 @@ public final class TvInputManagerService extends SystemService {
         // Here the system supplies the database the smallest set of information only that is
         // sufficient to consolidate the log entries while minimizing database operations in the
         // system service.
-        private static final int MSG_LOG_WATCH_START = 1;
-        private static final int MSG_LOG_WATCH_END = 2;
+        static final int MSG_LOG_WATCH_START = 1;
+        static final int MSG_LOG_WATCH_END = 2;
+        static final int MSG_SWITCH_CONTENT_RESOLVER = 3;
 
-        private final ContentResolver mContentResolver;
+        private ContentResolver mContentResolver;
 
-        public WatchLogHandler(ContentResolver contentResolver, Looper looper) {
+        WatchLogHandler(ContentResolver contentResolver, Looper looper) {
             super(looper);
             mContentResolver = contentResolver;
         }
@@ -2419,7 +2436,7 @@ public final class TvInputManagerService extends SystemService {
 
                     mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
                     args.recycle();
-                    return;
+                    break;
                 }
                 case MSG_LOG_WATCH_END: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -2434,11 +2451,15 @@ public final class TvInputManagerService extends SystemService {
 
                     mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
                     args.recycle();
-                    return;
+                    break;
+                }
+                case MSG_SWITCH_CONTENT_RESOLVER: {
+                    mContentResolver = (ContentResolver) msg.obj;
+                    break;
                 }
                 default: {
-                    Slog.w(TAG, "Unhandled message code: " + msg.what);
-                    return;
+                    Slog.w(TAG, "unhandled message code: " + msg.what);
+                    break;
                 }
             }
         }
