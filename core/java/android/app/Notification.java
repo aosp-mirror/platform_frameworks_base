@@ -3586,12 +3586,19 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
+            if (mSmallIcon != null) {
+                mSmallIcon.convertToAshmem();
+            }
+            if (mLargeIcon != null) {
+                mLargeIcon.convertToAshmem();
+            }
             mOriginatingUserId = mContext.getUserId();
             mHasThreeLines = hasThreeLines();
 
             Notification n = buildUnstyled();
 
             if (mStyle != null) {
+                mStyle.purgeResources();
                 n = mStyle.buildStyled(n);
             }
 
@@ -3790,6 +3797,8 @@ public class Notification implements Parcelable
             return wip;
         }
 
+        public void purgeResources() {}
+
         // The following methods are split out so we can re-create notification partially.
         /**
          * @hide
@@ -3901,8 +3910,18 @@ public class Notification implements Parcelable
             return this;
         }
 
-        private RemoteViews makeBigContentView() {
+        @Override
+        public void purgeResources() {
+            super.purgeResources();
+            if (mPicture != null && mPicture.isMutable()) {
+                mPicture = mPicture.createAshmemBitmap();
+            }
+            if (mBigLargeIcon != null) {
+                mBigLargeIcon.convertToAshmem();
+            }
+        }
 
+        private RemoteViews makeBigContentView() {
             // Replace mLargeIcon with mBigLargeIcon if mBigLargeIconSet
             // This covers the following cases:
             //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
