@@ -232,18 +232,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostęp do kontaktów"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokalizacja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do lokalizacji tego urządzenia"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Twoje informacje społecznościowe"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Bezpośredni dostęp do informacji o Twoich kontaktach i powiązaniach społecznościowych."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłać i wyświetlać SMS-y"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"uzyskiwać dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Słownik użytkownika"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Odczytywanie lub zapisywanie słów w słowniku użytkownika."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Zakładki i historia"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Bezpośredni dostęp do zakładek i historii przeglądarki."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagrywanie dźwięku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Aparat"</string>
@@ -334,16 +328,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Zezwala aplikacji na modyfikowanie rejestru połączeń tabletu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Pozwala aplikacji modyfikować rejestr połączeń telewizora, w tym dane o połączeniach przychodzących i wychodzących. Szkodliwe aplikacje mogą to wykorzystać do skasowania lub zmodyfikowania rejestru połączeń."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Zezwala aplikacji na modyfikowanie rejestru połączeń telefonu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"odczytywanie własnej karty kontaktu"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Pozwala aplikacji na odczyt osobistych informacji przechowywanych w Twoim profilu na urządzeniu (np. imienia i nazwiska lub adresu). Oznacza to, że aplikacja może Cię zidentyfikować i wysłać informacje z Twojego profilu do innych osób."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"zmiana własnej karty kontaktu"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Pozwala aplikacji na zmianę lub dodanie osobistych informacji przechowywanych w Twoim profilu na urządzeniu (np. imienia i nazwiska lub adresu). Oznacza to, że aplikacja może Cię zidentyfikować i wysłać informacje z Twojego profilu do innych osób."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"czujniki ciała (np. monitorujące tętno)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Pozwala aplikacji na dostęp do danych z czujników, które monitorują Twój stan fizyczny (np. tętno)."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"odczyt sieci społecznościowych"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Pozwala aplikacji na odczyt i synchronizację informacji publikowanych przez Ciebie i Twoich znajomych w sieciach społecznościowych. Zachowaj ostrożność, udostępniając informacje. Aplikacja z tym uprawnieniem może odczytać całą komunikację, którą prowadzisz ze swoimi znajomymi w sieciach społecznościowych, niezależnie od jej poufności. Uwaga: to uprawnienie może nie być egzekwowane we wszystkich sieciach społecznościowych."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zapis sieci społecznościowych"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Pozwala aplikacji na wyświetlanie informacji publikowanych przez Twoich znajomych w sieciach społecznościowych. Zachowaj ostrożność, udostępniając informacje. Aplikacja z tym uprawnieniem może tworzyć wiadomości, które wyglądają jakby pochodziły od znajomych. Uwaga: to uprawnienie może nie być egzekwowane we wszystkich sieciach społecznościowych."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"odczyt wydarzeń w kalendarzu wraz z informacjami poufnymi"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Pozwala aplikacji  na odczytywanie wszystkich wydarzeń w kalendarzu zapisanych na tablecie, w tym pochodzących od znajomych i współpracowników. Aplikacja z takim uprawnieniem może udostępniać i zapisywać dane kalendarza niezależnie od ich poufności."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Pozwala aplikacji odczytywać wszystkie zapisane na urządzeniu wydarzenia z kalendarza, również należące do znajomych i współpracowników. Może to umożliwić aplikacji przekazywanie lub zapisywanie danych z kalendarza, także tych poufnych."</string>
@@ -456,10 +442,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pozwala aplikacji na modyfikowanie ustawień synchronizacji z kontem. Tego uprawnienia można użyć np. do włączenia synchronizacji z kontem aplikacji Ludzie."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"czytanie statystyk dotyczących synchronizowania"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pozwala aplikacji na czytanie statystyk synchronizacji konta, w tym historii zdarzeń synchronizacji oraz ilości zsynchronizowanych danych."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"odczytywanie terminów dodanych do słownika"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Pozwala aplikacji na odczytywanie wszelkich słów, nazw i wyrażeń zapisanych w słowniku użytkownika."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"dodawanie wyrazów do słownika zdefiniowanego przez użytkownika"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pozwala aplikacji na zapisywanie nowych słów do słownika użytkownika."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"odczytywanie zawartości pamięci USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"odczytywanie zawartości karty SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Pozwala aplikacji na odczyt Twojej pamięci USB."</string>

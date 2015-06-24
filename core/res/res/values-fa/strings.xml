@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"دسترسی به مخاطبین شما"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"مکان"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"دسترسی به موقعیت مکانی این دستگاه"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"اطلاعات اجتماعی شما"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"مستقیم به اطلاعات مخاطبین و روابط اجتماعی دسترسی داشته باشید."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"تقویم"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"دسترسی به تقویم شما"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ارسال و مشاهده پیامک‌ها"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"حافظه"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"دسترسی به عکس‌ها، رسانه‌ها و فایل‌های روی دستگاهتان"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"فرهنگ‌ لغت کاربر"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"خواندن یا نوشتن کلمات در فرهنگ لغت کاربر."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"نشانک‌ها و سابقه"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"مستقیم به نشانک‌ها و سابقه مرور دسترسی داشته باشید."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"میکروفن"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ضبط صدا"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"دوربین"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"‏به برنامه اجازه می‌دهد گزارشات تماس رایانهٔ لوحی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"‏به برنامه اجازه می‌دهد گزارشات تماس تلویزیون شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب شاید از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"خواندن کارت تماس شما"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"‏به برنامه اجازه می‎دهد اطلاعات نمایه شخصی ذخیره شده در دستگاه شما، مانند نام و اطلاعات تماس شما را بخواند. یعنی برنامه می‎تواند شما را شناسایی کند و ممکن است اطلاعات نمایهٔ شما را به دیگران ارسال کند."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"اصلاح کارت تماس شما"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"‏به برنامه اجازه می‎دهد تا اطلاعات نمایه شخصی ذخیره شده در دستگاه شما، مانند نام و اطلاعات تماس شما را تغییر دهد یا اضافه کند. یعنی برنامه‎ می‎تواند شما را شناسایی کند و ممکن است اطلاعات نمایهٔ شما را برای دیگران ارسال کند."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"حسگرهای بدن (مانند پایشگرهای ضربان قلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"به برنامه امکان می‌دهد به اطلاعات حسگرهایی که بر شرایط فیزیکی شما مانند ضربان قلبتان، نظارت دارند، دسترسی داشته باشد."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"خواندن جریان اجتماعی شما"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"به برنامه اجازه می‌دهد به به‌روزرسانی‌های اجتماعی از طرف شما و دوستان شما دسترسی پیدا کرده و آن‌ها را همگام‌سازی کند. دقت کنید که هنگام اشتراک‌گذاری -- این ویژگی به برنامه اجازه می‌دهد ارتباطات بین شما و دوستان شما را در شبکه‌های اجتماعی، صرفنظر از محرمانه بودن آن‌ها بخواند. توجه: این مجوز ممکن است در همه شبکه‌های اجتماعی اجرا نشود."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"نوشتن در جریان اجتماعی شما"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"به برنامه اجازه می‌دهد به‌روزرسانی‌های اجتماعی از طرف دوستان شما را نمایش دهد. دقت کنید هنگام اشتراک‌گذاری اطلاعات -- این ویژگی به برنامه اجازه می‌دهد پیام‌هایی را که به نظر می‌رسد از طرف یکی از دوستان شما باشد ایجاد کند. توجه: این مجوز در همه شبکه‌های اجتماعی قابل اجرا نیست."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"خواندن رویدادهای تقویم به همراه اطلاعات محرمانه"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"به برنامه امکان می‌دهد همه رویدادهای تقویم ذخیره شده در رایانهٔ لوحی شما را بخواند، از جمله رویدادهای دوستان یا همکاران. این ممکن است به برنامه امکان دهد داده‌های تقویم شما را صرفنظر از محرمانه یا حساس بودن آن‌ها به اشتراک گذاشته یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"به برنامه اجازه می‌دهد تا همه رویدادهای تقویم ذخیره‌شده روی تلویزیون از جمله رویدادهای دوستان یا همکاران را بخواند. شاید به برنامه اجازه دهد تا اطلاعات تقویم را صرفنظر از محرمانه بودن یا حساسیت، به اشتراک بگذارد یا ذخیره کند."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"به یک برنامه اجازه می‌دهد تنظیمات همگام‌سازی را برای یک حساب اصلاح کند. به‌عنوان مثال، از این ویژگی می‌توان برای فعال کردن همگام‌سازی برنامه «افراد» با یک حساب استفاده کرد."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"خواندن اطلاعات آماری همگام‌سازی"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"به یک برنامه اجازه می‌دهد وضعیت همگام‌سازی یک حساب را بخواند، از جمله سابقه رویدادهای همگام‌سازی و میزان داده‌های همگام‌سازی شده."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"خواندن واژه‌هایی که به فرهنگ‌ لغت اضافه کردید"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"‏به برنامه اجازه می‎دهد همه کلمه، نام و عباراتی را که کاربر در فرهنگ لغت خود ذخیره کرده است بخواند."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"افزودن کلمات به فرهنگ لغت تعریف‌ شده توسط کاربر"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"‏به برنامه اجازه می‎دهد تا کلمات جدید را در فهرست کاربر بنویسد."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"‏خواندن محتویات حافظهٔ USB شما"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"‏خواندن محتویات کارت SD شما"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"‏به برنامه اجازه می‌دهد محتواهای فضای ذخیره USB را بخواند."</string>

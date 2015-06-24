@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ina-access ang iyong mga contact"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasyon"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"i-access ang lokasyon ng device na ito"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ang iyong social na impormasyon"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direktang access sa impormasyon tungkol sa iyong mga contact at social na koneksyon."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendaryo"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ina-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"magpadala at tumingin ng mga mensaheng SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Imbakan"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"mag-access ng mga larawan, media at file sa iyong device"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Diksyunaryo ng User"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Magbasa o magsulat ng mga salita sa diksyunaryo ng user"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Mga Bookmark at Kasaysayan"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direktang access sa mga bookmark at kasaysayan ng browser."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagre-record ng audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong TV, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng mga nakakahamak na app upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"basahin sarili mo contact card"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Pinapayagan ang app na basahin ang personal na impormasyon ng profile na naka-imbak sa iyong device, gaya ng iyong pangalan at impormasyon sa pakikipag-ugnay. Nangangahulugan ito na makikilala ka ng app at maaari nitong ipadala ang impormasyon ng iyong profile sa iba."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"baguhin sarili mo contact card"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Pinapayagan ang app na baguhin ang o magdagdag sa personal na impormasyon ng profile na naka-imbak sa iyong device, gaya ng iyong pangalan at impormasyon sa pakikipag-ugnay. Nangangahulugan ito na makikilala ka ng app at maaari nitong ipadala ang impormasyon ng iyong profile sa iba."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"mga sensor sa katawan (gaya ng mga heart rate monitor)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Pinapayagan ang app na i-access ang data mula sa mga sensor na sumusubaybay sa iyong pisikal na kundisyon, tulad ng iyong heart rate."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"basahin ang iyong social stream"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Pinapayagan ang app na mag-access at mag-sync ng mga social na update mula sa iyo at sa iyong mga kaibigan. Maging maingat kapag nagbabahagi ng impormasyon -- pinapayagan nito ang app na magbasa ng mga pakikipag-ugnayan sa pagitan mo at ng iyong mga kaibigan sa mga social network, ano pa man ang katayuan sa pagiging kumpedensyal nito. Tandaan: hindi maaaring ipatupad ang pahintulot na ito sa lahat ng social network."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"magsulat sa iyong social stream"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Pinapayagan ang app na magpakita ng mga social na update mula sa iyong mga kaibigan. Maging maingat kapag nagbabahagi ng impormasyon -- pinapayagan nito ang app na bumuo ng mga mensaheng maaaring lumitaw na mula sa isang kaibigan. Tandaan: hindi maaaring ipatupad ang pahintulot na ito sa lahat ng social network."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"magbasa ng mga kaganapan sa kalendaryo kasama ang kumpedensyal na impormasyon"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Pinapayagan ang app na basahin ang lahat ng kaganapan sa kalendaryo na naka-imbak sa iyong tablet, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na ibahagi o i-save ang data ng iyong kalendaryo, ano pa man ang katayuan ng pagiging kumpedensyal o sensitibo nito."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Nagbibigay-daan sa app na mabasa ang lahat ng mga kaganapan sa kalendaryo na nakaimbak sa iyong TV, kabilang ang mga kaganapan mula sa iyong mga kaibigan o katrabaho. Maaaring payagan nito ang app na magbahagi o mag-save ng iyong data ng kalendaryo kahit na kumpidensyal o sensitibo ito."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pinapayagan ang isang app na baguhin ang mga setting ng pag-sync para sa isang account. Halimbawa, magagamit ito upang paganahin ang pag-sync ng app na Mga Tao sa isang account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"basahin ang mga istatistika ng sync"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga kaganapan sa pag-sync at kung ilang data ang naka-sync."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"basahin ang mga terminong idinagdag mo sa diksyunaryo"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Pinapayagan ang app na basahin ang lahat ng salita, pangalan at parirala na maaaring inimbak ng user sa diksyunaryo ng user."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"magdagdag ng mga salita sa diksyunaryong tinukoy ng user"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pinapayagan ang app na magsulat ng mga bagong salita sa diksyunaryo ng user."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"basa nilalaman USB storage mo"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"basahin ang mga nilalaman ng iyong SD card"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Pinapayagan ang app na basahin ang mga nilalaman ng iyong USB storage."</string>

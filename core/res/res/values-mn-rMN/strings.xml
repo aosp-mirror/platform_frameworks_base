@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"харилцагч руугаа хандах"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Таны нийтийн мэдээлэл"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Таны харилцагчид болон нийтийн холбооны тухай мэдээлэлд шууд хандах."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Хуанли руу хандах"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Сан"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"Tөхөөрөмж дээрх зураг, медиа болон файлд хандалт хийх"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Хэрэглэгчийн толь бичиг"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Хэрэглэгчийн толь бичигт үг унших,бичих"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Хавчуурга болон түүх"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Хавчуурга болон хөтчийн түүхрүү шууд хандах."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"дуу хураах"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камер"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Апп нь таны таблетын ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг унших боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Апп-д орж ирсэн болон гадагш хийсэн телевизийн дуудлагын бүртгэлийг өөрчлөхийг зөвшөөрдөг. Хорлонтой апликейшнүүд үүнийг ашиглан таны дуудлагын бүртгэлийг устгах эсвэл өөрчилж болох юм."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"та өөрийн харилцагчийн картыг унших"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Апп нь таны нэр болон холбоо барих мэдээлэл зэрэг таны утсан дээр хадгалагдсан хувийн профайл мэдээллийг унших боломжтой. Ингэснээр апп нь танийг таньж чадах ба таны профайл мэдээллийг бусдад илгээх боломжтой."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"та өөрийн харилцагчийн картыг өөрчлөх"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Апп нь таны нэр болон холбоо барих мэдээлэл зэрэг таны төхөөрөмж дээр хадгалагдсан хувийн профайл мэдээллийг солих эсвэл нэмэх боломжтой. Ингэснээр апп нь танийг таньж чадах ба таны профайл мэдээллийг бусдад илгээх боломжтой."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"биеийн сенсор (зүрхний цохилт хянагч гэх мэт)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Апп-т таны зүрхний цохилт гэх мэт биеийн байдлыг хянадаг мэдрэгчдийн датанд хандалт хийх боломж олгоно."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"таны нийтийн урсгалаас унших"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Апп нь та болон таны найзуудын нийтийн шинэчлэлтэд хандах болон синк хийх боломжтой. Мэдээлэл хуваалцахдаа болгоомжтой байна уу - энэ нь апп-д нийтийн сүлжээндэх та болон таны найзууд хоорондын холбоог нууц эсэхээс үл хамааран унших боломжтой. Анхаар: энэ зөвшөөрөл нь бүх нийтийн сүлжээнд ашиглаж боломжгүй."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Таны нийтийн урсгалруу бичих"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Апп нь таны найзуудын нийтийн шинэчлэлтийг дүрслэх боломжтой.Мэдээлэл хуваалцахдаа болгоомжтой байна уу - энэ нь апп-д таны найзаас ирсэн мэт харагдах мессеж хийх боломжийг олгоно. Анхаар: энэ зөвшөөрөл нь бүх нийтийн сүлжээнд ашиглаж боломжгүй."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"календарийн хуваарийн нууц мэдээллийг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Апп нь таны таблет дээр хадгалагдсан найзууд болон хамтран ажиллагсдын календарийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны календарийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Апп-д таны найз, эсвэл хамтран ажиллагсдын гэх мэт таны телевиз дээр хадгалагдсан бүх хуанлийн үйл ажиллагааг уншихыг зөвшөөрдөг. Энэ нь апп-д таны хуанлийн өгөгдлийг нууцлалтай эсэхээс үл хамааран хадгалахыг зөвшөөрч болох юм."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Апп нь акаунтын синк тохиргоог өөрчлөх боломжтой. Жишээ нь энэ нь Хүмүүс апп акаунттай синк хийхийг идэвхжүүлэх боломжтой."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"синк статистикийг унших"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Апп нь синк үйлдэлийн түүх болон хэр их дата синк хийгдсэн зэрэг акаунтын синк статусыг унших боломжтой."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"таны толь бичигт нэмсэн нөхцөлийг унших"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Апп нь хэрэглэгч хэрэглэгчийн толь бичигт хадгалсан бүх үгс, нэрс болон хэлцийг унших боломжтой."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"хэрэглэгчийн толь бичигт үгс нэмэх"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Апп нь хэрэглэгчийн толь бичигт шинэ үг бичих боломжтой."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"таны USB сангийн контентыг унших боломжтой"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"таны SD картны контентыг унших боломжтой"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Апп нь таны USB сангийн контентыг унших боломжтой."</string>

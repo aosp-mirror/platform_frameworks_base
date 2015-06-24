@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"toegang krijgen tot uw contacten"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locatie"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"de locatie van dit apparaat openen"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Uw sociale informatie"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Rechtstreeks toegang krijgen tot informatie over uw contacten en sociale connecties."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"toegang krijgen tot uw agenda"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sms\'jes verzenden en bekijken"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Opslagruimte"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang tot foto\'s, media en bestanden op uw apparaat"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Gebruikerswoordenboek"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Woorden lezen of schrijven in gebruikerswoordenboek."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bladwijzers en geschiedenis"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Rechtstreeks toegang krijgen tot bladwijzers en browsergeschiedenis."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audio opnemen"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het gesprekkenlijst van uw tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app het gesprekkenlijst van uw tv aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het gesprekkenlijst van uw telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"uw eigen contactkaart lezen"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Hiermee kan de app persoonlijke profielgegevens lezen die op uw apparaat zijn opgeslagen, zoals uw naam en contactgegevens. Dit betekent dat de app u kan identificeren en uw profielgegevens naar anderen kan verzenden."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"uw eigen contactkaart aanpassen"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Hiermee kan de app persoonlijke profielgegevens wijzigen of toevoegen die op uw apparaat zijn opgeslagen, zoals uw naam en contactgegevens. Dit betekent dat de app u kan identificeren en uw profielgegevens naar anderen kan verzenden."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die uw lichamelijke conditie controleren, zoals uw hartslag."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"uw sociale stream lezen"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Hiermee kan de app toegang krijgen tot sociale updates van u en uw vrienden en deze synchroniseren. Wees voorzichtig bij het delen van informatie: hiermee kan de app communicatie lezen tussen u en uw vrienden op sociale netwerken, ongeacht de vertrouwelijkheid. Opmerking: deze toestemming kan niet worden afgedwongen voor alle sociale netwerken."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"schrijven naar sociale streams"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Hiermee kan de app sociale updates van u en uw vrienden weergeven. Wees voorzichtig bij het delen van informatie: hiermee kan de app berichten produceren die afkomstig lijken te zijn van een vriend. Opmerking: deze toestemming kan niet worden afgedwongen voor alle sociale netwerken."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"agenda-afspraken en vertrouwelijke informatie lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op uw tablet, inclusief die van vrienden of collega\'s. De app kan uw agenda delen of uw agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op uw tv, inclusief die van vrienden of collega\'s. De app kan uw agenda delen of uw agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Hiermee kan een app de synchronisatie-instellingen aanpassen voor een account. Deze toestemming kan bijvoorbeeld worden gebruikt om synchronisatie van de app Personen in te schakelen voor een account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"synchronisatiestatistieken lezen"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Hiermee kan een app de synchronisatiestatistieken voor een account lezen, inclusief de geschiedenis van synchronisatie-activiteiten en hoeveel gegevens zijn gesynchroniseerd."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"termen lezen die u heeft toegevoegd aan het woordenboek"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Hiermee kan de app alle woorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"woorden toevoegen aan het gebruikerswoordenboek"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Hiermee kan de app nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"de inhoud van uw USB-opslag lezen"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"de inhoud van uw SD-kaart lezen"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"De app toestaan de inhoud van uw USB-opslag te lezen."</string>

@@ -230,18 +230,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"तपाईँको सम्पर्कमा पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"यस यन्त्रको स्थान पहुँच गर्नुहोस्"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"तपाईँको सामाजिक सूचना"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"तपाईँको सम्पर्कहरू र सामाजिक जडानहरूको बारेको जानकारीमा सिधा पहुँच पुर्‍याउनुहोस्।"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"पात्रो"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"तपाईँको पात्रोमा पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"भण्डारण"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"तपाईँको यन्त्रमा तस्बिर, मिडिया, र फाइलहरूको पहुँच गर्नुहोस्"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"प्रयोगकर्ता शब्दकोश"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"प्रयोगकर्ता शब्दकोशमा शब्दहरू पढ्नुहोस् वा लेख्नुहोस्।"</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"बुकमार्कहरू र इतिहास"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"बुकमार्कहरू र ब्राउजर इतिहासमा सिधा पहुँच।"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"क्यामेरा"</string>
@@ -332,16 +326,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"आगमन तथा बहर्गमन डेटासहित तपाईँको ट्याब्लेटको कल लगको परिमार्जन गर्न अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले यसलाई तपाईँको कल लग परिमार्जन गर्न वा मेटाउन प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"अनुप्रयोगहरूलाई अनुमति दिन्छ तपाईँको TV को कल लग, आगमन र बहिर्गमन कलका डेटा लगायत,  परिमार्जन गर्न। दुस्प्रभावी अनुप्रयोगहरूले यसलाई तपाईँको कल लग मेट्न वा परिमार्जन गर्न सक्छ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"अनुप्रयोगलाई तपाईंको फोनको आउने र बाहिर जाने कलहरूको बारेको डेटा सहित कल लग परिमार्जन गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्दछ।"</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"तपाईँको आफ्नै सम्पर्क कार्ड पढ्नुहोस्"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"अनुप्रयोगलाई तपाईंको उपकरणमा भण्डारण गरिएका व्यक्तिगत प्रोफाइल जानकारी पढ्न अनुमति दिन्छ, जस्तै तपाईंको नाम र सम्पर्क जानकारी। यसको मतलब अनुप्रयोगले तपाईंलाई पहिचान गर्न सक्दछ र तपाईंको प्रोफाइल जानकारी अरूलाई पठाउन सक्दछ।"</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"तपाईँको आफ्नै सम्पर्क कार्ड परिमार्जन गर्नुहोस्"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"तपाईँको उपकरणमा भण्डार भएको व्याक्तिगत प्रोफाइल जानकारी, जस्तै तपाईँको नाम वा सम्पर्क जानकारीलाई परिवर्तन गर्न वा थप्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। यसको मतलब अन्य अनुप्रयोगले तपाईँलाई चिन्न सक्छन् र सायद अन्यलाई तपाईँको प्रोफाइल जानकारी पठाउन सक्छन्।"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"शरीर सेन्सर (हृदयदर मोनिटर जस्तै)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"तपाईँको हृदय गति जस्तो सेंसर बाट डेटा पहुँचको लागि अनुप्रयोग अनुमति दिन्छ जसले तपाईँको भौतिक अवस्था अनुगमन गर्छ।"</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"तपाईंको सामाजिक स्ट्रिम पढ्नुहोस्"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"तपाईँ र तपाईँका साथीहरूबाट सामाजिक अपडेटलाई पहुँच र सिंक गर्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। जानकारी साझेदारी गर्दा सावधान रहनुहोस्  -- समाजिक नेटवर्कहरूमा तपाईँ र तपाईँको साथीको  बिचमा भएका संचारलाई पढ्न विश्वासनीयता बेगरै यसले अनुप्रयोगलाई अनुमति दिन्छ। नोट: यो अनुमति बलपूर्वक सबै सामाजिक नेटवर्कहरूमा सायद नगर्न सकिन्छ।"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"तपाईँको सामाजिक प्रवाहमा लेख्‍नुहोस्"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"अनुप्रयोगलाई तपाईंको साथीहरूबाट सामाजिक अपडेटहरू प्रदर्शन गर्न अनुमति दिन्छ। जानकारी साझेदारी गर्ने बेलामा होशियार रहनुहोस् -- यसले अनुप्रयोगलाई सन्देशहरू निर्माण गर्न अनुमति दिन्छ जुन साथीबाट आएको देखिन्छ। टिप्पणी: यो अनुमति सबै सामाजिक सञ्जालहरूमा लागू नहुन सक्दछ।"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"गोप्य जानकारी र पात्रो घटनाहरू पढ्नुहोस्"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"अनुप्रयोगलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका ती साथीहरू वा सहयोगीहरू सहितको पात्राका कार्यक्रमहरू पढ्न अनुमति दिन्छ। यसले गोपनीयता वा संवेदनशीलता बिना पनि अनुप्रयोगलाई तपाईंको पात्राका डेटा साझेदारी गर्न वा बचत गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"अनुप्रयोगलाई अनुमति दिन्छ तपाईँको TV मा भण्डारण गरिएका पात्रो घटनाहरू, साथी तथा सहकर्मीहरू लगायतका पढ्न। यसले अनुप्रयोगहरूलाई तपाईँको पात्रो डेटा साझेदारी गर्न वा सुरक्षित गर्न अनुमति दिन सक्छ, गोपनीयता वा सम्वेदनशीलताको पर्वाह बिना।"</string>
@@ -454,10 +440,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"अनुप्रयोगहरूलाई खाताको लागि सिङ्क सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिङ्क सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिङ्क तथ्याङ्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"अनुप्रयोगलाई खाताको लागि समीकरणको आँकडा समीकरण घटनाहरूको  इतिहास र समीकरण गरिएको डेटाको मापन समेत, पढ्न अनुमति दिन्छ।"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"तपाईँले शब्दकोशमा थपेका शब्दहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"अनुप्रयोगलाई प्रयोगकर्ताले प्रयोगकर्ता शब्दकोशमा भण्डारण गरेका हुन सक्ने सबै शब्दहरू, नामहरू र पदावलीहरू पढ्न अनुमति दिन्छ।"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"प्रयोगकर्ता-परिभाषित शब्दकोशमा शब्दहरू थप्नुहोस्।"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"प्रयोगकर्ता शब्दकोशमा नयाँ शब्द लेख्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"आफ्नो USB भण्डारणको सामग्रीहरूहरु पढ्नुहोस्"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"आफ्नो SD कार्डको सामग्रीहरूहरु पढ्नुहोस्"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"अनुप्रयोगलाई तपाईंको USB भण्डारणको सामग्री पढ्न अनुमति दिन्छ।"</string>

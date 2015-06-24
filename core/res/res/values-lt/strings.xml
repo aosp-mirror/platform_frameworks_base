@@ -232,18 +232,12 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pasiekti kontaktus"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vietovė"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"galimybė pasiekti įrenginio vietovės informaciją"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Socialinė informacija"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Tiesioginė prieiga prie kontaktų ir socialinių ryšių informacijos."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendorius"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pasiekti kalendorių"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"siųsti ir peržiūrėti SMS pranešimus"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Saugykla"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"pasiekti nuotraukas, mediją ir failus įrenginyje"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Naudotojo žodynas"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Skaityti arba rašyti žodžius naudotojo žodyne."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Žymės ir istorija"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Tiesioginė prieiga prie žymių ir naršyklės istorijos."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonas"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"įrašyti garso įrašą"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparatas"</string>
@@ -334,16 +328,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Programai leidžiama skaityti planšetinio kompiuterio skambučių žurnalą, įskaitant duomenis apie gaunamuosius ir siunčiamuosius skambučius. Kenkėjiškos programos tai gali naudoti, kad ištrintų ar keistų jūsų skambučių žurnalą."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Programai leidžiama keisti TV skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Taip kenkėjiškos programos gali ištrinti arba pakeisti skambučių žurnalą."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Programai leidžiama skaityti telefono skambučių žurnalą, įskaitant duomenis apie gaunamuosius ir siunčiamuosius skambučius. Kenkėjiškos programos tai gali naudoti, kad ištrintų ar keistų jūsų skambučių žurnalą."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"skaityti jūsų kontakt. kortelę"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Programai leidžiama skaityti įrenginyje saugomą asmeninę profilio informaciją, pvz., vardą, pavardę ir kontaktinę informaciją. Tai reiškia, kad programa gali nustatyti tapatybę ir siųsti profilio informaciją kitiems."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"keisti jūsų kontaktinę kortelę"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Leidžiama programai keisti įrenginyje saugomą asmeninę profilio informaciją, pvz., vardą, pavardę ir kontaktinę informaciją, arba jos pridėti. Tai reiškia, kad programa gali nustatyti tapatybę ir siųsti profilio informaciją kitiems."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kūno jut. (pvz., pulso d. t.)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Programai leidžiama pasiekti duomenis, gautus iš jutiklių, stebinčių fizinę būseną, pvz., širdies ritmą."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"skaityti socialinį srautą"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Leidžiama programai pasiekti ir sinchronizuoti viešas naujienas iš jūsų ir jūsų draugų. Būkite atidūs bendrindami informaciją – programai leidžiama skaityti korespondenciją tarp jūsų ir draugų viešuosiuose tinkluose, neatsižvelgiant į konfidencialumą. Pastaba: šis leidimas negali būti taikomas visuose viešuosiuose tinkluose."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"rašyti į socialinį srautą"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Leidžiama programai rodyti viešas naujienas iš jūsų draugų. Būkite atidūs bendrindami informaciją – programai leidžiama kurti pranešimus, kurie atrodo lyg būtų siunčiami draugo. Pastaba: šis leidimas negali būti taikomas visuose viešuosiuose tinkluose."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"nuskaito kalendoriaus įvykius ir konfidencialią informaciją"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Leidžiama programai skaityti visus planšetiniame kompiuteryje išsaugotus kalendoriaus įvykius, įskaitant draugų ar bendradarbių įvykius. Dėl to programai gali būti leidžiama bendrinti ar saugoti kalendoriaus duomenis, neatsižvelgiant į konfidencialumą ar privatumą."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Programai leidžiama nuskaityti visus TV saugomus kalendoriaus įvykius, įskaitant draugų ir bendradarbių. Tai pasirinkus programai gali būti leidžiama bendrinti arba išsaugoti kalendoriaus duomenis, neatsižvelgiant į tai, kad informacija gali būti konfidenciali arba neskelbtina."</string>
@@ -456,10 +442,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Leidžiama programai keisti sinchronizuotus paskyros nustatymus. Pvz., tai gali būti naudojama norint įgalinti Žmonių programos sinchronizavimą su paskyra."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"skaityti sinchronizavimo statistiką"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Leidžiama programai skaityti sinchronizuotą paskyros statistiką, įskaitant sinchronizuotų įvykių istoriją ir informaciją, kiek duomenų sinchronizuota."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"skaityti terminus, kuriuos pridėjote į žodyną"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Leidžiama programai skaityti visus žodžius, vardus ir frazes, kuriuos naudotojas išsaugojo naudotojo žodyne."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"pridėti žodžių prie naudotojo apibrėžto žodyno"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Leidžiama programai rašyti naujus žodžius į naudotojo žodyną."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"skaityti USB atminties turinį"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"skaityti SD kortelės turinį"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Leidžiama skait. USB atmintį."</string>
