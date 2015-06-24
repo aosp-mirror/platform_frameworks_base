@@ -256,6 +256,14 @@ public class TelecomManager {
     public static final String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
 
     /**
+     * A boolean meta-data value indicating whether an {@link InCallService} implements an
+     * in-call user interface. Dialer implementations (see {@link #getDefaultDialerPackage()}) which
+     * would also like to replace the in-call interface should set this meta-data to {@code true} in
+     * the manifest registration of their {@link InCallService}.
+     */
+    public static final String METADATA_IN_CALL_SERVICE_UI = "android.telecom.IN_CALL_SERVICE_UI";
+
+    /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
      * pause for a predefined period.
      */
