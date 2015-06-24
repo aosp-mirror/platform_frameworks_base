@@ -1097,7 +1097,7 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-    if (bounds.intersect(mState.currentClipRect())) {
+    if (CC_LIKELY(!bounds.isEmpty() && bounds.intersect(mState.currentClipRect()))) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
         if (!dirty.isEmpty()) {
@@ -1146,7 +1146,7 @@ void OpenGLRenderer::clearLayerRegions() {
                 .setTransform(*currentSnapshot(), transformFlags)
                 .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getClipRect()))
                 .build();
-        renderGlop(glop, false);
+        renderGlop(glop, GlopRenderType::LayerClear);
 
         if (scissorChanged) mRenderState.scissor().setEnabled(true);
     } else {
@@ -1454,10 +1454,15 @@ void OpenGLRenderer::debugClip() {
 #endif
 }
 
-void OpenGLRenderer::renderGlop(const Glop& glop, bool clearLayer) {
+void OpenGLRenderer::renderGlop(const Glop& glop, GlopRenderType type) {
     // TODO: It would be best if we could do this before quickRejectSetupScissor()
     //       changes the scissor test state
-    if (clearLayer) clearLayerRegions();
+    if (type != GlopRenderType::LayerClear) {
+        // Regular draws need to clear the dirty area on the layer before they start drawing on top
+        // of it. If this draw *is* a layer clear, it skips the clear step (since it would
+        // infinitely recurse)
+        clearLayerRegions();
+    }
 
     if (mState.getDirtyClip()) {
         if (mRenderState.scissor().isEnabled()) {
@@ -1467,7 +1472,7 @@ void OpenGLRenderer::renderGlop(const Glop& glop, bool clearLayer) {
         setStencilFromClip();
     }
     mRenderState.render(glop);
-    if (!mRenderState.stencil().isWriteEnabled()) {
+    if (type == GlopRenderType::Standard && !mRenderState.stencil().isWriteEnabled()) {
         // TODO: specify more clearly when a draw should dirty the layer.
         // is writing to the stencil the only time we should ignore this?
         dirtyLayer(glop.bounds.left, glop.bounds.top, glop.bounds.right, glop.bounds.bottom);
@@ -1540,7 +1545,7 @@ void OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entr
             .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(0, 0, bounds.getWidth(), bounds.getHeight()))
             .build();
-    renderGlop(glop);
+    renderGlop(glop, GlopRenderType::Multi);
 }
 
 void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
@@ -1738,7 +1743,7 @@ void OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entr
             .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
             .build();
-    renderGlop(glop);
+    renderGlop(glop, GlopRenderType::Multi);
 }
 
 void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
