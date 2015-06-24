@@ -12783,6 +12783,9 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable loadDrawable(android.content.Context);
     method public void loadDrawableAsync(android.content.Context, android.os.Message);
     method public void loadDrawableAsync(android.content.Context, android.graphics.drawable.Icon.OnDrawableLoadedListener, android.os.Handler);
+    method public android.graphics.drawable.Icon setTint(int);
+    method public android.graphics.drawable.Icon setTintList(android.content.res.ColorStateList);
+    method public android.graphics.drawable.Icon setTintMode(android.graphics.PorterDuff.Mode);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.graphics.drawable.Icon> CREATOR;
   }
