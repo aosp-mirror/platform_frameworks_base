@@ -622,9 +622,8 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "onSystemReady");
             mSystemReady = true;
-            mUpdateMonitor.registerCallback(mUpdateCallback);
-
             doKeyguardLocked(null);
+            mUpdateMonitor.registerCallback(mUpdateCallback);
         }
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
