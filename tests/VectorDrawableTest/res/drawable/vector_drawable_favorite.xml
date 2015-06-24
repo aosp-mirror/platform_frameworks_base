@@ -26,6 +26,7 @@
         <path
             android:name="favorite"
             android:fillColor="#ff000000"
+            android:strokeWidth="2"
             android:pathData="M2.100006104,-6
                 C0.1449127197,-6,1.600006104,-5.975006104,0,-5.975006104
                 C-1.574996948,-5.975006104,0.00309753418,-6-1.949996948-6
