@@ -17,6 +17,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
+    android:id="@+id/volume_dialog_row"
     android:paddingEnd="8dp"
     android:paddingStart="8dp" >
 
