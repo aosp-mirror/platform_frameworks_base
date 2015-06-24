@@ -860,20 +860,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     aInfo.applicationInfo.packageName, aInfo.name));
 
             // Don't debug things in the system process
-            if ((startFlags&ActivityManager.START_FLAG_DEBUG) != 0) {
-                if (!aInfo.processName.equals("system")) {
+            if (!aInfo.processName.equals("system")) {
+                if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
                     mService.setDebugApp(aInfo.processName, true, false);
                 }
-            }
 
-            if ((startFlags&ActivityManager.START_FLAG_OPENGL_TRACES) != 0) {
-                if (!aInfo.processName.equals("system")) {
+                if ((startFlags & ActivityManager.START_FLAG_OPENGL_TRACES) != 0) {
                     mService.setOpenGlTraceApp(aInfo.applicationInfo, aInfo.processName);
                 }
-            }
 
-            if (profilerInfo != null) {
-                if (!aInfo.processName.equals("system")) {
+                if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
+                    mService.setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
+                }
+
+                if (profilerInfo != null) {
                     mService.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
                 }
             }

@@ -132,6 +132,7 @@ import libcore.net.event.NetworkEventDispatcher;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
+import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -446,6 +447,7 @@ public final class ActivityThread {
         IUiAutomationConnection instrumentationUiAutomationConnection;
         int debugMode;
         boolean enableOpenGlTrace;
+        boolean trackAllocation;
         boolean restrictedBackupMode;
         boolean persistent;
         Configuration config;
@@ -770,9 +772,9 @@ public final class ActivityThread {
                 ProfilerInfo profilerInfo, Bundle instrumentationArgs,
                 IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
-                boolean enableOpenGlTrace, boolean isRestrictedBackupMode, boolean persistent,
-                Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-                Bundle coreSettings) {
+                boolean enableOpenGlTrace, boolean trackAllocation, boolean isRestrictedBackupMode,
+                boolean persistent, Configuration config, CompatibilityInfo compatInfo,
+                Map<String, IBinder> services, Bundle coreSettings) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -828,6 +830,7 @@ public final class ActivityThread {
             data.instrumentationUiAutomationConnection = instrumentationUiConnection;
             data.debugMode = debugMode;
             data.enableOpenGlTrace = enableOpenGlTrace;
+            data.trackAllocation = trackAllocation;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.persistent = persistent;
             data.config = config;
@@ -4426,6 +4429,10 @@ public final class ActivityThread {
     }
 
     private void handleBindApplication(AppBindData data) {
+        if (data.trackAllocation) {
+            DdmVmInternal.enableRecentAllocations(true);
+        }
+
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);

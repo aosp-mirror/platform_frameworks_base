@@ -103,7 +103,7 @@ public class Am extends BaseCommand {
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
                 "               [--sampling INTERVAL] [-R COUNT] [-S] [--opengl-trace]\n" +
-                "               [--user <USER_ID> | current] <INTENT>\n" +
+                "               [--track-allocation] [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am force-stop [--user <USER_ID> | all | current] <PACKAGE>\n" +
@@ -159,6 +159,7 @@ public class Am extends BaseCommand {
                 "        the top activity will be finished.\n" +
                 "    -S: force stop the target app before starting the activity\n" +
                 "    --opengl-trace: enable tracing of OpenGL functions\n" +
+                "    --track-allocation: enable tracking of object allocations\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
                 "\n" +
@@ -687,6 +688,8 @@ public class Am extends BaseCommand {
                 mStopOption = true;
             } else if (opt.equals("--opengl-trace")) {
                 mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
+            } else if (opt.equals("--track-allocation")) {
+                mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
             } else if (opt.equals("--user")) {
                 mUserId = parseUserArg(nextArgRequired());
             } else if (opt.equals("--receiver-permission")) {
