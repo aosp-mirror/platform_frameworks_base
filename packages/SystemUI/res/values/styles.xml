@@ -291,11 +291,6 @@
         <item name="android:textColor">#ffb0b3c5</item>
     </style>
 
-    <style name="VolumeDialogAnimations">
-        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
-    </style>
-
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:background">@drawable/btn_borderless_rect</item>
     </style>
