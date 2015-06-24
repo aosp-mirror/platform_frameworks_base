@@ -1076,7 +1076,9 @@ final class Settings {
         ArraySet<String> currentDomains = current.getIntentFilterVerificationInfo().getDomains();
         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
             for (PackageSetting ps : mPackages.values()) {
-                if (ps == null || ps.pkg.packageName.equals(packageName)) continue;
+                if (ps == null || ps.pkg == null || packageName.equals(ps.pkg.packageName)) {
+                    continue;
+                }
                 IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
                 if (ivi == null) {
                     continue;
