@@ -23,8 +23,9 @@ sdk.platform.apiLevel=MNC
     <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
     <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
     <li><a href="#behavior-camera">Camera Service Changes</a></li>
-    <li><a href="#behavior-art-runtime">ART Runtime</a></li>
+    <li><a href="#behavior-runtime">Runtime</a></li>
     <li><a href="#behavior-apk-validation">APK Validation</a></li>
+    <li><a href="#behavior-usb">USB Connection</a></li>
     <li><a href="#behavior-afw">Android for Work Changes</a></li>
 </ol>
 
@@ -46,8 +47,8 @@ sdk.platform.apiLevel=MNC
 system changes and API behavior changes. This document highlights
 some of the key changes that you should understand and account for in your apps.</p>
 
-<p>If you have previously published an app for Android, be aware that your app
-  might be affected by these changes in the platform.</p>
+<p>If you have previously published an app for Android, be aware that these changes in the
+platform affect your app.</p>
 
 <h2 id="behavior-runtime-permissions">Runtime Permissions</h1>
 <p>This preview introduces a new permissions model, where users can now directly manage
@@ -55,11 +56,11 @@ app permissions at runtime. This model gives users improved visibility and contr
 permissions, while streamlining the installation and auto-update processes for app developers.
 Users can grant or revoke permissions individually for installed apps. </p>
 
-<p>On your apps that target the M Preview, make sure to check and request for permissions at
-runtime. To determine if your app has been granted a permission, call the
-new {@code Context.checkSelfPermission()} method. To request for a permission, call the new
-{@code Activity.requestPermission()} method. Even if your app is not targeting M, you
-should test your app under the new permissions model.</p>
+<p>On your apps that target the M Preview release or higher, make sure to check for and request
+permissions at runtime. To determine if your app has been granted a permission, call the
+new {@code Context.checkSelfPermission()} method. To request a permission, call the new
+{@code Activity.requestPermission()} method. Even if your app is not targeting the M Preview
+release, you should test your app under the new permissions model.</p>
 
 <p>For details on supporting the new permissions model in your app, see the
 <a href="{@docRoot}preview/features/runtime-permissions.html">
@@ -329,7 +330,7 @@ processes that use the camera subsystem when the user has switched to a differen
 </li>
 </ul>
 
-<h2 id="behavior-art-runtime">ART Runtime</h2>
+<h2 id="behavior-runtime">Runtime</h2>
 <p>The ART runtime now properly implements access rules for the
 {@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method. This
 change fixes a problem where Dalvik was checking access rules incorrectly in previous versions.
@@ -362,14 +363,22 @@ implemented. Apps which previously worked that have bad {@code DT_NEEDED} entrie
 declared in the manifest but not present in the APK itself. An APK must be re-signed if any of the
 contents are removed.</p>
 
+<h2 id="behavior-usb">USB Connection</h2>
+<p>Device connections through the USB port are now set to charge-only mode by default. To access
+the device and its content over a USB connection, users must explicitly grant permission for such
+interactions. If your app supports user interactions with the device over a USB port, take into
+consideration that the interaction must be explicitly enabled.
+</p>
+
 <h2 id="behavior-afw">Android for Work Changes</h2>
 <p>This preview includes the following behavior changes for Android for Work:</p>
 <ul>
 <li><strong>Work contacts in personal contexts.</strong> The Google Dialer
 Call Log now displays work contacts when the user views past calls.
-Setting {@code DevicePolicyManager.setCrossProfileCallerIdDisabled()} to {@code true} hides the
-work profile contacts in the Google Dialer Call Log. Work contacts can be displayed along with
-personal contacts to devices over Bluetooth only if
+Setting
+{@link android.app.admin.DevicePolicyManager#setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean) setCrossProfileCallerIdDisabled()}
+to {@code true} hides the work profile contacts in the Google Dialer Call Log. Work contacts can be
+displayed along with personal contacts to devices over Bluetooth only if
 you set {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} to {@code false}. By
 default, it is set to {@code true}.
 </li>
