@@ -199,6 +199,13 @@ public abstract class Connection extends Conferenceable {
     // Next CAPABILITY value: 0x00200000
     //**********************************************************************************************
 
+    /**
+     * Call extras key to pack/unpack call history info.
+     * The value for this key should be an ArrayList of Strings.
+     * @hide
+     */
+    public static final String EXTRA_CALL_HISTORY_INFO = "EXTRA_CALL_HISTORY_INFO";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
