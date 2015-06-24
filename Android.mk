@@ -173,6 +173,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/input/IInputManager.aidl \
 	core/java/android/hardware/input/IInputDevicesChangedListener.aidl \
 	core/java/android/hardware/location/IActivityRecognitionHardware.aidl \
+	core/java/android/hardware/location/IActivityRecognitionHardwareClient.aidl \
 	core/java/android/hardware/location/IActivityRecognitionHardwareSink.aidl \
 	core/java/android/hardware/location/IActivityRecognitionHardwareWatcher.aidl \
 	core/java/android/hardware/location/IFusedLocationHardware.aidl \

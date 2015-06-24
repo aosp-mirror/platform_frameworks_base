@@ -542,21 +542,24 @@ public class LocationManagerService extends ILocationManager.Stub {
             Slog.e(TAG,  "Unable to bind FLP Geofence proxy.");
         }
 
-        // bind to the hardware activity recognition if supported
-        if (ActivityRecognitionHardware.isSupported()) {
-            ActivityRecognitionProxy proxy = ActivityRecognitionProxy.createAndBind(
-                    mContext,
-                    mLocationHandler,
-                    ActivityRecognitionHardware.getInstance(mContext),
-                    com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay,
-                    com.android.internal.R.string.config_activityRecognitionHardwarePackageName,
-                    com.android.internal.R.array.config_locationProviderPackageNames);
-
-            if (proxy == null) {
-                Slog.e(TAG, "Unable to bind ActivityRecognitionProxy.");
-            }
+        // bind to hardware activity recognition
+        boolean activityRecognitionHardwareIsSupported = ActivityRecognitionHardware.isSupported();
+        ActivityRecognitionHardware activityRecognitionHardware = null;
+        if (activityRecognitionHardwareIsSupported) {
+            activityRecognitionHardware = ActivityRecognitionHardware.getInstance(mContext);
         } else {
             Slog.e(TAG, "Hardware Activity-Recognition not supported.");
+        }
+        ActivityRecognitionProxy proxy = ActivityRecognitionProxy.createAndBind(
+                mContext,
+                mLocationHandler,
+                activityRecognitionHardwareIsSupported,
+                activityRecognitionHardware,
+                com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay,
+                com.android.internal.R.string.config_activityRecognitionHardwarePackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames);
+        if (proxy == null) {
+            Slog.e(TAG, "Unable to bind ActivityRecognitionProxy.");
         }
 
         String[] testProviderStrings = resources.getStringArray(
