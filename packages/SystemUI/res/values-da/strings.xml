@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Lås op"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Knap til oplåsning. Venter på fingeraftryk"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Lås op uden at bruge dit fingeraftryk"</string>
     <string name="unlock_label" msgid="8779712358041029439">"lås op"</string>
     <string name="phone_label" msgid="2320074140205331708">"åbn telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"åbn voice assist"</string>
@@ -316,10 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Glid til venstre for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Du bliver ikke forstyrret af lyde og vibrationer undtagen fra de alarmer, påmindelser, begivenheder og opkaldere, som du angiver."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tilpas"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Dette blokerer ALLE lyde og vibrationer, bl.a. fra alarmer, musik, videoer og spil. Du vil stadig kunne foretage telefonopkald."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Dette blokerer ALLE lyde og vibrationer, bl.a. fra alarmer, musik, videoer og spil."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende underretninger nedenfor"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryk igen for at åbne"</string>

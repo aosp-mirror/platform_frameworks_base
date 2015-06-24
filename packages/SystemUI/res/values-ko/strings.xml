@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"전화"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"음성 지원"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"잠금 해제"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"잠금 해제 버튼, 지문 파일 대기 중"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"지문 파일을 사용하지 않고 잠금 해제"</string>
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"음성 지원 열기"</string>
@@ -316,10 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"지정한 알람, 알림, 이벤트, 발신자를 제외하고 소리와 진동을 끕니다."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"맞춤설정"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다. 전화는 걸 수 있습니다."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"다시 터치하여 열기"</string>

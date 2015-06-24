@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"โทรศัพท์"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ตัวช่วยเสียง"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ปลดล็อก"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"ปุ่มปลดล็อก กำลังรอลายนิ้วมือ"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ปลดล็อกโดยไม่ต้องใช้ลายนิ้วมือ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ปลดล็อก"</string>
     <string name="phone_label" msgid="2320074140205331708">"เปิดโทรศัพท์"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"เปิดตัวช่วยเสียง"</string>
@@ -316,10 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นการปลุก การเตือนความจำ กิจกรรม และผู้โทรที่คุณระบุ"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"กำหนดค่า"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม คุณจะยังโทรออกได้อยู่"</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยด้านล่าง"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"แตะอีกครั้งเพื่อเปิด"</string>
