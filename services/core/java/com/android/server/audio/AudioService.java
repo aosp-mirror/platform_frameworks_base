@@ -3099,10 +3099,13 @@ public class AudioService extends IAudioService.Stub {
                         || mContext.getResources().getBoolean(
                                 com.android.internal.R.bool.config_safe_media_volume_enabled);
 
+                boolean safeMediaVolumeBypass =
+                        SystemProperties.getBoolean("audio.safemedia.bypass", false);
+
                 // The persisted state is either "disabled" or "active": this is the state applied
                 // next time we boot and cannot be "inactive"
                 int persistedState;
-                if (safeMediaVolumeEnabled) {
+                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass) {
                     persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
                     // The state can already be "inactive" here if the user has forced it before
                     // the 30 seconds timeout for forced configuration. In this case we don't reset
