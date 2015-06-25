@@ -17765,7 +17765,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Returns the suggested minimum width that the view should use. This
-     * returns the maximum of the view's minimum width)
+     * returns the maximum of the view's minimum width
      * and the background's minimum width
      *  ({@link android.graphics.drawable.Drawable#getMinimumWidth()}).
      * <p>
