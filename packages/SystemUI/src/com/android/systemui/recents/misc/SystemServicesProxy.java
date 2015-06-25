@@ -62,9 +62,11 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsAppWidgetHost;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -527,14 +529,57 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Resolves and returns the first Recents widget from the same package as the global
-     * assist activity.
+     * Returns the current search widget id.
      */
-    public AppWidgetProviderInfo resolveSearchAppWidget() {
-        if (mAwm == null) return null;
-        if (mAssistComponent == null) return null;
+    public int getSearchAppWidgetId(Context context) {
+        return Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, -1);
+    }
 
-        // Find the first Recents widget from the same package as the global assist activity
+    /**
+     * Returns the current search widget info, binding a new one if necessary.
+     */
+    public AppWidgetProviderInfo getOrBindSearchAppWidget(Context context, AppWidgetHost host) {
+        int searchWidgetId = Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, -1);
+        AppWidgetProviderInfo searchWidgetInfo = mAwm.getAppWidgetInfo(searchWidgetId);
+        AppWidgetProviderInfo resolvedSearchWidgetInfo = resolveSearchAppWidget();
+
+        // Return the search widget info if it hasn't changed
+        if (searchWidgetInfo != null && resolvedSearchWidgetInfo != null &&
+                searchWidgetInfo.provider.equals(resolvedSearchWidgetInfo.provider)) {
+            if (Prefs.getString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null) == null) {
+                Prefs.putString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE,
+                        searchWidgetInfo.provider.getPackageName());
+            }
+            return searchWidgetInfo;
+        }
+
+        // Delete the old widget
+        if (searchWidgetId != -1) {
+            host.deleteAppWidgetId(searchWidgetId);
+        }
+
+        // And rebind a new search widget
+        if (resolvedSearchWidgetInfo != null) {
+            Pair<Integer, AppWidgetProviderInfo> widgetInfo = bindSearchAppWidget(host,
+                    resolvedSearchWidgetInfo);
+            if (widgetInfo != null) {
+                Prefs.putInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, widgetInfo.first);
+                Prefs.putString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE,
+                        widgetInfo.second.provider.getPackageName());
+                return widgetInfo.second;
+            }
+        }
+
+        // If we fall through here, then there is no resolved search widget, so clear the state
+        Prefs.remove(context, Prefs.Key.SEARCH_APP_WIDGET_ID);
+        Prefs.remove(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE);
+        return null;
+    }
+
+    /**
+     * Returns the first Recents widget from the same package as the global assist activity.
+     */
+    private AppWidgetProviderInfo resolveSearchAppWidget() {
         List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         for (AppWidgetProviderInfo info : widgets) {
@@ -548,45 +593,21 @@ public class SystemServicesProxy {
     /**
      * Resolves and binds the search app widget that is to appear in the recents.
      */
-    public Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host) {
+    private Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host,
+            AppWidgetProviderInfo resolvedSearchWidgetInfo) {
         if (mAwm == null) return null;
         if (mAssistComponent == null) return null;
-
-        // Find the first Recents widget from the same package as the global assist activity
-        AppWidgetProviderInfo searchWidgetInfo = resolveSearchAppWidget();
-
-        // Return early if there is no search widget
-        if (searchWidgetInfo == null) return null;
 
         // Allocate a new widget id and try and bind the app widget (if that fails, then just skip)
         int searchWidgetId = host.allocateAppWidgetId();
         Bundle opts = new Bundle();
         opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, searchWidgetInfo.provider, opts)) {
+        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, resolvedSearchWidgetInfo.provider, opts)) {
             host.deleteAppWidgetId(searchWidgetId);
             return null;
         }
-        return new Pair<Integer, AppWidgetProviderInfo>(searchWidgetId, searchWidgetInfo);
-    }
-
-    /**
-     * Returns the app widget info for the specified app widget id.
-     */
-    public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
-        if (mAwm == null) return null;
-
-        return mAwm.getAppWidgetInfo(appWidgetId);
-    }
-
-    /**
-     * Destroys the specified app widget.
-     */
-    public void unbindSearchAppWidget(AppWidgetHost host, int appWidgetId) {
-        if (mAwm == null) return;
-
-        // Delete the app widget
-        host.deleteAppWidgetId(appWidgetId);
+        return new Pair<>(searchWidgetId, resolvedSearchWidgetInfo);
     }
 
     /**

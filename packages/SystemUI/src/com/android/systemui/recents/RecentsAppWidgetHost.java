@@ -20,26 +20,20 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 
 /** Our special app widget host for the Search widget */
 public class RecentsAppWidgetHost extends AppWidgetHost {
 
     /* Callbacks to notify when an app package changes */
     interface RecentsAppWidgetHostCallbacks {
-        public void refreshSearchWidget();
+        void refreshSearchWidgetView();
     }
 
-    Context mContext;
     RecentsAppWidgetHostCallbacks mCb;
-    RecentsConfiguration mConfig;
     boolean mIsListening;
 
     public RecentsAppWidgetHost(Context context, int hostId) {
         super(context, hostId);
-        mContext = context;
-        mConfig = RecentsConfiguration.getInstance();
     }
 
     public void startListening(RecentsAppWidgetHostCallbacks cb) {
@@ -57,7 +51,6 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
         }
         // Ensure that we release any references to the callbacks
         mCb = null;
-        mContext = null;
         mIsListening = false;
     }
 
@@ -67,18 +60,14 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
         return new RecentsAppWidgetHostView(context);
     }
 
+    /**
+     * Note: this is only called for packages that have updated, not removed.
+     */
     @Override
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo) {
-        if (mCb == null) return;
-        if (mContext == null) return;
-
-        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
-        if (appWidgetId > -1 && appWidgetId == mConfig.searchBarAppWidgetId) {
-            // The search provider may have changed, so just delete the old widget and bind it again
-            ssp.unbindSearchAppWidget(this, appWidgetId);
-            // Update the search widget
-            mConfig.updateSearchBarAppWidgetId(mContext, -1);
-            mCb.refreshSearchWidget();
+        super.onProviderChanged(appWidgetId, appWidgetInfo);
+        if (mIsListening && mCb != null) {
+            mCb.refreshSearchWidgetView();
         }
     }
 }

@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
-import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -37,11 +36,10 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.MutableBoolean;
-import android.util.Pair;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
-
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
@@ -170,6 +168,7 @@ public class Recents extends SystemUI
     Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
     RecentsOwnerEventProxyReceiver mProxyBroadcastReceiver;
+    RecentsAppWidgetHost mAppWidgetHost;
     boolean mBootCompleted;
     boolean mStartAnimationTriggered;
     boolean mCanReuseTaskStackViews = true;
@@ -235,6 +234,7 @@ public class Recents extends SystemUI
         mSystemServicesProxy = new SystemServicesProxy(mContext);
         mHandler = new Handler();
         mTaskStackBounds = new Rect();
+        mAppWidgetHost = new RecentsAppWidgetHost(mContext, Constants.Values.App.AppWidgetHostId);
 
         // Register the task stack listener
         mTaskStackListener = new TaskStackListenerImpl(mHandler);
@@ -255,7 +255,7 @@ public class Recents extends SystemUI
         // Initialize some static datastructures
         TaskStackViewLayoutAlgorithm.initializeCurve();
         // Load the header bar layout
-        reloadHeaderBarLayout(true);
+        reloadHeaderBarLayout();
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
@@ -488,11 +488,11 @@ public class Recents extends SystemUI
         // Don't reuse task stack views if the configuration changes
         mCanReuseTaskStackViews = false;
         // Reload the header bar layout
-        reloadHeaderBarLayout(false);
+        reloadHeaderBarLayout();
     }
 
     /** Prepares the header bar layout. */
-    void reloadHeaderBarLayout(boolean reloadWidget) {
+    void reloadHeaderBarLayout() {
         Resources res = mContext.getResources();
         mWindowRect = mSystemServicesProxy.getWindowRect();
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -500,12 +500,16 @@ public class Recents extends SystemUI
         mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
         mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
         mConfig.updateOnConfigurationChange();
-        if (reloadWidget) {
-            // Reload the widget id before we get the task stack bounds
-            reloadSearchBarAppWidget(mContext, mSystemServicesProxy);
+        Rect searchBarBounds = new Rect();
+        // Try and pre-emptively bind the search widget on startup to ensure that we
+        // have the right thumbnail bounds to animate to.
+        // Note: We have to reload the widget id before we get the task stack bounds below
+        if (mSystemServicesProxy.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
+            mConfig.getSearchBarBounds(mWindowRect.width(), mWindowRect.height(),
+                    mStatusBarHeight, searchBarBounds);
         }
         mConfig.getAvailableTaskStackBounds(mWindowRect.width(), mWindowRect.height(),
-                mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0),
+                mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0), searchBarBounds,
                 mTaskStackBounds);
         if (mConfig.isLandscape && mConfig.hasTransposedNavBar) {
             mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
@@ -529,24 +533,6 @@ public class Recents extends SystemUI
                     View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(taskBarHeight, View.MeasureSpec.EXACTLY));
             mHeaderBar.layout(0, 0, taskViewSize.width(), taskBarHeight);
-        }
-    }
-
-    /** Prepares the search bar app widget */
-    void reloadSearchBarAppWidget(Context context, SystemServicesProxy ssp) {
-        // Try and pre-emptively bind the search widget on startup to ensure that we
-        // have the right thumbnail bounds to animate to.
-        if (Constants.DebugFlags.App.EnableSearchLayout) {
-            // If there is no id, then bind a new search app widget
-            if (mConfig.searchBarAppWidgetId < 0) {
-                AppWidgetHost host = new RecentsAppWidgetHost(context,
-                        Constants.Values.App.AppWidgetHostId);
-                Pair<Integer, AppWidgetProviderInfo> widgetInfo = ssp.bindSearchAppWidget(host);
-                if (widgetInfo != null) {
-                    // Save the app widget id into the settings
-                    mConfig.updateSearchBarAppWidgetId(context, widgetInfo.first);
-                }
-            }
         }
     }
 
@@ -799,27 +785,13 @@ public class Recents extends SystemUI
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
             if (hasRecentTasks) {
-                // Get the home activity info
                 String homeActivityPackage = mSystemServicesProxy.getHomeActivityPackageName();
-                // Get the search widget info
-                AppWidgetProviderInfo searchWidget = null;
-                String searchWidgetPackage = null;
-                if (mConfig.hasSearchBarAppWidget()) {
-                    searchWidget = mSystemServicesProxy.getAppWidgetInfo(
-                            mConfig.searchBarAppWidgetId);
-                } else {
-                    searchWidget = mSystemServicesProxy.resolveSearchAppWidget();
-                }
-                if (searchWidget != null && searchWidget.provider != null) {
-                    searchWidgetPackage = searchWidget.provider.getPackageName();
-                }
-                // Determine whether we are coming from a search owned home activity
-                boolean fromSearchHome = false;
-                if (homeActivityPackage != null && searchWidgetPackage != null &&
-                        homeActivityPackage.equals(searchWidgetPackage)) {
-                    fromSearchHome = true;
-                }
+                String searchWidgetPackage =
+                        Prefs.getString(mContext, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);
 
+                // Determine whether we are coming from a search owned home activity
+                boolean fromSearchHome = (homeActivityPackage != null) &&
+                        homeActivityPackage.equals(searchWidgetPackage);
                 ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
                 startAlternateRecentsActivity(topTask, opts, true /* fromHome */, fromSearchHome,
                         false /* fromThumbnail */, stackVr);
