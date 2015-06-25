@@ -682,18 +682,28 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             break;
         case FAILED_TRANSACTION: {
             ALOGE("!!! FAILED BINDER TRANSACTION !!!  (parcel size = %d)", parcelSize);
+            const char* exceptionToThrow;
             char msg[128];
-            snprintf(msg, sizeof(msg)-1, "data parcel size %d bytes", parcelSize);
             // TransactionTooLargeException is a checked exception, only throw from certain methods.
             // FIXME: Transaction too large is the most common reason for FAILED_TRANSACTION
             //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
             //        for other reasons also, such as if the transaction is malformed or
             //        refers to an FD that has been closed.  We should change the driver
             //        to enable us to distinguish these cases in the future.
-            jniThrowException(env, canThrowRemoteException
-                    ? "android/os/TransactionTooLargeException"
-                            : "java/lang/RuntimeException",
-                    parcelSize > 0 ? msg : NULL);
+            if (canThrowRemoteException && parcelSize > 200*1024) {
+                // bona fide large payload
+                exceptionToThrow = "android/os/TransactionTooLargeException";
+                snprintf(msg, sizeof(msg)-1, "data parcel size %d bytes", parcelSize);
+            } else {
+                // Heuristic: a payload smaller than this threshold "shouldn't" be too
+                // big, so it's probably some other, more subtle problem.  In practice
+                // it nearly always means that the remote process died while the binder
+                // transaction was already in flight.
+                exceptionToThrow = "java/lang/RuntimeException";
+                snprintf(msg, sizeof(msg)-1,
+                        "Transaction failed on small parcel; remote process probably died");
+            }
+            jniThrowException(env, exceptionToThrow, msg);
         } break;
         case FDS_NOT_ALLOWED:
             jniThrowException(env, "java/lang/RuntimeException",
