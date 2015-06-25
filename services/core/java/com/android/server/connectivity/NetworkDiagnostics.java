@@ -113,18 +113,18 @@ public class NetworkDiagnostics {
 
         public void recordSuccess(String msg) {
             maybeFixupTimes();
+            result = SUCCEEDED + ": " + msg;
             if (mCountDownLatch != null) {
                 mCountDownLatch.countDown();
             }
-            result = SUCCEEDED + ": " + msg;
         }
 
         public void recordFailure(String msg) {
             maybeFixupTimes();
+            result = FAILED + ": " + msg;
             if (mCountDownLatch != null) {
                 mCountDownLatch.countDown();
             }
-            result = FAILED + ": " + msg;
         }
 
         private void maybeFixupTimes() {
