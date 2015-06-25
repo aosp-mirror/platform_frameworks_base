@@ -6613,6 +6613,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void addScrapView(View scrap, int position) {
             final AbsListView.LayoutParams lp = (AbsListView.LayoutParams) scrap.getLayoutParams();
             if (lp == null) {
+                // Can't recycle, skip the scrap heap.
+                getSkippedScrap().add(scrap);
                 return;
             }
 
@@ -6622,6 +6624,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // should otherwise not be recycled.
             final int viewType = lp.viewType;
             if (!shouldRecycleViewType(viewType)) {
+                // Can't recycle, skip the scrap heap.
+                getSkippedScrap().add(scrap);
                 return;
             }
 
@@ -6641,22 +6645,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // If the adapter has stable IDs, we can reuse the view for
                     // the same data.
                     if (mTransientStateViewsById == null) {
-                        mTransientStateViewsById = new LongSparseArray<View>();
+                        mTransientStateViewsById = new LongSparseArray<>();
                     }
                     mTransientStateViewsById.put(lp.itemId, scrap);
                 } else if (!mDataChanged) {
                     // If the data hasn't changed, we can reuse the views at
                     // their old positions.
                     if (mTransientStateViews == null) {
-                        mTransientStateViews = new SparseArray<View>();
+                        mTransientStateViews = new SparseArray<>();
                     }
                     mTransientStateViews.put(position, scrap);
                 } else {
                     // Otherwise, we'll have to remove the view and start over.
-                    if (mSkippedScrap == null) {
-                        mSkippedScrap = new ArrayList<View>();
-                    }
-                    mSkippedScrap.add(scrap);
+                    getSkippedScrap().add(scrap);
                 }
             } else {
                 if (mViewTypeCount == 1) {
@@ -6669,6 +6670,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mRecyclerListener.onMovedToScrapHeap(scrap);
                 }
             }
+        }
+
+        private ArrayList<View> getSkippedScrap() {
+            if (mSkippedScrap == null) {
+                mSkippedScrap = new ArrayList<>();
+            }
+            return mSkippedScrap;
         }
 
         /**
