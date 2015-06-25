@@ -21,6 +21,7 @@
 #include <utils/Log.h>
 #include <utils/Trace.h>
 #include <utils/Vector.h>
+#include <utils/MathUtils.h>
 
 #include "AmbientShadow.h"
 #include "Properties.h"
@@ -172,6 +173,8 @@ int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1,
     // acos( )     --- [0, M_PI]
     // floor(...)  --- [0, EXTRA_VERTEX_PER_PI]
     float dotProduct = vector1.dot(vector2);
+    // make sure that dotProduct value is in acsof input range [-1, 1]
+    dotProduct = MathUtils::clamp(dotProduct, -1.0f, 1.0f);
     // TODO: Use look up table for the dotProduct to extraVerticesNumber
     // computation, if needed.
     float angle = acosf(dotProduct);
