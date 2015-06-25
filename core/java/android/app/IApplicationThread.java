@@ -96,9 +96,9 @@ public interface IApplicationThread extends IInterface {
             ComponentName testName, ProfilerInfo profilerInfo, Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
             int debugMode, boolean enableBinderTracking, boolean openGlTrace,
-            boolean restrictedBackupMode, boolean persistent, Configuration config,
-            CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings)
-            throws RemoteException;
+            boolean trackAllocation, boolean restrictedBackupMode, boolean persistent,
+            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
+            Bundle coreSettings) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;

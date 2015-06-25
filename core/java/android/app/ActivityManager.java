@@ -210,6 +210,13 @@ public class ActivityManager {
     public static final int START_FLAG_OPENGL_TRACES = 1<<2;
 
     /**
+     * Flag for IActivityManaqer.startActivity: launch the app for
+     * allocation tracking.
+     * @hide
+     */
+    public static final int START_FLAG_TRACK_ALLOCATION = 1<<3;
+
+    /**
      * Result for IActivityManaqer.broadcastIntent: success!
      * @hide
      */
