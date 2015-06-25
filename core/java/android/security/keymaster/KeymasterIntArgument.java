@@ -27,8 +27,8 @@ class KeymasterIntArgument extends KeymasterArgument {
     public KeymasterIntArgument(int tag, int value) {
         super(tag);
         switch (KeymasterDefs.getTagType(tag)) {
-            case KeymasterDefs.KM_INT:
-            case KeymasterDefs.KM_INT_REP:
+            case KeymasterDefs.KM_UINT:
+            case KeymasterDefs.KM_UINT_REP:
             case KeymasterDefs.KM_ENUM:
             case KeymasterDefs.KM_ENUM_REP:
                 break; // OK.

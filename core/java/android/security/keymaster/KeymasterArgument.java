@@ -39,11 +39,11 @@ abstract class KeymasterArgument implements Parcelable {
                     switch (KeymasterDefs.getTagType(tag)) {
                         case KeymasterDefs.KM_ENUM:
                         case KeymasterDefs.KM_ENUM_REP:
-                        case KeymasterDefs.KM_INT:
-                        case KeymasterDefs.KM_INT_REP:
+                        case KeymasterDefs.KM_UINT:
+                        case KeymasterDefs.KM_UINT_REP:
                             return new KeymasterIntArgument(tag, in);
-                        case KeymasterDefs.KM_LONG:
-                        case KeymasterDefs.KM_LONG_REP:
+                        case KeymasterDefs.KM_ULONG:
+                        case KeymasterDefs.KM_ULONG_REP:
                             return new KeymasterLongArgument(tag, in);
                         case KeymasterDefs.KM_DATE:
                             return new KeymasterDateArgument(tag, in);
