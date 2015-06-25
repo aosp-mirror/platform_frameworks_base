@@ -57,7 +57,7 @@ public class KeyButtonView extends ImageView {
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
                     performLongClick();
-                } else {
+                } else if (mSupportsLongpress) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                 }
@@ -92,7 +92,7 @@ public class KeyButtonView extends ImageView {
         super.onInitializeAccessibilityNodeInfo(info);
         if (mCode != 0) {
             info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, null));
-            if (mSupportsLongpress) {
+            if (mSupportsLongpress || isLongClickable()) {
                 info.addAction(
                         new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK, null));
             }
@@ -115,7 +115,7 @@ public class KeyButtonView extends ImageView {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
             playSoundEffect(SoundEffectConstants.CLICK);
             return true;
-        } else if (action == ACTION_LONG_CLICK && mCode != 0 && mSupportsLongpress) {
+        } else if (action == ACTION_LONG_CLICK && mCode != 0) {
             sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
             sendEvent(KeyEvent.ACTION_UP, 0);
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
@@ -144,10 +144,8 @@ public class KeyButtonView extends ImageView {
                     // Provide the same haptic feedback that the system offers for virtual keys.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
-                if (mSupportsLongpress) {
-                    removeCallbacks(mCheckLongPress);
-                    postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
-                }
+                removeCallbacks(mCheckLongPress);
+                postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
                 x = (int)ev.getX();
@@ -162,9 +160,7 @@ public class KeyButtonView extends ImageView {
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                 }
-                if (mSupportsLongpress) {
-                    removeCallbacks(mCheckLongPress);
-                }
+                removeCallbacks(mCheckLongPress);
                 break;
             case MotionEvent.ACTION_UP:
                 final boolean doIt = isPressed();
@@ -183,9 +179,7 @@ public class KeyButtonView extends ImageView {
                         performClick();
                     }
                 }
-                if (mSupportsLongpress) {
-                    removeCallbacks(mCheckLongPress);
-                }
+                removeCallbacks(mCheckLongPress);
                 break;
         }
 

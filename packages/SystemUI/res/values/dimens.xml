@@ -583,7 +583,7 @@
     <dimen name="managed_profile_toast_padding">4dp</dimen>
 
     <!-- Thickness of the assist disclosure beams -->
-    <dimen name="assist_disclosure_thickness">4dp</dimen>
+    <dimen name="assist_disclosure_thickness">3dp</dimen>
 
     <!-- Thickness of the shadows of the assist disclosure beams -->
     <dimen name="assist_disclosure_shadow_thickness">1.5dp</dimen>
