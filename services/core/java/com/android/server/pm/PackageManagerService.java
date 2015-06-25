@@ -7182,7 +7182,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         NativeLibraryHelper.Handle handle = null;
         try {
-            handle = NativeLibraryHelper.Handle.create(scanFile);
+            handle = NativeLibraryHelper.Handle.create(pkg);
             // TODO(multiArch): This can be null for apps that didn't go through the
             // usual installation process. We can calculate it again, like we
             // do during install time.
