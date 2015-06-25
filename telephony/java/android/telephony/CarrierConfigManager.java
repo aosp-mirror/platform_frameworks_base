@@ -211,6 +211,19 @@ public class CarrierConfigManager {
             KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY = "cdma_nonroaming_networks_string_array";
 
     /**
+     * Override the platform's notion of a network operator being considered non roaming.
+     * If true all networks are considered as home network a.k.a non-roaming.  When false,
+     * the 2 pairs of CMDA and GSM roaming/non-roaming arrays are consulted.
+     *
+     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
+     */
+    public static final String
+            KEY_FORCE_HOME_NETWORK_BOOL = "force_home_network_bool";
+
+    /**
      * Flag specifying whether VoLTE should be available for carrier, independent of carrier
      * provisioning. If false: hard disabled. If true: then depends on carrier provisioning,
      * availability, etc.
@@ -407,6 +420,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
