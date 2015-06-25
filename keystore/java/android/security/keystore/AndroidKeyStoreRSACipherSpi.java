@@ -60,9 +60,10 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         }
 
         @Override
-        protected boolean isEncryptingUsingPrivateKeyPermitted() {
-            // RSA encryption with no padding using private key is is a way to implement raw RSA
-            // signatures. We have to support this.
+        protected boolean adjustConfigForEncryptingWithPrivateKey() {
+            // RSA encryption with no padding using private key is a way to implement raw RSA
+            // signatures which JCA does not expose via Signature. We thus have to support this.
+            setKeymasterPurposeOverride(KeymasterDefs.KM_PURPOSE_SIGN);
             return true;
         }
 
@@ -195,6 +196,15 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
     public static final class PKCS1Padding extends AndroidKeyStoreRSACipherSpi {
         public PKCS1Padding() {
             super(KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT);
+        }
+
+        @Override
+        protected boolean adjustConfigForEncryptingWithPrivateKey() {
+            // RSA encryption with PCKS#1 padding using private key is a way to implement RSA
+            // signatures with PKCS#1 padding. We have to support this for legacy reasons.
+            setKeymasterPurposeOverride(KeymasterDefs.KM_PURPOSE_SIGN);
+            setKeymasterPaddingOverride(KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN);
+            return true;
         }
 
         @Override
@@ -425,6 +435,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
     }
 
     private final int mKeymasterPadding;
+    private int mKeymasterPaddingOverride;
 
     private int mModulusSizeBytes = -1;
 
@@ -458,20 +469,15 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                     // Permitted
                     break;
                 case Cipher.ENCRYPT_MODE:
-                    if (!isEncryptingUsingPrivateKeyPermitted()) {
+                case Cipher.WRAP_MODE:
+                    if (!adjustConfigForEncryptingWithPrivateKey()) {
                         throw new InvalidKeyException(
-                                "RSA private keys cannot be used with Cipher.ENCRYPT_MODE"
+                                "RSA private keys cannot be used with " + opmodeToString(opmode)
+                                + " and padding "
+                                + KeyProperties.EncryptionPadding.fromKeymaster(mKeymasterPadding)
                                 + ". Only RSA public keys supported for this mode");
                     }
-                    // JCA doesn't provide a way to generate raw RSA signatures (with arbitrary
-                    // padding). Thus, encrypting with private key is used instead.
-                    setKeymasterPurposeOverride(KeymasterDefs.KM_PURPOSE_SIGN);
                     break;
-                case Cipher.WRAP_MODE:
-                    throw new InvalidKeyException(
-                            "RSA private keys cannot be used with Cipher.WRAP_MODE"
-                            + ". Only RSA public keys supported for this mode");
-                    // break;
                 default:
                     throw new InvalidKeyException(
                             "RSA private keys cannot be used with opmode: " + opmode);
@@ -485,12 +491,15 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                     break;
                 case Cipher.DECRYPT_MODE:
                 case Cipher.UNWRAP_MODE:
-                    throw new InvalidKeyException("RSA public keys cannot be used with opmode: "
-                            + opmode + ". Only RSA private keys supported for this opmode.");
+                    throw new InvalidKeyException(
+                            "RSA public keys cannot be used with " + opmodeToString(opmode)
+                            + " and padding "
+                            + KeyProperties.EncryptionPadding.fromKeymaster(mKeymasterPadding)
+                            + ". Only RSA private keys supported for this opmode.");
                     // break;
                 default:
                     throw new InvalidKeyException(
-                            "RSA public keys cannot be used with opmode: " + opmode);
+                            "RSA public keys cannot be used with " + opmodeToString(opmode));
             }
         }
 
@@ -511,13 +520,22 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         setKey(keystoreKey);
     }
 
-    protected boolean isEncryptingUsingPrivateKeyPermitted() {
+    /**
+     * Adjusts the configuration of this cipher for encrypting using the private key.
+     *
+     * <p>The default implementation does nothing and refuses to adjust the configuration.
+     *
+     * @return {@code true} if the configuration has been adjusted, {@code false} if encrypting
+     *         using private key is not permitted for this cipher.
+     */
+    protected boolean adjustConfigForEncryptingWithPrivateKey() {
         return false;
     }
 
     @Override
     protected final void resetAll() {
         mModulusSizeBytes = -1;
+        mKeymasterPaddingOverride = -1;
         super.resetAll();
     }
 
@@ -530,7 +548,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
     protected void addAlgorithmSpecificParametersToBegin(
             @NonNull KeymasterArguments keymasterArgs) {
         keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
+        int keymasterPadding = getKeymasterPaddingOverride();
+        if (keymasterPadding == -1) {
+            keymasterPadding = mKeymasterPadding;
+        }
+        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, keymasterPadding);
         int purposeOverride = getKeymasterPurposeOverride();
         if ((purposeOverride != -1)
                 && ((purposeOverride == KeymasterDefs.KM_PURPOSE_SIGN)
@@ -567,5 +589,16 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             throw new IllegalStateException("Not initialized");
         }
         return mModulusSizeBytes;
+    }
+
+    /**
+     * Overrides the default padding of the crypto operation.
+     */
+    protected final void setKeymasterPaddingOverride(int keymasterPadding) {
+        mKeymasterPaddingOverride = keymasterPadding;
+    }
+
+    protected final int getKeymasterPaddingOverride() {
+        return mKeymasterPaddingOverride;
     }
 }

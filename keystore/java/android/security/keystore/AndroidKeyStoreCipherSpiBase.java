@@ -731,6 +731,21 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         return mMainDataStreamer.getProducedOutputSizeBytes();
     }
 
+    static String opmodeToString(int opmode) {
+        switch (opmode) {
+            case Cipher.ENCRYPT_MODE:
+                return "ENCRYPT_MODE";
+            case Cipher.DECRYPT_MODE:
+                return "DECRYPT_MODE";
+            case Cipher.WRAP_MODE:
+                return "WRAP_MODE";
+            case Cipher.UNWRAP_MODE:
+                return "UNWRAP_MODE";
+            default:
+                return String.valueOf(opmode);
+        }
+    }
+
     // The methods below need to be implemented by subclasses.
 
     /**
