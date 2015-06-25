@@ -305,6 +305,8 @@
                 />
         </LinearLayout>
 
+        <!-- On tablets in landscape the navbar is on the bottom, so use a
+             horizontal dead zone. -->
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"
             android:layout_height="match_parent"
@@ -313,7 +315,7 @@
             systemui:maxSize="@dimen/navigation_bar_deadzone_size_max"
             systemui:holdTime="@integer/navigation_bar_deadzone_hold"
             systemui:decayTime="@integer/navigation_bar_deadzone_decay"
-            systemui:orientation="vertical"
+            systemui:orientation="horizontal"
             android:layout_gravity="top"
             />
     </FrameLayout>
