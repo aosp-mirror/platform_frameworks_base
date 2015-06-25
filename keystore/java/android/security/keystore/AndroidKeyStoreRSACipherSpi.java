@@ -150,8 +150,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
             @Override
             public byte[] doFinal(byte[] input, int inputOffset, int inputLength,
-                    byte[] additionalEntropy)
-                    throws KeyStoreException {
+                    byte[] signature, byte[] additionalEntropy) throws KeyStoreException {
                 if (inputLength > 0) {
                     mConsumedInputSizeBytes += inputLength;
                     mInputBuffer.write(input, inputOffset, inputLength);
@@ -174,7 +173,8 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                             "Message size (" + bufferedInput.length + " bytes) must be smaller than"
                             + " modulus (" + mModulusSizeBytes + " bytes)");
                 }
-                return mDelegate.doFinal(paddedInput, 0, paddedInput.length, additionalEntropy);
+                return mDelegate.doFinal(paddedInput, 0, paddedInput.length, signature,
+                        additionalEntropy);
             }
 
             @Override
