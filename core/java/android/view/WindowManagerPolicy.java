@@ -877,13 +877,15 @@ public interface WindowManagerPolicy {
      * be correct.
      *
      * @param attrs The LayoutParams of the window.
+     * @param rotation Rotation of the display.
      * @param outContentInsets The areas covered by system windows, expressed as positive insets.
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
+     * @param outOutsets The areas that are not real display, but we would like to treat as such.
      *
      */
-    public void getInsetHintLw(WindowManager.LayoutParams attrs, Rect outContentInsets,
-            Rect outStableInsets);
+    public void getInsetHintLw(WindowManager.LayoutParams attrs, int rotation,
+            Rect outContentInsets, Rect outStableInsets, Rect outOutsets);
 
     /**
      * Called when layout of the windows is finished.  After this function has

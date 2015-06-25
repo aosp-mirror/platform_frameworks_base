@@ -519,6 +519,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     Display mDisplay;
 
+    private int mDisplayRotation;
+
     int mLandscapeRotation = 0;  // default landscape rotation
     int mSeascapeRotation = 0;   // "other" landscape rotation, 180 degrees from mLandscapeRotation
     int mPortraitRotation = 0;   // default portrait rotation
@@ -3219,11 +3221,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void getInsetHintLw(WindowManager.LayoutParams attrs, Rect outContentInsets,
-            Rect outStableInsets) {
+    public void getInsetHintLw(WindowManager.LayoutParams attrs, int displayRotation,
+            Rect outContentInsets, Rect outStableInsets, Rect outOutsets) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int sysuiVis = PolicyControl.getSystemUiVisibility(null, attrs);
         final int systemUiVisibility = (sysuiVis | attrs.subtreeSystemUiVisibility);
+
+        final boolean useOutsets = outOutsets != null && shouldUseOutsets(attrs, fl);
+        if (useOutsets) {
+            int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+            if (outset > 0) {
+                if (displayRotation == Surface.ROTATION_0) {
+                    outOutsets.bottom += outset;
+                } else if (displayRotation == Surface.ROTATION_90) {
+                    outOutsets.right += outset;
+                } else if (displayRotation == Surface.ROTATION_180) {
+                    outOutsets.top += outset;
+                } else if (displayRotation == Surface.ROTATION_270) {
+                    outOutsets.left += outset;
+                }
+            }
+        }
 
         if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
@@ -3264,10 +3282,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         outStableInsets.setEmpty();
     }
 
+    private boolean shouldUseOutsets(WindowManager.LayoutParams attrs, int fl) {
+        return attrs.type == TYPE_WALLPAPER || (fl & (WindowManager.LayoutParams.FLAG_FULLSCREEN
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)) != 0;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
                               int displayRotation) {
+        mDisplayRotation = displayRotation;
         final int overscanLeft, overscanTop, overscanRight, overscanBottom;
         if (isDefaultDisplay) {
             switch (displayRotation) {
@@ -4035,19 +4059,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // need to provide information to the clients that want to pretend that you can draw there.
         // We only want to apply outsets to certain types of windows. For example, we never want to
         // apply the outsets to floating dialogs, because they wouldn't make sense there.
-        final boolean useOutsets = attrs.type == TYPE_WALLPAPER
-                || (fl & (WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)) != 0;
+        final boolean useOutsets = shouldUseOutsets(attrs, fl);
         if (isDefaultDisplay && useOutsets) {
             osf = mTmpOutsetFrame;
             osf.set(cf.left, cf.top, cf.right, cf.bottom);
             int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
             if (outset > 0) {
-                int rotation = Surface.ROTATION_0;
-                try {
-                    rotation = mWindowManager.getRotation();
-                } catch (RemoteException e) {
-                }
+                int rotation = mDisplayRotation;
                 if (rotation == Surface.ROTATION_0) {
                     osf.bottom += outset;
                 } else if (rotation == Surface.ROTATION_90) {
