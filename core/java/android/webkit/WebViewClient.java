@@ -415,7 +415,7 @@ public class WebViewClient {
      * Notify the host application that the scale applied to the WebView has
      * changed.
      *
-     * @param view he WebView that is initiating the callback.
+     * @param view The WebView that is initiating the callback.
      * @param oldScale The old scale factor
      * @param newScale The new scale factor
      */

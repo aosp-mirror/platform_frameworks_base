@@ -793,7 +793,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * <li> {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING}
      * </ul>
      *
-     * @param mode target video scaling mode. Most be one of the supported
+     * @param mode target video scaling mode. Must be one of the supported
      * video scaling modes; otherwise, IllegalArgumentException will be thrown.
      *
      * @see MediaPlayer#VIDEO_SCALING_MODE_SCALE_TO_FIT
