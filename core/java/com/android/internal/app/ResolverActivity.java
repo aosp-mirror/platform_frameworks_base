@@ -74,6 +74,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -867,6 +868,16 @@ public class ResolverActivity extends Activity {
         }
     }
 
+    /**
+     * Check a simple match for the component of two ResolveInfos.
+     */
+    static boolean resolveInfoMatch(ResolveInfo lhs, ResolveInfo rhs) {
+        return lhs == null ? rhs == null
+                : lhs.activityInfo == null ? rhs.activityInfo == null
+                : Objects.equals(lhs.activityInfo.name, rhs.activityInfo.name)
+                && Objects.equals(lhs.activityInfo.packageName, rhs.activityInfo.packageName);
+    }
+
     final class DisplayResolveInfo implements TargetInfo {
         private final ResolveInfo mResolveInfo;
         private final CharSequence mDisplayLabel;
@@ -1462,7 +1473,7 @@ public class ResolverActivity extends Activity {
 
         public boolean hasResolvedTarget(ResolveInfo info) {
             for (int i = 0, N = mDisplayList.size(); i < N; i++) {
-                if (info.equals(mDisplayList.get(i).getResolveInfo())) {
+                if (resolveInfoMatch(info, mDisplayList.get(i).getResolveInfo())) {
                     return true;
                 }
             }
