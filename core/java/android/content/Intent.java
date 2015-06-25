@@ -1020,6 +1020,11 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Note: this Intent <strong>cannot</strong> be used to call emergency
      * numbers.  Applications can <strong>dial</strong> emergency numbers using
      * {@link #ACTION_DIAL}, however.
+     *
+     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC}
+     * and above and declares as using the {@link android.Manifest.permission#CALL_PHONE}
+     * permission which is not granted, then atempting to use this action will
+     * result in a {@link java.lang.SecurityException}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CALL = "android.intent.action.CALL";
