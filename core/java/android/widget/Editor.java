@@ -393,7 +393,7 @@ public class Editor {
         }
 
         mPreserveDetachedSelection = true;
-        hideControllers();
+        hideCursorAndSpanControllers();
         stopTextActionMode();
         mPreserveDetachedSelection = false;
         mTemporaryDetach = false;
@@ -605,9 +605,9 @@ public class Editor {
     }
 
     /**
-     * Hides the insertion controller and stops text selection mode, hiding the selection controller
+     * Hides the insertion and span controllers.
      */
-    void hideControllers() {
+    void hideCursorAndSpanControllers() {
         hideCursorControllers();
         hideSpanControllers();
     }
@@ -1104,12 +1104,12 @@ public class Editor {
                 // ExtractEditText goes out of focus.
                 final int selStart = mTextView.getSelectionStart();
                 final int selEnd = mTextView.getSelectionEnd();
-                hideControllers();
+                hideCursorAndSpanControllers();
                 stopTextActionMode();
                 Selection.setSelection((Spannable) mTextView.getText(), selStart, selEnd);
             } else {
                 if (mTemporaryDetach) mPreserveDetachedSelection = true;
-                hideControllers();
+                hideCursorAndSpanControllers();
                 stopTextActionMode();
                 if (mTemporaryDetach) mPreserveDetachedSelection = false;
                 downgradeEasyCorrectionSpans();
@@ -1182,6 +1182,12 @@ public class Editor {
                 mBlink.uncancel();
                 makeBlink();
             }
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            final boolean immFullScreen = (imm != null && imm.isFullscreenMode());
+            if (mSelectionModifierCursorController != null && mTextView.hasSelection()
+                    && !immFullScreen) {
+                mSelectionModifierCursorController.show();
+            }
         } else {
             if (mBlink != null) {
                 mBlink.cancel();
@@ -1190,7 +1196,10 @@ public class Editor {
                 mInputContentType.enterDown = false;
             }
             // Order matters! Must be done before onParentLostFocus to rely on isShowingUp
-            hideControllers();
+            hideCursorAndSpanControllers();
+            if (mSelectionModifierCursorController != null) {
+                mSelectionModifierCursorController.hide();
+            }
             if (mSuggestionsPopupWindow != null) {
                 mSuggestionsPopupWindow.onParentLostFocus();
             }
@@ -1913,7 +1922,7 @@ public class Editor {
 
     void onTouchUpEvent(MotionEvent event) {
         boolean selectAllGotFocus = mSelectAllOnFocus && mTextView.didTouchFocusSelect();
-        hideControllers();
+        hideCursorAndSpanControllers();
         stopTextActionMode();
         CharSequence text = mTextView.getText();
         if (!selectAllGotFocus && text.length() > 0) {
@@ -2034,7 +2043,7 @@ public class Editor {
         if (mSuggestionsPopupWindow == null) {
             mSuggestionsPopupWindow = new SuggestionsPopupWindow();
         }
-        hideControllers();
+        hideCursorAndSpanControllers();
         stopTextActionMode();
         mSuggestionsPopupWindow.show();
     }
