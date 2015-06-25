@@ -40,7 +40,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents a connection to a remote endpoint that carries voice traffic.
+ * Represents a phone call or connection to a remote endpoint that carries voice and/or video
+ * traffic.
  * <p>
  * Implementations create a custom subclass of {@code Connection} and return it to the framework
  * as the return value of
@@ -53,21 +54,52 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class Connection extends Conferenceable {
 
+    /**
+     * The connection is initializing. This is generally the first state for a {@code Connection}
+     * returned by a {@link ConnectionService}.
+     */
     public static final int STATE_INITIALIZING = 0;
 
+    /**
+     * The connection is new and not connected.
+     */
     public static final int STATE_NEW = 1;
 
+    /**
+     * An incoming connection is in the ringing state. During this state, the user's ringer or
+     * vibration feature will be activated.
+     */
     public static final int STATE_RINGING = 2;
 
+    /**
+     * An outgoing connection is in the dialing state. In this state the other party has not yet
+     * answered the call and the user traditionally hears a ringback tone.
+     */
     public static final int STATE_DIALING = 3;
 
+    /**
+     * A connection is active. Both parties are connected to the call and can actively communicate.
+     */
     public static final int STATE_ACTIVE = 4;
 
+    /**
+     * A connection is on hold.
+     */
     public static final int STATE_HOLDING = 5;
 
+    /**
+     * A connection has been disconnected. This is the final state once the user has been
+     * disconnected from a call either locally, remotely or by an error in the service.
+     */
     public static final int STATE_DISCONNECTED = 6;
 
-    /** Connection can currently be put on hold or unheld. */
+    /**
+     * Connection can currently be put on hold or unheld. This is distinct from
+     * {@link #CAPABILITY_SUPPORT_HOLD} in that although a connection may support 'hold' most times,
+     * it does not at the moment support the function. This can be true while the call is in the
+     * state {@link #STATE_DIALING}, for example. During this condition, an in-call UI may
+     * display a disabled 'hold' button.
+     */
     public static final int CAPABILITY_HOLD = 0x00000001;
 
     /** Connection supports the hold feature. */
