@@ -106,6 +106,7 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -676,8 +677,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanelDebugText.setVisibility(View.VISIBLE);
         }
 
-        updateShowSearchHoldoff();
-
         try {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
@@ -1013,11 +1012,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mStatusBarWindow;
     }
 
-    public void invokeAssistGesture(boolean vibrate) {
-        mHandler.removeCallbacks(mInvokeAssist);
-        mAssistManager.onGestureInvoked(vibrate);
-    }
-
     public int getStatusBarHeight() {
         if (mNaturalBarHeight < 0) {
             final Resources res = mContext.getResources();
@@ -1044,31 +1038,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private int mShowSearchHoldoff = 0;
-    private Runnable mInvokeAssist = new Runnable() {
-        public void run() {
+    private final View.OnLongClickListener mLongPressHomeListener
+            = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            if (shouldDisableNavbarGestures()) {
+                return false;
+            }
             mAssistManager.prepareBeforeInvocation();
-            invokeAssistGesture(true /* vibrate */);
+            mAssistManager.onGestureInvoked();
             awakenDreams();
             if (mNavigationBarView != null) {
                 mNavigationBarView.abortCurrentGesture();
             }
+            return true;
         }
     };
 
-    View.OnTouchListener mHomeActionListener = new View.OnTouchListener() {
+    private final View.OnTouchListener mHomeActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    if (!shouldDisableNavbarGestures()) {
-                        mHandler.removeCallbacks(mInvokeAssist);
-                        mHandler.postDelayed(mInvokeAssist, mShowSearchHoldoff);
-                    }
-                    break;
-
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    mHandler.removeCallbacks(mInvokeAssist);
                     awakenDreams();
                     break;
             }
@@ -1096,6 +1087,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNavigationBarView.getBackButton().setLongClickable(true);
         mNavigationBarView.getBackButton().setOnLongClickListener(mLongPressBackRecentsListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
+        mNavigationBarView.getHomeButton().setOnLongClickListener(mLongPressHomeListener);
         mAssistManager.onConfigurationChanged();
     }
 
@@ -1234,10 +1226,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mNavigationBarView != null) {
             mNavigationBarView.setLayoutDirection(layoutDirection);
         }
-    }
-
-    private void updateShowSearchHoldoff() {
-        mShowSearchHoldoff = ViewConfiguration.getLongPressTimeout();
     }
 
     private void updateNotificationShade() {
@@ -2922,7 +2910,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         updateResources();
         repositionNavigationBar();
-        updateShowSearchHoldoff();
         updateRowStates();
         mIconController.updateResources();
         mScreenPinningRequest.onConfigurationChanged();
