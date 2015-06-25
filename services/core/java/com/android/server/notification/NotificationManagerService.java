@@ -50,6 +50,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
@@ -72,6 +73,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
@@ -439,6 +441,12 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         return true;
+    }
+
+    /** Use this to check if a package can post a notification or toast. */
+    private boolean checkNotificationOp(String pkg, int uid) {
+        return mAppOps.checkOp(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
+                == AppOpsManager.MODE_ALLOWED;
     }
 
     private static final class ToastRecord
@@ -1908,6 +1916,26 @@ public class NotificationManagerService extends SystemService {
                     pw.println("!!!!!!LEAK: Record not found in mNotificationsByKey.");
                     r.dump(pw, "      ", getContext());
                 }
+            }
+
+            try {
+                pw.println("\n  Banned Packages:");
+                for(UserInfo user : UserManager.get(getContext()).getUsers()) {
+                    final int userId = user.getUserHandle().getIdentifier();
+                    pw.println("    UserId " + userId);
+                    final PackageManager packageManager = getContext().getPackageManager();
+                    List<PackageInfo> packages = packageManager.getInstalledPackages(0, userId);
+                    final int packageCount = packages.size();
+                    for (int p = 0; p < packageCount; p++) {
+                        final String packageName = packages.get(p).packageName;
+                        final int uid = packageManager.getPackageUid(packageName, userId);
+                        if (!checkNotificationOp(packageName, uid)) {
+                            pw.println("       " + packageName);
+                        }
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                // pass
             }
         }
     }
