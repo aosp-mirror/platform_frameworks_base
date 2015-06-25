@@ -33,20 +33,20 @@ public final class KeymasterDefs {
     public static final int KM_INVALID = 0 << 28;
     public static final int KM_ENUM = 1 << 28;
     public static final int KM_ENUM_REP = 2 << 28;
-    public static final int KM_INT = 3 << 28;
-    public static final int KM_INT_REP = 4 << 28;
-    public static final int KM_LONG = 5 << 28;
+    public static final int KM_UINT = 3 << 28;
+    public static final int KM_UINT_REP = 4 << 28;
+    public static final int KM_ULONG = 5 << 28;
     public static final int KM_DATE = 6 << 28;
     public static final int KM_BOOL = 7 << 28;
     public static final int KM_BIGNUM = 8 << 28;
     public static final int KM_BYTES = 9 << 28;
-    public static final int KM_LONG_REP = 10 << 28;
+    public static final int KM_ULONG_REP = 10 << 28;
 
     // Tag values.
     public static final int KM_TAG_INVALID = KM_INVALID | 0;
     public static final int KM_TAG_PURPOSE = KM_ENUM_REP | 1;
     public static final int KM_TAG_ALGORITHM = KM_ENUM | 2;
-    public static final int KM_TAG_KEY_SIZE = KM_INT | 3;
+    public static final int KM_TAG_KEY_SIZE = KM_UINT | 3;
     public static final int KM_TAG_BLOCK_MODE = KM_ENUM_REP | 4;
     public static final int KM_TAG_DIGEST = KM_ENUM_REP | 5;
     public static final int KM_TAG_PADDING = KM_ENUM_REP | 6;
@@ -56,19 +56,19 @@ public final class KeymasterDefs {
     public static final int KM_TAG_RESCOPING_DEL = KM_ENUM_REP | 102;
     public static final int KM_TAG_BLOB_USAGE_REQUIREMENTS = KM_ENUM | 705;
 
-    public static final int KM_TAG_RSA_PUBLIC_EXPONENT = KM_LONG | 200;
+    public static final int KM_TAG_RSA_PUBLIC_EXPONENT = KM_ULONG | 200;
     public static final int KM_TAG_ACTIVE_DATETIME = KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME = KM_DATE | 401;
     public static final int KM_TAG_USAGE_EXPIRE_DATETIME = KM_DATE | 402;
-    public static final int KM_TAG_MIN_SECONDS_BETWEEN_OPS = KM_INT | 403;
-    public static final int KM_TAG_MAX_USES_PER_BOOT = KM_INT | 404;
+    public static final int KM_TAG_MIN_SECONDS_BETWEEN_OPS = KM_UINT | 403;
+    public static final int KM_TAG_MAX_USES_PER_BOOT = KM_UINT | 404;
 
     public static final int KM_TAG_ALL_USERS = KM_BOOL | 500;
-    public static final int KM_TAG_USER_ID = KM_INT | 501;
-    public static final int KM_TAG_USER_SECURE_ID = KM_LONG_REP | 502;
+    public static final int KM_TAG_USER_ID = KM_UINT | 501;
+    public static final int KM_TAG_USER_SECURE_ID = KM_ULONG_REP | 502;
     public static final int KM_TAG_NO_AUTH_REQUIRED = KM_BOOL | 503;
     public static final int KM_TAG_USER_AUTH_TYPE = KM_ENUM | 504;
-    public static final int KM_TAG_AUTH_TIMEOUT = KM_INT | 505;
+    public static final int KM_TAG_AUTH_TIMEOUT = KM_UINT | 505;
 
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
     public static final int KM_TAG_APPLICATION_ID = KM_BYTES | 601;
@@ -82,7 +82,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
     public static final int KM_TAG_AUTH_TOKEN = KM_BYTES | 1002;
-    public static final int KM_TAG_MAC_LENGTH = KM_INT | 1003;
+    public static final int KM_TAG_MAC_LENGTH = KM_UINT | 1003;
 
     // Algorithm values.
     public static final int KM_ALGORITHM_RSA = 1;
