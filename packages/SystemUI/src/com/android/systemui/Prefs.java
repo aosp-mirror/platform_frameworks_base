@@ -44,6 +44,7 @@ public final class Prefs {
     })
     public @interface Key {
         String SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
+        String SEARCH_APP_WIDGET_PACKAGE = "searchAppWidgetPackage";
         String DEBUG_MODE_ENABLED = "debugModeEnabled";
         String HOTSPOT_TILE_LAST_USED = "HotspotTileLastUsed";
         String COLOR_INVERSION_TILE_LAST_USED = "ColorInversionTileLastUsed";
@@ -78,6 +79,14 @@ public final class Prefs {
 
     public static void putLong(Context context, @Key String key, long value) {
         get(context).edit().putLong(key, value).apply();
+    }
+
+    public static String getString(Context context, @Key String key, String defaultValue) {
+        return get(context).getString(key, defaultValue);
+    }
+
+    public static void putString(Context context, @Key String key, String value) {
+        get(context).edit().putString(key, value).apply();
     }
 
     public static Map<String, ?> getAll(Context context) {
