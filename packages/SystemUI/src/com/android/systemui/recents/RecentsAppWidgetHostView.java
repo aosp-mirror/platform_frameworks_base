@@ -18,6 +18,7 @@ package com.android.systemui.recents;
 
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
+import android.view.View;
 import android.widget.RemoteViews;
 
 public class RecentsAppWidgetHostView extends AppWidgetHostView {
@@ -35,6 +36,14 @@ public class RecentsAppWidgetHostView extends AppWidgetHostView {
         // Store the orientation in which the widget was inflated
         updateLastInflationOrientation();
         super.updateAppWidget(remoteViews);
+    }
+
+    @Override
+    protected View getErrorView() {
+        // Just return an empty view as the error view when failing to inflate the Recents search
+        // bar widget (this is mainly to catch the case where we try and inflate the widget view
+        // while the search provider is updating)
+        return new View(mContext);
     }
 
     /**

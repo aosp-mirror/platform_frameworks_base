@@ -287,17 +287,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Adds the search bar */
     public void setSearchBar(RecentsAppWidgetHostView searchBar) {
-        // Create the search bar (and hide it if we have no recent tasks)
-        if (Constants.DebugFlags.App.EnableSearchLayout) {
-            // Remove the previous search bar if one exists
-            if (mSearchBar != null && indexOfChild(mSearchBar) > -1) {
-                removeView(mSearchBar);
-            }
-            // Add the new search bar
-            if (searchBar != null) {
-                mSearchBar = searchBar;
-                addView(mSearchBar);
-            }
+        // Remove the previous search bar if one exists
+        if (mSearchBar != null && indexOfChild(mSearchBar) > -1) {
+            removeView(mSearchBar);
+        }
+        // Add the new search bar
+        if (searchBar != null) {
+            mSearchBar = searchBar;
+            addView(mSearchBar);
         }
     }
 
@@ -324,8 +321,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Get the search bar bounds and measure the search bar layout
+        Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
-            Rect searchBarSpaceBounds = new Rect();
             mConfig.getSearchBarBounds(width, height, mConfig.systemInsets.top, searchBarSpaceBounds);
             mSearchBar.measure(
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
@@ -334,7 +331,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         Rect taskStackBounds = new Rect();
         mConfig.getAvailableTaskStackBounds(width, height, mConfig.systemInsets.top,
-                mConfig.systemInsets.right, taskStackBounds);
+                mConfig.systemInsets.right, searchBarSpaceBounds, taskStackBounds);
 
         // Measure each TaskStackView with the full width and height of the window since the
         // transition view is a child of that stack view
