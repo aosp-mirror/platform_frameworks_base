@@ -353,6 +353,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             try {
                 output = mAdditionalAuthenticationDataStreamer.doFinal(
                         EmptyArray.BYTE, 0, 0,
+                        null, // no signature
                         null // no additional entropy needed flushing AAD
                         );
             } finally {
@@ -469,7 +470,10 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             byte[] additionalEntropy =
                     KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                             mRng, getAdditionalEntropyAmountForFinish());
-            output = mMainDataStreamer.doFinal(input, inputOffset, inputLen, additionalEntropy);
+            output = mMainDataStreamer.doFinal(
+                    input, inputOffset, inputLen,
+                    null, // no signature involved
+                    additionalEntropy);
         } catch (KeyStoreException e) {
             switch (e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH:

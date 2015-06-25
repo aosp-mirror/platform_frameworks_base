@@ -35,8 +35,8 @@ import java.io.IOException;
  * amount of data in one go because the operations are marshalled via Binder. Secondly, the update
  * operation may consume less data than provided, in which case the caller has to buffer the
  * remainder for next time. The helper exposes {@link #update(byte[], int, int) update} and
- * {@link #doFinal(byte[], int, int, byte[]) doFinal} operations which can be used to conveniently
- * implement various JCA crypto primitives.
+ * {@link #doFinal(byte[], int, int, byte[], byte[]) doFinal} operations which can be used to
+ * conveniently implement various JCA crypto primitives.
  *
  * <p>Bidirectional chunked streaming of data via a KeyStore crypto operation is abstracted away as
  * a {@link Stream} to avoid having this class deal with operation tokens and occasional additional
@@ -60,7 +60,7 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
          * Returns the result of the KeyStore {@code finish} operation or null if keystore couldn't
          * be reached.
          */
-        OperationResult finish(byte[] additionalEntropy);
+        OperationResult finish(byte[] siganture, byte[] additionalEntropy);
     }
 
     // Binder buffer is about 1MB, but it's shared between all active transactions of the process.
@@ -201,8 +201,8 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
     }
 
     @Override
-    public byte[] doFinal(byte[] input, int inputOffset, int inputLength, byte[] additionalEntropy)
-            throws KeyStoreException {
+    public byte[] doFinal(byte[] input, int inputOffset, int inputLength,
+            byte[] signature, byte[] additionalEntropy) throws KeyStoreException {
         if (inputLength == 0) {
             // No input provided -- simplify the rest of the code
             input = EmptyArray.BYTE;
@@ -213,7 +213,7 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
         byte[] output = update(input, inputOffset, inputLength);
         output = ArrayUtils.concat(output, flush());
 
-        OperationResult opResult = mKeyStoreStream.finish(additionalEntropy);
+        OperationResult opResult = mKeyStoreStream.finish(signature, additionalEntropy);
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
@@ -286,8 +286,8 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
         }
 
         @Override
-        public OperationResult finish(byte[] additionalEntropy) {
-            return mKeyStore.finish(mOperationToken, null, null, additionalEntropy);
+        public OperationResult finish(byte[] signature, byte[] additionalEntropy) {
+            return mKeyStore.finish(mOperationToken, null, signature, additionalEntropy);
         }
     }
 }

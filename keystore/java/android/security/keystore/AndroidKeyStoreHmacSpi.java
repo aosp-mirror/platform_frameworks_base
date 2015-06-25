@@ -234,6 +234,7 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
         try {
             result = mChunkedStreamer.doFinal(
                     null, 0, 0,
+                    null, // no signature provided -- this invocation will generate one
                     null // no additional entropy needed -- HMAC is deterministic
                     );
         } catch (KeyStoreException e) {
