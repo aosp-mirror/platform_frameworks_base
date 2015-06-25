@@ -588,6 +588,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
+    char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
+    char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -847,6 +849,24 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.profile.stack-depth",
                        profileMaxStackDepth,
                        "-Xprofile-max-stack-depth:");
+
+    /*
+     * Tracing options.
+     */
+    property_get("dalvik.vm.method-trace", propBuf, "false");
+    if (strcmp(propBuf, "true") == 0) {
+        addOption("-Xmethod-trace");
+        parseRuntimeOption("dalvik.vm.method-trace-file",
+                           methodTraceFileBuf,
+                           "-Xmethod-trace-file:");
+        parseRuntimeOption("dalvik.vm.method-trace-file-siz",
+                           methodTraceFileSizeBuf,
+                           "-Xmethod-trace-file-size:");
+        property_get("dalvik.vm.method-trace-stream", propBuf, "false");
+        if (strcmp(propBuf, "true") == 0) {
+            addOption("-Xmethod-trace-stream");
+        }
+    }
 
     // Native bridge library. "0" means that native bridge is disabled.
     property_get("ro.dalvik.vm.native.bridge", propBuf, "");
