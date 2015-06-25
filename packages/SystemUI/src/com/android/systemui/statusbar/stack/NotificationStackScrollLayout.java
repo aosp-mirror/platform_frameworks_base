@@ -1898,15 +1898,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean pinnedAndClosed = row.isPinned() && !mIsExpanded;
             if (!mIsExpanded && !isHeadsUp) {
                 type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
-            } else if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
-                if (pinnedAndClosed || shouldHunAppearFromBottom(row)) {
-                    // Our custom add animation
-                    type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
-                } else {
-                    // Normal add animation
-                    type = AnimationEvent.ANIMATION_TYPE_ADD;
+            } else {
+                StackViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
+                if (viewState == null) {
+                    // A view state was never generated for this view, so we don't need to animate
+                    // this. This may happen with notification children.
+                    continue;
                 }
-                onBottom = !pinnedAndClosed;
+                if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
+                    if (pinnedAndClosed || shouldHunAppearFromBottom(viewState)) {
+                        // Our custom add animation
+                        type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
+                    } else {
+                        // Normal add animation
+                        type = AnimationEvent.ANIMATION_TYPE_ADD;
+                    }
+                    onBottom = !pinnedAndClosed;
+                }
             }
             AnimationEvent event = new AnimationEvent(row, type);
             event.headsUpFromBottom = onBottom;
@@ -1916,8 +1924,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAddedHeadsUpChildren.clear();
     }
 
-    private boolean shouldHunAppearFromBottom(ExpandableNotificationRow row) {
-        StackViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
+    private boolean shouldHunAppearFromBottom(StackViewState viewState) {
         if (viewState.yTranslation + viewState.height < mAmbientState.getMaxHeadsUpTranslation()) {
             return false;
         }
