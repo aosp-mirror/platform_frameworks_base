@@ -152,7 +152,6 @@ public final class BluetoothLeAdvertiser {
      */
     public void stopAdvertising(final AdvertiseCallback callback) {
         synchronized (mLeAdvertisers) {
-            BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
