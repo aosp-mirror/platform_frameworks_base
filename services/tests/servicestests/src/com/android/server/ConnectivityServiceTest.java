@@ -20,8 +20,24 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_FOTA;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IA;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_SUPL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_XCAP;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static org.mockito.Matchers.anyInt;
@@ -174,6 +190,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         public void adjustScore(int change) {
             mScore += change;
             mNetworkAgent.sendNetworkScore(mScore);
+        }
+
+        public void addCapability(int capability) {
+            mNetworkCapabilities.addCapability(capability);
+            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
         }
 
         /**
@@ -736,10 +757,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertEquals(CallbackState.NONE, wifiNetworkCallback.getLastCallback());
     }
 
-    @LargeTest
-    public void testNetworkFactoryRequests() throws Exception {
+    private void tryNetworkFactoryRequests(int capability) throws Exception {
         NetworkCapabilities filter = new NetworkCapabilities();
-        filter.addCapability(NET_CAPABILITY_INTERNET);
+        filter.addCapability(capability);
         final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
         handlerThread.start();
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
@@ -747,57 +767,91 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         testFactory.setScoreFilter(40);
         ConditionVariable cv = testFactory.getNetworkStartedCV();
         testFactory.register();
+        int expectedRequestCount = 1;
+        NetworkCallback networkCallback = null;
+        // For non-INTERNET capabilities we cannot rely on the default request being present, so
+        // add one.
+        if (capability != NET_CAPABILITY_INTERNET) {
+            testFactory.waitForNetworkRequests(1);
+            assertFalse(testFactory.getMyStartRequested());
+            NetworkRequest request = new NetworkRequest.Builder().addCapability(capability).build();
+            networkCallback = new NetworkCallback();
+            mCm.requestNetwork(request, networkCallback);
+            expectedRequestCount++;
+        }
         waitFor(cv);
-        assertEquals(1, testFactory.getMyRequestCount());
-        assertEquals(true, testFactory.getMyStartRequested());
+        assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
+        assertTrue(testFactory.getMyStartRequested());
 
-        // now bring in a higher scored network
+        // Now bring in a higher scored network.
         MockNetworkAgent testAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
-        cv = waitForConnectivityBroadcasts(1);
-        ConditionVariable cvRelease = testFactory.getNetworkStoppedCV();
-        testAgent.connect(true);
+        // Rather than create a validated network which complicates things by registering it's
+        // own NetworkRequest during startup, just bump up the score to cancel out the
+        // unvalidated penalty.
+        testAgent.adjustScore(40);
+        cv = testFactory.getNetworkStoppedCV();
+        testAgent.connect(false);
+        testAgent.addCapability(capability);
         waitFor(cv);
-        // part of the bringup makes another network request and then releases it
-        // wait for the release
-        waitFor(cvRelease);
-        assertEquals(false, testFactory.getMyStartRequested());
-        testFactory.waitForNetworkRequests(1);
+        assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
+        assertFalse(testFactory.getMyStartRequested());
 
-        // bring in a bunch of requests..
+        // Bring in a bunch of requests.
         ConnectivityManager.NetworkCallback[] networkCallbacks =
                 new ConnectivityManager.NetworkCallback[10];
         for (int i = 0; i< networkCallbacks.length; i++) {
             networkCallbacks[i] = new ConnectivityManager.NetworkCallback();
             NetworkRequest.Builder builder = new NetworkRequest.Builder();
-            builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            builder.addCapability(capability);
             mCm.requestNetwork(builder.build(), networkCallbacks[i]);
         }
-        testFactory.waitForNetworkRequests(11);
-        assertEquals(false, testFactory.getMyStartRequested());
+        testFactory.waitForNetworkRequests(10 + expectedRequestCount);
+        assertFalse(testFactory.getMyStartRequested());
 
-        // remove the requests
+        // Remove the requests.
         for (int i = 0; i < networkCallbacks.length; i++) {
             mCm.unregisterNetworkCallback(networkCallbacks[i]);
         }
-        testFactory.waitForNetworkRequests(1);
-        assertEquals(false, testFactory.getMyStartRequested());
+        testFactory.waitForNetworkRequests(expectedRequestCount);
+        assertFalse(testFactory.getMyStartRequested());
 
-        // drop the higher scored network
-        cv = waitForConnectivityBroadcasts(1);
+        // Drop the higher scored network.
+        cv = testFactory.getNetworkStartedCV();
         testAgent.disconnect();
         waitFor(cv);
-        assertEquals(1, testFactory.getMyRequestCount());
-        assertEquals(true, testFactory.getMyStartRequested());
+        assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
+        assertTrue(testFactory.getMyStartRequested());
 
         testFactory.unregister();
+        if (networkCallback != null) mCm.unregisterNetworkCallback(networkCallback);
         handlerThread.quit();
+    }
+
+    @LargeTest
+    public void testNetworkFactoryRequests() throws Exception {
+        tryNetworkFactoryRequests(NET_CAPABILITY_MMS);
+        tryNetworkFactoryRequests(NET_CAPABILITY_SUPL);
+        tryNetworkFactoryRequests(NET_CAPABILITY_DUN);
+        tryNetworkFactoryRequests(NET_CAPABILITY_FOTA);
+        tryNetworkFactoryRequests(NET_CAPABILITY_IMS);
+        tryNetworkFactoryRequests(NET_CAPABILITY_CBS);
+        tryNetworkFactoryRequests(NET_CAPABILITY_WIFI_P2P);
+        tryNetworkFactoryRequests(NET_CAPABILITY_IA);
+        tryNetworkFactoryRequests(NET_CAPABILITY_RCS);
+        tryNetworkFactoryRequests(NET_CAPABILITY_XCAP);
+        tryNetworkFactoryRequests(NET_CAPABILITY_EIMS);
+        tryNetworkFactoryRequests(NET_CAPABILITY_NOT_METERED);
+        tryNetworkFactoryRequests(NET_CAPABILITY_INTERNET);
+        tryNetworkFactoryRequests(NET_CAPABILITY_TRUSTED);
+        tryNetworkFactoryRequests(NET_CAPABILITY_NOT_VPN);
+        // Skipping VALIDATED and CAPTIVE_PORTAL as they're disallowed.
     }
 
     @LargeTest
     public void testNoMutableNetworkRequests() throws Exception {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"), 0);
         NetworkRequest.Builder builder = new NetworkRequest.Builder();
-        builder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        builder.addCapability(NET_CAPABILITY_VALIDATED);
         try {
             mCm.requestNetwork(builder.build(), new NetworkCallback());
             fail();
@@ -807,7 +861,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             fail();
         } catch (IllegalArgumentException expected) {}
         builder = new NetworkRequest.Builder();
-        builder.addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL);
+        builder.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
         try {
             mCm.requestNetwork(builder.build(), new NetworkCallback());
             fail();
