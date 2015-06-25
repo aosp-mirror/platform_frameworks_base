@@ -48,7 +48,6 @@
 #define LIB_SUFFIX_LEN (sizeof(LIB_SUFFIX) - 1)
 
 #define RS_BITCODE_SUFFIX ".bc"
-#define RS_BITCODE_SUFFIX_LEN (sizeof(RS_BITCODE_SUFFIX) -1)
 
 #define GDBSERVER "gdbserver"
 #define GDBSERVER_LEN (sizeof(GDBSERVER) - 1)
@@ -322,7 +321,8 @@ private:
 public:
     static NativeLibrariesIterator* create(ZipFileRO* zipFile) {
         void* cookie = NULL;
-        if (!zipFile->startIteration(&cookie)) {
+        // Do not specify a suffix to find both .so files and gdbserver.
+        if (!zipFile->startIteration(&cookie, APK_LIB, NULL /* suffix */)) {
             return NULL;
         }
 
@@ -334,11 +334,6 @@ public:
         while ((next = mZipFile->nextEntry(mCookie)) != NULL) {
             // Make sure this entry has a filename.
             if (mZipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
-                continue;
-            }
-
-            // Make sure we're in the lib directory of the ZIP.
-            if (strncmp(fileName, APK_LIB, APK_LIB_LEN)) {
                 continue;
             }
 
@@ -529,7 +524,7 @@ com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode(JNIEnv *
         jlong apkHandle) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
     void* cookie = NULL;
-    if (!zipFile->startIteration(&cookie)) {
+    if (!zipFile->startIteration(&cookie, NULL /* prefix */, RS_BITCODE_SUFFIX)) {
         return APK_SCAN_ERROR;
     }
 
@@ -539,12 +534,9 @@ com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode(JNIEnv *
         if (zipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
             continue;
         }
-
-        const size_t fileNameLen = strlen(fileName);
         const char* lastSlash = strrchr(fileName, '/');
         const char* baseName = (lastSlash == NULL) ? fileName : fileName + 1;
-        if (!strncmp(fileName + fileNameLen - RS_BITCODE_SUFFIX_LEN, RS_BITCODE_SUFFIX,
-                     RS_BITCODE_SUFFIX_LEN) && isFilenameSafe(baseName)) {
+        if (isFilenameSafe(baseName)) {
             zipFile->endIteration(cookie);
             return BITCODE_PRESENT;
         }
