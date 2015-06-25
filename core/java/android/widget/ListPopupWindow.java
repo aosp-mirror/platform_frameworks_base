@@ -1127,10 +1127,19 @@ public class ListPopupWindow {
                     break;
                 }
 
-                // measure the hint's height to find how much more vertical space
-                // we need to add to the drop down's height
-                int widthSpec = MeasureSpec.makeMeasureSpec(mDropDownWidth, MeasureSpec.AT_MOST);
-                int heightSpec = MeasureSpec.UNSPECIFIED;
+                // Measure the hint's height to find how much more vertical
+                // space we need to add to the drop down's height.
+                final int widthSize;
+                final int widthMode;
+                if (mDropDownWidth >= 0) {
+                    widthMode = MeasureSpec.AT_MOST;
+                    widthSize = mDropDownWidth;
+                } else {
+                    widthMode = MeasureSpec.UNSPECIFIED;
+                    widthSize = 0;
+                }
+                final int widthSpec = MeasureSpec.makeMeasureSpec(widthSize, widthMode);
+                final int heightSpec = MeasureSpec.UNSPECIFIED;
                 hintView.measure(widthSpec, heightSpec);
 
                 hintParams = (LinearLayout.LayoutParams) hintView.getLayoutParams();
