@@ -139,10 +139,10 @@ public class KeymasterArguments implements Parcelable {
      */
     public void addUnsignedInt(int tag, long value) {
         int tagType = KeymasterDefs.getTagType(tag);
-        if ((tagType != KeymasterDefs.KM_INT) && (tagType != KeymasterDefs.KM_INT_REP)) {
+        if ((tagType != KeymasterDefs.KM_UINT) && (tagType != KeymasterDefs.KM_UINT_REP)) {
             throw new IllegalArgumentException("Not an int or repeating int tag: " + tag);
         }
-        // Keymaster's KM_INT is unsigned 32 bit.
+        // Keymaster's KM_UINT is unsigned 32 bit.
         if ((value < 0) || (value > UINT32_MAX_VALUE)) {
             throw new IllegalArgumentException("Int tag value out of range: " + value);
         }
@@ -156,14 +156,14 @@ public class KeymasterArguments implements Parcelable {
      * @throws IllegalArgumentException if {@code tag} is not an unsigned 32-bit int tag.
      */
     public long getUnsignedInt(int tag, long defaultValue) {
-        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_INT) {
+        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_UINT) {
             throw new IllegalArgumentException("Not an int tag: " + tag);
         }
         KeymasterArgument arg = getArgumentByTag(tag);
         if (arg == null) {
             return defaultValue;
         }
-        // Keymaster's KM_INT is unsigned 32 bit.
+        // Keymaster's KM_UINT is unsigned 32 bit.
         return ((KeymasterIntArgument) arg).value & 0xffffffffL;
     }
 
@@ -175,7 +175,7 @@ public class KeymasterArguments implements Parcelable {
      */
     public void addUnsignedLong(int tag, BigInteger value) {
         int tagType = KeymasterDefs.getTagType(tag);
-        if ((tagType != KeymasterDefs.KM_LONG) && (tagType != KeymasterDefs.KM_LONG_REP)) {
+        if ((tagType != KeymasterDefs.KM_ULONG) && (tagType != KeymasterDefs.KM_ULONG_REP)) {
             throw new IllegalArgumentException("Not a long or repeating long tag: " + tag);
         }
         addLongTag(tag, value);
@@ -187,7 +187,7 @@ public class KeymasterArguments implements Parcelable {
      * @throws IllegalArgumentException if {@code tag} is not a repeating unsigned 64-bit long tag.
      */
     public List<BigInteger> getUnsignedLongs(int tag) {
-        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_LONG_REP) {
+        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_ULONG_REP) {
             throw new IllegalArgumentException("Tag is not a repeating long: " + tag);
         }
         List<BigInteger> values = new ArrayList<BigInteger>();
@@ -200,7 +200,7 @@ public class KeymasterArguments implements Parcelable {
     }
 
     private void addLongTag(int tag, BigInteger value) {
-        // Keymaster's KM_LONG is unsigned 64 bit.
+        // Keymaster's KM_ULONG is unsigned 64 bit.
         if ((value.signum() == -1) || (value.compareTo(UINT64_MAX_VALUE) > 0)) {
             throw new IllegalArgumentException("Long tag value out of range: " + value);
         }
@@ -208,7 +208,7 @@ public class KeymasterArguments implements Parcelable {
     }
 
     private BigInteger getLongTagValue(KeymasterArgument arg) {
-        // Keymaster's KM_LONG is unsigned 64 bit. We're forced to use BigInteger for type safety
+        // Keymaster's KM_ULONG is unsigned 64 bit. We're forced to use BigInteger for type safety
         // because there's no unsigned long type.
         return toUint64(((KeymasterLongArgument) arg).value);
     }
