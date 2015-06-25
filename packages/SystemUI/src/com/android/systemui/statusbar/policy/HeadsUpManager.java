@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
@@ -82,6 +83,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private final View mStatusBarWindowView;
     private final int mStatusBarHeight;
     private final int mNotificationsTopPadding;
+    private final Context mContext;
     private PhoneStatusBar mBar;
     private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
@@ -101,7 +103,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mIsObserving;
 
     public HeadsUpManager(final Context context, View statusBarWindowView) {
-        Resources resources = context.getResources();
+        mContext = context;
+        Resources resources = mContext.getResources();
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
         mDefaultSnoozeLengthMs = resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
@@ -165,6 +168,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      */
     public void showNotification(NotificationData.Entry headsUp) {
         if (DEBUG) Log.v(TAG, "showNotification");
+        MetricsLogger.count(mContext, "note_peek", 1);
         addHeadsUpEntry(headsUp);
         updateNotification(headsUp, true);
         headsUp.setInterruption();
@@ -521,7 +525,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             }
         });
     }
-
 
     /**
      * This represents a notification and how long it is in a heads up mode. It also manages its

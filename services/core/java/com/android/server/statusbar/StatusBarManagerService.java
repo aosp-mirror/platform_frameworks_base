@@ -571,11 +571,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
      *     LED, vibration, and ringing
      */
     @Override
-    public void onPanelRevealed(boolean clearNotificationEffects) {
+    public void onPanelRevealed(boolean clearNotificationEffects, int numItems) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onPanelRevealed(clearNotificationEffects);
+            mNotificationDelegate.onPanelRevealed(clearNotificationEffects, numItems);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
