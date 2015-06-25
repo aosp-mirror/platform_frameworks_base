@@ -705,6 +705,9 @@ public final class MediaCodecInfo {
 
             int maxInstances = Utils.parseIntSafely(
                     map.get("max-supported-instances"), mMaxSupportedInstances);
+            // TODO: replace all max-supported-instances with max-concurrent-instances.
+            maxInstances = Utils.parseIntSafely(
+                    map.get("max-concurrent-instances"), maxInstances);
             mMaxSupportedInstances =
                     Range.create(1, MAX_SUPPORTED_INSTANCES_LIMIT).clamp(maxInstances);
 
