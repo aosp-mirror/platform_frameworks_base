@@ -893,13 +893,12 @@ public class StackStateAnimator {
                 if (mHostLayout.indexOfChild(changingView) == -1) {
                     // This notification was actually removed, so we need to add it to the overlay
                     mHostLayout.getOverlay().add(changingView);
-                    ViewState viewState = new ViewState();
-                    viewState.initFrom(changingView);
-                    viewState.yTranslation = -changingView.getActualHeight();
+                    mTmpState.initFrom(changingView);
+                    mTmpState.yTranslation = -changingView.getActualHeight();
                     // We temporarily enable Y animations, the real filter will be combined
                     // afterwards anyway
                     mAnimationFilter.animateY = true;
-                    startViewAnimations(changingView, viewState, 0,
+                    startViewAnimations(changingView, mTmpState, 0,
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR);
                     mChildrenToClearFromOverlay.add(changingView);
                 }
