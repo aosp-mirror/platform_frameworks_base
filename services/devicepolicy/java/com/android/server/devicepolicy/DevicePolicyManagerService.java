@@ -85,6 +85,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
@@ -108,7 +109,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
-import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -3307,25 +3307,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void wipeDataLocked(boolean wipeExtRequested, String reason) {
-        // TODO: wipe all public volumes on device
-
-        // If the SD card is encrypted and non-removable, we have to force a wipe.
-        boolean forceExtWipe = !Environment.isExternalStorageRemovable() && isExtStorageEncrypted();
-
-        // Note: we can only do the wipe via ExternalStorageFormatter if the volume is not emulated.
-        if ((forceExtWipe || wipeExtRequested) && !Environment.isExternalStorageEmulated()) {
-            Intent intent = new Intent(ExternalStorageFormatter.FORMAT_AND_FACTORY_RESET);
-            intent.putExtra(ExternalStorageFormatter.EXTRA_ALWAYS_RESET, true);
-            intent.putExtra(Intent.EXTRA_REASON, reason);
-            intent.setComponent(ExternalStorageFormatter.COMPONENT_NAME);
-            mWakeLock.acquire(10000);
-            mContext.startService(intent);
-        } else {
-            try {
-                RecoverySystem.rebootWipeUserData(mContext, reason);
-            } catch (IOException | SecurityException e) {
-                Slog.w(LOG_TAG, "Failed requesting data wipe", e);
-            }
+        if (wipeExtRequested) {
+            StorageManager sm = (StorageManager) mContext.getSystemService(
+                    Context.STORAGE_SERVICE);
+            sm.wipeAdoptableDisks();
+        }
+        try {
+            RecoverySystem.rebootWipeUserData(mContext, reason);
+        } catch (IOException | SecurityException e) {
+            Slog.w(LOG_TAG, "Failed requesting data wipe", e);
         }
     }
 
