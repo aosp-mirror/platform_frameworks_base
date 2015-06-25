@@ -303,6 +303,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             try {
                                 ActivityManagerNative.getDefault()
                                         .keyguardWaitingForActivityDrawn();
+                                ActivityManagerNative.getDefault().resumeAppSwitches();
                             } catch (RemoteException e) {
                             }
                         }
@@ -315,7 +316,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                                     true /* force */);
                             visibilityChanged(false);
+                            mAssistManager.hideAssist();
                         }
+
                         // Wait for activity start.
                         return handled;
                     }
