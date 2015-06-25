@@ -988,7 +988,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
                                 WAKELOCK_RELEASE_ON_FINISHED);
                     }
-                    getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
+                    getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.CURRENT,
                             null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
                 }
             }
