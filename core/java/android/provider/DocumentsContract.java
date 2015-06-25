@@ -432,6 +432,15 @@ public final class DocumentsContract {
         public static final String COLUMN_AVAILABLE_BYTES = "available_bytes";
 
         /**
+         * Capacity of a root in bytes. This column is optional, and may be
+         * {@code null} if unknown or unbounded.
+         * {@hide}
+         * <p>
+         * Type: INTEGER (long)
+         */
+        public static final String COLUMN_CAPACITY_BYTES = "capacity_bytes";
+
+        /**
          * MIME types supported by this root. This column is optional, and if
          * {@code null} the root is assumed to support all MIME types. Multiple
          * MIME types can be separated by a newline. For example, a root
