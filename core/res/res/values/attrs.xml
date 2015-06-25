@@ -1778,6 +1778,10 @@
         <enum name="KEYCODE_TV_MEDIA_CONTEXT_MENU" value="257" />
         <enum name="KEYCODE_TV_TIMER_PROGRAMMING" value="258" />
         <enum name="KEYCODE_HELP" value="259" />
+        <enum name="KEYCODE_STEM_PRIMARY" value="264" />
+        <enum name="KEYCODE_STEM_1" value="265" />
+        <enum name="KEYCODE_STEM_2" value="266" />
+        <enum name="KEYCODE_STEM_3" value="267" />
     </attr>
 
     <!-- ***************************************************************** -->

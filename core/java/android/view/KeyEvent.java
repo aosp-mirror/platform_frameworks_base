@@ -748,8 +748,21 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_TV_TIMER_PROGRAMMING = 258;
     /** Key code constant: Help key. */
     public static final int KEYCODE_HELP = 259;
+    /** Key code constant: Primary stem key for Wear
+     * Main power/reset button on watch.
+     * @hide */
+    public static final int KEYCODE_STEM_PRIMARY = 264;
+    /** Key code constant: Generic stem key 1 for Wear
+     * @hide */
+    public static final int KEYCODE_STEM_1 = 265;
+    /** Key code constant: Generic stem key 2 for Wear
+     * @hide */
+    public static final int KEYCODE_STEM_2 = 266;
+    /** Key code constant: Generic stem key 3 for Wear
+     * @hide */
+    public static final int KEYCODE_STEM_3 = 267;
 
-    private static final int LAST_KEYCODE = KEYCODE_HELP;
+    private static final int LAST_KEYCODE = KEYCODE_STEM_3;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
