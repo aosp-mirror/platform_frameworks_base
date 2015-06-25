@@ -125,14 +125,11 @@ public class AssistManager {
         }
     }
 
-    public void onGestureInvoked(boolean vibrate) {
+    public void onGestureInvoked() {
         if (mAssistComponent == null) {
             return;
         }
 
-        if (vibrate) {
-            vibrate();
-        }
         final boolean isService = isAssistantService();
         if (isService || !isVoiceSessionRunning()) {
             showOrb();
@@ -288,10 +285,6 @@ public class AssistManager {
             }
         }
         v.setImageDrawable(null);
-    }
-
-    private void vibrate() {
-        mView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
     private boolean isAssistantService() {
