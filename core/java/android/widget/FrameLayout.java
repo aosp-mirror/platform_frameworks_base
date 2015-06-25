@@ -230,28 +230,29 @@ public class FrameLayout extends ViewGroup {
         if (count > 1) {
             for (int i = 0; i < count; i++) {
                 final View child = mMatchParentChildren.get(i);
-
                 final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-                int childWidthMeasureSpec;
-                int childHeightMeasureSpec;
-                
+
+                final int childWidthMeasureSpec;
                 if (lp.width == LayoutParams.MATCH_PARENT) {
-                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth() -
-                            getPaddingLeftWithForeground() - getPaddingRightWithForeground() -
-                            lp.leftMargin - lp.rightMargin,
-                            MeasureSpec.EXACTLY);
+                    final int width = Math.max(0, getMeasuredWidth()
+                            - getPaddingLeftWithForeground() - getPaddingRightWithForeground()
+                            - lp.leftMargin - lp.rightMargin);
+                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            width, MeasureSpec.EXACTLY);
                 } else {
                     childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
                             getPaddingLeftWithForeground() + getPaddingRightWithForeground() +
                             lp.leftMargin + lp.rightMargin,
                             lp.width);
                 }
-                
+
+                final int childHeightMeasureSpec;
                 if (lp.height == LayoutParams.MATCH_PARENT) {
-                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight() -
-                            getPaddingTopWithForeground() - getPaddingBottomWithForeground() -
-                            lp.topMargin - lp.bottomMargin,
-                            MeasureSpec.EXACTLY);
+                    final int height = Math.max(0, getMeasuredHeight()
+                            - getPaddingTopWithForeground() - getPaddingBottomWithForeground()
+                            - lp.topMargin - lp.bottomMargin);
+                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            height, MeasureSpec.EXACTLY);
                 } else {
                     childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
                             getPaddingTopWithForeground() + getPaddingBottomWithForeground() +
