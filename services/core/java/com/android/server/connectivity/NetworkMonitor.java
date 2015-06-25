@@ -576,9 +576,12 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
                     log("Unlingered");
-                    // Go straight to active as we've already evaluated.
-                    transitionTo(mValidatedState);
-                    return HANDLED;
+                    // If already validated, go straight to validated state.
+                    if (mNetworkAgentInfo.lastValidated) {
+                        transitionTo(mValidatedState);
+                        return HANDLED;
+                    }
+                    return NOT_HANDLED;
                 case CMD_LINGER_EXPIRED:
                     if (message.arg1 != mLingerToken)
                         return HANDLED;
