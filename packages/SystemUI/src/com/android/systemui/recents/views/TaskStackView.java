@@ -29,6 +29,8 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -1361,6 +1363,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onTaskViewAppInfoClicked(TaskView tv) {
         if (mCb != null) {
             mCb.onTaskViewAppInfoClicked(tv.getTask());
+
+            // Keep track of app-info invocations
+            MetricsLogger.count(getContext(), "overview_app_info", 1);
         }
     }
 
