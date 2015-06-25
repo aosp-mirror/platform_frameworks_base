@@ -25,7 +25,6 @@ import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
@@ -39,11 +38,13 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
@@ -62,6 +63,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -90,9 +92,11 @@ import android.os.SystemClock;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
@@ -108,6 +112,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -169,6 +174,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
     private static final String LOCK_TASK_TAG = "Lock-to-App";
+
+    // Activity actions an app cannot start if it uses a permission which is not granted.
+    private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
+            new ArrayMap<>();
+    static {
+        ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_IMAGE_CAPTURE,
+                Manifest.permission.CAMERA);
+        ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_VIDEO_CAPTURE,
+                Manifest.permission.CAMERA);
+        ACTION_TO_RUNTIME_PERMISSION.put(Intent.ACTION_CALL,
+                Manifest.permission.CALL_PHONE);
+    }
+
+    /** Action not restricted for the calling package. */
+    private static final int ACTION_RESTRICTION_NONE = 0;
+    /** Action restricted for the calling package by not granting a used permission. */
+    private static final int ACTION_RESTRICTION_PERMISSION = 1;
+    /** Action restricted for the calling package by not allowing a used permission's app op. */
+    private static final int ACTION_RESTRICTION_APPOP = 2;
 
     /** Status Bar Service **/
     private IBinder mToken = new Binder();
@@ -1519,14 +1543,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 START_ANY_ACTIVITY, callingPid, callingUid);
         final int componentPerm = mService.checkComponentPermission(aInfo.permission, callingPid,
                 callingUid, aInfo.applicationInfo.uid, aInfo.exported);
-        if (startAnyPerm != PERMISSION_GRANTED && componentPerm != PERMISSION_GRANTED) {
+        final int actionRestriction = getActionRestrictionForCallingPackage(
+                intent.getAction(), callingPackage, callingPid, callingUid);
+
+        if (startAnyPerm != PERMISSION_GRANTED && (componentPerm != PERMISSION_GRANTED
+                || actionRestriction == ACTION_RESTRICTION_PERMISSION)) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1,
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
             String msg;
-            if (!aInfo.exported) {
+            if (actionRestriction == ACTION_RESTRICTION_PERMISSION) {
+                msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ")" + " with revoked permission "
+                        + ACTION_TO_RUNTIME_PERMISSION.get(intent.getAction());
+            } else if (!aInfo.exported) {
                 msg = "Permission Denial: starting " + intent.toString()
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ")"
@@ -1541,7 +1574,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
             throw new SecurityException(msg);
         }
 
-        boolean abort = !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
+        boolean abort = false;
+
+        if (startAnyPerm != PERMISSION_GRANTED
+                && actionRestriction == ACTION_RESTRICTION_APPOP) {
+            String msg = "Permission Denial: starting " + intent.toString()
+                    + " from " + callerApp + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ")"
+                    + " requires " + aInfo.permission;
+            Slog.w(TAG, msg);
+            abort = true;
+        }
+
+        abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
         if (mService.mController != null) {
@@ -1617,6 +1662,48 @@ public final class ActivityStackSupervisor implements DisplayListener {
             notifyActivityDrawnForKeyguard();
         }
         return err;
+    }
+
+    private int getActionRestrictionForCallingPackage(String action,
+            String callingPackage, int callingPid, int callingUid) {
+        if (action == null) {
+            return ACTION_RESTRICTION_NONE;
+        }
+
+        String permission = ACTION_TO_RUNTIME_PERMISSION.get(action);
+        if (permission == null) {
+            return ACTION_RESTRICTION_NONE;
+        }
+
+        final PackageInfo packageInfo;
+        try {
+            packageInfo = mService.mContext.getPackageManager()
+                    .getPackageInfo(callingPackage, PackageManager.GET_PERMISSIONS);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.i(TAG, "Cannot find package info for " + callingPackage);
+            return ACTION_RESTRICTION_NONE;
+        }
+
+        if (!ArrayUtils.contains(packageInfo.requestedPermissions, permission)) {
+            return ACTION_RESTRICTION_NONE;
+        }
+
+        if (mService.checkPermission(permission, callingPid, callingUid) ==
+                PackageManager.PERMISSION_DENIED) {
+            return ACTION_RESTRICTION_PERMISSION;
+        }
+
+        final int opCode = AppOpsManager.permissionToOpCode(permission);
+        if (opCode == AppOpsManager.OP_NONE) {
+            return ACTION_RESTRICTION_NONE;
+        }
+
+        if (mService.mAppOpsService.noteOperation(opCode, callingUid,
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return ACTION_RESTRICTION_APPOP;
+        }
+
+        return ACTION_RESTRICTION_NONE;
     }
 
     ActivityStack computeStackFocus(ActivityRecord r, boolean newTask) {

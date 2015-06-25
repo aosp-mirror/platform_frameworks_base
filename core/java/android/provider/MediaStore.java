@@ -283,7 +283,13 @@ public final class MediaStore {
      * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
      * If you don't set a ClipData, it will be copied there for you when calling
      * {@link Context#startActivity(Intent)}.
-     * @see #EXTRA_OUTPUT
+     *
+     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC} and above
+     * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
+     * is not granted, then atempting to use this action will result in a {@link
+     * java.lang.SecurityException}.
+     *
+     *  @see #EXTRA_OUTPUT
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public final static String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
@@ -331,6 +337,12 @@ public final class MediaStore {
      * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
      * If you don't set a ClipData, it will be copied there for you when calling
      * {@link Context#startActivity(Intent)}.
+     *
+     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC} and above
+     * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
+     * is not granted, then atempting to use this action will result in a {@link
+     * java.lang.SecurityException}.
+     *
      * @see #EXTRA_OUTPUT
      * @see #EXTRA_VIDEO_QUALITY
      * @see #EXTRA_SIZE_LIMIT
