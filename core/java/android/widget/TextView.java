@@ -5230,7 +5230,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Phone specific code (there is no ExtractEditText on tablets).
         // ExtractEditText does not call onFocus when it is displayed, and mHasSelectionOnFocus can
         // not be set. Do the test here instead.
-        if (this instanceof ExtractEditText && hasSelection() && mEditor != null) {
+        if (isInExtractedMode() && hasSelection() && mEditor != null
+                && mEditor.mTextActionMode == null) {
             mEditor.startSelectionActionMode();
         }
 
