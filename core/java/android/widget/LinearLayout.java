@@ -359,7 +359,7 @@ public class LinearLayout extends ViewGroup {
         }
 
         if (hasDividerBeforeChildAt(count)) {
-            final View child = getVirtualChildAt(count - 1);
+            final View child = getLastNonGoneChild();
             int bottom = 0;
             if (child == null) {
                 bottom = getHeight() - getPaddingBottom() - mDividerHeight;
@@ -369,6 +369,20 @@ public class LinearLayout extends ViewGroup {
             }
             drawHorizontalDivider(canvas, bottom);
         }
+    }
+
+    /**
+     * Finds the last child that is not gone. The last child will be used as the reference for
+     * where the end divider should be drawn.
+     */
+    private View getLastNonGoneChild() {
+        for (int i = getVirtualChildCount() - 1; i >= 0; i--) {
+            View child = getVirtualChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
+                return child;
+            }
+        }
+        return null;
     }
 
     void drawDividersHorizontal(Canvas canvas) {
@@ -392,7 +406,7 @@ public class LinearLayout extends ViewGroup {
         }
 
         if (hasDividerBeforeChildAt(count)) {
-            final View child = getVirtualChildAt(count - 1);
+            final View child = getLastNonGoneChild();
             int position;
             if (child == null) {
                 if (isLayoutRtl) {
@@ -627,21 +641,29 @@ public class LinearLayout extends ViewGroup {
      * @hide Pending API consideration. Currently only used internally by the system.
      */
     protected boolean hasDividerBeforeChildAt(int childIndex) {
-        if (childIndex == 0) {
-            return (mShowDividers & SHOW_DIVIDER_BEGINNING) != 0;
-        } else if (childIndex == getChildCount()) {
+        if (childIndex == getVirtualChildCount()) {
+            // Check whether the end divider should draw.
             return (mShowDividers & SHOW_DIVIDER_END) != 0;
-        } else if ((mShowDividers & SHOW_DIVIDER_MIDDLE) != 0) {
-            boolean hasVisibleViewBefore = false;
-            for (int i = childIndex - 1; i >= 0; i--) {
-                if (getChildAt(i).getVisibility() != GONE) {
-                    hasVisibleViewBefore = true;
-                    break;
-                }
-            }
-            return hasVisibleViewBefore;
         }
-        return false;
+        boolean allViewsAreGoneBefore = allViewsAreGoneBefore(childIndex);
+        if (allViewsAreGoneBefore) {
+            // This is the first view that's not gone, check if beginning divider is enabled.
+            return (mShowDividers & SHOW_DIVIDER_BEGINNING) != 0;
+        } else {
+            return (mShowDividers & SHOW_DIVIDER_MIDDLE) != 0;
+        }
+    }
+
+    /**
+     * Checks whether all (virtual) child views before the given index are gone.
+     */
+    private boolean allViewsAreGoneBefore(int childIndex) {
+        for (int i = childIndex - 1; i >= 0; i--) {
+            if (getVirtualChildAt(i).getVisibility() != GONE) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
