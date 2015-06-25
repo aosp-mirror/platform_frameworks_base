@@ -4261,7 +4261,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
             String resolvedType, int flags, int sourceUserId, int parentUserId) {
-        if (!sUserManager.hasUserRestriction(UserManager.ALLOW_PARENT_APP_LINKING,
+        if (!sUserManager.hasUserRestriction(UserManager.ALLOW_PARENT_PROFILE_APP_LINKING,
                 sourceUserId)) {
             return null;
         }
