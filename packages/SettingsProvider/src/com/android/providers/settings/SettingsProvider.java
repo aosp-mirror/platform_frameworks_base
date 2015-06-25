@@ -905,7 +905,9 @@ public class SettingsProvider extends ContentProvider {
     private boolean mutateSystemSetting(String name, String value, int runAsUserId,
             int operation) {
         // Check for permissions first.
-        hasPermissionsToMutateSystemSettings();
+        if (!hasPermissionsToMutateSystemSettings()) {
+            return false;
+        }
 
         // Verify whether this operation is allowed for the calling package.
         if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
