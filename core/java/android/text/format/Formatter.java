@@ -105,32 +105,45 @@ public final class Formatter {
             mult = TrafficStats.PB_IN_BYTES;
             result = result / 1024;
         }
-        String value;
+        // Note we calculate the rounded long by ourselves, but still let String.format()
+        // compute the rounded value. String.format("%f", 0.1) might not return "0.1" due to
+        // floating point errors.
+        final int roundFactor;
+        final String roundFormat;
         if (result < 1) {
-            value = String.format("%.2f", result);
+            roundFactor = 100;
+            roundFormat = "%.2f";
         } else if (result < 10) {
             if ((flags & FLAG_SHORTER) != 0) {
-                value = String.format("%.1f", result);
+                roundFactor = 10;
+                roundFormat = "%.1f";
             } else {
-                value = String.format("%.2f", result);
+                roundFactor = 100;
+                roundFormat = "%.2f";
             }
         } else if (result < 100) {
             if ((flags & FLAG_SHORTER) != 0) {
-                value = String.format("%.0f", result);
+                roundFactor = 1;
+                roundFormat = "%.0f";
             } else {
-                value = String.format("%.2f", result);
+                roundFactor = 100;
+                roundFormat = "%.2f";
             }
         } else {
-            value = String.format("%.0f", result);
+            roundFactor = 1;
+            roundFormat = "%.0f";
         }
+        final String roundedString = String.format(roundFormat, result);
+
+        // Note this might overflow if result >= Long.MAX_VALUE / 100, but that's like 80PB so
+        // it's okay (for now)...
+        final long roundedBytes =
+                (flags & FLAG_CALCULATE_ROUNDED) == 0 ? 0
+                : (((long) Math.round(result * roundFactor)) * mult / roundFactor);
+
         final String units = res.getString(suffix);
-        final long roundedBytes;
-        if ((flags & FLAG_CALCULATE_ROUNDED) != 0) {
-            roundedBytes = (long) (Double.parseDouble(value) * mult);
-        } else {
-            roundedBytes = 0;
-        }
-        return new BytesResult(value, units, roundedBytes);
+
+        return new BytesResult(roundedString, units, roundedBytes);
     }
 
     /**
