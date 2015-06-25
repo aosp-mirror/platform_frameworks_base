@@ -242,6 +242,38 @@ public class Switch extends CompoundButton {
                 com.android.internal.R.styleable.Switch_switchPadding, 0);
         mSplitTrack = a.getBoolean(com.android.internal.R.styleable.Switch_splitTrack, false);
 
+        ColorStateList thumbTintList = a.getColorStateList(
+                com.android.internal.R.styleable.Switch_thumbTint);
+        if (thumbTintList != null) {
+            mThumbTintList = thumbTintList;
+            mHasThumbTint = true;
+        }
+        PorterDuff.Mode thumbTintMode = Drawable.parseTintMode(
+                a.getInt(com.android.internal.R.styleable.Switch_thumbTintMode, -1), null);
+        if (mThumbTintMode != thumbTintMode) {
+            mThumbTintMode = thumbTintMode;
+            mHasThumbTintMode = true;
+        }
+        if (mHasThumbTint || mHasThumbTintMode) {
+            applyThumbTint();
+        }
+
+        ColorStateList trackTintList = a.getColorStateList(
+                com.android.internal.R.styleable.Switch_trackTint);
+        if (trackTintList != null) {
+            mTrackTintList = trackTintList;
+            mHasTrackTint = true;
+        }
+        PorterDuff.Mode trackTintMode = Drawable.parseTintMode(
+                a.getInt(com.android.internal.R.styleable.Switch_trackTintMode, -1), null);
+        if (mTrackTintMode != trackTintMode) {
+            mTrackTintMode = trackTintMode;
+            mHasTrackTintMode = true;
+        }
+        if (mHasTrackTint || mHasTrackTintMode) {
+            applyTrackTint();
+        }
+
         final int appearance = a.getResourceId(
                 com.android.internal.R.styleable.Switch_switchTextAppearance, 0);
         if (appearance != 0) {
