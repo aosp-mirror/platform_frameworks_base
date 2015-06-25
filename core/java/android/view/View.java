@@ -21041,9 +21041,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (sUseBrokenMakeMeasureSpec) {
                 return size + mode;
             } else {
-                if (size < 0) {
-                    throw new IllegalArgumentException("Measure spec size must be >= 0");
-                }
                 return (size & ~MODE_MASK) | (mode & MODE_MASK);
             }
         }
