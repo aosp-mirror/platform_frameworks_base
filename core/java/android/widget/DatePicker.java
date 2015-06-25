@@ -999,8 +999,8 @@ public class DatePicker extends FrameLayout {
 
         private boolean isNewDate(int year, int month, int dayOfMonth) {
             return (mCurrentDate.get(Calendar.YEAR) != year
-                    || mCurrentDate.get(Calendar.MONTH) != dayOfMonth
-                    || mCurrentDate.get(Calendar.DAY_OF_MONTH) != month);
+                    || mCurrentDate.get(Calendar.MONTH) != month
+                    || mCurrentDate.get(Calendar.DAY_OF_MONTH) != dayOfMonth);
         }
 
         private void setDate(int year, int month, int dayOfMonth) {
