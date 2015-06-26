@@ -140,19 +140,62 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new NullPointerException("alias == null");
         }
 
-        byte[] certificate = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
-        if (certificate != null) {
-            return wrapIntoKeyStoreCertificate(
-                    Credentials.USER_PRIVATE_KEY + alias, toCertificate(certificate));
+        byte[] encodedCert = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
+        if (encodedCert != null) {
+            return getCertificateForPrivateKeyEntry(alias, encodedCert);
         }
 
-        certificate = mKeyStore.get(Credentials.CA_CERTIFICATE + alias);
-        if (certificate != null) {
-            return wrapIntoKeyStoreCertificate(
-                    Credentials.USER_PRIVATE_KEY + alias, toCertificate(certificate));
+        encodedCert = mKeyStore.get(Credentials.CA_CERTIFICATE + alias);
+        if (encodedCert != null) {
+            return getCertificateForTrustedCertificateEntry(encodedCert);
         }
 
+        // This entry/alias does not contain a certificate.
         return null;
+    }
+
+    private Certificate getCertificateForTrustedCertificateEntry(byte[] encodedCert) {
+        // For this certificate there shouldn't be a private key in this KeyStore entry. Thus,
+        // there's no need to wrap this certificate as opposed to the certificate associated with
+        // a private key entry.
+        return toCertificate(encodedCert);
+    }
+
+    private Certificate getCertificateForPrivateKeyEntry(String alias, byte[] encodedCert) {
+        // All crypto algorithms offered by Android Keystore for its private keys must also
+        // be offered for the corresponding public keys stored in the Android Keystore. The
+        // complication is that the underlying keystore service operates only on full key pairs,
+        // rather than just public keys or private keys. As a result, Android Keystore-backed
+        // crypto can only be offered for public keys for which keystore contains the
+        // corresponding private key. This is not the case for certificate-only entries (e.g.,
+        // trusted certificates).
+        //
+        // getCertificate().getPublicKey() is the only way to obtain the public key
+        // corresponding to the private key stored in the KeyStore. Thus, we need to make sure
+        // that the returned public key points to the underlying key pair / private key
+        // when available.
+
+        X509Certificate cert = toCertificate(encodedCert);
+        if (cert == null) {
+            // Failed to parse the certificate.
+            return null;
+        }
+
+        String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
+        if (mKeyStore.contains(privateKeyAlias)) {
+            // As expected, keystore contains the private key corresponding to this public key. Wrap
+            // the certificate so that its getPublicKey method returns an Android Keystore
+            // PublicKey. This key will delegate crypto operations involving this public key to
+            // Android Keystore when higher-priority providers do not offer these crypto
+            // operations for this key.
+            return wrapIntoKeyStoreCertificate(privateKeyAlias, cert);
+        } else {
+            // This KeyStore entry/alias is supposed to contain the private key corresponding to
+            // the public key in this certificate, but it does not for some reason. It's probably a
+            // bug. Let other providers handle crypto operations involving the public key returned
+            // by this certificate's getPublicKey.
+            return cert;
+        }
     }
 
     /**
