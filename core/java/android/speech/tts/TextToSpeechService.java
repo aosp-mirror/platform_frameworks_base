@@ -293,7 +293,9 @@ public abstract class TextToSpeechService extends Service {
             }
             Set<String> features = onGetFeaturesForLanguage(locale.getISO3Language(),
                     locale.getISO3Country(), locale.getVariant());
-            voices.add(new Voice(locale.toLanguageTag(), locale, Voice.QUALITY_NORMAL,
+            String voiceName = onGetDefaultVoiceNameFor(locale.getISO3Language(),
+                    locale.getISO3Country(), locale.getVariant());
+            voices.add(new Voice(voiceName, locale, Voice.QUALITY_NORMAL,
                     Voice.LATENCY_NORMAL, false, features));
         }
         return voices;
