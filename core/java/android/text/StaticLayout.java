@@ -714,6 +714,27 @@ public class StaticLayout extends Layout {
             float[] lineWidths = lineBreaks.widths;
             int[] flags = lineBreaks.flags;
 
+            final int remainingLineCount = mMaximumVisibleLineCount - mLineCount;
+            final boolean ellipsisMayBeApplied = ellipsize != null
+                    && (ellipsize == TextUtils.TruncateAt.END
+                        || (mMaximumVisibleLineCount == 1
+                                && ellipsize != TextUtils.TruncateAt.MARQUEE));
+            if (remainingLineCount < breakCount && ellipsisMayBeApplied) {
+                // Treat the last line and overflowed lines as a single line.
+                breaks[remainingLineCount - 1] = breaks[breakCount - 1];
+                // Calculate width and flag.
+                float width = 0;
+                int flag = 0;
+                for (int i = remainingLineCount - 1; i < breakCount; i++) {
+                    width += lineWidths[i];
+                    flag |= flags[i] & TAB_MASK;
+                }
+                lineWidths[remainingLineCount - 1] = width;
+                flags[remainingLineCount - 1] = flag;
+
+                breakCount = remainingLineCount;
+            }
+
             // here is the offset of the starting character of the line we are currently measuring
             int here = paraStart;
 
