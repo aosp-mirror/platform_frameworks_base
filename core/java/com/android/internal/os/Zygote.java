@@ -46,8 +46,12 @@ public final class Zygote {
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
-    /** Default user-specific external storage should be mounted. */
+    /** Default external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_DEFAULT = 1;
+    /** Read-only external storage should be mounted. */
+    public static final int MOUNT_EXTERNAL_READ = 2;
+    /** Read-write external storage should be mounted. */
+    public static final int MOUNT_EXTERNAL_WRITE = 3;
 
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 
