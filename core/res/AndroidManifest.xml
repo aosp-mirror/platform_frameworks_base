@@ -1293,6 +1293,11 @@
                 android:description="@string/permdesc_control_incall_experience"
                 android:label="@string/permlab_control_incall_experience" />
 
+    <!-- Allows an application to receive STK related commands.
+         @hide -->
+    <permission android:name="android.permission.RECEIVE_STK_COMMANDS"
+        android:protectionLevel="system|signature" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->
