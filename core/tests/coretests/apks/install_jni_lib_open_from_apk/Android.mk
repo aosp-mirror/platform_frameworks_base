@@ -5,6 +5,4 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := install_jni_lib_open_from_apk
 
-LOCAL_PAGE_ALIGN_JNI_SHARED_LIBRARIES := true
-
 include $(FrameworkCoreTests_BUILD_PACKAGE)
