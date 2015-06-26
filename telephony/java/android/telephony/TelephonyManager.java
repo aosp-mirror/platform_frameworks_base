@@ -891,16 +891,17 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the neighboring cell information of the device. The getAllCellInfo is preferred
-     * and use this only if getAllCellInfo return nulls or an empty list.
-     *<p>
-     * In the future this call will be deprecated.
-     *<p>
+     * Returns the neighboring cell information of the device.
+     *
      * @return List of NeighboringCellInfo or null if info unavailable.
      *
      * <p>Requires Permission:
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
+     *
+     * @deprecated Use (@link getAllCellInfo} which returns a superset of the information
+     *             from NeighboringCellInfo.
      */
+    @Deprecated
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
         try {
             ITelephony telephony = getITelephony();
