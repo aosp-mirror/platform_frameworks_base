@@ -3340,6 +3340,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public void resetRuntimePermissions() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
+                "revokeRuntimePermission");
+
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "resetRuntimePermissions");
+        }
+
+        synchronized (mPackages) {
+            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
+            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+            }
+        }
+    }
+
+    @Override
     public int getPermissionFlags(String name, String packageName, int userId) {
         if (!sUserManager.exists(userId)) {
             return 0;
@@ -14190,6 +14211,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean checkin = false;
 
         String packageName = null;
+        ArraySet<String> permissionNames = null;
 
         int opti = 0;
         while (opti < args.length) {
@@ -14213,6 +14235,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    k[eysets]: print known keysets");
                 pw.println("    r[esolvers]: dump intent resolvers");
                 pw.println("    perm[issions]: dump permissions");
+                pw.println("    permission [name ...]: dump declaration and use of given permission");
                 pw.println("    pref[erred]: print preferred package settings");
                 pw.println("    preferred-xml [--full]: print preferred package settings as xml");
                 pw.println("    prov[iders]: dump content providers");
@@ -14254,6 +14277,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_RESOLVERS);
             } else if ("perm".equals(cmd) || "permissions".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PERMISSIONS);
+            } else if ("permission".equals(cmd)) {
+                if (opti >= args.length) {
+                    pw.println("Error: permission requires permission name");
+                    return;
+                }
+                permissionNames = new ArraySet<>();
+                while (opti < args.length) {
+                    permissionNames.add(args[opti]);
+                    opti++;
+                }
+                dumpState.setDump(DumpState.DUMP_PERMISSIONS
+                        | DumpState.DUMP_PACKAGES | DumpState.DUMP_SHARED_USERS);
             } else if ("pref".equals(cmd) || "preferred".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PREFERRED);
             } else if ("preferred-xml".equals(cmd)) {
@@ -14536,8 +14571,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
-                mSettings.dumpPermissionsLPr(pw, packageName, dumpState);
-                if (packageName == null) {
+                mSettings.dumpPermissionsLPr(pw, packageName, permissionNames, dumpState);
+                if (packageName == null && permissionNames == null) {
                     for (int iperm=0; iperm<mAppOpPermissionPackages.size(); iperm++) {
                         if (iperm == 0) {
                             if (dumpState.onTitlePrinted())
@@ -14597,11 +14632,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
-                mSettings.dumpPackagesLPr(pw, packageName, dumpState, checkin);
+                mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
             }
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
-                mSettings.dumpSharedUsersLPr(pw, packageName, dumpState, checkin);
+                mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState, checkin);
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
