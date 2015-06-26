@@ -101,6 +101,8 @@ public class WifiInfo implements Parcelable {
     private InetAddress mIpAddress;
     private String mMacAddress = DEFAULT_MAC_ADDRESS;
 
+    private boolean mEphemeral;
+
     /**
      * @hide
      */
@@ -253,6 +255,7 @@ public class WifiInfo implements Parcelable {
         setLinkSpeed(-1);
         setFrequency(-1);
         setMeteredHint(false);
+        setEphemeral(false);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -283,6 +286,7 @@ public class WifiInfo implements Parcelable {
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
             mMeteredHint = source.mMeteredHint;
+            mEphemeral = source.mEphemeral;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -430,6 +434,16 @@ public class WifiInfo implements Parcelable {
         return mMeteredHint;
     }
 
+    /** {@hide} */
+    public void setEphemeral(boolean ephemeral) {
+        mEphemeral = ephemeral;
+    }
+
+    /** {@hide} */
+    public boolean isEphemeral() {
+        return mEphemeral;
+    }
+
     /** @hide */
     public void setNetworkId(int id) {
         mNetworkId = id;
@@ -567,6 +581,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mBSSID);
         dest.writeString(mMacAddress);
         dest.writeInt(mMeteredHint ? 1 : 0);
+        dest.writeInt(mEphemeral ? 1 : 0);
         dest.writeInt(score);
         dest.writeDouble(txSuccessRate);
         dest.writeDouble(txRetriesRate);
@@ -597,6 +612,7 @@ public class WifiInfo implements Parcelable {
                 info.mBSSID = in.readString();
                 info.mMacAddress = in.readString();
                 info.mMeteredHint = in.readInt() != 0;
+                info.mEphemeral = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccessRate = in.readDouble();
                 info.txRetriesRate = in.readDouble();
