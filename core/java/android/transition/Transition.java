@@ -528,11 +528,13 @@ public abstract class Transition implements Cloneable {
             ArrayMap<View, TransitionValues> unmatchedEnd) {
         for (int i = unmatchedStart.size() - 1; i >= 0; i--) {
             View view = unmatchedStart.keyAt(i);
-            TransitionValues end = unmatchedEnd.remove(view);
-            if (end != null) {
-                TransitionValues start = unmatchedStart.removeAt(i);
-                mStartValuesList.add(start);
-                mEndValuesList.add(end);
+            if (view != null && isValidTarget(view)) {
+                TransitionValues end = unmatchedEnd.remove(view);
+                if (end != null && end.view != null && isValidTarget(end.view)) {
+                    TransitionValues start = unmatchedStart.removeAt(i);
+                    mStartValuesList.add(start);
+                    mEndValuesList.add(end);
+                }
             }
         }
     }
@@ -548,9 +550,9 @@ public abstract class Transition implements Cloneable {
         int numStartIds = startItemIds.size();
         for (int i = 0; i < numStartIds; i++) {
             View startView = startItemIds.valueAt(i);
-            if (startView != null) {
+            if (startView != null && isValidTarget(startView)) {
                 View endView = endItemIds.get(startItemIds.keyAt(i));
-                if (endView != null) {
+                if (endView != null && isValidTarget(endView)) {
                     TransitionValues startValues = unmatchedStart.get(startView);
                     TransitionValues endValues = unmatchedEnd.get(endView);
                     if (startValues != null && endValues != null) {
@@ -626,14 +628,20 @@ public abstract class Transition implements Cloneable {
             ArrayMap<View, TransitionValues> unmatchedEnd) {
         // Views that only exist in the start Scene
         for (int i = 0; i < unmatchedStart.size(); i++) {
-            mStartValuesList.add(unmatchedStart.valueAt(i));
-            mEndValuesList.add(null);
+            final TransitionValues start = unmatchedStart.valueAt(i);
+            if (isValidTarget(start.view)) {
+                mStartValuesList.add(start);
+                mEndValuesList.add(null);
+            }
         }
 
         // Views that only exist in the end Scene
         for (int i = 0; i < unmatchedEnd.size(); i++) {
-            mEndValuesList.add(unmatchedEnd.valueAt(i));
-            mStartValuesList.add(null);
+            final TransitionValues end = unmatchedEnd.valueAt(i);
+            if (isValidTarget(end.view)) {
+                mEndValuesList.add(end);
+                mStartValuesList.add(null);
+            }
         }
     }
 
