@@ -169,7 +169,7 @@ public:
         bool functorsNeedLayer = ancestorDictatesFunctorsNeedLayer
 
                 // Round rect clipping forces layer for functors
-                || CC_UNLIKELY(getOutline().willClip())
+                || CC_UNLIKELY(getOutline().willRoundRectClip())
                 || CC_UNLIKELY(getRevealClip().willClip())
 
                 // Complex matrices forces layer, due to stencil clipping
