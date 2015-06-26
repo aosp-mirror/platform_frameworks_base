@@ -369,7 +369,9 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Inform the notification manager that these notifications have been viewed by the
-     * user.
+     * user. This should only be called when there is sufficient confidence that the user is
+     * looking at the notifications, such as when the notifications appear on the screen due to
+     * an explicit user interaction.
      * @param keys Notifications to mark as seen.
      */
     public final void setNotificationsShown(String[] keys) {
