@@ -42,6 +42,7 @@ please see themes_device_defaults.xml.
     -->
     <style name="Theme">
 
+        <item name="isLightTheme">false</item>
         <item name="colorForeground">@color/bright_foreground_dark</item>
         <item name="colorForegroundInverse">@color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@color/background_dark</item>
@@ -472,6 +473,7 @@ please see themes_device_defaults.xml.
          background will be a light color.
          <p>This is designed for API level 10 and lower.</p>-->
     <style name="Theme.Light">
+        <item name="isLightTheme">true</item>
         <item name="windowBackground">@drawable/screen_background_selector_light</item>
         <item name="windowClipToOutline">false</item>
 
