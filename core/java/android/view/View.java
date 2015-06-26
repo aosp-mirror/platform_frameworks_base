@@ -8701,14 +8701,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Adds the children of a given View for accessibility. Since some Views are
-     * not important for accessibility the children for accessibility are not
-     * necessarily direct children of the view, rather they are the first level of
-     * descendants important for accessibility.
+     * Adds the children of this View relevant for accessibility to the given list
+     * as output. Since some Views are not important for accessibility the added
+     * child views are not necessarily direct children of this view, rather they are
+     * the first level of descendants important for accessibility.
      *
-     * @param children The list of children for accessibility.
+     * @param outChildren The output list that will receive children for accessibility.
      */
-    public void addChildrenForAccessibility(ArrayList<View> children) {
+    public void addChildrenForAccessibility(ArrayList<View> outChildren) {
 
     }
 
