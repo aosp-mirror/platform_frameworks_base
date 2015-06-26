@@ -240,6 +240,7 @@
   <java-symbol type="attr" name="windowFixedHeightMajor" />
   <java-symbol type="attr" name="windowFixedHeightMinor" />
   <java-symbol type="attr" name="accessibilityFocusedDrawable"/>
+  <java-symbol type="attr" name="isLightTheme"/>
 
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_embed_tabs_pre_jb" />
