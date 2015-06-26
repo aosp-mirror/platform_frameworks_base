@@ -4171,10 +4171,17 @@ public class Editor {
             if (isExpanding) {
                 // User is increasing the selection.
                 if (!mInWord || currLine < mPrevLine) {
-                    // We're not in a word, or we're on a different line so we'll expand by
-                    // word. First ensure the user has at least entered the next word.
-                    int offsetToWord = (end - start) / 2;
-                    if (offset <= end - offsetToWord || currLine < mPrevLine) {
+                    // Sometimes words can be broken across lines (Chinese, hyphenation).
+                    // We still snap to the start of the word but we only use the letters on the
+                    // current line to determine if the user is far enough into the word to snap.
+                    int wordStartOnCurrLine = start;
+                    if (layout != null && layout.getLineForOffset(start) != currLine) {
+                        wordStartOnCurrLine = layout.getLineStart(currLine);
+                    }
+                    int offsetThresholdToSnap = end - ((end - wordStartOnCurrLine) / 2);
+                    if (offset <= offsetThresholdToSnap || currLine < mPrevLine) {
+                        // User is far enough into the word or on a different
+                        // line so we expand by word.
                         offset = start;
                     } else {
                         offset = mPreviousOffset;
@@ -4352,10 +4359,17 @@ public class Editor {
             if (isExpanding) {
                 // User is increasing the selection.
                 if (!mInWord || currLine > mPrevLine) {
-                    // We're not in a word, or we're on a different line so we'll expand by
-                    // word. First ensure the user has at least entered the next word.
-                    int midPoint = (end - start) / 2;
-                    if (offset >= start + midPoint || currLine > mPrevLine) {
+                    // Sometimes words can be broken across lines (Chinese, hyphenation).
+                    // We still snap to the end of the word but we only use the letters on the
+                    // current line to determine if the user is far enough into the word to snap.
+                    int wordEndOnCurrLine = end;
+                    if (layout != null && layout.getLineForOffset(end) != currLine) {
+                        wordEndOnCurrLine = layout.getLineEnd(currLine);
+                    }
+                    final int offsetThresholdToSnap = start + ((wordEndOnCurrLine - start) / 2);
+                    if (offset >= offsetThresholdToSnap || currLine > mPrevLine) {
+                        // User is far enough into the word or on a different
+                        // line so we expand by word.
                         offset = end;
                     } else {
                         offset = mPreviousOffset;
