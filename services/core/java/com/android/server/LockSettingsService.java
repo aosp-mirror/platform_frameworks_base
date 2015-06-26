@@ -80,6 +80,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         void setCredential(String credential, String savedCredential, int userId)
                 throws RemoteException;
         byte[] toHash(String credential, int userId);
+        String adjustForKeystore(String credential);
     }
 
     public LockSettingsService(Context context) {
@@ -529,6 +530,11 @@ public class LockSettingsService extends ILockSettings.Stub {
                        return LockPatternUtils.patternToHash(
                                LockPatternUtils.stringToPattern(pattern));
                    }
+
+                   @Override
+                   public String adjustForKeystore(String pattern) {
+                       return LockPatternUtils.patternStringToBaseZero(pattern);
+                   }
                }
        );
 
@@ -569,6 +575,11 @@ public class LockSettingsService extends ILockSettings.Stub {
                    public byte[] toHash(String password, int userId) {
                        return mLockPatternUtils.passwordToHash(password, userId);
                    }
+
+                   @Override
+                   public String adjustForKeystore(String password) {
+                       return password;
+                   }
                }
        );
     }
@@ -588,7 +599,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (storedHash.version == CredentialHash.VERSION_LEGACY) {
             byte[] hash = credentialUtil.toHash(credential, userId);
             if (Arrays.equals(hash, storedHash.hash)) {
-                unlockKeystore(credential, userId);
+                unlockKeystore(credentialUtil.adjustForKeystore(credential), userId);
                 // migrate credential to GateKeeper
                 credentialUtil.setCredential(credential, null, userId);
                 if (!hasChallenge) {
