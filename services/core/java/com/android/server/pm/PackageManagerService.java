@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -54,6 +55,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
@@ -196,6 +198,7 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -208,8 +211,8 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
-import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.PermissionsState.PermissionState;
+import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -2560,6 +2563,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
+    public int getMountExternalMode(int uid) {
+        if (Process.isIsolated(uid)) {
+            return Zygote.MOUNT_EXTERNAL_NONE;
+        } else {
+            if (checkUidPermission(WRITE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
+                return Zygote.MOUNT_EXTERNAL_WRITE;
+            } else if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
+                return Zygote.MOUNT_EXTERNAL_READ;
+            } else {
+                return Zygote.MOUNT_EXTERNAL_DEFAULT;
+            }
+        }
+    }
+
     static PermissionInfo generatePermissionInfo(
             BasePermission bp, int flags) {
         if (bp.perm != null) {
@@ -3199,6 +3217,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "grantRuntimePermission");
 
+        final int uid;
         final SettingBase sb;
 
         synchronized (mPackages) {
@@ -3214,6 +3233,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
 
+            uid = pkg.applicationInfo.uid;
             sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
@@ -3243,10 +3263,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } break;
             }
 
-            mOnPermissionChangeListeners.onPermissionsChanged(pkg.applicationInfo.uid);
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Not critical if that is lost - app has to request again.
             mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+        }
+
+        if (READ_EXTERNAL_STORAGE.equals(name)
+                || WRITE_EXTERNAL_STORAGE.equals(name)) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                storage.remountUid(uid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 

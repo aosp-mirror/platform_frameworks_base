@@ -50,6 +50,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -85,6 +86,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -676,13 +678,15 @@ class MountService extends IMountService.Stub
     }
 
     private void handleSystemReady() {
-        resetIfReadyAndConnected();
+        synchronized (mLock) {
+            resetIfReadyAndConnectedLocked();
+        }
 
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
     }
 
-    private void resetIfReadyAndConnected() {
+    private void resetIfReadyAndConnectedLocked() {
         Slog.d(TAG, "Thinking about reset, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
         if (mSystemReady && mDaemonConnected) {
@@ -781,7 +785,9 @@ class MountService extends IMountService.Stub
     }
 
     private void handleDaemonConnected() {
-        resetIfReadyAndConnected();
+        synchronized (mLock) {
+            resetIfReadyAndConnectedLocked();
+        }
 
         /*
          * Now that we've done our initialization, release
@@ -1601,7 +1607,7 @@ class MountService extends IMountService.Stub
             // reset vold so we bind into new volume into place.
             if (Objects.equals(mPrimaryStorageUuid, fsUuid)) {
                 mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
-                resetIfReadyAndConnected();
+                resetIfReadyAndConnectedLocked();
             }
 
             writeSettingsLocked();
@@ -1629,7 +1635,7 @@ class MountService extends IMountService.Stub
             }
 
             writeSettingsLocked();
-            resetIfReadyAndConnected();
+            resetIfReadyAndConnectedLocked();
         }
     }
 
@@ -1638,6 +1644,30 @@ class MountService extends IMountService.Stub
             mConnector.execute("volume", "forget_partition", partGuid);
         } catch (NativeDaemonConnectorException e) {
             Slog.w(TAG, "Failed to forget key for " + partGuid + ": " + e);
+        }
+    }
+
+    @Override
+    public void remountUid(int uid) {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+
+        final int mountExternal = mPms.getMountExternalMode(uid);
+        final String mode;
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
+            mode = "default";
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
+            mode = "read";
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
+            mode = "write";
+        } else {
+            mode = "none";
+        }
+
+        try {
+            mConnector.execute("volume", "remount_uid", uid, mode);
+        } catch (NativeDaemonConnectorException e) {
+            Slog.w(TAG, "Failed to remount UID " + uid + " as " + mode + ": " + e);
         }
     }
 
@@ -1652,7 +1682,7 @@ class MountService extends IMountService.Stub
             }
 
             writeSettingsLocked();
-            resetIfReadyAndConnected();
+            resetIfReadyAndConnectedLocked();
         }
     }
 
@@ -1689,7 +1719,7 @@ class MountService extends IMountService.Stub
                 Slog.d(TAG, "Skipping move to/from primary physical");
                 onMoveStatusLocked(MOVE_STATUS_COPY_FINISHED);
                 onMoveStatusLocked(PackageManager.MOVE_SUCCEEDED);
-                resetIfReadyAndConnected();
+                resetIfReadyAndConnectedLocked();
 
             } else {
                 final VolumeInfo from = Preconditions.checkNotNull(
@@ -2023,7 +2053,7 @@ class MountService extends IMountService.Stub
 
     @Override
     public void finishMediaUpdate() {
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("no permission to call finishMediaUpdate()");
         }
         if (mUnmountSignal != null) {

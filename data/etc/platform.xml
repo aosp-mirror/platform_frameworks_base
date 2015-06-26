@@ -58,21 +58,6 @@
         <group gid="log" />
     </permission>
 
-    <permission name="android.permission.READ_EXTERNAL_STORAGE" perUser="true" >
-        <group gid="sdcard_r" />
-    </permission>
-
-    <permission name="android.permission.WRITE_EXTERNAL_STORAGE" perUser="true" >
-        <group gid="sdcard_r" />
-        <group gid="sdcard_rw" />
-    </permission>
-
-    <permission name="android.permission.ACCESS_ALL_EXTERNAL_STORAGE" >
-        <group gid="sdcard_r" />
-        <group gid="sdcard_rw" />
-        <group gid="sdcard_all" />
-    </permission>
-
     <permission name="android.permission.WRITE_MEDIA_STORAGE" >
         <group gid="media_rw" />
     </permission>
