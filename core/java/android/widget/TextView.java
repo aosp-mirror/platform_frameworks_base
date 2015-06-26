@@ -5231,7 +5231,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // ExtractEditText does not call onFocus when it is displayed, and mHasSelectionOnFocus can
         // not be set. Do the test here instead.
         if (isInExtractedMode() && hasSelection() && mEditor != null
-                && mEditor.mTextActionMode == null) {
+                && mEditor.mTextActionMode == null && isShown() && hasWindowFocus()) {
             mEditor.startSelectionActionMode();
         }
 
