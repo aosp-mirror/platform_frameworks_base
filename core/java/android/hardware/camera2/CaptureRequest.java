@@ -1062,6 +1062,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * capturing a high-resolution JPEG image will automatically trigger a
      * precapture sequence before the high-resolution capture, including
      * potentially firing a pre-capture flash.</p>
+     * <p>Using the precapture trigger and the auto-focus trigger {@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}
+     * simultaneously is allowed. However, since these triggers often require cooperation between
+     * the auto-focus and auto-exposure routines (for example, the may need to be enabled for a
+     * focus sweep), the camera device may delay acting on a later trigger until the previous
+     * trigger has been fully handled. This may lead to longer intervals between the trigger and
+     * changes to {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} indicating the start of the precapture sequence, for
+     * example.</p>
+     * <p>If both the precapture and the auto-focus trigger are activated on the same request, then
+     * the camera device will complete them in the optimal order for that device.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE IDLE}</li>
@@ -1075,6 +1084,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CaptureResult#CONTROL_AE_STATE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
@@ -1179,6 +1189,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * START for multiple captures in a row means restarting the AF operation over
      * and over again.</p>
      * <p>See {@link CaptureResult#CONTROL_AF_STATE android.control.afState} for what the trigger means for each AF mode.</p>
+     * <p>Using the autofocus trigger and the precapture trigger {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}
+     * simultaneously is allowed. However, since these triggers often require cooperation between
+     * the auto-focus and auto-exposure routines (for example, the may need to be enabled for a
+     * focus sweep), the camera device may delay acting on a later trigger until the previous
+     * trigger has been fully handled. This may lead to longer intervals between the trigger and
+     * changes to {@link CaptureResult#CONTROL_AF_STATE android.control.afState}, for example.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #CONTROL_AF_TRIGGER_IDLE IDLE}</li>
@@ -1187,6 +1203,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CaptureResult#CONTROL_AF_STATE
      * @see #CONTROL_AF_TRIGGER_IDLE
      * @see #CONTROL_AF_TRIGGER_START
