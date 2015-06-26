@@ -1545,7 +1545,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
      */
     int dirNameLen = dirName.length();
     void *iterationCookie;
-    if (!pZip->startIteration(&iterationCookie)) {
+    if (!pZip->startIteration(&iterationCookie, dirName.string(), NULL)) {
         ALOGW("ZipFileRO::startIteration returned false");
         return false;
     }
@@ -1560,9 +1560,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
             continue;
         }
         //printf("Comparing %s in %s?\n", nameBuf, dirName.string());
-        if (dirNameLen == 0 ||
-            (strncmp(nameBuf, dirName.string(), dirNameLen) == 0 &&
-             nameBuf[dirNameLen] == '/'))
+        if (dirNameLen == 0 || nameBuf[dirNameLen] == '/')
         {
             const char* cp;
             const char* nextSlash;
