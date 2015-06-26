@@ -387,7 +387,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         } else if (isActive()) {
             // This is the active connection on non-passpoint network
             summary.append(getSummary(mContext, getDetailedState(),
-                    networkId == WifiConfiguration.INVALID_NETWORK_ID));
+                    mInfo != null && mInfo.isEphemeral()));
         } else if (mConfig != null && mConfig.isPasspoint()) {
             String format = mContext.getString(R.string.available_via_passpoint);
             summary.append(String.format(format, mConfig.providerFriendlyName));
@@ -620,7 +620,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public boolean isEphemeral() {
-        return !isSaved() && mNetworkInfo != null && mNetworkInfo.getState() != State.DISCONNECTED;
+        return mInfo != null && mInfo.isEphemeral() &&
+                mNetworkInfo != null && mNetworkInfo.getState() != State.DISCONNECTED;
     }
 
     /** Return whether the given {@link WifiInfo} is for this access point. */
@@ -757,7 +758,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mAccessPointListener.onAccessPointChanged(this);
         }
     }
-    
+
     public static String getSummary(Context context, String ssid, DetailedState state,
             boolean isEphemeral, String passpointProvider) {
         if (state == DetailedState.CONNECTED && ssid == null) {
