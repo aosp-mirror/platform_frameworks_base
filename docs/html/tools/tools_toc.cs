@@ -189,6 +189,8 @@ class="en">Tools Help</span></a></div>
         <span class="en">Configuring Gradle Builds</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/building/plugin-for-gradle.html">
         <span class="en">Android Plugin for Gradle</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/building/manifest-merge.html">
+        <span class="en">Manifest Merging</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/building/multidex.html">
         <span class="en">Apps Over 65K Methods</span></a></li>
       </ul>
