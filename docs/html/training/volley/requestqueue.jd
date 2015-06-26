@@ -139,7 +139,8 @@ rotates the device).
 <p>Here is an example of a singleton class that provides {@code RequestQueue} and
 {@code ImageLoader} functionality:</p>
 
-<pre>private static MySingleton mInstance;
+<pre>public class MySingleton {
+    private static MySingleton mInstance;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static Context mCtx;
