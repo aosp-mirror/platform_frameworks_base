@@ -4173,7 +4173,7 @@ public class Editor {
                 if (!mInWord || currLine < mPrevLine) {
                     // We're not in a word, or we're on a different line so we'll expand by
                     // word. First ensure the user has at least entered the next word.
-                    int offsetToWord = Math.min((end - start) / 2, 2);
+                    int offsetToWord = (end - start) / 2;
                     if (offset <= end - offsetToWord || currLine < mPrevLine) {
                         offset = start;
                     } else {
@@ -4354,7 +4354,7 @@ public class Editor {
                 if (!mInWord || currLine > mPrevLine) {
                     // We're not in a word, or we're on a different line so we'll expand by
                     // word. First ensure the user has at least entered the next word.
-                    int midPoint = Math.min((end - start) / 2, 2);
+                    int midPoint = (end - start) / 2;
                     if (offset >= start + midPoint || currLine > mPrevLine) {
                         offset = end;
                     } else {
