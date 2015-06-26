@@ -519,6 +519,10 @@ class ZygoteConnection {
                     niceName = arg.substring(arg.indexOf('=') + 1);
                 } else if (arg.equals("--mount-external-default")) {
                     mountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
+                } else if (arg.equals("--mount-external-read")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_READ;
+                } else if (arg.equals("--mount-external-write")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
                 } else if (arg.equals("--query-abi-list")) {
                     abiListQuery = true;
                 } else if (arg.startsWith("--instruction-set=")) {

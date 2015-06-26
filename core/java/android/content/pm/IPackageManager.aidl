@@ -504,4 +504,5 @@ interface IPackageManager {
 
     void grantDefaultPermissions(int userId);
     void setCarrierAppPackagesProvider(in IPackagesProvider provider);
+    int getMountExternalMode(int uid);
 }

@@ -643,6 +643,10 @@ public class Process {
             }
             if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
                 argsForZygote.add("--mount-external-default");
+            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
+                argsForZygote.add("--mount-external-read");
+            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
+                argsForZygote.add("--mount-external-write");
             }
             argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 
@@ -802,7 +806,12 @@ public class Process {
      * @hide
      */
     public static final boolean isIsolated() {
-        int uid = UserHandle.getAppId(myUid());
+        return isIsolated(myUid());
+    }
+
+    /** {@hide} */
+    public static final boolean isIsolated(int uid) {
+        uid = UserHandle.getAppId(uid);
         return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
     }
 

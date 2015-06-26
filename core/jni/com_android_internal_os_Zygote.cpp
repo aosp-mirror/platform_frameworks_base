@@ -66,6 +66,8 @@ static jmethodID gCallPostForkChildHooks;
 enum MountExternalKind {
   MOUNT_EXTERNAL_NONE = 0,
   MOUNT_EXTERNAL_DEFAULT = 1,
+  MOUNT_EXTERNAL_READ = 2,
+  MOUNT_EXTERNAL_WRITE = 3,
 };
 
 static void RuntimeAbort(JNIEnv* env) {
@@ -249,38 +251,49 @@ static void SetSchedulerPolicy(JNIEnv* env) {
 
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
-static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_namespace) {
-  if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
+static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
+        bool force_mount_namespace) {
+    // See storage config details at http://source.android.com/tech/storage/
+
+    // Create a second private mount namespace for our process
+    if (unshare(CLONE_NEWNS) == -1) {
+        ALOGW("Failed to unshare(): %s", strerror(errno));
+        return false;
+    }
+
+    // Unmount storage provided by root namespace and mount requested view
+    umount2("/storage", MNT_FORCE);
+
+    String8 storageSource;
+    if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
+        storageSource = "/mnt/runtime_default";
+    } else if (mount_mode == MOUNT_EXTERNAL_READ) {
+        storageSource = "/mnt/runtime_read";
+    } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
+        storageSource = "/mnt/runtime_write";
+    } else {
+        // Sane default of no storage visible
+        return true;
+    }
+    if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
+            NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
+        ALOGW("Failed to mount %s to /storage: %s", storageSource.string(), strerror(errno));
+        return false;
+    }
+
+    // Mount user-specific symlink helpers into place
+    userid_t user_id = multiuser_get_user_id(uid);
+    const String8 userSource(String8::format("/mnt/user/%d", user_id));
+    if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
+        return false;
+    }
+    if (TEMP_FAILURE_RETRY(mount(userSource.string(), "/storage/self",
+            NULL, MS_BIND, NULL)) == -1) {
+        ALOGW("Failed to mount %s to /storage/self: %s", userSource.string(), strerror(errno));
+        return false;
+    }
+
     return true;
-  }
-
-  // Create a second private mount namespace for our process
-  if (unshare(CLONE_NEWNS) == -1) {
-      ALOGW("Failed to unshare(): %s", strerror(errno));
-      return false;
-  }
-
-  if (mount_mode == MOUNT_EXTERNAL_NONE) {
-    return true;
-  }
-
-  // See storage config details at http://source.android.com/tech/storage/
-  userid_t user_id = multiuser_get_user_id(uid);
-
-  // Bind mount user-specific storage into place
-  const String8 source(String8::format("/mnt/user/%d", user_id));
-  const String8 target(String8::format("/storage/self"));
-
-  if (fs_prepare_dir(source.string(), 0755, 0, 0) == -1) {
-    return false;
-  }
-
-  if (TEMP_FAILURE_RETRY(mount(source.string(), target.string(), NULL, MS_BIND, NULL)) == -1) {
-    ALOGW("Failed to mount %s to %s: %s", source.string(), target.string(), strerror(errno));
-    return false;
-  }
-
-  return true;
 }
 
 static bool NeedsNoRandomizeWorkaround() {
@@ -543,7 +556,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
-                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true, NULL,
+                                      MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
                                       NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
