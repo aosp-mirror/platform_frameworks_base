@@ -1130,7 +1130,7 @@ final class Settings {
         return result;
     }
 
-    boolean setDefaultBrowserPackageNameLPr(String packageName, int userId) {
+    boolean setDefaultBrowserPackageNameLPw(String packageName, int userId) {
         if (userId == UserHandle.USER_ALL) {
             return false;
         }
@@ -2710,7 +2710,7 @@ final class Settings {
         return true;
     }
 
-    void readDefaultPreferredAppsLPw(PackageManagerService service, int userId) {
+    void applyDefaultPreferredAppsLPw(PackageManagerService service, int userId) {
         // First pull data from any pre-installed apps.
         for (PackageSetting ps : mPackages.values()) {
             if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0 && ps.pkg != null
@@ -3618,7 +3618,7 @@ final class Settings {
                     UserHandle.getUid(userHandle, ps.appId), userHandle,
                     ps.pkg.applicationInfo.seinfo);
         }
-        readDefaultPreferredAppsLPw(service, userHandle);
+        applyDefaultPreferredAppsLPw(service, userHandle);
         writePackageRestrictionsLPr(userHandle);
         writePackageListLPr(userHandle);
     }
