@@ -47,6 +47,8 @@ import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
+import android.util.LocalLog;
+import android.util.LocalLog.ReadOnlyLocalLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -232,6 +234,8 @@ public class NetworkMonitor extends StateMachine {
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
     private String mCaptivePortalLoggedInResponseToken = null;
 
+    private final LocalLog validationLogs = new LocalLog(20); // 20 lines
+
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
         // Add suffix indicating which NetworkMonitor we're talking about.
@@ -270,6 +274,15 @@ public class NetworkMonitor extends StateMachine {
     @Override
     protected void log(String s) {
         Log.d(TAG + "/" + mNetworkAgentInfo.name(), s);
+    }
+
+    private void validationLog(String s) {
+        if (DBG) log(s);
+        validationLogs.log(s);
+    }
+
+    public ReadOnlyLocalLog getValidationLogs() {
+        return validationLogs.readOnlyLocalLog();
     }
 
     // DefaultState is the parent of all States.  It exists only to handle CMD_* messages but
@@ -649,10 +662,8 @@ public class NetworkMonitor extends StateMachine {
                     fetchPac = true;
                 }
             }
-            if (DBG) {
-                log("Checking " + url.toString() + " on " +
-                        mNetworkAgentInfo.networkInfo.getExtraInfo());
-            }
+            validationLog("Checking " + url.toString() + " on " +
+                    mNetworkAgentInfo.networkInfo.getExtraInfo());
             urlConnection = (HttpURLConnection) mNetworkAgentInfo.network.openConnection(url);
             urlConnection.setInstanceFollowRedirects(fetchPac);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
@@ -668,10 +679,8 @@ public class NetworkMonitor extends StateMachine {
             long responseTimestamp = SystemClock.elapsedRealtime();
 
             httpResponseCode = urlConnection.getResponseCode();
-            if (DBG) {
-                log("isCaptivePortal: ret=" + httpResponseCode +
-                        " headers=" + urlConnection.getHeaderFields());
-            }
+            validationLog("isCaptivePortal: ret=" + httpResponseCode +
+                    " headers=" + urlConnection.getHeaderFields());
             // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
             // portal.  The only example of this seen so far was a captive portal.  For
             // the time being go with prior behavior of assuming it's not a captive
@@ -684,12 +693,12 @@ public class NetworkMonitor extends StateMachine {
             // sign-in to an empty page.  Probably the result of a broken transparent proxy.
             // See http://b/9972012.
             if (httpResponseCode == 200 && urlConnection.getContentLength() == 0) {
-                if (DBG) log("Empty 200 response interpreted as 204 response.");
+                validationLog("Empty 200 response interpreted as 204 response.");
                 httpResponseCode = 204;
             }
 
             if (httpResponseCode == 200 && fetchPac) {
-                if (DBG) log("PAC fetch 200 response interpreted as 204 response.");
+                validationLog("PAC fetch 200 response interpreted as 204 response.");
                 httpResponseCode = 204;
             }
 
@@ -697,7 +706,7 @@ public class NetworkMonitor extends StateMachine {
                     httpResponseCode != 204 /* isCaptivePortal */,
                     requestTimestamp, responseTimestamp);
         } catch (IOException e) {
-            if (DBG) log("Probably not a portal: exception " + e);
+            validationLog("Probably not a portal: exception " + e);
             if (httpResponseCode == 599) {
                 // TODO: Ping gateway and DNS server and log results.
             }
