@@ -17,11 +17,13 @@
 package com.android.server.pm;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal.PackagesProvider;
 import android.content.pm.PackageParser;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
@@ -228,6 +230,7 @@ final class DefaultPermissionGrantPolicy {
             for (int i = 0; i < installerCount; i++) {
                 PackageParser.Package installPackage = installerPackages.get(i);
                 grantInstallPermissionsLPw(installPackage, INSTALLER_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(installPackage, STORAGE_PERMISSIONS, userId);
             }
 
             // Verifiers
@@ -239,6 +242,7 @@ final class DefaultPermissionGrantPolicy {
             for (int i = 0; i < verifierCount; i++) {
                 PackageParser.Package verifierPackage = verifierPackages.get(i);
                 grantInstallPermissionsLPw(verifierPackage, VERIFIER_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(verifierPackage, STORAGE_PERMISSIONS, userId);
             }
 
             // SetupWizard
@@ -273,6 +277,30 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(cameraPackage)) {
                 grantRuntimePermissionsLPw(cameraPackage, CAMERA_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(cameraPackage, MICROPHONE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(cameraPackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // Media provider
+            PackageParser.Package mediaStorePackage = getDefaultProviderAuthorityPackageLPr(
+                    MediaStore.AUTHORITY, userId);
+            if (mediaStorePackage != null) {
+                grantRuntimePermissionsLPw(mediaStorePackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // Downloads provider
+            PackageParser.Package downloadsPackage = getDefaultProviderAuthorityPackageLPr(
+                    "downloads", userId);
+            if (downloadsPackage != null) {
+                grantRuntimePermissionsLPw(downloadsPackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // Downloads UI
+            Intent downloadsUiIntent = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+            PackageParser.Package downloadsUiPackage = getDefaultSystemHandlerActvityPackageLPr(
+                    downloadsUiIntent, userId);
+            if (downloadsUiPackage != null
+                    && doesPackageSupportRuntimePermissions(downloadsUiPackage)) {
+                grantRuntimePermissionsLPw(downloadsUiPackage, STORAGE_PERMISSIONS, userId);
             }
 
             // Messaging
@@ -448,6 +476,15 @@ final class DefaultPermissionGrantPolicy {
             if (handlerPackage != null) {
                 return handlerPackage;
             }
+        }
+        return null;
+    }
+
+    private PackageParser.Package getDefaultProviderAuthorityPackageLPr(
+            String authority, int userId) {
+        ProviderInfo provider = mService.resolveContentProvider(authority, 0, userId);
+        if (provider != null) {
+            return getSystemPackageLPr(provider.packageName);
         }
         return null;
     }
