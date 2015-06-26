@@ -18,6 +18,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView android:id="@+id/full_screenshot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"/>
+
     <com.android.test.voiceinteraction.AssistVisualizer android:id="@+id/assist_visualizer"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -30,19 +35,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:background="#ffffffff"
             android:elevation="8dp"
             >
+            <ImageView android:id="@+id/screenshot"
+                android:layout_width="wrap_content"
+                android:layout_height="46dp"
+                android:adjustViewBounds="true" />
+            <View android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+            <Button android:id="@+id/do_tree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tree" />
+            <Button android:id="@+id/do_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text" />
             <Button android:id="@+id/start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|right"
-                android:text="@string/start"
-                />
-            <ImageView android:id="@+id/screenshot"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:text="@string/start" />
         </LinearLayout>
 
         <LinearLayout android:id="@+id/bottom_content"
@@ -58,26 +73,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal">
                 <Button android:id="@+id/confirm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/confirm"
-                    />
+                    android:text="@string/confirm" />
                 <Button android:id="@+id/complete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/complete"
-                    />
+                    android:text="@string/complete" />
                 <Button android:id="@+id/abort"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/abort"
-                    />
+                    android:text="@string/abort" />
             </LinearLayout>
 
         </LinearLayout>

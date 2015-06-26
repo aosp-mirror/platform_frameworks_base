@@ -2,6 +2,7 @@ package android.app.assist;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -128,24 +129,24 @@ public class AssistStructure implements Parcelable {
             view.dispatchProvideStructure(builder);
         }
 
-        WindowNode(Parcel in, PooledStringReader preader) {
+        WindowNode(Parcel in, PooledStringReader preader, float[] tmpMatrix) {
             mX = in.readInt();
             mY = in.readInt();
             mWidth = in.readInt();
             mHeight = in.readInt();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mDisplayId = in.readInt();
-            mRoot = new ViewNode(in, preader);
+            mRoot = new ViewNode(in, preader, tmpMatrix);
         }
 
-        void writeToParcel(Parcel out, PooledStringWriter pwriter) {
+        int writeToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
             out.writeInt(mX);
             out.writeInt(mY);
             out.writeInt(mWidth);
             out.writeInt(mHeight);
             TextUtils.writeToParcel(mTitle, out, 0);
             out.writeInt(mDisplayId);
-            mRoot.writeToParcel(out, pwriter);
+            return mRoot.writeToParcel(out, pwriter, tmpMatrix);
         }
 
         /**
@@ -216,7 +217,7 @@ public class AssistStructure implements Parcelable {
         public static final int TEXT_STYLE_UNDERLINE = 1<<2;
         public static final int TEXT_STYLE_STRIKE_THRU = 1<<3;
 
-        int mId;
+        int mId = View.NO_ID;
         String mIdPackage;
         String mIdType;
         String mIdEntry;
@@ -226,20 +227,35 @@ public class AssistStructure implements Parcelable {
         int mScrollY;
         int mWidth;
         int mHeight;
+        Matrix mMatrix;
+        float mElevation;
+        float mAlpha = 1.0f;
 
         static final int FLAGS_DISABLED = 0x00000001;
         static final int FLAGS_VISIBILITY_MASK = View.VISIBLE|View.INVISIBLE|View.GONE;
         static final int FLAGS_FOCUSABLE = 0x00000010;
         static final int FLAGS_FOCUSED = 0x00000020;
-        static final int FLAGS_ACCESSIBILITY_FOCUSED = 0x04000000;
         static final int FLAGS_SELECTED = 0x00000040;
         static final int FLAGS_ASSIST_BLOCKED = 0x00000080;
-        static final int FLAGS_ACTIVATED = 0x40000000;
         static final int FLAGS_CHECKABLE = 0x00000100;
         static final int FLAGS_CHECKED = 0x00000200;
-        static final int FLAGS_CLICKABLE = 0x00004000;
-        static final int FLAGS_LONG_CLICKABLE = 0x00200000;
-        static final int FLAGS_CONTEXT_CLICKABLE = 0x00400000;
+        static final int FLAGS_CLICKABLE = 0x00000400;
+        static final int FLAGS_LONG_CLICKABLE = 0x00000800;
+        static final int FLAGS_ACCESSIBILITY_FOCUSED = 0x00001000;
+        static final int FLAGS_ACTIVATED = 0x00002000;
+        static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
+
+        static final int FLAGS_HAS_MATRIX = 0x40000000;
+        static final int FLAGS_HAS_ALPHA = 0x20000000;
+        static final int FLAGS_HAS_ELEVATION = 0x10000000;
+        static final int FLAGS_HAS_SCROLL = 0x08000000;
+        static final int FLAGS_HAS_LARGE_COORDS = 0x04000000;
+        static final int FLAGS_HAS_CONTENT_DESCRIPTION = 0x02000000;
+        static final int FLAGS_HAS_TEXT = 0x01000000;
+        static final int FLAGS_HAS_EXTRAS = 0x00800000;
+        static final int FLAGS_HAS_ID = 0x00400000;
+        static final int FLAGS_HAS_CHILDREN = 0x00200000;
+        static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
         int mFlags;
 
@@ -254,79 +270,153 @@ public class AssistStructure implements Parcelable {
         ViewNode() {
         }
 
-        ViewNode(Parcel in, PooledStringReader preader) {
-            mId = in.readInt();
-            if (mId != 0) {
-                mIdEntry = preader.readString();
-                if (mIdEntry != null) {
-                    mIdType = preader.readString();
-                    mIdPackage = preader.readString();
-                } else {
-                    mIdPackage = mIdType = null;
-                }
-            } else {
-                mIdPackage = mIdType = mIdEntry = null;
-            }
-            mX = in.readInt();
-            mY = in.readInt();
-            mScrollX = in.readInt();
-            mScrollY = in.readInt();
-            mWidth = in.readInt();
-            mHeight = in.readInt();
-            mFlags = in.readInt();
+        ViewNode(Parcel in, PooledStringReader preader, float[] tmpMatrix) {
             mClassName = preader.readString();
-            mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-            if (in.readInt() != 0) {
-                mText = new ViewNodeText(in);
-            } else {
-                mText = null;
+            mFlags = in.readInt();
+            final int flags = mFlags;
+            if ((flags&FLAGS_HAS_ID) != 0) {
+                mId = in.readInt();
+                if (mId != 0) {
+                    mIdEntry = preader.readString();
+                    if (mIdEntry != null) {
+                        mIdType = preader.readString();
+                        mIdPackage = preader.readString();
+                    }
+                }
             }
-            mExtras = in.readBundle();
-            final int NCHILDREN = in.readInt();
-            if (NCHILDREN > 0) {
+            if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
+                mX = in.readInt();
+                mY = in.readInt();
+                mWidth = in.readInt();
+                mHeight = in.readInt();
+            } else {
+                int val = in.readInt();
+                mX = val&0x7fff;
+                mY = (val>>16)&0x7fff;
+                val = in.readInt();
+                mWidth = val&0x7fff;
+                mHeight = (val>>16)&0x7fff;
+            }
+            if ((flags&FLAGS_HAS_SCROLL) != 0) {
+                mScrollX = in.readInt();
+                mScrollY = in.readInt();
+            }
+            if ((flags&FLAGS_HAS_MATRIX) != 0) {
+                mMatrix = new Matrix();
+                in.readFloatArray(tmpMatrix);
+                mMatrix.setValues(tmpMatrix);
+            }
+            if ((flags&FLAGS_HAS_ELEVATION) != 0) {
+                mElevation = in.readFloat();
+            }
+            if ((flags&FLAGS_HAS_ALPHA) != 0) {
+                mAlpha = in.readFloat();
+            }
+            if ((flags&FLAGS_HAS_CONTENT_DESCRIPTION) != 0) {
+                mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            }
+            if ((flags&FLAGS_HAS_TEXT) != 0) {
+                mText = new ViewNodeText(in);
+            }
+            if ((flags&FLAGS_HAS_EXTRAS) != 0) {
+                mExtras = in.readBundle();
+            }
+            if ((flags&FLAGS_HAS_CHILDREN) != 0) {
+                final int NCHILDREN = in.readInt();
                 mChildren = new ViewNode[NCHILDREN];
                 for (int i=0; i<NCHILDREN; i++) {
-                    mChildren[i] = new ViewNode(in, preader);
+                    mChildren[i] = new ViewNode(in, preader, tmpMatrix);
                 }
-            } else {
-                mChildren = null;
             }
         }
 
-        void writeToParcel(Parcel out, PooledStringWriter pwriter) {
-            out.writeInt(mId);
-            if (mId != 0) {
-                pwriter.writeString(mIdEntry);
-                if (mIdEntry != null) {
-                    pwriter.writeString(mIdType);
-                    pwriter.writeString(mIdPackage);
+        int writeToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
+            int flags = mFlags & ~FLAGS_ALL_CONTROL;
+            if (mId != View.NO_ID) {
+                flags |= FLAGS_HAS_ID;
+            }
+            if ((mX&~0x7fff) != 0 || (mY&~0x7fff) != 0
+                    || (mWidth&~0x7fff) != 0 | (mHeight&~0x7fff) != 0) {
+                flags |= FLAGS_HAS_LARGE_COORDS;
+            }
+            if (mScrollX != 0 || mScrollY != 0) {
+                flags |= FLAGS_HAS_SCROLL;
+            }
+            if (mMatrix != null) {
+                flags |= FLAGS_HAS_MATRIX;
+            }
+            if (mElevation != 0) {
+                flags |= FLAGS_HAS_ELEVATION;
+            }
+            if (mAlpha != 1.0f) {
+                flags |= FLAGS_HAS_ALPHA;
+            }
+            if (mContentDescription != null) {
+                flags |= FLAGS_HAS_CONTENT_DESCRIPTION;
+            }
+            if (mText != null) {
+                flags |= FLAGS_HAS_TEXT;
+            }
+            if (mExtras != null) {
+                flags |= FLAGS_HAS_EXTRAS;
+            }
+            if (mChildren != null) {
+                flags |= FLAGS_HAS_CHILDREN;
+            }
+
+            pwriter.writeString(mClassName);
+            out.writeInt(flags);
+            if ((flags&FLAGS_HAS_ID) != 0) {
+                out.writeInt(mId);
+                if (mId != 0) {
+                    pwriter.writeString(mIdEntry);
+                    if (mIdEntry != null) {
+                        pwriter.writeString(mIdType);
+                        pwriter.writeString(mIdPackage);
+                    }
                 }
             }
-            out.writeInt(mX);
-            out.writeInt(mY);
-            out.writeInt(mScrollX);
-            out.writeInt(mScrollY);
-            out.writeInt(mWidth);
-            out.writeInt(mHeight);
-            out.writeInt(mFlags);
-            pwriter.writeString(mClassName);
-            TextUtils.writeToParcel(mContentDescription, out, 0);
-            if (mText != null) {
-                out.writeInt(1);
-                mText.writeToParcel(out);
+            if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
+                out.writeInt(mX);
+                out.writeInt(mY);
+                out.writeInt(mWidth);
+                out.writeInt(mHeight);
             } else {
-                out.writeInt(0);
+                out.writeInt((mY<<16) | mX);
+                out.writeInt((mHeight<<16) | mWidth);
             }
-            out.writeBundle(mExtras);
-            if (mChildren != null) {
+            if ((flags&FLAGS_HAS_SCROLL) != 0) {
+                out.writeInt(mScrollX);
+                out.writeInt(mScrollY);
+            }
+            if ((flags&FLAGS_HAS_MATRIX) != 0) {
+                mMatrix.getValues(tmpMatrix);
+                out.writeFloatArray(tmpMatrix);
+            }
+            if ((flags&FLAGS_HAS_ELEVATION) != 0) {
+                out.writeFloat(mElevation);
+            }
+            if ((flags&FLAGS_HAS_ALPHA) != 0) {
+                out.writeFloat(mAlpha);
+            }
+            if ((flags&FLAGS_HAS_CONTENT_DESCRIPTION) != 0) {
+                TextUtils.writeToParcel(mContentDescription, out, 0);
+            }
+            if ((flags&FLAGS_HAS_TEXT) != 0) {
+                mText.writeToParcel(out);
+            }
+            if ((flags&FLAGS_HAS_EXTRAS) != 0) {
+                out.writeBundle(mExtras);
+            }
+            int N = 1;
+            if ((flags&FLAGS_HAS_CHILDREN) != 0) {
                 final int NCHILDREN = mChildren.length;
                 out.writeInt(NCHILDREN);
                 for (int i=0; i<NCHILDREN; i++) {
-                    mChildren[i].writeToParcel(out, pwriter);
+                    N += mChildren[i].writeToParcel(out, pwriter, tmpMatrix);
                 }
-            } else {
-                out.writeInt(0);
             }
+            return N;
         }
 
         /**
@@ -405,6 +495,33 @@ public class AssistStructure implements Parcelable {
          */
         public int getHeight() {
             return mHeight;
+        }
+
+        /**
+         * Returns the transformation that has been applied to this view, such as a translation
+         * or scaling.  The returned Matrix object is owned by ViewNode; do not modify it.
+         * Returns null if there is no transformation applied to the view.
+         */
+        public Matrix getTransformation() {
+            return mMatrix;
+        }
+
+        /**
+         * Returns the visual elevation of the view, used for shadowing and other visual
+         * characterstics, as set by {@link ViewStructure#setElevation
+         * ViewStructure.setElevation(float)}.
+         */
+        public float getElevation() {
+            return mElevation;
+        }
+
+        /**
+         * Returns the alpha transformation of the view, used to reduce the overall opacity
+         * of the view's contents, as set by {@link ViewStructure#setAlpha
+         * ViewStructure.setAlpha(float)}.
+         */
+        public float getAlpha() {
+            return mAlpha;
         }
 
         /**
@@ -643,6 +760,25 @@ public class AssistStructure implements Parcelable {
             mNode.mScrollY = scrollY;
             mNode.mWidth = width;
             mNode.mHeight = height;
+        }
+
+        @Override
+        public void setTransformation(Matrix matrix) {
+            if (matrix == null) {
+                mNode.mMatrix = null;
+            } else {
+                mNode.mMatrix = new Matrix(matrix);
+            }
+        }
+
+        @Override
+        public void setElevation(float elevation) {
+            mNode.mElevation = elevation;
+        }
+
+        @Override
+        public void setAlpha(float alpha) {
+            mNode.mAlpha = alpha;
         }
 
         @Override
@@ -919,6 +1055,18 @@ public class AssistStructure implements Parcelable {
         if (scrollX != 0 || scrollY != 0) {
             Log.i(TAG, prefix + "  Scroll: " + scrollX + "," + scrollY);
         }
+        Matrix matrix = node.getTransformation();
+        if (matrix != null) {
+            Log.i(TAG, prefix + "  Transformation: " + matrix);
+        }
+        float elevation = node.getElevation();
+        if (elevation != 0) {
+            Log.i(TAG, prefix + "  Elevation: " + elevation);
+        }
+        float alpha = node.getAlpha();
+        if (alpha != 0) {
+            Log.i(TAG, prefix + "  Alpha: " + elevation);
+        }
         CharSequence contentDescription = node.getContentDescription();
         if (contentDescription != null) {
             Log.i(TAG, prefix + "  Content description: " + contentDescription);
@@ -1010,27 +1158,33 @@ public class AssistStructure implements Parcelable {
             }
             if (mPendingAsyncChildren.size() > 0) {
                 // We waited too long, assume none of the assist structure is valid.
+                Log.w(TAG, "Skipping assist structure, waiting too long for async children (have "
+                        + mPendingAsyncChildren.size() + " remaining");
                 skipStructure = true;
             }
         }
         int start = out.dataPosition();
         PooledStringWriter pwriter = new PooledStringWriter(out);
+        float[] tmpMatrix = new float[9];
         ComponentName.writeToParcel(mActivityComponent, out);
         final int N = skipStructure ? 0 : mWindowNodes.size();
         out.writeInt(N);
+        int NV = 0;
         for (int i=0; i<N; i++) {
-            mWindowNodes.get(i).writeToParcel(out, pwriter);
+            NV += mWindowNodes.get(i).writeToParcel(out, pwriter, tmpMatrix);
         }
         pwriter.finish();
-        Log.i(TAG, "Flattened assist data: " + (out.dataPosition() - start) + " bytes");
+        Log.i(TAG, "Flattened assist data: " + (out.dataPosition() - start) + " bytes, containing "
+                + N + " windows, " + NV + " views");
     }
 
     void readContentFromParcel(Parcel in) {
         PooledStringReader preader = new PooledStringReader(in);
+        float[] tmpMatrix = new float[9];
         mActivityComponent = ComponentName.readFromParcel(in);
         final int N = in.readInt();
         for (int i=0; i<N; i++) {
-            mWindowNodes.add(new WindowNode(in, preader));
+            mWindowNodes.add(new WindowNode(in, preader, tmpMatrix));
         }
         //dump();
     }
