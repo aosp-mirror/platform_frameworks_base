@@ -3351,6 +3351,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
+                // Also always dispatch the event that assist is reading context.
+                case AccessibilityEvent.TYPE_ASSIST_READING_CONTEXT:
                 // Also windows changing should always be anounced.
                 case AccessibilityEvent.TYPE_WINDOWS_CHANGED: {
                     return true;
