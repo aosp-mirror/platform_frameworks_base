@@ -31,6 +31,14 @@ Emulator</a></li>
     </div>
   </div>
 
+<p class="caution">
+  <strong>Important:</strong> Support for Ant as a build tool for Android is ending, per our
+  <a href="http://android-developers.blogspot.com/2015/06/an-update-on-eclipse-android-developer.html"
+  class="external-link">announcement</a>. You should migrate your app development projects to
+  Android Studio and Gradle as soon as possible. For more information on transitioning to these
+  tools, see <a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a>.
+</p>
+
   <p>There are two ways to build your application using the Ant build script: one for
   testing/debugging your application &mdash; <em>debug mode</em> &mdash; and one for building your
   final package for release &mdash; <em>release mode</em>. Regardless of which way you build your application,
