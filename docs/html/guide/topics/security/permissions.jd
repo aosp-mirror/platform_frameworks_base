@@ -52,9 +52,7 @@ must explicitly share resources and data. They do this by declaring the
 <em>permissions</em> they need for additional capabilities not provided by
 the basic sandbox. Applications statically declare the permissions they
 require, and the Android system prompts the user for consent at the time the
-application is installed. Android has no mechanism for granting permissions
-dynamically (at run-time) because it complicates the user experience to the
-detriment of security.</p>
+application is installed.</p>
 
 <p>The application sandbox does not depend on the technology used to build
 an application. In particular the Dalvik VM is not a security boundary, and
