@@ -2738,35 +2738,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The maximum number of frames that can occur after a request
      * (different than the previous) has been submitted, and before the
-     * result's state becomes synchronized (by setting
-     * android.sync.frameNumber to a non-negative value).</p>
+     * result's state becomes synchronized.</p>
      * <p>This defines the maximum distance (in number of metadata results),
-     * between android.sync.frameNumber and the equivalent
-     * frame number for that result.</p>
+     * between the frame number of the request that has new controls to apply
+     * and the frame number of the result that has all the controls applied.</p>
      * <p>In other words this acts as an upper boundary for how many frames
      * must occur before the camera device knows for a fact that the new
      * submitted camera settings have been applied in outgoing frames.</p>
-     * <p>For example if the distance was 2,</p>
-     * <pre><code>initial request = X (repeating)
-     * request1 = X
-     * request2 = Y
-     * request3 = Y
-     * request4 = Y
-     *
-     * where requestN has frameNumber N, and the first of the repeating
-     * initial request's has frameNumber F (and F &lt; 1).
-     *
-     * initial result = X' + { android.sync.frameNumber == F }
-     * result1 = X' + { android.sync.frameNumber == F }
-     * result2 = X' + { android.sync.frameNumber == CONVERGING }
-     * result3 = X' + { android.sync.frameNumber == CONVERGING }
-     * result4 = X' + { android.sync.frameNumber == 2 }
-     *
-     * where resultN has frameNumber N.
-     * </code></pre>
-     * <p>Since <code>result4</code> has a <code>frameNumber == 4</code> and
-     * <code>android.sync.frameNumber == 2</code>, the distance is clearly
-     * <code>4 - 2 = 2</code>.</p>
      * <p><b>Units</b>: Frame counts</p>
      * <p><b>Possible values:</b>
      * <ul>
