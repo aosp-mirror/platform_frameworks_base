@@ -433,6 +433,11 @@ public class VoiceInteractionManagerService extends SystemService {
                     + " user=" + userHandle);
         }
 
+        void resetCurAssistant(int userHandle) {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ASSISTANT, null, userHandle);
+        }
+
         @Override
         public void showSession(IVoiceInteractionService service, Bundle args, int flags) {
             synchronized (this) {
@@ -897,6 +902,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         }
                         setCurInteractor(null, userHandle);
                         setCurRecognizer(null, userHandle);
+                        resetCurAssistant(userHandle);
                         initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
                     }
