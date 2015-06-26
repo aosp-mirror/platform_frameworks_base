@@ -42,8 +42,11 @@ public class MainInteractionSession extends VoiceInteractionSession
     View mTopContent;
     View mBottomContent;
     TextView mText;
+    Button mTreeButton;
+    Button mTextButton;
     Button mStartButton;
     ImageView mScreenshot;
+    ImageView mFullScreenshot;
     Button mConfirmButton;
     Button mCompleteButton;
     Button mAbortButton;
@@ -110,9 +113,15 @@ public class MainInteractionSession extends VoiceInteractionSession
         mTopContent = mContentView.findViewById(R.id.top_content);
         mBottomContent = mContentView.findViewById(R.id.bottom_content);
         mText = (TextView)mContentView.findViewById(R.id.text);
+        mTreeButton = (Button)mContentView.findViewById(R.id.do_tree);
+        mTreeButton.setOnClickListener(this);
+        mTextButton = (Button)mContentView.findViewById(R.id.do_text);
+        mTextButton.setOnClickListener(this);
         mStartButton = (Button)mContentView.findViewById(R.id.start);
         mStartButton.setOnClickListener(this);
         mScreenshot = (ImageView)mContentView.findViewById(R.id.screenshot);
+        mScreenshot.setOnClickListener(this);
+        mFullScreenshot = (ImageView)mContentView.findViewById(R.id.full_screenshot);
         mConfirmButton = (Button)mContentView.findViewById(R.id.confirm);
         mConfirmButton.setOnClickListener(this);
         mCompleteButton = (Button)mContentView.findViewById(R.id.complete);
@@ -156,8 +165,10 @@ public class MainInteractionSession extends VoiceInteractionSession
             mScreenshot.setAdjustViewBounds(true);
             mScreenshot.setMaxWidth(screenshot.getWidth()/3);
             mScreenshot.setMaxHeight(screenshot.getHeight()/3);
+            mFullScreenshot.setImageBitmap(screenshot);
         } else {
             mScreenshot.setImageDrawable(null);
+            mFullScreenshot.setImageDrawable(null);
         }
     }
 
@@ -183,7 +194,15 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     public void onClick(View v) {
-        if (v == mStartButton) {
+        if (v == mTreeButton) {
+            if (mAssistVisualizer != null) {
+                mAssistVisualizer.logTree();
+            }
+        } else if (v == mTextButton) {
+            if (mAssistVisualizer != null) {
+                mAssistVisualizer.logText();
+            }
+        } else if (v == mStartButton) {
             mState = STATE_LAUNCHING;
             updateState();
             startVoiceActivity(mStartIntent);
@@ -219,9 +238,15 @@ public class MainInteractionSession extends VoiceInteractionSession
         } else if (v == mAbortButton) {
             mPendingRequest.sendAbortVoiceResult(null);
             mPendingRequest = null;
-        } else if (v== mCompleteButton) {
+        } else if (v == mCompleteButton) {
             mPendingRequest.sendCompleteVoiceResult(null);
             mPendingRequest = null;
+        } else if (v == mScreenshot) {
+            if (mFullScreenshot.getVisibility() != View.VISIBLE) {
+                mFullScreenshot.setVisibility(View.VISIBLE);
+            } else {
+                mFullScreenshot.setVisibility(View.INVISIBLE);
+            }
         }
         updateState();
     }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -48,6 +49,28 @@ public abstract class ViewStructure {
      */
     public abstract void setDimens(int left, int top, int scrollX, int scrollY, int width,
             int height);
+
+    /**
+     * Set the transformation matrix associated with this view, as per
+     * {@link View#getMatrix View.getMatrix()}, or null if there is none.
+     */
+    public abstract void setTransformation(Matrix matrix);
+
+    /**
+     * Set the visual elevation (shadow) of the view, as per
+     * {@link View#getZ View.getZ()}.  Note this is <em>not</em> related
+     * to the physical Z-ordering of this view relative to its other siblings (that is how
+     * they overlap when drawing), it is only the visual representation for shadowing.
+     */
+    public abstract void setElevation(float elevation);
+
+    /**
+     * Set an alpha transformation that is applied to this view, as per
+     * {@link View#getAlpha View.getAlpha()}.  Value ranges from 0
+     * (completely transparent) to 1 (completely opaque); the default is 1, which means
+     * no transformation.
+     */
+    public abstract void setAlpha(float alpha);
 
     /**
      * Set the visibility state of this view, as per
