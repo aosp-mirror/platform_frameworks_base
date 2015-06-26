@@ -292,6 +292,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
 
+    // Accessibility action to share selected text.
+    private static final int ACCESSIBILITY_ACTION_SHARE = 0x10000000;
+
     // System wide time for last cut, copy or text changed action.
     static long sLastCutCopyOrTextChangedTime;
 
@@ -8845,6 +8848,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canCut()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_CUT);
             }
+            if (canShare()) {
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                        ACCESSIBILITY_ACTION_SHARE,
+                        getResources().getString(com.android.internal.R.string.share)));
+            }
         }
 
         // Check for known input filter types.
@@ -8951,6 +8959,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 ensureIterableTextForAccessibilitySelectable();
                 return super.performAccessibilityActionInternal(action, arguments);
             }
+            case ACCESSIBILITY_ACTION_SHARE: {
+                if (isFocused() && canShare()) {
+                    if (onTextContextMenuItem(ID_SHARE)) {
+                        return true;
+                    }
+                }
+            } return false;
             default: {
                 return super.performAccessibilityActionInternal(action, arguments);
             }
