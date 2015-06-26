@@ -30,19 +30,20 @@ page.tags=adt
     </div>
   </div>
 
-  <p>ADT (Android Developer Tools) is a plugin for Eclipse that provides a suite of
+<p class="caution">
+  <strong>Important:</strong> Support for the Android Developer Tools (ADT) in Eclipse is ending,
+  per our <a href=
+  "http://android-developers.blogspot.com/2015/06/an-update-on-eclipse-android-developer.html"
+  class="external-link">announcement</a>. You should migrate your app development projects to
+  Android Studio as soon as possible. For more information on transitioning to Android Studio, see
+  <a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a>.
+</p>
+
+  <p>Android Developer Tools (ADT) is a plugin for Eclipse that provides a suite of
   tools that are integrated with the Eclipse IDE. It offers you access to many features that help
   you develop Android applications. ADT
   provides GUI access to many of the command line SDK tools as well as a UI design tool for rapid
   prototyping, designing, and building of your application's user interface.</p>
-
-<p class="note"><strong>Note:</strong>
-If you have been using Eclipse with ADT, be aware that <a
-href="{@docRoot}tools/studio/index.html">Android Studio</a> is now the official IDE
-for Android, so you should migrate to Android Studio to receive all the
-latest IDE updates. For help moving projects,
-see <a href="/sdk/installing/migrate.html">Migrating to Android
-Studio</a>.</p>
 
 <p>If you still wish to use the ADT plugin for Eclipse, see
 <a href="{@docRoot}sdk/installing/installing-adt.html">Installing Eclipse Plugin.</a>
