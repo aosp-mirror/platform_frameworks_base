@@ -26,7 +26,7 @@ import java.util.List;
  */
 interface IFingerprintService {
     // Authenticate the given sessionId with a fingerprint
-    void authenticate(IBinder token, long sessionId, int groupId,
+    void authenticate(IBinder token, long sessionId, int userId,
             IFingerprintServiceReceiver receiver, int flags, String opPackageName);
 
     // Cancel authentication for the given sessionId

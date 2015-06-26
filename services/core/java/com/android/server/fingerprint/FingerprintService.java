@@ -30,9 +30,11 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -70,6 +72,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final int MSG_USER_SWITCHING = 10;
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
 
+    private boolean mIsKeyguard; // true if the authentication client is keyguard
     private ClientMonitor mAuthClient = null;
     private ClientMonitor mEnrollClient = null;
     private ClientMonitor mRemoveClient = null;
@@ -78,6 +81,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final long MS_PER_SEC = 1000;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
     private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final int FINGERPRINT_ACQUIRED_GOOD = 0;
 
     Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -97,6 +101,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private long mHalDeviceId;
     private int mFailedAttempts;
     private IFingerprintDaemon mDaemon;
+    private PowerManager mPowerManager;
 
     private final Runnable mLockoutReset = new Runnable() {
         @Override
@@ -109,6 +114,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         super(context);
         mContext = context;
         mAppOps = context.getSystemService(AppOpsManager.class);
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
 
     @Override
@@ -191,7 +197,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 removeClient(mAuthClient);
             }
         }
+    }
 
+    private void userActivity() {
+        long now = SystemClock.uptimeMillis();
+        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
     void handleUserSwitching(int userId) {
@@ -498,9 +508,10 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
          */
         private boolean sendAuthenticated(int fpId, int groupId) {
             boolean result = false;
+            boolean authenticated = fpId != 0;
             if (receiver != null) {
                 try {
-                    if (fpId == 0) {
+                    if (!authenticated) {
                         receiver.onAuthenticationFailed(mHalDeviceId);
                     } else {
                         Fingerprint fp = !restricted ?
@@ -522,6 +533,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 result |= true; // we have a valid fingerprint
                 mLockoutReset.run();
             }
+            // For fingerprint devices that support touch-to-wake, this will ensure the device
+            // wakes up and turns the screen on when fingerprint is authenticated.
+            if (mIsKeyguard && authenticated) {
+                mPowerManager.wakeUp(SystemClock.uptimeMillis());
+            }
             return result;
         }
 
@@ -536,6 +552,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to invoke sendAcquired:", e);
                 return true; // client failed
+            }
+            finally {
+                // Good scans will keep the device awake
+                if (acquiredInfo == FINGERPRINT_ACQUIRED_GOOD) {
+                    userActivity();
+                }
             }
         }
 
@@ -589,6 +611,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     };
 
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
+        private static final String KEYGUARD_PACKAGE = "com.android.systemui";
+
         @Override // Binder call
         public long preEnroll(IBinder token) {
             checkPermission(MANAGE_FINGERPRINT);
@@ -638,7 +662,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public void authenticate(final IBinder token, final long opId, final int groupId,
-                final IFingerprintServiceReceiver receiver, final int flags, String opPackageName) {
+                final IFingerprintServiceReceiver receiver, final int flags,
+                final String opPackageName) {
 
             if (!canUseFingerprint(opPackageName)) {
                 return;
@@ -647,6 +672,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    mIsKeyguard = KEYGUARD_PACKAGE.equals(opPackageName);
                     startAuthentication(token, opId, groupId, receiver, flags, restricted);
                 }
             });
