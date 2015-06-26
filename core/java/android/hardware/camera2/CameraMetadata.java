@@ -967,8 +967,6 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Every frame has the requests immediately applied.</p>
-     * <p>Furthermore for all results,
-     * <code>android.sync.frameNumber == {@link android.hardware.camera2.CaptureResult#getFrameNumber }</code></p>
      * <p>Changing controls over multiple requests one after another will
      * produce results that have those controls applied atomically
      * each frame.</p>
