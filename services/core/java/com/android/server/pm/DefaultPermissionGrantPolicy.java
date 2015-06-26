@@ -403,6 +403,8 @@ final class DefaultPermissionGrantPolicy {
                     }
                 }
             }
+
+            mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
         }
     }
 
