@@ -17,6 +17,10 @@ import com.android.internal.R;
 
 /**
  * Takes care of unmounting and formatting external storage.
+ *
+ * @deprecated Please use {@link Intent#ACTION_MASTER_CLEAR} broadcast with extra
+ * {@link Intent#EXTRA_WIPE_EXTERNAL_STORAGE} to wipe and factory reset, or call
+ * {@link StorageManager#wipeAdoptableDisks} directly to format external storages.
  */
 public class ExternalStorageFormatter extends Service {
     static final String TAG = "ExternalStorageFormatter";
