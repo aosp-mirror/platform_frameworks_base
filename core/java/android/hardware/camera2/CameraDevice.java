@@ -236,13 +236,16 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link CameraCaptureSession.StateCallback}'s
      * {@link CameraCaptureSession.StateCallback#onConfigured} callback will be called.</p>
      *
-     * <p>If a prior CameraCaptureSession already exists when a new one is created, the previous
-     * session is closed. Any in-progress capture requests made on the prior session will be
-     * completed before the new session is configured and is able to start capturing its own
-     * requests. To minimize the transition time, the {@link CameraCaptureSession#abortCaptures}
-     * call can be used to discard the remaining requests for the prior capture session before a new
-     * one is created. Note that once the new session is created, the old one can no longer have its
-     * captures aborted.</p>
+     * <p>If a prior CameraCaptureSession already exists when this method is called, the previous
+     * session will no longer be able to accept new capture requests and will be closed. Any
+     * in-progress capture requests made on the prior session will be completed before it's closed.
+     * {@link CameraCaptureSession.StateListener#onConfigured} for the new session may be invoked
+     * before {@link CameraCaptureSession.StateListener#onClosed} is invoked for the prior
+     * session. Once the new session is {@link CameraCaptureSession.StateListener#onConfigured
+     * configured}, it is able to start capturing its own requests. To minimize the transition time,
+     * the {@link CameraCaptureSession#abortCaptures} call can be used to discard the remaining
+     * requests for the prior capture session before a new one is created. Note that once the new
+     * session is created, the old one can no longer have its captures aborted.</p>
      *
      * <p>Using larger resolution outputs, or more outputs, can result in slower
      * output rate from the device.</p>
