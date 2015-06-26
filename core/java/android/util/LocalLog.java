@@ -54,4 +54,18 @@ public final class LocalLog {
             pw.println(itr.next());
         }
     }
+
+    public static class ReadOnlyLocalLog {
+        private final LocalLog mLog;
+        ReadOnlyLocalLog(LocalLog log) {
+            mLog = log;
+        }
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            mLog.dump(fd, pw, args);
+        }
+    }
+
+    public ReadOnlyLocalLog readOnlyLocalLog() {
+        return new ReadOnlyLocalLog(this);
+    }
 }
