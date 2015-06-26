@@ -51,7 +51,7 @@ import com.android.internal.R;
 import java.util.List;
 
 /**
- * This activity is shown to the user for him/her to enable USB mass storage
+ * This activity is shown to the user to allow enabling of USB mass storage
  * on-demand (that is, when the USB cable is connected). It uses the alert
  * dialog style. It will be launched from a notification.
  */
