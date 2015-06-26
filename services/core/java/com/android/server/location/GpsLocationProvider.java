@@ -281,8 +281,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // current setting 24 hours
     private static final long NTP_INTERVAL = 24*60*60*1000;
     // how long to wait if we have a network error in NTP or XTRA downloading
+    // the initial value of the exponential backoff
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5*60*1000;
+    // how long to wait if we have a network error in NTP or XTRA downloading
+    // the max value of the exponential backoff
+    // current setting - 4 hours
+    private static final long MAX_RETRY_INTERVAL = 4*60*60*1000;
+
+    private BackOff mNtpBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
+    private BackOff mXtraBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
 
     // true if we are enabled, protected by this
     private boolean mEnabled;
@@ -832,9 +840,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
                     native_inject_time(time, timeReference, (int) certainty);
                     delay = NTP_INTERVAL;
+                    mNtpBackOff.reset();
                 } else {
                     if (DEBUG) Log.d(TAG, "requestTime failed");
-                    delay = RETRY_INTERVAL;
+                    delay = mNtpBackOff.nextBackoffMillis();
                 }
 
                 sendMessage(INJECT_NTP_TIME_FINISHED, 0, null);
@@ -875,6 +884,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         Log.d(TAG, "calling native_inject_xtra_data");
                     }
                     native_inject_xtra_data(data, data.length);
+                    mXtraBackOff.reset();
                 }
 
                 sendMessage(DOWNLOAD_XTRA_DATA_FINISHED, 0, null);
@@ -882,7 +892,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 if (data == null) {
                     // try again later
                     // since this is delayed and not urgent we do not hold a wake lock here
-                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA, RETRY_INTERVAL);
+                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA,
+                            mXtraBackOff.nextBackoffMillis());
                 }
 
                 // release wake lock held by task
@@ -2188,6 +2199,36 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         s.append(native_get_internal_state());
         pw.append(s);
+    }
+
+    /**
+     * A simple implementation of exponential backoff.
+     */
+    private static final class BackOff {
+        private static final int MULTIPLIER = 2;
+        private final long mInitIntervalMillis;
+        private final long mMaxIntervalMillis;
+        private long mCurrentIntervalMillis;
+
+        public BackOff(long initIntervalMillis, long maxIntervalMillis) {
+            mInitIntervalMillis = initIntervalMillis;
+            mMaxIntervalMillis = maxIntervalMillis;
+
+            mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
+        }
+
+        public long nextBackoffMillis() {
+            if (mCurrentIntervalMillis > mMaxIntervalMillis) {
+                return mMaxIntervalMillis;
+            }
+
+            mCurrentIntervalMillis *= MULTIPLIER;
+            return mCurrentIntervalMillis;
+        }
+
+        public void reset() {
+            mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
+        }
     }
 
     // for GPS SV statistics
