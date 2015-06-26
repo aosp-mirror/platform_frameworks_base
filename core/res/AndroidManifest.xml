@@ -1034,11 +1034,11 @@
         android:priority="1000" />
 
     <!-- Allows access to the list of accounts in the Accounts Service.
-        <p>Protection level: dangerous
+        <p>Protection level: normal
     -->
     <permission android:name="android.permission.GET_ACCOUNTS"
         android:permissionGroup="android.permission-group.CONTACTS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="normal"
         android:description="@string/permdesc_getAccounts"
         android:label="@string/permlab_getAccounts" />
 
