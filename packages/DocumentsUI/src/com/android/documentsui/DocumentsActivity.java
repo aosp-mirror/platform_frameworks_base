@@ -102,14 +102,23 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public void onCreate(Bundle icicle) {
+        mState = (icicle != null)
+                ? icicle.<State>getParcelable(EXTRA_STATE)
+                : buildDefaultState();
+
+        final Resources res = getResources();
+        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog) && mState.action != ACTION_MANAGE &&
+                mState.action != ACTION_BROWSE;
+        if (!mShowAsDialog) {
+            setTheme(R.style.DocumentsNonDialogTheme);
+        }
+
         super.onCreate(icicle);
 
         setResult(Activity.RESULT_CANCELED);
         setContentView(R.layout.activity);
 
         final Context context = this;
-        final Resources res = getResources();
-        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog);
 
         if (mShowAsDialog) {
             // Strongly define our horizontal dimension; we leave vertical as
@@ -126,19 +135,17 @@ public class DocumentsActivity extends BaseActivity {
             // Non-dialog means we have a drawer
             mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                    R.drawable.ic_hamburger, R.string.drawer_open, R.string.drawer_close);
+            if (mDrawerLayout != null) {
+                mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                        R.drawable.ic_hamburger, R.string.drawer_open, R.string.drawer_close);
 
-            mDrawerLayout.setDrawerListener(mDrawerListener);
+                mDrawerLayout.setDrawerListener(mDrawerListener);
 
-            mRootsDrawer = findViewById(R.id.drawer_roots);
+                mRootsDrawer = findViewById(R.id.drawer_roots);
+            }
         }
 
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
-
-        mState = (icicle != null)
-                ? icicle.<State>getParcelable(EXTRA_STATE)
-                : buildDefaultState();
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
@@ -159,7 +166,7 @@ public class DocumentsActivity extends BaseActivity {
 
         // Hide roots when we're managing a specific root
         if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
-            if (mShowAsDialog) {
+            if (mShowAsDialog || mDrawerLayout == null) {
                 findViewById(R.id.container_roots).setVisibility(View.GONE);
             } else {
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -370,7 +377,7 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     public void setRootsDrawerOpen(boolean open) {
-        if (!mShowAsDialog) {
+        if (!mShowAsDialog && mDrawerLayout != null) {
             if (open) {
                 mDrawerLayout.openDrawer(mRootsDrawer);
             } else {
@@ -380,7 +387,7 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     private boolean isRootsDrawerOpen() {
-        if (mShowAsDialog) {
+        if (mShowAsDialog || mDrawerLayout == null) {
             return false;
         } else {
             return mDrawerLayout.isDrawerOpen(mRootsDrawer);
@@ -405,8 +412,8 @@ public class DocumentsActivity extends BaseActivity {
             }
         }
 
-        if (!mShowAsDialog && mDrawerLayout.getDrawerLockMode(mRootsDrawer) ==
-                DrawerLayout.LOCK_MODE_UNLOCKED) {
+        if (!mShowAsDialog && mDrawerLayout != null &&
+                mDrawerLayout.getDrawerLockMode(mRootsDrawer) == DrawerLayout.LOCK_MODE_UNLOCKED) {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
