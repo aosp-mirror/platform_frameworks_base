@@ -64,6 +64,7 @@ public class SecurityControllerImpl implements SecurityController {
 
     private SparseArray<VpnConfig> mCurrentVpns = new SparseArray<>();
     private int mCurrentUserId;
+    private int mVpnUserId;
 
     public SecurityControllerImpl(Context context) {
         mContext = context;
@@ -78,7 +79,7 @@ public class SecurityControllerImpl implements SecurityController {
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
-        mCurrentUserId = ActivityManager.getCurrentUser();
+        onUserSwitched(ActivityManager.getCurrentUser());
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -123,9 +124,9 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public String getPrimaryVpnName() {
-        VpnConfig cfg = mCurrentVpns.get(mCurrentUserId);
+        VpnConfig cfg = mCurrentVpns.get(mVpnUserId);
         if (cfg != null) {
-            return getNameForVpnConfig(cfg, new UserHandle(mCurrentUserId));
+            return getNameForVpnConfig(cfg, new UserHandle(mVpnUserId));
         } else {
             return null;
         }
@@ -133,8 +134,8 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public String getProfileVpnName() {
-        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
-            if (profile.id == mCurrentUserId) {
+        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
+            if (profile.id == mVpnUserId) {
                 continue;
             }
             VpnConfig cfg = mCurrentVpns.get(profile.id);
@@ -147,7 +148,7 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public boolean isVpnEnabled() {
-        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
+        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
             if (mCurrentVpns.get(profile.id) != null) {
                 return true;
             }
@@ -172,6 +173,12 @@ public class SecurityControllerImpl implements SecurityController {
     @Override
     public void onUserSwitched(int newUserId) {
         mCurrentUserId = newUserId;
+        if (mUserManager.getUserInfo(newUserId).isRestricted()) {
+            // VPN for a restricted profile is routed through its owner user
+            mVpnUserId = UserHandle.USER_OWNER;
+        } else {
+            mVpnUserId = mCurrentUserId;
+        }
         fireCallbacks();
     }
 
