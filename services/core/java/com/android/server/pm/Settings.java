@@ -195,6 +195,7 @@ final class Settings {
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
     private static final String ATTR_PACKAGE_NAME= "packageName";
+    private static final String ATTR_FINGERPRINT = "fingerprint";
 
     private final Object mLock;
 
@@ -1175,6 +1176,16 @@ final class Settings {
         for (int userId : UserManagerService.getInstance().getUserIds()) {
             mRuntimePermissionsPersistence.writePermissionsForUserAsyncLPr(userId);
         }
+    }
+
+    boolean areDefaultRuntimePermissionsGrantedLPr(int userId) {
+        return mRuntimePermissionsPersistence
+                .areDefaultRuntimPermissionsGrantedLPr(userId);
+    }
+
+    void onDefaultRuntimePermissionsGrantedLPr(int userId) {
+        mRuntimePermissionsPersistence
+                .onDefaultRuntimePermissionsGrantedLPr(userId);
     }
 
     /**
@@ -4364,13 +4375,31 @@ final class Settings {
         private final Object mLock;
 
         @GuardedBy("mLock")
-        private SparseBooleanArray mWriteScheduled = new SparseBooleanArray();
+        private final SparseBooleanArray mWriteScheduled = new SparseBooleanArray();
 
         @GuardedBy("mLock")
-        private SparseLongArray mLastNotWrittenMutationTimesMillis = new SparseLongArray();
+        // The mapping keys are user ids.
+        private final SparseLongArray mLastNotWrittenMutationTimesMillis = new SparseLongArray();
+
+        @GuardedBy("mLock")
+        // The mapping keys are user ids.
+        private final SparseArray<String> mFingerprints = new SparseArray<>();
+
+        @GuardedBy("mLock")
+        // The mapping keys are user ids.
+        private final SparseBooleanArray mDefaultPermissionsGranted = new SparseBooleanArray();
 
         public RuntimePermissionPersistence(Object lock) {
             mLock = lock;
+        }
+
+        public boolean areDefaultRuntimPermissionsGrantedLPr(int userId) {
+            return mDefaultPermissionsGranted.get(userId);
+        }
+
+        public void onDefaultRuntimePermissionsGrantedLPr(int userId) {
+            mFingerprints.put(userId, Build.FINGERPRINT);
+            writePermissionsForUserAsyncLPr(userId);
         }
 
         public void writePermissionsForUserSyncLPr(int userId) {
@@ -4457,6 +4486,9 @@ final class Settings {
                 serializer.startDocument(null, true);
                 serializer.startTag(null, TAG_RUNTIME_PERMISSIONS);
 
+                String fingerprint = mFingerprints.get(userId);
+                serializer.attribute(null, ATTR_FINGERPRINT, fingerprint);
+
                 final int packageCount = permissionsForPackage.size();
                 for (int i = 0; i < packageCount; i++) {
                     String packageName = permissionsForPackage.keyAt(i);
@@ -4481,7 +4513,10 @@ final class Settings {
                 serializer.endDocument();
                 destination.finishWrite(out);
 
-                // Any error while writing is fatal.
+                if (Build.FINGERPRINT.equals(fingerprint)) {
+                    mDefaultPermissionsGranted.put(userId, true);
+                }
+            // Any error while writing is fatal.
             } catch (Throwable t) {
                 Slog.wtf(PackageManagerService.TAG,
                         "Failed to write settings, restoring backup", t);
@@ -4559,6 +4594,13 @@ final class Settings {
                 }
 
                 switch (parser.getName()) {
+                    case TAG_RUNTIME_PERMISSIONS: {
+                        String fingerprint = parser.getAttributeValue(null, ATTR_FINGERPRINT);
+                        mFingerprints.put(userId, fingerprint);
+                        final boolean defaultsGranted = Build.FINGERPRINT.equals(fingerprint);
+                        mDefaultPermissionsGranted.put(userId, defaultsGranted);
+                    } break;
+
                     case TAG_PACKAGE: {
                         String name = parser.getAttributeValue(null, ATTR_NAME);
                         PackageSetting ps = mPackages.get(name);

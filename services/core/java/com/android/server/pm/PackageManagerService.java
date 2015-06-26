@@ -14013,6 +14013,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
         }
 
+        int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
+
         synchronized (mPackages) {
             // Verify that all of the preferred activity components actually
             // exist.  It is possible for applications to be updated and at
@@ -14042,15 +14044,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                             mSettings.mPreferredActivities.keyAt(i));
                 }
             }
+
+            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                if (!mSettings.areDefaultRuntimePermissionsGrantedLPr(userId)) {
+                    grantPermissionsUserIds = ArrayUtils.appendInt(
+                            grantPermissionsUserIds, userId);
+                }
+            }
         }
         sUserManager.systemReady();
 
         // If we upgraded grant all default permissions before kicking off.
-        if (isFirstBoot() || (CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE && mIsUpgrade)) {
-            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
-            for (int userId : UserManagerService.getInstance().getUserIds()) {
-                mDefaultPermissionPolicy.grantDefaultPermissions(userId);
-            }
+        for (int userId : grantPermissionsUserIds) {
+            mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         }
 
         // Kick off any messages waiting for system ready
