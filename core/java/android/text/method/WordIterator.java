@@ -147,24 +147,13 @@ public class WordIterator implements Selection.PositionIterator {
      * @throws IllegalArgumentException is offset is not valid.
      */
     public int getBeginning(int offset) {
-        final int shiftedOffset = offset - mOffsetShift;
-        checkOffsetIsValid(shiftedOffset);
-
-        if (isOnLetterOrDigit(shiftedOffset)) {
-            if (mIterator.isBoundary(shiftedOffset)) {
-                return shiftedOffset + mOffsetShift;
-            } else {
-                return mIterator.preceding(shiftedOffset) + mOffsetShift;
-            }
-        } else {
-            if (isAfterLetterOrDigit(shiftedOffset)) {
-                return mIterator.preceding(shiftedOffset) + mOffsetShift;
-            }
-        }
-        return BreakIterator.DONE;
+        // TODO: Check if usage of this can be updated to getBeginning(offset, true) if
+        // so this method can be removed.
+        return getBeginning(offset, false);
     }
 
-    /** If <code>offset</code> is within a word, returns the index of the last character of that
+    /**
+     * If <code>offset</code> is within a word, returns the index of the last character of that
      * word plus one, otherwise returns BreakIterator.DONE.
      *
      * The offsets that are considered to be part of a word are the indexes of its characters,
@@ -177,11 +166,106 @@ public class WordIterator implements Selection.PositionIterator {
      * @throws IllegalArgumentException is offset is not valid.
      */
     public int getEnd(int offset) {
+        // TODO: Check if usage of this can be updated to getEnd(offset, true), if
+        // so this method can be removed.
+        return getEnd(offset, false);
+    }
+
+    /**
+     * If the <code>offset</code> is within a word or on a word boundary that can only be
+     * considered the start of a word (e.g. _word where "_" is any character that would not
+     * be considered part of the word) then this returns the index of the first character of
+     * that word.
+     *
+     * If the offset is on a word boundary that can be considered the start and end of a
+     * word, e.g. AABB (where AA and BB are both words) and the offset is the boundary
+     * between AA and BB, this would return the start of the previous word, AA.
+     *
+     * Returns BreakIterator.DONE if there is no previous boundary.
+     *
+     * @throws IllegalArgumentException is offset is not valid.
+     */
+    public int getPrevWordBeginningOnTwoWordsBoundary(int offset) {
+        return getBeginning(offset, true);
+    }
+
+    /**
+     * If the <code>offset</code> is within a word or on a word boundary that can only be
+     * considered the end of a word (e.g. word_ where "_" is any character that would not
+     * be considered part of the word) then this returns the index of the last character
+     * plus one of that word.
+     *
+     * If the offset is on a word boundary that can be considered the start and end of a
+     * word, e.g. AABB (where AA and BB are both words) and the offset is the boundary
+     * between AA and BB, this would return the end of the next word, BB.
+     *
+     * Returns BreakIterator.DONE if there is no next boundary.
+     *
+     * @throws IllegalArgumentException is offset is not valid.
+     */
+    public int getNextWordEndOnTwoWordBoundary(int offset) {
+        return getEnd(offset, true);
+    }
+
+    /**
+     * If the <code>offset</code> is within a word or on a word boundary that can only be
+     * considered the start of a word (e.g. _word where "_" is any character that would not
+     * be considered part of the word) then this returns the index of the first character of
+     * that word.
+     *
+     * If the offset is on a word boundary that can be considered the start and end of a
+     * word, e.g. AABB (where AA and BB are both words) and the offset is the boundary
+     * between AA and BB, and getPrevWordBeginningOnTwoWordsBoundary is true then this would
+     * return the start of the previous word, AA. Otherwise it would return the current offset,
+     * the start of BB.
+     *
+     * Returns BreakIterator.DONE if there is no previous boundary.
+     *
+     * @throws IllegalArgumentException is offset is not valid.
+     */
+    private int getBeginning(int offset, boolean getPrevWordBeginningOnTwoWordsBoundary) {
+        final int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
+
+        if (isOnLetterOrDigit(shiftedOffset)) {
+            if (mIterator.isBoundary(shiftedOffset)
+                    && (!isAfterLetterOrDigit(shiftedOffset)
+                            || !getPrevWordBeginningOnTwoWordsBoundary)) {
+                return shiftedOffset + mOffsetShift;
+            } else {
+                return mIterator.preceding(shiftedOffset) + mOffsetShift;
+            }
+        } else {
+            if (isAfterLetterOrDigit(shiftedOffset)) {
+                return mIterator.preceding(shiftedOffset) + mOffsetShift;
+            }
+        }
+        return BreakIterator.DONE;
+    }
+
+    /**
+     * If the <code>offset</code> is within a word or on a word boundary that can only be
+     * considered the end of a word (e.g. word_ where "_" is any character that would not be
+     * considered part of the word) then this returns the index of the last character plus one
+     * of that word.
+     *
+     * If the offset is on a word boundary that can be considered the start and end of a
+     * word, e.g. AABB (where AA and BB are both words) and the offset is the boundary
+     * between AA and BB, and getNextWordEndOnTwoWordBoundary is true then this would return
+     * the end of the next word, BB. Otherwise it would return the current offset, the end
+     * of AA.
+     *
+     * Returns BreakIterator.DONE if there is no next boundary.
+     *
+     * @throws IllegalArgumentException is offset is not valid.
+     */
+    private int getEnd(int offset, boolean getNextWordEndOnTwoWordBoundary) {
         final int shiftedOffset = offset - mOffsetShift;
         checkOffsetIsValid(shiftedOffset);
 
         if (isAfterLetterOrDigit(shiftedOffset)) {
-            if (mIterator.isBoundary(shiftedOffset)) {
+            if (mIterator.isBoundary(shiftedOffset)
+                    && (!isOnLetterOrDigit(shiftedOffset) || !getNextWordEndOnTwoWordBoundary)) {
                 return shiftedOffset + mOffsetShift;
             } else {
                 return mIterator.following(shiftedOffset) + mOffsetShift;
