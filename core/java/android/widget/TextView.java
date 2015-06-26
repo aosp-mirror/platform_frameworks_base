@@ -9658,6 +9658,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // controllers interact with how selection behaves.
         if (mEditor != null) {
             mEditor.hideCursorAndSpanControllers();
+            mEditor.stopTextActionMode();
         }
         CharSequence text = getIterableTextForAccessibility();
         if (Math.min(start, end) >= 0 && Math.max(start, end) <= text.length()) {
