@@ -5964,10 +5964,12 @@ package android.app.assist {
   }
 
   public static class AssistStructure.ViewNode {
+    method public float getAlpha();
     method public android.app.assist.AssistStructure.ViewNode getChildAt(int);
     method public int getChildCount();
     method public java.lang.String getClassName();
     method public java.lang.CharSequence getContentDescription();
+    method public float getElevation();
     method public android.os.Bundle getExtras();
     method public int getHeight();
     method public java.lang.String getHint();
@@ -5986,6 +5988,7 @@ package android.app.assist {
     method public float getTextSize();
     method public int getTextStyle();
     method public int getTop();
+    method public android.graphics.Matrix getTransformation();
     method public int getVisibility();
     method public int getWidth();
     method public boolean isAccessibilityFocused();
@@ -39245,6 +39248,7 @@ package android.view {
     method public abstract android.view.ViewStructure newChild(int);
     method public abstract void setAccessibilityFocused(boolean);
     method public abstract void setActivated(boolean);
+    method public abstract void setAlpha(float);
     method public abstract void setCheckable(boolean);
     method public abstract void setChecked(boolean);
     method public abstract void setChildCount(int);
@@ -39253,6 +39257,7 @@ package android.view {
     method public abstract void setContentDescription(java.lang.CharSequence);
     method public abstract void setContextClickable(boolean);
     method public abstract void setDimens(int, int, int, int, int, int);
+    method public abstract void setElevation(float);
     method public abstract void setEnabled(boolean);
     method public abstract void setFocusable(boolean);
     method public abstract void setFocused(boolean);
@@ -39263,6 +39268,7 @@ package android.view {
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
     method public abstract void setTextStyle(float, int, int, int);
+    method public abstract void setTransformation(android.graphics.Matrix);
     method public abstract void setVisibility(int);
   }
 
