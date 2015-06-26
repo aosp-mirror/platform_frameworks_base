@@ -1919,7 +1919,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void addChildrenForAccessibility(ArrayList<View> childrenForAccessibility) {
+    public void addChildrenForAccessibility(ArrayList<View> outChildren) {
         if (getAccessibilityNodeProvider() != null) {
             return;
         }
@@ -1930,9 +1930,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 View child = children.getChildAt(i);
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     if (child.includeForAccessibility()) {
-                        childrenForAccessibility.add(child);
+                        outChildren.add(child);
                     } else {
-                        child.addChildrenForAccessibility(childrenForAccessibility);
+                        child.addChildrenForAccessibility(outChildren);
                     }
                 }
             }
