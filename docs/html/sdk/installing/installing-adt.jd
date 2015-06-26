@@ -7,6 +7,14 @@ adt.zip.checksum=f64b7e50c84799f41c642218c35f1bbe
 @jd:body
 
 
+<p class="caution">
+  <strong>Important:</strong> Support for the Android Developer Tools (ADT) in Eclipse is ending,
+  per our <a href=
+  "http://android-developers.blogspot.com/2015/06/an-update-on-eclipse-android-developer.html"
+  class="external-link">announcement</a>. You should migrate your app development projects to
+  Android Studio as soon as possible. For more information on transitioning to Android Studio, see
+  <a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a>.
+</p>
 
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
 Development Tools (ADT). This plugin provides a powerful, integrated
@@ -14,15 +22,6 @@ environment in which to develop Android apps. It extends the capabilities
 of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
 </p>
-
-<p class="note"><strong>Note:</strong>
-If you have been using Eclipse with ADT, be aware that <a
-href="{@docRoot}tools/studio/index.html">Android Studio</a> is now the official IDE
-for Android, so you should migrate to Android Studio to receive all the
-latest IDE updates. For help moving projects,
-see <a href="/sdk/installing/migrate.html">Migrating to Android
-Studio</a>.</p>
-
 
 <p>You should install the ADT plugin
 only if you already have an Eclipse installation that you want to continue using.
