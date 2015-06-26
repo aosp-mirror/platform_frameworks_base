@@ -23,6 +23,7 @@ import android.animation.ObjectAnimator;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -30,6 +31,7 @@ import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
 import android.util.Size;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -108,8 +110,10 @@ public final class FloatingToolbar {
      * Initializes a floating toolbar.
      */
     public FloatingToolbar(Context context, Window window) {
-        mContext = Preconditions.checkNotNull(context);
-        mPopup = new FloatingToolbarPopup(window.getDecorView());
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(window);
+        mContext = applyDefaultTheme(context);
+        mPopup = new FloatingToolbarPopup(mContext, window.getDecorView());
     }
 
     /**
@@ -276,6 +280,7 @@ public final class FloatingToolbar {
         public static final int OVERFLOW_DIRECTION_UP = 0;
         public static final int OVERFLOW_DIRECTION_DOWN = 1;
 
+        private final Context mContext;
         private final View mParent;
         private final PopupWindow mPopupWindow;
         private final ViewGroup mContentContainer;
@@ -375,9 +380,10 @@ public final class FloatingToolbar {
          * @param parent  A parent view to get the {@link android.view.View#getWindowToken()} token
          *      from.
          */
-        public FloatingToolbarPopup(View parent) {
+        public FloatingToolbarPopup(Context context, View parent) {
             mParent = Preconditions.checkNotNull(parent);
-            mContentContainer = createContentContainer(parent.getContext());
+            mContext = Preconditions.checkNotNull(context);
+            mContentContainer = createContentContainer(context);
             mPopupWindow = createPopupWindow(mContentContainer);
             mDismissAnimation = createExitAnimation(
                     mContentContainer,
@@ -415,7 +421,7 @@ public final class FloatingToolbar {
 
             mContentContainer.removeAllViews();
             if (mMainPanel == null) {
-                mMainPanel = new FloatingToolbarMainPanel(mParent.getContext(), mOpenOverflow);
+                mMainPanel = new FloatingToolbarMainPanel(mContext, mOpenOverflow);
             }
             List<MenuItem> overflowMenuItems =
                     mMainPanel.layoutMenuItems(menuItems, getToolbarWidth(suggestedWidth));
@@ -423,7 +429,7 @@ public final class FloatingToolbar {
             if (!overflowMenuItems.isEmpty()) {
                 if (mOverflowPanel == null) {
                     mOverflowPanel =
-                            new FloatingToolbarOverflowPanel(mParent.getContext(), mCloseOverflow);
+                            new FloatingToolbarOverflowPanel(mContext, mCloseOverflow);
                 }
                 mOverflowPanel.setMenuItems(overflowMenuItems);
                 mOverflowPanel.setOnMenuItemClickListener(menuItemClickListener);
@@ -540,7 +546,7 @@ public final class FloatingToolbar {
          * Returns the context this popup is running in.
          */
         public Context getContext() {
-            return mContentContainer.getContext();
+            return mContext;
         }
 
         private void refreshCoordinatesAndOverflowDirection(Rect contentRect) {
@@ -562,7 +568,7 @@ public final class FloatingToolbar {
                 } else if (availableHeightBelowContent >= getToolbarHeightWithVerticalMargin()) {
                     // There is enough space at the bottom of the content.
                     y = contentRect.bottom;
-                } else if (availableHeightBelowContent >= getEstimatedToolbarHeight(getContext())) {
+                } else if (availableHeightBelowContent >= getEstimatedToolbarHeight(mContext)) {
                     // Just enough space to fit the toolbar with no vertical margins.
                     y = contentRect.bottom - mMarginVertical;
                 } else {
@@ -621,7 +627,7 @@ public final class FloatingToolbar {
         }
 
         private int getToolbarHeightWithVerticalMargin() {
-            return getEstimatedToolbarHeight(mParent.getContext()) + mMarginVertical * 2;
+            return getEstimatedToolbarHeight(mContext) + mMarginVertical * 2;
         }
 
         /**
@@ -1477,6 +1483,17 @@ public final class FloatingToolbar {
         return animation;
     }
 
+    /**
+     * Returns a re-themed context with controlled look and feel for views.
+     */
+    private static Context applyDefaultTheme(Context originalContext) {
+        TypedArray a = originalContext.obtainStyledAttributes(new int[]{R.attr.isLightTheme});
+        boolean isLightTheme = a.getBoolean(0, true);
+        int themeId = isLightTheme ? R.style.Theme_Material_Light : R.style.Theme_Material;
+        a.recycle();
+        return new ContextThemeWrapper(originalContext, themeId);
+    }
+
     private static int getEstimatedToolbarHeight(Context context) {
         return context.getResources().getDimensionPixelSize(R.dimen.floating_toolbar_height);
     }
@@ -1484,18 +1501,6 @@ public final class FloatingToolbar {
     private static int getEstimatedOpenOverflowButtonWidth(Context context) {
         return context.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_menu_button_minimum_width);
-    }
-
-    private static int getAdjustedToolbarWidth(Context context, int width) {
-        int maximumWidth = getScreenWidth(context) - 2 * context.getResources()
-                .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
-
-        if (width <= 0 || width > maximumWidth) {
-            int defaultWidth = context.getResources()
-                    .getDimensionPixelSize(R.dimen.floating_toolbar_preferred_width);
-            width = Math.min(defaultWidth, maximumWidth);
-        }
-        return width;
     }
 
     /**

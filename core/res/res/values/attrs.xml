@@ -27,6 +27,9 @@
         <!-- ============== -->
         <eat-comment />
 
+        <!-- Specifies that a theme has a light background with dark text on top.  -->
+        <attr name="isLightTheme" format="boolean" />
+
         <!-- Default color of foreground imagery. -->
         <attr name="colorForeground" format="color" />
         <!-- Default color of foreground imagery on an inverted background. -->
