@@ -151,12 +151,7 @@
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
 class="en">Tools Help</span></a></div>
     <ul>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/help/shell.html">Shell commands</a></li>
-        </ul>
-      </li>
+      <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
@@ -173,7 +168,6 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
-       <li><a href="<?cs var:toroot ?>tools/help/sqlite3.html">sqlite3</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
@@ -199,66 +193,6 @@ class="en">Tools Help</span></a></div>
         <span class="en">Apps Over 65K Methods</span></a></li>
       </ul>
   </li><!-- end of build system -->
-
-<!-- Performance Tools menu-->
-  <li class="nav-section">
-    <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>tools/performance/index.html">Peformance Tools</a>
-    </div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/performance/debug-gpu-overdraw/index.html">
-        Overdraw Debugger</a>
-      </li>
-      <li><a href="<?cs var:toroot ?>tools/performance/profile-gpu-rendering/index.html">
-        Rendering Profiler</a>
-      </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>tools/performance/hierarchy-viewer/index.html">
-          Hierarchy Viewer</a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/performance/hierarchy-viewer/setup.html"><span
-            class="en">Setup</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/performance/hierarchy-viewer/profiling.html"><span
-            class="en">Profiling</span></a>
-          </li>
-        </ul>
-      </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>tools/performance/comparison.html">
-          Memory Profilers</a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/performance/memory-monitor/index.html"><span
-            class="en">Memory Monitor</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/performance/heap-viewer/index.html"><span
-            class="en">Heap Viewer</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/performance/allocation-tracker/index.html"><span
-            class="en">Allocation Tracker</span></a>
-          </li>
-        </ul>
-      </li>
-      <li><a href="<?cs var:toroot ?>tools/performance/traceview/index.html">
-        Traceview</a>
-      </li>
-      <li><a href="<?cs var:toroot ?>tools/performance/systrace/index.html">
-        Systrace</a>
-      </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>tools/performance/batterystats-battery-historian/index.html">
-          Battery Profilers</a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/performance/batterystats-battery-historian/charts.html"><span
-            class="en">Historian Charts</span></a>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </li><!-- End Performance Tools menu-->
 
   <!-- Testing Tools menu-->
 
@@ -357,7 +291,15 @@ class="en">Data Binding Library</span></a></div>
       <span class="en">Eclipse with ADT</span></a>
     </div>
     <ul>
-    <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+        <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
+          <span class="en">Migrating to Android Studio</span></a></div>
+         <ul>
+            <li><a href="<?cs var:toroot ?>tools/studio/eclipse-transition-guide.html">
+            Transition Guide</span></a> </li>
+         </ul>
+        </li>
+
     <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
         <span class="en">Installing the Eclipse Plugin</span></a></li>
     <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>

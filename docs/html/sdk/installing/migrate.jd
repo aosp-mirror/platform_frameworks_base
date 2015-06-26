@@ -4,53 +4,264 @@ page.title=Migrating to Android Studio
 
 <div id="qv-wrapper">
 <div id="qv">
+
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#overview">Migration Overview</a></li>
+  <li><a href="#prerequisites">Migration Prerequisites</a></li>
+  <li><a href="#migrate">Importing Projects to Android Studio</a></li>
+  <li><a href="#post-migration">Validating imported projects</a></li>
+</ol>
+
+
 <h2>See also</h2>
 <ul>
+  <li><a href="{@docRoot}tools/studio/eclipse-transition-guide.html">
+    Transition Guide for Eclipse ADT</a></li>
   <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA"
-  class="external-link">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
- <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Working+in+Eclipse+Compatibility+Mode" class="external-link"
- >Eclipse Compatibility Mode</a></li>
- <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA" class="external-link"
- >FAQ on Migrating</a></li>
+    class="external-link">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
+  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/IntelliJ+IDEA+for+Eclipse+Users"
+    class="external-link">IntelliJ IDEA for Eclipse users</a></li>
+  <li><a href="{@docRoot}tools/studio/index.html">Android Studio Overview</a></li>
 </ul>
 </div>
 </div>
 
 
-<p>If you have been using <a href="{@docRoot}tools/help/adt.html">Eclipse with ADT</a>, be aware
-that <a href="{@docRoot}tools/studio/index.html">Android Studio</a> is now the official IDE for
-Android, so you should migrate to Android Studio to receive all the latest IDE updates.</p>
+<p>Migrating from Eclipse ADT to Android Studio requires adapting to a new project structure,
+build system, and IDE functionality. To simplify the migration process, Android Studio provides an
+import tool so you can quickly transition your Eclipse ADT workspaces and Ant build scripts to
+Android Studio projects and <a href="http://www.gradle.org">Gradle</a>-based build files.</p>
 
-<p>To migrate existing Android projects, simply import them using Android Studio:</p>
+<p>This document provides an overview of the migration process and walks you
+through a sample import procedure. For more information about Android Studio features and the
+Gradle-based build system, see <a href="{@docRoot}tools/studio/index.html">Android Studio Overview</a>
+and <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
+
+
+
+<h2 id="overview">Migration Overview </h2>
+<p>Migrating from Eclipse to Android Studio requires that you change the structure of your
+development projects, move to a new build system, and use a new user interface. Here are some of
+the key changes you should be aware of as you prepare to migrate to Android Studio:</p>
+<ul>
+  <li><strong>Project files</strong>
+    <p>Android Studio uses a different project structure. Each Eclipse ADT
+    project is called a module in Android Studio. Each instance of Android
+    Studio contains a project with one or more app modules. For more information see,
+    <a href="{@docRoot}tools/studio/eclipse-migration-guide.html#project-structure">Project
+    Structure</a>.</p></li>
+
+  <li><strong>Manifest settings</strong>
+    <p>Several elements in the <code>AndroidManifest.xml</code> file are now properties in the
+    <code>defaultConfig</code> and <code>productFlavors</code> blocks in the
+    <code>build.gradle</code> file. These elements are still valid manifest entries and may
+    appear in manifests from older projects, imported projects, dependencies, and libraries. For
+    more information see,
+    <a href="{@docRoot}tools/studio/eclipse-migration-guide.html#manifest-settings">Manifest
+    Settings</a>.</p></li>
+
+  <li><strong>Dependencies</strong>
+    <p>Library dependencies are handled differently in Android Studio, using Gradle dependency
+    declarations and Maven dependencies for well-known local source and binary libraries with
+    Maven coordinates.  For more information see,
+    <a href="{@docRoot}tools/studio/eclipse-migration-guide.html#dependencies">Dependencies</a></p>
+    </li>
+
+  <li><strong>Test code</strong>
+    <p>With Eclipse ADT, test code is written in separate projects and integrated through the
+    <code>&lt;instrumentation&gt;</code> element in your manifest file. Android Studio provides a
+    <code>AndroidTest</code> folder within your project so you can easily add and maintain your test
+    code within the same project view. JUnit tests can also be configured to run locally to reduce
+    testing cycles.</p></li>
+
+  <li><strong>Gradle-based build system</strong>
+    <p>In place of XML-based Ant build files, Android Studio supports Gradle build files, which
+    use the Gradle Domain Specific Language (DSL) for ease of extensibility and customization.
+    The Android Studio build system also supports
+    <a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants"> build variants</a>,
+    which are combinations of <code>productFlavor</code> and <code>buildTypes</code>, to customize
+    your build outputs.</p></li>
+
+  <li><strong>User interface</strong>
+    <p>Android Studio provides an intuitive interface and menu options based on the
+    <a class="external-link" href="https://www.jetbrains.com/idea/" target="_blank">IntelliJ IDEA</a>
+    IDE. To become familiar with the IDE basics, such as navigation, code completion, and keyboard
+    shortcuts, see
+    <a class="external-link" href="https://www.jetbrains.com/idea/help/intellij-idea-quick-start-guide.html"
+    target="_blank">IntelliJ IDEA Quick Start Guide</a>.</p></li>
+
+  <li><strong>Developer tools versioning</strong>
+    <p>Android Studio updates independently of the Gradle-based build system so different build
+    settings can be applied across different versions of command line, Android Studio, and
+    continuous integration builds. For more information, see
+    <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
+    </li>
+</ul>
+
+
+
+
+<h2 id="prerequisites">Migration Prerequisites</h2>
+<p>Before migrating your Eclipse ADT app to Android Studio, review the following steps to make
+sure your project is ready for conversion, and verify you have the tool configuration you need in
+Android Studio:</p>
+
+<ul>
+ <li>In Eclipse ADT:
+   <ul>
+     <li>Make sure the Eclipse ADT root directory contains the <code>AndroidManifest.xml</code>
+       file. Also, the root directory must contain either the <code>.project</code> and
+       <code>.classpath</code> files from Eclipse or the <code>res/</code> and <code>src/</code>
+       directories.</li>
+     <li>Build your project to ensure your latest workspace and project updates are saved and
+       included in the import.</li>
+     <li>Comment out any references to Eclipse ADT workspace library files in the
+       <code>project.properties</code> or <code>.classpath</code> files for import. You can
+       add these references in the <code>build.gradle</code> file after the import. For more
+       information, see
+       <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</li>
+     <li>It may be useful to record your workspace directory, path variables, and any actual path
+       maps that could be used to specify any unresolved relative paths, path variables, and
+       linked resource references. Android Studio allows you to manually specify any unresolved
+       paths during the import process.</li>
+   </ul>
+ </li>
+ <li>In Android Studio:
+   <ul>
+    <li>Make a note of any third-party Eclipse ADT plugins in use and check for equivalent features
+      in Android Studio or search for a compatible plugin in the
+      <a href="https://plugins.jetbrains.com/?androidstudio" class="external-link">IntelliJ Android
+      Studio Plugins</a> repository. Use the <strong>File &gt; Settings &gt; Plugins</strong> menu
+      option to manage plugins in Android Studio. Android Studio does not migrate any third-party
+      Eclipse ADT plugins.</li>
+    <li>If you plan to run Android Studio behind a firewall, be sure to set the proxy settings for
+      Android Studio and the SDK Manager. Android Studio requires an internet connection for
+      Setup Wizard synchronization, 3rd-party library access, access to remote repositories,
+      <a href="http://www.gradle.org" class="external-link">Gradle</a>
+      initialization and synchronization, and Android Studio version updates. For more information,
+      see <a href="{@docRoot}tools/studio/index.html#proxy">Proxy Settings</a>.</li>
+    <li>Use the <strong>File &gt; Settings &gt; System Settings</strong> menu option to verify the
+      current version and, if necessary, update Android Studio to the latest version from the
+      stable channel. To install Android Studio, please visit the
+      <a href="{@docRoot}sdk/index.html">Android Studio download page</a>.</li>
+    </ul>
+  </li>
+ </ul>
+
+
+
+<h2 id="migrate">Importing Projects to Android Studio</h2>
+<p>Android Studio provides a function for importing Eclipse ADT projects, which creates a new
+Android Studio project and app modules based on your current
+Eclipse ADT workspace and projects. No changes are made to your Eclipse project files. The Eclipse
+ADT workspace becomes a new Android Studio project, and each Eclipse ADT project within the workspace
+becomes a new Android Studio module. Each instance of Android Studio contains a project with one or
+more app modules.</p>
+
+<p>After selecting an Eclipse ADT project to import, Android Studio creates the Android
+Studio project structure and app modules, generates the new Gradle-based build files and settings,
+and configures the required dependencies. The import options also allow you to enter your workspace
+directory and any actual path maps to handle any unresolved relative paths, path variables, and
+linked resource references.</p>
+
+<p>Depending on the structure of your Eclipse ADT development project, you should select specific
+files for importing:</p>
+<ul>
+<li>For workspaces with multiple projects, select the project folder for each Eclipse ADT
+  project individually to import the projects into the same Android Studio project. Android
+  Studio combines the Eclipse ADT projects into a single Android Studio project with different app
+  modules for each imported project.</li>
+
+<li>For Eclipse ADT projects with separate test projects, select the test project folder for
+  import. Android Studio imports the test project and then follows the dependency chain to import
+  the source project and any project dependencies.</li>
+
+ <li>If Eclipse ADT projects share dependencies within the same workspace, import each
+   project individually into Android Studio. Android Studio maintains the shared dependencies
+   across the newly created modules as part of the import process.</li>
+</ul>
+
+<p>To import a project to Android Studio:</p>
 
 <ol>
-  <li>In Android Studio, from the main menu or the <strong>Welcome to Android Studio</strong> page,
-  choose <strong>File &gt; Import Project</strong>.</li>
-  <li> Select the Eclipse root project directory</strong> and click <strong>OK</strong>.
-  <p class="note"><strong>Note:</strong> The Eclipse root directory must contain the
-  <code>AndroidManifest.xml</code> file. Also, the root directory must contain either the
-  <code>.project</code> and <strong>.classpath</strong> files from Eclipse or the
-  <code>res/</code> and <code>src/</code> directories.</p>
-  </li>
-  <li>Follow the steps in the import wizard. </li>
+ <li>Start Android Studio and close any open Android Studio projects.</li>
+ <li>From the Android Studio menu select <strong>File &gt; New &gt; Import Project</strong>.
+  <p>Alternatively, from the <em>Welcome</em> screen, select <strong>Import project
+  (Eclipse ADT, Gradle, etc.)</strong>.</p></li>
+ <li>Select the Eclipse ADT project folder with the <code>AndroidManifest.xml</code> file
+   and click <strong>Ok</strong>.
+   <p> <img src="{@docRoot}images/tools/studio-select-project-forimport.png" alt="" /></p>
+ </li>
+ <li>Select the destination folder and click <strong>Next</strong>.
+   <p> <img src="{@docRoot}images/tools/studio-import-destination-dir.png" alt="" /></p></li>
+ <li>Select the import options and click <strong>Finish</strong>.
+   <p>The import process prompts to migrate any library and project dependencies to Android Studio,
+   and add the dependency declarations to the <code>build.gradle</code> file. The import process
+   also replaces any well-known source libraries, binary libraries, and JAR files that have known
+   Maven coordinates with Maven dependencies, so you no longer need to maintain these dependencies
+   manually. The import options also allow you to enter your workspace directory and any actual
+   path maps to handle any unresolved relative paths, path variables, and linked resource
+   references.</p>
+   <p> <img src="{@docRoot}images/tools/studio-import-options.png" alt="" /></p></li>
+
+ <li>Android Studio imports the app and displays the project import summary. Review the summary
+   for details about the project restructuring and the import process.
+    <p> <img src="{@docRoot}images/tools/studio-import-summary.png"/></p>
+ </li>
 </ol>
 
-<p>Android Studio imports the current dependencies, downloads libraries, and
-creates an Android Studio project with the imported Eclipse project as the main module. Android
-Studio also creates the required Gradle build files. </p>
-
-<p>The import process replaces any JAR files and libraries with Gradle dependencies, and replaces
-source libraries and binary libraries with Maven dependencies, so you no longer need to maintain
-these files manually.</p>
-
- <p class="note"><strong>Note:</strong> If there are references to Eclipse workspace library files,
- comment them out in the <code>project.properties</code> or <code>.classpath</code> files
- that you imported from the Eclipse project. You can then add these files in the
- <code>build.gradle</code> file. See
- <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>. </p>
+<p>After importing the project from Eclipse ADT to the new Android Studio project and module
+structure, each app module folder in Android Studio contains the complete source set for that
+module, including the {@code src/main} and {@code src/androidTest} directories, resources, build
+file, and Android manifest. Before starting app development, you should resolve any issues shown in
+the project import summary to make sure the project re-structuring and import process completed
+properly.</p>
 
 
-<p>For more help getting started with Android Studio and the IntelliJ user experience,
-<a href="{@docRoot}tools/studio/index.html">learn more about Android Studio</a> and
-read <a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA"
-  class="external-link">FAQ on Migrating to IntelliJ IDEA</a>.</p>
+
+<h3 id="post-migration">Validating imported projects</h3>
+<p>After completing the import process, use the Android Studio <strong>Build</strong> and
+<strong>Run</strong> menu options to build your project and verify the output. If your project
+is not building properly, check the following settings:</p>
+
+<ul>
+<ul>
+  <li>Use the <strong>Android SDK</strong> button in Android Studio to launch the <a href=
+  "{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> and verify the installed versions of SDK
+  tools, build tools, and platform match the settings for your Eclipse ADT project. Android Studio
+  inherits the SDK Manager and JDK settings from your imported Eclipse project.
+  </li>
+  <li>Use the <strong>File &gt; Project Structure</strong> menu option to verify additional
+    Android Studio settings:
+   <ul>
+     <li>Under <em>SDK Location</em> verify Android Studio has access to the correct SDK and
+       JDK locations and versions. </li>
+     <li>Under <em>Project</em> verify the Gradle version, Android Plugin version, and related
+       repositories.</li>
+     <li>Under <em>Modules</em> verify the app and module settings, such as signing configuration
+       and library dependencies. </li>
+   </ul>
+ </li>
+ <li>If your project depends on another project, make sure that dependency is defined properly in
+  the <code>build.gradle</code> file in the app module folder.</li>
+</ul>
+
+
+<p>If there still are unexpected issues when building and running your project in Android
+Studio after you have checked these settings, consider modifying the Eclipse ADT project and
+re-starting the import process. Importing an Eclipse ADT project to Android Studio creates a new
+Android Studio project and does not impact the existing Eclipse ADT project. </p>
+
+
+
+<p>To get started using Android Studio, review the
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a> features and
+<a href="http://www.gradle.org">Gradle</a>-based build system to become familiar with the new
+project and module structure, flexible build settings, and other advanced Android development
+capabilities. For a comparison of Eclipse ADT and Android Studio features and usage, see
+<a href="{@docRoot}tools/studio/eclipse-migration-guide.html">Transitioning to Android Studio from
+Eclipse</a>. For specific Android Studio how-to documentation, see the pages in the
+<a href="{@docRoot}tools/workflow/index.html">Workflow</a> section.
+</p>
