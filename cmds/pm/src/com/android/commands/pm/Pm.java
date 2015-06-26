@@ -204,6 +204,10 @@ public final class Pm {
             return runGrantRevokePermission(false);
         }
 
+        if ("reset-permissions".equals(op)) {
+            return runResetPermissions();
+        }
+
         if ("set-permission-enforced".equals(op)) {
             return runSetPermissionEnforced();
         }
@@ -1636,6 +1640,24 @@ public final class Pm {
         }
     }
 
+    private int runResetPermissions() {
+        try {
+            mPm.resetRuntimePermissions();
+            return 0;
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        } catch (IllegalArgumentException e) {
+            System.err.println("Bad argument: " + e.toString());
+            showUsage();
+            return 1;
+        } catch (SecurityException e) {
+            System.err.println("Operation not allowed: " + e.toString());
+            return 1;
+        }
+    }
+
     private int runSetPermissionEnforced() {
         final String permission = nextArg();
         if (permission == null) {
@@ -1911,6 +1933,7 @@ public final class Pm {
         System.err.println("       pm unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant [--user USER_ID] PACKAGE PERMISSION");
         System.err.println("       pm revoke [--user USER_ID] PACKAGE PERMISSION");
+        System.err.println("       pm reset-permissions");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
@@ -1987,6 +2010,8 @@ public final class Pm {
         System.err.println("    to apps. The permissions must be declared as used in the app's");
         System.err.println("    manifest, be runtime permissions (protection level dangerous),");
         System.err.println("    and the app targeting SDK greater than Lollipop MR1.");
+        System.err.println("");
+        System.err.println("pm reset-permissions: revert all runtime permissions to their default state.");
         System.err.println("");
         System.err.println("pm get-install-location: returns the current install location.");
         System.err.println("    0 [auto]: Let system decide the best location");
