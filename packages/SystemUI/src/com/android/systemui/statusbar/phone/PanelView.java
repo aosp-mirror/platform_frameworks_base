@@ -226,7 +226,7 @@ public abstract class PanelView extends FrameLayout {
          * We capture touch events here and update the expand height here in case according to
          * the users fingers. This also handles multi-touch.
          *
-         * If the user just clicks shortly, we give him a quick peek of the shade.
+         * If the user just clicks shortly, we show a quick peek of the shade.
          *
          * Flinging is also enabled in order to open or close the shade.
          */
@@ -442,7 +442,7 @@ public abstract class PanelView extends FrameLayout {
         }
 
         /*
-         * If the user drags anywhere inside the panel we intercept it if he moves his finger
+         * If the user drags anywhere inside the panel we intercept it if the movement is
          * upwards. This allows closing the shade from anywhere inside the panel.
          *
          * We only do this if the current content is scrolled to the bottom,

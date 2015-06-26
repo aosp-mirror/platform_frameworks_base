@@ -2077,7 +2077,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         /*
         * Shortcut the most recurring case: the user is in the dragging
-        * state and he is moving his finger.  We want to intercept this
+        * state and is moving their finger.  We want to intercept this
         * motion.
         */
         final int action = ev.getAction();
@@ -2089,7 +2089,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             case MotionEvent.ACTION_MOVE: {
                 /*
                  * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
-                 * whether the user has moved far enough from his original down touch.
+                 * whether the user has moved far enough from the original down touch.
                  */
 
                 /*
