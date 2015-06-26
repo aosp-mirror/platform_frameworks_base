@@ -30,6 +30,8 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.FloatingToolbar;
 
+import java.util.Arrays;
+
 public class FloatingActionMode extends ActionMode {
 
     private static final int MAX_HIDE_DURATION = 3000;
@@ -42,7 +44,9 @@ public class FloatingActionMode extends ActionMode {
     private final Rect mContentRectOnWindow;
     private final Rect mPreviousContentRectOnWindow;
     private final int[] mViewPosition;
+    private final int[] mPreviousViewPosition;
     private final Rect mViewRect;
+    private final Rect mPreviousViewRect;
     private final Rect mScreenRect;
     private final View mOriginatingView;
     private final int mBottomAllowance;
@@ -75,7 +79,9 @@ public class FloatingActionMode extends ActionMode {
         mContentRectOnWindow = new Rect();
         mPreviousContentRectOnWindow = new Rect();
         mViewPosition = new int[2];
+        mPreviousViewPosition = new int[2];
         mViewRect = new Rect();
+        mPreviousViewRect = new Rect();
         mScreenRect = new Rect();
         mOriginatingView = Preconditions.checkNotNull(originatingView);
         mOriginatingView.getLocationInWindow(mViewPosition);
@@ -129,9 +135,17 @@ public class FloatingActionMode extends ActionMode {
 
     public void updateViewLocationInWindow() {
         checkToolbarInitialized();
+
         mOriginatingView.getLocationInWindow(mViewPosition);
         mOriginatingView.getGlobalVisibleRect(mViewRect);
-        repositionToolbar();
+
+        if (!Arrays.equals(mViewPosition, mPreviousViewPosition)
+                || !mViewRect.equals(mPreviousViewRect)) {
+            repositionToolbar();
+            mPreviousViewPosition[0] = mViewPosition[0];
+            mPreviousViewPosition[1] = mViewPosition[1];
+            mPreviousViewRect.set(mViewRect);
+        }
     }
 
     private void repositionToolbar() {
