@@ -619,10 +619,6 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useVolumeKeySounds);
         mUseFixedVolume = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
-        sAudioPortEventHandler.init();
-
-        mPortListener = new OnAmPortUpdateListener();
-        registerAudioPortUpdateListener(mPortListener);
     }
 
     private Context getContext() {
@@ -3554,6 +3550,7 @@ public class AudioManager {
      * @hide
      */
     public void registerAudioPortUpdateListener(OnAudioPortUpdateListener l) {
+        sAudioPortEventHandler.init();
         sAudioPortEventHandler.registerListener(l);
     }
 
@@ -3586,6 +3583,7 @@ public class AudioManager {
 
     static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches,
                                     ArrayList<AudioPort> previousPorts) {
+        sAudioPortEventHandler.init();
         synchronized (sAudioPortGeneration) {
 
             if (sAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
@@ -3849,6 +3847,12 @@ public class AudioManager {
             android.os.Handler handler) {
         if (callback != null && !mDeviceCallbacks.containsKey(callback)) {
             synchronized (mDeviceCallbacks) {
+                if (mDeviceCallbacks.size() == 0) {
+                    if (mPortListener == null) {
+                        mPortListener = new OnAmPortUpdateListener();
+                    }
+                    registerAudioPortUpdateListener(mPortListener);
+                }
                 NativeEventHandlerDelegate delegate =
                         new NativeEventHandlerDelegate(callback, handler);
                 mDeviceCallbacks.put(callback, delegate);
@@ -3867,6 +3871,9 @@ public class AudioManager {
         synchronized (mDeviceCallbacks) {
             if (mDeviceCallbacks.containsKey(callback)) {
                 mDeviceCallbacks.remove(callback);
+                if (mDeviceCallbacks.size() == 0) {
+                    unregisterAudioPortUpdateListener(mPortListener);
+                }
             }
         }
     }
