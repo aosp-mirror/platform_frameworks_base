@@ -85,6 +85,7 @@ public final class FloatingToolbar {
     private final FloatingToolbarPopup mPopup;
 
     private final Rect mContentRect = new Rect();
+    private final Rect mPreviousContentRect = new Rect();
 
     private Menu mMenu;
     private List<Object> mShowingMenuItems = new ArrayList<Object>();
@@ -178,11 +179,13 @@ public final class FloatingToolbar {
             mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
             mShowingMenuItems = getShowingMenuItemsReferences(menuItems);
         }
-        mPopup.updateCoordinates(mContentRect);
         if (!mPopup.isShowing()) {
             mPopup.show(mContentRect);
+        } else if (!mPreviousContentRect.equals(mContentRect)) {
+            mPopup.updateCoordinates(mContentRect);
         }
         mWidthChanged = false;
+        mPreviousContentRect.set(mContentRect);
         return this;
     }
 
@@ -318,24 +321,8 @@ public final class FloatingToolbar {
                 };
         private final AnimatorSet mDismissAnimation;
         private final AnimatorSet mHideAnimation;
-        private final AnimationSet mOpenOverflowAnimation = new AnimationSet(true) {
-            @Override
-            public void cancel() {
-                if (hasStarted() && !hasEnded()) {
-                    super.cancel();
-                    setOverflowPanelAsContent();
-                }
-            }
-        };
-        private final AnimationSet mCloseOverflowAnimation = new AnimationSet(true) {
-            @Override
-            public void cancel() {
-                if (hasStarted() && !hasEnded()) {
-                    super.cancel();
-                    setMainPanelAsContent();
-                }
-            }
-        };
+        private final AnimationSet mOpenOverflowAnimation = new AnimationSet(true);
+        private final AnimationSet mCloseOverflowAnimation = new AnimationSet(true);
 
         private final Runnable mOpenOverflow = new Runnable() {
             @Override
@@ -657,8 +644,24 @@ public final class FloatingToolbar {
         }
 
         private void cancelOverflowAnimations() {
-            mOpenOverflowAnimation.cancel();
-            mCloseOverflowAnimation.cancel();
+            if (mOpenOverflowAnimation.hasStarted()
+                    && !mOpenOverflowAnimation.hasEnded()) {
+                // Remove the animation listener, stop the animation,
+                // then trigger the lister explicitly so it is not posted
+                // to the message queue.
+                mOpenOverflowAnimation.setAnimationListener(null);
+                mContentContainer.clearAnimation();
+                mOnOverflowOpened.onAnimationEnd(null);
+            }
+            if (mCloseOverflowAnimation.hasStarted()
+                    && !mCloseOverflowAnimation.hasEnded()) {
+                // Remove the animation listener, stop the animation,
+                // then trigger the lister explicitly so it is not posted
+                // to the message queue.
+                mCloseOverflowAnimation.setAnimationListener(null);
+                mContentContainer.clearAnimation();
+                mOnOverflowClosed.onAnimationEnd(null);
+            }
         }
 
         /**
