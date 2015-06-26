@@ -53,7 +53,7 @@ public class StatusBarWindowView extends FrameLayout {
 
     private int mRightInset = 0;
 
-    PhoneStatusBar mService;
+    private PhoneStatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
@@ -124,14 +124,22 @@ public class StatusBarWindowView extends FrameLayout {
     }
 
     @Override
-    protected void onAttachedToWindow () {
-        super.onAttachedToWindow();
-
+    protected void onFinishInflate() {
+        super.onFinishInflate();
         mStackScrollLayout = (NotificationStackScrollLayout) findViewById(
                 R.id.notification_stack_scroller);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
-        mDragDownHelper = new DragDownHelper(getContext(), this, mStackScrollLayout, mService);
         mBrightnessMirror = findViewById(R.id.brightness_mirror);
+    }
+
+    public void setService(PhoneStatusBar service) {
+        mService = service;
+        mDragDownHelper = new DragDownHelper(getContext(), this, mStackScrollLayout, mService);
+    }
+
+    @Override
+    protected void onAttachedToWindow () {
+        super.onAttachedToWindow();
 
         // We really need to be able to animate while window animations are going on
         // so that activities may be started asynchronously from panel animations
