@@ -3117,7 +3117,7 @@ public final class PowerManagerService extends SystemService
                 return;
             }
 
-            if (eventTime > SystemClock.uptimeMillis()) {
+            if (eventTime > now) {
                 throw new IllegalArgumentException("event time must not be in the future");
             }
 
