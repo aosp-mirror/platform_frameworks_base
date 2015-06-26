@@ -6179,6 +6179,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setId(id, null, null, null);
         }
         structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
+        if (!hasIdentityMatrix()) {
+            structure.setTransformation(getMatrix());
+        }
+        structure.setElevation(getZ());
         structure.setVisibility(getVisibility());
         structure.setEnabled(isEnabled());
         if (isClickable()) {
@@ -6215,11 +6219,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         structure.setContentDescription(getContentDescription());
     }
 
-    /** @hide */
-    public void onProvideAssistStructure(ViewStructure structure) {
-        onProvideStructure(structure);
-    }
-
     /**
      * Called when assist structure is being retrieved from a view as part of
      * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData} to
@@ -6232,17 +6231,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
             AccessibilityNodeInfo info = createAccessibilityNodeInfo();
-            Log.i("View", "Provider of " + this + ": children=" + info.getChildCount());
             structure.setChildCount(1);
             ViewStructure root = structure.newChild(0);
             populateVirtualStructure(root, provider, info);
             info.recycle();
         }
-    }
-
-    /** @hide */
-    public void onProvideVirtualAssistStructure(ViewStructure structure) {
-        onProvideVirtualStructure(structure);
     }
 
     private void populateVirtualStructure(ViewStructure structure,
@@ -6284,8 +6277,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
-        Log.i("View", "vassist " + cname + " @ " + rect.toShortString()
-                + " text=" + info.getText() + " cd=" + info.getContentDescription());
         if (info.getText() != null || info.getError() != null) {
             structure.setText(info.getText(), info.getTextSelectionStart(),
                     info.getTextSelectionEnd());
@@ -6310,8 +6301,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void dispatchProvideStructure(ViewStructure structure) {
         if (!isAssistBlocked()) {
-            onProvideAssistStructure(structure);
-            onProvideVirtualAssistStructure(structure);
+            onProvideStructure(structure);
+            onProvideVirtualStructure(structure);
         } else {
             structure.setClassName(getAccessibilityClassName().toString());
             structure.setAssistBlocked(true);
