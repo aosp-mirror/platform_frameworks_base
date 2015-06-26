@@ -1,0 +1,510 @@
+page.title=Manifest Merging
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#merge-rules">Merge Conflict Rules</a></li>
+    <li><a href="#markers-selectors">Merge Conflict Markers and Selectors</a></li>
+    <li><a href="#inject-values">Injecting Build Values into a Manifest</a></li>
+    <li><a href="#merge-prodflavorsGroups">Manifest Merging Across Product Flavor Groups</a></li>
+    <li><a href="#implicit-permissions">Implicit Permissions</a></li>
+    <li><a href="#merge-errors">Handling Manifest Merge Build Errors</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}sdk/installing/studio-build.html">Build System Overview</a></li>
+    <li><a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a> </li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>With Android Studio and <a href="http://www.gradle.org">Gradle</a>-based builds, each app can
+contain manifest files in multiple locations, such as the <code>src/main/</code> folder for
+the <code>productFlavor</code>, libraries, Android ARchive (AAR) bundles of Android Library
+projects, and dependencies. During the build process, manifest merging combines the settings from
+the various <code>AndroidManifest.xml</code> files included in your app into a single, generated APK
+manifest file for app packaging and distribution. Manifest settings are merged based on the manifest
+priority, determined by the manifest's file location. Building your app merges the
+manifest elements, attributes, and sub-elements from these manifests for the specified
+<a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants">build variant</a>.</p>
+
+
+<h2 id="merge-rules">Merge Conflict Rules</h2>
+<p>Merge conflicts occur when merged manifests contain the same manifest element but with a
+different attribute value that does not resolve based on the default merge conflict rules.
+<a href="#markers-selectors">Conflict markers and selectors</a> can also define custom merge rules,
+such as allowing an imported library to have a <code>minSdkVersion</code> higher than the
+version defined in the other higher priority manifests.  </p>
+
+<p>The manifest merge priority determines which manifest settings are retained in merge conflicts,
+with the settings in higher priority manifest overwriting those in lower priority manifests.
+The following list details which manifest settings are are the highest priority during the merge
+process:</p>
+
+<ul>
+ <li>Highest priority: <code>buildType</code> manifest settings </li>
+ <li>Higher priority: <code>productFlavor</code> manifest settings </li>
+ <li>Medium priority: Manifests in the <code>src/main/</code> directory of an app project</li>
+ <li>Low priority: Dependency and library manifest settings </li>
+</ul>
+
+<p>Manifest merge conflicts are resolved at the XML node and
+attribute levels based on the following merge rules. </p>
+
+<table>
+    <tr>
+        <th scope="col">High Priority Element</th>
+        <th scope="col">Low Priority Element</th>
+        <th scope="col">Manifest Merge Result</th>
+    </tr>
+    <tr>
+        <td rowspan="3">no attribute</td>
+        <td>no attribute</td>
+        <td>no attribute</td>
+    </tr>
+    <tr>
+
+        <td>attribute set to default</td>
+        <td>default attribute</td>
+    </tr>
+    <tr>
+
+        <td>attribute set to non-default </td>
+        <td>low priority attribute</td>
+    </tr>
+    <tr>
+        <td>attribute set to default</td>
+        <td rowspan="2">no attribute</td>
+        <td>default attribute</td>
+    </tr>
+    <tr>
+        <td>attribute set to non-default </td>
+
+        <td>high priority attribute</td>
+    </tr>
+    <tr>
+        <td>attribute set to default</td>
+        <td>attribute set to default</td>
+        <td>default attribute</td>
+    </tr>
+    <tr>
+        <td>attribute set to default</td>
+        <td>attribute set to non-default </td>
+        <td>low priority attribute</td>
+    </tr>
+    <tr>
+        <td>attribute set to non-default</td>
+        <td>attribute set to default</td>
+        <td>high priority attribute</td>
+    </tr>
+    <tr>
+        <td>attribute set to non-default</td>
+        <td>attribute set to non-default </td>
+        <td>Merge if settings match, otherwise causes conflict error.</td>
+    </tr>
+   </table>
+
+
+
+<p>Exceptions to the manifest merge rules: </p>
+
+<ul>
+ <li>The <code>uses-feature android:required;</code> and
+ <code>uses-library android:required</code> elements default to <code>true</code> and use
+ an <em>OR</em> merge so that any required feature or library is included in the generated APK. </li>
+
+ <li>If not declared, the
+ <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+ elements, <code>minSdkVersion</code> and
+ <code>targetSdkVersion</code>, default to a value of 1. When
+ merge conflicts occur, the value in the higher priority manifest version is used.</li>
+
+ <li>Importing a library with a <code>minSdkVersion</code> value higher than the app's
+ <code>src/main/</code> manifest manifest generates an error unless
+ the <code>overrideLibrary</code> conflict marker is used.
+
+ <p class="note"><strong>Note:</strong> If not explicitly declared, the <code>targetSdkVersion</code>
+ defaults to the <code>minSdkVersion</code> value. When no <code><uses-sdk></code> element is
+ present in any manifest or the <code>build.gradle</code> file, the
+ <code>minSdkVersion</code> defaults to 1.</p> </li>
+
+ <li>When importing a library with a <code>targetSdkVersion</code> value lower than the app's
+ <code>src/main/</code> manifest, the manifest merge
+ process explicitly grants permissions and ensures that the imported library functions properly. </li>
+
+ <li>The <code>manifest</code> element only merges with child manifest elements. </li>
+
+ <li>The <code>intent-filter</code> element is never changed and is always added to the common
+ parent node in the merged manifest. </li>
+</ul>
+
+<p class="caution"><strong>Important:</strong> After the manifests are merged, the build process
+overrides the final manifest settings with any settings that are also in the
+<code>build.gradle</code> file. For more details, see
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>. </p>
+
+
+
+<h2 id="markers-selectors">Merge Conflict Markers and Selectors</h2>
+<p>Manifest markers and selectors override the default merge rules through
+specific conflict resolutions. For example, use a conflict marker to
+merge a library manifest with a higher <code>minSdkVersion</code> value than the higher priority
+manifest, or to merge manifests with the same activity but different <code>android:theme</code>
+values. </p>
+
+<h3 id="conflict-markers">Merge Conflict Markers</h3>
+<p>A merge conflict marker is a special attribute in the Android tools namespace that defines a
+specific merge conflict resolution. Create a conflict marker to avoid a merge conflict error for
+conflicts not resolved by the default merge rules. Supported merge conflict markers include:</p>
+
+<dl>
+  <dt><code>merge</code></dt>
+    <dd>Merges attributes when there are no conflicts with the merge rules. The default merge
+    action.</dd>
+  <dt><code>replace</code></dt>
+    <dd>Replaces attributes in the lower priority manifest with those from the higher priority
+    manifest.</dd>
+  <dt><code>strict</code></dt>
+    <dd>Sets the merge policy level so that merged elements with same attributes, but different
+     values generate a build failure, unless resolved through the conflict rules.</dd>
+  <dt><code>merge-only</code></dt>
+    <dd>Allows merge actions for only lower priority attributes.</dd>
+  <dt><code>remove</code></dt>
+    <dd>Removes the specified lower priority element from the merged manifest.</dd>
+  <dt><code>remove-All</code></dt>
+    <dd>Removes all lower priority elements of the same node type from the merged manifest.</dd>
+</dl>
+
+
+<p>By default, the manifest merge process applies the <code>merge</code> conflict marker to
+the node level. All declared manifest attributes default to a <code>strict</code>
+merging policy. </p>
+
+<p>To set a merge conflict marker, first declare the namespace in the
+<code>AndroidManifest.xml</code> file. Then, enter the merge conflict marker in the manifest to
+specify a custom merge conflict action. This example inserts the <code>replace</code> marker to
+set a replace action to resolve conflicts between the <code>android:icon</code> and
+<code>android:label</code> manifest elements. </p>
+
+<pre>
+
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   package="com.android.tests.flavorlib.app"
+   xmlns:tools="http://schemas.android.com/tools"&gt;
+
+   &lt;application
+       android:icon="&#64;drawable/icon"
+       android:label="&#64;string/app_name"
+       tools:replace="icon, label"&gt;
+       ...
+
+</manifest>
+
+</pre>
+
+
+<h4>Marker attributes</h4>
+<p>Conflict markers use <code>tools:node</code> and <code>tools:attr</code> attributes to
+restrict merge actions at the XML node or attribute level. </p>
+
+<p>The <code>tools:attr</code> markers use only the <code>restrict</code>, <code>remove</code>, and
+<code>replace</code> merge actions. Multiple <code>tools:attr</code> marker values can be applied
+to a specific element. For example, use <code>tools:replace="icon, label, theme"</code> to replace
+lower priority <code>icon</code>, <code>label</code>, and <code>theme</code> attributes. </p>
+
+
+<h4>Merge conflict marker for imported libraries</h4>
+<p>The <code>overrideLibrary</code> conflict marker applies to the <code>&lt;uses-sdk&gt;</code>
+manifest declaration and is used to import a library even though the library's
+<code>&lt;uses-sdk&gt;</code> values, such as <code>minSdkVersion</code>
+are set to different values than those in the other higher priority manifests. </p>
+
+<p>Without this marker, library manifest merge conflicts from the
+<code>&lt;uses-sdk&gt;</code> values cause the merge process to fail.</p>
+
+<p>This example applies the <code>overrideLibrary</code> conflict marker to resolve the merge
+conflict between <code>minSdkVersion</code> values in the <code>src/main/</code> manifest and an
+imported library manifest.
+
+
+<p><code>src/main/</code> manifest: </p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   package="com.android.example.app"
+   xmlns:tools="http://schemas.android.com/tools"&gt;
+   ...
+   &lt;uses-sdk android:targetSdkVersion="22" android:minSdkVersion="2"
+             tools:overrideLibrary="com.example.lib1, com.example.lib2"/&gt;
+   ...
+</pre>
+
+<p>Library manifest: </p>
+
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   	 package="com.example.lib1"&gt;
+     ...
+   	 &lt;uses-sdk android:minSdkVersion="4" /&gt;
+     ...
+    &lt;/manifest&gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> The default merge process does not allow importing a library
+with a higher <code>minSdkVersion</code> than the app's <code>src/main/</code> manifest unless
+the <code>overrideLibrary</code> conflict marker is used. </p>
+
+
+
+<h3 id="marker-selectors">Marker Selectors</h3>
+<p>Marker selectors limit a merge action to a specific lower priority manifest. For example, a
+marker selector can be used to remove a permission from only one library, while allowing the
+same permission from other libraries.</p>
+
+<p>This example uses the <code>tools:node</code> marker to remove the <code>permisionOne</code>
+attribute, while the <code>tools:selector</code> selector specifies the specific library as
+<em>com.example.lib1</em>. The <code>permisionOne</code> permission is filtered from only the
+<code>lib1</code> library manifests. </p>
+
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   package="com.android.example.app"
+   xmlns:tools="http://schemas.android.com/tools"&gt;
+   ...
+   &lt;permission
+         android:name="permissionOne"
+         tools:node="remove"
+         tools:selector="com.example.lib1"&gt;
+   ...
+</pre>
+
+
+
+<h2 id="inject-values">Injecting Build Values into a Manifest</h2>
+<p>Manifest merging can also be configured to use manifest placeholders to inject
+property values from the <code>build.gradle</code> file into the manifest attributes. </p>
+
+<p>Manifest placeholders use the syntax <code>&#36;{name}</code> for attribute values, where
+<code>name</code> is the injected <code>build.gradle</code> property. The <code>build.gradle</code>
+file uses the <code>manifestPlaceholders</code> property to define the placeholder values. </p>
+
+<p class="note"><strong>Note:</strong> Unresolved placeholder names in apps cause build failures.
+Unresolved placeholder names in libraries generate warnings and need to be resolved when importing
+the library into an app.</p>
+
+<p>This example shows the manifest placeholder <code>&#36;{applicationId}</code> used to inject the
+<code>build.gradle</code> <code>applicationId</code> property value in to <code>android:name</code>
+attribute value.  </p>
+
+<p class="note"><strong>Note:</strong> Android Studio provides a default
+<code>&#36;{applicationId}</code> placeholder for the <code>build.gradle</code>
+<code>applicationId</code> value that is not shown in the build file.</p>
+
+
+<p>Manifest entry:</p>
+
+<pre>
+
+&lt;activity
+android:name=".Main"&gt;
+     &lt;intent-filter&gt;
+     &lt;action android:name="&#36;{applicationId}.foo"&gt;
+         &lt;/action&gt;
+&lt;/intent-filter&gt;
+&lt;/activity&gt;
+
+</pre>
+
+
+<p>Gradle build file:</p>
+
+<pre>
+android {
+   compileSdkVersion 22
+   buildToolsVersion "22.0.1"
+
+   productFlavors {
+       flavor1 {
+           applicationId = "com.mycompany.myapplication.productFlavor1"
+       }
+}
+
+</pre>
+
+<p>Merged manifest value: </p>
+
+<pre>
+&lt;action android:name="com.mycompany.myapplication.productFlavor1.foo"&gt;
+</pre>
+
+
+<p>The manifest placeholder syntax and build file <code>manifestPlaceholders</code>
+property can be used to inject other manifest values. For properties other than the
+<code>applicationId</code>, the <code>manifestPlaceholders</code> property is explicitly declared
+in the <code>build.gradle</code> file. This example shows the manifest placeholder for injecting
+<code>activityLabel</code> values.</p>
+
+<p>Gradle build file: </p>
+
+<pre>
+android {
+    defaultConfig {
+        manifestPlaceholders = [ activityLabel:"defaultName"]
+    }
+    productFlavors {
+        free {
+        }
+        pro {
+            manifestPlaceholders = [ activityLabel:"proName" ]
+        }
+    }
+
+</pre>
+
+<p>Placeholder in the manifest file: </p>
+
+<pre>
+&lt;activity android:name=".MainActivity" android:label="&#36;{activityLabel}" &gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> The placeholder value supports partial value injection,
+for example <code>android:authority="com.acme.&#36;{localApplicationId}.foo"</code>. </p>
+
+
+
+<h2 id="merge-prodflavorsGroups">Manifest Merging Across Product Flavor Groups</h2>
+
+<p>When using the <code>GroupableProductFlavor</code> property, the manifest merge
+priority of any manifests in the product flavor groups follows the order in which the
+product flavor groups are listed in the build file. The manifest merge process creates a single
+merged manifest for the product flavor groups based on the configured build variant. </p>
+
+<p>For example, if a build variant references the product flavors <code>x86</code>,
+<code>mdpi</code>, <code>21</code>, and <code>paid</code> from the respective product flavor
+groups <code>ABI</code>, <code>Density</code>, <code>API</code>, and <code>Prod</code>, listed
+in this order in the <code>build.gradle</code> file, then the manifest merge process merges the
+manifests in this priority order, which follows how the product flavors are listed in the build
+file.</p>
+
+<p>To illustrate this example, the following table shows how the product flavors are listed for
+each product flavor group. This combination of product flavors and groups defines the
+build variant. </p>
+<table>
+    <tr>
+        <th scope="col">Product Flavor Group</th>
+        <th scope="col">Product Flavor</th>
+    <tr>
+        <td>ABI</td>
+        <td>x86</td>
+    </tr>
+    <tr>
+       <td>density</td>
+        <td>mdpi</td>
+    </tr>
+    <tr>
+        <td>API</td>
+        <td>22</td>
+    </tr>
+    <tr>
+        <td>prod</td>
+        <td>paid</td>
+    </tr>
+</table>
+
+<p>Manifest merge order:</p>
+
+ <ul>
+  <li>prod-paid AndroidManifest.xml (lowest priority) merges into API-22 AndroidManifest.xml</li>
+  <li>API-22 AndroidManifest.xml merges into density-mpi AndroidManifest.xml</li>
+  <li>density-mpi AndroidManifest.xml merges into ABI-x86 AndroidManifest.xml (highest priority)</li>
+ </ul>
+
+
+<h2 id="implicit-permissions">Implicit Permissions</h2>
+<p>Importing a library that targets an Android runtime with implicitly
+granted permissions may automatically add the permissions to the resulting merged manifest.
+For example, if an application with a <code>targetSdkVersion</code> of 16 imports a library with a
+<code>targetSdkVersion</code> of 2, Android Studio adds the <code>WRITE_EXTERNAL_STORAGE</code>
+permission to ensure permission compatibility across the SDK versions.
+
+<p class="note"><strong>Note:</strong> More recent Android releases replace implicit
+permissions with permission declarations.</p>
+
+
+This table lists the importing library versions and the declared permissions.
+</p>
+
+  <table>
+    <tr>
+      <th>Importing this library version</th>
+      <th>Declares this permission in the manifest </th>
+    </tr>
+    <tr>
+      <td><code>targetSdkVersion</code> &lt; 2 </td>
+      <td><code>WRITE_EXTERNAL_STORAGE</code> </td>
+    </tr>
+    <tr>
+      <td><code>targetSdkVersion</code> &lt; 4 </td>
+      <td><code>WRITE_EXTERNAL_STORAGE</code>, <code>READ_PHONE_STATE</code> </td>
+    </tr>
+    <tr>
+      <td>Declared <code>WRITE_EXTERNAL_STORAGE</code></td>
+      <td><code>READ_EXTERNAL_STORAGE</code></td>
+    </tr>
+    <tr>
+      <td><code>targetSdkVersion</code> &lt; 16 and using the <code>READ_CONTACTS</code>
+      permission</td>
+      <td><code>READ_CALL_LOG</code></td>
+    </tr>
+    <tr>
+      <td><code>targetSdkVersion</code> &lt; 16 and using the <code>WRITE_CONTACTS</code>
+      permission</td>
+      <td><code>WRITE_CALL_LOG</code></td>
+    </tr>
+  </table>
+
+
+
+<h2 id="merge-errors">Handling Manifest Merge Build Errors</h2>
+<p>During the build process, the manifest merge process stores a record of each merge transaction
+in the <code>manifest-merger-&lt;productFlavor&gt;-report.txt</code> file in the module
+<code>build/outputs/logs</code> folder. A different log file is generated for each of the
+module's build variants. </p>
+
+<p>When a manifest merge build error occurs, the merge process records the error message
+describing the merge conflict in the log file. For example, the
+<code>android:screenOrientation</code> merge conflict between the following manifests causes
+a build error. </p>
+
+<p>Higher priority manifest declaration: </p>
+
+<pre>
+&lt;activity
+   android:name="com.foo.bar.ActivityOne"
+   android:screenOrientation="portrait"
+   android:theme="&#64;theme1"/&gt;
+</pre>
+
+<p>Lower priority manifest declaration: </p>
+
+<pre>
+&lt;activity
+   android:name="com.foo.bar.ActivityOne"
+   android:screenOrientation="landscape"/&gt;
+</pre>
+
+<p>Error log:</p>
+
+<pre>
+/project/app/src/main/AndroidManifest.xml:3:9 Error:
+ Attribute activity&#64;screenOrientation value=(portrait) from AndroidManifest.xml:3:9
+ is also present at flavorlib:lib1:unspecified:3:18 value=(landscape)
+ Suggestion: add 'tools:replace="icon"' to <activity> element at AndroidManifest.xml:1:5 to override
+</pre>
+
+
