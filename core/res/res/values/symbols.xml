@@ -903,6 +903,7 @@
   <java-symbol type="string" name="sipAddressTypeOther" />
   <java-symbol type="string" name="sipAddressTypeWork" />
   <java-symbol type="string" name="default_sms_application" />
+  <java-symbol type="string" name="default_browser" />
   <java-symbol type="string" name="sms_control_message" />
   <java-symbol type="string" name="sms_control_title" />
   <java-symbol type="string" name="sms_control_no" />
