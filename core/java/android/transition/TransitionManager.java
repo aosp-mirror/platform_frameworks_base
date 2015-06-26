@@ -435,10 +435,11 @@ public class TransitionManager {
         sPendingTransitions.remove(sceneRoot);
 
         final ArrayList<Transition> runningTransitions = getRunningTransitions().get(sceneRoot);
-        if (runningTransitions != null) {
-            final int count = runningTransitions.size();
-            for (int i = 0; i < count; i++) {
-                final Transition transition = runningTransitions.get(i);
+        if (runningTransitions != null && !runningTransitions.isEmpty()) {
+            // Make a copy in case this is called by an onTransitionEnd listener
+            ArrayList<Transition> copy = new ArrayList(runningTransitions);
+            for (int i = copy.size() - 1; i >= 0; i--) {
+                final Transition transition = copy.get(i);
                 transition.end();
             }
         }
