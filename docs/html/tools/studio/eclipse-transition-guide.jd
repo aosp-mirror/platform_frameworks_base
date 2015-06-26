@@ -1,0 +1,773 @@
+page.title=Transition Guide for Eclipse ADT
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+  <ol>
+    <li><a href="#project-structure">Project Structure</a></li>
+    <li><a href="#manifest-settings">Manifest Settings</a></li>
+    <li><a href="#dependencies">Dependencies</a></li>
+    <li><a href="#build-process">Gradle-based Build Process</a></li>
+    <li><a href="#debug-inspect">Debugging and Code Inspections</a></li>
+    <li><a href="#resource-optimization">Resource Optimization</a></li>
+    <li><a href="#signing">App Signing</a></li>
+    <li><a href="#support-lib">Android Support Repository and Google Play services Repository</a></li>
+    <li><a href="#app-package">App Packaging</a></li>
+    <li><a href="#software-updates">Software Updates </a></li>
+    <li><a href="#version-control">Version Control</a></li>
+    </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a class="external-link"
+      href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">
+      IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
+    <li><a class="external-link"
+      href="https://confluence.jetbrains.com/display/IntelliJIDEA/IntelliJ+IDEA+for+Eclipse+Users">
+      IntelliJ IntelliJ for Eclipse Users</a></li>
+    <li><a href="{@docRoot}tools/studio/index.html">Android Studio Overview</a> </li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>This document describes the differences between Eclipse ADT and Android Studio, including project
+  structure, build system, debugging, and application packaging. This guide is intended to help you
+  transition to using Android Studio as your development environment.</p>
+
+<h2 id="project-structure">Project Structure </h2>
+<p>Eclipse provides workspaces as a common area for grouping related projects, configurations, and
+settings. In Android Studio, each instance of Android Studio contains a top-level project with one
+or more app modules. Each app module folder contains the equivalent to an Eclipse
+project, the complete source sets for that module, including {@code src/main} and
+{@code src/androidTest} directories, resources, build file, and the Android manifest. In general,
+to update and build your app you modify the files under each module's
+{@code src/main} directory for source code updates, the <code>gradle.build</code> file for
+build specification, and the files under {@code src/androidTest} directory for test case creation. </p>
+
+<p>You can also customize the view of the project files in Android Studio to focus on specific
+aspects of your app development: </p>
+
+<ul>
+  <li><em>Packages</em> </li>
+  <li><em>Project Files</em> </li>
+  <li><em>Scratches</em> </li>
+  <li><em>Problems</em> </li>
+  <li><em>Production</em> </li>
+  <li><em>Tests</em> </li>
+</ul>
+
+
+<p>The following table shows the general mapping of the Eclipse ADT project structure and file
+locations to Android Studio.</p>
+
+<p class="table-caption" id="table-project-structure-mapping">
+  <strong>Table 1.</strong> Project structure mapping.</p>
+
+<table>
+    <tr>
+        <th scope="col">Eclipse ADT</th>
+        <th scope="col">Android Studio</th>
+    </tr>
+
+    <tr>
+        <td>Workspace </td>
+        <td>Project </td>
+    </tr>
+
+    <tr>
+        <td>Project </td>
+        <td>Module </td>
+    </tr>
+
+     <tr>
+        <td>Project-specific JRE </td>
+        <td>Module JDK </td>
+     </tr>
+
+     <tr>
+        <td>Classpath variable </td>
+        <td>Path variable</td>
+     </tr>
+
+     <tr>
+        <td>Project dependency</td>
+        <td>Module dependency</td>
+     </tr>
+
+     <tr>
+        <td>Library Module</td>
+        <td>Library </td>
+     </tr>
+
+     <tr>
+       <td><code>AndroidManifest.xml</code></td>
+       <td><code>app/src/main/AndroidManifest.xml</code> </td>
+     </tr>
+     <tr>
+       <td><code>assets/</code></td>
+       <td><code>app/src/main/assets</code> </td>
+     </tr>
+     <tr>
+       <td><code>res/</code></td>
+       <td><code>app/src/main/res/</code> </td>
+     </tr>
+     <tr>
+       <td><code>src/</code></td>
+       <td><code>app/src/main/java/ </code> </td>
+     </tr>
+     <tr>
+       <td><code>tests/src/</code></td>
+       <td><code>app/src/androidTest/java/</code> </td>
+     </tr>
+
+   </table>
+
+
+
+<p>Table 2 shows Eclipse ADT and Android Studio project views. </p>
+
+<p class="table-caption" id="table2">
+  <strong>Table 2.</strong> Comparing project views.</p>
+<table>
+  <tbody><tr>
+    <th>Eclipse ADT</th>
+    <th>Android Studio Project View</th>
+    <th>Android Studio Android View</th>
+  </tr>
+  <tr>
+    <td><img src="{@docRoot}images/tools/eclipse-notepad-pre-import--structure.png"/>  </td>
+    <td><img src="{@docRoot}images/tools/studio-import-project-structure-project.png"/>  </td>
+    <td><img src="{@docRoot}images/tools/studio-import-project-structure-android.png"/>  </td>
+  </tr>
+ </tbody>
+</table>
+
+
+<p class="note"><strong>Note:</strong> Multiple instances of Android Studio can be used to develop
+independent projects. </p>
+
+
+
+
+<h2 id="manifest-settings">Manifest Settings</h2>
+<p>Android Studio and <a href="http://www.gradle.org">Gradle</a>-based builds support
+<a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants"> build variants</a>,
+which are combinations of <code>productFlavor</code> and <code>buildTypes</code>, to customize
+your build outputs. To support these custom builds, several elements in the
+<code>AndroidManifest.xml</code> file are now properties in the <code>defaultConfig</code> and
+<code>productFlavors</code> blocks in the <code>build.gradle</code> file. The import process
+copies these manifest settings to the properties in the <code>build.gradle</code> file.
+These properties overwrite the settings in any other manifest files as shown in table 3. </p>
+
+<p class="table-caption" id="table-manifest-gradle-settings">
+  <strong>Table 3.</strong> Manifest and Gradle property settings.</p>
+<table>
+    <tr>
+        <th scope="col">Manifest Setting</th>
+        <th scope="col">build.gradle Setting</th>
+    </tr>
+    <tr>
+        <td><code>&lt;uses-sdk</code> <br>
+            <p><code>android:minSdkVersion</code></p>
+            <p><code>android:targetSdkVersion /&gt;</code></p>
+    </td>
+        <td> <br>
+           <p><code>minSdkVersion</code></p>
+           <p><code>targetSdkVersion</code></p> </td>
+    </tr>
+    <tr>
+        <td><code>&lt;manifest</code>
+            <p>package (Required in the default manifest file.) </p>
+            <p><code>android:versionCode</code></p>
+            <p><code>android:versionName /&gt;</code></p>
+    </td>
+        <td> <br>
+            <p><code>applicationId</code> (See
+            <a href="{@docRoot}tools/studio/index.html#app-id"> Application ID
+            for Package Identification</a>)</p>
+            <p><code>versionCode</code></p>
+            <p><code>versionName</code></p> </td>
+    </tr>
+
+   </table>
+
+
+<p>Although these settings may no longer appear in the default app manifest file, they are still
+valid manifest entries and may still appear in manifests from older projects, imported projects,
+dependencies, and libraries.</p>
+
+<p>The <code>package</code> element must still be specified in the manifest file. It is used in
+your source code to refer to your <code>R</code> class and to resolve any relative activity/service
+registrations. </p>
+
+<p class="note"><strong>Note:</strong> When multiple manifests are present in your app, for
+example a library manifest and a <code>src/main/</code> manifest, the build process combines
+the manifest settings into a single merged manifest based on the manifest priority and
+manifest merge settings. For more information about the manifest merge process and merge settings,
+see
+<a href="{@docRoot}tools/building/manifest-merger.html"> Manifest Merger</a>. </p>
+
+
+<h2>Application ID for package identification </h2>
+<p>With the Android build system, the <code>applicationId</code> attribute is used to
+uniquely identify application packages for publishing. The application ID is set in the
+<code>android</code> section of the <code>build.gradle</code> file. This field is populated in the
+build file as part of the migration process. </p>
+
+<pre>
+apply plugin: &#39;com.android.application&#39;
+
+android {
+   compileSdkVersion 19
+   buildToolsVersion "19.1"
+
+   defaultConfig {
+       <strong>applicationId "com.example.my.app"</strong>
+       minSdkVersion 15
+       targetSdkVersion 19
+       versionCode 1
+       versionName "1.0"
+   }
+ ...
+</pre>
+
+<p class="note"><strong>Note:</strong> The <code>applicationId</code> is specified only in your
+<code>build.gradle</code> file, and not in the <code>AndroidManifest.xml</code> file.</p>
+
+<p><a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants">Build variants</a>
+enable you to uniquely identify different
+packages for each product flavor and build type. The application ID in the build type setting can
+be added as a suffix to the ID specified for the product flavors. The following example adds the
+<code>.debug</code> suffix to the application ID of the <code>pro</code> and <code>free</code>
+product flavors: </p>
+
+<pre>
+productFlavors {
+     pro {
+          applicationId = &quot;com.example.my.pkg.pro&quot;
+     }
+     free {
+          applicationId = &quot;com.example.my.pkg.free&quot;
+     }
+}
+
+buildTypes {
+    debug {
+          applicationIdSuffix &quot;.debug&quot;
+    }
+}
+....
+</pre>
+
+
+
+<h2 id="dependencies">Dependencies</h2>
+<p>During the import process, Android Studio imports the current Eclipse ADT dependencies and
+downloads any project libraries as Android Studio modules. The dependency declarations are added to
+the <code>build.gradle</code> file. The declarations include a
+<a href="#scopes">dependency scope</a>, such as
+<code>compile</code>, to specify in which builds the dependency is included. </p>
+
+<p>The following example shows how to add an external library JAR dependency so it's included in
+each compile:</p>
+
+<pre>
+dependencies {
+    compile files(&#39;libs/*.jar&#39;)
+}
+
+android {
+    ...
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Android Studio supports the Android ARchive (AAR) format
+for the distribution of Android library projects as dependencies. For more information, see
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>. </p>
+
+
+<p>The import process replaces any well-known source libraries, binary libraries, and JAR files
+that have known Maven coordinates with Maven dependencies, so you no longer need to
+maintain these dependencies manually. </p>
+
+<p>Android Studio enables access to Maven, JCenter, and Ivy repositories with the
+<code>repositories</code> block in the <code>build.gradle</code> as a shortcut to specifying
+the URL of the repository.
+
+<p>If there are required repositories not declared in the <code>build.gradle</code> file, first add
+the repository to the <code>repositories</code> block, and then declare the dependencies in a way
+that Maven, JCenter, or Ivy declare their artifacts. The following example shows how to add the
+Maven repository with the guava 11.0.2 dependency using the <code>mavenCentral()</code> property: </p>
+
+<pre>
+repositories {
+    mavenCentral()
+}
+
+android {
+    ...
+}
+
+dependencies {
+    compile &#39;com.google.guava:guava:11.0.2&#39;
+    instrumentationtestCompile &#39;com.squareup.fast-android:1:0.4&#39;
+}
+
+</pre>
+
+<p>The Android Studio project created during the import process can also re-use any
+dependencies on other components. These components can be external binary packages or other
+<a href="http://www.gradle.org">Gradle</a> projects. If a dependency has dependencies of its own,
+those dependencies are also included in the new Android Studio project. </p>
+
+
+<p class="note"><strong>Note:</strong> If there were references to Eclipse ADT workspace library
+files in the <code>project.properties</code> or <code>.classpath</code> files
+that were not imported from the Eclipse project, you can now add dependencies to these library files
+in the <code>build.gradle</code> file. For more information, see
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>. </p>
+
+
+<h3 id="scopes">Dependency and compilation scopes </h3>
+<p>Android Studio supports compilation scopes to customize which dependencies get
+included in each build, for example assigning different dependencies to different
+<a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants"> build variants</a>.</p>
+
+<p>This list shows the Android Studio scope names and definitions: </p>
+
+<ul>
+ <li>compile - <code>compile</code> </li>
+ <li>run time - <code>package</code></li>
+ <li>testCompile - <code>AndroidTestCompile</code></li>
+ <li>testRuntime - <code>AndroidTestRunPackage</code></li>
+ <li>buildTypeCompile - <code>buildTypeCompile</code> </li>
+ <li>productFlavorCompile - <code>productFlavorCompile</code> </li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Dependencies for library projects must be added with the
+<code>compile</code> scope. </p>
+
+
+<p>With the <a href="http://www.gradle.org">Gradle</a>-based DSL, you can also add custom
+dependency scopes, such as <code>betaCompile file('libs/protobug.jar')</code> to define a beta
+build dependency. </p>
+
+<p>The scope and compilation configuration in the build file determine the
+components compiled into the app, added to the compilation classpath, and packaged in the final
+APK file. Based on the dependency and compilation scope, different compilation configurations
+can be specified to include the dependencies and classpaths, for example: </p>
+
+<ul>
+<li><code>compile</code> - for the main application. </li>
+<li><code>androidTestCompile</code> - for the test application. </li>
+<li><code>debugCompile</code> - for the debug buildType application.</li>
+<li><code>releaseCompile</code> - for the release buildType application. </li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Because it’s not possible to build an APK that does not
+have an associated <code>buildType</code>, the APK built from your app is always configured with
+at least two dependency and compile configurations: <code>compile</code> and
+<code>debugCompile</code>. </p>
+
+<p>Unlike Eclipse ADT, by default Android Studio does not compile your code when there are changes.
+Use the <strong>File &gt; Settings &gt; Build, Execution, Deployment Compiler</strong> option
+to enable automatic compilation. </p>
+
+
+
+<h2 id="build-process">Gradle-based Build Process </h2>
+<p>Android Studio imports the Eclipse ADT Ant-based
+build tasks and converts the tasks to <a href="http://www.gradle.org">Gradle</a>-based build tasks.
+These new build tasks include the
+main <code>assemble</code> task and at least two outputs based on the default build types:
+a <code>debug</code> APK and a
+<code>release</code> APK. Each of these build tasks has its own Android build system anchor task
+to facilitate building them independently: </p>
+<ul>
+  <li><code>assemble</code></li>
+  <li><code>assembleDebug</code></li>
+  <li><code>assembleRelease</code></li>
+</ul>
+
+<p>In Android Studio, you can view all the supported build tasks in the
+<em>Gradle</em> project tab. </p>
+
+<p>With the <a href="http://www.gradle.org">Gradle</a>-based build system, Android Studio uses a
+<a href="http://www.gradle.org">Gradle</a> wrapper to fully integrate the
+Android Plugin for Gradle. The Android Plugin for Gradle also
+runs independent of Android Studio. This means that with Android Studio build system your build
+output is always the same, whether you build your Android apps from Android Studio, from the
+command line on your machine, or on machines where Android Studio is not installed (such as
+continuous integration servers). </p>
+
+<p>Unlike Eclipse ADT with dependent plugin and build updates, the <code>build.gradle</code>
+files allow you to customize the build settings for each Android Studio module and build variant,
+so the build versions can be set independently, and are not dependent on the Android Studio
+or build tools versions. This makes it easy to maintain and build legacy apps along with your
+current app, using build variants to generate different APKs from the same app modules, but
+built with different build versions and build chains. </p>
+
+<p>For more details about the Android Studio build system, see
+<a href="{@docRoot}sdk/installing/studio-build.html">Build System Overview</a>.</p>
+
+<h3>Using the Android Studio build system's declarative logic </h3>
+<p>In contrast with the XML statements in Ant build files, the Android build system and
+<a href="http://www.gradle.org">Gradle</a> DSL provide a declarative build language so you can
+easily extend the Gradle-based build process beyond the typical XML build tasks. For example,
+this build file shows how to define a custom function to inject a dynamic <code>versionCode</code>
+in build outputs: </p>
+
+<pre>
+def getVersionCode) {
+      def code = …
+      return code
+}
+
+android {
+    defaultConfig {
+        versionCode getVersionCode()
+              …
+    }
+}
+</pre>
+
+<p>This example shows how to append <em>debug</em> to your package and version names used in the
+<code>debug</code> build variant of your app: </p>
+
+<pre>
+android {
+    buildTypes {
+        debug {
+            packageNameSuffix ‘.debug’
+            versionNameSuffix ‘-DEBUG’
+              }
+            beta {
+                   …
+            }
+        }
+}
+</pre>
+
+
+<p>You can also use the declarative DSL in the Android build system to generate custom build
+versions, for example a debuggable version of your release APK. This examples adds the
+<code>debuggable true</code> property to the <code>release</code> build type in the
+<code>build.gradle</code> file to build an identical debuggable version of the release package.  </p>
+
+<pre>
+android {
+    buildTypes {
+        debugRelease.initWith(buildTypes.release)
+        debugRelease {
+            debuggable true
+            packageNameSuffix &#39;.debugrelease&#39;
+            signingConfig signingConfigs.debug
+        }
+
+    }
+    sourceSets.debugRelease.setRoot(&#39;src/release&#39;)
+}
+</pre>
+
+
+
+
+
+
+<h2 id="debug-inspect">Debugging and Code Inspections</h2>
+<p>Using code inspection tools such as <a href="{@docRoot}tools/help/lint.html">lint</a> is a
+standard part of Android development. Android Studio extends
+<a href="{@docRoot}tools/help/lint.html">lint</a> support with additional
+<a href="{@docRoot}tools/help/lint.html">lint</a> checks and supports Android
+<a href="{@docRoot}tools/debugging/annotations.html">annotations</a> that
+allow you to help detect more subtle code problems, such as null pointer exceptions and resource
+type conflicts. Annotations are added as metadata tags that you attach to variables, parameters,
+and return values to inspect method return values, passed parameters, and local variables and
+fields.  </p>
+
+<p>For more information on enabling <a href="{@docRoot}tools/help/lint.html">lint</a> inspections
+and running <a href="{@docRoot}tools/help/lint.html">lint</a>,
+see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a>.
+For more information about using annotations, see
+<a href="{@docRoot}tools/debugging/annotations.html#annotations">Improving your Code with
+Annotations</a>. </p>
+
+<p>In addition to code inspection, Android Studio provides an integrated
+<a href="{@docRoot}tools/studio/index.html#mem-cpu">memory and CPU monitor</a> view so you
+can more easily monitor your app's performance and memory usage to track CPU usage, find
+deallocated objects, locate memory leaks, and track the amount of memory the connected device is
+using. </p>
+
+
+
+<h2 id="resource-optimization">Resource Optimization </h2>
+<p>After importing and building your app, Android Studio supports several
+<a href="http://www.gradle.org">Gradle</a>-based properties to help you minimize your app's
+resource utilization. </p>
+
+
+<h3>Resource shrinking</h3>
+<p>In Android Studio, resource shrinking enables the automatic removal of unused resources from
+your packaged app and also removes resources from library dependencies if the resources are not
+actually used by your app.</p>
+
+<p>Use the <code>shrinkResources</code> attribute in the <code>buildType</code> block in your
+<code>build.gradle</code> file to enable resource shrinking. For example, if your application is
+using <a href="{@docRoot}google/play-services/index.html">Google Play services</a>
+to access Google Drive functionality, and you are not currently using
+<a href="{@docRoot}google/play-services/plus.html">Google+ Sign In</a>, then
+this setting removes the various drawable assets for the <code>SignInButton</code> buttons. </p>
+
+<p class="note"><strong>Note:</strong> Resource shrinking works in conjunction with code shrinking
+tools, such as <a href="{@docRoot}tools/help/proguard.html">ProGuard</a>. </p>
+
+<p>To enable resource shrinking, update the <code>buildTypes</code> block in the
+<code>build.gradle</code> file to include <code>minifyEnabled true</code>,
+<code>shrinkResources true</code>, and <code>proguardFiles</code> settings as shown in the
+following example <a href="http://www.gradle.org">Gradle</a> build file.</p>
+
+<pre>
+android {
+    ...
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+            'proguard-rules.pro'
+        }
+    }
+}
+</pre>
+
+
+
+<h3>Filtering language resources</h3>
+<p>Use the <code>resConfig</code> attribute in your <code>build.gradle</code> file
+to filter the locale resources included in your packaged app. This filtering can be especially
+useful when library dependencies such as <code>appcompat-v7</code> and other libraries such as
+<code>google-play-services_lib</code> are included in your app. </p>
+
+<p>The following example limits the locale resources to three language settings: <code>en</code>,
+<code>de</code>, and <code>es</code>:</p>
+
+<pre>
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+        resConfigs "en", "de", "es" //Define the included language resources.
+    }
+...
+
+</pre>
+
+
+
+<h4>Filtering bundled resources</h4>
+<p>You can also use the <code>resConfig</code> build setting to limit the bundled resources
+in any resource folder. For example, you could also add <code>resConfigs</code>
+settings for density folders, such as <code>mdpi</code> or <code>hdpi</code> to limit the drawable
+resources that are packaged in your <code>APK</code> file. This example limits the app's
+bundled resources to medium-density (MDPI) and high-density (HDPI) resources. </p>
+
+<pre>
+android {
+    defaultConfig {
+        ...
+        resConfigs "mdpi", "hdpi"
+    }
+}
+</pre>
+
+For more information about screen and resource densities, see
+<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>
+and <a href="{@docRoot}training/multiscreen/screendensities.html">Supporting Different Densities</a>.
+
+
+<h3>Resource merging </h3>
+<p>With Android Studio, identical resources, such as copies of launcher and menu icons, may end up
+in different resource folders throughout your app. To reduce resource duplication and improve
+the performance of your app, Android Studio merges resources with an identical resource name, type,
+and qualifier into a single resource and passes the single, merged resource to the Android Asset
+Packaging Tool (AAPT) for distribution in the APK file. </p>
+
+<p>The resource merging process looks for identical resources in the following <code>/res/</code>
+folders: </p>
+<ul>
+  <li>AAR bundles of library project dependencies</li>
+  <li><code>src/main/</code> </li>
+  <li><code>src/<em>productFlavor</em>/</code> </li>
+  <li><code>src/<em>buildType</em>/</code> </li>
+</ul>
+
+<p>Identical resources are merged in the following low to high priority order: </p>
+<pre>
+dependencies --> src/main/ --> src/productFlavor/ --> src/buildType/
+</pre>
+
+<p>For example, if the <code>res/ic_menu.png</code> file is included in both the
+<code>src/main/res/</code> and <code>src/productFlavor/res/</code> folders, the resources are merged
+so only the file with the higher priority, in this case the <code>src/productFlavor/res/</code>
+file, is included in the APK file. </p>
+
+<p class="note"><strong>Note:</strong> Identical resources in the same source set are not merged
+and instead generate a resource merge error. This can happen if the <code>sourceSet</code> property
+in the <code>build.gradle</code> file is used to define multiple source sets, for example
+<code>src/main/res/</code> and <code>src/main/res2/</code>, and these folders contain identical
+resources. </p>
+
+
+
+
+<h2 id="signing">App Signing and ProGuard </h2>
+<p>Based on the imported Eclipse ADT app settings, Android Studio automatically sets up your app
+signing and maintains any ProGuard settings. </p>
+
+<h3>App Signing</h3>
+<p>If your app used a debug certificate in Eclipse ADT, Android Studio continues to reference that
+certificate. Otherwise, the <code>debug</code> configuration uses the Android Studio generated
+debug keystore, with a known password and a default key with a known password located in
+<code>$HOME/.android/debug.keystore</code>. The <code>debug</code> build type is set to use this
+debug <code>SigningConfig</code> automatically when you run or debug your project
+from Android Studio. </p>
+
+<p>In release mode, Android Studio applies the release certificate used in Eclipse ADT. If no
+release certificate was located during the import process, add the release signing configuration to
+the <code>build.gradle</code> file or use the <strong> Build > Generate Signed APK</strong> menu
+option to open the Generate Signed APK Wizard. For more information about signing your app, see
+<a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>. </p>
+
+
+<h3>ProGuard</h3>
+<p>If the <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> option is specified in the
+<code>project.properties</code> file in the Eclipse ADT project, Android Studio imports the
+<a href="{@docRoot}tools/help/proguard.html">ProGuard</a> files and adds the
+<a href="{@docRoot}tools/help/proguard.html">ProGuard</a> settings to the
+<code>build.gradle</code> file. <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> is
+supported through the <code>minifyEnabled</code> property as shown in this example. </p>
+
+<pre>
+android {
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFile getDefaultProguardFile(&#39;proguard-android.txt&#39;)
+        }
+    }
+
+    productFlavors {
+        flavor1 {
+        }
+        flavor2 {
+            proguardFile &#39;some-other-rules.txt&#39;
+        }
+    }
+}
+
+</pre></p>
+
+
+
+
+<h2 id="support-lib">Android Support Repository and Google Play services Repository</h2>
+<p>While Eclipse ADT uses the Android <a href="{@docRoot}tools/support-library/index.html">Support
+Library</a> and Google Play services Library, Android Studio replaces these libraries during the
+import process with the Android Support Repository and Google Repository to maintain
+compatible functionality and support new Android features. Android Studio adds these dependencies
+as Maven dependencies using the known Maven coordinates, so these dependencies do not require
+manual updates.  </p>
+
+<p>In Eclipse, in order to use a
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a>, you must modify your
+project's classpath dependencies within your development environment for each
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a> you want to use. In
+Android Studio, you no longer need to copy library sources into your
+own projects, you can simply declare a dependency and the library is automatically downloaded and
+merged into your project. This includes automatically merging in resources, manifest entries,
+<a href="{@docRoot}tools/help/proguard.html">ProGuard</a> exclusion rules, and custom lint rules
+at build time. </p>
+
+<p>Android Studio also supports binary library Android ARchives (AARs). AARs are a library project's
+main output as a combination of compiled code (as a jar file and/or native .so files) and
+resources (manifest, res, assets). <p/>
+
+
+<h2 id="app-package">App Packaging</h2>
+<p>The Android build system introduces the use of the <code>applicationId</code> attribute to
+uniquely identify application packages for publishing. The application ID is set in the
+<code>android</code> section of the <code>build.gradle</code> file. </p>
+
+<p>The <code>applicationId</code> is specified only in your <code>build.gradle</code> file, and
+not in the
+<code>AndroidManifest.xml</code> file. The Gradle-based build system enables you
+to uniquely identify different packages for each build variant based on product flavors and build
+types. You can also add the <code>applicationIdSuffix</code> property to the build type in the
+<code>build.gradle</code> file to append an identifier, such as '.debug', to the  application ID
+generated for each product flavor. </p>
+
+
+
+<h2 id="software-updates">Software Updates</h2>
+<p>Android Studio provides several levels of update and maintenance to help you keep Android Studio
+up-to-date based on your code-level preference: </p>
+
+<ul>
+  <li><strong>Canary channel</strong>: Canary builds provide bleeding edge releases and are updated
+  about weekly. These builds do get tested, but are still subject to bugs, as these are
+  early releases. This is not recommended for production.</li>
+  <li><strong>Dev channel</strong>: Dev builds are canary builds that passed initial testing and
+  usage. They are updated roughly bi-weekly or monthly.</li>
+  <li><strong>Beta channel</strong>: Beta builds provide beta-quality releases for final testing
+  and feedback before a production release.</li>
+  <li><strong>Stable channel</strong>: Stable builds provide stable, production-ready release
+  versions.</li>
+</ul>
+
+
+
+<h2 id="version-control">Version Control </h2>
+<p>Eclipse ADT supports version control through the use of plugins, such as the EGit and Subversive
+plug-ins.  </p>
+
+<p>Android Studio supports a variety of version control systems (Git, GitHub, CVS, Mercurial,
+Subversion, and Google Cloud) so version control operations can continue from within Android
+Studio. </p>
+
+<p>After importing your Eclipse ADT app into Android Studio, use the
+Android Studio <em>VCS</em> menu options to enable VCS support for the desired version control
+system, create a repository, import the new files into version control, and perform other version
+control operations.  </p>
+
+<p class="note"><strong>Note:</strong> You can also use the
+<strong>File &gt; Setting &gt; Version Control</strong> menu option to setup and modify the version
+control settings. </p>
+
+<h3>Files to ignore </h3>
+<p>A number of Android Studio files are typically not added to version control as these are
+temporary files or files that get overwritten with each build. These files are listed in
+an exclusion file, such as <code>.gitignore</code>, for the project and each app module.
+Typically, the following files are excluded from version control:  </p>
+
+<ul>
+  <li>.gradle </li>
+  <li>/local.properties </li>
+  <li>/.idea/workspace.xml </li>
+  <li>/.idea/libraries </li>
+  <li>.DS_Store</li>
+  <li>/build </li>
+  <li>/captures </li>
+</ul>
