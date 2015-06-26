@@ -3784,6 +3784,9 @@ public class Intent implements Parcelable, Cloneable {
     /** {@hide} */
     public static final String EXTRA_REASON = "android.intent.extra.REASON";
 
+    /** {@hide} */
+    public static final String EXTRA_WIPE_EXTERNAL_STORAGE = "android.intent.extra.WIPE_EXTERNAL_STORAGE";
+
     /**
      * Optional {@link android.app.PendingIntent} extra used to deliver the result of the SIM
      * activation request.
