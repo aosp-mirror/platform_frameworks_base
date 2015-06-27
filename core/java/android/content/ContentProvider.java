@@ -475,18 +475,38 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         private int enforceReadPermission(String callingPkg, Uri uri, IBinder callerToken)
                 throws SecurityException {
             enforceReadPermissionInner(uri, callerToken);
-            if (mReadOp != AppOpsManager.OP_NONE) {
-                return mAppOpsManager.noteOp(mReadOp, Binder.getCallingUid(), callingPkg);
+
+            final int permOp = AppOpsManager.permissionToOpCode(mReadPermission);
+            if (permOp != AppOpsManager.OP_NONE) {
+                final int mode = mAppOpsManager.noteProxyOp(permOp, callingPkg);
+                if (mode != AppOpsManager.MODE_ALLOWED) {
+                    return mode;
+                }
             }
+
+            if (mReadOp != AppOpsManager.OP_NONE) {
+                return mAppOpsManager.noteProxyOp(mReadOp, callingPkg);
+            }
+
             return AppOpsManager.MODE_ALLOWED;
         }
 
         private int enforceWritePermission(String callingPkg, Uri uri, IBinder callerToken)
                 throws SecurityException {
             enforceWritePermissionInner(uri, callerToken);
-            if (mWriteOp != AppOpsManager.OP_NONE) {
-                return mAppOpsManager.noteOp(mWriteOp, Binder.getCallingUid(), callingPkg);
+
+            final int permOp = AppOpsManager.permissionToOpCode(mWritePermission);
+            if (permOp != AppOpsManager.OP_NONE) {
+                final int mode = mAppOpsManager.noteProxyOp(permOp, callingPkg);
+                if (mode != AppOpsManager.MODE_ALLOWED) {
+                    return mode;
+                }
             }
+
+            if (mWriteOp != AppOpsManager.OP_NONE) {
+                return mAppOpsManager.noteProxyOp(mWriteOp, callingPkg);
+            }
+
             return AppOpsManager.MODE_ALLOWED;
         }
     }

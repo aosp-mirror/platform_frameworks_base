@@ -116,6 +116,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     public final static class Op {
         public final int uid;
         public final String packageName;
+        public int proxyUid = -1;
+        public String proxyPackageName;
         public final int op;
         public int mode;
         public int duration;
@@ -289,7 +291,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int j=0; j<pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
                 resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
-                        curOp.rejectTime, curOp.duration));
+                        curOp.rejectTime, curOp.duration, curOp.proxyUid,
+                        curOp.proxyPackageName));
             }
         } else {
             for (int j=0; j<ops.length; j++) {
@@ -299,7 +302,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                         resOps = new ArrayList<AppOpsManager.OpEntry>();
                     }
                     resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
-                            curOp.rejectTime, curOp.duration));
+                            curOp.rejectTime, curOp.duration, curOp.proxyUid,
+                            curOp.proxyPackageName));
                 }
             }
         }
@@ -659,9 +663,28 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
+    public int noteProxyOperation(int code, String proxyPackageName,
+            int proxiedUid, String proxiedPackageName) {
+        verifyIncomingOp(code);
+        final int proxyMode = noteOperationUnchecked(code, Binder.getCallingUid(),
+                proxyPackageName, -1, null);
+        if (proxyMode != AppOpsManager.MODE_ALLOWED || Binder.getCallingUid() == proxiedUid) {
+            return proxyMode;
+        }
+        return noteOperationUnchecked(code, proxiedUid, proxiedPackageName,
+                Binder.getCallingUid(), proxyPackageName);
+
+    }
+
+    @Override
     public int noteOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        return noteOperationUnchecked(code, uid, packageName, 0, null);
+    }
+
+    private int noteOperationUnchecked(int code, int uid, String packageName,
+            int proxyUid, String proxyPackageName) {
         synchronized (this) {
             Ops ops = getOpsLocked(uid, packageName, true);
             if (ops == null) {
@@ -690,6 +713,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     + " package " + packageName);
             op.time = System.currentTimeMillis();
             op.rejectTime = 0;
+            op.proxyUid = proxyUid;
+            op.proxyPackageName = proxyPackageName;
             return AppOpsManager.MODE_ALLOWED;
         }
     }
@@ -1051,6 +1076,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (dur != null) {
                     op.duration = Integer.parseInt(dur);
                 }
+                String proxyUid = parser.getAttributeValue(null, "pu");
+                if (proxyUid != null) {
+                    op.proxyUid = Integer.parseInt(proxyUid);
+                }
+                String proxyPackageName = parser.getAttributeValue(null, "pp");
+                if (proxyPackageName != null) {
+                    op.proxyPackageName = proxyPackageName;
+                }
                 HashMap<String, Ops> pkgOps = mUidOps.get(uid);
                 if (pkgOps == null) {
                     pkgOps = new HashMap<String, Ops>();
@@ -1131,6 +1164,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                             int dur = op.getDuration();
                             if (dur != 0) {
                                 out.attribute(null, "d", Integer.toString(dur));
+                            }
+                            int proxyUid = op.getProxyUid();
+                            if (proxyUid != -1) {
+                                out.attribute(null, "pu", Integer.toString(proxyUid));
+                            }
+                            String proxyPackageName = op.getProxyPackageName();
+                            if (proxyPackageName != null) {
+                                out.attribute(null, "pp", proxyPackageName);
                             }
                             out.endTag(null, "op");
                         }
