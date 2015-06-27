@@ -295,13 +295,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Accessibility action to share selected text.
     private static final int ACCESSIBILITY_ACTION_SHARE = 0x10000000;
 
-    // System wide time for last cut, copy or text changed action.
-    static long sLastCutCopyOrTextChangedTime;
+    /**
+     * @hide
+     */
+    // Accessibility action start id for "process text" actions.
+    static final int ACCESSIBILITY_ACTION_PROCESS_TEXT_START_ID = 0x10000100;
 
     /**
      * @hide
      */
     static final int PROCESS_TEXT_REQUEST_CODE = 100;
+
+    // System wide time for last cut, copy or text changed action.
+    static long sLastCutCopyOrTextChangedTime;
 
     private ColorStateList mTextColor;
     private ColorStateList mHintTextColor;
@@ -8857,6 +8863,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         ACCESSIBILITY_ACTION_SHARE,
                         getResources().getString(com.android.internal.R.string.share)));
             }
+            if (canProcessText()) {  // also implies mEditor is not null.
+                mEditor.mProcessTextIntentActionsHandler.onInitializeAccessibilityNodeInfo(info);
+            }
         }
 
         // Check for known input filter types.
@@ -8881,6 +8890,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (mEditor != null
+                && mEditor.mProcessTextIntentActionsHandler.performAccessibilityAction(action)) {
+            return true;
+        }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 boolean handled = false;
@@ -8979,6 +8992,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /** @hide */
     @Override
     public void sendAccessibilityEventInternal(int eventType) {
+        if (eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED && mEditor != null) {
+            mEditor.mProcessTextIntentActionsHandler.initializeAccessibilityActions();
+        }
+
         // Do not send scroll events since first they are not interesting for
         // accessibility and second such events a generated too frequently.
         // For details see the implementation of bringTextIntoView().
