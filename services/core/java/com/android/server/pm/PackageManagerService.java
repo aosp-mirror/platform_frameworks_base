@@ -12136,7 +12136,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int verificationId = mIntentFilterVerificationToken++;
                 for (PackageParser.Activity a : pkg.activities) {
                     for (ActivityIntentInfo filter : a.intents) {
-                        if (filter.hasOnlyWebDataURI() && needsNetworkVerificationLPr(filter)) {
+                        if (filter.handlesWebUris(true) && needsNetworkVerificationLPr(filter)) {
                             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
                                     "Verification needed for IntentFilter:" + filter.toString());
                             mIntentFilterVerifier.addOneIntentFilterVerification(
