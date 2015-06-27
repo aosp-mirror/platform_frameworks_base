@@ -88,6 +88,7 @@ public class CellNetworkScanResult implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mStatus);
         if (mOperators != null && mOperators.size() > 0) {
+            out.writeInt(mOperators.size());
             for (OperatorInfo network : mOperators) {
                 network.writeToParcel(out, flags);
             }
