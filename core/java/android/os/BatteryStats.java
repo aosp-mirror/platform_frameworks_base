@@ -184,6 +184,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String UID_DATA = "uid";
     private static final String APK_DATA = "apk";
     private static final String PROCESS_DATA = "pr";
+    private static final String CPU_DATA = "cpu";
     private static final String SENSOR_DATA = "sr";
     private static final String VIBRATOR_DATA = "vib";
     private static final String FOREGROUND_DATA = "fg";
@@ -457,8 +458,13 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getSystemCpuTimeUs(int which);
 
         /**
+         * Get the total cpu power consumed (in milli-ampere-microseconds).
+         */
+        public abstract long getCpuPowerMaUs(int which);
+
+        /**
          * Returns the approximate cpu time (in milliseconds) spent at a certain CPU speed.
-         * @param speedStep the index of the CPU speed. This is not the actual speed of the CPU.
+         * @param step the index of the CPU speed. This is not the actual speed of the CPU.
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
          * @see BatteryStats#getCpuSpeedSteps()
          */
@@ -2905,6 +2911,14 @@ public abstract class BatteryStats implements Parcelable {
                 dumpLine(pw, uid, category, STATE_TIME_DATA, stateTimes);
             }
 
+            final long userCpuTimeUs = u.getUserCpuTimeUs(which);
+            final long systemCpuTimeUs = u.getSystemCpuTimeUs(which);
+            final long powerCpuMaUs = u.getCpuPowerMaUs(which);
+            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0 || powerCpuMaUs > 0) {
+                dumpLine(pw, uid, category, CPU_DATA, userCpuTimeUs / 1000, systemCpuTimeUs / 1000,
+                        powerCpuMaUs / 1000);
+            }
+
             final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats
                     = u.getProcessStats();
             for (int ipr=processStats.size()-1; ipr>=0; ipr--) {
@@ -2968,6 +2982,10 @@ public abstract class BatteryStats implements Parcelable {
 
     private void printmAh(PrintWriter printer, double power) {
         printer.print(BatteryStatsHelper.makemAh(power));
+    }
+
+    private void printmAh(StringBuilder sb, double power) {
+        sb.append(BatteryStatsHelper.makemAh(power));
     }
 
     /**
@@ -4028,13 +4046,17 @@ public abstract class BatteryStats implements Parcelable {
 
             final long userCpuTimeUs = u.getUserCpuTimeUs(which);
             final long systemCpuTimeUs = u.getSystemCpuTimeUs(which);
-            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0) {
+            final long powerCpuMaUs = u.getCpuPowerMaUs(which);
+            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0 || powerCpuMaUs > 0) {
                 sb.setLength(0);
                 sb.append(prefix);
                 sb.append("    Total cpu time: u=");
                 formatTimeMs(sb, userCpuTimeUs / 1000);
                 sb.append("s=");
                 formatTimeMs(sb, systemCpuTimeUs / 1000);
+                sb.append("p=");
+                printmAh(sb, powerCpuMaUs / (1000.0 * 1000.0 * 60.0 * 60.0));
+                sb.append("mAh");
                 pw.println(sb.toString());
             }
 
