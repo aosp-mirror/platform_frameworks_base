@@ -48,9 +48,9 @@ namespace android
 static bool wakeup_init = false;
 static sem_t wakeup_sem;
 
-static void wakeup_callback(void)
+static void wakeup_callback(bool success)
 {
-    ALOGV("In wakeup_callback");
+    ALOGV("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
     int ret = sem_post(&wakeup_sem);
     if (ret < 0) {
         char buf[80];
@@ -59,10 +59,9 @@ static void wakeup_callback(void)
     }
 }
 
-static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
-        jobjectArray outReasons)
+static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobjectArray outReasons)
 {
-    if (outIrqs == NULL || outReasons == NULL) {
+    if (outReasons == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", "null argument");
         return -1;
     }
@@ -100,32 +99,47 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
         return -1;
     }
 
-    int numOut = env->GetArrayLength(outIrqs);
-    ScopedIntArrayRW irqs(env, outIrqs);
-
-    ALOGV("Reading up to %d wakeup reasons", numOut);
+    ALOGV("Reading wakeup reasons");
 
     char mergedreason[MAX_REASON_SIZE];
     char* mergedreasonpos = mergedreason;
     int remainreasonlen = MAX_REASON_SIZE;
-    int firstirq = 0;
     char reasonline[128];
     int i = 0;
-    while (fgets(reasonline, sizeof(reasonline), fp) != NULL && i < numOut) {
+    while (fgets(reasonline, sizeof(reasonline), fp) != NULL) {
         char* pos = reasonline;
         char* endPos;
-        // First field is the index.
+        int len;
+        // First field is the index or 'Abort'.
         int irq = (int)strtol(pos, &endPos, 10);
-        if (pos == endPos) {
-            // Ooops.
-            ALOGE("Bad reason line: %s", reasonline);
-            continue;
+        if (pos != endPos) {
+            // Write the irq number to the merged reason string.
+            len = snprintf(mergedreasonpos, remainreasonlen, i == 0 ? "%d" : ":%d", irq);
+        } else {
+            // The first field is not an irq, it may be the word Abort.
+            const size_t abortPrefixLen = strlen("Abort:");
+            if (strncmp(pos, "Abort:", abortPrefixLen) != 0) {
+                // Ooops.
+                ALOGE("Bad reason line: %s", reasonline);
+                continue;
+            }
+
+            // Write 'Abort' to the merged reason string.
+            len = snprintf(mergedreasonpos, remainreasonlen, i == 0 ? "Abort" : ":Abort");
+            endPos = pos + abortPrefixLen;
         }
         pos = endPos;
+
+        if (len >= 0 && len < remainreasonlen) {
+            mergedreasonpos += len;
+            remainreasonlen -= len;
+        }
+
         // Skip whitespace; rest of the buffer is the reason string.
         while (*pos == ' ') {
             pos++;
         }
+
         // Chop newline at end.
         char* endpos = pos;
         while (*endpos != 0) {
@@ -135,38 +149,17 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
             }
             endpos++;
         }
-        // For now we are not separating out the first irq.
-        // This is because in practice there are always multiple
-        // lines of wakeup reasons, so it is better to just treat
-        // them all together as a single string.
-        if (false && i == 0) {
-            firstirq = irq;
-        } else {
-            int len = snprintf(mergedreasonpos, remainreasonlen,
-                    i == 0 ? "%d" : ":%d", irq);
-            if (len >= 0 && len < remainreasonlen) {
-                mergedreasonpos += len;
-                remainreasonlen -= len;
-            }
-        }
-        int len = snprintf(mergedreasonpos, remainreasonlen, ":%s", pos);
+
+        len = snprintf(mergedreasonpos, remainreasonlen, ":%s", pos);
         if (len >= 0 && len < remainreasonlen) {
             mergedreasonpos += len;
             remainreasonlen -= len;
         }
-        // For now it is better to combine all of these in to one entry in the
-        // battery history.  In the future, it might be nice to figure out a way
-        // to efficiently store multiple lines as a single entry in the history.
-        //irqs[i] = irq;
-        //ScopedLocalRef<jstring> reasonString(env, env->NewStringUTF(pos));
-        //env->SetObjectArrayElement(outReasons, i, reasonString.get());
-        //ALOGV("Wakeup reason #%d: irw %d reason %s", i, irq, pos);
         i++;
     }
 
     ALOGV("Got %d reasons", i);
     if (i > 0) {
-        irqs[0] = firstirq;
         *mergedreasonpos = 0;
         ScopedLocalRef<jstring> reasonString(env, env->NewStringUTF(mergedreason));
         env->SetObjectArrayElement(outReasons, 0, reasonString.get());
@@ -182,7 +175,7 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
 }
 
 static JNINativeMethod method_table[] = {
-    { "nativeWaitWakeup", "([I[Ljava/lang/String;)I", (void*)nativeWaitWakeup },
+    { "nativeWaitWakeup", "([Ljava/lang/String;)I", (void*)nativeWaitWakeup },
 };
 
 int register_android_server_BatteryStatsService(JNIEnv *env)
