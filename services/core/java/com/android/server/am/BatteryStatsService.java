@@ -864,8 +864,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     final class WakeupReasonThread extends Thread {
-        final int[] mIrqs = new int[32];
-        final String[] mReasons = new String[32];
+        final String[] mReason = new String[1];
 
         WakeupReasonThread() {
             super("BatteryStats_wakeupReason");
@@ -876,12 +875,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             try {
                 int num;
-                while ((num=nativeWaitWakeup(mIrqs, mReasons)) >= 0) {
+                while ((num = nativeWaitWakeup(mReason)) >= 0) {
                     synchronized (mStats) {
+                        // num will be either 0 or 1.
                         if (num > 0) {
-                            for (int i=0; i<num; i++) {
-                                mStats.noteWakeupReasonLocked(mReasons[i]);
-                            }
+                            mStats.noteWakeupReasonLocked(mReason[0]);
                         } else {
                             mStats.noteWakeupReasonLocked("unknown");
                         }
@@ -893,7 +891,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    private static native int nativeWaitWakeup(int[] outIrqs, String[] outReasons);
+    private static native int nativeWaitWakeup(String[] outReason);
 
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
