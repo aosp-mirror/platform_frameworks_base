@@ -253,7 +253,8 @@ public final class VoiceInteractor {
 
         /**
          * Report from voice interaction service: this operation has been canceled, typically
-         * as a completion of a previous call to {@link #cancel}.
+         * as a completion of a previous call to {@link #cancel} or when the user explicitly
+         * cancelled.
          */
         public void onCancel() {
         }
@@ -288,7 +289,8 @@ public final class VoiceInteractor {
      * would require the user to touch the screen when voice interaction mode is not enabled.
      * The result of the confirmation will be returned through an asynchronous call to
      * either {@link #onConfirmationResult(boolean, android.os.Bundle)} or
-     * {@link #onCancel()}.
+     * {@link #onCancel()} - these methods should be overridden to define the application specific
+     *  behavior.
      *
      * <p>In some cases this may be a simple yes / no confirmation or the confirmation could
      * include context information about how the action will be completed
@@ -315,13 +317,19 @@ public final class VoiceInteractor {
          * @param prompt Optional confirmation to speak to the user or null if nothing
          *     should be spoken.
          * @param extras Additional optional information or null.
-         * @deprecated Prefer the version that takes a {@link Prompt}.
+         * @hide
          */
         public ConfirmationRequest(CharSequence prompt, Bundle extras) {
             mPrompt = (prompt != null ? new Prompt(prompt) : null);
             mExtras = extras;
         }
 
+        /**
+         * Handle the confirmation result. Override this method to define
+         * the behavior when the user confirms or rejects the operation.
+         * @param confirmed Whether the user confirmed or rejected the operation.
+         * @param result Additional result information or null.
+         */
         public void onConfirmationResult(boolean confirmed, Bundle result) {
         }
 
@@ -336,7 +344,8 @@ public final class VoiceInteractor {
      * VoiceInteractionService. Typically, the application would present this visually as
      * a list view to allow selecting the option by touch.
      * The result of the confirmation will be returned through an asynchronous call to
-     * either {@link #onPickOptionResult} or {@link #onCancel()}.
+     * either {@link #onPickOptionResult} or {@link #onCancel()} - these methods should
+     * be overridden to define the application specific behavior.
      */
     public static class PickOptionRequest extends Request {
         final Prompt mPrompt;
@@ -344,7 +353,9 @@ public final class VoiceInteractor {
         final Bundle mExtras;
 
         /**
-         * Represents a single option that the user may select using their voice.
+         * Represents a single option that the user may select using their voice. The 
+         * {@link #getIndex()} method should be used as a unique ID to identify the option
+         * when it is returned from the voice interactor.
          */
         public static final class Option implements Parcelable {
             final CharSequence mLabel;
@@ -357,6 +368,7 @@ public final class VoiceInteractor {
              * or one of several synonyms.
              * @param label The label that will both be matched against what the user speaks
              *     and displayed visually.
+             * @hide
              */
             public Option(CharSequence label) {
                 mLabel = label;
@@ -481,7 +493,7 @@ public final class VoiceInteractor {
          *     presented or null if nothing should be asked.
          * @param options The set of {@link Option}s the user is selecting from.
          * @param extras Additional optional information or null.
-         * @deprecated Prefer the version that takes a {@link Prompt}.
+         * @hide
          */
         public PickOptionRequest(CharSequence prompt, Option[] options, Bundle extras) {
             mPrompt = (prompt != null ? new Prompt(prompt) : null);
@@ -490,7 +502,9 @@ public final class VoiceInteractor {
         }
 
         /**
-         * Called when a single option is confirmed or narrowed to one of several options.
+         * Called when a single option is confirmed or narrowed to one of several options. Override
+         * this method to define the behavior when the user selects an option or narrows down the
+         * set of options.
          * @param finished True if the voice interaction has finished making a selection, in
          *     which case {@code selections} contains the final result.  If false, this request is
          *     still active and you will continue to get calls on it.
@@ -536,7 +550,7 @@ public final class VoiceInteractor {
          * @param message Optional message to speak to the user about the completion status of
          *     the task or null if nothing should be spoken.
          * @param extras Additional optional information or null.
-         * @deprecated Prefer the version that takes a {@link Prompt}.
+         * @hide
          */
         public CompleteVoiceRequest(CharSequence message, Bundle extras) {
             mPrompt = (message != null ? new Prompt(message) : null);
@@ -583,7 +597,7 @@ public final class VoiceInteractor {
          * @param message Optional message to speak to the user indicating why the task could
          *     not be completed by voice or null if nothing should be spoken.
          * @param extras Additional optional information or null.
-         * @deprecated Prefer the version that takes a {@link Prompt}.
+         * @hide
          */
         public AbortVoiceRequest(CharSequence message, Bundle extras) {
             mPrompt = (message != null ? new Prompt(message) : null);
