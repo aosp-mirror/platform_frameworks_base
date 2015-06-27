@@ -22704,7 +22704,7 @@ package android.os {
     field public static final int KITKAT_WATCH = 20; // 0x14
     field public static final int LOLLIPOP = 21; // 0x15
     field public static final int LOLLIPOP_MR1 = 22; // 0x16
-    field public static final int MNC = 10000; // 0x2710
+    field public static final int MNC = 23; // 0x17
   }
 
   public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
