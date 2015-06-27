@@ -2093,8 +2093,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (UserInfo user : users) {
             for (int i = mPowerSaveTempWhitelistAppIds.size() - 1; i >= 0; i--) {
                 int appId = mPowerSaveTempWhitelistAppIds.keyAt(i);
+                boolean isAllow = mPowerSaveTempWhitelistAppIds.valueAt(i);
                 int uid = UserHandle.getUid(user.id, appId);
                 updateRulesForUidLocked(uid);
+                setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, !isAllow);
             }
         }
     }
@@ -2190,11 +2192,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean firewallReject = (uidRules & RULE_REJECT_ALL) != 0;
         if (oldFirewallReject != firewallReject) {
             setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, firewallReject);
-            if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE) && !firewallReject) {
-                // if the dozable chain is on, and we decide to allow this uid.  we need to punch
-                // a hole in the dozable chain.
-                setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, false);
-            }
         }
 
         // dispatch changed rule to existing listeners
