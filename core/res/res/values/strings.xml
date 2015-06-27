@@ -584,7 +584,7 @@
     <string name="permgroupdesc_phone">make and manage phone calls</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_sensors">Sensors</string>
+    <string name="permgrouplab_sensors">Body Sensors</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_sensors">access sensor data about your vital signs</string>
 
