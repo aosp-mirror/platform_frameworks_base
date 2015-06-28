@@ -2320,5 +2320,5 @@
   <java-symbol type="drawable" name="ic_dialog_alert_material" />
 
   <java-symbol type="bool" name="allow_stacked_button_bar" />
-
+  <java-symbol type="bool" name="config_eap_sim_based_auth_supported" />
 </resources>
