@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"အာရုံခံကိရိယာများ"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"သင်၏ အဓိကကျသောလက္ခဏာများနှင့် ရုပ်ပိုင်းဆိုင်ရာဆောင်ရွက်ချက်များအကြောင်း အချက်အလက်အား ဝင်ရောက်သုံးပါ"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးမှာပါရှိသည်များကို ထုတ်ယူခြင်း"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင် အပြန်အလှန်လုပ်နေသော ဝင်းဒိုးမှာပါရှိသည်များကို သေချာစွာ ကြည့်ရှုစစ်ဆေးပါ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ထိတို့ခြင်းဖြင့် ရှာဖွေပေးနိုင်တာကို ဖွင့်လိုက်ပါ"</string>

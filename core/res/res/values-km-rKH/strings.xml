@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ថតរូប និងថតវីដេអូ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ទូរស័ព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"ឧបករណ៍ចាប់សញ្ញា"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ចូលដំណើរការព័ត៌មានអំពីស្ថានភាពសុខភាព និងសកម្មភាពរាងកាយរបស់អ្នក"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ឧបករណ៍ចាប់សញ្ញារាងកាយ"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទៅ​យក​មាតិកា​បង្អួច"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​មាតិកា​បង្អួច​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>

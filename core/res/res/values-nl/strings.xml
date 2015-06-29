@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"bellen en telefoontjes beheren"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensoren"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"toegang tot informatie over uw vitale functies en fysieke activiteit"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang tot sensorgegevens over uw vitale functies"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Inhoud van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De inhoud inspecteren van een venster waarmee u interactie heeft."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>

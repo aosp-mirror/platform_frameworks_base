@@ -242,8 +242,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍照及錄製影片"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"撥打電話及管理通話"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"感應器"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"存取生命徵象和體能活動的相關資訊"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"存取生命徵象的相關感應器資料"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您存取的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"啟用輕觸探索功能"</string>

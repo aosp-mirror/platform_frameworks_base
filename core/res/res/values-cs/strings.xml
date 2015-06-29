@@ -244,8 +244,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"pořizování fotografií a nahrávání videa"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"uskutečňování a správa telefonních hovorů"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"přístup k informacím o životních funkcích a fyzické aktivitě"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Tělesné senzory"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"přístup k údajům snímačů vašich životních funkcí"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načíst obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Můžete prozkoumat obsah okna, se kterým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnout funkci Prozkoumání dotykem"</string>

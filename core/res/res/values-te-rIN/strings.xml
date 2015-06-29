@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీస్తుంది మరియు వీడియోను రికార్డ్ చేస్తుంది"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లను చేస్తుంది మరియు నిర్వహిస్తుంది"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"సెన్సార్‌లు"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"మీ అత్యంత కీలకమైన గుర్తులు మరియు భౌతిక కార్యాచరణ గురించి సమాచారాన్ని ప్రాప్యత చేస్తుంది"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"శరీర సెన్సార్‌లు"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని ప్రాప్యత చేస్తుంది"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలించండి."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>

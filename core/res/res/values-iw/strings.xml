@@ -244,8 +244,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"צילום תמונות והקלטת וידאו"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"טלפון"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"התקשרות וניהול של שיחות טלפון"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"חיישנים"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"גישה אל מידע על הסימנים החיוניים והפעילות הגופנית שלך"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"חיישני גוף"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"גישה אל נתוני חיישנים של הסימנים החיוניים שלך"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעלה של \'גילוי באמצעות מגע\'"</string>

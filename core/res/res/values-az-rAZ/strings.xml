@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"şəkil çəkin və video yazın"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon zəngləri edin və onları idarə edin"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorlar"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"həyati əlamətlər və fiziki aktivliyiniz haqqında məlumatlara daxil olun"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Bədən Sensorları"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"Həyati əlamətlər haqqında sensor dataya daxil olun"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pəncərənin məzmununu əldə edin"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Əlaqədə olduğunuz pəncərənin məzmununu nəzərdən keçirin."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Toxunaraq Kəşf et funksiyasını yandırın"</string>

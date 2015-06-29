@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ფოტოებისა და ვიდეოების გადაღება"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ტელეფონი"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"სატელეფონო ზარების განხორციელება და მართვა"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"სენსორები"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"თქვენი სასიცოცხლო ფუნქციებისა და ფიზიკური აქტივობის ინფორმაციაზე წვდომა"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"სხეულის სენსორები"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"თქვენი სასიცოცხლო ფუნქციების შესახებ სენსორის მონაცემებზე წვდომა"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ფანჯრის კონტენტის მოძიება"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"შეამოწმეთ იმ ფანჯრის კონტექტი, რომელშიც მუშაობთ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"„შეხებით აღმოჩენის“ ჩართვა"</string>

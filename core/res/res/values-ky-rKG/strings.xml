@@ -351,8 +351,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"сүрөт тартуу жана видео жаздыруу"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлор"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"олуттуу белгилериңиз жана физикалык аракетиңиз тууралуу маалыматка кирүү"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене сенсорлору"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"өмүр белгилериңиз тууралуу сенсордун дайындарына мүмкүнчүлүк алуу"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмунун алуу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сиз иштеп жаткан терезенин мазмунун изилдөө."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Сыйпалап изилдөөнү жандыруу"</string>

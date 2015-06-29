@@ -242,8 +242,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"පින්තූර ගැනීම සහ වීඩියෝ පටිගත කිරීම"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"දුරකථනය"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"සංවේදක"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ඔබේ ජෛව ලක්ෂණ සහ ශාරීරික ක්‍රියාකාරකම් පිළිබඳ ප්‍රවේශ තොරතුරු"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ඔබේ ජෛව ලක්ෂණ පිළිබඳ සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"කවුළු අන්න්තර්ගතය ලබාගන්න"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ඔබ අන්තර්ක්‍රියාකාරී වන කවුළුවේ අන්තර්ගතය පරීක්ෂා කරන්න."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ස්පර්ශයෙන් ගවේෂණය සක්‍රිය කරන්න"</string>
@@ -368,7 +369,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ටැබ්ලටයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"යෙදුමට රූපවාහිනියේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතා කිරීමට අවසර දෙයි."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"දුරකථනයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"බිතුපත සැකසීම"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"වෝල්පේපරය සැකසීම"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"පද්ධති බිතුපත සැකසීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ඔබගේ බිතුපතේ ප්‍රමාණය සැකසීම"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"පද්ධති බිතුපතේ ප්‍රමාණ ඉඟි සකස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
