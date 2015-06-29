@@ -198,9 +198,13 @@ public class VolumeDialogMotion {
         setDismissing(true);
         if (mShowing) {
             mDialogView.animate().cancel();
-            mContentsPositionAnimator.cancel();
+            if (mContentsPositionAnimator != null) {
+                mContentsPositionAnimator.cancel();
+            }
             mContents.animate().cancel();
-            mChevronPositionAnimator.cancel();
+            if (mChevronPositionAnimator != null) {
+                mChevronPositionAnimator.cancel();
+            }
             mChevron.animate().cancel();
             setShowing(false);
         }
