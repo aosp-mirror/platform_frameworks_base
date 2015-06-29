@@ -244,8 +244,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"opravljanje in upravljanje telefonskih klicev"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Tipala"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"dostop do podatkov o vaših vitalnih znakih in fizični dejavnosti"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Tipala telesnih funkcij"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"dostop do podatkov tipala o vaših vitalnih znakih"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobiti vsebino okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>

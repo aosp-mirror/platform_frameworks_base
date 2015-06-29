@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ছবি তুলুন এবং ভিডিও রেকর্ড করুন"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফোন"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফোন কলগুলি করুন এবং পরিচালনা করুন"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"সেন্সরগুলি"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"আপনার গুরুত্বপূর্ণ লক্ষণ এবং শারীরিক ক্রিয়াকলাপের সম্পর্কে তথ্য অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"বডি সেন্সরগুলি"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"আপনার অত্যাবশ্যক লক্ষণগুলির সম্পর্কে সেন্সর ডেটা অ্যাক্সেস করে"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"উইন্ডোর সামগ্রী পুনরুদ্ধার করে"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপনি ইন্টারঅ্যাক্ট করছেন এমন একটি উইন্ডোর সামগ্রীকে সযত্নে নিরীক্ষণ করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
@@ -852,7 +852,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"সবগুলি নির্বাচন করুন"</string>
-    <string name="cut" msgid="3092569408438626261">"ছেদন"</string>
+    <string name="cut" msgid="3092569408438626261">"কাটুন"</string>
     <string name="copy" msgid="2681946229533511987">"অনুলিপি"</string>
     <string name="paste" msgid="5629880836805036433">"আটকান"</string>
     <string name="replace" msgid="5781686059063148930">"প্রতিস্থাপন করুন..."</string>

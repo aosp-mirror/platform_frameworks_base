@@ -242,16 +242,17 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"تصاویر لیں اور ویڈیو ریکارڈ کریں"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"فون"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"فون کالز کریں اور ان کا نظم کریں"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"سینسرز"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"اپنی علاماتِ حیات اور جسمانی سرگرمی بارے معلومات تک رسائی حاصل کریں"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"اپنی علامات حیات کے متعلق سنسر ڈیٹا تک رسائی حاصل کریں"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد بازیافت کرنے کی"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسے ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسی ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کریں"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ٹچ کیے ہوئے آئٹمز کو زور سے بولا جائے گا اور اشاروں کا استعمال کرکے اسکرین کو دریافت کیا جا سکتا ہے۔"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"‏بہتر ویب accessibility کو آن کریں"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ایپ کا مواد مزید قابل رسائی بنانے کیلئے اسکرپٹس کو انسٹال کیا جا سکتا ہے۔"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"آپکے ٹائپ کردہ متن کا مشاہدہ کرنے کی"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"کریڈٹ کارڈ نمبرز اور پاس ورڈز جیسے ذاتی ڈیٹا پر مشتمل ہوتا ہے۔"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اس میں ذاتی ڈیٹا جیسے کریڈٹ کارڈ نمبرز اور پاس ورڈز شامل ہیں۔"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"حیثیت بار"</string>

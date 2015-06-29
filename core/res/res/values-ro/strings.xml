@@ -243,8 +243,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiază și înregistrează videoclipuri"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițiază și gestionează apeluri telefonice"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzori"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"accesează informații despre semnele vitale și activitatea fizică"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesează datele înregistrate de senzori despre semnele vitale"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activează funcția Explorați prin atingere"</string>
@@ -918,7 +919,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reactivaţi acest mod din Setări de sistem &gt; Aplicaţii &gt; Descărcate."</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) a încălcat propria politică StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> a încălcat propria politică StrictMode."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android trece la o vers. superioară..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Android trece la o versiune superioară..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android pornește..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Se optimizează stocarea."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Se optimizează aplicația <xliff:g id="NUMBER_0">%1$d</xliff:g> din <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

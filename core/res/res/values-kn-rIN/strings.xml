@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ಚಿತ್ರಗಳನ್ನು ತೆಗೆಯಿರಿ ಹಾಗೂ ವೀಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"ಸಂವೇದಕಗಳು"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ನಿಮ್ಮ ಮಹತ್ವಪೂರ್ಣ ಚಿಹ್ನೆಗಳು ಮತ್ತು ದೈಹಿಕ ಚಟುವಟಿಕೆ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ದೇಹ ಸೆನ್ಸರ್‌ಗಳು"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಸಂವಹನ ನಡೆಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯವನ್ನು ಪರೀಕ್ಷಿಸಿ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶಿಸುವ ಮೂಲಕ ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡಿ"</string>

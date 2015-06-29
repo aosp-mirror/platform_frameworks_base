@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"λήψη φωτογραφιών και εγγραφή βίντεο"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Τηλέφωνο"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"πραγματοποίηση και διαχείριση τηλεφωνικών κλήσεων"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Αισθητήρες"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"πρόσβαση σε πληροφορίες σχετικά με τις ζωτικές ενδείξεις και τη σωματική δραστηριότητα"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Αισθητήρες σώματος"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"πρόσβαση στα δεδομένα αισθητήρα σχετικά με τις ζωτικές ενδείξεις σας"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ανάκτηση του περιεχομένου του παραθύρου"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της \"Εξερεύνησης με άγγιγμα\""</string>

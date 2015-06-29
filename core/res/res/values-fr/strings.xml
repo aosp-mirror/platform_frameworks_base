@@ -242,8 +242,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Capteurs"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"accéder à des informations relatives à vos signes vitaux et à votre activité physique"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs relatives à vos signes vitaux"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecter le contenu d\'une fenêtre avec laquelle vous interagissez"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activer la fonctionnalité Explorer au toucher"</string>
@@ -310,7 +311,7 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Permet à l\'application d\'envoyer des intentions de diffusion \"persistantes\", qui perdurent une fois la diffusion terminée. Une utilisation excessive peut ralentir la tablette ou la rendre instable en l\'obligeant à utiliser trop de mémoire."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Permet à l\'application d\'envoyer des diffusions ancrées, qui persistent au terme de la diffusion. L\'utilisation excessive de cette fonctionnalité, qui nécessite beaucoup de mémoire, peut ralentir le téléviseur ou nuire à sa stabilité."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Permet à l\'application d\'envoyer des intentions de diffusion \"persistantes\", qui perdurent une fois la diffusion terminée. Une utilisation excessive peut ralentir le téléphone ou le rendre instable en l\'obligeant à utiliser trop de mémoire."</string>
-    <string name="permlab_readContacts" msgid="8348481131899886131">"voir les contacts"</string>
+    <string name="permlab_readContacts" msgid="8348481131899886131">"Voir les contacts"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permet à l\'application de lire les données relatives aux contacts stockés sur votre tablette, y compris la fréquence à laquelle vous avez appelé des personnes spécifiques, leur avez envoyé des e-mails ou avez communiqué avec elles par d\'autres moyens. Cette autorisation permet aux applications d\'enregistrer ces données. Les applications malveillantes peuvent les partager à votre insu."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Permet à l\'application de lire les données relatives à vos contacts sur le téléviseur, y compris la fréquence de vos appels, de vos e-mails et de toute autre communication avec ces personnes. Cette autorisation permet aux applications d\'enregistrer les données relatives à vos contacts. Les applications malveillantes sont susceptibles de partager ces données à votre insu."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permet à l\'application de lire les données relatives aux contacts stockés sur votre téléphone, y compris la fréquence à laquelle vous avez appelé des personnes spécifiques, leur avez envoyé des e-mails ou avez communiqué avec elles par d\'autres moyens. Cette autorisation permet aux applications d\'enregistrer ces données. Les applications malveillantes peuvent les partager à votre insu."</string>
@@ -356,7 +357,7 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permet à l\'application de contrôler la lampe de poche."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"appeler directement les numéros de téléphone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
-    <string name="permlab_readPhoneState" msgid="9178228524507610486">"voir l\'état et l\'identité du téléphone"</string>
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"Voir l\'état et l\'identité du téléphone"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet à l\'application d\'accéder aux fonctionnalités téléphoniques de l\'appareil. Cette autorisation permet à l\'application de déterminer le numéro de téléphone et les identifiants de l\'appareil, si un appel est actif et le numéro distant connecté par un appel."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"empêcher la tablette de passer en mode veille"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"empêcher l\'activation du mode veille sur le téléviseur"</string>
@@ -412,7 +413,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet à l\'application d\'accéder à la configuration du Bluetooth sur le téléphone, et d\'établir et accepter des connexions avec les appareils associés."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"contrôler la communication en champ proche"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet à l\'application de communiquer avec des tags, des cartes et des lecteurs compatibles avec la technologie NFC (communication en champ proche)."</string>
-    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"désactiver le verrouillage de l\'écran"</string>
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité via mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Gérer le matériel d\'empreintes digitales"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Autoriser l\'application à invoquer des méthodes pour ajouter et supprimer des modèles d\'empreintes digitales"</string>
@@ -440,11 +441,11 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet à une application de modifier les paramètres de synchronisation d\'un compte. Cette autorisation peut, par exemple, être utilisée pour activer la synchronisation de l\'application Contacts avec un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Lecture des statistiques de synchronisation"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permet à une application d\'accéder aux statistiques de synchronisation d\'un compte, y compris l\'historique des événements de synchronisation et le volume de données synchronisées."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"voir le contenu de la mémoire USB"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"Voir le contenu de la mémoire USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"voir le contenu de la carte SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permettre de lire contenu de la mémoire de stockage USB"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permettre à l\'application de lire le contenu de la carte SD"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifier ou supprimer le contenu de la mémoire USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"Modifier ou supprimer le contenu de la mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifier ou supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet à l\'application de modifier le contenu de la mémoire de stockage USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permet à l\'application de modifier le contenu de la carte SD."</string>
@@ -1014,7 +1015,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOUVEAU"</font>" :"</string>
     <string name="perms_description_app" msgid="5139836143293299417">"Fourni par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"cela peut engendrer des frais"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"Cela peut engendrer des frais"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Mémoire de stockage de masse USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Connecté par USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Vous êtes connecté à votre ordinateur via un câble USB. Appuyez sur le bouton ci-dessous pour copier des fichiers de votre ordinateur vers la mémoire de stockage USB de votre appareil Android, ou inversement."</string>
@@ -1337,7 +1338,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Passage à (<xliff:g id="NAME">%1$s</xliff:g>) en cours…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Chargement du profil de <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erreur"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Votre administrateur n\'autorise pas cette modification."</string>

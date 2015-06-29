@@ -246,8 +246,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"أجهزة الاستشعار"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"الوصول إلى المعلومات عن علاماتك الحيوية ونشاطك البدني"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"أجهزة استشعار الجسم"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>

@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"mengambil gambar dan merekam video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"melakukan dan mengelola panggilan telepon"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensor"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"mengakses informasi tentang tanda-tanda vital dan aktivitas fisik"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensor Tubuh"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"mengakses data sensor tentang tanda-tanda vital"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Mengambil konten jendela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
