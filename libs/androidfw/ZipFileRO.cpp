@@ -39,7 +39,7 @@ using namespace android;
 class _ZipEntryRO {
 public:
     ZipEntry entry;
-    ZipEntryName name;
+    ZipString name;
     void *cookie;
 
     _ZipEntryRO() : cookie(NULL) {}
@@ -79,7 +79,7 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 {
     _ZipEntryRO* data = new _ZipEntryRO;
 
-    data->name = ZipEntryName(entryName);
+    data->name = ZipString(entryName);
 
     const int32_t error = FindEntry(mHandle, data->name, &(data->entry));
     if (error) {
@@ -128,7 +128,8 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
 bool ZipFileRO::startIteration(void** cookie)
 {
     _ZipEntryRO* ze = new _ZipEntryRO;
-    int32_t error = StartIteration(mHandle, &(ze->cookie), NULL /* prefix */);
+    int32_t error = StartIteration(mHandle, &(ze->cookie),
+                                   NULL /* prefix */, NULL /* suffix */);
     if (error) {
         ALOGW("Could not start iteration over %s: %s", mFileName, ErrorCodeString(error));
         delete ze;
