@@ -18,7 +18,7 @@ package com.android.internal.app;
 
 import com.android.internal.R;
 
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.app.MediaRouteActionProvider;
 import android.app.MediaRouteButton;
 import android.content.Context;
@@ -46,7 +46,7 @@ import android.widget.SeekBar;
  *
  * TODO: Move this back into the API, as in the support library media router.
  */
-public class MediaRouteControllerDialog extends Dialog {
+public class MediaRouteControllerDialog extends AlertDialog {
     // Time to wait before updating the volume when the user lets go of the seek bar
     // to allow the route provider time to propagate the change and publish a new
     // route descriptor.
@@ -133,8 +133,6 @@ public class MediaRouteControllerDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        getWindow().requestFeature(Window.FEATURE_LEFT_ICON);
 
         setContentView(R.layout.media_route_controller_dialog);
 
