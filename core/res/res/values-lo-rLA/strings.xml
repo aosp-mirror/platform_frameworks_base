@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ຖ່າຍ​ຮູບ ແລະ​ບັນ​ທຶກວິ​ດີ​ໂອ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ໂທລະສັບ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ໂທ ແລະ​ຈັດ​ການ​ການ​ໂທ​ລະ​ສັບ"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"ເຊັນເຊີ"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ເຂົ້າເຖິງຂໍ້ມູນກ່ຽວກັບສັນຍານຊີບ ແລະກິດຈະກຳທາງຮ່າງກາຍຂອງທ່ານ"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ເຊັນ​ເຊີ​ຮ່າງ​ກາຍ"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ເຊັນ​ເຊີ​ກ່ຽວ​ກັບ​ສັນ​ຍານ​ຊີບ​ຂອງ​ທ່ານ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳພັດ\""</string>

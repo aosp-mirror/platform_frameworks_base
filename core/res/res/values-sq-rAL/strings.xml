@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"bëj fotografi dhe regjistro video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"kryej dhe menaxho telefonata"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorët"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"qasu tek informacionet për shenjat jetësore dhe aktivitetin tënd fizik"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensorët e trupit"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"qasu tek të dhënat e sensorëve rreth shenjave të tua jetësore"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nxjerrë përmbajtjen e dritares"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po ndërvepron."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizojë funksionin \"Eksploro me prekje\""</string>

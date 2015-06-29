@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisizione di foto e registrazione di video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"esecuzione e gestione delle telefonate"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensori"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"accesso alle informazioni sui tuoi parametri vitali e sulla tua attività fisica"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensori per il corpo"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesso ai dati dei sensori sui tuoi parametri vitali"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>

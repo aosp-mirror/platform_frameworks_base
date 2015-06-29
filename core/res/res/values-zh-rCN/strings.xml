@@ -242,8 +242,10 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍摄照片和录制视频"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"电话"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"拨打电话和管理通话"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"传感器"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"访问与您的生命体征和健身运动相关的信息"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (7147968539346634043) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
