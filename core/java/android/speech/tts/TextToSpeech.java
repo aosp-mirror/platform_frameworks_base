@@ -1486,19 +1486,28 @@ public class TextToSpeech {
                     // Get the default voice for the locale.
                     String voiceName = service.getDefaultVoiceNameFor(language, country, variant);
                     if (TextUtils.isEmpty(voiceName)) {
-                        Log.w(TAG, "Couldn't find the default voice for " + language + "/" +
-                                country + "/" + variant);
+                        Log.w(TAG, "Couldn't find the default voice for " + language + "-" +
+                                country + "-" + variant);
                         return LANG_NOT_SUPPORTED;
                     }
 
                     // Load it.
                     if (service.loadVoice(getCallerIdentity(), voiceName) == TextToSpeech.ERROR) {
+                        Log.w(TAG, "The service claimed " + language + "-" + country + "-"
+                                + variant + " was available with voice name " + voiceName
+                                + " but loadVoice returned ERROR");
                         return LANG_NOT_SUPPORTED;
                     }
 
                     // Set the language/country/variant of the voice, so #getLanguage will return
                     // the currently set voice locale when called.
                     Voice voice = getVoice(service, voiceName);
+                    if (voice == null) {
+                        Log.w(TAG, "getDefaultVoiceNameFor returned " + voiceName + " for locale "
+                                + language + "-" + country + "-" + variant
+                                + " but getVoice returns null");
+                        return LANG_NOT_SUPPORTED;
+                    }
                     String voiceLanguage = "";
                     try {
                         voiceLanguage = voice.getLocale().getISO3Language();
@@ -1682,6 +1691,7 @@ public class TextToSpeech {
     private Voice getVoice(ITextToSpeechService service, String voiceName) throws RemoteException {
         List<Voice> voices = service.getVoices();
         if (voices == null) {
+            Log.w(TAG, "getVoices returned null");
             return null;
         }
         for (Voice voice : voices) {
@@ -1689,6 +1699,7 @@ public class TextToSpeech {
                 return voice;
             }
         }
+        Log.w(TAG, "Could not find voice " + voiceName + " in voice list");
         return null;
     }
 
