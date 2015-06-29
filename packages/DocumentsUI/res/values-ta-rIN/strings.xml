@@ -53,7 +53,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"குறுக்குவழிகள்"</string>
     <string name="root_type_device" msgid="7121342474653483538">"சாதனங்கள்"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"மேலும் பயன்பாடுகள்"</string>
-    <string name="empty" msgid="7858882803708117596">"உருப்படிகள் இல்லை"</string>
+    <string name="empty" msgid="7858882803708117596">"எதுவும் இல்லை"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"கோப்பைத் திறக்க முடியவில்லை"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"சில ஆவணங்களை நீக்க முடியவில்லை"</string>
     <string name="share_via" msgid="8966594246261344259">"இதன் வழியாகப் பகிர்"</string>
