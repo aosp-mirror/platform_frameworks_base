@@ -2111,4 +2111,7 @@
 
     <!-- This config is ued to determine whether animations are allowed in low power mode. -->
     <bool name="config_allowAnimationsInLowPowerMode">false</bool>
+
+    <!-- How long history of previous vibrations should be kept for the dumpsys. -->
+    <integer name="config_previousVibrationsDumpLimit">20</integer>
 </resources>
