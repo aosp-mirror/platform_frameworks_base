@@ -5740,8 +5740,8 @@ package android.app.admin {
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public void clearProfileOwner(android.content.ComponentName);
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
-    method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
-    method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
+    method public android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
+    method public android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public void enableSystemApp(android.content.ComponentName, java.lang.String);
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
