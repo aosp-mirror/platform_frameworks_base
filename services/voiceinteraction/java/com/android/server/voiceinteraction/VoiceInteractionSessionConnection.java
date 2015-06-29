@@ -193,8 +193,14 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         new UserHandle(mUser));
             }
             mShown = true;
-            boolean allDataEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0;
+            boolean isScreenCaptureAllowed = true;
+            try {
+                isScreenCaptureAllowed = mAm.isScreenCaptureAllowedOnCurrentActivity();
+            } catch (RemoteException e) {
+            }
+            boolean allDataEnabled = (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0)
+                    && isScreenCaptureAllowed;
             mShowArgs = args;
             mShowFlags = flags;
             mHaveAssistData = false;

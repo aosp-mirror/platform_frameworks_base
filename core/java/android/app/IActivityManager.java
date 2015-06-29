@@ -441,6 +441,8 @@ public interface IActivityManager extends IInterface {
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) throws RemoteException;
 
+    public boolean isScreenCaptureAllowedOnCurrentActivity() throws RemoteException;
+
     public void killUid(int uid, String reason) throws RemoteException;
 
     public void hang(IBinder who, boolean allowRestart) throws RemoteException;
@@ -859,7 +861,10 @@ public interface IActivityManager extends IInterface {
     int KEYGUARD_GOING_AWAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+296;
     int REGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+297;
     int UNREGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+298;
+    int IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION
+            = IBinder.FIRST_CALL_TRANSACTION+299;
 
-    int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 299;
-    int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 300;
+    // Start of N transactions
+    int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 340;
+    int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 341;
 }
