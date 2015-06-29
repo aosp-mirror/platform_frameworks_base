@@ -269,6 +269,11 @@ abstract class DhcpPacket {
      */
     abstract void finishPacket(ByteBuffer buffer);
 
+    // Set in unit tests, to ensure that the test does not break when run on different devices and
+    // on different releases.
+    static String testOverrideVendorId = null;
+    static String testOverrideHostname = null;
+
     protected DhcpPacket(int transId, short secs, Inet4Address clientIp, Inet4Address yourIp,
                          Inet4Address nextIp, Inet4Address relayIp,
                          byte[] clientMac, boolean broadcast) {
@@ -571,6 +576,16 @@ abstract class DhcpPacket {
         buf.put((byte) 0xFF);
     }
 
+    private String getVendorId() {
+        if (testOverrideVendorId != null) return testOverrideVendorId;
+        return "android-dhcp-" + Build.VERSION.RELEASE;
+    }
+
+    private String getHostname() {
+        if (testOverrideHostname != null) return testOverrideHostname;
+        return SystemProperties.get("net.hostname");
+    }
+
     /**
      * Adds common client TLVs.
      *
@@ -579,8 +594,8 @@ abstract class DhcpPacket {
      */
     protected void addCommonClientTlvs(ByteBuffer buf) {
         addTlv(buf, DHCP_MAX_MESSAGE_SIZE, (short) MAX_LENGTH);
-        addTlv(buf, DHCP_VENDOR_CLASS_ID, "android-dhcp-" + Build.VERSION.RELEASE);
-        addTlv(buf, DHCP_HOST_NAME, SystemProperties.get("net.hostname"));
+        addTlv(buf, DHCP_VENDOR_CLASS_ID, getVendorId());
+        addTlv(buf, DHCP_HOST_NAME, getHostname());
     }
 
     /**
