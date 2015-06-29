@@ -412,7 +412,7 @@ public final class PhoneAccount implements Parcelable {
      * bit mask.
      *
      * @param capability The capabilities to check.
-     * @return {@code True} if the phone account has the capability.
+     * @return {@code true} if the phone account has the capability.
      */
     public boolean hasCapabilities(int capability) {
         return (mCapabilities & capability) == capability;
@@ -455,9 +455,10 @@ public final class PhoneAccount implements Parcelable {
     }
 
     /**
-     * Indicates whether the user has enabled this phone account or not {@code PhoneAccounts}.
+     * Indicates whether the user has enabled this {@code PhoneAccount} or not. This value is only
+     * populated for {@code PhoneAccount}s returned by {@link TelecomManager#getPhoneAccount}.
      *
-     * @return The {@code true} if the account is enabled by the user, {@code false} otherwise.
+     * @return {@code true} if the account is enabled by the user, {@code false} otherwise.
      */
     public boolean isEnabled() {
         return mIsEnabled;
@@ -468,7 +469,7 @@ public final class PhoneAccount implements Parcelable {
      * scheme.
      *
      * @param uriScheme The URI scheme to check.
-     * @return {@code True} if the {@code PhoneAccount} supports calls to/from addresses with the
+     * @return {@code true} if the {@code PhoneAccount} supports calls to/from addresses with the
      * specified URI scheme.
      */
     public boolean supportsUriScheme(String uriScheme) {
