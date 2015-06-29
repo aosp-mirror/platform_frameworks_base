@@ -768,6 +768,7 @@ public class VolumeDialogController {
             filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
+            filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
             mContext.registerReceiver(this, filter, null, mWorker);
         }
 
@@ -822,6 +823,9 @@ public class VolumeDialogController {
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 if (D.BUG) Log.d(TAG, "onReceive ACTION_SCREEN_OFF");
                 mCallbacks.onScreenOff();
+            } else if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                if (D.BUG) Log.d(TAG, "onReceive ACTION_CLOSE_SYSTEM_DIALOGS");
+                dismiss();
             }
             if (changed) {
                 mCallbacks.onStateChanged(mState);
