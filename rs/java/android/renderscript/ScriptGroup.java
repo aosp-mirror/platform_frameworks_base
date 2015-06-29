@@ -995,6 +995,8 @@ public final class ScriptGroup extends BaseObj {
          *
          * @param name name for the script group. Legal names can only contain letters, digits,
          *        '-', or '_'. The name can be no longer than 100 characters.
+         *        Try to use unique names, to avoid name conflicts and reduce
+         *        the cost of group creation.
          * @param outputs futures intended as outputs of the script group
          * @return a script group
          */
