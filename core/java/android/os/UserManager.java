@@ -449,6 +449,8 @@ public class UserManager {
     public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
 
     /**
+     * Allows apps in the parent profile to handle web links from the managed profile.
+     *
      * This user restriction has an effect only in a managed profile.
      * If set:
      * Intent filters of activities in the parent profile with action
@@ -462,7 +464,8 @@ public class UserManager {
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String ALLOW_PARENT_APP_LINKING = "allow_parent_app_linking";
+    public static final String ALLOW_PARENT_PROFILE_APP_LINKING
+            = "allow_parent_profile_app_linking";
 
     /**
      * Application restriction key that is used to indicate the pending arrival
