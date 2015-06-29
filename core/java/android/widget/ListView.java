@@ -1143,8 +1143,8 @@ public class ListView extends AbsListView {
         // Sets up mListPadding
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -1153,10 +1153,12 @@ public class ListView extends AbsListView {
         int childState = 0;
 
         mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
-        if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED ||
-                heightMode == MeasureSpec.UNSPECIFIED)) {
+        if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED
+                || heightMode == MeasureSpec.UNSPECIFIED)) {
             final View child = obtainView(0, mIsScrap);
 
+            // Lay out child directly against the parent measure spec so that
+            // we can obtain exected minimum width and height.
             measureScrapChild(child, 0, widthMeasureSpec, heightSize);
 
             childWidth = child.getMeasuredWidth();
@@ -1173,7 +1175,7 @@ public class ListView extends AbsListView {
             widthSize = mListPadding.left + mListPadding.right + childWidth +
                     getVerticalScrollbarWidth();
         } else {
-            widthSize |= (childState&MEASURED_STATE_MASK);
+            widthSize |= (childState & MEASURED_STATE_MASK);
         }
 
         if (heightMode == MeasureSpec.UNSPECIFIED) {
@@ -1186,8 +1188,9 @@ public class ListView extends AbsListView {
             heightSize = measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
         }
 
-        setMeasuredDimension(widthSize , heightSize);
-        mWidthMeasureSpec = widthMeasureSpec;        
+        setMeasuredDimension(widthSize, heightSize);
+
+        mWidthMeasureSpec = widthMeasureSpec;
     }
 
     private void measureScrapChild(View child, int position, int widthMeasureSpec, int heightHint) {
@@ -1199,16 +1202,20 @@ public class ListView extends AbsListView {
         p.viewType = mAdapter.getItemViewType(position);
         p.forceAdd = true;
 
-        int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
+        final int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
                 mListPadding.left + mListPadding.right, p.width);
-        int lpHeight = p.height;
-        int childHeightSpec;
+        final int lpHeight = p.height;
+        final int childHeightSpec;
         if (lpHeight > 0) {
             childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
         } else {
             childHeightSpec = MeasureSpec.makeSafeMeasureSpec(heightHint, MeasureSpec.UNSPECIFIED);
         }
         child.measure(childWidthSpec, childHeightSpec);
+
+        // Since this view was measured directly aginst the parent measure
+        // spec, we must measure it again before reuse.
+        child.forceLayout();
     }
 
     /**
@@ -1248,8 +1255,7 @@ public class ListView extends AbsListView {
      * @return The height of this ListView with the given children.
      */
     final int measureHeightOfChildren(int widthMeasureSpec, int startPosition, int endPosition,
-            final int maxHeight, int disallowPartialChildPosition) {
-
+            int maxHeight, int disallowPartialChildPosition) {
         final ListAdapter adapter = mAdapter;
         if (adapter == null) {
             return mListPadding.top + mListPadding.bottom;
@@ -1907,8 +1913,8 @@ public class ListView extends AbsListView {
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if ((recycled && !p.forceAdd) || (p.recycledHeaderFooter &&
-                p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
+        if ((recycled && !p.forceAdd) || (p.recycledHeaderFooter
+                && p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
             attachViewToParent(child, flowDown ? -1 : 0, p);
         } else {
             p.forceAdd = false;
@@ -1936,10 +1942,10 @@ public class ListView extends AbsListView {
         }
 
         if (needToMeasure) {
-            int childWidthSpec = ViewGroup.getChildMeasureSpec(mWidthMeasureSpec,
+            final int childWidthSpec = ViewGroup.getChildMeasureSpec(mWidthMeasureSpec,
                     mListPadding.left + mListPadding.right, p.width);
-            int lpHeight = p.height;
-            int childHeightSpec;
+            final int lpHeight = p.height;
+            final int childHeightSpec;
             if (lpHeight > 0) {
                 childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
             } else {

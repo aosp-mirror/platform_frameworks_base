@@ -32,6 +32,7 @@
     <android.widget.YearPickerView
         android:id="@+id/date_picker_year_picker"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:scrollIndicators="bottom" />
 
 </com.android.internal.widget.DialogViewAnimator>
