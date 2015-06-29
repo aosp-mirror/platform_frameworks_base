@@ -291,6 +291,7 @@ public class MobileSignalController extends SignalController<
             notifyListenersIfNecessary();
         } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
             updateDataSim();
+            notifyListenersIfNecessary();
         }
     }
 
@@ -308,7 +309,6 @@ public class MobileSignalController extends SignalController<
             // for long.
             mCurrentState.dataSim = true;
         }
-        notifyListenersIfNecessary();
     }
 
     /**
