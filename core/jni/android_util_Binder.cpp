@@ -697,9 +697,11 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             } else {
                 // Heuristic: a payload smaller than this threshold "shouldn't" be too
                 // big, so it's probably some other, more subtle problem.  In practice
-                // it nearly always means that the remote process died while the binder
+                // it seems to always mean that the remote process died while the binder
                 // transaction was already in flight.
-                exceptionToThrow = "java/lang/RuntimeException";
+                exceptionToThrow = (canThrowRemoteException)
+                        ? "android/os/DeadObjectException"
+                        : "java/lang/RuntimeException";
                 snprintf(msg, sizeof(msg)-1,
                         "Transaction failed on small parcel; remote process probably died");
             }
