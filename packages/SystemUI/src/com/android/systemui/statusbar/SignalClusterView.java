@@ -224,7 +224,10 @@ public class SignalClusterView
     public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
             int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
             String description, boolean isWide, int subId) {
-        PhoneState state = getOrInflateState(subId);
+        PhoneState state = getState(subId);
+        if (state == null) {
+            return;
+        }
         state.mMobileVisible = statusIcon.visible && !mBlockMobile;
         state.mMobileStrengthId = statusIcon.icon;
         state.mMobileTypeId = statusType;
@@ -281,13 +284,14 @@ public class SignalClusterView
         return true;
     }
 
-    private PhoneState getOrInflateState(int subId) {
+    private PhoneState getState(int subId) {
         for (PhoneState state : mPhoneStates) {
             if (state.mSubId == subId) {
                 return state;
             }
         }
-        return inflatePhoneState(subId);
+        Log.e(TAG, "Unexpected subscription " + subId);
+        return null;
     }
 
     private PhoneState inflatePhoneState(int subId) {
