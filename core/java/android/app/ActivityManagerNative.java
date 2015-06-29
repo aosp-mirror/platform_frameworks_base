@@ -2217,6 +2217,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            boolean res = isScreenCaptureAllowedOnCurrentActivity();
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
         case KILL_UID_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int uid = data.readInt();
@@ -5402,6 +5410,18 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(userHandle);
         data.writeBundle(args);
         mRemote.transact(LAUNCH_ASSIST_INTENT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public boolean isScreenCaptureAllowedOnCurrentActivity() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
         data.recycle();
