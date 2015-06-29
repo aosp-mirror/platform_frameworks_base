@@ -1,0 +1,402 @@
+page.title=Изменения в работе
+page.keywords=предварительная версия,пакет sdk,совместимость
+sdk.platform.apiLevel=MNC
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Содержание документа</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">Разрешения на выполнение</a></li>
+    <li><a href="#behavior-power">Оптимизация экономии энергии</a>
+        <ol>
+            <li><a href="#behavior-doze">Режим «Doze»</a></li>
+            <li><a href="#behavior-app-standby">Ждущий режим для приложений</a></li>
+        </ol>
+    </li>
+    <li><a href="#behavior-adoptable-storage">Подключаемые устройства хранения</a></li>
+    <li><a href="#behavior-apache-http-client">Отказ от HTTP-клиента Apache</a></li>
+    <li><a href="#behavior-audiomanager-Changes">Изменения в классе AudioManager</a></li>
+    <li><a href="#behavior-test-selection">Выделение текста</a></li>
+    <li><a href="#behavior-keystore">Изменения в хранилище ключей Android</a></li>
+    <li><a href="#behavior-network">Изменения в работе с Wi-Fi и сетями</a></li>
+    <li><a href="#behavior-camera">Изменения в службе камеры</a></li>
+    <li><a href="#behavior-art-runtime">Среда выполнения ART</a></li>
+    <li><a href="#behavior-apk-validation">Проверка пакетов APK</a></li>
+    <li><a href="#behavior-afw">Изменения в Android for Work</a></li>
+</ol>
+
+<h2>Различия между API-интерфейсами</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API уровня 22 в M Preview &raquo;</a> </li>
+</ol>
+
+
+<h2>См. также:</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">Обзор API-интерфейсов M Developer Preview</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>Наряду с новыми функциями и возможностями, версия M Developer Preview также включает в себя ряд 
+системных изменений и изменений в работе API-интерфейсов. В этом документе рассматриваются
+определенные ключевые изменения, о которых следует знать, чтобы учитывать их при разработке приложений.</p>
+
+<p>Если вы ранее публиковали приложения для Android, то примите во внимание,
+что эти изменения в платформе могут повлиять на работу ваших уже опубликованных приложений.</p>
+
+<h2 id="behavior-runtime-permissions">Разрешения на выполнение</h1>
+<p>В M Preview представлена новая модель разрешений: теперь пользователи могут управлять разрешениями приложений
+напрямую во время работы с ними. Такая модель обеспечивает улучшенное управление
+разрешениями и одновременно позволяет оптимизировать установку и автоматическое обновление для разработчиков.
+Пользователи могут предоставлять разрешения или отзывать их отдельно для каждого установленного приложения. </p>
+
+<p>В ваших приложениях, предназначенных для M Preview, следует в обязательном порядке проверить такие разрешения и при необходимости
+запросить их. Чтобы определить, было ли вашему приложению предоставлено разрешение, вызовите новый метод
+{@code Context.checkSelfPermission()}. Чтобы запросить разрешение, вызовите новый метод
+{@code Activity.requestPermission()}. Даже если ваше приложение не предназначено для использования в версии M, вам все равно следует
+протестировать его с использованием новой модели разрешений.</p>
+
+<p>Подробные сведения о поддержке новой модели
+разрешений вашим приложением представлены в статье
+<a href="{@docRoot}preview/features/runtime-permissions.html">Разрешения</a>. Как можно проверить влияние новой модели на ваше приложение, читайте в
+<a href="{@docRoot}preview/testing/guide.html#runtime-permissions">руководстве по тестированию</a></p>
+
+<h2 id="behavior-power">Оптимизация экономии энергии</h2>
+<p>В M Preview реализован ряд новых функций оптимизации экономии энергии для неактивных устройств и приложений.</p>
+
+<h3 id="behavior-doze">Режим «Doze»</h3>
+<p>Если устройство отключено от сети и остается неактивным (и с выключенным экраном) в течение определенного времени, 
+оно переходит в режим <em>Doze</em> и старается, чтобы система не выходила из спящего состояния. В этому режиме
+устройство периодически возобновляет свою обычную работу на краткие промежутки времени, чтобы произвести
+синхронизацию и позволить системе выполнить какие-либо отложенные операции.</p>
+
+<p>Когда устройство находится в режиме «Doze», к приложениям применяются следующие ограничения:</p>
+<ul>
+<li>Доступ к сети отключен до тех пор, пока от службы Google Cloud Messaging
+не будет получен высокоприоритетный сигнал побуждения приложения к действию.</li>
+<li>Механизмы <a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">WakeLock</a> игнорируются.</li>
+<li>Будильники, установленные с помощью класса {@link android.app.AlarmManager}, отключаются, кроме
+тех, которые установлены с помощью методов {@link android.app.AlarmManager#setAlarmClock setAlarmClock()}
+и {@code AlarmManager.setAndAllowWhileIdle()}.</li>
+<li>Поиск сетей Wi-Fi не производится.</li>
+<li>Операции синхронизации и заданий для адаптеров синхронизации и {@link android.app.job.JobScheduler} блокируются.
+</li>
+</ul>
+</p>
+<p>После выхода из режима «Doze», устройство приступает к выполнению любых отложенных заданий и операций синхронизации.</p>
+<p>Чтобы протестировать эту функцию, подключите устройство под управлением M Preview к своему компьютеру
+для разработки и выполните следующие команды:
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+<p class="note"><strong>Примечание.</strong> В предстоящем выпуске службы
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">Google Cloud Messaging</a>
+реализована возможность назначения сообщений
+с высоким приоритетом. При получении вашим приложением сообщений GCM с высоким приоритетом ему на короткое время предоставляется
+доступ к сети, даже если устройство находится в режиме «Doze».
+</p>
+
+<p>Советы по тестированию работы приложений в режиме «Doze» представлены
+в <a href="{@docRoot}preview/testing/guide.html#doze-standby">руководстве
+по тестированию</a>. </p>
+
+<h3 id="behavior-app-standby">Ждущий режим для приложений</h3>
+<p>В M Preview система может определять, что приложения неактивны, когда они
+не используются. Приложение считается неактивным по прошествии определенного периода времени до тех пор, пока система
+не обнаружит один из следующих сигналов:</p>
+
+<ul>
+<li>приложение явным образом запущено пользователем;</li>
+<li>у приложения имеется процесс, который в настоящее время выполняется на переднем плане (это может быть как сама операция или служба переднего плана,
+так и процесс, используемый другой операцией или службой переднего плана).</li>
+<li>приложение создает уведомление, которое пользователи видят на экране блокировки или в
+области уведомлений.</li>
+<li>пользователь явным образом исключает приложение из списка для оптимизации
+в разделе <strong>Настройки</strong>.</li>
+</ul>
+
+<p>Если устройство отключено от электросети, для приложений, которые считаются неактивными, закрывается доступ к Интернету,
+а их операции синхронизации и задания приостанавливаются. После подключения устройства к электросети доступ к Интернету для приложений возобновится
+и они смогут приступить к выполнению любых ожидающих заданий и операций синхронизации. Если устройство
+неактивно в течение длительного времени, неактивным приложениям раз в день предоставляется доступ к сети.</p>
+
+<p>Чтобы протестировать эту функцию, подключите устройство под управлением M Preview к своему компьютеру
+для разработки и выполните следующие команды:
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<p class="note"><strong>Примечание.</strong> В предстоящем выпуске службы
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">Google Cloud Messaging</a> (GCM)
+реализована возможность назначения сообщений
+с высоким приоритетом. При получении вашим приложением сообщений GCM с высоким приоритетом ему на короткий промежуток времени предоставляется
+доступ к сети, даже если приложение находится в неактивном состоянии.
+</p>
+
+<p>Советы по тестированию работы приложений в ждущем режиме представлены
+в <a href="{@docRoot}preview/testing/guide.html#doze-standby">руководстве
+по тестированию</a>. </p>
+
+<h2 id="behavior-adoptable-storage">Подключаемые устройства хранения</h2>
+<p>
+В M Preview пользователи могут <em>подключать</em> внешние устройства хранения, такие как SD-карты, и использовать их как внутреннее хранилище,
+зашифровав и отформатировав требуемым образом. Благодаря этому
+ пользователи могут переносить как сами приложения, так свои файлы для этих приложений с одного устройства хранения на другое. При переносе
+приложений система руководствуется настройкой
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a>
+в манифесте.</p>
+
+<p>Если ваше приложение работает с указанными ниже API-интерфейсами или полями, следует помнить, что возвращаемые ими пути к файлам
+будут динамически изменяться при перемещении приложения с внутреннего хранилища на внешнее устройство или наоборот.
+При создании путей к файлам настоятельно рекомендуется всегда вызывать эти API-интерфейсы динамическим образом.
+Не используйте жестко запрограммированные пути к файлам и не указывайте созданные ранее полные пути к файлам.</p>
+
+<ul>
+<li>Методы {@link android.content.Context}:
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>Поля {@link android.content.pm.ApplicationInfo}:
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>Для отладки этой функции в Developer Preview подключите USB-устройство,
+ к устройству Android посредством USB-кабеля On-The-Go (OTG) и выполните следующую команду:</p>
+
+<pre class="no-prettyprint">
+$ adb shell sm set-force-adoptable true
+</pre>
+
+<h2 id="behavior-apache-http-client">Отказ от HTTP-клиента Apache</h2>
+<p>В M Preview удалена поддержка HTTP-клиента Apache. Если ваше приложение, разработанное для
+Android 2.3 (уровень API 9) или более поздней версии, использует этот клиент, вам необходимо воспользоваться вместо него классом {@link java.net.HttpURLConnection}.
+ Этот API-интерфейс более эффективный, поскольку он сокращает использование сетевого трафика за счет прозрачного сжатия
+и кэширования ответов, а также сводит к минимуму потребление энергии. Чтобы продолжить использовать API-интерфейсы HTTP Apache,
+сначала объявите в своем файле {@code build.gradle} следующую зависимость compile-time:
+</p>
+<pre>
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+<p>Вместо OpenSSL в Android теперь будет использоваться библиотека 
+<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
+. Если вы используете в ваших приложениях Android NDK, не связывайте его с криптографическими библиотеками,
+которые не входят в состав API-интерфейса NDK, такими как {@code libcrypto.so} и {@code libssl.so}. Эти библиотеки
+не являются общедоступными API-интерфейсами, и в разных выпусках или на разных устройствах они могут быть изменены или разбиты без предварительного уведомления.
+Кроме того, этим вы можете создать уязвимости в системе безопасности вашего продукта. Вместо этого внесите изменения в
+собственный код для вызова криптографических API-интерфейсов Java посредством JNI или статической ссылки на
+библиотеку криптографии по своему выбору.</p>
+
+<h2 id="behavior-audiomanager-Changes">Изменения в классе AudioManager</h2>
+<p>Теперь в платформе не поддерживается настройка уровня громкости напрямую или отключение звука определенных потоков с помощью класса {@link android.media.AudioManager}.
+ Метод {@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} больше не используется. Вместо него следует вызывать метод
+{@code AudioManager.requestAudioFocus()}. Также больше не используется метод
+{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()};
+вместо него следует вызывать метод {@code AudioManager.adjustStreamVolume()}
+и передавать в него значение направления {@code ADJUST_MUTE} или {@code ADJUST_UNMUTE}.</p>
+
+<h2 id="behavior-test-selection">Выделение текста</h2>
+
+<img src="{@docRoot}preview/images/text-selection.gif" style="float:right; margin:0 0 20px 30px" width="360" height="640" />
+
+<p>Теперь, когда пользователь выделяет текст в приложении, такие дополнительные действия как
+<em>Вырезать</em>, <em>Копировать</em> и <em>Вставить</em>, можно отображать на
+<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection" class="external-link">перемещаемой панели инструментов</a>. Реализация взаимодействия пользователя с текстом аналогична той, которая используется для
+контекстного меню,
+как описано в статье
+<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">Запуск контекстного меню для отдельных представлений</a>.</p>
+
+<p>Чтобы реализовать перемещаемую панель инструментов для выделения текста, внесите в ваши существующие приложения
+следующие изменения.</p>
+<ol>
+<li>В объекте {@link android.view.View} или {@link android.app.Activity} измените вызовы
+{@link android.view.ActionMode} с
+{@code startActionMode(Callback)} на {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}.</li>
+<li>Возьмите свою реализацию класса {@code ActionMode.Callback} и сделайте его наследуемой от класса
+{@code ActionMode.Callback2}.</li>
+<li>Переопределите метод {@code Callback2.onGetContentRect()} для указания координат объекта
+{@link android.graphics.Rect} контента (например, прямоугольника выделения текста) в представлении.</li>
+<li>Если расположение прямоугольника больше недействительно и это единственный элемент, который не подлежит пересчитыванию,
+вызовите метод {@code ActionMode.invalidateContentRect()}.</li>
+</ol>
+
+<p>Если вы используете
+<a href="{@docRoot}tools/support-library/index.html">вспомогательную библиотеку Android</a> версии 22.2, то помните, что перемещаемым панелям инструментов
+не свойственна обратная совместимость и по умолчанию для управления объектами {@link android.view.ActionMode}
+используется библиотека appcompat. Это означает, что перемещаемые панели инструментов не будут отображаться. Чтобы включить поддержку
+{@link android.view.ActionMode} в
+{@link android.support.v7.app.AppCompatActivity}, вызовите метод
+{@code android.support.v7.app.AppCompatActivity.getDelegate()}, затем вызовите 
+{@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()} для возвращенного объекта
+{@link android.support.v7.app.AppCompatDelegate} и задайте для параметра input
+значение {@code false}. Этот вызов возвращает управление объектами {@link android.view.ActionMode}
+платформе. На устройствах под управлением M Preview платформа поддерживает как режимы
+{@link android.support.v7.app.ActionBar}, так и режимы перемещаемых панелей инструментов, тогда как на устройствах под управлением более ранних версий
+поддерживаются только режимы {@link android.support.v7.app.ActionBar}.</p>
+
+<h2 id="behavior-keystore">Изменения в хранилище ключей Android</h2>
+<p>В M Preview
+<a href="{@docRoot}training/articles/keystore.html">поставщик хранилища ключей Android</a> больше не поддерживает
+DSA. ECDSA по-прежнему поддерживается.</p>
+
+<p>Ключи, для которых не требуется шифрование в хранилище, больше не будут удаляться при отключении или сбросе защищенного экрана блокировки
+(например, пользователем или администратором устройства). Ключи, для которых требуется шифрование
+в хранилище, во время таких событий будут удалены.</p>
+
+<h2 id="behavior-network">Изменения в работе с Wi-Fi и сетями</h2>
+
+<p>Ниже перечислены изменения в API-интерфейсах для работы с Wi-Fi и сетями, реализованные в M Preview.</p>
+<ul>
+<li>Теперь ваши приложения могут изменять состояние объектов {@link android.net.wifi.WifiConfiguration}
+только в том случае, если эти объекты вы создали сами. Вам запрещено изменять или удалять объекты
+{@link android.net.wifi.WifiConfiguration}, созданные пользователем или другими приложениями.
+</li>
+<li>
+Ранее, если приложение принудительно подключало устройство к определенной сети Wi-Fi с помощью метода
+{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} и настройки
+{@code disableAllOthers=true}, то устройство отключалось от других сетей, например, от
+сотовой сети. В M Preview устройство больше не отключается от других сетей. Если
+в вашем приложении для параметра {@code targetSdkVersion} выбрано значение {@code “20”} или меньше, оно закрепляется за выбранной сетью
+Wi-Fi. Если же параметр {@code targetSdkVersion} имеет значение {@code “21”} или больше, следует использовать
+API-интерфейсы для работы с несколькими сетями (такие как
+{@link android.net.Network#openConnection(java.net.URL) openConnection()},
+{@link android.net.Network#bindSocket(java.net.Socket) bindSocket()} и новый метод
+{@code ConnectivityManager.bindProcessToNetwork()}), чтобы обеспечить отправку
+сетевого трафика приложения в выбранную сеть.</li>
+</ul>
+
+<h2 id="behavior-camera">Изменения в службе камеры</h2>
+<p>В M Preview изменена модель получения доступа к ресурсам в службе камеры.
+ Если раньше запросы доступа обрабатывались в порядке поступления, то теперь процессы с высоким приоритетом имеют преимущество.
+  В работе службы камеры произошли следующие изменения:</p>
+<ul>
+<li>Доступ к ресурсам подсистемы камеры, включая открытие и настройку устройства камеры,
+предоставляется в зависимости от того, какой приоритет имеет процесс клиентского приложения. Процессы приложений с операциями, которые
+видны пользователю или выполняются на переднем плане, обычно имеют более высокий приоритет, что повышает возможность доступа к ресурсам камеры и их
+использования.</li>
+<li>Когда приложение с более высоким приоритетом пытается использовать камеру, активные клиенты камеры для приложений с более низким приоритетом могут быть исключены из очереди доступа.
+  В устаревшем API-интерфейсе {@link android.hardware.Camera}
+это приводит к вызову
+{@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()}
+для исключенного клиента. В API-интерфейсе {@link android.hardware.camera2 Camera2} в таких случаях для исключенного клиента вызывается
+{@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()}.
+</li>
+<li>На устройствах, где камера позволяет такое, отдельным процессам
+приложения предоставляется возможность одновременно и независимо друг от друга открывать и использовать ресурсы камеры. При этом служба камеры теперь отслеживает и исключает ситуации с использованием ресурсов несколькими процессами,
+когда одновременный доступ вызывает значительное снижение производительности или негативно влияет на возможности
+всех открытых камер. Это изменение
+может привести к отключению доступа для клиентов с более низким приоритетом, даже если к этой же камере не пытаются получить доступ другие приложения.
+
+</li>
+<li>
+Смена пользователя приводит к исключению активных клиентов камеры в приложениях, относящихся к предыдущей учетной записи,
+из очереди доступа.  Доступ к камере предоставлен только профилям, которыми владеет активный пользователь устройства.
+Фактически это означает, что если, например, пользователь переключился с гостевой учетной записи на другую, гостевой аккаунт не сможет покинуть запущенные процессы
+, использующие ресурсы подсистемы камеры.
+</li>
+</ul>
+
+<h2 id="behavior-art-runtime">Среда выполнения ART</h2>
+<p>Среда выполнения ART теперь должным образом реализует правила доступа для метода
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()}. Это
+изменение позволило устранить проблему, связанную с тем, что в предыдущих версиях система Dalvik неправильно проверяла правила доступа.
+Если ваше приложение использует метод
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} и вы
+хотите переопределить проверки доступа, вызовите метод
+{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()}, присвоив параметру input
+значение {@code true}. Если ваше приложение использует
+<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">библиотеку appcompat v7</a> или
+<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">библиотеку recyclerview v7</a>,
+вам необходимо установить актуальные версии этих библиотек. В противном случае убедитесь в том,
+что любые настраиваемые классы, на которые имеются ссылки из XML, обновлены и их конструкторы классов доступны.</p>
+
+<p>В M Preview обновлено поведение динамического компоновщика. Теперь он распознает разницу между
+{@code soname} библиотеки и путем к ней
+(<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">ошибка 6670, о которой сообщалось в открытых источниках</a>),
+и позволяет выполнять поиск по {@code soname}.
+ Приложения, которые ранее работали, но содержали неправильные записи {@code DT_NEEDED}
+(обычно абсолютные пути в файловой системе компьютера для сборки), теперь при загрузке могут выдавать ошибки.</p>
+
+<p>В M Preview правильно реализован флаг {@code dlopen(3) RTLD_LOCAL}. Обратите внимание, что
+{@code RTLD_LOCAL} используется по умолчанию, поэтому будут затронуты вызовы {@code dlopen(3)}, которые явно не используют
+{@code RTLD_LOCAL} (за исключением случаев, когда ваше приложение явным образом использует{@code RTLD_GLOBAL}). Поскольку используется
+{@code RTLD_LOCAL}, символы не будут доступны для библиотек, загруженных с использованием последующих вызовов
+{@code dlopen(3)} (в противоположность ссылкам из записей {@code DT_NEEDED}).</p>
+</p>
+
+<h2 id="behavior-apk-validation">Проверка пакетов APK</h2>
+<p>Теперь платформа более строго подходит к проверке пакетов APK. Пакет APK считается поврежденным, если файл объявлен
+в манифесте, но отсутствует в самом пакете APK. Пакет APK подлежит повторной подписи в случае удаления любого его
+содержимого.</p>
+
+<h2 id="behavior-afw">Изменения в Android for Work</h2>
+<p>В M Preview представлены следующие изменения работы Android for Work:</p>
+<ul>
+<li><strong>Рабочие контакты в контексте личных сведений.</strong> Теперь при просмотре пользователем прошлых звонков в журнале вызовов Google Dialer
+в нем отображаются и рабочие контакты.
+Чтобы скрыть эти сведения в журнале вызовов, установите для параметра {@code DevicePolicyManager.setCrossProfileCallerIdDisabled()} значение {@code true}.
+ Рабочие контакты могут отображаться на устройствах через Bluetooth вместе с
+личными контактами только в том случае, если
+для параметра {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} задано значение {@code false}. По
+умолчанию для этого параметра установлено значение {@code true}.
+</li>
+<li><strong>Удаление конфигурации Wi-Fi.</strong> Конфигурации Wi-Fi, добавленные владельцем профиля
+(например, посредством вызова метода
+{@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()}), теперь удаляются при удалении соответствующего рабочего профиля.</li>
+<li><strong>Блокировка конфигурации Wi-Fi.</strong> Пользователю больше не удастся изменить или удалить любые конфигурации Wi-Fi, созданные активным 
+владельцем устройства. Пользователь по-прежнему может создавать
+и изменять свои собственные конфигурации Wi-Fi, если для этого пользователя не задана константа
+{@link android.os.UserManager#DISALLOW_CONFIG_WIFI} {@link android.os.UserManager}.</li>
+<li><strong>Загрузка приложения «Контроллер политики работы» путем добавления учетной записи Google.</strong> Теперь при добавлении на устройство учетной записи Google,
+для управления которой требуется приложение «Контроллер политики работы»,
+вне управляемого контекста пользователю предлагается установить соответствующее приложение.
+Это также применимо к учетным записям, добавляемым посредством мастера первоначальной настройки устройства в разделе
+<strong>Настройки &gt; Учетные записи</strong>.</li>
+<li><strong>Изменения, касающиеся работы API-интерфейса DevicePolicyManager.</strong>
+Вызов метода {@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()}
+затрагивает только использование камеры пользователем, который его вызвал; вызов этого метода из управляемого профиля
+не влияет на работу приложений камеры, выполняющихся для основного пользователя. Кроме того, метод
+{@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()}
+теперь доступен как для владельцев устройства, так и для владельцев профиля. Владелец профиля может задать
+следующие ограничения для блокировки клавиатуры:
+<ul>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} и
+{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}, которые влияют на настройки
+блокировки клавиатуры для родительского пользователя профиля;</li>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}, которое
+влияет только на уведомления, создаваемые приложениями в управляемом профиле.</li>
+</ul>
+</li>
+</ul>

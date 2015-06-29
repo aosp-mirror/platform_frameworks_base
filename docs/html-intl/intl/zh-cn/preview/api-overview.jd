@@ -1,0 +1,521 @@
+page.title=API 概览
+page.keywords=预览版,sdk,兼容性
+page.tags=previewresources, androidm
+sdk.platform.apiLevel=22-mnc
+page.image=images/cards/card-api-overview_16-9_2x.png
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文内容
+<a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">显示详细信息</span>
+        <span class="less" style="display:none">显示精简信息</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#app-linking">应用链接</a></li>
+  <li><a href="#backup">自动备份应用</a></li>
+  <li><a href="#authentication">身份验证</a>
+    <ol>
+      <li><a href="#fingerprint-authentication">指纹身份验证</a></li>
+      <li><a href="#confirm-credential">确认凭据</a></li>
+    </ol>
+  </li>
+  <li><a href="#direct-share">直接共享</a></li>
+  <li><a href="#voice-interactions">语音交互</a></li>
+  <li><a href="#assist">助手 API</a></li>
+  <li><a href="#notifications">通知</a></li>
+  <li><a href="#bluetooth-stylus">蓝牙触控笔支持</a></li>
+  <li><a href="#ble-scanning">改进的蓝牙低功耗扫描</a></li>
+  <li><a href="#hotspot">Hotspot 2.0 第 1 版支持</a></li>
+  <li><a href="#4K-display">4K 显示模式</a></li>
+  <li><a href="#behavior-themeable-colorstatelists">主题化 ColorStateList</a></li>
+  <li><a href="#audio">音频功能</a></li>
+  <li><a href="#video">视频功能</a></li>
+  <li><a href="#camera">相机功能</a>
+    <ol>
+      <li><a href="#flashlight">闪光灯 API</a></li>
+      <li><a href="#reprocessing">相机再处理</a></li>
+    </ol>
+  </li>
+  <li><a href="#afw">Android for Work 功能</a></li>
+</ol>
+
+<h2>API 差异</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API 级别 22 至 M 预览版&raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>M 开发者预览版可让您预览即将推出的 Android 平台版本为用户和应用开发者提供的新功能。
+
+本文旨在介绍其中最值得关注的 API。</p>
+
+<p>M 开发者预览版的适用对象是<strong>喜欢尝鲜的开发者</strong>和<strong>测试人员</strong>。
+如果您有兴趣影响 Android 框架的发展方向，<a href="{@docRoot}preview/setup-sdk.html">欢迎试用 M 开发者预览版</a>并向我们提供反馈！
+
+
+</p>
+
+<p class="caution"><strong>注意</strong>：请不要在 Google Play 商店中发布基于 M 开发者预览版的应用。
+</p>
+
+<p class="note"><strong>注：</strong>本文经常提及的一些类和方法在 <a href="{@docRoot}">developer.android.com</a> 上尚未提供相关参考资料。
+这些 API 元素在本文中设置为 {@code code style} 格式（不带超链接）。
+如需查看这些元素的初步 API 文档，请下载<a href="{@docRoot}preview/download.html#docs">预览版参考资料</a>。
+</p>
+
+<h3>重要的行为变更</h3>
+
+<p>如果您之前发布过 Android 应用，请注意您的应用可能受到平台变化的影响。
+</p>
+
+<p>如需了解完整信息，请参阅<a href="behavior-changes.html">行为变更</a>。</p>
+
+<h2 id="app-linking">应用链接</h2>
+<p>此预览版通过提供功能更强大的应用链接，增强了 Android 的意向系统。您可以利用此功能将应用与您拥有的某个 Web 域关联。
+平台可以根据此关联确定在处理特定 Web 链接时默认使用的应用，跳过提示用户选择应用的步骤。如需了解如何实现此功能，请参阅<a href="{@docRoot}preview/features/app-linking.html">应用链接</a>。
+
+
+
+
+<h2 id="backup">自动备份应用</h2>
+<p>现在，系统可以自动为应用执行完整数据备份和恢复。对于以 M 预览版为目标平台的应用，系统会默认启用此行为，您无需额外添加任何代码。
+如果用户删除其 Google 帐户，其备份数据也会被删除。
+如需了解该功能的工作方式以及配置文件系统备份内容的方法，请参阅<a href="{@docRoot}preview/backup/index.html">自动备份应用</a>。
+
+</p>
+
+<h2 id="authentication">身份验证</h2>
+<p>本预览版提供一些新的 API，在受支持的设备上，用户只需扫描其指纹即可完成身份验证，还可检查系统最后一次使用设备解锁机制（如锁屏密码）对用户进行身份验证是发生在多久之前。
+
+这些 API 可与 <a href="{@docRoot}training/articles/keystore.html">Android 密钥库系统</a>结合使用。
+</p>
+
+<h3 id="fingerprint-authentication">指纹身份验证</h3>
+
+<p>如需通过指纹扫描验证用户身份，请获取新增 
+{@code android.hardware.fingerprint.FingerprintManager} 类的实例，并调用 
+{@code FingerprintManager.authenticate()} 方法。您的应用必须运行在带有指纹传感器的兼容设备上。
+您必须在应用中实现指纹身份验证流的用户界面，并在 UI 中使用标准 Android 指纹图标。<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">示例应用</a>中包含有 Android 指纹图标 ({@code c_fp_40px.png})。请注意，如果您要开发多个使用指纹身份验证的应用，每个应用必须独立验证用户的指纹。
+
+
+
+
+</p>
+
+<p>如需在您的应用中使用此功能，请先在清单文件中添加 {@code USE_FINGERPRINT} 权限。
+</p>
+
+<pre>
+&lt;uses-permission
+        android:name="android.permission.USE_FINGERPRINT" /&gt;
+</pre>
+
+<img src="{@docRoot}preview/images/fingerprint-screen.png" srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+
+<p>如需查看指纹身份验证的应用实现，请参阅<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">指纹对话框示例</a>。
+
+</p>
+
+<p>如果您要测试此功能，请执行以下步骤：</p>
+<ol>
+<li>如果您尚未安装 Android SDK 工具 24.3 修订版，请执行此操作。</li>
+<li>转到<strong>设置 &gt; 安全 &gt; 指纹</strong>，然后按照登记说明在模拟器中登记新指纹。
+</li>
+<li>使用模拟器通过以下命令模拟指纹触摸事件。
+使用同一命令模拟锁屏上或应用中的指纹触摸事件。
+
+<pre class="no-prettyprint">
+adb -e emu finger touch &lt;finger_id&gt;
+</pre>
+<p>在 Windows 上，您可能需要运行带有 
+{@code finger touch &lt;finger_id&gt;} 参数的 {@code telnet 127.0.0.1 &lt;emulator-id&gt;} 命令。
+</p>
+</li>
+</ol>
+
+<h3 id="confirm-credential">确认凭据</h3>
+<p>您的应用可以根据用户在多久之前最后一次解锁设备来验证其身份。此功能让用户不必费心记忆应用特定密码，您也无需实现自己的身份验证用户界面。
+
+您的应用应当利用此功能并结合实现公钥或私钥，以进行用户身份验证。
+</p>
+
+<p>如需设置成功验证用户身份后可再次使用同一密钥的超时持续时间，请在设置 {@link javax.crypto.KeyGenerator} 或 
+{@link java.security.KeyPairGenerator} 时调用新增的 
+{@code android.security.keystore.KeyGenParameterSpec.setUserAuthenticationValidityDurationSeconds()}
+ 方法。
+此功能目前适用于对称加密操作。
+</p>
+
+<p>避免过多显示重新验证对话框 -- 您的应用应尝试先使用加密对象，如果超时到期，请使用 
+{@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence) createConfirmDeviceCredentialIntent()} 方法在您的应用内重新验证用户身份。
+
+
+</p>
+
+<p>如需查看此功能的应用实现，请参阅<a href="https://github.com/googlesamples/android-ConfirmCredential" class="external-link">确认凭据示例</a>。
+
+</p>
+
+<h2 id="direct-share">直接共享</h2>
+
+<img src="{@docRoot}preview/images/direct-share-screen.png" srcset="{@docRoot}preview/images/direct-share-screen.png 1x, {@docRoot}preview/images/direct-share-screen_2x.png 2x" style="float:right; margin:0 0 20px 30px" width="312" height="329" />
+
+<p>本预览版为您提供的 API 可让用户直观、快捷地进行共享。现在，您可以定义可在您的应用内启动特定活动的<em>直接共享目标</em>。这些直接共享目标通过“共享”<em></em>菜单公开给用户。
+
+此功能让用户可以向其他应用内的目标（如联系人）共享内容。
+例如，直接共享目标可以启动另一社交网络应用中的某个活动，让用户可以直接向该应用中的某位朋友或某个社区共享内容。
+
+</p>
+
+<p>如需启用直接共享目标，您必须定义一个类，用于扩展 
+{@code android.service.} <br>
+{@code chooser.ChooserTargetService} 类。在清单文件中声明您的 
+{@code ChooserTargetService}。在该声明内，指定 
+{@code BIND_CHOOSER_TARGET_SERVICE} 权限和一个带有 
+{@code SERVICE_INTERFACE} 操作的意向过滤器。</p>
+<p>以下示例展示了如何在清单文件中声明 {@code ChooserTargetService}。
+</p>
+<pre>
+&lt;service android:name=".ChooserTargetService"
+        android:label="&#64;string/service_name"
+        android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.service.chooser.ChooserTargetService" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service&gt;
+</pre>
+
+<p>对于您想要向 {@code ChooserTargetService} 公开的每个活动，请在您的应用清单文件中为其添加一个名为 
+{@code "android.service.chooser.chooser_target_service"} 的 
+{@code &lt;meta-data&gt;} 元素。
+</p>
+
+<pre>
+&lt;activity android:name=".MyShareActivity”
+        android:label="&#64;string/share_activity_label"&gt;
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND" /&gt;
+    &lt;/intent-filter>
+&lt;meta-data
+        android:name="android.service.chooser.chooser_target_service"
+        android:value=".ChooserTargetService" /&gt;
+&lt;/activity>
+</pre>
+
+<h2 id="voice-interactions">语音交互</h2>
+<p>
+本预览版提供了一个新的语音交互 API，与
+<a href="https://developers.google.com/voice-actions/" class="external-link">语音操作</a>一起使用时，可让您为应用内建对话式语音体验。
+调用 
+{@code android.app.Activity.isVoiceInteraction()} 方法可确定您的活动是否为响应语音操作而启动。
+如果是这样，则您的应用可以使用 
+{@code android.app.VoiceInteractor} 类请求用户进行语音确认、从选项列表中进行选择以及执行其他操作。
+如需了解有关实现语音操作的更多信息，请参阅 
+<a href="https://developers.google.com/voice-actions/interaction/" class="external-link">语音操作开发者网站</a>。
+</p>
+
+<h2 id="assist">助手 API</h2>
+<p>
+本预览版提供了一种让用户通过助手程序与应用进行互动的新方式。如需使用此功能，用户必须启用助手以使用当前上下文。
+启用后，用户可通过长按<strong>主页</strong>按钮在任何应用内召唤助手。
+</p>
+<p>您的应用可通过设置 
+{@link android.view.WindowManager.LayoutParams#FLAG_SECURE} 标志选择不与助手共享当前上下文。除了平台传递给助手的一组标准信息外，您的应用还可利用新增的 {@code android.app.Activity.AssistContent} 类共享其他信息。
+
+</p>
+
+<p>如需为助手提供您的应用内的其他上下文，请执行以下步骤：</p>
+
+<ol>
+<li>实现 {@link android.app.Application.OnProvideAssistDataListener} 接口。</li>
+<li>利用 
+{@link android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener) registerOnProvideAssistDataListener()} 注册此侦听器。</li>
+<li>如需提供特定于活动的上下文信息，请替代 
+{@link android.app.Activity#onProvideAssistData(android.os.Bundle) onProvideAssistData()}
+ 回调和新增的 {@code Activity.onProvideAssistContent()} 回调（可选操作）。
+</ol>
+
+<h2 id="notifications">通知</h2>
+<p>本预览版针对通知功能引入了下列 API 变更：</p>
+<ul>
+  <li>新增了 {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} 过滤级别，它对应于新增的“仅闹铃”<em></em>免打扰模式。
+</li>
+  <li>新增了 {@code Notification.CATEGORY_REMINDER} 类别值，用于区分用户安排的提醒与其他事件 ({@link android.app.Notification#CATEGORY_EVENT}) 和闹铃 ({@link android.app.Notification#CATEGORY_ALARM})。
+
+
+</li>
+  <li>新增了 {@code android.graphics.drawable.Icon} 类，可通过 {@code Notification.Builder.setSmallIcon(Icon)} 方法和 
+{@code Notification.Builder.setLargeIcon(Icon)} 方法附加到通知上。
+</li>
+  <li>新增了 {@code NotificationManager.getActiveNotifications()} 方法，让您的应用能够了解哪些通知目前处于活动状态。
+如需查看使用此功能的应用实现，请参阅<a href="https://github.com/googlesamples/android-ActiveNotifications" class="external-link">活动通知示例</a>。
+</li>
+</ul>
+
+<h2 id="bluetooth-stylus">蓝牙触控笔支持</h2>
+<p>本预览版改善了对用户使用蓝牙触控笔进行输入的支持。用户可将兼容的蓝牙触控笔与其手机或平板电脑配对并建立连接。
+连接后，来自触摸屏的位置信息将与来自触控笔的压力和按键信息融合，从而实现比单纯使用触摸屏更丰富的表达。
+
+您的应用可以通过在活动中注册新增的 
+{@code View.onStylusButtonPressListener} 回调和 {@code GestureDetector.OnStylusButtonPressListener}
+ 回调侦听触控笔按键动作并执行辅助操作。
+</p>
+
+<p>可使用 {@link android.view.MotionEvent} 方法和常量来检测触控笔按键交互：
+</p>
+<ul>
+<li>如果用户使用带按键的触控笔触按应用屏幕，
+{@link android.view.MotionEvent#getToolType(int) getTooltype()} 方法会返回 
+{@link android.view.MotionEvent#TOOL_TYPE_STYLUS}。</li>
+<li>对于以 M 预览版为目标平台的应用，当用户按触控笔的主按键时，
+{@link android.view.MotionEvent#getButtonState() getButtonState()}
+ 方法会返回 {@code MotionEvent.STYLUS_BUTTON_PRIMARY}。
+如果触控笔有辅助按键，当用户按下它时，同一方法会返回 
+{@code MotionEvent.STYLUS_BUTTON_SECONDARY}。如果用户同时按下两个按键，该方法会同时返回通过 OR 运算符连接起来的两个值 ({@code STYLUS_BUTTON_PRIMARY|STYLUS_BUTTON_SECONDARY})。
+
+</li>
+<li>
+对于以较低平台版本为目标的应用，
+{@link android.view.MotionEvent#getButtonState() getButtonState()} 方法返回 
+{@link android.view.MotionEvent#BUTTON_SECONDARY}（按下触控笔主按键时）、
+{@link android.view.MotionEvent#BUTTON_TERTIARY}（按下触控笔辅助按键时）之一或同时返回这两者。
+</li>
+</ul>
+
+<h2 id="ble-scanning">改进的蓝牙低功耗扫描</h2>
+<p>
+如果您的应用执行蓝牙低功耗扫描，可以使用新增的 
+{@code android.bluetooth.le.ScanSettings.Builder.setCallbackType()} 方法指定您只希望在下列条件下通知回调：首次找到与设置的 
+{@link android.bluetooth.le.ScanFilter} 匹配的播发数据包并且该数据包已有一段时间没有出现。
+
+这种扫描方法与旧平台版本中提供的方法相比更加节能。
+
+</p>
+
+<h2 id="hotspot">Hotspot 2.0 第 1 版支持</h2>
+<p>
+本预览版在 Nexus 6 和 Nexus 9 设备上添加了对 Hotspot 2.0 第 1 版规范的支持。如需在您的应用中设置 Hotspot 2.0 凭据，请使用新增的 
+{@link android.net.wifi.WifiEnterpriseConfig} 类方法，如 {@code setPlmn()} 方法和 
+{@code setRealm()} 方法。
+在 {@link android.net.wifi.WifiConfiguration} 对象中，您可以设置 
+{@link android.net.wifi.WifiConfiguration#FQDN} 字段和 {@code providerFriendlyName} 字段。
+新增的 {@code ScanResult.PasspointNetwork} 属性可指示检测到的网络是否为 Hotspot 2.0 接入点。
+
+</p>
+
+<h2 id="4K-display">4K 显示模式</h2>
+<p>现在，平台允许应用在兼容硬件上请求将显示分辨率升级到 4K 渲染。
+如需查询当前物理分辨率，请使用新增的 
+{@code android.view.Display.Mode} API。请注意，如果 UI 是以较低逻辑分辨率绘制并通过放大达到更高的物理分辨率，则 
+{@code Display.Mode.getPhysicalWidth()} 方法返回的物理分辨率可能不同于 {@link android.view.Display#getSize(android.graphics.Point) getSize()} 所报告的逻辑分辨率。
+
+</p>
+
+<p>您可以通过设置应用窗口的 {@code WindowManager.LayoutParams.preferredDisplayModeId} 属性请求系统更改应用运行时的物理分辨率。
+如果您想切换到 4K 显示分辨率，此功能会很有帮助。
+在 4K 显示模式下，UI 仍然以原始分辨率（如 1080p）渲染，通过放大达到 4K，但 
+{@link android.view.SurfaceView} 对象可能会以原生分辨率显示内容。
+</p>
+
+<h2 id="behavior-themeable-colorstatelists">主题化 ColorStateList</h2>
+<p>对于运行 M 预览版的设备，现在支持在 
+{@link android.content.res.ColorStateList} 中使用主题属性。
+{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} 方法和 
+{@link android.content.res.Resources#getColor(int) getColor()} 方法已弃用。如果您要调用这些 API，请改为调用新增的 {@code Context.getColorStateList()} 方法或 
+{@code Context.getColor()} 方法。
+还可在 v4 appcompat 库中通过 {@link android.support.v4.content.ContextCompat} 使用这些方法。
+</p>
+
+<h2 id="audio">音频功能</h2>
+
+<p>本预览版增强了 Android 上的音频处理功能，包括： </p>
+<ul>
+  <li>通过新增的 {@code android.media.midi} API 提供了对 <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a>
+ 协议的支持。使用这些 API 可发送和接收 MIDI 事件。
+</li>
+  <li>新增了 {@code android.media.AudioRecord.Builder} 类和 {@code android.media.AudioTrack.Builder}
+ 类，分别用于创建数字音频采集和回放对象，还可用于配置音频源和接收器属性来替代系统默认值。
+</li>
+  <li>用于关联音频和输入设备的 API 钩子。如果您的应用允许用户通过与 Android TV 相连的游戏控制器或遥控器启动语音搜索，此功能尤为有用。系统会在用户启动搜索时调用新增的 {@code android.app.Activity.onSearchRequested()} 回调。
+
+
+如需确定用户的输入设备是否内置麦克风，请从该回调检索 {@link android.view.InputDevice} 对象，然后调用新增的 
+{@code InputDevice.hasMic()} 方法。
+</li>
+  <li>新增了 {@code android.media.AudioDevicesManager} 类，让您可以检索连接的所有源设备和接收器音频设备列表。
+如果您想让应用在音频设备连接或断开时收到通知，还可以指定一个 
+{@code android.media.OnAudioDeviceConnectionListener} 对象。
+</li>
+</ul>
+
+<h2 id="video">视频功能</h2>
+<p>本预览版为视频处理 API 添加了新功能，包括：</p>
+<ul>
+<li>新增了 {@code android.media.MediaSync} 类，可帮助应用同步渲染音频流和视频流。
+音频缓冲区以非锁定方式提交，并通过回调返回。
+此外，它还支持动态回放速率。
+</li>
+<li>新增了 {@code MediaDrm.EVENT_SESSION_RECLAIMED} 事件，它表示应用打开的会话已被资源管理器收回。
+如果您的应用使用 DRM 会话，则应处理此事件，并确保不使用收回的会话。
+
+</li>
+<li>新增了 {@code MediaCodec.CodecException.ERROR_RECLAIMED} 错误代码，它表示资源管理器收回了编解码器使用的媒体资源。
+出现此异常时，必须释放编解码器，因为它已转入终止状态。
+
+</li>
+<li>新增了 {@code MediaCodecInfo.CodecCapabilities.getMaxSupportedInstances()} 接口，用于获取有关支持的编解码器实例最大并发数量的提示。
+
+</li>
+<li>新增了 {@code MediaPlayer.setPlaybackParams()} 方法，用于设置快动作回放或慢动作回放的媒体回放速率。
+此外，它还会随视频一起自动拉长或加速音频回放。
+</li>
+</ul>
+
+<h2 id="camera">相机功能</h2>
+<p>本预览版提供了下列用于访问相机闪光灯和相机图像再处理的新 API：
+</p>
+
+<h3 id="flashlight">闪光灯 API</h3>
+<p>如果相机设备带有闪光灯，您可以通过调用 {@code CameraManager.setTorchMode()}
+ 方法，在不打开相机设备的情况下打开或关闭闪光灯的火炬模式。应用对闪光灯或相机设备不享有独占所有权。
+每当相机设备不可用，或者开启火炬的其他相机资源不可用时，火炬模式即会被关闭并变为不可用状态。
+
+其他应用也可调用 {@code setTorchMode()} 来关闭火炬模式。
+当最后一个开启火炬模式的应用关闭时，火炬模式就会被关闭。
+</p>
+
+<p>您可以注册一个回调，通过调用 
+{@code CameraManager.registerTorchCallback()} 方法接收有关火炬模式状态的通知。第一次注册回调时，系统会立即调用它，并返回所有当前已知配备闪光灯的相机设备的火炬模式状态。
+
+如果成功开启或关闭火炬模式，系统会调用 
+{@code CameraManager.TorchCallback.onTorchModeChanged()} 方法。</p>
+
+<h3 id="reprocessing">再处理 API</h3>
+<p>{@link android.hardware.camera2 Camera2} API 进行了扩展，以支持 YUV 和专用不透明格式图像再处理。
+您的应用通过 {@code CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES} 确定再处理功能是否可用。
+如果设备支持再处理，您可以通过调用 
+{@code CameraDevice.createReprocessableCaptureSession()} 创建一个可再处理的相机捕获会话并创建输入缓冲区再处理请求。
+
+</p>
+
+<p>使用 {@code ImageWriter} 类可将输入缓冲区流与相机再处理输入相连。
+如需获得空白缓冲区，请遵循以下编程模型：</p>
+
+<ol>
+<li>调用 {@code ImageWriter.dequeueInputImage()} 方法。</li>
+<li>在输入缓冲区中填充数据。</li>
+<li>通过调用 {@code ImageWriter.queueInputImage()} 方法将缓冲区发送至相机。</li>
+</ol>
+
+<p>如果您将 {@code ImageWriter} 对象与 
+{@code android.graphics.ImageFormat.PRIVATE} 图像一起使用，您的应用并不能直接访问图像数据。
+请改为调用 {@code ImageWriter.queueInputImage()} 方法，将 {@code ImageFormat.PRIVATE} 图像直接传递给 
+{@code ImageWriter}，而无需进行任何缓冲区复制。
+</p>
+
+<p>{@code ImageReader} 类现在支持 {@code android.graphics.ImageFormat.PRIVATE} 格式图像流。
+凭借此支持特性，您的应用可使 
+{@code ImageReader} 输出图像保持为循环图像队列，还可选择一个或多个图像并将其发送给 
+{@code ImageWriter} 进行相机再处理。</p>
+
+<h2 id="afw">Android for Work 功能</h2>
+<p>本预览版提供了下列用于 Android for Work 的新 API：</p>
+<ul>
+  <li><strong>用于企业所有、单一用途设备的增强型控件</strong>：现在，设备所有者可以通过控制以下设置来改善企业所有、单一用途 (COSU) 设备的管理：
+
+
+  <ul>
+    <li>通过 
+{@code DevicePolicyManager.setKeyguardEnabledState()} 方法禁用或重新启用键盘锁。</li>
+    <li>通过 
+{@code DevicePolicyManager.setStatusBarEnabledState()} 方法禁用或重新启用状态栏（包括快速设置、通知以及启动 Google Now 的向上划动手势）。
+</li>
+    <li>通过 {@link android.os.UserManager} 常量 
+{@code DISALLOW_SAFE_BOOT} 禁用或重新启用安全启动</li>
+    <li>通过 
+{@link android.provider.Settings.Global} 常量 {@code STAY_ON_WHILE_PLUGGED_IN} 防止屏幕在插入电源的情况下关闭。</li>
+  </ul>
+  </li>
+  <li><strong>设备所有者静默式安装和卸载应用</strong>：现在，设备所有者可使用 {@link android.content.pm.PackageInstaller}
+ API 在不依赖 Google Play for Work 的情况下静默式安装和卸载应用。
+现在，您可以通过设备所有者配置设备，从而无需用户干预即可获取并安装应用。
+此功能可用于在不激活 Google 帐户的情况下实现信息亭或其他此类设备的一键式配置。
+</li>
+<li><strong>静默式企业证书访问</strong>：现在，当应用调用 
+{@link android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity,android.security.KeyChainAliasCallback,java.lang.String[],java.security.Principal[],java.lang.String,int,java.lang.String) choosePrivateKeyAlias()} 时，配置文件所有者或设备所有者可以在系统提示用户选择证书前调用 {@code DeviceAdminReceiver.onChoosePrivateKeyAlias()} 方法，静默式向发出请求的应用提供别名。
+
+
+此功能让您可以在无需用户干预的情况下授予托管应用访问证书的权限。
+</li>
+<li><strong>自动接受系统更新</strong>。现在，设备所有者可以通过 
+{@code DevicePolicyManager.setSystemUpdatePolicy()} 设置一个系统更新政策来自动接受系统更新（例如对于信息亭设备），或者推迟更新并在至多 30 天的时间内防止用户获取更新。
+
+此外，管理员还可设置每日必须获取更新的时间窗口，例如在信息亭设备无人使用的时段。
+有可用的系统更新时，系统会检查工作政策控制器应用是否设置了系统更新政策，并相应地执行操作。
+
+
+</li>
+<li>
+<strong>授权证书安装</strong>：配置文件所有者或设备所有者现在可以授权第三方应用调用以下 {@link android.app.admin.DevicePolicyManager} 证书管理 API：
+
+
+<ul>
+  <li>{@link android.app.admin.DevicePolicyManager#getInstalledCaCerts(android.content.ComponentName)
+getInstalledCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#hasCaCertInstalled(android.content.ComponentName,byte[])
+hasCaCertInstalled()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installCaCert(android.content.ComponentName,byte[])
+installCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallCaCert(android.content.ComponentName,byte[])
+uninstallCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallAllUserCaCerts(android.content.ComponentName)
+uninstallAllUserCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName,java.security.PrivateKey,java.security.cert.Certificate,java.lang.String)
+installKeyPair()}</li>
+</ul>
+</li>
+<li><strong>企业恢复出厂设置保护</strong>：现在，配置设备所有者时，您可以通过设置 
+{@code DeviceManagerPolicy.EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS} 捆绑包配置参数来解锁恢复出厂设置保护 (FRP)。
+在重置设备以解锁 FRP 和配置设备之后，NFC 编程器应用可提供这些参数，而无需事先配置 Google 帐户。
+
+如果您不修改这些参数，FRP 仍然发挥作用，必须使用之前激活的 Google 凭据方可激活设备。
+
+
+<p>此外，通过对 Google Play 服务设置应用限制，设备所有者可以指定用于 FRP 解锁的备用 Google 帐户，以替代在设备上激活的 Google 帐户。
+</p>
+</li>
+<img src="{@docRoot}preview/images/work-profile-screen.png" srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+<li><strong>数据使用情况跟踪</strong>。现在，配置文件所有者或设备所有者可以利用新增的 
+{@code android.app.usage.NetworkStatsManager} 方法查询<strong>设置 &gt; 数据使用情况</strong>中显示的数据使用情况统计信息。
+配置文件所有者会被自动授予查询其管理的配置文件相关数据的权限，而设备所有者则被授予对其管理的主要用户使用情况数据的访问权。
+
+</li>
+<li><strong>运行时权限管理</strong>：
+<p>配置文件所有者或设备所有者可以利用 
+{@code DevicePolicyManager.setPermissionPolicy()} 设置适用于所有应用全部运行时请求的权限政策，以提示用户照常授予权限，或自动以静默方式授予或拒绝权限。
+
+如果设置后一种政策，则用户将无法修改配置文件所有者或设备所有者在应用权限屏幕的<strong>设置</strong>内所做的选择。
+
+</p></li>
+<li><strong>“设置”中的 VPN</strong>：现在，<strong>设置 &gt; 更多 &gt; VPN</strong> 中会显示 VPN 应用。此外，现在，关于 VPN 使用情况的通知取决于该 VPN 的配置方式。
+
+
+对于配置文件所有者，通知取决于该 VPN 是针对托管配置文件、个人配置文件还是同时针对这两者进行配置。
+对于设备所有者，通知取决于 VPN 是否针对整个设备进行配置。
+</li>
+<li><strong>工作状态通知</strong>：现在，每当来自托管配置文件的应用具有前台活动时，状态栏就会出现一个公文包图标。
+此外，如果设备直接解锁到托管配置文件中某个应用的活动，则会显示一个 Toast，通知用户他们位于托管配置文件内。
+
+
+</li>
+</ul>
+
+<p class="note">
+  如需详细了解 M 开发者预览版中的所有 API 变更，请参阅 <a href="{@docRoot}preview/download.html">API 差异报告</a>。
+</p>

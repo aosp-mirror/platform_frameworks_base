@@ -1,0 +1,521 @@
+page.title=API 總覽
+page.keywords=預覽,sdk,相容性
+page.tags=previewresources, androidm
+sdk。platform.apiLevel=22-mnc
+page.image=images/cards/card-api-overview_16-9_2x.png
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文件內容
+<a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">顯示更多內容</span>
+        <span class="less" style="display:none">顯示較少內容</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#app-linking">應用程式連結</a></li>
+  <li><a href="#backup">針對應用程式進行自動備份</a></li>
+  <li><a href="#authentication">驗證</a>
+    <ol>
+      <li><a href="#fingerprint-authentication">指紋驗證</a></li>
+      <li><a href="#confirm-credential">確認認證</a></li>
+    </ol>
+  </li>
+  <li><a href="#direct-share">直接分享</a></li>
+  <li><a href="#voice-interactions">語音互動</a></li>
+  <li><a href="#assist">協助 API</a></li>
+  <li><a href="#notifications">通知</a></li>
+  <li><a href="#bluetooth-stylus">藍牙手寫筆支援</a></li>
+  <li><a href="#ble-scanning">已改進藍牙低電量掃描</a></li>
+  <li><a href="#hotspot">無線基地台 2.0 版本 1 支援</a></li>
+  <li><a href="#4K-display">4K 顯示模式</a></li>
+  <li><a href="#behavior-themeable-colorstatelists">具備設計風格的 ColorStateList</a></li>
+  <li><a href="#audio">音訊功能</a></li>
+  <li><a href="#video">影片功能</a></li>
+  <li><a href="#camera">相機功能</a>
+    <ol>
+      <li><a href="#flashlight">閃光燈 API</a></li>
+      <li><a href="#reprocessing">相機重新處理</a></li>
+    </ol>
+  </li>
+  <li><a href="#afw">Android for Work 功能</a></li>
+</ol>
+
+<h2>API 差異</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API 級別 22 到 M 預覽版&raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>M 開發人員預覽版讓您能夠搶先查看即將發行的 Android 平台版本，這個版本將提供可供使用者和應用程式開發人員使用的新功能。
+
+本文件提供最值得受到矚目的 API 簡介。</p>
+
+<p>M 開發人員預覽版的適用對象是<strong>早期採用的開發人員</strong>和<strong>測試者</strong>。
+如果您對於如何影響 Android 架構方向深感興趣，請<a href="{@docRoot}preview/setup-sdk.html">嘗試使用 M 開發人員預覽版</a>，然後將您的意見反應傳送給我們！
+
+
+</p>
+
+<p class="caution"><strong>注意：</strong>請勿將使用 M 開發人員預覽版的應用程式發行到 Google Play 商店。
+</p>
+
+<p class="note"><strong>注意：</strong>本文件通常會參考 <a href="{@docRoot}">developer.android.com</a> 上尚未提供可用參考資料的類別和方法。
+這些 API 元素在本文件中的格式是 {@code code style} (不含超連結)。
+如需這些元素的 API 初稿文件，請下載<a href="{@docRoot}preview/download.html#docs">預覽版參考資料</a>。
+</p>
+
+<h3>重要行為變更</h3>
+
+<p>如果您先前曾發行過適用於 Android 的應用程式，請注意，您的應用程式會受到平台中的變更所影響。
+</p>
+
+<p>如需完整資訊，請參閱<a href="behavior-changes.html">行為變更</a>。</p>
+
+<h2 id="app-linking">應用程式連結</h2>
+<p>這個預覽版提供功能更強大的應用程式連結來增強 Android 的意圖系統。此功能讓您能夠將應用程式關聯到您自己的 Web 網域。
+根據這個關聯，平台可以判斷要用來處理特定 Web 連結的預設應用程式，並略過提示使用者選取應用程式的程序。如要深入瞭解如何實作此功能，請參閱<a href="{@docRoot}preview/features/app-linking.html">應用程式連結</a>。
+
+
+
+
+<h2 id="backup">針對應用程式進行自動備份</h2>
+<p>系統現在會針對應用程式執行自動完整資料備份與還原。預設會針對目標為 M 預覽版的應用程式啟用這個行為；您不需要新增任何其他的程式碼。
+如果使用者刪除他們的 Google 帳戶，也會同時刪除他們的備份資料。
+如要深入瞭解此功能的運作方式以及如何在檔案系統上設定要備份的內容，請參閱<a href="{@docRoot}preview/backup/index.html">針對應用程式進行自動備份</a>。
+
+</p>
+
+<h2 id="authentication">驗證</h2>
+<p>這個預覽版提供新的 API，讓您能夠在支援的裝置上利用使用者的指紋掃描來驗證他們，並使用裝置解鎖機制 (例如鎖定螢幕密碼) 來檢查距離最後一次驗證該使用者的時間有多接近。
+
+將這些 API 與 <a href="{@docRoot}training/articles/keystore.html">Android 金鑰存放區系統</a>搭配使用。
+</p>
+
+<h3 id="fingerprint-authentication">指紋驗證</h3>
+
+<p>如要透過指紋掃描驗證使用者，請取得新的
+{@code android.hardware.fingerprint.FingerprintManager} 類別的執行個體，然後呼叫
+{@code FingerprintManager.authenticate()} 方法。您的應用程式必須在配備指紋感應器的相容裝置上執行。
+您必須在應用程式上實作適用於指紋驗證流程的使用者介面，並在您的 UI 中使用標準的 Android 指紋圖示。Android 指紋圖示 ({@code c_fp_40px.png}) 隨附於<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">範例應用程式</a>中。如果您正在開發多個使用指紋驗證的應用程式，請注意，每個應用程式都必須個別驗證使用者的指紋。
+
+
+
+
+</p>
+
+<p>如要在您的應用程式中使用此功能，請先在您的宣示說明中新增 {@code USE_FINGERPRINT} 權限。
+</p>
+
+<pre>
+&lt;uses-permission
+        android:name="android.permission.USE_FINGERPRINT" /&gt;
+</pre>
+
+<img src="{@docRoot}preview/images/fingerprint-screen.png" srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+
+<p>如要查看指紋驗證的應用程式實作，請參閱<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">指紋對話方塊範例</a>。
+
+</p>
+
+<p>如果您正在測試此功能，請依照下列步驟執行：</p>
+<ol>
+<li>安裝 Android SDK 工具修訂版 24.3 (如果您尚未安裝)。</li>
+<li>前往 [設定] &gt; [安全性] &gt; [指紋]<strong></strong>，然後依照註冊指示，在模擬器中註冊新的指紋。
+</li>
+<li>使用模擬器，利用下列命令來模擬指紋輕觸事件。
+使用同一個命令，在鎖定螢幕上或您的應用程式中模擬指紋輕觸事件。
+
+<pre class="no-prettyprint">
+adb -e emu finger touch &lt;finger_id&gt;
+</pre>
+<p>在 Windows 上，您可能必須執行 {@code telnet 127.0.0.1 &lt;emulator-id&gt;}，後面接著
+{@code finger touch &lt;finger_id&gt;}。
+</p>
+</li>
+</ol>
+
+<h3 id="confirm-credential">確認認證</h3>
+<p>您的應用程式可以根據使用者最近一次將裝置解鎖的時間有多接近來驗證他們。此功能讓使用者不需記住其他應用程式特定的密碼，並且讓您不需要實作自己的驗證使用者介面。
+
+您的應用程式應該將此功能與公用或秘密金鑰實作搭配使用，來進行使用者驗證。
+</p>
+
+<p>如要設定在成功驗證使用者之後，同一個金鑰可重複使用的逾時時間長度，可在您設定 {@link javax.crypto.KeyGenerator} 或
+{@link java.security.KeyPairGenerator} 時，呼叫新的
+{@code android.security.keystore.KeyGenParameterSpec.setUserAuthenticationValidityDurationSeconds()}
+方法。
+此功能目前適用於對稱式密碼編譯操作。
+</p>
+
+<p>避免過度顯示重新驗證對話方塊 -- 您的應用程式應該先嘗試使用密碼編譯物件，如果逾時過期，才使用
+{@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence) createConfirmDeviceCredentialIntent()}
+方法在您的應用程式內重新驗證使用者。
+
+</p>
+
+<p>如要查看此功能的應用程式實作，請參閱<a href="https://github.com/googlesamples/android-ConfirmCredential" class="external-link">確認認證範例</a>。
+
+</p>
+
+<h2 id="direct-share">直接分享</h2>
+
+<img src="{@docRoot}preview/images/direct-share-screen.png" srcset="{@docRoot}preview/images/direct-share-screen.png 1x, {@docRoot}preview/images/direct-share-screen_2x.png 2x" style="float:right; margin:0 0 20px 30px" width="312" height="329" />
+
+<p>這個預覽版提供 API，讓使用者能夠以直覺且快速的方式進行分享。您現在可以定義「直接分享目標」<em></em>，在您的應用程式中啟動特定的行為。這些直接分享目標是透過 [分享]<em></em> 選單來向使用者公開。
+
+此功能讓使用者能夠將內容分享到其他應用程式內的目標，例如聯絡人。
+例如，直接分享目標可以在其他社交網路應用程式中啟動某個活動，讓使用者能夠在該應用程式中，直接與特定的朋友或社群分享內容。
+
+</p>
+
+<p>如要啟用直接分享目標，您必須定義一個類別來擴充
+{@code android.service.} <br>
+{@code chooser.ChooserTargetService} 類別。在宣示說明中宣告您的
+{@code ChooserTargetService}。在該宣告中，指定
+{@code BIND_CHOOSER_TARGET_SERVICE} 權限以及含有
+{@code SERVICE_INTERFACE} 動作的意圖篩選條件。</p>
+<p>下列範例示範如何在您的宣示說明中宣告 {@code ChooserTargetService}。
+</p>
+<pre>
+&lt;service android:name=".ChooserTargetService"
+        android:label="&#64;string/service_name"
+        android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.service.chooser.ChooserTargetService" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service&gt;
+</pre>
+
+<p>針對您要向 {@code ChooserTargetService} 公開的每個活動，在您的應用程式宣示說明中，新增名稱為
+{@code "android.service.chooser.chooser_target_service"} 的
+{@code &lt;meta-data&gt;} 元素。
+</p>
+
+<pre>
+&lt;activity android:name=".MyShareActivity”
+        android:label="&#64;string/share_activity_label"&gt;
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND" /&gt;
+    &lt;/intent-filter>
+&lt;meta-data
+        android:name="android.service.chooser.chooser_target_service"
+        android:value=".ChooserTargetService" /&gt;
+&lt;/activity>
+</pre>
+
+<h2 id="voice-interactions">語音互動</h2>
+<p>
+這個預覽版提供新的語音互動 API，可與<a href="https://developers.google.com/voice-actions/" class="external-link">語音操作</a>搭配使用，讓您能夠在應用程式內建置交談式語音體驗。
+
+呼叫
+{@code android.app.Activity.isVoiceInteraction()} 方法，來判斷是否已啟動您的活動來回應語音操作。
+如果是，則您的應用程式可以使用
+{@code android.app.VoiceInteractor} 類別，來要求使用者進行語音確認、從選項清單中選取，以及其他更多動作。
+如要深入瞭解如何實作語音操作，請參閱<a href="https://developers.google.com/voice-actions/interaction/" class="external-link">語音操作開發人員網站</a>。
+
+</p>
+
+<h2 id="assist">協助 API</h2>
+<p>
+這個預覽版提供一種新方式，可透過小幫手吸引使用者來使用您的應用程式。如要使用此功能，使用者必須啟用小幫手來使用目前的內容。
+啟用之後，使用者就能夠在所有應用程式內，按住 <strong>Home</strong> 按鈕不放來啟用小幫手。
+</p>
+<p>您的應用程式可以設定
+{@link android.view.WindowManager.LayoutParams#FLAG_SECURE} 旗標，選擇不要與小幫手分享目前的內容。除了平台傳遞給小幫手的一組標準資訊之外，您的應用程式也可以使用新的 {@code android.app.Activity.AssistContent} 類別來分享其他資訊。
+
+</p>
+
+<p>如要將您應用程式的其他內容提供給小幫手，請依照下列步驟執行：</p>
+
+<ol>
+<li>實作 {@link android.app.Application.OnProvideAssistDataListener} 介面。</li>
+<li>使用
+{@link android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener) registerOnProvideAssistDataListener()} 來註冊這個監聽器。</li>
+<li>如要提供特定活動的內容資訊，請覆寫
+ {@link android.app.Activity#onProvideAssistData(android.os.Bundle) onProvideAssistData()}
+回呼，然後選擇性地覆寫新的 {@code Activity.onProvideAssistContent()} 回呼。
+</ol>
+
+<h2 id="notifications">通知</h2>
+<p>這個預覽版新增了下列適用於通知的 API 變更：</p>
+<ul>
+  <li>新的 {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} 篩選條件級別，會對應至新的「僅允許鬧鐘」<em></em>的請勿打擾模式。
+</li>
+  <li>新的 {@code Notification.CATEGORY_REMINDER} 類別值，可用來分辨來自其他事件 ({@link android.app.Notification#CATEGORY_EVENT}) 與鬧鐘 ({@link android.app.Notification#CATEGORY_ALARM}) 的使用者排程提醒。
+
+
+</li>
+  <li>新的 {@code android.graphics.drawable.Icon} 類別，可以透過 {@code Notification.Builder.setSmallIcon(Icon)} 和
+{@code Notification.Builder.setLargeIcon(Icon)} 方法來附加您的通知。
+</li>
+  <li>新的 {@code NotificationManager.getActiveNotifications()} 方法，讓您的應用程式能夠找出它們目前有哪些通知仍處於有效狀態。
+如要查看使用此功能的應用程式實作，請參閱<a href="https://github.com/googlesamples/android-ActiveNotifications" class="external-link">使用中通知範例</a>。
+</li>
+</ul>
+
+<h2 id="bluetooth-stylus">藍牙手寫筆支援</h2>
+<p>這個預覽版提供對於使用者使用藍牙手寫筆進行輸入的改良支援。使用者可以將相容的藍芽手寫筆與他們的手機或平板電腦配對並連線。
+連線之後，來自觸控螢幕的位置資訊會與來自手寫筆的壓力和按鈕資訊結合，比起單獨使用觸控螢幕，這樣能夠提供更大範圍的表達方式。
+
+您的應用程式可以藉由在您的活動中註冊新的
+{@code View.onStylusButtonPressListener} 和 {@code GestureDetector.OnStylusButtonPressListener}
+回呼，來監聽手寫筆按鈕的按下動作，並執行次要動作。
+</p>
+
+<p>使用 {@link android.view.MotionEvent} 方法和常數來偵測手寫筆按鈕互動：
+</p>
+<ul>
+<li>如果使用者使用具有一個按鈕的手寫筆輕觸應用程式的螢幕，則
+{@link android.view.MotionEvent#getToolType(int) getTooltype()} 方法會傳回
+{@link android.view.MotionEvent#TOOL_TYPE_STYLUS}。</li>
+<li>針對目標為 M 預覽版的應用程式，
+{@link android.view.MotionEvent#getButtonState() getButtonState()}
+方法會在使用者按下主要手寫筆按鈕時傳回 {@code MotionEvent.STYLUS_BUTTON_PRIMARY}。
+如果手寫筆有第二個按鈕，則當使用者按下該按鈕時，同一個方法會傳回
+{@code MotionEvent.STYLUS_BUTTON_SECONDARY}。如果使用者同時按下這兩個按鈕，此方法即會使用 OR 連結，一併傳回這兩個值 ({@code STYLUS_BUTTON_PRIMARY|STYLUS_BUTTON_SECONDARY})。
+
+</li>
+<li>
+針對目標為較低平台版本的應用程式，
+{@link android.view.MotionEvent#getButtonState() getButtonState()} 方法會傳回
+{@link android.view.MotionEvent#BUTTON_SECONDARY} (針對主要手寫筆按鈕的按下動作)、
+{@link android.view.MotionEvent#BUTTON_TERTIARY} (針對次要手寫筆按鈕的按下動作)，或兩者。
+</li>
+</ul>
+
+<h2 id="ble-scanning">已改進藍牙低電量掃描</h2>
+<p>
+如果您的應用程式會執行藍芽低電量掃描，就可以使用新的
+{@code android.bluetooth.le.ScanSettings.Builder.setCallbackType()} 方法，來指定如果先找到符合
+{@link android.bluetooth.le.ScanFilter} 組合的廣告封包，以及在某個時段中找不到它時，只需通知回呼。
+
+比起先前平台版本中所提供的功能，這個掃描方法功能更強大且更有效率。
+
+</p>
+
+<h2 id="hotspot">無線基地台 2.0 版本 1 支援</h2>
+<p>
+這個預覽版在 Nexus 6 和 Nexus 9 裝置上新增對於無線基地台 2.0 版本 1 規格的支援。如要在您的應用程式中佈建無線基地台 2.0 認證，請使用
+{@link android.net.wifi.WifiEnterpriseConfig} 類別的新方法，例如 {@code setPlmn()} 和
+{@code setRealm()}。
+在 {@link android.net.wifi.WifiConfiguration} 物件中，您可以設定
+{@link android.net.wifi.WifiConfiguration#FQDN} 和 {@code providerFriendlyName} 欄位。新的 {@code ScanResult.PasspointNetwork} 屬性指出偵測到的網路是否代表無線基地台 2.0 存取點。
+
+
+</p>
+
+<h2 id="4K-display">4K 顯示模式</h2>
+<p>此平台現在允許應用程式能夠要求將在相容硬體中呈現的顯示解析度升級到 4K。
+如要查詢目前的實際解析度，請使用新的
+{@code android.view.Display.Mode} API。如果 UI 是使用較低的邏輯解析度來繪製，並向上升級為較高的實際解析度，請注意，
+{@code Display.Mode.getPhysicalWidth()} 方法傳回的實際解析度可能會與 {@link android.view.Display#getSize(android.graphics.Point) getSize()} 報告的邏輯解析度不同。
+
+</p>
+
+<p>您可以在應用程式執行時，藉由設定應用程式視窗的 {@code WindowManager.LayoutParams.preferredDisplayModeId} 屬性，來要求系統變更該應用程式中的實際解析度。
+如果您想要切換為 4K 顯示解析度，這個功能非常實用。
+儘管在 4K 顯示模式中，UI 會持續使用原始解析度 (例如 1080p) 來呈現並向上升級為 4K，但是
+{@link android.view.SurfaceView} 物件可能會以原生解析度來顯示內容。
+</p>
+
+<h2 id="behavior-themeable-colorstatelists">具備設計風格的 ColorStateList</h2>
+<p>針對執行 M 預覽版的裝置，
+{@link android.content.res.ColorStateList} 中目前支援設計風格屬性。
+{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} 和
+{@link android.content.res.Resources#getColor(int) getColor()} 方法已過時。如果您正在呼叫這些 API，請改為呼叫新的 {@code Context.getColorStateList()} 或
+{@code Context.getColor()} 方法。
+您也可以透過 {@link android.support.v4.content.ContextCompat}，在 v4 appcompat 程式庫中取得這些方法。
+</p>
+
+<h2 id="audio">音訊功能</h2>
+
+<p>這個預覽版在 Android 上新增了音訊處理的增強功能，包括： </p>
+<ul>
+  <li>利用新的 {@code android.media.midi} API，來支援 <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a> 通訊協定。
+使用這些 API 來傳送與接收 MIDI 事件。
+</li>
+  <li>新的 {@code android.media.AudioRecord.Builder} 和 {@code android.media.AudioTrack.Builder}
+類別，可分別建立數位音訊擷取和播放物件，並設定音訊來源和接收屬性來覆寫系統預設值。
+</li>
+  <li>API 勾點，適合用來關聯音訊與輸入裝置。如果您的應用程式允許使用者從連接到 Android TV 的遊戲控制器或遙控器啟動音訊搜尋，則這特別有用。系統會在使用者啟動搜尋時，叫用新的 {@code android.app.Activity.onSearchRequested()} 回呼。
+
+
+如要判斷使用者的輸入裝置是否有內建的麥克風，請從該回呼中擷取 {@link android.view.InputDevice} 物件，然後呼叫新的
+{@code InputDevice.hasMic()} 方法。
+</li>
+  <li>新的 {@code android.media.AudioDevicesManager} 類別，讓您能夠擷取所有已連接的來源與接收音訊裝置的清單。
+如果您想要讓應用程式在連接或中斷連接音訊裝置時收到通知，也可以指定
+{@code android.media.OnAudioDeviceConnectionListener} 物件。
+</li>
+</ul>
+
+<h2 id="video">影片功能</h2>
+<p>這個預覽版在影片處理 API 中增加了新功能，包括：</p>
+<ul>
+<li>新的 {@code android.media.MediaSync} 類別，可協助應用程式同步轉譯音訊和影片串流。
+音訊緩衝區是利用非封鎖的方式來提交，並透過回呼來傳回。
+它也支援動態播放速率。
+</li>
+<li>新的 {@code MediaDrm.EVENT_SESSION_RECLAIMED} 事件，指出應用程式開啟的工作階段已由資源管理員所回收。
+如果您的應用程式使用 DRM 工作階段，就應該處理這個事件，並確定不會使用回收的工作階段。
+
+</li>
+<li>新的 {@code MediaCodec.CodecException.ERROR_RECLAIMED} 錯誤碼，表示資源管理員已回收轉碼器所使用的媒體資源。
+如果發生這個例外狀況，就必須釋放轉碼器，就如同它已進入終止狀態。
+
+</li>
+<li>新的 {@code MediaCodecInfo.CodecCapabilities.getMaxSupportedInstances()} 介面，可取得支援並行轉碼器執行個體數目上限的提示。
+
+</li>
+<li>新的 {@code MediaPlayer.setPlaybackParams()} 方法，可將媒體播放速率設定為快速或慢速播放。
+這也可以和影片一起自動延伸或加速音訊播放。
+</li>
+</ul>
+
+<h2 id="camera">相機功能</h2>
+<p>這個預覽版包含下列可用來存取相機閃光燈和相機重新處理影像的 API：
+</p>
+
+<h3 id="flashlight">閃光燈 API</h3>
+<p>如果相機裝置具有閃光裝置，則您可以呼叫 {@code CameraManager.setTorchMode()}
+方法，在不開啟相機裝置的情況下，開啟或關閉閃光裝置的閃光模式。應用程式不具備閃光裝置或相機裝置的獨佔擁有權。
+每當相機裝置變成無法使用時，或者，當其他相機資源讓閃光變成無法使用時，閃光模式也會關閉且變成無法使用。
+
+其他應用程式也會呼叫 {@code setTorchMode()}
+來關閉閃光模式。關閉最後一個開啟閃光模式的應用程式時，閃光模式即會關閉。
+</p>
+
+<p>您可以呼叫
+{@code CameraManager.registerTorchCallback()} 方法，來註冊回呼要收到有關閃光模式狀態的通知。第一次註冊回呼時，會立即使用所有目前已知具有閃光裝置之相機裝置的閃光模式來呼叫它。
+
+如果成功開啟或關閉閃光模式，即會叫用
+{@code CameraManager.TorchCallback.onTorchModeChanged()} 方法。</p>
+
+<h3 id="reprocessing">重新處理 API</h3>
+<p>{@link android.hardware.camera2 Camera2} API 已擴充，支援重新處理 YUV 和私人不透明格式的影像。
+您的應用程式會判斷是否可透過 {@code CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES} 使用重新處理功能。
+如果裝置支援重新處理，您就可以呼叫
+{@code CameraDevice.createReprocessableCaptureSession()} 來建立可重新處理的相機拍攝工作階段，然後建立適用於重新處理輸入緩衝區的要求。
+
+</p>
+
+<p>使用 {@code ImageWriter} 類別，將輸入緩衝區流程連接到相機重新處理輸入。
+如要取得空的緩衝區，請依照這個程式設計模型執行：</p>
+
+<ol>
+<li>呼叫 {@code ImageWriter.dequeueInputImage()} 方法。</li>
+<li>在輸入緩衝區中填入資料。</li>
+<li>呼叫 {@code ImageWriter.queueInputImage()} 方法，將緩衝區傳送到相機。</li>
+</ol>
+
+<p>如果您將 {@code ImageWriter} 物件和
+{@code android.graphics.ImageFormat.PRIVATE} 影像一起使用，您的應用程式就無法直接存取影像資料。
+請改為呼叫 {@code ImageWriter.queueInputImage()} 方法但不含任何緩衝區複本，直接將 {@code ImageFormat.PRIVATE} 影像傳遞到
+{@code ImageWriter}。
+</p>
+
+<p>{@code ImageReader} 類別現在支援 {@code android.graphics.ImageFormat.PRIVATE} 格式的影像串流。
+這個支援讓您的應用程式能夠保留
+{@code ImageReader} 輸出影像的循環影像佇列、選取一或多個影像，然後將它們傳送到
+{@code ImageWriter} 以進行相機重新處理。</p>
+
+<h2 id="afw">Android for Work 功能</h2>
+<p>這個預覽版包含下列適用於 Android for Work 功能的新 API：</p>
+<ul>
+  <li><strong>已增強適用於公司擁有、單一用途裝置的控制項：</strong>裝置擁有者現在可以控制下列設定，來改進公司擁有、單一用途 (COSU) 裝置的管理：
+
+
+  <ul>
+    <li>使用
+{@code DevicePolicyManager.setKeyguardEnabledState()} 方法來停用或重新啟用滑動解鎖。</li>
+    <li>使用
+{@code DevicePolicyManager.setStatusBarEnabledState()} 方法，來停用或重新啟用狀態列 (包括快速設定、通知，以及啟動 Google 即時資訊的導覽向上滑動手勢)。
+</li>
+    <li>使用 {@link android.os.UserManager} 常數
+{@code DISALLOW_SAFE_BOOT} 來停用或重新啟用安全開機。</li>
+    <li>使用 
+  {@link android.provider.Settings.Global} 常數 {@code STAY_ON_WHILE_PLUGGED_IN}，防止螢幕在使用者為裝置連接電源時關閉。</li>
+  </ul>
+  </li>
+  <li><strong>透過裝置擁有者自動安裝與解除安裝應用程式：</strong>裝置擁有者現在可以使用 {@link android.content.pm.PackageInstaller}
+API (與 Google Play for Work 無關) 自動安裝與解除安裝應用程式。
+您現在可以透過裝置擁有者佈建裝置，該裝置擁有者可在不與使用者互動的情況下擷取並安裝應用程式。
+如要在不啟用 Google 帳戶的情況下輕觸一次就能佈建 Kiosk 或其他這類裝置，這個功能非常有用。
+</li>
+<li><strong>自動存取企業憑證：</strong>當應用程式呼叫
+{@link android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity,android.security.KeyChainAliasCallback,java.lang.String[],java.security.Principal[],java.lang.String,int,java.lang.String) choosePrivateKeyAlias()} 時，在系統提示使用者選取憑證之前，設定檔或裝置擁有者現在會呼叫 {@code DeviceAdminReceiver.onChoosePrivateKeyAlias()} 方法，為提出要求的應用程式自動提供別名。
+
+
+這個功能讓您能夠在不與使用者互動的情況下，為受管理的應用程式授與存取憑證的權限。
+</li>
+<li><strong>自動接受系統更新。</strong>藉由使用
+{@code DevicePolicyManager.setSystemUpdatePolicy()} 來設定系統更新原則，裝置擁有者現在可以自動接受系統更新 (例如，在 Kiosk 裝置的案例中)，或者延後更新，並防止使用者進行更新，最多 30 天。
+
+因此，系統管理員可以設定必須取得更新的每日時間範圍 ，例如，在 Kiosk 裝置處於未使用狀態時。
+在系統更新可供使用時，系統就會檢查工作原則控制器應用程式是否已設定系統更新原則，並據以運作。
+
+
+</li>
+<li>
+<strong>委派的憑證安裝：</strong>設定檔或裝置擁有者現在可以授與第三方廠商的應用程式呼叫這些 {@link android.app.admin.DevicePolicyManager} 憑證管理 API 的能力：
+
+
+<ul>
+  <li>{@link android.app.admin.DevicePolicyManager#getInstalledCaCerts(android.content.ComponentName)
+getInstalledCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#hasCaCertInstalled(android.content.ComponentName,byte[])
+hasCaCertInstalled()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installCaCert(android.content.ComponentName,byte[])
+installCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallCaCert(android.content.ComponentName,byte[])
+uninstallCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallAllUserCaCerts(android.content.ComponentName)
+uninstallAllUserCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName,java.security.PrivateKey,java.security.cert.Certificate,java.lang.String)
+installKeyPair()}</li>
+</ul>
+</li>
+<li><strong>企業原廠重設保護：</strong>佈建裝置擁有者時，您現在可以藉由設定
+{@code DeviceManagerPolicy.EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS} 套件組合，來設定參數以解除鎖定原廠重設保護 (FRP)。
+NFC 程式設計人員應用程式可以在已重設裝置來解除鎖定 FRP 並佈建裝置之後提供這些參數，而不需使用先前設定的 Google 帳戶。
+
+如果您並未修改這些參數，FRP 會就地保留，並防止裝置在沒有先前啟用的 Google 認證的情況下啟用。
+
+
+<p>此外，裝置擁有者可以在 Google Play 服務上設定應用程式限制，來指定可用來解除鎖定 FRP 的替代 Google 帳戶，以取代已在裝置上啟用的帳戶。
+</p>
+</li>
+<img src="{@docRoot}preview/images/work-profile-screen.png" srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+<li><strong>資料使用量追蹤。</strong>設定檔或裝置擁有者現在可以使用新的
+{@code android.app.usage.NetworkStatsManager} 方法，針對可在 [設定] &gt; [資料]<strong></strong> 使用量中看見的資料使用量統計資料進行查詢。
+系統會自動授與設定檔擁有者權限來查詢他們所管理之設定檔上的資料，在此同時，裝置擁有者會取得受管理的主要使用者之使用量資料的存取權限。
+
+</li>
+<li><strong>執行階段權限管理：</strong>
+<p>設定檔或裝置擁有者可以使用
+{@code DevicePolicyManager.setPermissionPolicy()}，針對所有應用程式的所有執行階段要求設定權限原則，以提示使用者授與一般權限，或者以無訊息方式自動授與或拒絕該權限。
+
+如果設定了後項原則，使用者就無法在應用程式權限畫面的 [設定]<strong></strong> 中，修改設定檔或裝置擁有者所做的選項。
+
+</p></li>
+<li><strong>設定中的 VPN：</strong>VPN 應用程式現在可以在 [設定] &gt; [更多] &gt; [VPN]<strong></strong> 中看見。此外，伴隨 VPN 使用量出現的通知是該 VPN 設定方式的特定通知。
+
+
+針對設定檔擁有者，通知是專門用來通知是否已針對受管理的設定檔、個人設定檔或兩者設定了 VPN。
+針對裝置擁有者，通知是專門用來通知是否已針對整個裝置設定了 VPN。
+</li>
+<li><strong>工作狀態通知：</strong>每當來自受管理設定檔的應用程式在前景中有活動時，狀態列上就會出現公事包圖示。
+因此，如果直接將裝置解除鎖定至受管理設定檔中應用程式的活動，即會顯示一個快顯通知，通知使用者他們正處於工作設定檔內。
+
+
+</li>
+</ul>
+
+<p class="note">
+  如需 M 開發人員預覽版中所有 API 變更的詳細檢視，請參閱 <a href="{@docRoot}preview/download.html">API 差異報告</a>。
+</p>
