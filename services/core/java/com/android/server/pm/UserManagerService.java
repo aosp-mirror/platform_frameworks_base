@@ -988,7 +988,7 @@ public class UserManagerService extends IUserManager.Stub {
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_OUTGOING_BEAM);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_WALLPAPER);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_SAFE_BOOT);
-        writeBoolean(serializer, restrictions, UserManager.ALLOW_PARENT_APP_LINKING);
+        writeBoolean(serializer, restrictions, UserManager.ALLOW_PARENT_PROFILE_APP_LINKING);
         serializer.endTag(null, TAG_RESTRICTIONS);
     }
 
@@ -1120,7 +1120,7 @@ public class UserManagerService extends IUserManager.Stub {
         readBoolean(parser, restrictions, UserManager.DISALLOW_OUTGOING_BEAM);
         readBoolean(parser, restrictions, UserManager.DISALLOW_WALLPAPER);
         readBoolean(parser, restrictions, UserManager.DISALLOW_SAFE_BOOT);
-        readBoolean(parser, restrictions, UserManager.ALLOW_PARENT_APP_LINKING);
+        readBoolean(parser, restrictions, UserManager.ALLOW_PARENT_PROFILE_APP_LINKING);
     }
 
     private void readBoolean(XmlPullParser parser, Bundle restrictions,
