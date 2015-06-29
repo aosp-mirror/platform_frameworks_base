@@ -314,8 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Реттеу"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Бұл БАРЛЫҚ дыбыстарды және дірілдерді бұғаттайды, соның ішінде, дабылдардыкін, музыканыкін, бейнелердікін және ойындардыкін. Сіз әлі де телефон қоңырауларын шала аласыз."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"Бұл БАРЛЫҚ дыбыстарды және дірілдерді бұғаттайды, соның ішінде, дабылдардыкін, музыканыкін, бейнелердікін және ойындардыкін."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі. Бірақ телефон қоңыраулары шалына береді."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Шұғылдығы азырақ хабарландырулар төменде"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Ашу үшін қайтадан түртіңіз"</string>
