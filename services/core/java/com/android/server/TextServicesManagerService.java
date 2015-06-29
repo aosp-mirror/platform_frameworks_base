@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.textservice.ISpellCheckerService;
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
@@ -61,9 +62,11 @@ import android.view.textservice.SpellCheckerSubtype;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -141,7 +144,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
         SpellCheckerInfo sci = getCurrentSpellChecker(null);
         if (sci == null) {
-            sci = findAvailSpellCheckerLocked(null, null);
+            sci = findAvailSpellCheckerLocked(null);
             if (sci != null) {
                 // Set the current spell checker if there is one or more spell checkers
                 // available. In this case, "sci" is the first one in the available spell
@@ -190,7 +193,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
                         // Package modified
                         || isPackageModified(packageName)) {
-                    sci = findAvailSpellCheckerLocked(null, packageName);
+                    sci = findAvailSpellCheckerLocked(packageName);
                     if (sci != null) {
                         setCurrentSpellCheckerLocked(sci.getId());
                     }
@@ -331,8 +334,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mSpellCheckerBindGroups.clear();
     }
 
-    // TODO: find an appropriate spell checker for specified locale
-    private SpellCheckerInfo findAvailSpellCheckerLocked(String locale, String prefPackage) {
+    private SpellCheckerInfo findAvailSpellCheckerLocked(String prefPackage) {
         final int spellCheckersCount = mSpellCheckerList.size();
         if (spellCheckersCount == 0) {
             Slog.w(TAG, "no available spell checker services found");
@@ -349,6 +351,38 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 }
             }
         }
+
+        // Look up a spell checker based on the system locale.
+        // TODO: Still there is a room to improve in the following logic: e.g., check if the package
+        // is pre-installed or not.
+        final Locale systemLocal = mContext.getResources().getConfiguration().locale;
+        final ArrayList<Locale> suitableLocales =
+                InputMethodUtils.getSuitableLocalesForSpellChecker(systemLocal);
+        if (DBG) {
+            Slog.w(TAG, "findAvailSpellCheckerLocked suitableLocales="
+                    + Arrays.toString(suitableLocales.toArray(new Locale[suitableLocales.size()])));
+        }
+        final int localeCount = suitableLocales.size();
+        for (int localeIndex = 0; localeIndex < localeCount; ++localeIndex) {
+            final Locale locale = suitableLocales.get(localeIndex);
+            for (int spellCheckersIndex = 0; spellCheckersIndex < spellCheckersCount;
+                    ++spellCheckersIndex) {
+                final SpellCheckerInfo info = mSpellCheckerList.get(spellCheckersIndex);
+                final int subtypeCount = info.getSubtypeCount();
+                for (int subtypeIndex = 0; subtypeIndex < subtypeCount; ++subtypeIndex) {
+                    final SpellCheckerSubtype subtype = info.getSubtypeAt(subtypeIndex);
+                    final Locale subtypeLocale = InputMethodUtils.constructLocaleFromString(
+                            subtype.getLocale());
+                    if (locale.equals(subtypeLocale)) {
+                        // TODO: We may have more spell checkers that fall into this category.
+                        // Ideally we should pick up the most suitable one instead of simply
+                        // returning the first found one.
+                        return info;
+                    }
+                }
+            }
+        }
+
         if (spellCheckersCount > 1) {
             Slog.w(TAG, "more than one spell checker service found, picking first");
         }
