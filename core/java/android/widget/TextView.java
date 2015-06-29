@@ -7577,10 +7577,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     String getSelectedText() {
-        if (hasSelection()) {
-            return String.valueOf(mText.subSequence(getSelectionStart(), getSelectionEnd()));
+        if (!hasSelection()) {
+            return null;
         }
-        return null;
+
+        final int start = getSelectionStart();
+        final int end = getSelectionEnd();
+        return String.valueOf(
+                start > end ? mText.subSequence(end, start) : mText.subSequence(start, end));
     }
 
     /**
