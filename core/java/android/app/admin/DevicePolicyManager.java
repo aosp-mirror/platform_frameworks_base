@@ -2402,6 +2402,9 @@ public class DevicePolicyManager {
      * <p>The calling device admin must be a device or profile owner. If it is not, a
      * security exception will be thrown.
      *
+     * <p>From version {@link android.os.Build.VERSION_CODES#MNC} disabling screen capture also
+     * blocks assist requests for all activities of the relevant user.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled Whether screen capture is disabled or not.
      */
