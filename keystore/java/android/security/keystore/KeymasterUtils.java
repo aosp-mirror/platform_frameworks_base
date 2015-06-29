@@ -74,7 +74,7 @@ public abstract class KeymasterUtils {
                 return true;
             default:
                 throw new IllegalArgumentException(
-                        "Unsupported encryption padding scheme: " + keymasterPadding);
+                        "Unsupported asymmetric encryption padding scheme: " + keymasterPadding);
         }
     }
 
