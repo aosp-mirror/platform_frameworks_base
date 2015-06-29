@@ -67,11 +67,19 @@ public class TelecomManager {
     public static final String ACTION_NEW_UNKNOWN_CALL = "android.telecom.action.NEW_UNKNOWN_CALL";
 
     /**
-     * The {@link android.content.Intent} action used to configure a
-     * {@link android.telecom.ConnectionService}.
+     * An {@link android.content.Intent} action sent by the telecom framework to start a
+     * configuration dialog for a registered {@link PhoneAccount}. There is no default dialog
+     * and each app that registers a {@link PhoneAccount} should provide one if desired.
+     * <p>
+     * A user can access the list of enabled {@link android.telecom.PhoneAccount}s through the Phone
+     * app's settings menu. For each entry, the settings app will add a click action. When
+     * triggered, the click-action will start this intent along with the extra
+     * {@link #EXTRA_PHONE_ACCOUNT_HANDLE} to indicate the {@link PhoneAccount} to configure. If the
+     * {@link PhoneAccount} package does not register an {@link android.app.Activity} for this
+     * intent, then it will not be sent.
      */
-    public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
-            "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
+    public static final String ACTION_CONFIGURE_PHONE_ACCOUNT =
+            "android.telecom.action.CONFIGURE_PHONE_ACCOUNT";
 
     /**
      * The {@link android.content.Intent} action used to show the call accessibility settings page.

@@ -45,6 +45,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class RemoteConnection {
 
+    /**
+     * Callback base class for {@link RemoteConnection}.
+     */
     public static abstract class Callback {
         /**
          * Invoked when the state of this {@code RemoteConnection} has changed. See
@@ -200,7 +203,7 @@ public final class RemoteConnection {
                 RemoteConference conference) {}
 
         /**
-         * Handles changes to the {@code RemoteConference} extras.
+         * Handles changes to the {@code RemoteConnection} extras.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param extras The extras containing other information associated with the connection.
