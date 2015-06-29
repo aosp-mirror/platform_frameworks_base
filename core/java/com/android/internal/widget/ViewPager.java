@@ -85,7 +85,7 @@ import java.util.Comparator;
  */
 public class ViewPager extends ViewGroup {
     private static final String TAG = "ViewPager";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int MAX_SCROLL_X = 2 << 23;
     private static final boolean USE_CACHE = false;
