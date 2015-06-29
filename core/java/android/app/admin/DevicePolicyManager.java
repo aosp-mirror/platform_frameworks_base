@@ -3956,23 +3956,26 @@ public class DevicePolicyManager {
      * <li>{@link Settings.Global#ADB_ENABLED}</li>
      * <li>{@link Settings.Global#AUTO_TIME}</li>
      * <li>{@link Settings.Global#AUTO_TIME_ZONE}</li>
-     * <li>{@link Settings.Global#BLUETOOTH_ON}
-     * Changing this setting has not effect as of {@link android.os.Build.VERSION_CODES#MNC}. Use
-     * {@link android.bluetooth.BluetoothAdapter#enable()} and
-     * {@link android.bluetooth.BluetoothAdapter#disable()} instead.</li>
      * <li>{@link Settings.Global#DATA_ROAMING}</li>
-     * <li>{@link Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
-     * <li>{@link Settings.Global#MODE_RINGER}</li>
-     * <li>{@link Settings.Global#NETWORK_PREFERENCE}</li>
      * <li>{@link Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
-     * <li>{@link Settings.Global#WIFI_ON}
-     * Changing this setting has not effect as of {@link android.os.Build.VERSION_CODES#MNC}. Use
-     * {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
      * <li>{@link Settings.Global#WIFI_SLEEP_POLICY}</li>
      * <li>{@link Settings.Global#STAY_ON_WHILE_PLUGGED_IN}
-     * This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards
-     * and can only be set if {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
+     *   This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards
+     *   and can only be set if {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
      * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
+     * </ul>
+     * <p>Changing the following settings has no effect as of
+     * {@link android.os.Build.VERSION_CODES#MNC}:
+     * <ul>
+     * <li>{@link Settings.Global#BLUETOOTH_ON}.
+     *   Use {@link android.bluetooth.BluetoothAdapter#enable()} and
+     *   {@link android.bluetooth.BluetoothAdapter#disable()} instead.</li>
+     * <li>{@link Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
+     * <li>{@link Settings.Global#MODE_RINGER}.
+     *   Use {@link android.media.AudioManager#setRingerMode(int)} instead.</li>
+     * <li>{@link Settings.Global#NETWORK_PREFERENCE}</li>
+     * <li>{@link Settings.Global#WIFI_ON}.
+     *   Use {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
      * </ul>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
