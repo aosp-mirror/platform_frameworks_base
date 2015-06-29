@@ -32,25 +32,90 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * A conference provided to a {@link ConnectionService} by another {@code ConnectionService}
- * running in a different process.
+ * A conference provided to a {@link ConnectionService} by another {@code ConnectionService} through
+ * {@link ConnectionService#conferenceRemoteConnections}. Once created, a {@code RemoteConference}
+ * can be used to control the conference call or monitor changes through
+ * {@link RemoteConnection.Callback}.
  *
  * @see ConnectionService#onRemoteConferenceAdded
  */
 public final class RemoteConference {
 
+    /**
+     * Callback base class for {@link RemoteConference}.
+     */
     public abstract static class Callback {
+        /**
+         * Invoked when the state of this {@code RemoteConferece} has changed. See
+         * {@link #getState()}.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param oldState The previous state of the {@code RemoteConference}.
+         * @param newState The new state of the {@code RemoteConference}.
+         */
         public void onStateChanged(RemoteConference conference, int oldState, int newState) {}
+
+        /**
+         * Invoked when this {@code RemoteConference} is disconnected.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param disconnectCause The ({@see DisconnectCause}) associated with this failed
+         *     conference.
+         */
         public void onDisconnected(RemoteConference conference, DisconnectCause disconnectCause) {}
+
+        /**
+         * Invoked when a {@link RemoteConnection} is added to the conference call.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param connection The {@link RemoteConnection} being added.
+         */
         public void onConnectionAdded(RemoteConference conference, RemoteConnection connection) {}
+
+        /**
+         * Invoked when a {@link RemoteConnection} is removed from the conference call.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param connection The {@link RemoteConnection} being removed.
+         */
         public void onConnectionRemoved(RemoteConference conference, RemoteConnection connection) {}
+
+        /**
+         * Indicates that the call capabilities of this {@code RemoteConference} have changed.
+         * See {@link #getConnectionCapabilities()}.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param connectionCapabilities The new capabilities of the {@code RemoteConference}.
+         */
         public void onConnectionCapabilitiesChanged(
                 RemoteConference conference,
                 int connectionCapabilities) {}
+
+        /**
+         * Invoked when the set of {@link RemoteConnection}s which can be added to this conference
+         * call have changed.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param conferenceableConnections The list of conferenceable {@link RemoteConnection}s.
+         */
         public void onConferenceableConnectionsChanged(
                 RemoteConference conference,
                 List<RemoteConnection> conferenceableConnections) {}
+
+        /**
+         * Indicates that this {@code RemoteConference} has been destroyed. No further requests
+         * should be made to the {@code RemoteConference}, and references to it should be cleared.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         */
         public void onDestroyed(RemoteConference conference) {}
+
+        /**
+         * Handles changes to the {@code RemoteConference} extras.
+         *
+         * @param conference The {@code RemoteConference} invoking this method.
+         * @param extras The extras containing other information associated with the conference.
+         */
         public void onExtrasChanged(RemoteConference conference, @Nullable Bundle extras) {}
     }
 
