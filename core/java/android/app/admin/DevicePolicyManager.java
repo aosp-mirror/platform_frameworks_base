@@ -215,7 +215,7 @@ public class DevicePolicyManager {
      * <p>This component is set as device owner and active admin when device owner provisioning is
      * started by an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE} or by an NFC
      * message containing an NFC record with MIME type
-     * {@link #MIME_TYPE_PROVISIONING_NFC_V2}. For the NFC record, the component name should be
+     * {@link #MIME_TYPE_PROVISIONING_NFC}. For the NFC record, the component name should be
      * flattened to a string, via {@link ComponentName#flattenToShortString()}.
      *
      * @see DeviceAdminReceiver
@@ -386,7 +386,7 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION} if the version of the
      * installed package is less than this version code.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE
@@ -461,7 +461,7 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether device encryption can be skipped as part of Device Owner
      * provisioning.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} or an intent with action
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} or an intent with action
      * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
@@ -558,12 +558,17 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM";
 
     /**
-     * This MIME type is used for starting the Device Owner provisioning that does not require
-     * provisioning features introduced in Android API level
-     * {@link android.os.Build.VERSION_CODES#MNC} or later levels.
+     * This MIME type is used for starting the Device Owner provisioning.
      *
-     * <p>For more information about the provisioning process see
-     * {@link #MIME_TYPE_PROVISIONING_NFC_V2}.
+     * <p>During device owner provisioning a device admin app is set as the owner of the device.
+     * A device owner has full control over the device. The device owner can not be modified by the
+     * user and the only way of resetting the device is if the device owner app calls a factory
+     * reset.
+     *
+     * <p> A typical use case would be a device that is owned by a company, but used by either an
+     * employee or client.
+     *
+     * <p> The NFC message should be send to an unprovisioned device.
      *
      * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
      * contains the following properties:
@@ -589,15 +594,13 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead of
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}, (although specifying only
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported).
-     *
-     * @see #MIME_TYPE_PROVISIONING_NFC_V2
-     *
      */
     public static final String MIME_TYPE_PROVISIONING_NFC
         = "application/com.android.managedprovisioning";
 
 
     /**
+     * @hide
      * This MIME type is used for starting the Device Owner provisioning that requires
      * new provisioning features introduced in API version
      * {@link android.os.Build.VERSION_CODES#MNC} in addition to those supported in earlier
