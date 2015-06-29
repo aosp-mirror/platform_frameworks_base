@@ -143,6 +143,8 @@ public class ImsCallProfile implements Parcelable {
     public static final int OIR_DEFAULT = 0;    // "user subscription default value"
     public static final int OIR_PRESENTATION_RESTRICTED = 1;
     public static final int OIR_PRESENTATION_NOT_RESTRICTED = 2;
+    public static final int OIR_PRESENTATION_UNKNOWN = 3;
+    public static final int OIR_PRESENTATION_PAYPHONE = 4;
 
     /**
      * Values for EXTRA_DIALSTRING
@@ -381,6 +383,10 @@ public class ImsCallProfile implements Parcelable {
                 return ImsCallProfile.OIR_PRESENTATION_RESTRICTED;
             case PhoneConstants.PRESENTATION_ALLOWED:
                 return ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
+            case PhoneConstants.PRESENTATION_PAYPHONE:
+                return ImsCallProfile.OIR_PRESENTATION_PAYPHONE;
+            case PhoneConstants.PRESENTATION_UNKNOWN:
+                return ImsCallProfile.OIR_PRESENTATION_UNKNOWN;
             default:
                 return ImsCallProfile.OIR_DEFAULT;
         }
@@ -397,6 +403,10 @@ public class ImsCallProfile implements Parcelable {
                 return PhoneConstants.PRESENTATION_RESTRICTED;
             case ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED:
                 return PhoneConstants.PRESENTATION_ALLOWED;
+            case ImsCallProfile.OIR_PRESENTATION_PAYPHONE:
+                return PhoneConstants.PRESENTATION_PAYPHONE;
+            case ImsCallProfile.OIR_PRESENTATION_UNKNOWN:
+                return PhoneConstants.PRESENTATION_UNKNOWN;
             default:
                 return PhoneConstants.PRESENTATION_UNKNOWN;
         }
