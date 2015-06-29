@@ -34,7 +34,6 @@ import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -195,8 +194,30 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CAN_PAUSE_VIDEO = 0x00100000;
 
+    /**
+     * For a conference, indicates the conference will not have child connections.
+     * <p>
+     * An example of a conference with child connections is a GSM conference call, where the radio
+     * retains connections to the individual participants of the conference.  Another example is an
+     * IMS conference call where conference event package functionality is supported; in this case
+     * the conference server ensures the radio is aware of the participants in the conference, which
+     * are represented by child connections.
+     * <p>
+     * An example of a conference with no child connections is an IMS conference call with no
+     * conference event package support.  Such a conference is represented by the radio as a single
+     * connection to the IMS conference server.
+     * <p>
+     * Indicating whether a conference has children or not is important to help user interfaces
+     * visually represent a conference.  A conference with no children, for example, will have the
+     * conference connection shown in the list of calls on a Bluetooth device, where if the
+     * conference has children, only the children will be shown in the list of calls on a Bluetooth
+     * device.
+     * @hide
+     */
+    public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 0x00200000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x00200000
+    // Next CAPABILITY value: 0x00400000
     //**********************************************************************************************
 
     // Flag controlling whether PII is emitted into the logs
@@ -308,6 +329,9 @@ public abstract class Connection extends Conferenceable {
         }
         if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
             builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
+        }
+        if (can(capabilities, CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)) {
+            builder.append(" CAPABILITY_SINGLE_PARTY_CONFERENCE");
         }
         builder.append("]");
         return builder.toString();
