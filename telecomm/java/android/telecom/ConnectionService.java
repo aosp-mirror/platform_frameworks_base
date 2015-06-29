@@ -41,8 +41,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@code ConnectionService} is an abstract service that should be implemented by any app which can
- * make phone calls and want those calls to be integrated into the built-in phone app.
+ * An abstract service that should be implemented by any apps which can make phone calls (VoIP or
+ * otherwise) and want those calls to be integrated into the built-in phone app.
  * Once implemented, the {@code ConnectionService} needs two additional steps before it will be
  * integrated into the phone app:
  * <p>
@@ -62,7 +62,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <br/>
  * See {@link PhoneAccount} and {@link TelecomManager#registerPhoneAccount} for more information.
  * <p>
- * Once registered and enabled by the user in the dialer settings, telecom will bind to a
+ * Once registered and enabled by the user in the phone app settings, telecom will bind to a
  * {@code ConnectionService} implementation when it wants that {@code ConnectionService} to place
  * a call or the service has indicated that is has an incoming call through
  * {@link TelecomManager#addNewIncomingCall}. The {@code ConnectionService} can then expect a call
