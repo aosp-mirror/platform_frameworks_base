@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotók és videók készítése"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonhívások kezdeményezése és kezelése"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Érzékelők"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"életjelekkel és fizikai tevékenységgel kapcsolatos információk elérése"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Testérzékelők"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"az érzékelők által mért, életjelekkel kapcsolatos adatok elérése"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ablaktartalom lekérdezése"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"A használt ablak tartalmának vizsgálata."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Felfedezés érintéssel bekapcsolása"</string>

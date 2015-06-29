@@ -242,8 +242,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"taka myndir og taka upp myndskeið"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Sími"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"hringja og stjórna símtölum"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Skynjarar"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"fá aðgang að upplýsingum um líkamsstarfsemi þína og hreyfingu"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"aðgangur að skynjaragögnum yfir lífsmörk þín"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Sækja innihald glugga"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kanna innihald glugga sem þú ert að nota."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kveikja á snertikönnun"</string>

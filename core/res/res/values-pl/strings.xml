@@ -244,8 +244,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"robienie zdjęć i nagrywanie filmów"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"nawiązywanie połączeń telefonicznych i zarządzanie nimi"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Czujniki"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"uzyskiwać dostęp do informacji o podstawowych funkcjach Twojego organizmu i Twojej aktywności fizycznej"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Czujniki na ciele"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"dostęp do danych czujnika podstawowych funkcji życiowych"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobieranie zawartości okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włączenie czytania dotykiem"</string>

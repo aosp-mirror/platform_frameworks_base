@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tage billeder og optage video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"foretage og administrere telefonopkald"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorer"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"Få adgang til oplysninger om dine livstegn og din fysiske aktivitet"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Kropssensorer"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få adgang til sensordata om dine livstegn"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente indholdet i vinduet"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>

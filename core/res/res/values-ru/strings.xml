@@ -244,8 +244,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"фото- и видеосъемка"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществление телефонных звонков и управление ими"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Датчики"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"доступ к основным показателям состояния организма и сведениям о физической активности"</string>
+    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
+    <skip />
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки"</string>

@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"Atera argazkiak eta grabatu bideoak"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"Egin eta kudeatu telefono-deiak"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sentsoreak"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"Atzitu zure bizi-konstanteei eta ariketa fisikoari buruzko informazioa"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Gorputz-sentsoreak"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"Atzitu bizi-konstanteei buruzko sentsore-datuak"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu ukipen bidez arakatzeko eginbidea"</string>

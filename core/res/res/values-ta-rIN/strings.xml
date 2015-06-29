@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்களை எடுக்கும், வீடியோவைப் பதிவுசெய்யும்"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"மொபைல் அழைப்புகளைச் செய்யும், பெறும்"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"உணர்விகள்"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"உங்கள் உடலியக்க குறிகள் மற்றும் உடல் சார்ந்த செயல்பாடு பற்றிய தகவலை அணுகும்"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் உணர்விகள்"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுகும்"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறுதல்"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் ஊடாடிக்கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கவும்"</string>

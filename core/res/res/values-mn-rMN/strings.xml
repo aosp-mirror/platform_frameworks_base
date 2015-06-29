@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"зураг авах, бичлэг хийх"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Утас"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"утасны дуудлага хийх, дуудлага удирдах"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Мэдрэгчүүд"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"тaны ерөнхий байдлыг үзүүлэх үзүүлэлт болон биеийн хүчний ноогдлын мэдээлэлд нэвтрэх"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Биеийн мэдрэгч"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"таны биеийн байдлын талаарх мэдрэгч бүхий өгөгдөлд нэвтрэх"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Цонхны контентыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Хүрч танихыг асаах"</string>

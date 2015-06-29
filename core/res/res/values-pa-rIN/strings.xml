@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਖਿੱਚੋ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫੋਨ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰੋ ਅਤੇ ਉਹਨਾਂ ਨੂੰ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"ਸੰੰਵੇਦਕ"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ਆਪਣੇ ਮਹੱਤਵਪੂਰਣ ਲੱਛਣਾਂ ਅਤੇ ਸਰੀਰਕ ਗਤੀਵਿਧੀ ਬਾਰੇ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ਸਰੀਰ ਸੰਵੇਦਕ"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਮਹੱਤਵਪੂਰਣ ਲੱਛਣਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਇੰਟਰੈਕਟ ਕਰ ਰਹੇ ਹੋ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਇ ਟਚ ਚਾਲੂ ਕਰੋ"</string>

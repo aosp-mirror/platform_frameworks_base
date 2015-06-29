@@ -242,8 +242,9 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"суретке түсіріп, бейне жазу"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"қоңырау шалу және телефон қоңырауларын басқару"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлар"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"ағза күйінің көрсеткіштері мен дене белсенділігі туралы ақпаратқа қол жеткізу"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене датчиктері"</string>
+    <!-- no translation found for permgroupdesc_sensors (7147968539346634043) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ашық тұрған терезе мазмұнын тексеру."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Түртілген элементтерді дыбыстау функциясын қосу"</string>

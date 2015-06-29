@@ -242,8 +242,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真の撮影と動画の記録"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"通話の発信と管理"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"センサー"</string>
-    <string name="permgroupdesc_sensors" msgid="2280821510554029577">"バイタルサインや身体活動に関する情報へのアクセス"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ボディーセンサー"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"バイタルサインに関するセンサーデータへのアクセス"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
