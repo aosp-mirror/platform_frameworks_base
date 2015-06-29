@@ -51,11 +51,15 @@ public class InputMethodTest extends InstrumentationTestCase {
     private static final Locale LOCALE_FR = new Locale("fr");
     private static final Locale LOCALE_FR_CA = new Locale("fr", "CA");
     private static final Locale LOCALE_HI = new Locale("hi");
+    private static final Locale LOCALE_JA = new Locale("ja");
     private static final Locale LOCALE_JA_JP = new Locale("ja", "JP");
     private static final Locale LOCALE_ZH_CN = new Locale("zh", "CN");
     private static final Locale LOCALE_ZH_TW = new Locale("zh", "TW");
     private static final Locale LOCALE_IN = new Locale("in");
     private static final Locale LOCALE_ID = new Locale("id");
+    private static final Locale LOCALE_TH = new Locale("ht");
+    private static final Locale LOCALE_TH_TH = new Locale("ht", "TH");
+    private static final Locale LOCALE_TH_TH_TH = new Locale("ht", "TH", "TH");
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
     private static final String SUBTYPE_MODE_ANY = null;
@@ -848,5 +852,100 @@ public class InputMethodTest extends InstrumentationTestCase {
         }
 
         return preinstalledImes;
+    }
+
+    @SmallTest
+    public void testGetSuitableLocalesForSpellChecker() throws Exception {
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_EN_US);
+            assertEquals(3, locales.size());
+            assertEquals(LOCALE_EN_US, locales.get(0));
+            assertEquals(LOCALE_EN_GB, locales.get(1));
+            assertEquals(LOCALE_EN, locales.get(2));
+        }
+
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_EN_GB);
+            assertEquals(3, locales.size());
+            assertEquals(LOCALE_EN_GB, locales.get(0));
+            assertEquals(LOCALE_EN_US, locales.get(1));
+            assertEquals(LOCALE_EN, locales.get(2));
+        }
+
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_EN);
+            assertEquals(3, locales.size());
+            assertEquals(LOCALE_EN, locales.get(0));
+            assertEquals(LOCALE_EN_US, locales.get(1));
+            assertEquals(LOCALE_EN_GB, locales.get(2));
+        }
+
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_EN_IN);
+            assertEquals(4, locales.size());
+            assertEquals(LOCALE_EN_IN, locales.get(0));
+            assertEquals(LOCALE_EN_US, locales.get(1));
+            assertEquals(LOCALE_EN_GB, locales.get(2));
+            assertEquals(LOCALE_EN, locales.get(3));
+        }
+
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_JA_JP);
+            assertEquals(5, locales.size());
+            assertEquals(LOCALE_JA_JP, locales.get(0));
+            assertEquals(LOCALE_JA, locales.get(1));
+            assertEquals(LOCALE_EN_US, locales.get(2));
+            assertEquals(LOCALE_EN_GB, locales.get(3));
+            assertEquals(Locale.ENGLISH, locales.get(4));
+        }
+
+        // Test 3-letter language code.
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_FIL_PH);
+            assertEquals(5, locales.size());
+            assertEquals(LOCALE_FIL_PH, locales.get(0));
+            assertEquals(LOCALE_FIL, locales.get(1));
+            assertEquals(LOCALE_EN_US, locales.get(2));
+            assertEquals(LOCALE_EN_GB, locales.get(3));
+            assertEquals(Locale.ENGLISH, locales.get(4));
+        }
+
+        // Test variant.
+        {
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(LOCALE_TH_TH_TH);
+            assertEquals(6, locales.size());
+            assertEquals(LOCALE_TH_TH_TH, locales.get(0));
+            assertEquals(LOCALE_TH_TH, locales.get(1));
+            assertEquals(LOCALE_TH, locales.get(2));
+            assertEquals(LOCALE_EN_US, locales.get(3));
+            assertEquals(LOCALE_EN_GB, locales.get(4));
+            assertEquals(Locale.ENGLISH, locales.get(5));
+        }
+
+        // Test Locale extension.
+        {
+            final Locale localeWithoutVariant = LOCALE_JA_JP;
+            final Locale localeWithVariant = new Locale.Builder()
+                    .setLocale(LOCALE_JA_JP)
+                    .setExtension('x', "android")
+                    .build();
+            assertFalse(localeWithoutVariant.equals(localeWithVariant));
+
+            final ArrayList<Locale> locales =
+                    InputMethodUtils.getSuitableLocalesForSpellChecker(localeWithVariant);
+            assertEquals(5, locales.size());
+            assertEquals(LOCALE_JA_JP, locales.get(0));
+            assertEquals(LOCALE_JA, locales.get(1));
+            assertEquals(LOCALE_EN_US, locales.get(2));
+            assertEquals(LOCALE_EN_GB, locales.get(3));
+            assertEquals(Locale.ENGLISH, locales.get(4));
+        }
     }
 }
