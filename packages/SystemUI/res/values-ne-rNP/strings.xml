@@ -87,7 +87,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"आवाज सहायता"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"खोल्नुहोस्"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"अनलक बटन फिंगरप्रिन्ट पर्खँदै"</string>
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"अनलक बटन, फिंगरप्रिन्ट पर्खँदै"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"तपाईँको फिंगरप्रिन्ट बिना नै अनलक गर्नुहोस्"</string>
     <string name="unlock_label" msgid="8779712358041029439">"खोल्नुहोस्"</string>
     <string name="phone_label" msgid="2320074140205331708">"फोन खोल्नुहोस्"</string>
@@ -314,7 +314,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"स्लाइड <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि बायाँ।"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"अलार्म, रिमाइन्डर, घटना, र तपाईँले निर्दिष्ट गर्नुहुने कलरहरू देखि बाहेक, आवाज र कम्पनले तपाईँ लाई वाधा गर्ने छैन।"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"अनुकूलन गर्नुहोस्"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"यसले अलार्म, संगीत, भिडियो, र खेलहरू लगायतका सबै ध्वनि र कम्पन निषेध गर्छ। तपाईँ अझै पनि फोन कल गर्न सक्षम हुनुहुन्छ।"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"यसले अलार्म, संगीत, भिडियो, र खेलहरू लगायतका सबै ध्वनि र कम्पन रोक्छ। तपाईँ अझै पनि फोन कल गर्न सक्षम हुनुहुन्छ।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"यसले अलार्म, संगीत, भिडियोहरू र खेलहरूसहित सबै ध्वनिहरू र कम्पनहरूलाई रोक्छ।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"तल कम जरुरी सूचनाहरू"</string>

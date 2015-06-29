@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ტელეფონი"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ხმოვანი დახმარება"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"განბლოკვა"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"განბლოკვის ღილაკი, ელოდება თითის ანაბეჭდს"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"თქვენი თითის ანაბეჭდის გარეშე განბლოკვა"</string>
     <string name="unlock_label" msgid="8779712358041029439">"განბლოკვა"</string>
     <string name="phone_label" msgid="2320074140205331708">"ტელეფონის გახსნა"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ხმოვანი დახმარების გახსნა"</string>
@@ -316,10 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"გაასრიალეთ მარცხნივ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-თვის."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"თქვენ მიერ მითითებული გაფრთხილებების, შეხსენებების, ღონისძიებებისა და აბონენტების გარდა, არავითარი ხმა და ვიბრაცია არ შეგაწუხებთ."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"მორგება"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ეს ბლოკავს ყველა ხმასა და ვიბრაციას, მათ შორის, მაღვიძარების, მუსიკის, ვიდეოებისა და თამაშების. მიუხედავად ამისა, თქვენ მაინც შეძლებთ სატელეფონო ზარების განხორციელებას."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"ეს ბლოკავს ყველა ხმასა და ვიბრაციას, მათ შორის, მაღვიძარების, მუსიკის, ვიდეოებისა და თამაშების."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ქვემოთ მითითებულია ნაკლებად სასწრაფო შეტყობინებები"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"შეეხეთ ისევ გასახსნელად"</string>

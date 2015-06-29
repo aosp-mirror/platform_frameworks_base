@@ -88,7 +88,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"குரல் உதவி"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"திறப்பதற்கான பொத்தான், கைரேகைக்காகக் காத்திருக்கிறது"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கும்"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கவும்"</string>
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"குரல் உதவியைத் திற"</string>
