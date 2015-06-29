@@ -144,6 +144,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -10688,6 +10689,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             mHandler.removeCallbacks(pae);
         }
         return pae.extras;
+    }
+
+    @Override
+    public boolean isScreenCaptureAllowedOnCurrentActivity() {
+        int userId = mCurrentUserId;
+        synchronized (this) {
+            ActivityRecord activity = getFocusedStack().topActivity();
+            if (activity == null) {
+                return false;
+            }
+            userId = activity.userId;
+        }
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        return (dpm == null) || (!dpm.getScreenCaptureDisabled(null, userId));
     }
 
     @Override
