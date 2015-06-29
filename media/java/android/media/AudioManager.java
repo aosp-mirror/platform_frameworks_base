@@ -204,6 +204,17 @@ public class AudioManager {
     public static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
 
     /**
+     * @hide
+     * The stream type alias for the volume changed intent.
+     * For instance the intent may indicate a change of the {@link #STREAM_NOTIFICATION} stream
+     * type (as indicated by the {@link #EXTRA_VOLUME_STREAM_TYPE} extra), but this is also
+     * reflected by a change of the volume of its alias, {@link #STREAM_RING} on some devices,
+     * {@link #STREAM_MUSIC} on others (e.g. a television).
+     */
+    public static final String EXTRA_VOLUME_STREAM_TYPE_ALIAS =
+            "android.media.EXTRA_VOLUME_STREAM_TYPE_ALIAS";
+
+    /**
      * @hide The volume associated with the stream for the volume changed intent.
      */
     public static final String EXTRA_VOLUME_STREAM_VALUE =
