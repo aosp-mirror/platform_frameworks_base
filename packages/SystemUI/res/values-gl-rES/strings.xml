@@ -87,7 +87,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Asistente de voz"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Botón de desbloqueo, agardando pola impresión dixital"</string>
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Botón de desbloqueo; agardando pola impresión dixital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquea sen usar a túa impresión dixital"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>

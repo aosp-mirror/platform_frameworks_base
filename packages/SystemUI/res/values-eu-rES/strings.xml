@@ -87,7 +87,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefonoa"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Ahots-laguntza"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desblokeatu"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Desblokeatze-botoia; hatz-markaren zain"</string>
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Desblokeatzeko botoia; hatz-markaren zain"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desblokeatu hatz-markaren bidez"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desblokeatu"</string>
     <string name="phone_label" msgid="2320074140205331708">"ireki telefonoan"</string>

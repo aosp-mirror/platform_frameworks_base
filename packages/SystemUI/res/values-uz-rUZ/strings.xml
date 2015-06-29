@@ -87,10 +87,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Ovozli yordam"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Qulfdan chiqarish"</string>
-    <!-- no translation found for accessibility_unlock_button_fingerprint (8214125623493923751) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_without_fingerprint (7541705575183694446) -->
-    <skip />
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Qulfdan chiqarish tugmasi, barmoq izi kutilmoqda"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Barmoq izisiz qulfdan chiqarish"</string>
     <string name="unlock_label" msgid="8779712358041029439">"qulfdan chiqarish"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonni ochish"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ovozli yordamni yoqish"</string>
@@ -316,10 +314,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun chapga suring."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq uyg‘otkich signallari, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan qo‘ng‘iroqlar bundan mustasno."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Sozlash"</string>
-    <!-- no translation found for zen_silence_introduction_voice (2284540992298200729) -->
-    <skip />
-    <!-- no translation found for zen_silence_introduction (3137882381093271568) -->
-    <skip />
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Bu BARCHA, jumladan signallar, musiqa, videolar va o‘yinlardan keladigan tovush va tebranishlarni to‘sib qo‘yadi. Siz telefon qo‘ng‘iroqlarini bemalol amalga oshirishingiz mumkin."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Bu BARCHA, jumladan, signallar, musiqa, videolar va o‘yinlardan keladigan tovush va tebranishlarni to‘sib qo‘yadi."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Kam ahamiyatli bildirishnomalarni pastda ko‘rsatish"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Ochish uchun yana bosing"</string>
