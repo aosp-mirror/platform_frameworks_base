@@ -3612,7 +3612,10 @@ public class DevicePolicyManager {
      * @see UserHandle
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#MNC}
      */
+    @Deprecated
     public UserHandle createUser(@NonNull ComponentName admin, String name) {
         try {
             return mService.createUser(admin, name);
@@ -3646,7 +3649,10 @@ public class DevicePolicyManager {
      * @see UserHandle
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#MNC}
      */
+    @Deprecated
     public UserHandle createAndInitializeUser(@NonNull ComponentName admin, String name,
             String ownerName, @NonNull ComponentName profileOwnerComponent, Bundle adminExtras) {
         try {
