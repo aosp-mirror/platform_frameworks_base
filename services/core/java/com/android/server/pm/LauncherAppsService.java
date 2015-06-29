@@ -271,7 +271,8 @@ public class LauncherAppsService extends SystemService {
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             launchIntent.setSourceBounds(sourceBounds);
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launchIntent.setPackage(component.getPackageName());
 
             long ident = Binder.clearCallingIdentity();
