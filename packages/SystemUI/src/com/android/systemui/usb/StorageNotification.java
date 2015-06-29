@@ -318,11 +318,14 @@ public class StorageNotification extends SystemUI {
 
     private Notification onVolumeMounted(VolumeInfo vol) {
         final VolumeRecord rec = mStorageManager.findRecordByUuid(vol.getFsUuid());
-
-        // Don't annoy when user dismissed in past
-        if (rec.isSnoozed()) return null;
-
         final DiskInfo disk = vol.getDisk();
+
+        // Don't annoy when user dismissed in past.  (But make sure the disk is adoptable; we
+        // used to allow snoozing non-adoptable disks too.)
+        if (rec.isSnoozed() && disk.isAdoptable()) {
+            return null;
+        }
+
         if (disk.isAdoptable() && !rec.isInited()) {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
@@ -346,7 +349,7 @@ public class StorageNotification extends SystemUI {
                     R.string.ext_media_ready_notification_message, disk.getDescription());
 
             final PendingIntent browseIntent = buildBrowsePendingIntent(vol);
-            return buildNotificationBuilder(vol, title, text)
+            final Notification.Builder builder = buildNotificationBuilder(vol, title, text)
                     .addAction(new Action(R.drawable.ic_folder_24dp,
                             mContext.getString(R.string.ext_media_browse_action),
                             browseIntent))
@@ -354,10 +357,14 @@ public class StorageNotification extends SystemUI {
                             mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(browseIntent)
-                    .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
                     .setCategory(Notification.CATEGORY_SYSTEM)
-                    .setPriority(Notification.PRIORITY_LOW)
-                    .build();
+                    .setPriority(Notification.PRIORITY_LOW);
+            // Non-adoptable disks can't be snoozed.
+            if (disk.isAdoptable()) {
+                builder.setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()));
+            }
+
+            return builder.build();
         }
     }
 
