@@ -110,6 +110,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // The current user ID.
     private int mCurrentUserId;
 
+    private OnSubscriptionsChangedListener mSubscriptionListener;
+
     // Handler that all broadcasts are received on.
     private final Handler mReceiverHandler;
     // Handler that all callbacks are made on.
@@ -178,6 +180,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private void registerListeners() {
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.registerListener();
+        }
+        if (mSubscriptionListener == null) {
+            mSubscriptionListener = new SubListener();
         }
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
 
@@ -422,7 +427,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         : lhs.getSimSlotIndex() - rhs.getSimSlotIndex();
             }
         });
-        mCallbackHandler.setSubs(subscriptions);
         mCurrentSubscriptions = subscriptions;
 
         HashMap<Integer, MobileSignalController> cachedControllers =
@@ -455,6 +459,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 cachedControllers.get(key).unregisterListener();
             }
         }
+        mCallbackHandler.setSubs(subscriptions);
+        notifyAllListeners();
+
         // There may be new MobileSignalControllers around, make sure they get the current
         // inet condition and airplane mode.
         pushConnectivityToSignals();
@@ -724,13 +731,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return info;
     }
 
-    private final OnSubscriptionsChangedListener mSubscriptionListener =
-            new OnSubscriptionsChangedListener() {
+    private class SubListener extends OnSubscriptionsChangedListener {
         @Override
         public void onSubscriptionsChanged() {
             updateMobileControllers();
-        };
-    };
+        }
+    }
 
     /**
      * Used to register listeners from the BG Looper, this way the PhoneStateListeners that
