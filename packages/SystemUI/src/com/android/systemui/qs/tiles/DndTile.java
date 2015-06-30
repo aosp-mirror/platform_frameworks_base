@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
@@ -98,6 +99,14 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void handleClick() {
+        if (mController.isVolumeRestricted()) {
+            // Collapse the panels, so the user can see the toast.
+            mHost.collapsePanels();
+            Toast.makeText(mContext, mContext.getString(
+                    com.android.internal.R.string.error_message_change_not_allowed),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
         mDisable.setAllowAnimation(true);
         mDisableTotalSilence.setAllowAnimation(true);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
