@@ -423,14 +423,14 @@ public class ImageView extends View {
      *
      * <p class="note">This does Bitmap reading and decoding on the UI
      * thread, which can cause a latency hiccup.  If that's a concern,
-     * consider using {@link #setImageDrawable(android.graphics.drawable.Drawable)} or
+     * consider using {@link #setImageDrawable(Drawable)} or
      * {@link #setImageBitmap(android.graphics.Bitmap)} and
      * {@link android.graphics.BitmapFactory} instead.</p>
      *
-     * @param uri The Uri of an image
+     * @param uri the Uri of an image, or {@code null} to clear the content
      */
     @android.view.RemotableViewMethod
-    public void setImageURI(Uri uri) {
+    public void setImageURI(@Nullable Uri uri) {
         if (mResource != 0 ||
                 (mUri != uri &&
                  (uri == null || mUri == null || !uri.equals(mUri)))) {
@@ -453,9 +453,10 @@ public class ImageView extends View {
     /**
      * Sets a drawable as the content of this ImageView.
      * 
-     * @param drawable The drawable to set
+     * @param drawable the Drawable to set, or {@code null} to clear the
+     *                 content
      */
-    public void setImageDrawable(Drawable drawable) {
+    public void setImageDrawable(@Nullable Drawable drawable) {
         if (mDrawable != drawable) {
             mResource = 0;
             mUri = null;
@@ -475,16 +476,19 @@ public class ImageView extends View {
     /**
      * Sets the content of this ImageView to the specified Icon.
      *
-     * <p class="note">Depending on the Icon type, this may do Bitmap reading and decoding
-     * on the UI thread, which can cause UI jank.  If that's a concern, consider using
+     * <p class="note">Depending on the Icon type, this may do Bitmap reading
+     * and decoding on the UI thread, which can cause UI jank.  If that's a
+     * concern, consider using
      * {@link Icon#loadDrawableAsync(Context, Icon.OnDrawableLoadedListener, Handler)}
-     * and then {@link #setImageDrawable(android.graphics.drawable.Drawable)} instead.</p>
+     * and then {@link #setImageDrawable(android.graphics.drawable.Drawable)}
+     * instead.</p>
      *
-     * @param icon an Icon holding the desired image
+     * @param icon an Icon holding the desired image, or {@code null} to clear
+     *             the content
      */
     @android.view.RemotableViewMethod
-    public void setImageIcon(Icon icon) {
-        setImageDrawable(icon.loadDrawable(mContext));
+    public void setImageIcon(@Nullable Icon icon) {
+        setImageDrawable(icon == null ? null : icon.loadDrawable(mContext));
     }
 
     /**
