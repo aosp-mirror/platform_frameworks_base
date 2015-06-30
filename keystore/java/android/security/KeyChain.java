@@ -17,6 +17,7 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -351,11 +352,15 @@ public final class KeyChain {
      * Returns the {@code PrivateKey} for the requested alias, or null
      * if no there is no result.
      *
-     * @param alias The alias of the desired private key, typically
-     * returned via {@link KeyChainAliasCallback#alias}.
+     * <p> This method may block while waiting for a connection to another process, and must never
+     * be called from the main thread.
+     *
+     * @param alias The alias of the desired private key, typically returned via
+     *              {@link KeyChainAliasCallback#alias}.
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
+     * @throws IllegalStateException if called from the main thread.
      */
-    @Nullable
+    @Nullable @WorkerThread
     public static PrivateKey getPrivateKey(@NonNull Context context, @NonNull String alias)
             throws KeyChainException, InterruptedException {
         if (alias == null) {
@@ -386,11 +391,15 @@ public final class KeyChain {
      * Returns the {@code X509Certificate} chain for the requested
      * alias, or null if no there is no result.
      *
+     * <p> This method may block while waiting for a connection to another process, and must never
+     * be called from the main thread.
+     *
      * @param alias The alias of the desired certificate chain, typically
      * returned via {@link KeyChainAliasCallback#alias}.
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
+     * @throws IllegalStateException if called from the main thread.
      */
-    @Nullable
+    @Nullable @WorkerThread
     public static X509Certificate[] getCertificateChain(@NonNull Context context,
             @NonNull String alias) throws KeyChainException, InterruptedException {
         if (alias == null) {
@@ -505,6 +514,7 @@ public final class KeyChain {
      *
      * Caller should call unbindService on the result when finished.
      */
+    @WorkerThread
     public static KeyChainConnection bind(@NonNull Context context) throws InterruptedException {
         return bindAsUser(context, Process.myUserHandle());
     }
@@ -512,6 +522,7 @@ public final class KeyChain {
     /**
      * @hide
      */
+    @WorkerThread
     public static KeyChainConnection bindAsUser(@NonNull Context context, UserHandle user)
             throws InterruptedException {
         if (context == null) {
