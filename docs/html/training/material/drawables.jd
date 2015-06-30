@@ -36,8 +36,9 @@ alpha masks. You can tint them with color resources or theme attributes that res
 resources (for example, <code>?android:attr/colorPrimary</code>). Usually, you create these assets
 only once and color them automatically to match your theme.</p>
 
-<p>You can apply a tint to {@link android.graphics.drawable.BitmapDrawable} or {@link
-android.graphics.drawable.NinePatchDrawable} objects with the {@code setTint()} method. You can
+<p>You can apply a tint to {@link android.graphics.drawable.BitmapDrawable}, {@link
+android.graphics.drawable.NinePatchDrawable} or {@link
+android.graphics.drawable.VectorDrawable} objects with the {@code setTint()} method. You can
 also set the tint color and mode in your layouts with the <code>android:tint</code> and
 <code>android:tintMode</code> attributes.</p>
 
