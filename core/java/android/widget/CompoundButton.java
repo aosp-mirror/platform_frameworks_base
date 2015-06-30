@@ -245,6 +245,17 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public void onResolveDrawables(@ResolvedLayoutDir int layoutDirection) {
+        super.onResolveDrawables(layoutDirection);
+        if (mButtonDrawable != null) {
+            mButtonDrawable.setLayoutDirection(layoutDirection);
+        }
+    }
+
+    /**
      * @return the drawable used as the compound button image
      * @see #setButtonDrawable(Drawable)
      * @see #setButtonDrawable(int)
