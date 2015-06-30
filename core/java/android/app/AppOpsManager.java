@@ -229,8 +229,12 @@ public class AppOpsManager {
     public static final int OP_READ_CELL_BROADCASTS = 57;
     /** @hide Inject mock location into the system. */
     public static final int OP_MOCK_LOCATION = 58;
+    /** @hide Read external storage. */
+    public static final int OP_READ_EXTERNAL_STORAGE = 59;
+    /** @hide Write external storage. */
+    public static final int OP_WRITE_EXTERNAL_STORAGE = 60;
     /** @hide */
-    public static final int _NUM_OP = 59;
+    public static final int _NUM_OP = 61;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -313,6 +317,12 @@ public class AppOpsManager {
     /** Inject mock location into the system. */
     public static final String OPSTR_MOCK_LOCATION
             = "android:mock_location";
+    /** Read external storage. */
+    public static final String OPSTR_READ_EXTERNAL_STORAGE
+            = "android:read_external_storage";
+    /** Write external storage. */
+    public static final String OPSTR_WRITE_EXTERNAL_STORAGE
+            = "android:write_external_storage";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -381,7 +391,9 @@ public class AppOpsManager {
             OP_USE_FINGERPRINT,
             OP_BODY_SENSORS,
             OP_READ_CELL_BROADCASTS,
-            OP_MOCK_LOCATION
+            OP_MOCK_LOCATION,
+            OP_READ_EXTERNAL_STORAGE,
+            OP_WRITE_EXTERNAL_STORAGE
     };
 
     /**
@@ -447,7 +459,9 @@ public class AppOpsManager {
             OPSTR_USE_FINGERPRINT,
             OPSTR_BODY_SENSORS,
             OPSTR_READ_CELL_BROADCASTS,
-            OPSTR_MOCK_LOCATION
+            OPSTR_MOCK_LOCATION,
+            OPSTR_READ_EXTERNAL_STORAGE,
+            OPSTR_WRITE_EXTERNAL_STORAGE
     };
 
     /**
@@ -513,7 +527,9 @@ public class AppOpsManager {
             "USE_FINGERPRINT",
             "BODY_SENSORS",
             "READ_CELL_BROADCASTS",
-            "MOCK_LOCATION"
+            "MOCK_LOCATION",
+            "OPSTR_READ_EXTERNAL_STORAGE",
+            "OPSTR_WRITE_EXTERNAL_STORAGE",
     };
 
     /**
@@ -579,7 +595,9 @@ public class AppOpsManager {
             Manifest.permission.USE_FINGERPRINT,
             Manifest.permission.BODY_SENSORS,
             Manifest.permission.READ_CELL_BROADCASTS,
-            null
+            null,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
 
     /**
@@ -646,7 +664,9 @@ public class AppOpsManager {
             null, // USE_FINGERPRINT
             null, // BODY_SENSORS
             null, // READ_CELL_BROADCASTS
-            null  // MOCK_LOCATION
+            null, // MOCK_LOCATION
+            null, // READ_EXTERNAL_STORAGE
+            null  // WRITE_EXTERNAL_STORAGE
     };
 
     /**
@@ -712,7 +732,9 @@ public class AppOpsManager {
             false, // USE_FINGERPRINT
             false, // BODY_SENSORS
             false, // READ_CELL_BROADCASTS
-            false  // MOCK_LOCATION
+            false, // MOCK_LOCATION
+            false, // READ_EXTERNAL_STORAGE
+            false  // WRITE_EXTERNAL_STORAGE
     };
 
     /**
@@ -777,7 +799,9 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ERRORED  // OP_MOCK_LOCATION
+            AppOpsManager.MODE_ERRORED,  // OP_MOCK_LOCATION
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED
     };
 
     /**
@@ -804,6 +828,8 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
+            false,
             false,
             false,
             false,
