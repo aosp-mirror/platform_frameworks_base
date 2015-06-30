@@ -47,7 +47,10 @@ import android.media.AudioAttributes;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -58,6 +61,8 @@ public class VibratorService extends IVibratorService.Stub
     private static final boolean DEBUG = false;
 
     private final LinkedList<Vibration> mVibrations;
+    private final LinkedList<VibrationInfo> mPreviousVibrations;
+    private final int mPreviousVibrationsLimit;
     private Vibration mCurrentVibration;
     private final WorkSource mTmpWorkSource = new WorkSource();
     private final Handler mH = new Handler();
@@ -146,6 +151,47 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    private static class VibrationInfo {
+        long timeout;
+        long startTime;
+        long[] pattern;
+        int repeat;
+        int usageHint;
+        int uid;
+        String opPkg;
+
+        public VibrationInfo(long timeout, long startTime, long[] pattern, int repeat,
+                int usageHint, int uid, String opPkg) {
+            this.timeout = timeout;
+            this.startTime = startTime;
+            this.pattern = pattern;
+            this.repeat = repeat;
+            this.usageHint = usageHint;
+            this.uid = uid;
+            this.opPkg = opPkg;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("timeout: ")
+                    .append(timeout)
+                    .append(", startTime: ")
+                    .append(startTime)
+                    .append(", pattern: ")
+                    .append(Arrays.toString(pattern))
+                    .append(", repeat: ")
+                    .append(repeat)
+                    .append(", usageHint: ")
+                    .append(usageHint)
+                    .append(", uid: ")
+                    .append(uid)
+                    .append(", opPkg: ")
+                    .append(opPkg)
+                    .toString();
+        }
+    }
+
     VibratorService(Context context) {
         // Reset the hardware to a default state, in case this is a runtime
         // restart instead of a fresh boot.
@@ -161,7 +207,11 @@ public class VibratorService extends IVibratorService.Stub
         mBatteryStatsService = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
-        mVibrations = new LinkedList<Vibration>();
+        mPreviousVibrationsLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_previousVibrationsDumpLimit);
+
+        mVibrations = new LinkedList<>();
+        mPreviousVibrations = new LinkedList<>();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -252,6 +302,7 @@ public class VibratorService extends IVibratorService.Stub
                 removeVibrationLocked(token);
                 doCancelVibrateLocked();
                 mCurrentVibration = vib;
+                addToPreviousVibrationsLocked(vib);
                 startVibrationLocked(vib);
             }
         } finally {
@@ -315,11 +366,20 @@ public class VibratorService extends IVibratorService.Stub
                     mCurrentVibration = vib;
                     startVibrationLocked(vib);
                 }
+                addToPreviousVibrationsLocked(vib);
             }
         }
         finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private void addToPreviousVibrationsLocked(Vibration vib) {
+        if (mPreviousVibrations.size() > mPreviousVibrationsLimit) {
+            mPreviousVibrations.removeFirst();
+        }
+        mPreviousVibrations.addLast(new VibratorService.VibrationInfo(vib.mTimeout, vib.mStartTime,
+                vib.mPattern, vib.mRepeat, vib.mUsageHint, vib.mUid, vib.mOpPkg));
     }
 
     @Override // Binder call
@@ -649,7 +709,6 @@ public class VibratorService extends IVibratorService.Stub
                 if (!mDone) {
                     // If this vibration finished naturally, start the next
                     // vibration.
-                    mVibrations.remove(mVibration);
                     unlinkVibration(mVibration);
                     startNextVibrationLocked();
                 }
@@ -685,4 +744,23 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
     };
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            pw.println("Permission Denial: can't dump vibrator service from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+        pw.println("Previous vibrations:");
+        synchronized (mVibrations) {
+            for (VibrationInfo info : mPreviousVibrations) {
+                pw.print("  ");
+                pw.println(info.toString());
+            }
+        }
+    }
 }
