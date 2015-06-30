@@ -549,6 +549,22 @@ is not related to the screen orientation.</p>
 which indicates whether the screen is long.</p>
       </td>
     </tr>
+    <tr id="ScreenRoundQualifier">
+      <td>Round screen</td>
+      <td>
+        <code>round</code><br/>
+        <code>notround</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code round}: Round screens, such as a round wearable device</li>
+          <li>{@code notround}: Rectangular screens, such as phones or tablets</li>
+        </ul>
+        <p><em>Added in API level 23.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#isScreenRound()} configuration
+method, which indicates whether the screen is round.</p>
+      </td>
+    </tr>
     <tr id="OrientationQualifier">
       <td>Screen orientation</td>
       <td>
