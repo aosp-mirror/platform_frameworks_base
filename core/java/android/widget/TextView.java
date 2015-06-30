@@ -8837,12 +8837,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
+            info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
         }
 
         if (isFocused()) {
-            if (canSelectText()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
-            }
             if (canCopy()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_COPY);
             }
@@ -8931,30 +8929,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             } return false;
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
-                if (isFocused() && canSelectText()) {
-                    ensureIterableTextForAccessibilitySelectable();
-                    CharSequence text = getIterableTextForAccessibility();
-                    if (text == null) {
-                        return false;
+                ensureIterableTextForAccessibilitySelectable();
+                CharSequence text = getIterableTextForAccessibility();
+                if (text == null) {
+                    return false;
+                }
+                final int start = (arguments != null) ? arguments.getInt(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, -1) : -1;
+                final int end = (arguments != null) ? arguments.getInt(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, -1) : -1;
+                if ((getSelectionStart() != start || getSelectionEnd() != end)) {
+                    // No arguments clears the selection.
+                    if (start == end && end == -1) {
+                        Selection.removeSelection((Spannable) text);
+                        return true;
                     }
-                    final int start = (arguments != null) ? arguments.getInt(
-                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, -1) : -1;
-                    final int end = (arguments != null) ? arguments.getInt(
-                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, -1) : -1;
-                    if ((getSelectionStart() != start || getSelectionEnd() != end)) {
-                        // No arguments clears the selection.
-                        if (start == end && end == -1) {
-                            Selection.removeSelection((Spannable) text);
-                            return true;
+                    if (start >= 0 && start <= end && end <= text.length()) {
+                        Selection.setSelection((Spannable) text, start, end);
+                        // Make sure selection mode is engaged.
+                        if (mEditor != null) {
+                            mEditor.startSelectionActionMode();
                         }
-                        if (start >= 0 && start <= end && end <= text.length()) {
-                            Selection.setSelection((Spannable) text, start, end);
-                            // Make sure selection mode is engaged.
-                            if (mEditor != null) {
-                                mEditor.startSelectionActionMode();
-                            }
-                            return true;
-                        }
+                        return true;
                     }
                 }
             } return false;
