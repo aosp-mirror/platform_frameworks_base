@@ -29,6 +29,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.Condition;
@@ -57,6 +58,7 @@ public class ZenModeControllerImpl implements ZenModeController {
     private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
     private final AlarmManager mAlarmManager;
     private final SetupObserver mSetupObserver;
+    private final UserManager mUserManager;
 
     private int mUserId;
     private boolean mRequesting;
@@ -84,6 +86,13 @@ public class ZenModeControllerImpl implements ZenModeController {
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mSetupObserver = new SetupObserver(handler);
         mSetupObserver.register();
+        mUserManager = context.getSystemService(UserManager.class);
+    }
+
+    @Override
+    public boolean isVolumeRestricted() {
+        return mUserManager.hasUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME,
+                new UserHandle(mUserId));
     }
 
     @Override

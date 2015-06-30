@@ -36,6 +36,7 @@ public interface ZenModeController {
     ComponentName getEffectsSuppressor();
     boolean isCountdownConditionSupported();
     int getCurrentUser();
+    boolean isVolumeRestricted();
 
     public static class Callback {
         public void onZenChanged(int zen) {}
