@@ -907,11 +907,7 @@ to ensure the best fit in the action bar.</p>
 <p>To get started, your layout must include a {@link android.view.ViewGroup} in which you place
 each {@link android.app.Fragment} associated with a tab. Be sure the {@link android.view.ViewGroup}
 has a resource ID so you can reference it from your code and swap the tabs within it.
-Alternatively, if the tab content will fill the activity layout, then your activity doesn't need a
-layout at all (you don't even need to call {@link android.app.Activity#setContentView
-setContentView()}). Instead, you can place each fragment in the default root view, which you can
-refer to with the {@code android.R.id.content} ID.</p>
-
+</p>
 
 <p>Once you determine where the fragments appear in the layout, the basic procedure to add tabs
 is:</p>
