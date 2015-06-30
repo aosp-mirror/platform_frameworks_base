@@ -372,13 +372,4 @@ public final class UsageEvents implements Parcelable {
             return new UsageEvents[size];
         }
     };
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        if (mParcel != null) {
-            mParcel.recycle();
-            mParcel = null;
-        }
-    }
 }
