@@ -3236,13 +3236,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                Insets insets = c.getOpticalInsets();
+                if (c.getVisibility() != View.GONE) {
+                    Insets insets = c.getOpticalInsets();
 
-                drawRect(canvas, paint,
-                        c.getLeft()   + insets.left,
-                        c.getTop()    + insets.top,
-                        c.getRight()  - insets.right  - 1,
-                        c.getBottom() - insets.bottom - 1);
+                    drawRect(canvas, paint,
+                            c.getLeft() + insets.left,
+                            c.getTop() + insets.top,
+                            c.getRight() - insets.right - 1,
+                            c.getBottom() - insets.bottom - 1);
+                }
             }
         }
 
@@ -3263,8 +3265,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             int lineWidth = dipsToPixels(1);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                drawRectCorners(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(),
-                        paint, lineLength, lineWidth);
+                if (c.getVisibility() != View.GONE) {
+                    drawRectCorners(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(),
+                            paint, lineLength, lineWidth);
+                }
             }
         }
     }
