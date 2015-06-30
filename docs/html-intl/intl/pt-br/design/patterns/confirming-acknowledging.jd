@@ -1,0 +1,70 @@
+page.title=Confirmação e reconhecimento
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>Em algumas situações, quando um usuário invoca uma ação em seu aplicativo, é uma boa ideia <em>confirmar</em> ou <em>reconhecer</em> essa ação com texto.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>Confirmar</strong> é pedir ao usuário que verifique se realmente quer prosseguir com a ação que acabou de invocar. Em alguns casos, a confirmação é apresentada com uma advertência ou informações críticas relacionadas à ação que ele precisa considerar.</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>Reconhecer</strong> é exibir texto para avisar ao usuário que a ação que acabou de ser invocada foi concluída. Isso remove a incerteza sobre operações implícitas que o sistema adota. Em alguns casos, o reconhecimento é apresentado com uma opção para desfazer a ação.</p>
+  </div>
+</div>
+
+<p>Comunicar-se com os usuários dessas formas pode ajudar a reduzir a incerteza sobre o que aconteceu ou o que acontecerá. Confirmar ou reconhecer também pode evitar que os usuários cometam erros dos quais possam se arrepender.</p>
+
+<h2>Quando confirmar ou reconhecer ações do usuário</h2>
+<p>Nem todas as ações precisam de uma confirmação ou um reconhecimento. Use este fluxograma para orientar as decisões de projeto.</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>Confirmação</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Exemplo: livros do Google Play</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>Nesse exemplo, o usuário solicitou a exclusão de um livro da biblioteca do Google Play. Um <a href="{@docRoot}design/building-blocks/dialogs.html#alerts">alerta</a> aparece para confirmar essa ação porque é importante entender que o livro não estará mais disponível em nenhum dispositivo.</p>
+    <p>Ao montar uma caixa de diálogo de confirmação, use um título significativo que ecoe a ação solicitada.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>Exemplo: Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>As confirmações não necessariamente precisam ser apresentadas em um alerta com dois botões. Depois de iniciar o Android Beam, o usuário é solicitado a tocar no conteúdo a ser compartilhado (nesse exemplo, uma foto). Se ele decidir não prosseguir, simplesmente afastará o celular.</p>
+  </div>
+</div>
+
+<h2>Reconhecimento</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Exemplo: abandonar rascunho salvo do Gmail</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>Nesse exemplo, se o usuário navegar para trás ou para cima na tela de composição do Gmail, alguma coisa possivelmente inesperada acontecerá: o rascunho atual será salvo automaticamente. Um reconhecimento na forma de aviso torna isso aparente. Ele desaparece depois de alguns segundos.</p>
+    <p>Desfazer não é adequado aqui, pois o ato de salvar foi iniciado pelo aplicativo, não pelo usuário, Além de ser rápido e fácil retomar a composição da mensagem navegando para a lista de rascunhos.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>Exemplo: conversa do Gmail excluída</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>Depois que o usuário exclui uma conversa da lista no Gmail, um reconhecimento aparece com a opção de desfazer. O reconhecimento permanece até que o usuário tome uma ação não relacionada, como rolar a lista.</p>
+  </div>
+</div>
+
+<h2>Sem confirmação nem reconhecimento</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Exemplo: +1</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>A confirmação é desnecessária.</strong> Se o usuário usar +1 por acidente, não é um problema. Poderá simplesmente tocar no botão novamente para desfazer a ação.</p>
+    <p><strong>O reconhecimento é desnecessário.</strong> O usuário verá o botão +1 oscilar e ficar vermelho. Esse é um sinal muito claro.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>Exemplo: Remover um aplicativo da tela inicial</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>A confirmação é desnecessária.</strong> Essa é uma ação deliberada: o usuário precisa arrastar e soltar um item em um alvo relativamente grande e isolado. Portanto, acidentes são altamente improváveis. Mas, se o usuário se arrepender da decisão, levará apenas alguns segundos para trazê-lo de volta.</p>
+    <p><strong>O reconhecimento é desnecessário.</strong> O usuário saberá que o aplicativo saiu da tela inicial porque fez com que ele desaparecesse arrastando-o para longe.</p>
+
+  </div>
+</div>

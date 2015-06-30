@@ -1,0 +1,70 @@
+page.title=Confirmación y reconocimiento
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>En algunos casos, cuando un usuario invoca una acción desde su aplicación, se recomienda <em>confirmar</em> o proporcionar un <em>reconocimiento</em> de dicha acción a través del texto.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>Confirmación</strong> es solicitarle al usuario que verifique que realmente desea proceder con una acción que acaba de invocar. En algunos casos, la confirmación se presenta junto con una advertencia o mensaje con información importante relacionada con la acción que el usuario debe aprobar.</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p>El <strong>reconocimiento</strong> hace referencia al hecho de mostrar un determinado texto para informarle al usuario que la acción que acaba de invocar ya se completó. De este modo, se elimina la incertidumbre sobre las operaciones implícitas que lleva a cabo el sistema. En algunos casos, el reconocimiento se presenta junto con una opción para deshacer la acción.</p>
+  </div>
+</div>
+
+<p>Comunicarse con los usuarios de este modo permite reducir la incertidumbre respecto de acciones pasadas o futuras. Mediante la confirmación o el reconocimiento también se puede evitar que los usuarios cometan errores de los que podrían arrepentirse.</p>
+
+<h2>Cuándo se debe solicitar una confirmación o proporcionar un reconocimiento de las acciones de los usuarios</h2>
+<p>No es necesario que se solicite una confirmación o se proporcione un reconocimiento para todas las acciones. Utilice este diagrama de flujo cuando tenga que tomar decisiones relacionadas con el diseño.</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>Confirmación</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Ejemplo: Google Play Books</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>En este ejemplo, el usuario solicitó eliminar un libro de su biblioteca de Google Play. Aparecerá una <a href="{@docRoot}design/building-blocks/dialogs.html#alerts">alerta</a> para confirmar esta acción porque es importante que el usuario comprenda que el libro ya no estará disponible desde ningún dispositivo.</p>
+    <p>Cuando diseñe un cuadro de diálogo de confirmación, asegúrese de que el título sea significativo y que incluya la acción solicitada.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>Ejemplo: Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>No es necesario que las confirmaciones se presenten en todas las alertas con dos botones. Luego de iniciar Android Beam, se le solicita al usuario que seleccione el contenido que desea compartir (en este ejemplo, se trata de una fotografía). Si el usuario decide no continuar, simplemente se descartará el teléfono de la lista.</p>
+  </div>
+</div>
+
+<h2>Reconocimiento</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Ejemplo: Borrador de Gmail abandonado y guardado</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>En este ejemplo, si el usuario navega con los botones Back o Up desde la pantalla de redacción de Gmail, posiblemente ocurrirá algo inesperado: el borrador actual se guardará automáticamente. Esto se mostrará a través de un reconocimiento en forma de aviso. Dicho aviso desaparece luego de algunos segundos.</p>
+    <p>En este caso, no se puede incluir la opción de deshacer porque el almacenamiento fue iniciado por la aplicación, no por el usuario. Gracias a esto, se puede continuar redactando el mensaje de forma rápida y fácil con solo navegar hasta la lista de borradores.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>Ejemplo: Conversación de Gmail eliminada</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>Después de que el usuario elimina una conversación de la lista de Gmail, aparece un mensaje de reconocimiento con la opción de deshacer la acción. Dicho reconocimiento seguirá en pantalla hasta que el usuario lleve a cabo una acción no relacionada, como desplazarse por la lista.</p>
+  </div>
+</div>
+
+<h2>Sin confirmación ni reconocimiento</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Ejemplo: Hacer +1</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>No se necesita confirmación</strong>. Si el usuario hizo +1 sin querer, esto no es un problema. Simplemente, puede tocar el botón de nuevo para deshacer la acción.</p>
+    <p><strong>No se necesita un reconocimiento</strong>. El usuario verá que el botón +1 parpadea y cambia a color rojo. Esa es una señal muy clara.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>Ejemplo: Eliminación de una aplicación de la pantalla de inicio</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>No se necesita confirmación</strong>. Esta es una acción intencionada: el usuario debe arrastrar y colocar un elemento en un destino relativamente grande y aislado. Por lo tanto, es poco probable que se cometan errores. No obstante, si el usuario se arrepiente de la decisión que tomó, solo demorará algunos segundos en recuperar lo eliminado.</p>
+    <p><strong>No se necesita un reconocimiento</strong>. El usuario sabrá que la aplicación ya no aparecerá en la Pantalla de inicio porque él mismo la hizo desaparecer al arrastrarla.</p>
+
+  </div>
+</div>
