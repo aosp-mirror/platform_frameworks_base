@@ -1593,7 +1593,11 @@ public abstract class ContentResolver {
             @NonNull ContentObserver observer) {
         Preconditions.checkNotNull(uri, "uri");
         Preconditions.checkNotNull(observer, "observer");
-        registerContentObserver(uri, notifyForDescendents, observer, UserHandle.myUserId());
+        registerContentObserver(
+                ContentProvider.getUriWithoutUserId(uri),
+                notifyForDescendents,
+                observer,
+                ContentProvider.getUserIdFromUri(uri, UserHandle.myUserId()));
     }
 
     /** @hide - designated user version */
@@ -1659,7 +1663,11 @@ public abstract class ContentResolver {
     public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
             boolean syncToNetwork) {
         Preconditions.checkNotNull(uri, "uri");
-        notifyChange(uri, observer, syncToNetwork, UserHandle.myUserId());
+        notifyChange(
+                ContentProvider.getUriWithoutUserId(uri),
+                observer,
+                syncToNetwork,
+                ContentProvider.getUserIdFromUri(uri, UserHandle.myUserId()));
     }
 
     /**
