@@ -167,6 +167,7 @@ public class FloatingActionMode extends ActionMode {
                 // Content rect is moving.
                 mOriginatingView.removeCallbacks(mMovingOff);
                 mFloatingToolbarVisibilityHelper.setMoving(true);
+                mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
                 mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
 
                 mFloatingToolbar.setContentRect(mContentRectOnWindow);
@@ -174,9 +175,9 @@ public class FloatingActionMode extends ActionMode {
             }
         } else {
             mFloatingToolbarVisibilityHelper.setOutOfBounds(true);
+            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
             mContentRectOnWindow.setEmpty();
         }
-        mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
 
         mPreviousContentRectOnWindow.set(mContentRectOnWindow);
     }
