@@ -1818,6 +1818,7 @@ public class NotificationPanelView extends PanelView implements
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
             mAfforanceHelper.animateHideLeftRightIcon();
         }
+        mNotificationStackScroller.onPanelTrackingStarted();
     }
 
     @Override
@@ -1827,6 +1828,7 @@ public class NotificationPanelView extends PanelView implements
             mNotificationStackScroller.setOverScrolledPixels(
                     0.0f, true /* onTop */, true /* animate */);
         }
+        mNotificationStackScroller.onPanelTrackingStopped();
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             if (!mHintAnimationRunning) {
