@@ -248,7 +248,7 @@ public abstract class InCallService extends Service {
     }
 
     /**
-     * Obtains the current list of {@code Call}s to be displayed by this in-call experience.
+     * Obtains the current list of {@code Call}s to be displayed by this in-call service.
      *
      * @return A list of the relevant {@code Call}s.
      */
