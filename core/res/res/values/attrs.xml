@@ -3128,6 +3128,8 @@ i
             <flag name="typeWindowsChanged" value="0x00400000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CONTEXT_CLICKED} events. -->
             <flag name="typeContextClicked" value="0x00800000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_ASSIST_READING_CONTEXT} events. -->
+            <flag name="typeAssistReadingContext" value="0x01000000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPES_ALL_MASK} i.e. all events. -->
             <flag name="typeAllMask" value="0xffffffff" />
         </attr>
