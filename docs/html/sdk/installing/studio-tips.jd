@@ -6,7 +6,7 @@ page.title=Android Studio Tips and Tricks
 
     <h2>In this document</h2>
     <ol>
-      <li><a href="#productivity-features">Productivity Features</a></li>
+      <li><a href="#productivity-features">Productivity Shortcuts</a></li>
       <li><a href="#intellij">Working with IntelliJ</a></li>
       <li><a href="#key-commands">Key Commands</a></li>
     </ol>
@@ -26,7 +26,7 @@ provides some tips to help you get started with some of the most common tasks an
 enhancements. </p>
 
 
-<h2 id="productivity-features">Productivity Features</h2>
+<h2 id="productivity-features">Productivity Shortcuts</h2>
 
 <p>Android Studio includes a number of features to help you be more productive in your coding.
 This section notes a few of the key features to help you work quickly and efficiently.
@@ -46,6 +46,18 @@ add all missing attributes</em>. Clicking the message adds the missing attribute
 the bitmap in the debugger. </p>
 <p><img src="{@docRoot}images/tools/studio-bitmap-rendering.png" style="width:350px"/></p>
 <p class="img-caption"><strong>Figure 1.</strong> Bitmap Rendering</p>
+
+
+<h3>Creating new files</h3>
+<p>You can quickly add new code and resource files by clicking the appropriate directory in the
+<strong>Project</strong> pane and pressing <code>ALT + INSERT</code> on Windows and Linux or
+<code>COMMAND + N</code> on Mac. Based on the type of directory selected, Android Studio
+offers to create the appropriate file type.</p>
+
+<p>For example, if you select a layout directory, press <code>ALT + INSERT</code> on Windows,
+and select <strong>Layout resource file</strong>, a dialog opens so you can name the file
+(you can exclude the {@code .xml} suffix) and choose a root view element. The editor then
+switches to the layout design editor so you can begin designing your layout.</p>
 
 
 <h3>Output window message filtering</h3>
@@ -111,8 +123,8 @@ a class, method, or field from a library for which you do not have source file a
 <h3>Debugging and performance enhancements</h3>
 <p>Android Studio offers debugging and performance enhancements such as:</p>
 <ul>
-  <li>Auto detect an expanded set of code styles. To modify the current code style, choose
-   <strong>File &gt; Settings &gt; Code Styles</strong>.  </li>
+  <li>Custom keymaps. To modify the current keymap, choose
+   <strong>File &gt; Settings &gt; Keymap</strong>.  </li>
   <li>Support for high density (Retina) displays on Windows and Linux.  </li>
   <li>Scratch files for quick prototyping without creating any project files.
    <p>Choose <strong>Tools &gt; New Scratch File</strong> to open a scratch file to quickly
@@ -174,7 +186,7 @@ updates. </p>
 <h3>Image and color preview</h3>
 <p>When referencing images and icons in your code, a preview of the image or icon appears
 (in actual size at different densities) in the code margin to help you verify the image or icon
-reference.  Pressing {@code F1} with the preview image or icon selected displays resource asset
+reference. Pressing {@code F1} with the preview image or icon selected displays resource asset
 details, such as the <em>dp</em> settings.   </p>
 
 
@@ -187,13 +199,6 @@ see the theme inheritance hierarchy, and resolve values for the various attribut
 attribute <em>?android:textAppearanceLarge</em>, you will see the theme inheritance hierarchy and
 resolved values for the various attributes that are pulled in.</p>
 
-
-<h3>New Allocation Tracker integration in the Android/DDMS window</h3>
-<p>You can now inspect theme attributes using <strong> View > Quick Documentation
-</strong> <code>F1</code>, see the theme inheritance hierarchy, and resolved values for the
-various attributes.</p>
-<img src="{@docRoot}images/tools/studio-allocationtracker.png" style="width:300px" />
-<p class="img-caption"><strong>Figure 4.</strong> Allocation Tracker</p>
 
 
 <h3 id="key-commands">Keyboard Commands</h3>
