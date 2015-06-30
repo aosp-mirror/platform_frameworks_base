@@ -50,6 +50,8 @@
         android:layout_below="@id/volume_row_header"
         android:layout_toEndOf="@id/volume_row_icon"
         android:layout_toStartOf="@+id/volume_settings_button"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:paddingEnd="8dp"
         android:paddingStart="8dp" />
 
