@@ -25,6 +25,6 @@ public class KeyguardConstants {
      * Turns on debugging information for the whole Keyguard. This is very verbose and should only
      * be used temporarily for debugging.
      */
-    public static final boolean DEBUG = true;
-    public static final boolean DEBUG_SIM_STATES = true;
+    public static final boolean DEBUG = false;
+    public static final boolean DEBUG_SIM_STATES = false;
 }
