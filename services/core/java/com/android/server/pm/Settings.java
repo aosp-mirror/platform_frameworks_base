@@ -4490,7 +4490,9 @@ final class Settings {
                 serializer.startTag(null, TAG_RUNTIME_PERMISSIONS);
 
                 String fingerprint = mFingerprints.get(userId);
-                serializer.attribute(null, ATTR_FINGERPRINT, fingerprint);
+                if (fingerprint != null) {
+                    serializer.attribute(null, ATTR_FINGERPRINT, fingerprint);
+                }
 
                 final int packageCount = permissionsForPackage.size();
                 for (int i = 0; i < packageCount; i++) {
