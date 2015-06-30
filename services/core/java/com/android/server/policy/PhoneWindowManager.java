@@ -95,6 +95,8 @@ import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.PhoneWindow;
 import android.view.Surface;
 import android.view.View;
@@ -5348,6 +5350,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void finishedGoingToSleep(int why) {
         EventLog.writeEvent(70000, 0);
         if (DEBUG_WAKEUP) Slog.i(TAG, "Finished going to sleep... (why=" + why + ")");
+        MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
         // We must get this work done here because the power manager will drop
         // the wake lock and let the system suspend once this function returns.
