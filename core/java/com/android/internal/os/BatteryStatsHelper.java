@@ -480,6 +480,7 @@ public final class BatteryStatsHelper {
         final boolean forAllUsers = (asUsers.get(UserHandle.USER_ALL) != null);
         mStatsPeriod = mTypeBatteryRealtime;
 
+        BatterySipper osSipper = null;
         final SparseArray<? extends Uid> uidStats = mStats.getUidStats();
         final int NU = uidStats.size();
         for (int iu = 0; iu < NU; iu++) {
@@ -526,14 +527,18 @@ public final class BatteryStatsHelper {
                 }
 
                 if (uid == 0) {
-                    // The device has probably been awake for longer than the screen on
-                    // time and application wake lock time would account for.  Assign
-                    // this remainder to the OS, if possible.
-                    mWakelockPowerCalculator.calculateRemaining(app, mStats, mRawRealtime,
-                                                                mRawUptime, mStatsType);
-                    app.sumPower();
+                    osSipper = app;
                 }
             }
+        }
+
+        if (osSipper != null) {
+            // The device has probably been awake for longer than the screen on
+            // time and application wake lock time would account for.  Assign
+            // this remainder to the OS, if possible.
+            mWakelockPowerCalculator.calculateRemaining(osSipper, mStats, mRawRealtime,
+                                                        mRawUptime, mStatsType);
+            osSipper.sumPower();
         }
     }
 
