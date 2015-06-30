@@ -1,0 +1,402 @@
+page.title=동작 변경
+page.keywords=미리 보기, SDK, 호환성
+sdk.platform.apiLevel=MNC
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">런타임 권한</a></li>
+    <li><a href="#behavior-power">절전 최적화</a>
+        <ol>
+            <li><a href="#behavior-doze">Doze</a></li>
+            <li><a href="#behavior-app-standby">앱 대기 모드</a></li>
+        </ol>
+    </li>
+    <li><a href="#behavior-adoptable-storage">채택 가능한 저장소 기기</a></li>
+    <li><a href="#behavior-apache-http-client">Apache HTTP 클라이언트 제거</a></li>
+    <li><a href="#behavior-audiomanager-Changes">AudioManager 변경</a></li>
+    <li><a href="#behavior-test-selection">텍스트 선택</a></li>
+    <li><a href="#behavior-keystore">Android 키노트 변경</a></li>
+    <li><a href="#behavior-network">Wi-Fi 및 네트워킹 변경</a></li>
+    <li><a href="#behavior-camera">카메라 서비스 변경</a></li>
+    <li><a href="#behavior-art-runtime">ART 런타임</a></li>
+    <li><a href="#behavior-apk-validation">APK 유효성 검사</a></li>
+    <li><a href="#behavior-afw">Android for Work 변경</a></li>
+</ol>
+
+<h2>API 차이점</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">M 미리 보기에 대한 API 레벨 22 &raquo;</a> </li>
+</ol>
+
+
+<h2>참고 항목</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">M 개발자 미리 보기 API 개요</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>M 개발자 미리 보기에는 새로운 기능 및 특징과 더불어 다양한 시스템 변경과 API 동작 변경 내용이 포함되어 있습니다.
+ 이 문서에서는 개발자 여러분이 숙지해야 하고 앱을 개발할 때 감안해야 하는 몇 가지 주요 변경 내용을 소개하겠습니다.
+</p>
+
+<p>이전에 Android용 앱을 게시한 적이 있는 경우, 이와 같은 플랫폼 변경으로 인해 앱이 영향을 받을 수 있다는 점을 유의하세요.
+</p>
+
+<h2 id="behavior-runtime-permissions">런타임 권한</h1>
+<p>이 미리 보기에서는 새 권한 모델을 소개합니다. 여기에서는 이제 사용자가 런타임에 직접 앱 권한을 관리할 수 있게 됩니다.
+ 이 모델을 사용하면 사용자에게 개선된 가시성과 권한에 대한 제어권을 부여하는 한편 앱 개발자에게는 설치와 자동 업데이트 과정을 간소화해줍니다. 사용자는 설치된 여러 앱에 대해 따로따로 권한을 허용하거나 취소할 수 있습니다.
+
+ </p>
+
+<p>M 미리 보기를 대상으로 하는 앱을 개발하는 경우, 권한 확인과 요청은 런타임에 해야 합니다.
+ 앱에 어떤 권한이 허용되었는지 판단하려면, 새로운 {@code Context.checkSelfPermission()} 메서드를 호출하면 됩니다.
+ 권한을 요청하려면 새 {@code Activity.requestPermission()} 메서드를 호출하세요.
+ 앱이 M을 대상으로 하지 않더라도, 앱을 새 권한 모델에서 테스트해보는 것이 좋습니다.
+</p>
+
+<p>앱에서 새 권한 모델을 지원하는 방법에 대한 자세한 내용은 <a href="{@docRoot}preview/features/runtime-permissions.html">권한</a> 개발자 미리 보기 페이지를 참조하세요.
+
+ 앱에 미친 영향을 평가하는 방법에 대한 팁은 <a href="{@docRoot}preview/testing/guide.html#runtime-permissions">테스트 가이드</a>를 참조하세요.
+</p>
+
+<h2 id="behavior-power">절전 최적화</h2>
+<p>이 미리 보기에서는 유휴 상태의 기기 및 앱에 대한 새로운 절전 최적화 기능을 소개합니다.</p>
+
+<h3 id="behavior-doze">Doze</h3>
+<p>기기의 플러그가 뽑히고 화면이 꺼진 채로 일정 시간 동안 변화 없는 상태로 유지되면, <em>Doze</em> 상태로 들어갑니다. 이 상태에서는 기기가 시스템을 절전 모드 상태로 유지하려 시도합니다.
+ 이 모드에서 기기는 정기적으로 잠시 동안 정상 작동을 재개하여 앱 동기화가 일어날 수 있도록 하고 보류된 작업이 있으면 시스템이 이를 수행할 수 있도록 합니다.
+
+</p>
+
+<p>앱이 Doze 상태에 있는 동안 다음과 같은 제한 사항이 적용됩니다.</p>
+<ul>
+<li>네트워크 액세스가 비활성화됩니다. 다만 앱이 우선 순위가 높은 Google Cloud 메시지 Tickle을 받을 때는 예외입니다.
+</li>
+<li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">절전 모드 해제 잠금</a>이 무시됩니다.</li>
+<li>{@link android.app.AlarmManager} 클래스로 일정이 예약된 알람이 비활성화됩니다. 다만 {@link android.app.AlarmManager#setAlarmClock setAlarmClock()} 메서드 및 {@code AlarmManager.setAndAllowWhileIdle()}로 설정한 알람은 예외입니다.
+
+</li>
+<li>WiFi 스캔을 수행하지 않습니다.</li>
+<li>동기화 어댑터와 {@link android.app.job.JobScheduler}의 동기화와 작업 실행이 금지됩니다.
+</li>
+</ul>
+</p>
+<p>기기가 Doze 모드를 종료하면 보류되어 있던 작업과 동기화를 모두 실행합니다.</p>
+<p>이 기능을 테스트하려면 개발 머신에 M 미리 보기를 실행하는 기기를 연결하여 다음과 같은 명령을 호출하면 됩니다.
+
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+<p class="note"><strong>참고:</strong> 다가오는 <a href="https://developers.google.com/cloud-messaging/" class="external-link">Google Cloud 메시지</a> 릴리스에서는 개발자에게 우선 순위가 높은 메시지를 지정하게 해줍니다.
+
+
+ 앱이 우선 순위가 높은 GCM 메시지를 수신하면 이 앱에는 기기가 Doze 모드에 있더라도 잠시 네트워크 액세스가 허용됩니다.
+
+</p>
+
+<p>앱에서 Doze를 테스트하는 방법에 대한 팁은 <a href="{@docRoot}preview/testing/guide.html#doze-standby">테스트 가이드</a>를 참조하세요.
+
+ </p>
+
+<h3 id="behavior-app-standby">앱 대기 모드</h3>
+<p>이 미리 보기에서는 시스템이 보기에 앱이 활성 사용 중이 아닌 경우 해당 앱은 유휴 상태라고 판별할 수 있습니다.
+ 일정 시간이 지나면 앱이 유휴 상태인 것으로 간주되는데, 시스템이 다음과 같은 신호 중 하나를 감지하는 경우는 예외입니다.
+</p>
+
+<ul>
+<li>사용자가 명시적으로 앱을 시작했습니다.</li>
+<li>앱에 현재 전경에 있는 프로세스가 있습니다(액티비티 또는 전경 서비스 중 하나의 형태로, 또는 다른 액티비티나 전경 서비스가 사용 중인 상태로).
+</li>
+<li>앱이 알림을 생성하여 사용자가 그것을 잠금 화면에서 보거나 알림 트레이에서 확인합니다.
+</li>
+<li><strong>설정</strong>을 통해 사용자가 명시적으로 앱이 최적화에서 면제되도록 요청합니다.
+</li>
+</ul>
+
+<p>기기의 플러그가 뽑혀 있는 경우, 유휴 상태인 것으로 간주된 앱은 자신의 네트워크 액세스를 비활성화하고 동기화와 작업을 일시 중단시킵니다.
+ 기기가 전원 공급 장치에 연결되면 이와 같은 앱에 네트워크 액세스가 허용되며 보류 중이었던 작업과 동기화를 모두 실행할 수 있습니다.
+ 기기가 오랜 시간 동안 유휴 상태인 경우, 유휴 앱에는 하루에 한 번 정도 네트워크 액세스가 허용됩니다.
+</p>
+
+<p>이 기능을 테스트하려면 개발 머신에 M 미리 보기를 실행하는 기기를 연결하여 다음과 같은 명령을 호출하면 됩니다.
+
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<p class="note"><strong>참고:</strong> 다가오는 <a href="https://developers.google.com/cloud-messaging/" class="external-link">Google Cloud 메시지</a>(GCM) 릴리스에서는 개발자에게 우선 순위가 높은 메시지를 지정할 수 있습니다.
+
+
+ 앱이 우선 순위가 높은 GCM 메시지를 수신하면 이 앱에는 앱이 유휴 상태에 있더라도 잠시 네트워크 액세스가 허용됩니다.
+
+</p>
+
+<p>앱에서 앱 대기 모드를 테스트하는 방법에 대한 팁은 <a href="{@docRoot}preview/testing/guide.html#doze-standby">테스트 가이드</a>를 참조하세요.
+
+ </p>
+
+<h2 id="behavior-adoptable-storage">채택 가능한 저장소 기기</h2>
+<p>
+이 미리 보기에서는 사용자가 SD 카드와 같은 외부 저장소 기기를 <em>채택</em>할 수 있습니다. 외부 저장소 기기를 채택하면 기기를 암호화하고 포맷하여 내부 저장소처럼 작동하도록 합니다.
+ 이 기능을 사용하면 사용자가 앱과 해당 앱의 비공개 데이터를 여러 저장소 기기 사이에서 이동시킬 수 있습니다.
+ 앱을 이동시키는 경우, 시스템은 매니페스트의 <a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a> 기본 설정을 사용합니다.
+
+
+</p>
+
+<p>앱이 다음과 같은 API 또는 필드에 액세스하는 경우, 앱이 내부 및 외부 저장소 기기 사이를 이동하면서 반환하는 파일 경로가 급격하게 달라진다는 점을 유의하세요. 파일 경로를 구축할 때에는 이와 같은 API를 항상 동적으로 호출하는 것을 강력히 권장합니다. 하드코드된 파일 경로를 사용하거나 이전에 구축된 정규화된 파일 경로를 유지하지 마세요.
+
+
+</p>
+
+<ul>
+<li>{@link android.content.Context} 메서드:
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>{@link android.content.pm.ApplicationInfo} 필드:
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>개발자 미리 보기에서 이 기능을 디버그하려면, 다음 명령을 실행하여 USB On-The-Go(OTG) 케이블을 통해 Android 기기에 연결된 USB 드라이브 채택을 활성화하면 됩니다.
+</p>
+
+<pre class="no-prettyprint">
+$ adb shell sm set-force-adoptable true
+</pre>
+
+<h2 id="behavior-apache-http-client">Apache HTTP 클라이언트 제거</h2>
+<p>이 미리 보기에서는 Apache HTTP 클라이언트에 대한 지원을 제거합니다. 앱이 이 클라이언트를 사용하고 Android 2.3(API 레벨 9) 이상을 대상으로 하는 경우, {@link java.net.HttpURLConnection} 클래스를 대신 사용하세요.
+
+ 이는 투명한 압축과 응답 캐싱을 통해 네트워크 사용량을 줄이고 전력 소모를 최소화하기 때문에 API가 더 효율적입니다.
+ Apache HTTP API를 계속 사용하려면 우선 다음과 같은 컴파일-시간 종속성을 {@code build.gradle} 파일에서 선언해야 합니다.
+
+</p>
+<pre>
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+<p>Android는 OpenSSL에서 <a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a> 라이브러리로 옮겨갑니다.
+
+ 앱에서 Android NDK를 사용하는 경우, NDK API의 일부분이 아닌 암호화 라이브러리에 대해 링크를 연결하지 마세요(예:{@code libcrypto.so} 및 {@code libssl.so}).
+ 이러한 라이브러리는 공개 API가 아니며, 여러 릴리스와 기기에 걸쳐 통보 없이 변경되거나 중단될 수 있으며 스스로를 보안 취약점에 노출시킬 수도 있습니다.
+
+ 대신에 원래 코드를 수정하여 JNI를 통해 Java 암호화 API를 호출하도록 하거나, 직접 선택한 암호화 라이브러리에 대해 정적으로 연결하도록 하세요.
+
+</p>
+
+<h2 id="behavior-audiomanager-Changes">AudioManager 변경</h2>
+<p>볼륨을 직접 설정하거나 특정 스트림을 {@link android.media.AudioManager} 클래스를 통해 음소거하는 것은 이제 더 이상 지원되지 않습니다.
+ {@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} 메서드는 사용이 중단되었으며, 그 대신 {@code AudioManager.requestAudioFocus()} 메서드를 호출해야 합니다.
+ 이와 마찬가지로, {@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} 메서드도 사용이 중단되었습니다. 그 대신 {@code AudioManager.adjustStreamVolume()} 메서드를 호출하고 방향 값 {@code ADJUST_MUTE} 또는 {@code ADJUST_UNMUTE}에서 전달해야 합니다.
+
+
+</p>
+
+<h2 id="behavior-test-selection">텍스트 선택</h2>
+
+<img src="{@docRoot}preview/images/text-selection.gif" style="float:right; margin:0 0 20px 30px" width="360" height="640" />
+
+<p>사용자가 앱에서 텍스트를 선택하면 이제 텍스트 선택 작업을 표시할 수 있습니다. 예를 들어 <em>잘라내기</em>, <em>복사</em> 및 <em>붙여넣기</em>를 <a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection" class="external-link">부동 도구 모음</a>으로 표시하게 됩니다.
+
+ 이 사용자 상호작용 구현은 상황별 작업 모음에서와 비슷합니다. 이 내용은 <a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">각각의 보기에 대한 상황별 작업 모드의 활성화</a>에 설명되어 있습니다.
+
+
+</p>
+
+<p>텍스트 선택을 위해 부동 도구 모음을 구현하려면 기존 앱에 다음과 같은 변경을 적용하면 됩니다.
+</p>
+<ol>
+<li>{@link android.view.View} 또는 {@link android.app.Activity} 객체에서 {@link android.view.ActionMode} 호출을 {@code startActionMode(Callback)}에서 {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}로 변경합니다.
+
+</li>
+<li>기존 {@code ActionMode.Callback} 구현을 변경하여 대신 {@code ActionMode.Callback2}를 확장합니다.
+</li>
+<li>{@code Callback2.onGetContentRect()} 메서드를 재정의하여 보기에서 콘텐츠 {@link android.graphics.Rect} 객체(예: 텍스트 선택 직사각형)의 좌표를 제공합니다.
+</li>
+<li>직사각형 위치 지정이 더 이상 유효하지 않고, 무효화할 요소가 이것뿐인 경우 {@code ActionMode.invalidateContentRect()} 메서드를 호출합니다.
+</li>
+</ol>
+
+<p><a href="{@docRoot}tools/support-library/index.html">Android 지원 라이브러리</a> 수정 버전 22.2를 사용하는 경우, 부동 도구 모음은 이전 버전과 호환되지 않으며 AppCompat이 기본적으로 {@link android.view.ActionMode} 객체의 제어권을 넘겨받는다는 점을 유의하세요.
+
+
+ 이렇게 하면 부동 도구 모음이 표시되지 않도록 방지합니다. {@link android.support.v7.app.AppCompatActivity}에서 {@link android.view.ActionMode}를 활성화하려면, {@code android.support.v7.app.AppCompatActivity.getDelegate()}를 호출한 다음 {@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()}를 반환된 {@link android.support.v7.app.AppCompatDelegate} 객체에서 호출하고 입력 매개변수를 {@code false}로 설정하세요.
+
+
+
+
+
+ 이 호출은 {@link android.view.ActionMode} 객체의 제어권을 프레임워크에 돌려줍니다.
+ M 미리 보기를 실행하는 기기에서 이렇게 하면 프레임워크가 {@link android.support.v7.app.ActionBar} 또는 부동 도구 모음 모드를 지원할 수 있고, 한편 M 미리 보기 이전 기기에서는 {@link android.support.v7.app.ActionBar} 모드만 지원됩니다.
+
+</p>
+
+<h2 id="behavior-keystore">Android 키노트 변경</h2>
+<p>이 미리 보기에서는 <a href="{@docRoot}training/articles/keystore.html">Android 키노트 제공자</a>가 더 이상 DSA를 지원하지 않습니다.
+
+ ECDSA는 여전히 지원됩니다.</p>
+
+<p>휴식 중일 때 암호화가 필요하지 않은 키도 보안 잠금 화면이 비활성화되거나 재설정될 때(예: 사용자가 또는 기기 관리자가 재설정) 더 이상 삭제되지 않습니다.
+ 휴식 중일 때 암호화가 필요한 키는 이러한 이벤트 중에 삭제됩니다.
+</p>
+
+<h2 id="behavior-network">Wi-Fi 및 네트워킹 변경</h2>
+
+<p>이 미리 보기에서는 Wi-Fi와 네트워킹 API에 다음과 같은 동작 변경을 도입합니다.</p>
+<ul>
+<li>이제 앱이 {@link android.net.wifi.WifiConfiguration} 객체의 상태를 변경할 수 있는 것은 개발자가 이와 같은 객체를 생성한 경우뿐입니다.
+ 사용자 또는 다른 앱이 생성한 {@link android.net.wifi.WifiConfiguration} 객체는 개발자가 수정하거나 삭제할 권한이 없습니다.
+
+</li>
+<li>
+이전에는 앱이 기기에 강제로 특정 Wi-Fi 네트워크에 연결하도록 하는 경우, 즉{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()}를 {@code disableAllOthers=true} 설정으로 사용하면 기기가 셀룰러 데이터와 같은 다른 네트워크에서는 연결을 해제했습니다.
+
+
+ 이 미리 보기에서는 기기가 그러한 다른 네트워크에서 더 이상 연결을 해제하지 않습니다. 앱의 {@code targetSdkVersion}이 {@code “20”} 이하인 경우, 이것은 선택한 Wi-Fi 네트워크에 고정되어 있습니다.
+
+ 앱의 {@code targetSdkVersion}이 {@code “21”} 이상인 경우, 멀티네트워크 API를 사용합니다(예: {@link android.net.Network#openConnection(java.net.URL) openConnection()}, {@link android.net.Network#bindSocket(java.net.Socket) bindSocket()} 및 새로운 {@code ConnectivityManager.bindProcessToNetwork()} 메서드). 이렇게 하면 네트워크 트래픽이 선택한 네트워크에서 전송되도록 보장할 수 있습니다.
+
+
+
+
+</li>
+</ul>
+
+<h2 id="behavior-camera">카메라 서비스 변경</h2>
+<p>이 미리 보기에서는 카메라 서비스에서 공유된 리소스에 액세스하는 모델이 이전의 "선착순" 액세스 모델에서 바뀌어 우선 순위가 높은 프로세스를 선호하는 액세스 모델로 변경되었습니다.
+
+  서비스 동작에 대한 변경 내용은 다음과 같습니다.</p>
+<ul>
+<li>카메라 하위 시스템 리소스(카메라 기기 열기 및 구성하기 포함)에 대한 액세스 권한은 클라이언트 애플리케이션 프로세스의 "우선 순위"를 기반으로 부여됩니다.
+ 대개는 사용자에게 표시되는 액티비티 또는 전경 액티비티가 있는 애플리케이션 프로세스에 높은 우선 순위가 부여되어 카메라 리소스 획득과 사용에 좀 더 신뢰감을 더합니다.
+
+</li>
+<li>우선 순위가 낮은 앱에 대한 활성 카메라 클라이언트는 우선 순위가 더 높은 애플리케이션이 카메라를 사용하려 시도하면 "제거"될 수 있습니다.
+  사용이 중단된 {@link android.hardware.Camera} API의 경우, 이 때문에 {@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()}가 제거된 클라이언트에 대해 호출되는 결과를 초래합니다.
+
+
+ {@link android.hardware.camera2 Camera2} API에서는 제거된 클라이언트에 대해 {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()}가 호출됩니다.
+
+</li>
+<li>적절한 카메라 하드웨어를 갖춘 기기에서는 별도의 애플리케이션 프로세스가 각자 따로따로 열려 동시에 각기 다른 카메라 기기를 사용할 수 있습니다.
+ 하지만 여러 프로세스를 사용하는 경우 동시에 액세스하면 열려 있는 카메라 기기 모두의 성능 또는 기능이 대폭 저하되는 결과를 유발했었는데, 이런 경우도 이제 카메라 서비스가 감지하여 허용하지 않게 됩니다.
+
+ 이러한 변경으로 인해, 같은 카메라 기기에 직접 액세스하려 시도하는 앱이 없는 경우에도 우선 순위가 낮은 클라이언트를 "제거"하는 결과를 초래할 수도 있습니다.
+
+
+</li>
+<li>
+현재 사용자를 변경하면 앱 내에서 이전 사용자 계정이 소유하는 활성 카메라 클라이언트를 제거하는 결과를 유발할 수 있습니다.
+  카메라에 대한 액세스는 현재 기기 사용자가 소유한 사용자 프로필에게만 국한됩니다. 이것은 실제로 예를 들면, 사용자가 다른 계정으로 전환하면 "Guest" 계정은 카메라 시스템을 사용하는 실행 중인 프로세스에서 나갈 수 없게 된다는 뜻입니다.
+
+
+</li>
+</ul>
+
+<h2 id="behavior-art-runtime">ART 런타임</h2>
+<p>이제 ART 런타임이 {@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} 메서드에 대한 액세스 규칙을 제대로 구현할 수 있습니다.
+ 이 변경 덕분에 이전 버전에서는 Dalvik이 액세스 규칙을 잘못 확인하던 문제를 해결했습니다. 앱이 {@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} 메서드를 사용하고 액세스 확인을 재정의하고자 하는 경우, {@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} 메서드를 호출하되 입력 매개변수를 {@code true}로 설정한 상태로 사용합니다.
+
+
+
+
+
+ 앱이 <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 AppCompat 라이브러리</a> 또는 <a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 RecyclerView 라이브러리</a>를 사용하는 경우, 앱을 업데이트하여 이러한 라이브러리의 최신 버전을 사용하도록 해야 합니다.
+
+
+ 그렇지 않으면, XML에서 참조되는 모든 사용자 지정 클래스가 업데이트되도록 확인하여 그 클래스 생성자에 액세스할 수 있도록 해야 합니다.
+</p>
+
+<p>이 미리 보기에서는 동적 링커의 동작을 업데이트합니다. 동적 링커는 이제 라이브러리의 {@code soname}과 그 경로(<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">공개 버그 6670</a>) 사이의 차이점을 숙지하고 있으며, 이제 {@code soname} 기준 검색도 구현되었습니다.
+
+
+
+ 이전에 작동한 앱 중에서 {@code DT_NEEDED} 항목이 있는 경우(주로 빌드 머신의 파일 시스템에 있는 절대 경로) 로딩했을 때 실패할 수 있습니다.
+</p>
+
+<p>이제 {@code dlopen(3) RTLD_LOCAL} 플래그를 올바르게 구현했습니다. 이때 {@code RTLD_LOCAL}이 기본이므로 {@code dlopen(3)}에 대한 호출 중에서 {@code RTLD_LOCAL}을 명시적으로 사용하지 않으면 영향받을 수 있다는 점을 유의하세요(다만 앱이 명시적으로 {@code RTLD_GLOBAL}을 사용한 경우는 예외입니다).
+
+ {@code RTLD_LOCAL}의 경우, 나중에 {@code dlopen(3)}으로 한 호출로 인해 로딩된 라이브러리에서는 기호를 이용할 수 없게 됩니다({@code DT_NEEDED} 항목에 의해 참조된 것과는 반대입니다).
+
+</p>
+</p>
+
+<h2 id="behavior-apk-validation">APK 유효성 검사</h2>
+<p>이제 플랫폼이 APK에 대해 좀 더 엄격한 유효성 검사를 수행합니다. APK는 파일이 매니페스트에서는 선언되었지만 APK 자체에는 없는 경우 손상된 것으로 간주됩니다.
+ 콘텐츠가 하나라도 제거되면 APK를 다시 서명해야 합니다.
+</p>
+
+<h2 id="behavior-afw">Android for Work 변경</h2>
+<p>이 미리 보기에는 Android for Work에 대해 다음과 같은 동작 변경을 포함합니다.</p>
+<ul>
+<li><strong>업무용 연락처를 개인적인 맥락에서 이용.</strong> 이제 Google 다이얼러 통화 기록에서 사용자가 이전 통화 목록을 볼 때 업무용 연락처를 표시합니다. {@code DevicePolicyManager.setCrossProfileCallerIdDisabled()}를 {@code true}로 설정하면 Google 다이얼러 통화 기록에서 업무용 프로필 연락처를 숨길 수 있습니다.
+
+
+ {@code DevicePolicyManager.setBluetoothContactSharingDisabled()}를 {@code false}로 설정했을 때에만 블루투스를 통해 기기에 업무용 연락처를 개인용 연락처와 함께 표시합니다.
+
+ 이것은 기본적으로 {@code true}로 설정되어 있습니다.
+
+</li>
+<li><strong>WiFi 구성 제거:</strong> 프로필 소유자가 추가한 WiFi 구성(예를 들어 {@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()} 메서드로의 호출을 통해)은 이제 해당 작업 프로필이 삭제되면 함께 제거됩니다.
+
+</li>
+<li><strong>WiFi 구성 잠금:</strong> 이제 활성 기기 소유자가 생성한 WiFi 구성이라면 사용자는 임의의 구성을 수정 또는 삭제할 수 없습니다.
+ 사용자는 여전히 본인의 WiFi 구성을 생성하고 수정할 수 있습니다. 해당 사용자에 대해 {@link android.os.UserManager} 상수 {@link android.os.UserManager#DISALLOW_CONFIG_WIFI}가 설정되지만 않았으면 됩니다.
+
+</li>
+<li><strong>Google 계정 추가를 통해 작업 정책 컨트롤러 다운로드:</strong> 작업 정책 컨트롤러(WPC) 앱을 통해 관리해야 하는 Google 계정이 관리된 맥락을 벗어나 기기에 추가되는 경우, 이제 추가 계정 흐름이 사용자에게 메시지를 표시하여 적절한 WPC를 설치하도록 합니다. 이 동작은 최초 기기 설정 마법사의 <strong>설정 &gt; 계정</strong>을 통해서 추가되는 계정에도 적용됩니다.
+
+
+
+</li>
+<li><strong>특정 DevicePolicyManager API 동작에 적용된 변경:</strong> {@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()} 메서드를 호출하면 호출한 사용자에 대한 카메라에만 영향을 미칩니다. 이것을 관리된 프로필에서 호출하면 기본 사용자에서 실행 중인 카메라 앱에 영향을 미치지 않습니다.
+
+
+ 또한, 이제 {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()} 메서드를 기기 소유자뿐만 아니라 프로필 소유자에 대해서도 이용할 수 있습니다.
+
+ 프로필 소유자는 다음과 같은 키가드 제한 사항을 설정할 수 있습니다.
+
+<ul>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} 및 {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}를 설정하면 프로필의 상위 사용자에 대한 키가드 설정에 영향을 미칩니다.
+
+</li>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}를 설정하면 관리된 프로필에 있는 애플리케이션이 생성한 알림에만 영향을 미칩니다.
+</li>
+</ul>
+</li>
+</ul>
