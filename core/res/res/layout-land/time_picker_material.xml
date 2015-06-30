@@ -21,7 +21,7 @@
             android:layoutDirection="ltr">
 
     <!-- Provides a background for the time layout that extends into the button bar area. -->
-    <View
+    <com.android.internal.widget.DrawingSpace
         android:id="@+id/time_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
