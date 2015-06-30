@@ -51,6 +51,7 @@ import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.session.MediaSessionLegacyHelper;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.FactoryTest;
@@ -61,6 +62,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -267,6 +269,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     SearchManager mSearchManager;
     AccessibilityManager mAccessibilityManager;
     BurnInProtectionHelper mBurnInProtectionHelper;
+    AppOpsManager mAppOpsManager;
 
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
@@ -1255,6 +1258,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
+        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
 
         // Init display burn-in protection
         boolean burnInProtectionEnabled = context.getResources().getBoolean(
@@ -1812,6 +1816,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 permission = android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
         }
         if (permission != null) {
+            if (permission == android.Manifest.permission.SYSTEM_ALERT_WINDOW) {
+                final int callingUid = Binder.getCallingUid();
+                // check if this is a system uid first before bothering with
+                // obtaining package name
+                if (callingUid == Process.SYSTEM_UID) {
+                    return WindowManagerGlobal.ADD_OKAY;
+                }
+
+                final int mode = mAppOpsManager.checkOp(outAppOp[0], callingUid,
+                        attrs.packageName);
+                if (mode == AppOpsManager.MODE_DEFAULT) {
+                    if (mContext.checkCallingPermission(permission) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        return WindowManagerGlobal.ADD_PERMISSION_DENIED;
+                    }
+                }
+                return WindowManagerGlobal.ADD_OKAY;
+            }
+
             if (mContext.checkCallingOrSelfPermission(permission)
                     != PackageManager.PERMISSION_GRANTED) {
                 return WindowManagerGlobal.ADD_PERMISSION_DENIED;
