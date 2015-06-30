@@ -517,7 +517,7 @@ public final class LinkProperties implements Parcelable {
      * Note that Http Proxies are only a hint - the system recommends their use, but it does
      * not enforce it and applications may ignore them.
      *
-     * @param proxy A {@link ProxyInfo} defining the Http Proxy to use on this link.
+     * @param proxy A {@link ProxyInfo} defining the HTTP Proxy to use on this link.
      * @hide
      */
     public void setHttpProxy(ProxyInfo proxy) {
@@ -771,6 +771,43 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean isProvisioned() {
         return (isIPv4Provisioned() || isIPv6Provisioned());
+    }
+
+    /**
+     * Evaluate whether the {@link InetAddress} is considered reachable.
+     *
+     * @return {@code true} if the given {@link InetAddress} is considered reachable,
+     *         {@code false} otherwise.
+     * @hide
+     */
+    public boolean isReachable(InetAddress ip) {
+        final List<RouteInfo> allRoutes = getAllRoutes();
+        // If we don't have a route to this IP address, it's not reachable.
+        final RouteInfo bestRoute = RouteInfo.selectBestRoute(allRoutes, ip);
+        if (bestRoute == null) {
+            return false;
+        }
+
+        // TODO: better source address evaluation for destination addresses.
+
+        if (ip instanceof Inet4Address) {
+            // For IPv4, it suffices for now to simply have any address.
+            return hasIPv4Address();
+        } else if (ip instanceof Inet6Address) {
+            if (ip.isLinkLocalAddress()) {
+                // For now, just make sure link-local destinations have
+                // scopedIds set, since transmits will generally fail otherwise.
+                // TODO: verify it matches the ifindex of one of the interfaces.
+                return (((Inet6Address)ip).getScopeId() != 0);
+            }  else {
+                // For non-link-local destinations check that either the best route
+                // is directly connected or that some global preferred address exists.
+                // TODO: reconsider all cases (disconnected ULA networks, ...).
+                return (!bestRoute.hasGateway() || hasGlobalIPv6Address());
+            }
+        }
+
+        return false;
     }
 
     /**
