@@ -457,9 +457,23 @@ watch face. The bounds take into account any inset areas, such as the "chin" on 
 round devices. You can use this canvas to draw your watch face directly as follows:</p>
 
 <ol>
-<li>If this is the first invocation of the
-<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onDraw(android.graphics.Canvas, android.graphics.Rect)"><code>onDraw()</code></a>
-method, scale your background to fit.</li>
+<li>Override the
+<a href="{@docRoot}reference/android/support/wearable/watchface/CanvasWatchFaceService.Engine.html#onSurfaceChanged(android.view.SurfaceHolder, int, int, int)"><code>onSurfaceChanged()</code></a>
+method to scale your background to fit the device any time the view changes.
+<pre>
+&#64;Override
+public void onSurfaceChanged(
+        SurfaceHolder holder, int format, int width, int height) {
+    if (mBackgroundScaledBitmap == null
+            || mBackgroundScaledBitmap.getWidth() != width
+            || mBackgroundScaledBitmap.getHeight() != height) {
+        mBackgroundScaledBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
+                width, height, true /* filter */);
+    }
+    super.onSurfaceChanged(holder, format, width, height);
+}
+</pre>
+</li>
 <li>Check whether the device is in ambient mode or interactive mode.</li>
 <li>Perform any required graphic computations.</li>
 <li>Draw your background bitmap on the canvas.</li>
@@ -482,13 +496,6 @@ public void onDraw(Canvas canvas, Rect bounds) {
     int width = bounds.width();
     int height = bounds.height();
 
-    // Draw the background, scaled to fit.
-    if (mBackgroundScaledBitmap == null
-        || mBackgroundScaledBitmap.getWidth() != width
-        || mBackgroundScaledBitmap.getHeight() != height) {
-        mBackgroundScaledBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
-                                      width, height, true);
-    }
     canvas.drawBitmap(mBackgroundScaledBitmap, 0, 0, null);
 
     // Find the center. Ignore the window insets so that, on round watches
