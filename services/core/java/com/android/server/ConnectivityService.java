@@ -2711,7 +2711,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             nai = getNetworkAgentInfoForNetwork(network);
         }
-        if (nai == null) return;
+        if (nai == null || nai.networkInfo.getState() == NetworkInfo.State.DISCONNECTING ||
+            nai.networkInfo.getState() == NetworkInfo.State.DISCONNECTED) {
+            return;
+        }
         // Revalidate if the app report does not match our current validated state.
         if (hasConnectivity == nai.lastValidated) return;
         final int uid = Binder.getCallingUid();
