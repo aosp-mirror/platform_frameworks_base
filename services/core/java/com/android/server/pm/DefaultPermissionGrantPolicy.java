@@ -117,7 +117,7 @@ final class DefaultPermissionGrantPolicy {
 
     private static final Set<String> ACCOUNTS_PERMISSIONS = new ArraySet<>();
     static {
-        ACCOUNTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
+        //ACCOUNTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
     private static final Set<String> SETTINGS_PERMISSIONS = new ArraySet<>();
