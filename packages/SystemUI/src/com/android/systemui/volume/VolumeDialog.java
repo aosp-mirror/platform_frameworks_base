@@ -741,12 +741,7 @@ public class VolumeDialog {
 
     private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
         if (isActive && mExpanded) {
-            row.slider.setFocusable(true);
-            row.slider.setFocusableInTouchMode(true);
             row.slider.requestFocus();
-        } else {
-            row.slider.setFocusableInTouchMode(false);
-            row.slider.setFocusable(false);
         }
         final ColorStateList tint = isActive && row.slider.isEnabled() ? mActiveSliderTint
                 : mInactiveSliderTint;
