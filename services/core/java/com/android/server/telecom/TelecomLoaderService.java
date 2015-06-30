@@ -20,12 +20,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManagerInternal;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.telecom.DefaultDialerManager;
 import android.util.Slog;
 
+import com.android.internal.telephony.SmsApplication;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 /**
@@ -48,7 +57,7 @@ public class TelecomLoaderService extends SystemService {
                         connectToTelecom();
                     }
                 }, 0);
-
+                SmsApplication.getDefaultMmsApplication(mContext, false);
                 ServiceManager.addService(Context.TELECOM_SERVICE, service);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed linking to death.");
@@ -73,6 +82,7 @@ public class TelecomLoaderService extends SystemService {
     public TelecomLoaderService(Context context) {
         super(context);
         mContext = context;
+        registerDefaultAppProviders();
     }
 
     @Override
@@ -82,6 +92,7 @@ public class TelecomLoaderService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+            registerDefaultAppNotifier();
             connectToTelecom();
         }
     }
@@ -103,5 +114,75 @@ public class TelecomLoaderService extends SystemService {
         if (mContext.bindServiceAsUser(intent, serviceConnection, flags, UserHandle.OWNER)) {
             mServiceConnection = serviceConnection;
         }
+    }
+
+    private void registerDefaultAppProviders() {
+        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+
+        // Set a callback for the package manager to query the default sms app.
+        packageManagerInternal.setSmsAppPackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+            @Override
+            public String[] getPackages(int userId) {
+                ComponentName smsComponent = SmsApplication.getDefaultSmsApplication(
+                        mContext, true);
+                if (smsComponent != null) {
+                    return new String[]{smsComponent.getPackageName()};
+                }
+                return null;
+            }
+        });
+
+        // Set a callback for the package manager to query the default dialer app.
+        packageManagerInternal.setDialerAppPackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+            @Override
+            public String[] getPackages(int userId) {
+                String packageName = DefaultDialerManager.getDefaultDialerApplication(mContext);
+                if (packageName != null) {
+                    return new String[]{packageName};
+                }
+                return null;
+            }
+        });
+    }
+
+    private void registerDefaultAppNotifier() {
+        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+
+        // Notify the package manager on default app changes
+        final Uri defaultSmsAppUri = Settings.Secure.getUriFor(
+                Settings.Secure.SMS_DEFAULT_APPLICATION);
+        final Uri defaultDialerAppUri = Settings.Secure.getUriFor(
+                Settings.Secure.DIALER_DEFAULT_APPLICATION);
+
+        ContentObserver contentObserver = new ContentObserver(
+                new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri, int userId) {
+                if (defaultSmsAppUri.equals(uri)) {
+                    ComponentName smsComponent = SmsApplication.getDefaultSmsApplication(
+                            mContext, true);
+                    if (smsComponent != null) {
+                        packageManagerInternal.grantDefaultPermissionsToDefaultSmsApp(
+                                smsComponent.getPackageName(), userId);
+                    }
+                } else if (defaultDialerAppUri.equals(uri)) {
+                    String packageName = DefaultDialerManager.getDefaultDialerApplication(
+                            mContext);
+                    if (packageName != null) {
+                        packageManagerInternal.grantDefaultPermissionsToDefaultDialerApp(
+                                packageName, userId);
+                    }
+                }
+            }
+        };
+
+        mContext.getContentResolver().registerContentObserver(defaultSmsAppUri,
+                false, contentObserver, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(defaultDialerAppUri,
+                false, contentObserver, UserHandle.USER_ALL);
     }
 }
