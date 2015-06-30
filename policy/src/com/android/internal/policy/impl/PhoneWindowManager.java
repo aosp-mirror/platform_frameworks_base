@@ -1005,6 +1005,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case MULTI_PRESS_POWER_NOTHING:
                 break;
             case MULTI_PRESS_POWER_THEATER_MODE:
+                if (!isUserSetupComplete()) {
+                    Slog.i(TAG, "Ignoring toggling theater mode - device not setup.");
+                    break;
+                }
+
                 if (isTheaterModeEnabled()) {
                     Slog.i(TAG, "Toggling theater mode off.");
                     Settings.Global.putInt(mContext.getContentResolver(),
