@@ -55,4 +55,30 @@ public abstract class PackageManagerInternal {
      * @param provider The packages provider.
      */
     public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the SMS packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setSmsAppPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the dialer packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setDialerAppPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Requests granting of the default permissions to the current default SMS app.
+     * @param packageName The default SMS package name.
+     * @param userId The user for which to grant the permissions.
+     */
+    public abstract void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId);
+
+    /**
+     * Requests granting of the default permissions to the current default dialer app.
+     * @param packageName The default dialer package name.
+     * @param userId The user for which to grant the permissions.
+     */
+    public abstract void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId);
 }
