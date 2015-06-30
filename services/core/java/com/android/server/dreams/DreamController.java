@@ -16,6 +16,8 @@
 
 package com.android.server.dreams;
 
+import com.android.internal.logging.MetricsLogger;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +27,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.service.dreams.DreamService;
@@ -55,6 +58,7 @@ final class DreamController {
     private final Handler mHandler;
     private final Listener mListener;
     private final IWindowManager mIWindowManager;
+    private long mDreamStartTime;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -123,6 +127,10 @@ final class DreamController {
 
             mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId);
 
+            mDreamStartTime = SystemClock.elapsedRealtime();
+            MetricsLogger.visible(mContext,
+                    mCurrentDream.mCanDoze ? MetricsLogger.DOZING : MetricsLogger.DREAMING);
+
             try {
                 mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
             } catch (RemoteException ex) {
@@ -185,6 +193,11 @@ final class DreamController {
             Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
                     + ", isTest=" + oldDream.mIsTest + ", canDoze=" + oldDream.mCanDoze
                     + ", userId=" + oldDream.mUserId);
+            MetricsLogger.hidden(mContext,
+                    oldDream.mCanDoze ? MetricsLogger.DOZING : MetricsLogger.DREAMING);
+            MetricsLogger.histogram(mContext,
+                    oldDream.mCanDoze ? "dozing_minutes" : "dreaming_minutes" ,
+                    (int) ((SystemClock.elapsedRealtime() - mDreamStartTime) / (1000L * 60L)));
 
             mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
             mHandler.removeCallbacks(mStopStubbornDreamRunnable);
