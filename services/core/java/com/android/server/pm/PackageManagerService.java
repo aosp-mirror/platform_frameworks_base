@@ -3411,11 +3411,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "resetRuntimePermissions");
         }
 
+        final int[] userIds;
+
         synchronized (mPackages) {
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
-            for (int userId : UserManagerService.getInstance().getUserIds()) {
-                mDefaultPermissionPolicy.grantDefaultPermissions(userId);
-            }
+            final int userCount = UserManagerService.getInstance().getUserIds().length;
+            userIds = Arrays.copyOf(UserManagerService.getInstance().getUserIds(), userCount);
+        }
+
+        for (int userId : userIds) {
+            mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         }
     }
 
