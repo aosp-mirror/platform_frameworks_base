@@ -1414,7 +1414,7 @@
     <permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
         android:label="@string/permlab_systemAlertWindow"
         android:description="@string/permdesc_systemAlertWindow"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="signature|system|appop" />
 
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
