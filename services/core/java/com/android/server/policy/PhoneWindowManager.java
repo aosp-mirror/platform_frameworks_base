@@ -4244,7 +4244,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs) {
+    public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
+            WindowState attached) {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
                 + win.isVisibleOrBehindKeyguardLw());
         final int fl = PolicyControl.getWindowFlags(win, attrs);
@@ -4289,8 +4290,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
 
-            if (appWindow) {
-                final IApplicationToken appToken = win.getAppToken();
+            final IApplicationToken appToken = win.getAppToken();
+
+            // For app windows that are not attached, we decide if all windows in the app they
+            // represent should be hidden or if we should hide the lockscreen. For attached app
+            // windows we defer the decision to the window it is attached to.
+            if (appWindow && attached == null) {
                 if (showWhenLocked) {
                     // Remove any previous windows with the same appToken.
                     mAppsToBeHidden.remove(appToken);
