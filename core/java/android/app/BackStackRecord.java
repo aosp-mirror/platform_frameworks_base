@@ -717,6 +717,7 @@ final class BackStackRecord extends FragmentTransaction implements
                 break;
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
+                    int containerId = f.mContainerId;
                     if (mManager.mAdded != null) {
                         for (int i = 0; i < mManager.mAdded.size(); i++) {
                             Fragment old = mManager.mAdded.get(i);
@@ -724,7 +725,7 @@ final class BackStackRecord extends FragmentTransaction implements
                                 Log.v(TAG,
                                         "OP_REPLACE: adding=" + f + " old=" + old);
                             }
-                            if (f == null || old.mContainerId == f.mContainerId) {
+                            if (old.mContainerId == containerId) {
                                 if (old == f) {
                                     op.fragment = f = null;
                                 } else {
