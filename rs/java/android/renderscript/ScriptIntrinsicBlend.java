@@ -402,6 +402,8 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
     /**
      * Sets dst = {src.r ^ dst.r, src.g ^ dst.g, src.b ^ dst.b, src.a ^ dst.a}
      *
+     * <b>Note:</b> this is NOT the Porter/Duff XOR mode; this is a bitwise xor.
+     *
      * @param ain The source buffer
      * @param aout The destination buffer
      * @param opt LaunchOptions for clipping
