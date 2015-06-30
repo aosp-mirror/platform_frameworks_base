@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
@@ -25,6 +27,7 @@ import junit.framework.TestCase;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+
 
 public class LinkPropertiesTest extends TestCase {
     private static InetAddress ADDRV4 = NetworkUtils.numericToInetAddress("75.208.6.1");
@@ -566,5 +569,81 @@ public class LinkPropertiesTest extends TestCase {
                 LinkProperties.compareProvisioning(v6lp2, v6lp));
         assertEquals(ProvisioningChange.STILL_PROVISIONED,
                 LinkProperties.compareProvisioning(v6lp, v6lp2));
+    }
+
+    @SmallTest
+    public void testIsReachable() {
+        final LinkProperties v4lp = new LinkProperties();
+        assertFalse(v4lp.isReachable(DNS1));
+        assertFalse(v4lp.isReachable(DNS2));
+
+        // Add an on-link route, making the on-link DNS server reachable,
+        // but there is still no IPv4 address.
+        assertTrue(v4lp.addRoute(new RouteInfo(
+                new IpPrefix(NetworkUtils.numericToInetAddress("75.208.0.0"), 16))));
+        assertFalse(v4lp.isReachable(DNS1));
+        assertFalse(v4lp.isReachable(DNS2));
+
+        // Adding an IPv4 address (right now, any IPv4 address) means we use
+        // the routes to compute likely reachability.
+        assertTrue(v4lp.addLinkAddress(new LinkAddress(ADDRV4, 16)));
+        assertTrue(v4lp.isReachable(DNS1));
+        assertFalse(v4lp.isReachable(DNS2));
+
+        // Adding a default route makes the off-link DNS server reachable.
+        assertTrue(v4lp.addRoute(new RouteInfo(GATEWAY1)));
+        assertTrue(v4lp.isReachable(DNS1));
+        assertTrue(v4lp.isReachable(DNS2));
+
+        final LinkProperties v6lp = new LinkProperties();
+        final InetAddress kLinkLocalDns = NetworkUtils.numericToInetAddress("fe80::6:1");
+        final InetAddress kLinkLocalDnsWithScope = NetworkUtils.numericToInetAddress("fe80::6:2%43");
+        final InetAddress kOnLinkDns = NetworkUtils.numericToInetAddress("2001:db8:85a3::53");
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertFalse(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertFalse(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a link-local route, making the link-local DNS servers reachable. Because
+        // we assume the presence of an IPv6 link-local address, link-local DNS servers
+        // are considered reachable, but only those with a non-zero scope identifier.
+        assertTrue(v6lp.addRoute(new RouteInfo(
+                new IpPrefix(NetworkUtils.numericToInetAddress("fe80::"), 64))));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertFalse(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a link-local address--nothing changes.
+        assertTrue(v6lp.addLinkAddress(LINKADDRV6LINKLOCAL));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertFalse(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a global route on link, but no global address yet. DNS servers reachable
+        // via a route that doesn't require a gateway: give them the benefit of the
+        // doubt and hope the link-local source address suffices for communication.
+        assertTrue(v6lp.addRoute(new RouteInfo(
+                new IpPrefix(NetworkUtils.numericToInetAddress("2001:db8:85a3::"), 64))));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertTrue(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a global address; the on-link global address DNS server is (still)
+        // presumed reachable.
+        assertTrue(v6lp.addLinkAddress(new LinkAddress(ADDRV6, 64)));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertTrue(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Adding a default route makes the off-link DNS server reachable.
+        assertTrue(v6lp.addRoute(new RouteInfo(GATEWAY62)));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertTrue(v6lp.isReachable(kOnLinkDns));
+        assertTrue(v6lp.isReachable(DNS6));
     }
 }
