@@ -151,7 +151,7 @@ public class AppCompatActionBar extends BridgeActionBar {
 
     @Override
     public void createMenuPopup() {
-        // it's hard to addd menus to appcompat's actionbar, since it'll use a lot of reflection.
+        // it's hard to add menus to appcompat's actionbar, since it'll use a lot of reflection.
         // so we skip it for now.
     }
 
