@@ -24751,6 +24751,7 @@ package android.os {
 
   public class DeadObjectException extends android.os.RemoteException {
     ctor public DeadObjectException();
+    ctor public DeadObjectException(java.lang.String);
   }
 
   public final class Debug {
