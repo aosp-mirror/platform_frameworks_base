@@ -3879,6 +3879,7 @@ package android.app {
     field public static final java.lang.String OPSTR_READ_CALL_LOG = "android:read_call_log";
     field public static final java.lang.String OPSTR_READ_CELL_BROADCASTS = "android:read_cell_broadcasts";
     field public static final java.lang.String OPSTR_READ_CONTACTS = "android:read_contacts";
+    field public static final java.lang.String OPSTR_READ_EXTERNAL_STORAGE = "android:read_external_storage";
     field public static final java.lang.String OPSTR_READ_PHONE_STATE = "android:read_phone_state";
     field public static final java.lang.String OPSTR_READ_SMS = "android:read_sms";
     field public static final java.lang.String OPSTR_RECEIVE_MMS = "android:receive_mms";
@@ -3891,6 +3892,7 @@ package android.app {
     field public static final java.lang.String OPSTR_WRITE_CALENDAR = "android:write_calendar";
     field public static final java.lang.String OPSTR_WRITE_CALL_LOG = "android:write_call_log";
     field public static final java.lang.String OPSTR_WRITE_CONTACTS = "android:write_contacts";
+    field public static final java.lang.String OPSTR_WRITE_EXTERNAL_STORAGE = "android:write_external_storage";
   }
 
   public static abstract interface AppOpsManager.OnOpChangedListener {
