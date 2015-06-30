@@ -1,0 +1,70 @@
+page.title=在 Google Play 上取得成功
+page.metaDescription=帮助您的应用或游戏业务在 Google Play 上取得成功的指南。
+meta.tags="distribute", "bestpractices"
+page.tags="google play", "business", "monetize", "engagement"
+page.image=distribute/images/play_dev_guide.png
+
+@jd:body
+
+<p>
+  我们编写了一份可下载的指南，以帮助您的应用或游戏业务在 Google Play 上取得成功。
+在该指南中，您将发现各种功能、技巧和最佳做法，以帮助您建立一种有效的策略。
+
+</p>
+
+<p>
+  该指南分为以下几个部分：
+</p>
+<ul>
+  <li>
+    <strong>在 Google Play 上发布</strong> &mdash;使用 Google Play
+ 的开发者控制台，将您的应用分发给全球超过 10 亿 
+Android 用户。
+  </li>
+
+  <li>
+    <strong>质量</strong> &mdash; 开发出色应用的基本原则以及对 Google Play 准则和政策的详细介绍。
+
+  </li>
+
+  <li>
+    <strong>可发现性和影响范围</strong> &mdash; 最大程度提高应用的可发现性，尽可能影响最广泛的受众。
+
+  </li>
+
+  <li>
+    <strong>参与和保留</strong> &mdash; 将安装量转化为活跃用户并提高用户保留率。
+
+  </li>
+
+  <li>
+    <strong>盈利</strong> &mdash; 可产生持续增长的收入流的货币化策略。
+
+  </li>
+
+  <li>
+    <strong>通过 Google Analytics 衡量</strong> &mdash; 了解您的用户并改善应用的体验、提高转化率和提升营销效果。
+
+  </li>
+
+  <li>
+    <strong>全球化</strong> &mdash; 在全球各地的当地市场中发布您的应用。
+
+  </li>
+</ul>
+
+<p>
+  要下载该指南，请点击下面的图片或<a href="http://goo.gl/DFjbrS">在 Google Play 下载</a>。
+</p>
+
+<p>
+  在未来几个月中，我们将发布该指南的更多语言版本。请定期回访本网站，因为我们会发布有关新功能和最佳做法的信息，以帮助您分发应用并从中盈利。
+
+
+</p>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:play_dev_guide"
+    data-cardSizes="9x6"
+    data-maxResults="1">
+  </div>
+

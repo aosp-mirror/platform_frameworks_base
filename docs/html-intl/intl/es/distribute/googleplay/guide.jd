@@ -1,0 +1,70 @@
+page.title=Cómo tener éxito en Google Play
+page.metaDescription=Una guía que te ayudará a tener éxito con tu aplicación o juego en Google Play.
+meta.tags="distribute", "bestpractices"
+page.tags="google play", "business", "monetize", "engagement"
+page.image=distribute/images/play_dev_guide.png
+
+@jd:body
+
+<p>
+  Creamos una guía para descargar que te ayudará a tener éxito con tu aplicación o
+ juego en Google Play. En la guía encontrarás funciones, sugerencias y mejores
+ prácticas que te ayudarán a crear una estrategia eficaz.
+</p>
+
+<p>
+  La guía se divide en las siguientes secciones:
+</p>
+<ul>
+  <li>
+    <strong>Publicación en Google Play</strong> &mdash; Mediante la Consola para desarrolladores de Google Play
+ podrás distribuir tu aplicación a más de mil millones de usuarios de Android
+ en todo el mundo.
+  </li>
+
+  <li>
+    <strong>Calidad</strong> &mdash; Los aspectos básicos para crear una excelente aplicación
+ e información acerca de las pautas y las políticas de Google Play.
+  </li>
+
+  <li>
+    <strong>Capacidad de detección y alcance</strong> &mdash; Optimización de la
+ capacidad de detección de tu aplicación y llegada al público más amplio posible.
+  </li>
+
+  <li>
+    <strong>Atracción y retención</strong> &mdash; Transformación de
+ las instalaciones en usuarios activos y optimización de la retención de usuarios.
+  </li>
+
+  <li>
+    <strong>Monetización</strong> &mdash; Estrategias de monetización para generar
+ flujos de ingresos constantes y en aumento.
+  </li>
+
+  <li>
+    <strong>Medición con Google Analytics</strong> &mdash; Comprensión
+ de tus usuarios y optimización de la experiencia, las conversiones y la comercialización de tu aplicación.
+  </li>
+
+  <li>
+    <strong>Alcance global</strong> &mdash; Lanzamiento de tu aplicación en mercados locales
+ alrededor del mundo.
+  </li>
+</ul>
+
+<p>
+  Para descargar la guía, haz clic en la imagen a continuación o <a href="http://goo.gl/DFjbrS">consíguela en Google Play</a>.
+</p>
+
+<p>
+  En los próximos meses, publicaremos la guía en más idiomas. Regresa a este
+ sitio web con frecuencia para consultar la información que publiquemos acerca de nuevas funciones y mejores
+ prácticas que te ayudarán a distribuir y monetizar tu aplicación.
+</p>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:play_dev_guide"
+    data-cardSizes="9x6"
+    data-maxResults="1">
+  </div>
+

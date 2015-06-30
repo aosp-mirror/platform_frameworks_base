@@ -1,0 +1,210 @@
+page.title=散佈至 Android 電視
+page.image=/design/tv/images/atv-home.jpg
+meta.tags="tv", "publish", "quality"
+page.tags="tv", "publish", "googleplay"
+page.metaDescription=將您的應用程式、遊戲與內容散佈至 Android 電視。
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>如何參加</h2>
+<ol>
+<li><a href="#understand_guidelines">了解指導方針</a></li>
+<li><a href="#develop_app">開發適用於電視的卓越應用程式</a></li>
+<li><a href="#test_app">測試電視應用程式品質</a></li>
+<li><a href="#opt_in">選擇</a></li>
+<li><a href="#track_review">追蹤檢閱</a></li>
+</ol>
+
+<h2>您也應閱讀</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  若您開發出卓越的應用程式或遊戲，Android 電視與 Google Play 可協助您將其提供給客廳中的使用者。您可以採用針對電視進行最佳化的店面形式，來提供應用程式與遊戲。您可以延伸適用於電視的新應用程式或既有應用程式，然後在 Google Play 中使用熟悉的工具與程序發行這些應用程式。
+</p>
+
+<p>
+  若要開始，請檢閱本文件的各節，以了解如何透過 Google Play 將您的電視應用程式散佈至使用者。如需有關您的應用程式應符合的可用性與品質標準的資訊，請務必閱讀<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>。若應用程式已準備就緒，您可以選擇在 Developer Console 的 Android 電視店面中發行。
+</p>
+
+<h2 id="how_to_participate">
+  如何參加
+</h2>
+
+<p>
+  藉由 Google Play，您可以向客廳中的新使用者展示您的電視應用程式。您可以使用既有的 Developer Console 帳戶以及目前的散佈與定價設定來執行開發與發行。參加方式非常簡單，以下諸節將說明參加程序。
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-tv-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1.了解指導方針與需求
+</h3>
+
+<p>
+  若要準備在 Android 電視上成功推出應用程式，首先請檢閱有關在電視上營造絕佳應用程式體驗的指導方針。請參閱 <a href="{@docRoot}design/tv/index.html">Android 電視設計指導方針</a>，以了解延伸電視所適用應用程式的創意，以及有關設計與可用性的詳細資料。
+</p>
+
+<p>
+  著手設計電視體驗時，請確保閱讀並了解電視應用程式的品質準則。適用於 Android 電視的 Google Play 體驗<strong>只會展示電視上可以使用的應用程式</strong>，若您的應用程式符合一組基本的品質準則，則可以參加。如需詳細資料，請參閱<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>。
+</p>
+
+<h3 id="develop_app">2.開發適用於電視的卓越應用程式</h3>
+
+<p>
+  適用於電視的卓越應用程式針對在客廳使用而設計，可利用 Android 電視的功能以及相關輸入配件 (例如遊戲手把、D-pad 及遙控器)。應用程式經過改進，以便在大螢幕上提供完美的高品質體驗，並為使用者提供引人注目的功能組。
+</p>
+
+<p>
+  考慮電視應用程式時，請檢閱<a href="{@docRoot}training/tv/start/index.html">開發人員文件</a>以及可用性指導方針，然後對以可能的最大限度提供支援進行規劃。請確保為使用者設計絕佳的可靠體驗，並使用 SDK 中包括的可靠資源庫營造該體驗。您會希望針對電視使用狀況對應用程式的其他部分進行最佳化，在開發程序的早期確認這些部分是不錯的想法。
+</p>
+
+<p>
+  在大多數狀況下，我們建議在提供用於手機、平板電腦及其他裝置的既有應用程式過程中，提供電視應用程式 (使用相同的套件名稱與市集清單) 的體驗。藉由此方法，使用者可以順利升級至您的電視體驗，您也可以利用在應用程式用於手機與平板電腦時所取得的評論與評分。
+</p>
+
+<p>
+  對於支援的所有裝置，您可將電視意圖、可靠資源庫、電視特定程式碼及資源包含在單一 APK 解決方案中。若需要，您可以使用<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 支援</a>向 Android 電視裝置提供自訂二進位檔案 (使用用於手機與平板電腦的相同套件名稱與市集清單)。
+</p>
+
+<p>
+  在整個設計與開發過程中，請務必採用適當的裝置執行使用者體驗的原型建立與測試。您應儘早取得一或多個 Android 電視裝置或模擬器，並設定測試環境。建議在 Android 電視環境中供測試的硬體裝置為 Nexus Player，<a href="http://www.google.com/intl/all/nexus/player/">Google Play</a> 與其他市集可提供該裝置，此外，您還應取得遊戲手把及其他電視輸入裝置。
+</p>
+
+<h3 id="test_app">3.測試電視應用程式品質</h3>
+
+<p>
+  應將您的電視應用程式設計為在 Android 電視上具有良好的執行狀況與極佳的外觀，並提供可能最優的使用者體驗。Google Play 會顯示高品質的應用程式，以降低使用者在 Google Play 中的探尋難度。以下說明您如何參加並提供使用者會喜愛的 Android 電視應用程式。
+</p>
+
+<ul>
+  <li>符合核心應用程式品質指導方針 <ul>
+      <li>遵循 <a href="{@docRoot}design/index.html">Android 設計指導方針</a>。請格外注意在應用程式中使用<a href="http://www.google.com/design/spec/material-design/introduction.html">材料設計</a>。
+      </li>
+
+      <li>根據<a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質指導方針</a>測試您的應用程式。
+      </li>
+    </ul>
+  </li>
+  <li>符合<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>指導方針 <ul>
+      <li>遵循<a href="{@docRoot}training/tv/index.html">電視應用程式開發</a>的最佳做法</li>
+      <li>確保您的應用程式符合所有<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>準則</li>
+    </ul>
+  </li>
+  <li>盡力實現簡易性與最高的可用性</li>
+</ul>
+
+<h3 id="opt_in">4.選擇 Android 電視並發行</h3>
+
+<p>
+  若您已建置準備發行的 APK，並已進行測試，確保其符合所有<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>指導方針，請將其上傳至 Developer Console。使用電視螢幕擷取畫面與電視橫幅更新您的市集清單，然後視需要設定散佈選項。若您不熟悉如何在 Google Play 上準備推出應用程式，請參閱<a href="{@docRoot}distribute/googleplay/publish/preparing.html">推出檢查清單</a>。
+</p>
+
+<p>
+  您需要先從 Developer Console 的 [定價與散佈]<strong></strong> 區段中選擇 Android 電視，然後才能發佈至 Android 電視使用者。該選擇意味著您希望透過 Google Play 為 Android 電視使用者提供您的應用程式，且您的應用程式符合<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>指導方針。
+</p>
+
+<p>
+  只有在您的應用程式符合上傳 APK 時會自動檢查的以下兩項初級品質準則時，才可以進行選擇：
+</p>
+
+<ul>
+  <li>您的應用程式宣示說明必須包括 <a href="{@docRoot}reference/android/content/Intent.html#ACTION_MAIN"><code>ACTION_MAIN</code></a> 意圖類型，以及 <a href="{@docRoot}reference/android/content/Intent.html#CATEGORY_LEANBACK_LAUNCHER"><code>CATEGORY_LEANBACK_LAUNCHER</code></a> 類別。請在<a href="{@docRoot}training/tv/start/start.html#tv-activity">這裡</a>深入了解。
+  </li>
+
+  <li>您的應用程式必須宣告其不需要觸控螢幕。宣示說明必須使用 <code>android:required="false”</code> 宣告 <code>android.hardware.touchscreen</code> 硬體。請在<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">這裡</a>深入了解。
+  </li>
+</ul>
+
+<p>
+  若您的應用程式符合上述初級準則，您將看到 Android 電視的選擇核取方塊，如下所示。若未啟用選擇核取方塊，請檢閱您的 APK，以確保其符合上述初級準則。
+</p>
+
+<p>
+  您選擇並儲存變更後，即可照常發行應用程式。在向 Android 電視使用者提供應用程式之前，Google Play 會提交您的應用程式以根據<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>準則進行檢閱，並向您通知結果。如需有關如何追蹤您應用程式核准狀態的詳細資料，請參閱下一節。
+</p>
+
+<p>
+  若您的應用程式符合<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>準則，Google Play 會向 Android 電視使用者提供該應用程式。您的應用程式也有資格成為應用程式集合與推廣中展示機會更多的精選應用程式。為了讓各地的使用者知道您的應用程式針對 Android 電視而設計，Google Play 會為應用程式的市集清單新增電視徽章。
+</p>
+
+<p>
+  請注意，選擇與檢閱不會影響您的應用程式對 Google Play 市集內其他裝置的可用性，例如在電話或平板電腦上，您的應用程式一經發行即可使用。
+</p>
+
+<p>
+  在 Developer Console 中選擇 Android 電視的步驟如下：
+</p>
+
+<ol>
+  <li>請確保您的應用程式符合所有<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>準則
+  </li>
+
+  <li>將電視螢幕擷取畫面與橫幅圖形新增至應用程式的市集清單
+  </li>
+
+  <li>在 [所有應用程式]<strong></strong> 頁面中，按一下您希望選擇的應用程式。
+  </li>
+
+  <li>在 [定價與散佈]<strong></strong> 下，向下捲動以尋找 <em>Android 電視</em>及選擇核取方塊。
+  </li>
+
+  <li>按一下 [將您的應用程式散佈至 Android 電視]<em></em> 旁的核取方塊。
+  </li>
+
+  <li>按一下 [儲存]<strong></strong> 以儲存變更。
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-tv-opt-in.png">
+  <p class="caption">
+    <strong>電視選擇：</strong>從 Developer Console 中選擇 Android 電視，以便將應用程式包括在 Android 電視中。
+  </p>
+</div>
+
+<h3 id="track_review">5.追蹤您的檢閱與核准</h3>
+
+<p>
+  若您的應用程式符合 Android 電視的技術與品質準則 (如上所述)，則會向 Android 電視的使用者提供您的應用程式。若您的應用程式不符合該準則，您將收到<strong>傳送至您開發人員帳戶地址的通知電子郵件</strong>，內含需要修正的領域的摘要。若您已進行所需調整，可以將新版本的應用程式上傳至 Developer Console。 
+</p>
+
+<p>
+  在 Developer Console 中，您隨時可以在應用程式 [定價與散佈] <strong></strong> 頁面中的 [Android 電視]<em></em> 下，檢查應用程式的檢閱與核准狀態。
+</p>
+
+<p>
+  存在三種核准狀態：
+</p>
+
+<ul>
+  <li>
+    <em>待決</em> - 已傳送您的應用程式供檢閱，檢閱尚未完成。
+  </li>
+
+  <li>
+    <em>已核准</em> - 已檢閱並核准您的應用程式。會直接向 Android 電視使用者提供該應用程式。 
+  </li>
+
+  <li>
+    <em>未核准</em> - 已檢閱但未核准您的應用程式。如需有關為何未核准應用程式的資訊，請檢查通知電子郵件。您可以解決所有問題，然後再次選擇並發行，以啟動另一次檢閱。
+  </li>
+</ul>
+
+<p>若要了解您應用程式的評估方式，請參閱<a href="{@docRoot}distribute/essentials/quality/tv.html">電視應用程式品質</a>文件。 </p>
+
+
+  <h3>相關資源</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:tvlanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div> 

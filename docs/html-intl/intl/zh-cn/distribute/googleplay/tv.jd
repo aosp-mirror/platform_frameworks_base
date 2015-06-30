@@ -1,0 +1,305 @@
+page.title=分发到 Android TV
+page.image=/design/tv/images/atv-home.jpg
+meta.tags="tv", "publish", "quality"
+page.tags="tv", "publish", "googleplay"
+page.metaDescription=将您的应用、游戏和内容分发到 Android TV。
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>参加办法</h2>
+<ol>
+<li><a href="#understand_guidelines">了解准则</a></li>
+<li><a href="#develop_app">开发优秀的电视应用</a></li>
+<li><a href="#test_app">测试电视应用的质量</a></li>
+<li><a href="#opt_in">选择加入</a></li>
+<li><a href="#track_review">跟踪审查进度</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用的质量</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">核心的应用质量</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  如果您有一款优秀的应用或游戏，Android TV 和 Google Play 可以帮助您直接推送到用户的客厅中。
+您将能够在为电视优化的店面体验中提供您的应用和游戏。
+您可以针对电视扩展您的新旧应用，然后在 Google Play 上使用熟悉的工具和流程来发布应用。
+
+
+</p>
+
+<p>
+  首先，查看本文档各部分，了解如何通过 Google Play 将您的电视应用分发给用户。
+一定要阅读
+<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用的质量</a>
+，了解有关您的应用应符合的可用性和质量标准的信息。
+当您的应用准备就绪时，可以在开发者控制台选择加入 Android TV 店面发布。
+
+</p>
+
+<h2 id="how_to_participate">
+  参加办法
+</h2>
+
+<p>
+  Google Play 让您能将电视应用推送到新用户群体的客厅中。
+您可以使用现有的开发者控制台帐户和当前的分发及定价设置来开发和发布应用。
+参加方法很简单 — 以下几部分概述了整个流程。
+
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-tv-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1.了解准则和要求
+</h3>
+
+<p>
+  为了做好准备，以便在 Android TV 上成功推出应用，首先要查阅在电视上提供出色应用体验的准则。
+请参考 <a href="{@docRoot}design/tv/index.html">Android TV 设计准则</a>，了解有关针对电视扩展应用的建议，以及有关设计和可用性的详情。
+
+</p>
+
+<p>
+  开始设计电视体验时，务必阅读并理解电视应用的质量标准。
+Android TV 的 Google Play 体验仅<strong>展示可在电视上使用的应用。</strong>
+ &mdash; 如果您的应用符合一组基本的质量标准，则可以参加。
+
+参考<a href="{@docRoot}distribute/essentials/quality/tv.html">电视
+应用的质量</a>，了解详情。
+</p>
+
+<h3 id="develop_app">2.开发优秀的电视应用</h3>
+
+<p>
+  出色的电视应用专为客厅使用而设计，并充分利用 Android TV 和相关输入配件（如游戏手柄、方向键和遥控器）的功能。
+
+应用经优化后，应在大屏幕上提供美观、高品质的体验，并为用户提供一组吸引人的功能。
+
+
+</p>
+
+<p>
+  在考虑您的电视应用时，请查看<a href="{@docRoot}training/tv/start/index.html">开发者文档</a>和可用性准则，并且尽可能支持这些准则。
+
+确保为用户设计一种出色 Leanback 观看体验，并使用 SDK 中随附的 
+Leanback 库来打造这种体验。您想针对电视用例优化应用的其他部分，最好在开发过程的早期确定这些部分。
+
+
+</p>
+
+<p>
+  大多数情况下，我们建议您使用相同的程序包名称和商品详情，将您的电视体验作为您针对手机、平板电脑和其他设备的现有应用的一部分来提交。
+
+这种方法可让用户无缝升级到您的电视体验，也可让您充分利用您在手机和平板电脑应用中获得的评价和评分。
+
+
+</p>
+
+<p>
+  可以将电视意图、Leanback 库、电视特有代码和资源捆绑在一起，作为针对所有受支持设备的单个 APK 解决方案的一部分。
+必要时，可以使用<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK
+ 支持</a>，在您用于手机和平板电脑的同一程序包名称和商店详情下，为 Android TV 设备提供一个自定义二进制文件。
+
+
+</p>
+
+<p>
+  在整个设计和开发中，务必使用合适的设备来进行原型设计并测试您的用户体验。
+您应该购买一个或多个 Android TV 设备或模拟器，并尽早设置您的测试环境。
+
+在 Android TV 环境下测试的推荐硬件设备是 Nexus Player，可从<a href="http://www.google.com/intl/all/nexus/player/">Google Play</a>
+和其他商店中购买此设备，您还应购买游戏手柄和其他电视输入设备。
+
+
+</p>
+
+<h3 id="test_app">3.测试电视应用的质量</h3>
+
+<p>
+  您的电视应用应表现出色，在 Android TV 上看起来引人入胜，并且提供尽可能最佳的用户体验。
+Google Play 将展示优质应用，以便用户能够在 Google Play 中轻松发现。
+以下说明了您如何加入平台，提交用户喜爱的 Android TV 应用：
+
+</p>
+
+<ul>
+  <li>符合核心应用质量的准则
+    <ul>
+      <li>遵循 <a href="{@docRoot}design/index.html">Android 设计准则</a>。
+特别注意在应用中使用<a href="http://www.google.com/design/spec/material-design/introduction.html">素材设计</a>。
+
+      </li>
+
+      <li>按照<a href="{@docRoot}distribute/essentials/quality/core.html">核心应用质量的准则</a>来测试您的应用。
+
+      </li>
+    </ul>
+  </li>
+  <li>符合<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用的质量</a>准则
+
+    <ul>
+      <li>遵循我们的<a href="{@docRoot}training/tv/index.html">
+电视应用开发</a>最佳做法</li>
+      <li>确保您的应用符合<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>的所有标准</li>
+    </ul>
+  </li>
+  <li>争取简洁性和最佳的可用性</li>
+</ul>
+
+<h3 id="opt_in">4.选择加入 Android TV 并发布</h3>
+
+<p>
+  当您已创建可供发布的 APK 并且已通过测试确保它符合
+<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>准则后，将其上传到开发者控制台。
+在您的商品详情中更新电视屏幕截图和电视横幅，并按需设置分发选项。
+
+如果不熟悉如何准备在 Google Play 上发布，请参考<a href="{@docRoot}distribute/googleplay/publish/preparing.html">发布操作检查单。</a>
+
+
+</p>
+
+<p>
+  在向 Android TV 用户发布之前，您需要从开发者控制台的<strong>定价和分发</strong>部分加入 Android TV。
+
+选择加入即表示您希望将应用通过 Google Play 提供给 Android TV 用户，并且您的应用符合<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>准则。
+
+
+
+</p>
+
+<p>
+  只有在您的应用符合两个初步的质量标准时才能选择加入，在上传 APK 时将按这些标准自动检查：
+
+</p>
+
+<ul>
+  <li>应用的清单文件必须包括一个带有类别<a href="{@docRoot}reference/android/content/Intent.html#CATEGORY_LEANBACK_LAUNCHER">
+ <code>CATEGORY_LEANBACK_LAUNCHER</code></a>的意图类型<a href="{@docRoot}reference/android/content/Intent.html#ACTION_MAIN"><code>ACTION_MAIN</code></a>
+。<a href="{@docRoot}training/tv/start/start.html#tv-activity">在此</a>了解详情。
+  </li>
+
+  <li>您的应用必须声明它不需要触摸屏。清单文件必须通过<code>android:required="false”</code>声明
+ <code>android.hardware.touchscreen</code>硬件。
+<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">在此</a>了解详情。
+  </li>
+</ul>
+
+<p>
+  如果应用符合初步标准，您将看到如下所示的 Android TV
+ 加入复选框。如果选择加入复选框未启用，请审查 APK，以确保它符合初步标准。
+
+</p>
+
+<p>
+  在选择加入并保存更改之后，就可以像平常一样发布您的应用。
+  在将应用提供给 Android TV 用户之前，Google Play 会提交您的应用并对照<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>标准进行审查，然后将结果通知您。
+
+参考下一部分以详细了解如何跟踪应用的审批状态。
+
+</p>
+
+<p>
+  如果应用符合<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>标准，Google Play 便将应用提供给 Android TV 用户。
+
+您的应用还可以加入应用合集和推广，获得更高的知名度。
+为了让每个地方的用户都知道您的应用是为 Android TV 设计的，Google Play 使用电视徽章来装饰应用的商店详情。
+
+
+</p>
+
+<p>
+  注意，选择加入和审查并不影响您的应用在 Google Play 商店中对其他设备的可用性 &mdash; 例如，手机和平板电脑上，应用在发布之后就立即可用。
+
+
+</p>
+
+<p>
+  以下是您在开发者控制台中加入 Android TV 的步骤：
+</p>
+
+<ol>
+  <li>确保您的应用符合<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>的所有标准
+  </li>
+
+  <li>将电视屏幕截图和横幅图片添加到应用的商店详情中
+  </li>
+
+  <li>在<strong>所有应用</strong>页面，点击您要加入的应用。
+  </li>
+
+  <li>在<strong>定价和分发</strong>下面，向下滚动找到<em>Android TV</em>和加入复选框。
+
+  </li>
+
+  <li>点击<em>将应用分发到 Android TV</em>旁边的复选框。
+  </li>
+
+  <li>点击<strong>保存</strong>以保存更改。
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-tv-opt-in.png">
+  <p class="caption">
+    <strong>选择加入电视：</strong>在开发者控制台中加入，将您的应用包括在 Android TV 平台中。
+
+  </p>
+</div>
+
+<h3 id="track_review">5.跟踪审查和批准进度</h3>
+
+<p>
+  如果应用符合 Android TV 的上述技术和质量标准，则该应用将可供用户在 Android TV 上使用。
+如果应用不符合这些标准，您的<strong>开发者帐户地址将收到电子邮件通知</strong>，概述您需要解决的问题区域。
+
+当您进行必要的调整后，就可以将应用的新版本上传到开发者控制台。
+
+ 
+</p>
+
+<p>
+  您随时可以在开发者控制台中该应用的<strong>定价和分发</strong>
+页的 <em>Android TV </em>下面，检查应用的审查和批准状态。
+
+</p>
+
+<p>
+  有三种审批状态：
+</p>
+
+<ul>
+  <li>
+    <em>待定</em> — 您的应用已发送供审查并且审查尚未完成。
+
+  </li>
+
+  <li>
+    <em>已批准</em> — 您的应用已被审查并获得批准。该应用将直接提供给 Android TV 用户。
+ 
+  </li>
+
+  <li>
+    <em>未批准</em> — 您的应用已被审查但未获得批准。请查看通知电子邮件，了解有关应用未被批准的原因的信息。
+您可以解决存在的问题，然后重新加入和发布，以启动另一次审查。
+
+
+  </li>
+</ul>
+
+<p>要了解如何评估您的应用，请参阅<a href="{@docRoot}distribute/essentials/quality/tv.html">电视应用质量</a>文档。 </p>
+
+
+  <h3>相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:tvlanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div>

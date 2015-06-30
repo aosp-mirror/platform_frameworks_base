@@ -1,0 +1,61 @@
+page.title=为家庭设计
+page.metaDescription=“为家庭设计”有助于使您的应用和游戏更容易被家庭发现。
+page.image=/distribute/images/about-dff-sm.jpg
+meta.tags="families, googleplay, distribution"
+page.tags="families"
+
+@jd:body
+
+<p>
+  在几个星期后，Google Play 上一种以家庭为中心的新体验将为用户提供新的方式来浏览、搜索和发现适合其家庭的优质应用和游戏。
+
+
+</p>
+
+<p>
+  为支持更适合家庭的商店，我们邀请开发者选择将以家庭为中心的应用和游戏加入新的“为家庭设计”计划。
+符合
+<a href="https://support.google.com/googleplay/android-developer/answer/6184502">该计划
+要求</a>的应用将展示在新的家庭体验中，以便家长们更轻松地找到合适、受信任的优质应用和游戏。
+
+</p>
+
+<img src="{@docRoot}distribute/images/about-dff-sm.jpg">
+
+<p>
+  立即使用您目前在开发者控制台中用于管理应用的工具和流程，选择将您的应用和游戏加入其中。
+加入该计划的应用，除了保持 Google Play 商店中其他位置的现有类别、排名和评价外，还能更容易被用户发现。
+
+
+
+</p>
+
+<h2 id="elibibility">资格</h2>
+
+<p>
+  Google Play 家庭友好体验中的应用更容易被家长和家庭发现，他们希望应用与孩子的年龄相称。
+
+“为家庭设计”计划旨在包括专为孩子设计的应用以及可由全家人使用的应用。
+
+为满足这些受众的需求，您的应用需要符合特定的准则和政策，这将在应用内容审查时进行评估。
+
+
+</p>
+
+<p>
+  请务必熟悉您的应用必须遵守的政策。
+这些政策包括<a href="http://play.google.com/about/developer-content-policy.html">内容政策</a>、<a href="http://play.google.com/about/developer-distribution-agreement.html">开发者分发协议</a>和<a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+为家庭设计 DDA 附录</a>。
+
+
+</p>
+
+<p>
+  您的应用还必须符合 Google Play 开发者帮助中心列出的<a href="https://support.google.com/googleplay/android-developer/answer/6184502">“为家庭设计”计划的要求</a>。
+
+
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/start.html" class="next-class-link">下一步：选择加入</a>
+</div>

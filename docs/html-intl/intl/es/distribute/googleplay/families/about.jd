@@ -1,0 +1,61 @@
+page.title=Diseñado para la familia
+page.metaDescription=Diseñado para la familia te ayuda a que cualquier familia pueda descubrir más fácilmente tus aplicaciones y juegos.
+page.image=/distribute/images/about-dff-sm.jpg
+meta.tags="families, googleplay, distribution"
+page.tags="families"
+
+@jd:body
+
+<p>
+  En algunas semanas, una nueva experiencia en Google Play centrada en la familia les ofrecerá a los
+ usuarios nuevas maneras de examinar, buscar y descubrir aplicaciones y juegos de alta calidad
+ para sus familias.
+</p>
+
+<p>
+  A fin de construir una tienda más accesible para toda la familia, se invita a los desarrolladores a incluir
+ aplicaciones y juegos orientados a la familia en el nuevo programa Diseñado para la familia. Las aplicaciones
+ que cumplan con los <a href="https://support.google.com/googleplay/android-developer/answer/6184502">requisitos
+ del programa</a> se mostrarán en la nueva experiencia para la familia, de modo que los
+ padres puedan encontrar más fácilmente aplicaciones y juegos adecuados, confiables y de alta calidad.
+</p>
+
+<img src="{@docRoot}distribute/images/about-dff-sm.jpg">
+
+<p>
+  Incluye tus aplicaciones y juegos hoy mismo con las herramientas y los procesos que actualmente
+ usas para administrar tus aplicaciones en la Consola para desarrolladores. Al incluir tus aplicaciones en el programa
+ puedes beneficiarte de una mayor capacidad de detección y de la posibilidad de mantener sus
+ categorías, calificaciones y reseñas existentes en cualquier otra parte de la Play Store
+ de Google.
+</p>
+
+<h2 id="elibibility">Elegibilidad</h2>
+
+<p>
+  Las aplicaciones que forman parte de la experiencia para toda la familia en Google Play serán más fáciles
+ de descubrir para los padres y las familias que esperan que las aplicaciones sean aptas para
+ determinadas edades. El programa Diseñado para la familia tiene como objetivo la inclusión de
+ aplicaciones creadas para niños como también aquellas que puede disfrutar
+ toda la familia. Para poder abordar ese público, existen pautas y políticas
+ específicas que tus aplicaciones deben cumplir y que se evaluarán en una revisión de contenido de
+ las aplicaciones.
+</p>
+
+<p>
+  Asegúrate de conocer las políticas que tu aplicación debe
+ cumplir. Esas políticas incluyen <a href="http://play.google.com/about/developer-content-policy.html">políticas
+ de contenido</a>, el <a href="http://play.google.com/about/developer-distribution-agreement.html">Acuerdo de
+ distribución para desarrolladores</a> y el <a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+Anexo de DDA para Diseñado para la familia</a>.
+</p>
+
+<p>
+  Tu aplicación también debe cumplir los requisitos del <a href="https://support.google.com/googleplay/android-developer/answer/6184502">programa Diseñado
+ para la familia</a> que se indican en el Centro de ayuda para desarrolladores de
+ Google Play.
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/start.html" class="next-class-link">A continuación: Inclusión</a>
+</div>

@@ -1,0 +1,61 @@
+page.title=Designed for Families
+page.metaDescription=Designed for Families는 앱과 게임을 가족이 더 쉽게 검색할 수 있도록 지원합니다.
+page.image=/distribute/images/about-dff-sm.jpg
+meta.tags="families, googleplay, distribution"
+page.tags="families"
+
+@jd:body
+
+<p>
+  몇 주 이내에 Google Play의 새로운 가족 중심 경험을 통해 사용자는 새로운 방식으로 가족용 고품질 앱과 게임을 검색하고 찾을 수 있게 될 것입니다.
+
+
+</p>
+
+<p>
+  가족 친화적인 스토어를 지원하기 위해 가족 중심 앱 및 게임을 옵트인하도록 새 Designed for Families 프로그램에 개발자를 초대합니다.
+ <a href="https://support.google.com/googleplay/android-developer/answer/6184502"> 프로그램 요구사항</a>을 충족하는 앱은 부모가 적합하고 신뢰할 수 있는 고품질 앱과 게임을 쉽게 찾을 수 있도록 새로운 가족 친화적인 앱에 표시됩니다.
+
+
+
+</p>
+
+<img src="{@docRoot}distribute/images/about-dff-sm.jpg">
+
+<p>
+  현재 개발자 콘솔에서 앱을 관리하는 데 사용하는 도구와 프로세스를 사용하여 앱과 게임을 옵트인하십시오.
+ Designed for Families 프로그램의 앱은 Google Play 스토어에서 기존 카테고리, 순위 및 리뷰를 그대로 유지하면서 고급 검색 기능을 활용할 수 있습니다.
+
+
+
+</p>
+
+<h2 id="elibibility">자격</h2>
+
+<p>
+  Google Play의 가족 친화적인 앱을 통해 부모와 가족은 연령에 적합한 앱을 더 쉽게 검색할 수 있습니다.
+
+ Designed for Families 프로그램은 아이들은 물론 전체 가족이 즐길 수 있는 앱을 포함하도록 고안되었습니다.
+
+ 이러한 목표를 구현하기 위해 앱이 충족해야 하는 특정 가이드라인 및 정책이 있는데, 이는 앱 콘텐츠 리뷰에서 평가합니다.
+
+
+</p>
+
+<p>
+  앱이 준수해야 하는 정책을 숙지하십시오.
+ 여기에는 <a href="http://play.google.com/about/developer-content-policy.html">콘텐츠 정책</a>, <a href="http://play.google.com/about/developer-distribution-agreement.html">개발자 배포 계약</a> 및 <a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">Designed for Families DDA 추록</a>이 포함됩니다.
+
+
+
+</p>
+
+<p>
+  또한 앱이 Google Play 개발자 도움말 센터에 나오는 <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families 프로그램 요구사항</a>도 충족해야 합니다.
+
+
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/start.html" class="next-class-link">다음: 옵트인</a>
+</div>

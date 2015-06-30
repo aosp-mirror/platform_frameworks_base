@@ -1,0 +1,106 @@
+page.title=加入“为家庭设计”计划
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=加入“为家庭设计”计划只需几个简单步骤。
+
+@jd:body
+
+<p>
+  如果您正在开发一个针对孩子和家庭的应用，在准备加入“为家庭设计”计划<em>之前</em>，您需要做几件事情：
+
+
+</p>
+
+<ul>
+  <li>为您的应用填写内容分级问卷调查，并且要符合 ESRB 分级中的任何人或 10 岁以上任何人等级。
+
+  </li>
+
+  <li>给应用<strong>商品详情</strong>
+页面添加一个隐私政策链接。
+  </li>
+
+  <li>确保您的应用符合<a href="https://support.google.com/googleplay/android-developer/answer/6184502">“为家庭设计”计划的所有要求</a>。
+
+  </li>
+</ul>
+
+<p>
+  现在，您的应用已为发布做好准备，可以直接从<a href="https://play.google.com/apps/publish/">开发者控制台</a>中加入“为家庭设计”。
+加入即表示您希望此应用除了放入您在 Google Play 商店中选择的类别之外，还放入 Google Play 的家庭友好型新体验中。
+
+
+
+</p>
+
+<p>
+  加入也是确认您的应用符合 <a href="http://play.google.com/about/developer-content-policy.html">Google Play 开发者计划政策</a>和<a href="http://play.google.com/about/developer-distribution-agreement.html">开发者分发协议</a>，包括<a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">为家庭设计 DDA 附录</a>。
+
+
+如果您不熟悉这些政策文件或附录，在加入之前请务必阅读这些资料。
+
+</p>
+
+<p>
+  在您准备好之后，以下说明了将某一应用加入“为家庭设计”计划的方式：
+</p>
+
+<ol>
+<li>在开发者控制台的<strong>所有应用</strong>页面中，点击您要加入的应用。
+在“定价和分发”下面，向下滚动找到 <strong>为家庭设计</strong>和“加入”复选框。<img src="/images/gp-dff-optin.png" style="border:2px solid #ddd;margin:1em 0;">
+
+  </li>
+
+  <li>开始加入流程，并确认您的应用符合资格要求。
+</li>
+  <li>如果您的应用内有广告，请确认它符合广告政策。
+<img src="/images/gp-dff-appinfo.png" style="border:2px solid #ddd;margin:1em 0;"></li>
+  <li>选择目标年龄组：5 岁及以下、6-8 岁、9-12 岁或一般受众（针对儿童和年龄较大受众的应用）。
+
+如果您的应用针对多个年龄组，则可以选择最多两个相邻的年龄组。
+ESRB 10+ 分级的应用只能选择一个目标年龄：9-12 岁或一般受众。
+
+  </li>
+
+  <li>针对 Google Play 上以家庭为中心的新体验，为您的应用选择一个类别。
+您的应用也将显示在它在 Google Play 中的现有类别中。
+</li>
+  <li>查看并同意链接的文档，然后点击
+<strong>加入</strong>。最后，在“定价和分发”页上点击<strong>提交更新</strong>以发布或更新您的应用。
+
+  </li>
+</ol>
+
+<p>
+  在加入您的应用之后，它将接受彻底审查，然后才能被“为家庭设计”计划接受。
+
+</p>
+
+<p class="note">
+  <strong>注意</strong>：在“为家庭设计”计划中发布的应用也可供
+ Google Play 上的所有用户使用。 
+</p>
+
+<p>
+  如果加入的应用是首次发布并且不符合“为家庭设计”计划的要求，则不会在 Google Play 上提供，<strong>直到</strong>您更新应用以符合计划的要求，<strong>或</strong>您取消选中“加入”框并通过 Google Play 的标准审查流程。
+
+
+
+
+</p>
+
+<p>
+  如果加入的应用已发布在 Google Play 上并且不符合该计划的要求，则它仍然可供所有用户使用，但不会添加到新的家庭体验中，直到您更新应用以符合该计划的要求。
+
+
+
+</p>
+
+<p>
+  如果是发布已加入“为家庭设计”计划的应用的更新，则应用更新需要通过“为家庭设计”审查，才能提供给 Google Play 的所有用户。
+
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">下一步：常见问题</a>
+</div>
