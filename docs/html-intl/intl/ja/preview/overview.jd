@@ -1,0 +1,362 @@
+page.title=プログラム概要
+page.metaDescription=Android M Developer Preview では、Android の次のバージョンでアプリをテストして最適化するためのすべてを備えています。
+page.image=images/cards/card-preview_16-9_2x.png
+page.tags="preview", "developer", "android"
+
+@jd:body
+
+<p>
+  <strong>Android M Developer Preview</strong> では、Android の次のバージョンでアプリをテストして最適化するためのすべてを備えています。
+
+M Developer Preview ツールをダウンロードするだけで、無料ですぐにご利用いただけます。
+
+</p>
+
+<div style="background-color:#eceff1;padding:1em;">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-4of12">
+      <h5>
+        ハードウェアとエミュレータのシステム イメージ
+      </h5>
+
+      <p>
+        Nexus 5、6、9、Nexus Player（TV 向け）やエミュレータでアプリをテストしましょう。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        最新プラットフォーム コード
+      </h5>
+
+      <p>
+        プレビューで複数のアップデートが提供されますので、最新プラットフォームの変更に応じてテストできます。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        OTA でのアップデート
+      </h5>
+
+      <p>
+        デバイスに初期プレビューをコピーしたら、無線経由でアップデートを入手できます。
+
+      </p>
+    </div>
+  </div>
+
+  <div class="cols">
+
+
+    <div class="col-4of12">
+      <h5>
+        新しい動作と機能
+      </h5>
+
+      <p>
+        新しい実行時パーミッション モデルや省電力機能など、新しいプラットフォームの動作をあらかじめサポートする
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        開発者が報告した問題に対する優先度ウィンドウ
+      </h5>
+
+      <p>
+        最初の数週間で開発者から報告のあった問題について優先度を設定し、可能な限り早くテストを行いフィードバックを提供できるようにします。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        フィードバックとサポート
+      </h5>
+
+      <p>
+        <a href="https://code.google.com/p/android-developer-preview/">Issue Tracker</a> で問題を報告し、フィードバックをお送りください。
+        <a href="http://g.co/dev/AndroidMDevPreview">M&nbsp;Developer コミュニティ</a> で他の開発者とつながりましょう。
+
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
+<p>
+  With the M Developer Preview, you'll get an early start on testing your apps,
+  with enough time to make adjustments before the public platform release later
+  in the year. We'll provide several updates to the Preview tools in the weeks
+  ahead, so you can keep in sync with the latest changes as the platform moves
+  toward launch.
+</p>
+<img src="{@docRoot}preview/images/m-preview-timeline.png" alt=
+"Preview program timeline" id="timeline">
+<p>
+  You can help us improve the platform by <a href=
+  "https://code.google.com/p/android-developer-preview/">reporting issues</a>
+  through our feedback channels. This is especially
+  critical in the first month of the preview, when we’ll be giving priority to
+  developer-reported issues and feedback.
+</p> -->
+
+
+<h2 id="timeline">
+  タイムラインとアップデート
+</h2>
+<img src="{@docRoot}preview/images/m-preview-timeline-crop.png" alt="Preview program timeline" id="timeline">
+<p>
+  M Developer Preview は 5 月 28 日から最終の Android M SDK まで実行されます。Android M SDK はまもなく、2015 年第三四半期に予定されている正式公開の前にリリースされます。
+
+
+</p>
+
+<p>
+  開発の主なマイルストーンごとにテスト端末へアップデートを配信する予定としています。
+  暫定マイルストーンは以下のとおりです。
+</p>
+
+<ul>
+  <li>
+    <strong>Preview&nbsp;1</strong>（初期プレビュー リリース、5 月下旬）
+  </li>
+
+  <li>
+    <strong>Preview&nbsp;2</strong>（6 月下旬/7 月上旬）
+  </li>
+
+  <li>
+    <strong>Preview&nbsp;3</strong>（最終近く、7 月下旬）
+  </li>
+</ul>
+
+<p>
+  アップデートは第三四半期後半に予定されている<strong>最終 SDK</strong> で終了します。最終版では新しい Android に対する正式な API や最終的なシステム動作や機能が提供されます。
+
+
+</p>
+
+<p>
+  Android M でのテストや開発に際しては、Preview アップデートがリリースされるたびに<strong>開発環境を最新に保つ</strong>ことを強くお勧めします。
+
+  プロセスをより容易にするため、既に Preview ビルドがインストールされた端末に<strong>無線経由でアップデート（OTA）</strong>を配信します。また手動でダウンロードして展開できるシステム イメージもご提供します。
+
+
+</p>
+<p class="note">
+  <strong>注:</strong> 最終 SDK とシステム イメージは OTA では配信できません。代わりにテスト端末に<strong>手動でコピー</strong>する必要があります。</strong>
+
+
+</p>
+
+<p>
+  Preview アップデートをご利用いただけるようになった際は <a href="http://android-developers.blogspot.com/">Android デベロッパー ブログ</a>、このサイト、<a href="http://g.co/dev/AndroidMDevPreview">Android M デベロッパー コミュニティ</a>でお知らせします。
+
+
+</p>
+
+<h2 id="preview_tools">
+  Preview の内容
+</h2>
+
+<p>
+  M Developer Preview では、ご利用のアプリをさまざまな画面サイズ、ネットワーク、テクノロジー、CPU や GPU チップセット、ハードウェア設計でテストするために必要なあらゆるものを備えています。
+
+
+</p>
+
+<h4>
+  SDK ツール
+</h4>
+
+<p>
+  各コンポーネントは <a href="{@docRoot}sdk/installing/adding-packages.html">Android Studio</a> の SDK Manager でダウンロードできます。
+</p>
+
+<ul>
+  <li>M Developer Preview <strong>SDK ツール</strong>
+  </li>
+
+  <li>M Developer Preview <strong>エミュレータ システム イメージ</strong>（32 ビット版と 64 ビット版）
+
+  </li>
+
+  <li>M Developer Preview <strong>Android TV 版エミュレータ システム イメージ</strong>（32 ビット版）
+
+  </li>
+</ul>
+
+<h4>
+  ハードウェアのシステム イメージ
+</h4>
+
+<p>
+  Nexus 端末向けハードウェア システム イメージは、<a href="download.html">ダウンロード ページ</a>からダウンロードできます。
+
+</p>
+
+<ul>
+  <li>
+    <strong>Nexus 5</strong>（GSM と LTE）“hammerhead” 端末システム イメージ
+  </li>
+
+  <li>
+    <strong>Nexus 6</strong> “shamu” 端末システム イメージ
+  </li>
+
+  <li>
+    <strong>Nexus 9</strong>（Wi-Fi）“volantis” 端末システム イメージ
+  </li>
+
+  <li>
+    <strong>Nexus Player</strong>（AndroidTV）“fugu” 端末システム イメージ
+  </li>
+</ul>
+
+<h4>
+  ドキュメントとサンプル コード
+</h4>
+
+<p>
+  次のドキュメント リソースで Preview についての詳細をご確認いただけます。
+</p>
+
+<ul>
+  <li>
+    <a href="setup-sdk.html">SDK のセットアップ</a>では、はじめの手順をステップ バイ ステップでご説明しています。
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/testing/guide.html">Testing Guide</a> と <a href="behavior-changes.html">Behavior Changes</a> では、テストでカバーされる主な分野について示しています。
+  </li>
+
+  <li>新しい API のドキュメントである <a href="api-overview.html">API 概要</a>、ダウンロード可能な <a href="{@docRoot}preview/download.html#docs">API リファレンス</a>や、主な機能のデベロッパー ガイドである<a href="{@docRoot}preview/features/runtime-permissions.html">パーミッション</a>、<a href="{@docRoot}preview/backup/index.html">アプリのバックアップ</a>などをご提供しています。
+
+
+
+
+  </li>
+
+  <li>
+    パーミッションや他の新しい機能をサポートする方法について、<a href="{@docRoot}preview/samples.html">サンプル コード</a>でお試しいただけます。
+
+  </li>
+
+  <li>
+    現行バージョンの<a href="{@docRoot}preview/support.html#release-notes">リリース ノート</a>で M Developer Preview の変更メモや差分レポートなどをご覧いただけます。
+
+  </li>
+</ul>
+
+<h4>
+  サポート リソース
+</h4>
+
+<p>
+  M Developer Preview でのテストや開発について、次のサポート リソースをご確認いただけます。
+
+</p>
+
+<ul>
+  <li><a href="https://code.google.com/p/android-developer-preview/">M Developer Preview Issue Tracker</a> は、<strong>主なフィードバック チャンネル</strong>としてご利用になれます。
+
+バグやパフォーマンスの問題、一般的なフィードバックなど Issue Tracker からご連絡いただけます。
+また、<a href="https://code.google.com/p/android-developer-preview/wiki/KnownIssues">既知の問題</a>
+やその回避策をご確認いただけます。
+  </li>
+
+  <li><a href="http://g.co/dev/AndroidMDevPreview">Android M Developer コミュニティ</a>は Google+ のコミュニティで、Android M を使っている<strong>他のデベロッパーとつながる</strong>ことができます。Android M に関する現象や考えを共有したり、疑問点を解消したりできます。
+
+
+
+  </li>
+</ul>
+
+
+<h2 id="preview_apis_and_publishing">
+  対象、プレビュー API、公開
+</h2>
+
+<p>
+  Android M Developer Preview は開発リリースのみであり、<strong>標準 API レベルはありません</strong>。
+アプリのテストで互換性の問題は除外する場合（強く推奨します）、アプリの<code><a href=
+  "/guide/topics/manifest/uses-sdk-element.html">targetSdkVersion</a></code> を <code>“MNC”</code> に設定することで M Developer Preview を対象にできます。
+
+
+
+</p>
+
+<p>
+  Android M Developer Preview では<strong>プレビュー API</strong> を配信しています。現在 2015 年度第三四半期に予定されている最終 SDK がリリースされるまで、API は正式版ではありません。
+
+つまり、時間がたつにつれて <strong>API の細かな変更</strong>が見込まれます（特にプログラムの最初の数週間）。
+
+Android M Developer Preview でアップデートがあればその都度変更の概要をご提供します。
+
+</p>
+
+<p class="note">
+  プレビュー API は変更される可能性がありますが、実行時パーミッションや省電力機能などのシステムの基幹にかかわる機能には変更はありませんので、すぐにテストしていただけます。
+
+
+</p>
+
+<p>
+  公開に関して、Google Play では <strong>M Developer Preview 対象アプリは公開できません</strong>。
+Android M 最終 SDK が利用可能になれば正式な Android M API レベルを対象にして、Google Play でアプリを公開できるようになります。
+
+それまでは、Android M 対象のアプリをテスターに配布する場合は電子メールで送付したりご自分のサイトから直接ダウンロードしてもらったりしてください。
+
+
+</p>
+
+<h2 id="get_started">
+  開始するには
+</h2>
+
+<p>
+  アプリのテストをはじめるには: 
+</p>
+
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">API 概要</a>や <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a> で新しい機能やご自分のアプリへの影響についてご確認ください。
+
+特に、<a href="{@docRoot}preview/features/runtime-permissions.html">実行時パーミッション</a> モデルや省電力機能、自動バックアップ機能についてお確かめください。
+
+
+  </li>
+
+  <li><a href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a> の手順に従い、ご利用の環境をセットアップしてテスト端末を構成してください。
+
+
+  </li>
+
+  <li><a href="https://developers.google.com/android/nexus/images">コピー手順</a>に従い、最新の M Developer Preview システム イメージを Nexus 5、6、9、Nexus Player にコピーします。
+
+1 度開発端末に Preview 環境をコピーすると、アップデートが無線経由（OTA）で配信されます。</a>
+
+  </li>
+
+  <li><a href="{@docRoot}preview/download.html#docs">M Preview API リファレンス</a>や<a href="{@docRoot}preview/samples.html">M Preview サンプル</a>をダウンロードして、新しい API の機能についてさらに学び、ご自分のアプリで活用する方法についてご確認ください。
+
+
+
+  </li>
+
+  <li><a href="http://g.co/dev/AndroidMDevPreview">Android M Developer コミュニティ</a>に参加して最新のニュースを入手し、Preview に取り組んでいる他のデベロッパーとつながってください。
+
+
+  </li>
+</ol>
+
+<p>
+  Android M Developer Preview プログラムへのご参加ありがとうございます。
+</p>

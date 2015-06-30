@@ -1,0 +1,794 @@
+page.title=權限
+page.tags=previewresources, androidm
+page.keywords=權限, 執行階段, 預覽
+page.image={@docRoot}preview/features/images/permissions_check.png
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>快速檢視</h2>
+    <ul>
+      <li>如果您的應用程式是以 M 預覽版 SDK 為目標，它會提示使用者在執行階段授與權限，而不是安裝期間。
+</li>
+      <li>使用者能隨時從應用程式 [設定] 畫面撤銷權限。
+</li>
+      <li>您的應用程式每次執行時都需要檢查它是否有所需的權限。
+</li>
+    </ul>
+
+    <h2>本文件內容</h2>
+    <ol>
+      <li><a href="#overview">總覽</a></li>
+      <li><a href="#coding">編寫執行階段權限的程式碼</a></li>
+      <li><a href="#testing">測試執行階段權限</a></li>
+      <li><a href="#best-practices">建議做法</a></li>
+    </ol>
+
+<!--
+  <h2>Related Samples</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+
+<!--
+  <h2>See also</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+  </div> <!-- qv -->
+</div> <!-- qv-wrapper -->
+
+
+<p>
+  M 開發人員預覽版導入新的應用程式權限模型，簡化使用者安裝和升級應用程式的程序。
+如果 M 預覽版上執行的應用程式支援新的權限模型，使用者安裝或升級應用程式時，不需要授與任何權限。應用程式會在需要時才要求權限，而且系統會對使用者顯示要求權限的對話方塊。
+
+
+
+
+</p>
+
+<p>
+  如果應用程式支援新的權限模型，它仍能在在執行舊版 Android 的裝置上安裝並執行 (在那些裝置上使用舊的權限模型)。
+
+
+</p>
+
+<h2 id="overview">
+  總覽
+</h2>
+
+<p>
+  使用 M 開發人員預覽版，平台導入新的應用程式權限模型。
+以下是這個新模型的主要元件摘要：
+</p>
+
+<ul>
+  <li>
+    <strong>宣告權限：</strong>應用程式會在宣示說明中宣告所需的所有權限，如舊版 Android 平台。
+
+  </li>
+
+  <li>
+    <strong>權限群組：</strong>權限會根據其功能分為「權限群組」
+<em></em>。例如，
+<code>CONTACTS</code> 權限群組包含讀取和寫入使用者聯絡人與設定檔資訊的權限。
+
+  </li>
+
+  <li>
+    <p><strong>安裝期間授與的有限權限：</strong>當使用者安裝或更新應用程式時，系統會將應用程式所要求且歸入 {@link
+android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL} 的所有權限授與應用程式。
+
+
+    例如，會在安裝期間自動授與歸入 {@link
+android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL} 的鬧鐘與網際網路權限。
+
+    </p>
+
+    <p>系統也會授與應用程式簽名和系統權限，如<a href="#system-apps">系統應用程式和簽名</a>所述。
+
+安裝期間「不」<em></em>會提示使用者授與任何權限。
+</p>
+  </li>
+
+  <li>
+    <strong>使用者在執行階段授與權限：</strong>應用程式要求權限時，系統會對使用者顯示對話方塊，接著呼叫應用程式的回呼函數，通知它是否已授與權限。
+
+如果使用者授與權限，應用程式會獲得在應用程式宣示說明中所宣告之權限功能區域中的所有權限。
+
+
+  </li>
+
+</ul>
+
+<p>
+  此權限模型改變應用程式要求權限的功能行為。
+以下是您應遵循以調整此模型的開發做法摘要：
+
+</p>
+
+<ul>
+
+  <li>
+    <strong>一律檢查是否具備權限：</strong>當應用程式需要執行任何需要權限的動作時，都應要先檢查是否具備有該權限。
+
+若不具備，即要求獲得授與該權限。
+
+  </li>
+
+  <li>
+    <strong>適當處理缺少權限的情況：</strong>如果應用程式未獲授與適當的權限，它應要能完全處理失敗。
+
+    例如，若只有新增功能需要該權限，應用程式可以將該功能停用。
+如果應用程式務必要具備該權限才能運作，應用程式可以停用其所有功能，並通知使用者務必要授與該權限。
+
+
+  </li>
+
+  <div class="figure" style="width:220px" id="fig-perms-screen">
+    <img src="{@docRoot}preview/features/images/app-permissions-screen_2x.png" srcset="{@docRoot}preview/features/images/app-permissions-screen.png 1x, {@docRoot}preview/features/images/app-permissions-screen_2x.png 2x" alt="" width="220">
+    <p class="img-caption">
+      <strong>圖 1.</strong>應用程式 [設定] 的權限畫面。
+    </p>
+  </div>
+
+  <li>
+    <strong>權限可以撤銷：</strong>使用者可以隨時撤銷應用程式的權限。
+如果使用者關閉應用程式的權限，並「不」<em></em>會通知應用程式。
+再次強調，您的應用程式在執行任何受限制的動作之前，應該驗證它是否具備所需的權限。
+
+  </li>
+</ul>
+
+<p class="note">
+  <strong>注意：</strong>如果應用程式是以 M 開發人員預覽版為目標，「務必要」
+<em></em>使用新的權限模型。
+</p>
+
+<p>
+  自 M 開發人員預覽版推出起，並非所有 Google 應用程式都完全實作新的權限模型。
+Google 正透過 M 開發人員預覽版逐漸更新這些應用程式，以適當保留權限切換設定。
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>如果您的應用程式有自己的 API 介面，務必要先確定呼叫端具備存取該資料的必要權限後，再 Proxy 權限。
+
+
+</p>
+
+<h3 id="system-apps">
+  系統應用程式和簽名權限
+</h3>
+
+<p>
+  一般來說，當使用者安裝應用程式時，系統只會將
+ {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL
+ PROTECTION_NORMAL} 授與應用程式。不過，在某些情況下，系統會授與應用程式更多權限：
+
+</p>
+
+<ul>
+  <li>如果應用程式屬於系統映像的一部分，會自動獲授與其宣示說明中列出的所有權限。
+
+  </li>
+
+  <li>如果應用程式要求宣示說明中歸入 {@link
+android.content.pm.PermissionInfo#PROTECTION_SIGNATURE PROTECTION_SIGNATURE} 的權限，並和宣告那些權限的應用程式一樣，以相同的憑證簽署應用程式，系統會在安裝時將那些權限授與要求的應用程式。
+
+
+
+  </li>
+</ul>
+
+<p>
+  在這兩種情況下，使用者仍能隨時撤銷權限，只要前往系統的 [設定]<strong></strong> 畫面，然後選擇 [應用程式] &gt;<strong></strong>
+
+ <i>app_name</i> &gt; [權限]<strong></strong>。應用程式應持續在執行階段檢查是否具備權限，並在必要時予以要求。
+
+
+</p>
+
+<h3 id="compatibility">
+  往後和回溯相容性
+</h3>
+
+<p>
+  如果應用程式不是以 M 開發人員預覽版為目標，即使在 M 預覽版裝置上，應用程式也會持續使用舊的權限模型。
+當使用者安裝應用程式時，系統會要求使用者授與應用程式的宣示說明中列出的所有權現。
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>在執行 M 開發人員預覽版的裝置上，使用者能從應用程式的設定畫面關閉任何應用程式 (包括舊版應用程式) 的權限。
+
+如果使用者關閉舊版應用程式的權限，系統會自動停用適當功能。
+當應用程式嘗試執行需要那項權限的操作時，該操作不一定會造成例外狀況。
+
+而可能傳回空的資料集，通知發生錯誤，或展示未預期的行為。
+例如，如果您不具備查詢行事曆的權限，方法會傳回空的資料集。
+
+</p>
+
+<p>
+  如果您在並非執行 M 預覽版的裝置上使用新的權限模型來安裝應用程式，系統會將它和任何其他應用程式一視同仁：系統會在安裝期間要求使用者授與所有宣告的權限。
+
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>對於預覽版，您必須將 SDK 最低版本設定為 M 預覽版 SDK，才能以預覽版 SDK 編譯。
+這表示在開發人員預覽版期間，您將無法在舊版平台上測試這類應用程式。
+
+
+</p>
+
+<h3 id="perms-vs-intents">權限與意圖比較</h3>
+
+<p>
+  在許多情況下，您可以為應用程式在兩種方法當中擇一來執行工作。
+您可以讓應用程式要求權限以自行執行操作。
+或者，您可以讓應用程式使用意圖，讓其他應用程式來執行工作。
+
+</p>
+
+<p>
+  例如，假設您的應用程式需要能夠使用裝置相機拍攝相片。
+您的應用程式能要求
+<code>android.permission.CAMERA</code> 權限，讓應用程式直接存取相機。
+接著，應用程式會使用相機 API 來控制相機並拍攝相片。
+這種方法可讓您的應用程式對攝影處理程序有完整控制權，並讓您將相機 UI 納入應用程式。
+
+
+</p>
+
+<p>
+  不過，如果您不需要這類控制權，您可以只使用 {@link
+android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} 意圖來要求影像。
+當您啟動意圖時，會提示使用者選擇相機應用程式 (如果還沒有預設的相機應用程式)，然後該應用程式會拍攝相片。
+
+相機應用程式會將相片傳回應用程式的 {@link
+ android.app.Activity#onActivityResult onActivityResult()} 方法。
+</p>
+
+<p>
+  同樣地，如果您需要撥打電話、存取使用者的聯絡人等等，您都可以建立適當的意圖來執行，或是要求權限，然後直接存取適當的物件。
+
+每種方法各有利弊。
+
+</p>
+
+<p>
+  如果您使用權限：
+</p>
+
+<ul>
+  <li>當您執行操作時，應用程式對使用者體驗有完整控制權。
+不過，如此多樣化控制使您必須設計適當的 UI，而增加工作複雜度。
+
+  </li>
+
+  <li>當您初次執行操作時，會提示使用者授與權限 (僅此一次)。
+之後應用程式可以逕行執行該操作，不需要再與使用者有其他互動。
+不過，如果使用者未授與權限 (或稍後予以撤銷)，您的應用程式會完全無法執行該操作。
+
+
+  </li>
+</ul>
+
+<p>
+  如果您使用意圖：
+</p>
+
+<ul>
+  <li>您不必為該操作設計 UI。處理意圖的應用程式會提供 UI。不過，這表示您對使用者體驗沒有控制權。
+
+使用者可能會和您不曾見過的應用程式互動。
+
+  </li>
+
+  <li>如果使用者沒有執行該操作的預設應用程式，系統會提示使用者選擇應用程式。如果使用者未指定預設處理常式，每次執行操作時可能都要完成額外的對話方塊。
+
+
+
+  </li>
+</ul>
+
+<h2 id="coding">編寫執行階段權限的程式碼</h2>
+
+<p>
+  如果您的應用程式是以新的 M 開發人員預覽版為目標，請務必使用新的權限模型。
+這表示除了在宣示說明中宣告所需的權限之外，您也必須在執行階段檢查是否具備權限，並在您不具備時要求權限。
+
+
+
+</p>
+
+<h3 id="enabling">
+  啟用新的權限模型
+</h3>
+
+<p>
+  如要啟用新的 M 開發人員預覽版權限模型，可將應用程式的
+<code>targetSdkVersion</code> 屬性設定為 <code>"MNC"</code>，並將
+<code>compileSdkVersion</code> 設定為 <code>"android-MNC"</code>。這樣做可啟用所有新權限功能。
+
+</p>
+
+<p>
+  對於預覽版，您必須將 <code>minSdkVersion</code> 設定為
+<code>"MNC"</code>，才能以預覽版 SDK 編譯。
+</p>
+
+<h3 id="m-only-perm">
+  指定只限 M 預覽版使用的權限
+</h3>
+
+<p>
+  您可以在宣示說明中使用新的 <code>&lt;uses-permission-sdk-m&gt;</code> 元素，指出只有在 M 預覽版上才需要某權限。
+如果您以這種方式宣告權限，每當在舊版裝置上安裝應用程式時，系統都不會提示使用者或將權限授與應用程式。藉由使用 <code>&lt;uses-permission-sdk-m&gt;</code> 元素，當使用者安裝更新時，您不需要強制他們授與權限，就可以將新的權限新增至更新的應用程式版本。
+
+
+
+
+
+
+</p>
+
+<p>
+  如果應用程式在使用 M 開發人員預覽版的裝置上執行，
+<code>&lt;uses-permission-sdk-m&gt;</code> 的運作方式會和
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 相同。
+  當他們安裝應用程式時，系統不會提示使用者授與任何權限，而應用程式會在需要時才要求權限。
+
+</p>
+
+<h3 id="prompting">
+  提示授與權限
+</h3>
+
+<p>
+  如果您的應用程式使用新的 M 開發人員預覽版權限模型，在執行 M 預覽版的裝置上初次啟動應用程式時，不會要求使用者授與所有權限。
+
+您的應用程式會在需要時才要求權限。
+應用程式要求權限時，系統會對使用者顯示對話方塊。
+
+</p>
+
+<p>
+  如果您的應用程式在 SDK 22 以下版本的裝置上執行，應用程式會使用舊的權限模型。
+當使用者安裝應用程式時，會提示他們授與應用程式在其宣示說明中要求的所有權限，但標示為 <code>&lt;uses-permission-sdk-m&gt;</code> 的那些權限除外。
+
+
+</p>
+
+<h4 id="check-platform">檢查應用程式執行所在的平台</h4>
+
+<p>
+  只有執行 M 開發人員預覽版的裝置上才支援此權限模型。
+呼叫這些方法之前，應用程式應該檢查 {@link android.os.Build.VERSION#CODENAME
+ Build.VERSION.CODENAME} 的值，驗證它執行所在的平台。
+
+如果裝置是執行 M 開發人員預覽版，
+{@link android.os.Build.VERSION#CODENAME CODENAME} 是 <code>"MNC"</code>。
+</p>
+
+<h4 id="check-for-permission">檢查應用程式是否具備所需權限</h4>
+
+<p>當使用者嘗試執行需要權限的操作時，應用程式會檢查它目前是否具備可執行此操作的權限。
+如要這麼做，應用程式可呼叫
+
+<code>Context.checkSelfPermission(<i>permission_name</i>)</code>。由於使用者可以隨時撤銷應用程式的權限，即使應用程式知道使用者已授與該權限，還是應該執行此檢查。
+
+
+例如，如果使用者想要使用應用程式拍攝相片，應用程式會呼叫 <code>Context.checkSelfPermission(Manifest.permission.CAMERA)</code>。
+
+</p>
+
+<p class="table-caption" id="permission-groups">
+  <strong>表 1.</strong>權限和權限群組。</p>
+<table>
+  <tr>
+    <th scope="col">權限群組</th>
+    <th scope="col">權限</th>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CALENDAR</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CALENDAR</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.WRITE_CALENDAR</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CAMERA</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.CAMERA</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CONTACTS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_PROFILE</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_PROFILE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.LOCATION</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.ACCESS_FINE_LOCATION</code>
+        </li>
+        <li>
+          <code>android.permission.ACCESS_COARSE_LOCATION</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.MICROPHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.RECORD_AUDIO</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.PHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_PHONE_STATE</code>
+        </li>
+        <li>
+          <code>android.permission.CALL_PHONE</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CALL_LOG</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CALL_LOG</code>
+        </li>
+        <li>
+          <code>com.android.voicemail.permission.ADD_VOICEMAIL</code>
+        </li>
+        <li>
+          <code>android.permission.USE_SIP</code>
+        </li>
+        <li>
+          <code>android.permission.PROCESS_OUTGOING_CALLS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SENSORS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.BODY_SENSORS</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.USE_FINGERPRINT</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SMS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.SEND_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_WAP_PUSH</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_MMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CELL_BROADCASTS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+</table>
+
+<h4 id="request-permissions">必要時要求權限</h4>
+
+<p>如果應用程式還沒有所需的權限，應用程式會呼叫
+<code>Activity.requestPermissions(String[], int)</code> 方法以要求適當的權限。
+應用程式會傳遞它所需的權限，還有整數「要求代碼」。
+
+  這種方法以非同步方式運作：它會立即傳回，並在使用者回應對話方塊後，系統會以該結果呼叫應用程式的回呼方法，傳遞應用程式傳遞給 <code>requestPermissions()</code> 的相同「要求代碼」。
+
+
+</p>
+
+  <p>下列程式碼會檢查應用程式是否具備讀取使用者聯絡人的權限，並在必要時要求權限。
+</p>
+
+<pre>
+if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+        != PackageManager.PERMISSION_GRANTED) {
+    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+    // app-defined int constant
+
+    return;
+}
+</pre>
+
+<h4 id="handle-response">處理權限要求回應</h4>
+
+<p>
+  當應用程式要求權限時，系統會對使用者呈現對話方塊。
+當使用者回應時，系統會呼叫 <code>Activity.onRequestPermissionsResult(int, String[], int[])</code> 並將使用者回應傳遞給它。
+
+您的應用程式需要覆寫該方法。將您傳遞給 <code>requestPermissions()</code> 的相同要求代碼傳遞給回呼。
+
+例如，如果應用程式要求 <code>READ_CONTACTS</code> 存取權，可能會有下列回呼方法：
+
+
+</p>
+
+<pre>
+&#64;Override
+public void onRequestPermissionsResult(int requestCode,
+        String permissions[], int[] grantResults) {
+    switch (requestCode) {
+        case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // permission was granted, yay! do the
+                // calendar task you need to do.
+
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+            }
+            return;
+        }
+
+        // other 'switch' lines to check for other
+        // permissions this app might request
+    }
+}
+</pre>
+
+  <p>如果使用者授與權限，系統就會將應用程式宣示說明所列出該功能區域的所有權限給予應用程式。
+如果使用者拒絕要求，您應該執行適當動作。
+例如，您可能會停用依存於此權限的任何選單動作。
+
+  </li>
+</p>
+
+<p>
+  系統要求使用者授與權限時，使用者可選擇告知系統不要再次要求該權限。
+在上述情況下，當應用程式使用 <code>requestPermissions()</code> 要求該權限時，系統會立即拒絕要求。
+
+在這種情況下，如果使用者再次明確拒絕您的要求，系統會以相同的方式呼叫您的 <code>onRequestPermissionsResult()</code>。
+
+基於這個理由，您的應用程式不能假設已與使用者發生任何直接互動。
+
+</p>
+
+<h2 id="testing">測試執行階段權限</h2>
+
+
+<p>
+  如果您的應用程式是以新的 M 開發人員預覽版為目標，您必須測試它是否能適當處理權限。
+您不能假設應用程式在執行時具備任何特定權限。
+應用程式初次啟動時，很可能不具備任何權限，且使用者可隨時撤銷或還原權限。
+
+
+</p>
+
+<p>
+  您應該測試應用程式，確保它在所有權限情況下都能正常運作。
+使用 M 預覽版 SDK，我們現在提供 <a href="{@docRoot}tools/help/adb.html">Android 偵錯橋 (adb)</a> 命令，不管需要嘗試哪種權限設定都能讓您測試。
+
+
+
+</p>
+
+<h3>
+  新的 adb 命令和選項
+</h3>
+
+<p>
+  M 預覽版 SDK 平台工具提供的數個命令可讓您測試應用程式如何處理權限。
+
+</p>
+
+<h4>
+  連同權限一併安裝
+</h4>
+
+<p>
+  您可以使用 <a href="{@docRoot}tools/help/adb.html#move"><code>adb
+  install</code></a> 命令的新 <code>-g</code> 選項，安裝應用程式並授與其宣示說明中列出的所有權限：
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb install -g &lt;path_to_apk&gt;
+</pre>
+
+<h4>
+  授與和撤銷權限
+</h4>
+
+<p>
+  您可以使用新的 ADB <a href="{@docRoot}tools/help/adb.html#pm">套件管理員 (pm)</a> 命令，對安裝的應用程式授與和撤銷權限。此功能在自動化測試時非常實用。
+
+
+</p>
+
+<p>
+  如要授與權限，可使用套件管理員的 <code>grant</code> 命令：
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<p>
+  例如，如要將可錄製音訊的權限授與 com.example.myapp 套件，請使用此命令：
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
+</pre>
+
+<p>
+  如要撤銷權限，可使用套件管理員的 <code>revoke</code> 命令：
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<h2 id="best-practices">最佳做法</h2>
+
+<p>
+  新的權限模型讓使用者有更順暢的體驗，並能輕鬆安裝應用程式且對應用程式執行的工作感到自在。
+
+建議使用下列最佳做法以充分利用新的模型。
+
+</p>
+
+
+<h3 id="bp-what-you-need">只要求您所需的權限</h3>
+
+<p>
+  每次要求權限時，您都是在強迫使用者做出決定。
+  如果使用者拒絕要求，就會減少您應用程式的功能。
+  您應該儘可能減少提出這些要求的次數。
+</p>
+
+<p>
+  例如，您的應用程式可經常使用<a href="{@docRoot}guide/components/intents-filters.html">意圖</a>來取得所需功能，而不是要求權限。
+
+如果您的應用程式需要使用手機的相機拍攝相片，應用程式可以使用 {@link
+  android.provider.MediaStore#ACTION_IMAGE_CAPTURE
+  MediaStore.ACTION_IMAGE_CAPTURE} 意圖。
+當您的應用程式執行意圖時，系統會提示使用者選擇已安裝的相機應用程式來拍攝相片。
+
+
+</p>
+
+<h3 id="bp-dont-overwhelm">
+  別讓使用者無法承受
+</h3>
+
+<p>
+  如果您讓使用者一次面對太多權限要求，可能會讓使用者無法承受而結束您的應用程式。您應該改為在需要時才要求權限。
+
+
+</p>
+
+<p>
+  在某些情況下，您的應用程式可能必須具備一或多個權限。在那種情況下，在應用程式啟動時立即要求所有權限是合理的舉措。
+
+例如，如果您建立攝影應用程式，該應用程式會需要存取裝置相機。
+使用者初次啟動應用程式時，看到要求使用相機的權限不會被嚇到。
+
+但如果相同的應用程式具有與使用者聯絡人分享相片的功能，您可能「不」<em></em>應該在初次啟動時要求該權限。
+
+可以等到使用者嘗試使用「分享」功能時，再要求該權限。
+
+</p>
+
+<p>
+  如果您的應用程式提供教學課程，在教學課程結束時要求應用程式的基本權限是合理的舉措。
+
+</p>
+
+<h3 id="bp-explain">
+  說明需要權限的原因
+</h3>
+
+<p>
+  當您呼叫
+<code>requestPermissions()</code> 時，系統顯示的權限對話方塊會說明您的應用程式想要的權限，但不會說明原因。
+在某些情況下，使用者可能會感到不解。
+  在呼叫 <code>requestPermissions()</code> 前對使用者說明應用程式想要權限的原因是不錯的想法。
+
+</p>
+
+<p>
+  例如，攝影應用程式可能想要使用定位服務，以便將相片加上地理標籤。
+一般使用者可能不明白相片可以包含定位資訊，而不明白為何攝影應用程式會想要知道位置。
+
+在這種情況下，在呼叫 <code>requestPermissions()</code>「之前」<em></em>，將此功能的相關資訊告訴使用者會是不錯的想法。
+
+
+</p>
+
+<p>
+  您可以將這些要求與應用程式教學課程結合來完成此作業。教學課程可依序顯示應用程式的各項功能，並可以同時說明需要哪些權限。
+
+例如，攝影應用程式的教學課程可以示範「與聯絡人分享相片」功能，接著告訴使用者需要提供權限，應用程式才能看到使用者的聯絡人。
+
+
+接著，應用程式可以呼叫 <code>requestPermissions()</code>，要求使用者提供該存取權。
+當然，並非每位使用者都會依照教學課程執行動作，所以您仍需要在應用程式的正常操作期間檢查和要求權限。
+
+
+</p>

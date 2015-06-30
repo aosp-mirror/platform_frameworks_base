@@ -1,0 +1,794 @@
+page.title=권한
+page.tags=previewresources, androidm
+page.keywords=권한, 런타임, 미리 보기
+page.image={@docRoot}preview/features/images/permissions_check.png
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>간략히 보기</h2>
+    <ul>
+      <li>앱이 M 미리 보기 SDK를 대상으로 하는 경우, 앱은 사용자에게 설치 시점이 아닌 런타임에 권한을 허용하도록 메시지를 표시합니다.
+</li>
+      <li>사용자는 앱 설정 화면에서 언제든 권한을 취소할 수 있습니다.
+</li>
+      <li>앱은 실행될 때마다 자신에게 필요한 권한이 있는지 확인해야 합니다.
+</li>
+    </ul>
+
+    <h2>이 문서의 내용</h2>
+    <ol>
+      <li><a href="#overview">개요</a></li>
+      <li><a href="#coding">런타임 권한에 대한 코딩</a></li>
+      <li><a href="#testing">런타임 권한 테스트</a></li>
+      <li><a href="#best-practices">모범 사례</a></li>
+    </ol>
+
+<!--
+  <h2>Related Samples</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+
+<!--
+  <h2>See also</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+  </div> <!-- qv -->
+</div> <!-- qv-wrapper -->
+
+
+<p>
+  M 개발자 미리 보기에서는 새로운 앱 권한 모델을 소개하여 사용자가 앱을 설치하고 업그레이드하는 과정을 간소화할 수 있습니다.
+ M 미리 보기에서 실행되는 앱이 새 권한 모델을 지원하는 경우, 사용자가 앱을 설치하거나 업그레이드할 때 아무런 권한을 허용하지 않아도 됩니다. 그 대신, 앱이 필요할 때마다 권한을 요청하고 시스템이 사용자에게 해당 권한을 요청하는 대화창을 표시합니다.
+
+
+
+
+</p>
+
+<p>
+  앱이 새 권한 모델을 지원하는 경우, Android 이전 버전을 실행하는 기기에서도 설치 및 실행할 수 있는 것은 변하지 않습니다. 이 경우, 그러한 기기의 기존 권한 모델을 사용합니다.
+
+
+</p>
+
+<h2 id="overview">
+  개요
+</h2>
+
+<p>
+  M 개발자 미리 보기에서는 플랫폼에 새로운 권한 모델을 도입합니다.
+ 이 새로운 모델의 주요 구성 요소를 다음과 같이 요약해 보았습니다.
+</p>
+
+<ul>
+  <li>
+    <strong>권한 선언:</strong> 이전 Android 플랫폼에서와 같이 앱은 자신이 필요로 하는 권한을 모두 매니페스트에서 선언합니다.
+
+  </li>
+
+  <li>
+    <strong>권한 그룹:</strong> 권한은 각자의 기능을 기반으로 <em>권한 그룹</em>으로 나뉩니다.
+ 예를 들어 <code>CONTACTS</code> 권한 그룹에는 사용자의 연락처와 프로필 정보를 읽고 쓰는 데 필요한 권한이 들어있습니다.
+
+
+  </li>
+
+  <li>
+    <p><strong>설치 시점에 제한된 권한 허용:</strong> 사용자가 앱을 설치 또는 업데이트하면 시스템이 해당 앱에 앱이 요청하는 권한 중 {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}에 포함되는 것을 모두 허용합니다.
+
+
+
+    예를 들어 알람 시계와 인터넷 권한은 {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}에 속하므로 이들 권한은 설치 시점에 자동으로 허용됩니다.
+
+
+    </p>
+
+    <p>시스템은 이외에도 앱 서명과 시스템 권한을 허용할 수도 있습니다. 이 내용은 <a href="#system-apps">시스템 앱 및 서명 권한</a>에 설명되어 있습니다.
+
+ 설치 시 사용자에게 권한을 허용하라는 메시지가 표시되지 <em>않습니다.</em>
+</p>
+  </li>
+
+  <li>
+    <strong>사용자가 런타임에 권한 허용:</strong> 앱이 권한을 요청하면, 시스템이 사용자에게 대화창을 표시한 다음 앱의 콜백 기능을 호출해 권한이 허용되었는지를 알려줍니다.
+
+ 사용자가 권한을 허용하는 경우, 앱에는 앱 매니페스트에서 선언한 해당 권한의 기능 영역에 관한 모든 권한이 부여됩니다.
+
+
+  </li>
+
+</ul>
+
+<p>
+  이 권한 모델은 앱이 권한을 필요로 하는 기능에 대해 동작하는 방식을 바꾸어 놓습니다.
+ 다음은 이 모델에 적응하기 위한 몇 가지 개발 사례를 요약했습니다.
+
+</p>
+
+<ul>
+
+  <li>
+    <strong>항상 권한을 확인:</strong> 앱이 권한을 필요로 하는 작업을 수행해야 할 때마다, 우선 앱에 해당 권한이 있는지 확인해야 합니다.
+
+ 권한이 없는 경우, 해당 권한을 허용해도록 요청합니다.
+
+  </li>
+
+  <li>
+    <strong>권한 부족을 안정적으로 처리:</strong> 앱이 적절한 권한을 허용받지 못하면, 실패를 깔끔하게 처리할 수 있어야 합니다.
+
+    예를 들어 권한에 기능만 추가하면 되는 것이었다면, 앱이 해당 기능을 비활성화하면 됩니다.
+ 해당 권한이 앱이 제대로 기능하는 데 꼭 필요한 것이라면, 앱이 자신의 기능을 모두 비활성화하고 사용자에게 그 권한을 허용해야 한다고 알릴 수도 있습니다.
+
+
+  </li>
+
+  <div class="figure" style="width:220px" id="fig-perms-screen">
+    <img src="{@docRoot}preview/features/images/app-permissions-screen_2x.png" srcset="{@docRoot}preview/features/images/app-permissions-screen.png 1x, {@docRoot}preview/features/images/app-permissions-screen_2x.png 2x" alt="" width="220">
+    <p class="img-caption">
+      <strong>그림 1.</strong> 앱의 '설정'에 있는 권한 화면.
+    </p>
+  </div>
+
+  <li>
+    <strong>취소 가능한 권한:</strong> 사용자는 언제든 앱의 권한을 취소할 수 있습니다.
+ 사용자가 앱의 권한을 끄면 해당 앱에 그 사실을 알리지 <em>않습니다.</em>
+ 이런 경우, 앱이 제한된 작업을 수행하려면 필요한 권한이 있다는 점을 다시 확인해야 합니다.
+
+  </li>
+</ul>
+
+<p class="note">
+  <strong>참고:</strong> 앱이 M 개발자 미리 보기를 대상으로 하는 경우, <em>반드시</em> 새 권한 모델을 사용해야 합니다.
+
+</p>
+
+<p>
+  M 개발자 미리 보기 시작 시점에는 Google 앱 중에 새 권한 모델을 완전히 구현하지 않는 앱도 있습니다.
+ Google은 이러한 앱을 M 개발자 미리 보기를 시행하면서 시간을 두고 업데이트하여 권한 설정/해제 설정을 제대로 사용하도록 할 예정입니다.
+
+
+</p>
+
+<p class="note">
+  <strong>참고:</strong> 앱에 자체 API 표면이 있는 경우, 권한을 대리로 허가하기 전에 우선 발신자에게 해당 데이터에 액세스할 필수 권한이 있는지 확인해야 합니다.
+
+
+</p>
+
+<h3 id="system-apps">
+  시스템 앱 및 서명 권한
+</h3>
+
+<p>
+  보통 사용자가 앱을 설치하면 시스템이 앱에 {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}만 허용합니다.
+
+ 하지만 시스템이 앱에 더 많은 권한을 허용하는 경우도 몇 가지 있습니다.
+
+</p>
+
+<ul>
+  <li>앱이 시스템 이미지의 일부분인 경우, 이 앱의 매니페스트에 목록으로 표시된 권한을 자동으로 모두 허용합니다.
+
+  </li>
+
+  <li>앱이 매니페스트에서 권한을 요청했는데 그것이 {@link android.content.pm.PermissionInfo#PROTECTION_SIGNATURE PROTECTION_SIGNATURE}에 속하며 해당 앱이 그러한 권한을 선언한 앱과 같은 인증서로 서명되어 있는 경우, 시스템은 요청하는 앱을 설치할 때 그러한 권한을 허용합니다.
+
+
+
+
+  </li>
+</ul>
+
+<p>
+  두 가지 경우 모두, 사용자가 언제든 권한을 취소할 수 있는 것은 변하지 않습니다. 시스템의 <strong>설정</strong> 화면으로 이동하여 <strong>앱 &gt;</strong>
+
+ <i>app_name</i> <strong>&gt; 권한</strong>을 선택하면 됩니다. 이 앱은 계속해서 런타임에 권한을 확인하고 필요한 경우 해당 권한을 요청해야 합니다.
+
+
+</p>
+
+<h3 id="compatibility">
+  이전 및 이후 버전과의 호환성
+</h3>
+
+<p>
+  앱이 M 개발자 미리 보기를 대상으로 하지 않더라도, 앱은 M 미리 보기 기기에서도 기존 권한 모델을 계속 사용합니다.
+ 사용자가 앱을 설치하면 시스템이 사용자에게 앱의 매니페스트에 목록으로 표시된 권한을 모두 허용하도록 요청합니다.
+
+
+</p>
+
+<p class="note">
+  <strong>참고:</strong> M 개발자 미리 보기를 실행하는 기기에서는 사용자가 어느 앱에 대해서든(레거시 앱 포함) 앱의 설정 화면에서 권한을 끌 수 있습니다.
+
+ 사용자가 레거시 앱에 대한 권한을 끄면, 시스템이 자동으로 적절한 기능을 비활성화합니다.
+ 앱이 해당 권한을 필요로 하는 작업을 수행하려 시도한다고 해도 그 작업이 반드시 예외를 발생시키는 것은 아닙니다.
+
+ 그 대신에 빈 데이터 세트를 반환하거나 오류를 신호하거나, 기타 예기치 못한 동작을 선보일 수 있습니다.
+ 예를 들어 권한 없이 캘린더를 쿼리하면 해당 메서드가 빈 데이터 세트를 반환합니다.
+
+</p>
+
+<p>
+  M 미리 보기를 실행하지 않는 기기에서 새 권한 모델을 사용하는 앱을 설치하면 시스템은 해당 앱을 다른 앱과 똑같이 다룹니다. 즉, 설치 시점에 시스템에 사용자에게 선언된 권한 모두를 허용하도록 요청합니다.
+
+
+
+</p>
+
+<p class="note">
+  <strong>참고:</strong> 미리 보기 릴리스에서는 최소 SDK 버전을 M 미리 보기 SDK로 설정해야 미리 보기 SDK와 컴파일할 수 있습니다.
+ 즉, 개발자 미리 보기 시행 중에는 그러한 앱을 기존 플랫폼에서 테스트할 수 없다는 뜻입니다.
+
+
+</p>
+
+<h3 id="perms-vs-intents">권한과 인텐트 비교</h3>
+
+<p>
+  대부분의 경우, 앱에게 어떤 작업을 수행하도록 하려면 두 가지 방식 중 하나를 선택할 수 있습니다.
+ 첫째로 앱이 작업을 직접 수행하도록 권한을 요청할 수 있습니다.
+ 또는, 앱에 인텐트를 사용하도록 하여 또 다른 앱이 해당 작업을 수행하도록 할 수 있습니다.
+
+</p>
+
+<p>
+  예를 들어 앱이 기기 카메라로 사진을 촬영할 수 있어야 한다고 가정합시다.
+ 그러면 앱은 <code>android.permission.CAMERA</code> 권한을 요청할 수 있습니다. 이렇게 하면 앱이 카메라에 직접 액세스할 수 있습니다.
+
+ 그런 다음 앱이 카메라 API를 사용하여 카메라를 제어하고 사진을 촬영합니다.
+ 이 방식을 사용하면 앱에 사진 촬영 과정에 대해 완전한 제어권을 부여하고, 카메라 UI를 앱에 통합할 수 있습니다.
+
+
+</p>
+
+<p>
+  하지만, 그러한 제어권이 필요하지 않은 경우라면 그저 {@link android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} 인텐트를 사용해 이미지를 요청하면 됩니다.
+
+ 이 인텐트를 시작하면 사용자에게 카메라 앱을 선택하라는 메시지가 표시되고(기본 카메라 앱이 이미 있는 경우) 그 앱이 사진을 촬영합니다.
+
+ 이 카메라 앱은 촬영한 사진을 개발자의 앱의 {@link android.app.Activity#onActivityResult onActivityResult()} 메서드에 반환합니다.
+
+</p>
+
+<p>
+  이와 마찬가지로, 전화를 걸어야 하거나 사용자의 연락처에 액세스해야 하는 경우 등에는 적절한 인텐트를 만들거나 적절한 객체에 직접 액세스하도록 권한을 요청할 수 있습니다.
+
+ 이 두 가지 방식에는 각각 장단점이 있습니다.
+
+</p>
+
+<p>
+  권한을 사용하는 경우:
+</p>
+
+<ul>
+  <li>개발자가 직접 작업을 수행하는 경우 본인의 앱이 사용자 환경을 완전히 제어합니다.
+ 다만, 그렇게 포괄적인 제어권을 가지면 적절한 UI를 디자인해야 하므로 작업이 복잡해집니다.
+
+  </li>
+
+  <li>사용자에게 권한을 부여하라는 메시지는 작업을 처음 수행할 때만 표시됩니다.
+ 그 다음부터는 앱이 사용자로부터 더 이상의 상호작용을 요청하지 않아도 작업을 수행할 수 있습니다.
+ 다만, 사용자가 해당 권한을 허용하지 않는 경우(또는 나중에 취소하는 경우), 앱은 해당 작업을 수행할 수 없게 됩니다.
+
+
+  </li>
+</ul>
+
+<p>
+  인텐트를 사용하는 경우:
+</p>
+
+<ul>
+  <li>작업을 위해 UI를 디자인하지 않아도 됩니다. 이는 인텐트를 처리하는 앱이 UI를 제공하기 때문입니다. 하지만, 이것은 즉 개발자에게 사용자 환경에 대한 제어권이 전혀 없다는 뜻이기도 합니다.
+
+ 사용자는 어쩌면 개발자가 본 적도 없는 앱과 상호작용하고 있을지 모릅니다.
+
+  </li>
+
+  <li>사용자에게 해당 작업에 대한 기본 앱이 없는 경우, 시스템은 사용자에게 앱을 선택하라는 메시지를 표시합니다. 사용자가 기본 처리기를 지정하지 않으면 해당 작업을 수행할 때마다 추가 대화창을 거쳐야 할 수도 있습니다.
+
+
+
+  </li>
+</ul>
+
+<h2 id="coding">런타임 권한에 대한 코딩</h2>
+
+<p>
+  새로운 M 개발자 미리 보기를 대상으로 앱을 개발하는 경우, 새 권한 모델을 사용해야 합니다.
+ 이는 즉, 매니페스트에 필요한 권한을 선언하는 것 말고도 런타임에 자신이 해당 권한을 가지고 있는지도 확인해야 하며, 그러한 권한을 이미 가지고 있지 않으면 권한을 요청해야 한다는 뜻입니다.
+
+
+
+</p>
+
+<h3 id="enabling">
+  새 권한 모델 활성화하기
+</h3>
+
+<p>
+  새로운 M 개발자 미리 보기 권한 모델을 활성화하려면 앱의 <code>targetSdkVersion</code> 특성을 <code>"MNC"</code>로 설정하고, <code>compileSdkVersion</code>은 <code>"android-MNC"</code>로 설정하세요.
+
+ 이렇게 하면 새 권한 기능이 모두 활성화됩니다.
+
+</p>
+
+<p>
+  미리 보기 릴리스에서는 <code>minSdkVersion</code>을 <code>"MNC"</code>로 설정해야만 미리 보기 SDK와 컴파일할 수 있습니다.
+
+</p>
+
+<h3 id="m-only-perm">
+  M 미리 보기 전용 권한 지정하기
+</h3>
+
+<p>
+  새 <code>&lt;uses-permission-sdk-m&gt;</code> 요소를 앱 매니페스트에 사용하여 권한이 M 개발자 미리 보기에서만 필요하다는 것을 나타낼 수 있습니다.
+ 권한을 이런 식으로 선언하면 앱이 이전 버전의 기기에 설치될 때마다 시스템에서 사용자에게 메시지를 표시하지도 않고 앱에 권한을 허용하지도 않습니다. <code>&lt;uses-permission-sdk-m&gt;</code> 요소를 사용하면 새 권한을 앱의 업데이트된 버전에 추가하면서도 사용자가 업데이트를 설치할 때 권한을 허용하라고 강제로 시키지 않아도 됩니다.
+
+
+
+
+
+
+</p>
+
+<p>
+  앱이 M 개발자 미리 보기를 갖춘 기기에서 실행되는 경우, <code>&lt;uses-permission-sdk-m&gt;</code>은 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>과 똑같이 동작합니다.
+
+
+  시스템은 사용자가 앱을 설치할 때 권한을 허용하라는 메시지를 표시하지 않고, 앱이 필요할 때마다 권한을 요청하게 됩니다.
+
+</p>
+
+<h3 id="prompting">
+  권한에 대한 메시지 표시하기
+</h3>
+
+<p>
+  앱이 새로운 M 개발자 미리 보기 권한 모델을 사용하는 경우, 앱이 M 미리 보기에서 실행되는 기기에서 처음 시작되었을 때 사용자에게 모든 권한을 허용하도록 요청하지 않습니다.
+
+ 대신, 앱은 필요할 때마다 권한을 요청합니다.
+ 앱이 권한을 요청하면 시스템이 사용자에게 대화창으로 표시합니다.
+
+</p>
+
+<p>
+  앱이 SDK 22 이하를 탑재한 기기에서 실행되는 경우, 앱은 기존 권한 모델을 사용합니다.
+ 사용자가 앱을 설치하면 앱이 자신의 매니페스트에서 요청하는 모든 권한을 허용하라는 메시지가 표시되는데, 이때 <code>&lt;uses-permission-sdk-m&gt;</code>이라는 레이블이 붙은 권한은 예외입니다.
+
+
+</p>
+
+<h4 id="check-platform">앱이 실행되는 플랫폼 확인</h4>
+
+<p>
+  이 권한 모델은 M 개발자 미리 보기를 실행하는 기기에서만 지원됩니다.
+ 이러한 메서드 중에서 호출하려면 앱은 우선 {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME} 값을 확인하여 자신이 어느 플랫폼에서 실행 중인지 확인해야 합니다.
+
+
+ 기기가 M 개발자 미리 보기에서 실행 중인 경우, {@link android.os.Build.VERSION#CODENAME CODENAME}은 <code>"MNC"</code>입니다.
+
+</p>
+
+<h4 id="check-for-permission">앱에 필요한 권한이 있는지 확인</h4>
+
+<p>사용자가 권한을 필요로 하는 무언가를 하려고 시도하면, 앱은 자신이 현재 이 작업을 수행하는 데 필요한 권한을 가지고 있는지 확인합니다.
+ 이렇게 하기 위해 앱은 <code>Context.checkSelfPermission( )</code>을 호출합니다.
+
+<i>permission_name</i> 사용자가 앱의 권한을 언제든 취소할 수 있기 때문에 앱은 사용자가 해당 권한을 이미 허용했다는 것을 알고 있더라도 확인 작업을 수행해야 합니다.
+
+
+ 예를 들어, 사용자가 사진 촬영 앱을 사용하고자 한다면 앱은 <code>Context.checkSelfPermission(Manifest.permission.CAMERA)</code>를 호출합니다.
+
+</p>
+
+<p class="table-caption" id="permission-groups">
+  <strong>표 1.</strong> 권한과 권한 그룹.</p>
+<table>
+  <tr>
+    <th scope="col">권한 그룹</th>
+    <th scope="col">권한</th>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CALENDAR</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CALENDAR</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.WRITE_CALENDAR</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CAMERA</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.CAMERA</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CONTACTS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_PROFILE</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_PROFILE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.LOCATION</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.ACCESS_FINE_LOCATION</code>
+        </li>
+        <li>
+          <code>android.permission.ACCESS_COARSE_LOCATION</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.MICROPHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.RECORD_AUDIO</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.PHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_PHONE_STATE</code>
+        </li>
+        <li>
+          <code>android.permission.CALL_PHONE</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CALL_LOG</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CALL_LOG</code>
+        </li>
+        <li>
+          <code>com.android.voicemail.permission.ADD_VOICEMAIL</code>
+        </li>
+        <li>
+          <code>android.permission.USE_SIP</code>
+        </li>
+        <li>
+          <code>android.permission.PROCESS_OUTGOING_CALLS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SENSORS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.BODY_SENSORS</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.USE_FINGERPRINT</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SMS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.SEND_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_WAP_PUSH</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_MMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CELL_BROADCASTS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+</table>
+
+<h4 id="request-permissions">필요한 경우 권한 요청</h4>
+
+<p>앱이 자신에게 필요한 권한을 이미 가지고 있지 않은 경우, 앱은 <code>Activity.requestPermissions(String[], int)</code> 메서드를 호출하여 적절한 권한(여러 개일 수 있음)을 요청합니다.
+
+ 앱은 원하는 권한을 요청하면서 정수 "요청 코드"를 요청합니다.
+
+  이 메서드는 비동기화 방식으로 기능합니다. 이는 즉각적으로 반환되며, 사용자가 대화 상자에 응답한 다음에는 시스템이 결과를 가지고 앱의 콜백 메서드를 호출하여 앱이 <code>requestPermissions()</code>에 전달한 "요청 코드"와 같은 코드를 전달합니다.
+
+
+</p>
+
+  <p>다음 코드는 앱에 사용자의 연락처를 읽을 권한이 있는지 코드 확인을 하고, 필요한 경우 해당 권한을 요청합니다.
+</p>
+
+<pre>
+if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+        != PackageManager.PERMISSION_GRANTED) {
+    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+    // app-defined int constant
+
+    return;
+}
+</pre>
+
+<h4 id="handle-response">권한 요청 응답 처리하기</h4>
+
+<p>
+  앱이 권한을 요청하면 시스템이 사용자에게 대화 상자를 표시합니다.
+ 사용자가 응답하면 시스템은 앱의 <code>Activity.onRequestPermissionsResult(int, String[], int[])</code>를 불러내 이를 사용자 응답에 전달합니다.
+
+ 앱은 해당 메서드를 재정의해야 합니다. 이 콜백에는 개발자가 <code>requestPermissions()</code>에 전달한 것과 같은 요청 코드가 전달됩니다.
+
+ 예를 들어 어느 앱이 <code>READ_CONTACTS</code> 액세스를 요청한다면 다음과 같은 콜백 메서드를 가지고 있을 수 있습니다.
+
+
+</p>
+
+<pre>
+&#64;Override
+public void onRequestPermissionsResult(int requestCode,
+        String permissions[], int[] grantResults) {
+    switch (requestCode) {
+        case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // permission was granted, yay! do the
+                // calendar task you need to do.
+
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+            }
+            return;
+        }
+
+        // other 'switch' lines to check for other
+        // permissions this app might request
+    }
+}
+</pre>
+
+  <p>사용자가 권한을 허용하면 시스템은 앱 매니페스트에 그 기능 영역에 대해 목록으로 표시된 모든 권한을 해당 앱에 부여합니다.
+ 사용자가 요청을 거부하면 적절한 조치를 취해야 합니다.
+ 예를 들어 이 권한에 좌우되는 메뉴 작업을 모두 비활성화할 수 있습니다.
+
+  </li>
+</p>
+
+<p>
+  시스템이 사용자에게 권한을 허용하도록 요청하면 사용자에게는 시스템에 해당 권한을 다시 요청하지 말라고 지시할 선택권이 있습니다.
+ 그런 경우, 앱이 해당 권한을 요청하기 위해 <code>requestPermissions()</code>를 사용하면 시스템이 즉시 요청을 거부합니다.
+
+ 이 경우 시스템은 사용자가 명시적으로 개발자의 요청을 다시 거부한 것처럼 <code>onRequestPermissionsResult()</code>를 호출합니다.
+
+ 이러한 이유로, 앱은 사용자와의 직접적인 상호작용이 일어났다고 가정해서는 안 됩니다.
+
+</p>
+
+<h2 id="testing">런타임 권한 테스트</h2>
+
+
+<p>
+  M 개발자 미리 보기를 대상으로 삼고 앱을 개발하는 경우, 이 앱이 권한을 적절하게 처리하는지 테스트해보아야 합니다.
+ 앱이 실행될 때 특정 권한을 가지고 있다고 가정해서는 안 됩니다.
+ 앱을 처음 시작할 때에는 아무런 권한도 없을 가능성이 높고, 사용자가 언제든 권한을 취소하거나 복원할 수 있기 때문입니다.
+
+
+</p>
+
+<p>
+  앱을 테스트하여 모든 권한 관련 상황에서 제대로 작동하는지 확인하는 것이 좋습니다.
+ M 미리 보기 SDK에서는 새로운 <a href="{@docRoot}tools/help/adb.html">Android 디버그 브리지(adb)</a> 명령을 제공하여 여러분이 시도해 보아야 하는 권한 설정이 무엇이든 앱을 테스트할 수 있도록 하였습니다.
+
+
+
+</p>
+
+<h3>
+  새로운 adb 명령 및 선택 사항
+</h3>
+
+<p>
+  M 미리 보기 SDK 플랫폼 도구에서는 여러 가지 새로운 명령을 제공하여 앱이 권한을 처리하는 방식을 테스트해볼 수 있습니다.
+
+</p>
+
+<h4>
+  권한으로 설치
+</h4>
+
+<p>
+  <a href="{@docRoot}tools/help/adb.html#move"><code>adb
+  install</code></a> 명령의 새로운 <code>-g</code> 선택 항목을 사용하면 앱을 설치하고 해당 앱의 매니페스트에 목록으로 표시된 모든 권한을 허용합니다.
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb install -g &lt;path_to_apk&gt;
+</pre>
+
+<h4>
+  권한 허용 및 취소
+</h4>
+
+<p>
+  새로운 ADB <a href="{@docRoot}tools/help/adb.html#pm">패키지 관리자(pm)</a> 명령을 사용하면 설치된 앱에 권한을 허용하고 취소할 수 있습니다. 이 기능은 자동화 설정에서 유용하게 쓰일 수 있습니다.
+
+
+</p>
+
+<p>
+  권한을 허용하려면, 패키지 관리자의 <code>grant</code> 명령을 사용하세요.
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<p>
+  예를 들어 com.example.myapp 패키지 권한을 허용하여 오디오를 녹음하려면 이 명령을 사용하면 됩니다.
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
+</pre>
+
+<p>
+  권한을 취소하려면, 패키지 관리자의 <code>revoke</code> 명령을 사용하세요.
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<h2 id="best-practices">모범 사례</h2>
+
+<p>
+  새 권한 모델을 사용하면 사용자에게 보다 원활한 환경을 제공하고, 앱을 더욱 쉽게 설치하며 앱이 어떤 작업을 하고 있는지 바로 확인할 수 있습니다.
+
+ 새 모델의 장점을 최대한 활용할 수 있도록 다음과 같은 모범 사례를 추천해 드립니다.
+
+</p>
+
+
+<h3 id="bp-what-you-need">필요한 권한만 요청</h3>
+
+<p>
+  권한을 요청할 때마다 사용자에게는 결정을 내리라는 강요를 하는 셈입니다.
+  사용자가 요청을 거절하면 앱의 기능이 저하됩니다.
+  때문에 이러한 요청을 하는 횟수를 최소한으로 줄이는 것이 좋습니다.
+</p>
+
+<p>
+  예를 들어 앱이 권한을 요청하는 대신 <a href="{@docRoot}guide/components/intents-filters.html">인텐트</a>를 사용해 필요한 기능을 얻을 수 있는 경우도 꽤 많습니다.
+
+ 앱이 전화기의 카메라를 사용해 사진을 촬영해야 하는 경우, 앱은 {@link android.provider.MediaStore#ACTION_IMAGE_CAPTURE MediaStore.ACTION_IMAGE_CAPTURE} 인텐트를 사용할 수 있습니다.
+
+
+ 앱이 인텐트를 실행하면 시스템이 사용자에게 메시지를 표시해 이미 설치된 카메라 앱을 선택하여 사진을 촬영하도록 합니다.
+
+
+</p>
+
+<h3 id="bp-dont-overwhelm">
+  사용자에게 부담을 주지 말 것
+</h3>
+
+<p>
+  사용자에게 엄청나게 많은 수의 권한 요청을 한꺼번에 들이밀면 사용자가 부담을 느끼고 앱을 종료해버리는 결과를 초래할 수 있습니다. 대신 권한이 필요할 때마다 요청하는 것이 좋습니다.
+
+
+</p>
+
+<p>
+  일부 경우에는 앱에 절대적으로 꼭 필요한 권한이 한 개 이상 있을 수도 있습니다. 그런 경우에는 앱이 시작되자마자 해당 권한을 모두 요청하는 것을 권장합니다.
+
+ 예를 들어 사진 앱을 만들면 앱이 기기 카메라로 액세스할 수 있는 권한이 필요합니다.
+ 사용자가 앱을 처음으로 시작할 때 카메라를 사용할 권한을 요청받아도 놀라지는 않을 것입니다.
+
+ 하지만 같은 앱에 사용자의 연락처과 사진을 공유하는 기능도 있다고 가정한다면 이 경우 해당 권한을 첫 시작 시점에 요청하는 것은 별로 권장할 만한 일이 <em>아닙니다.</em>
+
+ 대신, 사용자가 "공유" 기능을 요청하려 할 때까지 기다렸다가 그 때 해당 권한을 요청하면 됩니다.
+
+</p>
+
+<p>
+  앱이 튜토리얼을 제공하는 경우, 튜토리얼 시퀀스가 다 끝날 무렵에 앱의 필수 권한을 요청하는 것이 이치에 맞을 수 있습니다.
+
+</p>
+
+<h3 id="bp-explain">
+  권한이 필요한 이유 설명
+</h3>
+
+<p>
+  개발자가 <code>requestPermissions()</code>를 호출하면 시스템이 표시하는 권한 대화창에는 앱이 원하는 권한이 무엇인지는 나타나 있지만 그것이 필요한 이유는 설명하지 않습니다.
+
+ 사용자가 이런 것을 의아하게 여기는 경우가 있을 수 있습니다.
+  우선 사용자에게 앱이 왜 그런 권한을 원하는지 설명한 다음 <code>requestPermissions()</code>를 호출하는 것이 좋습니다.
+
+</p>
+
+<p>
+  예를 들어 사진 앱인 경우 위치 서비스를 이용하고자 할 수 있습니다. 그래야 사진에 지오태그를 표시할 수 있기 때문입니다.
+ 일반적인 사용자는 사진에 위치 정보를 담을 수 있다는 점을 모를 수도 있고, 그러면 사진 앱이 왜 위치를 알고 싶어 하는지 의아하게 여길 수 있습니다.
+
+ 그러므로 이런 경우에는 앱이 사용자에게 이런 기능에 대해 <em>미리</em> 알려드린 후 <code>requestPermissions()</code>를 호출하는 것이 좋습니다.
+
+
+</p>
+
+<p>
+  이를 수행하기 위한 한 가지 방법은 이러한 요청을 앱 튜토리얼에 넣는 것입니다. 튜토리얼에는 앱의 각 기능을 표시할 수 있고, 그러면서 어느 권한이 필요한지 설명할 수도 있기 때문입니다.
+
+ 예를 들어 사진 앱의 튜토리얼에서 "연락처 목록의 지인들과 사진 공유" 기능을 시연한 다음 사용자에게 앱이 사용자의 연락처를 보려면 권한을 부여해야 한다고 알리면 됩니다.
+
+
+ 그런 다음, 앱이 <code>requestPermissions()</code>를 호출하여 사용자에게 해당 액세스를 요청합니다.
+ 물론 튜토리얼을 따르지 않는 사용자도 있게 마련이므로 앱의 정상 작동 중에 권한을 확인하고 요청해야 합니다.
+
+
+</p>

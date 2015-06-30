@@ -1,0 +1,402 @@
+page.title=行为变更
+page.keywords=预览版,sdk,兼容性
+sdk.platform.apiLevel=MNC
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文内容</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">运行时权限</a></li>
+    <li><a href="#behavior-power">节能优化</a>
+        <ol>
+            <li><a href="#behavior-doze">打盹</a></li>
+            <li><a href="#behavior-app-standby">应用待机</a></li>
+        </ol>
+    </li>
+    <li><a href="#behavior-adoptable-storage">可采用的存储设备</a></li>
+    <li><a href="#behavior-apache-http-client">取消支持 Apache HTTP 客户端</a></li>
+    <li><a href="#behavior-audiomanager-Changes">音频管理器变更</a></li>
+    <li><a href="#behavior-test-selection">文本选择</a></li>
+    <li><a href="#behavior-keystore">Android 密钥库变更</a></li>
+    <li><a href="#behavior-network">Wi-Fi 和网络连接变更</a></li>
+    <li><a href="#behavior-camera">相机服务变更</a></li>
+    <li><a href="#behavior-art-runtime">ART 运行时</a></li>
+    <li><a href="#behavior-apk-validation">APK 验证</a></li>
+    <li><a href="#behavior-afw">Android for Work 变更</a></li>
+</ol>
+
+<h2>API 差异</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API 级别 22 至 M 预览版&raquo;</a> </li>
+</ol>
+
+
+<h2>另请参阅</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">M 开发者预览版 API 概览</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>M 开发者预览版除了提供诸多新特性和功能外，还对系统和 API 行为做出了各种变更。
+本文重点介绍您应该了解并在开发应用时加以考虑的一些重要变更。
+</p>
+
+<p>如果您之前发布过 Android 应用，请注意您的应用可能受到这些平台变更的影响。
+</p>
+
+<h2 id="behavior-runtime-permissions">运行时权限</h1>
+<p>本预览版引入了一种新的权限模型，如今，用户可直接在运行时管理应用权限。
+这种模型让用户能够更好地了解和控制权限，同时为应用开发者精简了安装和自动更新过程。用户可为所安装的各个应用分别授予或撤销权限。
+
+ </p>
+
+<p>对于面向 M 预览版开发的应用，请务必在运行时检查和请求权限。
+如需确定您的应用是否已被授予权限，请调用新增的 {@code Context.checkSelfPermission()} 方法。
+如需请求权限，请调用新增的 
+{@code Activity.requestPermission()} 方法。即使您的应用不是针对 M 开发的，您也应该在新权限模型下测试您的应用。
+</p>
+
+<p>如需了解有关在您的应用中支持新权限模型的详细信息，请参阅开发者预览版的<a href="{@docRoot}preview/features/runtime-permissions.html">权限</a>页面。
+
+如需了解如何评估新模型对应用的影响，请参阅<a href="{@docRoot}preview/testing/guide.html#runtime-permissions">测试指南</a>。
+</p>
+
+<h2 id="behavior-power">节能优化</h2>
+<p>本预览版引入了针对空闲设备和应用的最新节能优化技术。</p>
+
+<h3 id="behavior-doze">打盹</h3>
+<p>如果设备未插入电源，并在屏幕关闭后的一段时间内保持不活动状态，则会进入<em>打盹</em>模式，在该模式下设备会尝试让系统保持休眠状态。
+在该模式下，设备会定期短时间恢复正常工作，以便进行应用同步，还可让系统执行任何挂起的操作。
+
+</p>
+
+<p>在打盹模式下，您的应用会受到以下限制：</p>
+<ul>
+<li>网络访问被禁用，除非您的应用获得高优先级 Google Cloud Messaging 操作消息 (tickle)。
+</li>
+<li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">唤醒锁</a>会被忽略。</li>
+<li>通过 {@link android.app.AlarmManager} 类设置的闹铃会被禁用，但通过 {@link android.app.AlarmManager#setAlarmClock setAlarmClock()} 方法和 {@code AlarmManager.setAndAllowWhileIdle()} 方法设置的闹铃除外。
+
+</li>
+<li>不执行 WiFi 扫描</li>
+<li>不允许运行同步适配器和 {@link android.app.job.JobScheduler} 的同步和作业。
+</li>
+</ul>
+</p>
+<p>当设备退出打盹模式时，它会执行任何挂起的作业和同步。</p>
+<p>您可以通过将运行 M 预览版的设备与您的开发计算机相连，并调用以下命令来测试此功能：
+
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+<p class="note"><strong>注</strong>：即将推出的 
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+ Google Cloud Messaging</a> 版本允许您指定高优先级消息。
+如果您的应用收到高优先级 GCM 消息，即使设备处于打盹模式，系统也会向其授予短时间的网络访问权限。
+
+</p>
+
+<p>如需了解在您的应用中测试打盹模式的技巧，请参阅
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">测试指南</a>。
+ </p>
+
+<h3 id="behavior-app-standby">应用待机</h3>
+<p>使用本预览版时，系统会在应用未被主动使用时确定其处于空闲状态。
+除非系统检测到以下信号之一，否则将在一段时间后将您的应用视为处于空闲状态：
+</p>
+
+<ul>
+<li>用户显式启动应用。</li>
+<li>应用当前有一个进程位于前台（表现为活动或前台服务形式，或被另一活动或前台服务占用）。
+</li>
+<li>应用生成用户可在锁屏或通知托盘中看到的通知。
+</li>
+<li>用户通过<strong>设置</strong>显式请求不对应用进行优化。
+</li>
+</ul>
+
+<p>如果设备未插入电源，系统会将被视为处于空闲状态的应用的网络访问禁用，并暂停其同步和作业。
+当设备插入电源时，系统将允许这些应用访问网络并执行任何挂起的作业和同步。
+如果设备长时间处于空闲状态，系统将按每天大约一次的频率允许空闲状态的应用访问网络。
+</p>
+
+<p>您可以通过将运行 M 预览版的设备与您的开发计算机相连，并调用以下命令来测试此功能：
+
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<p class="note"><strong>注</strong>：即将推出的 
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+ Google Cloud Messaging</a> (GCM) 版本允许您指定高优先级消息。
+如果您的应用收到高优先级 GCM 消息，即使其处于空闲状态，也会被授予短时间的网络访问权限。
+
+</p>
+
+<p>如需了解在您的应用中测试应用待机的技巧，请参阅
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">测试指南</a>。
+ </p>
+
+<h2 id="behavior-adoptable-storage">可采用的存储设备</h2>
+<p>
+使用本预览版时，用户可以<em>采用</em> SD 卡等外部存储设备。采用外部存储设备可加密和格式化设备，使其具有类似内部存储设备的行为。
+用户可以利用此特性在存储设备之间移动应用及其私有数据。
+移动应用时，系统会遵守清单文件中的 
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a>
+ 首选项。
+</p>
+
+<p>请注意，在内部存储设备与外部存储设备之间移动应用时，如果您的应用访问以下 API 或字段，它们返回的文件路径将会动态变化。郑重建议：在生成文件路径时，请始终动态调用这些 API。请勿使用硬编码文件路径或之前生成的永久性完全限定文件路径。
+
+
+</p>
+
+<ul>
+<li>{@link android.content.Context} 方法：
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>{@link android.content.pm.ApplicationInfo} 字段：
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>如需在开发者预览版中调试此功能，您可以将一个 USB 驱动器通过一根 USB On-The-Go (OTG) 电缆连接到 Android 设备并运行以下命令启用对该 USB 驱动器的采用：
+</p>
+
+<pre class="no-prettyprint">
+$ adb shell sm set-force-adoptable true
+</pre>
+
+<h2 id="behavior-apache-http-client">取消支持 Apache HTTP 客户端</h2>
+<p>本预览版取消了对 Apache HTTP 客户端的支持。如果您的应用使用该客户端，并以 Android 2.3（API 级别 9）或更高版本为目标平台，请改用 {@link java.net.HttpURLConnection} 类。
+
+此 API 效率更高，因为它可以通过透明压缩和响应缓存减少网络使用，并可最大限度降低耗电量。
+如需继续使用 Apache HTTP API，您必须先在 {@code build.gradle} 文件中声明以下编译时依赖项：
+
+</p>
+<pre>
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+<p>Android 正在从使用 OpenSSL 库转向使用 
+<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
+ 库。如果您要在应用中使用 Android NDK，请勿链接到并非 NDK API 组成部分的加密库，如 {@code libcrypto.so} 和 {@code libssl.so}。
+这些库并非公共 API，可能会在不同版本和设备上毫无征兆地发生变化或出现故障。此外，您还可能让自己暴露在安全漏洞的风险之下。
+
+请改为修改原生代码，以通过 JNI 调用 Java 加密 API，或静态链接到您选择的加密库。
+
+</p>
+
+<h2 id="behavior-audiomanager-Changes">音频管理器变更</h2>
+<p>不再支持通过 {@link android.media.AudioManager}
+ 类直接设置音量或将特定音频流静音。{@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} 方法已弃用，您应该改为调用
+{@code AudioManager.requestAudioFocus()} 方法。类似地，
+{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} 方法也已弃用，请改为调用 {@code AudioManager.adjustStreamVolume()} 方法并传入方向值 {@code ADJUST_MUTE} 或 {@code ADJUST_UNMUTE}。
+
+</p>
+
+<h2 id="behavior-test-selection">文本选择</h2>
+
+<img src="{@docRoot}preview/images/text-selection.gif" style="float:right; margin:0 0 20px 30px" width="360" height="640" />
+
+<p>现在，当用户在您的应用中选择文本时，您可以在一个<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection" class="external-link">浮动工具栏</a>中显示“剪切”<em></em>、“复制”<em></em>和“粘贴”<em></em>等文本选择操作。
+
+其在用户交互实现上与<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">为单个视图启用上下文操作模式</a>中所述的上下文操作栏类似。
+
+
+</p>
+
+<p>如需实现可用于文本选择的浮动工具栏，请在您的现有应用中做出以下更改：
+</p>
+<ol>
+<li>在 {@link android.view.View} 对象或 {@link android.app.Activity} 对象中，将 
+{@link android.view.ActionMode} 调用从 
+{@code startActionMode(Callback)} 更改为 {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}。</li>
+<li>改为使用 {@code ActionMode.Callback} 的现有实现扩展 
+{@code ActionMode.Callback2}。</li>
+<li>替代 {@code Callback2.onGetContentRect()} 方法，用于提供 {@link android.graphics.Rect} 内容对象（如文本选择矩形）在视图中的坐标。
+</li>
+<li>如果矩形的定位不再有效，并且这是唯一需要声明为无效的元素，请调用 {@code ActionMode.invalidateContentRect()} 方法。
+</li>
+</ol>
+
+<p>请注意，如果您使用 <a href="{@docRoot}tools/support-library/index.html">
+ Android Support Library</a> 22.2 修订版，浮动工具栏不向后兼容，默认情况下 appcompat 会获得对 {@link android.view.ActionMode} 对象的控制权。
+
+这会禁止显示浮动工具栏。如需在 
+{@link android.support.v7.app.AppCompatActivity} 中启用 
+{@link android.view.ActionMode} 支持，请调用 
+{@code android.support.v7.app.AppCompatActivity.getDelegate()}，然后对返回的 
+{@link android.support.v7.app.AppCompatDelegate} 调用 
+{@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()}，并将输入参数设置为 {@code false}。
+此调用会将 {@link android.view.ActionMode} 对象的控制权交还给框架。
+在运行 M 预览版的设备上，框架可以支持 
+{@link android.support.v7.app.ActionBar} 模式或浮动工具栏模式；而在运行 M 预览版之前版本的设备上，框架仅支持 {@link android.support.v7.app.ActionBar} 模式。
+</p>
+
+<h2 id="behavior-keystore">Android 密钥库变更</h2>
+<p>使用本预览版时，
+<a href="{@docRoot}training/articles/keystore.html">Android 密钥库提供程序</a>不再支持 DSA，
+但仍支持 ECDSA。</p>
+
+<p>禁用或重置安全锁屏时（例如，由用户或设备管理员执行此类操作时），系统将不再删除需要闲时加密的密钥，
+但在上述事件期间会删除需要闲时加密的密钥。
+</p>
+
+<h2 id="behavior-network">Wi-Fi 和网络连接变更</h2>
+
+<p>本预览版对 Wi-Fi 和网络连接 API 引入了以下行为变更。</p>
+<ul>
+<li>现在，您的应用只能更改由您创建的 {@link android.net.wifi.WifiConfiguration} 对象的状态。
+系统不允许您修改或删除由用户或其他应用创建的 
+{@link android.net.wifi.WifiConfiguration} 对象；
+</li>
+<li>
+在之前的版本中，如果应用利用带有 
+{@code disableAllOthers=true} 设置的 
+{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} 强制设备连接特定 Wi-Fi 网络，设备将会断开与蜂窝数据网络等其他网络的连接。
+在本预览版中，设备不再断开与上述其他网络的连接。如果您的应用的 {@code targetSdkVersion} 为 {@code “20”} 或更低，则会固定连接所选 Wi-Fi 网络。
+
+如果您的应用的 {@code targetSdkVersion} 为 {@code “21”} 或更高，请使用多网络 API（如 
+{@link android.net.Network#openConnection(java.net.URL) openConnection()} 、
+{@link android.net.Network#bindSocket(java.net.Socket) bindSocket()} 和新增的 
+{@code ConnectivityManager.bindProcessToNetwork()} 方法）来确保通过所选网络传送网络流量。
+
+</li>
+</ul>
+
+<h2 id="behavior-camera">相机服务变更</h2>
+<p>在本预览版中，相机服务中共享资源的访问模式已从之前的“先到先得”访问模式更改为高优先级进程优先的访问模式。
+
+对服务行为的变更包括：</p>
+<ul>
+<li>根据客户端应用进程的“优先级”授予对相机子系统资源的访问权，包括打开和配置相机设备。
+带有对用户可见活动或前台活动的应用进程一般会被授予较高的优先级，从而使相机资源的获取和使用更加可靠；
+
+</li>
+<li>当高优先级的应用尝试使用相机时，系统可能会“驱逐”正在使用相机客户端的低优先级应用。
+在已弃用的 {@link android.hardware.Camera} API 中，这会导致系统为被驱逐的客户端调用 
+{@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()}。
+
+在 {@link android.hardware.camera2 Camera2} API 中，这会导致系统为被驱逐的客户端调用 
+{@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()}；
+</li>
+<li>在配备相应相机硬件的设备上，不同的应用进程可同时独立打开和使用不同的相机设备。
+但现在，如果在多进程用例中同时访问相机会造成任何打开的相机设备的性能或能力严重下降，相机服务会检测到这种情况并禁止同时访问。
+
+即使并没有其他应用直接尝试访问同一相机设备，此变更也可能导致低优先级客户端被“驱逐”。
+
+
+</li>
+<li>
+更改当前用户会导致之前用户帐户拥有的应用内活动相机客户端被驱逐。
+对相机的访问仅限于访问当前设备用户拥有的用户个人资料。举例来说，这意味着，当用户切换到其他帐户后，“来宾”帐户实际上无法让使用相机子系统的进程保持运行状态。
+
+
+</li>
+</ul>
+
+<h2 id="behavior-art-runtime">ART 运行时</h2>
+<p>ART 运行时现在可正确实现 
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} 方法的访问规则。此变更修正了之前版本中 Dalvik 无法正确检查访问规则的问题。如果您的应用使用
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} 方法，并且您想替代访问检查，请调用 
+{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} 方法（将输入参数设置为 {@code true}）。
+
+
+
+如果您的应用使用
+<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 appcompat 库</a>或
+<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 recyclerview 库</a>，则您必须更新应用以使用这些库的最新版本。
+否则，请务必更新从 XML 引用的任何自定义类，以便能够访问它们的类构造函数。
+</p>
+
+<p>本预览版更新了动态链接程序的行为。动态链接程序现在可以识别库的 {@code soname} 与其路径之间的差异（<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
+公开 bug 6670</a>），并且现在已实现了按 {@code soname} 搜索。
+
+
+之前包含错误的 {@code DT_NEEDED} 条目（通常是开发计算机文件系统上的绝对路径）却仍工作正常的应用，如今可能会出现加载失败。
+</p>
+
+<p>现已正确实现 {@code dlopen(3) RTLD_LOCAL} 标志。请注意，
+{@code RTLD_LOCAL} 是默认值，因此不显式使用 
+{@code RTLD_LOCAL} 的 {@code dlopen(3)} 调用将受到影响（除非您的应用显式使用 {@code RTLD_GLOBAL}）。使用 
+{@code RTLD_LOCAL} 时，在随后通过调用 
+{@code dlopen(3)} 加载的库中并不能使用这些符号（这与由 {@code DT_NEEDED} 条目引用的情况截然不同）。</p>
+</p>
+
+<h2 id="behavior-apk-validation">APK 验证</h2>
+<p>该平台现在执行的 APK 验证更为严格。如果在清单文件中声明的文件在 APK 中并不存在，该 APK 将被视为已损坏。
+移除任何内容后必须重新签署 APK。
+</p>
+
+<h2 id="behavior-afw">Android for Work 变更</h2>
+<p>本预览版包含下列针对 Android for Work 的行为变更：</p>
+<ul>
+<li><strong>个人上下文中的工作联系人。</strong>Google Dialer Call Log 现在会在用户查看通话记录时显示工作联系人。将 {@code DevicePolicyManager.setCrossProfileCallerIdDisabled()} 设置为 {@code true} 可在 Google Dialer Call Log 中隐藏托管配置文件联系人。
+
+
+仅当您将 {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} 设置为 {@code false} 时，才可以通过蓝牙将工作联系人随个人联系人一起显示给设备。
+
+默认情况下，它设置为 {@code true}。
+
+</li>
+<li><strong>WiFi 配置移除</strong>：现在，当删除某个托管配置文件时，将会移除由配置文件所有者添加的 WiFi 配置（例如，通过调用
+{@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()} 方法添加的配置）；
+</li>
+<li><strong>WiFi 配置锁定</strong>：用户无法再修改或删除任何由活动设备所有者创建的 WiFi 配置。
+用户仍可创建和修改其自己的 WiFi 配置，前提是尚未针对该用户设置 {@link android.os.UserManager} 常量 
+{@link android.os.UserManager#DISALLOW_CONFIG_WIFI}。
+</li>
+<li><strong>通过添加 Google 帐户下载工作策略控制器</strong>向托管环境以外的设备添加需要通过工作策略控制器 (WPC) 管理的 Google 帐户时，帐户添加流程现在会提示用户安装相应的 WPC。在设备初始设置向导中通过<strong>设置 &gt; 帐户</strong>添加帐户时，也会出现此行为。
+
+
+
+</li>
+<li><strong>对特定 DevicePolicyManager API 行为的变更</strong>：调用 {@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()} 方法只会影响调用该方法的用户的相机；从托管配置文件调用它不会影响主用户运行的相机应用。
+
+
+此外，
+{@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()} 方法现在除了可供设备所有者使用外，还可供配置文件所有者使用。
+配置文件所有者可设置以下键盘锁限制：
+
+<ul>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} 和 
+{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}，它们影响配置文件上级用户的键盘锁设置。
+</li>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}，它只影响应用在托管配置文件中生成的通知。
+</li>
+</ul>
+</li>
+</ul>
