@@ -33,6 +33,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
 
     static final String REQUEST_ABORT = "abort";
     static final String REQUEST_COMPLETE = "complete";
+    static final String REQUEST_COMMAND = "command";
     static final String REQUEST_PICK = "pick";
     static final String REQUEST_CONFIRM = "confirm";
 
@@ -41,6 +42,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     TextView mLog;
     Button mAbortButton;
     Button mCompleteButton;
+    Button mCommandButton;
     Button mPickButton;
     Button mJumpOutButton;
     Button mCancelButton;
@@ -68,6 +70,8 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         mAbortButton.setOnClickListener(this);
         mCompleteButton = (Button)findViewById(R.id.complete);
         mCompleteButton.setOnClickListener(this);
+        mCommandButton = (Button)findViewById(R.id.command);
+        mCommandButton.setOnClickListener(this);
         mPickButton = (Button)findViewById(R.id.pick);
         mPickButton.setOnClickListener(this);
         mJumpOutButton = (Button)findViewById(R.id.jump);
@@ -117,6 +121,9 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         } else if (v == mCompleteButton) {
             VoiceInteractor.CompleteVoiceRequest req = new TestCompleteVoice();
             mInteractor.submitRequest(req, REQUEST_COMPLETE);
+        } else if (v == mCommandButton) {
+            VoiceInteractor.CommandRequest req = new TestCommand("Some arg");
+            mInteractor.submitRequest(req, REQUEST_COMMAND);
         } else if (v == mPickButton) {
             VoiceInteractor.PickOptionRequest.Option[] options =
                     new VoiceInteractor.PickOptionRequest.Option[5];
@@ -176,6 +183,37 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         }
     }
 
+    static class TestCommand extends VoiceInteractor.CommandRequest {
+        public TestCommand(String arg) {
+            super("com.android.test.voiceinteraction.COMMAND", makeBundle(arg));
+        }
+        @Override public void onCancel() {
+            Log.i(TAG, "Canceled!");
+            ((TestInteractionActivity)getActivity()).mLog.append("Canceled command\n");
+        }
+        @Override
+        public void onCommandResult(boolean finished, Bundle result) {
+            Log.i(TAG, "Command result: finished=" + finished + " result=" + result);
+            StringBuilder sb = new StringBuilder();
+            if (finished) {
+                sb.append("Command final result: ");
+            } else {
+                sb.append("Command intermediate result: ");
+            }
+            if (result != null) {
+                result.getString("key");
+            }
+            sb.append(result);
+            sb.append("\n");
+            ((TestInteractionActivity)getActivity()).mLog.append(sb.toString());
+        }
+        static Bundle makeBundle(String arg) {
+            Bundle b = new Bundle();
+            b.putString("key", arg);
+            return b;
+        }
+    }
+
     static class TestPickOption extends VoiceInteractor.PickOptionRequest {
         public TestPickOption(Option[] options) {
             super(new VoiceInteractor.Prompt("Need to pick something"), options, null);
@@ -200,10 +238,8 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                 }
                 sb.append(selections[i].getLabel());
             }
+            sb.append("\n");
             ((TestInteractionActivity)getActivity()).mLog.append(sb.toString());
-            if (finished) {
-                getActivity().finish();
-            }
         }
     }
 }

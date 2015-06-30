@@ -109,7 +109,7 @@ public abstract class VoiceInteractionSessionService extends Service {
         mSession = onNewSession(args);
         try {
             mSystemService.deliverNewSession(token, mSession.mSession, mSession.mInteractor);
-            mSession.doCreate(mSystemService, token, args, startFlags);
+            mSession.doCreate(mSystemService, token);
         } catch (RemoteException e) {
         }
     }
