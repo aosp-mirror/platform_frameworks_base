@@ -3,6 +3,7 @@ package android.net.dhcp;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
+import android.net.util.IpUtils;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.system.OsConstants;
@@ -405,82 +406,17 @@ abstract class DhcpPacket {
             // fix UDP header: insert length
             short udpLen = (short)(buf.position() - udpHeaderOffset);
             buf.putShort(udpLengthOffset, udpLen);
+
             // fix UDP header: checksum
-            // checksum for UDP at udpChecksumOffset
-            int udpSeed = 0;
+            buf.putShort(udpChecksumOffset,
+                    IpUtils.udpChecksum(buf, ipHeaderOffset, udpHeaderOffset));
 
-            // apply IPv4 pseudo-header.  Read IP address src and destination
-            // values from the IP header and accumulate checksum.
-            udpSeed += intAbs(buf.getShort(ipChecksumOffset + 2));
-            udpSeed += intAbs(buf.getShort(ipChecksumOffset + 4));
-            udpSeed += intAbs(buf.getShort(ipChecksumOffset + 6));
-            udpSeed += intAbs(buf.getShort(ipChecksumOffset + 8));
-
-            // accumulate extra data for the pseudo-header
-            udpSeed += IP_TYPE_UDP;
-            udpSeed += udpLen;
-            // and compute UDP checksum
-            buf.putShort(udpChecksumOffset, (short) checksum(buf, udpSeed,
-                                                             udpHeaderOffset,
-                                                             buf.position()));
             // fix IP header: insert length
             buf.putShort(ipLengthOffset, (short)(buf.position() - ipHeaderOffset));
+
             // fixup IP-header checksum
-            buf.putShort(ipChecksumOffset,
-                         (short) checksum(buf, 0, ipHeaderOffset, endIpHeader));
+            buf.putShort(ipChecksumOffset, IpUtils.ipChecksum(buf, ipHeaderOffset));
         }
-    }
-
-    /**
-     * Converts a signed short value to an unsigned int value.  Needed
-     * because Java does not have unsigned types.
-     */
-    private static int intAbs(short v) {
-        return v & 0xFFFF;
-    }
-
-    /**
-     * Performs an IP checksum (used in IP header and across UDP
-     * payload) on the specified portion of a ByteBuffer.  The seed
-     * allows the checksum to commence with a specified value.
-     */
-    private int checksum(ByteBuffer buf, int seed, int start, int end) {
-        int sum = seed;
-        int bufPosition = buf.position();
-
-        // set position of original ByteBuffer, so that the ShortBuffer
-        // will be correctly initialized
-        buf.position(start);
-        ShortBuffer shortBuf = buf.asShortBuffer();
-
-        // re-set ByteBuffer position
-        buf.position(bufPosition);
-
-        short[] shortArray = new short[(end - start) / 2];
-        shortBuf.get(shortArray);
-
-        for (short s : shortArray) {
-            sum += intAbs(s);
-        }
-
-        start += shortArray.length * 2;
-
-        // see if a singleton byte remains
-        if (end != start) {
-            short b = buf.get(start);
-
-            // make it unsigned
-            if (b < 0) {
-                b += 256;
-            }
-
-            sum += b * 256;
-        }
-
-        sum = ((sum >> 16) & 0xFFFF) + (sum & 0xFFFF);
-        sum = ((sum + ((sum >> 16) & 0xFFFF)) & 0xFFFF);
-        int negated = ~sum;
-        return intAbs((short) negated);
     }
 
     /**
