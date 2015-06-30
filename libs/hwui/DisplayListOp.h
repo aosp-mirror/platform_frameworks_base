@@ -489,6 +489,25 @@ private:
     const SkMatrix mMatrix;
 };
 
+class SetLocalMatrixOp : public StateOp {
+public:
+    SetLocalMatrixOp(const SkMatrix& matrix)
+            : mMatrix(matrix) {}
+
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
+        renderer.setLocalMatrix(mMatrix);
+    }
+
+    virtual void output(int level, uint32_t logFlags) const override {
+        OP_LOG("SetLocalMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(&mMatrix));
+    }
+
+    virtual const char* name() override { return "SetLocalMatrix"; }
+
+private:
+    const SkMatrix mMatrix;
+};
+
 class ConcatMatrixOp : public StateOp {
 public:
     ConcatMatrixOp(const SkMatrix& matrix)
