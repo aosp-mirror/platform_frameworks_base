@@ -198,8 +198,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                 isScreenCaptureAllowed = mAm.isScreenCaptureAllowedOnCurrentActivity();
             } catch (RemoteException e) {
             }
-            boolean allDataEnabled = (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0)
+            boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0
+                    && isScreenCaptureAllowed;
+            boolean screenshotEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ASSIST_SCREENSHOT_ENABLED, 1, mUser) != 0
                     && isScreenCaptureAllowed;
             mShowArgs = args;
             mShowFlags = flags;
@@ -208,7 +211,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             if ((flags& VoiceInteractionSession.SHOW_WITH_ASSIST) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_STRUCTURE, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
-                        && allDataEnabled) {
+                        && structureEnabled) {
                     try {
                         needDisclosure = true;
                         mAm.requestAssistContextExtras(ActivityManager.ASSIST_CONTEXT_FULL,
@@ -226,7 +229,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             if ((flags& VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_SCREENSHOT, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
-                        && allDataEnabled) {
+                        && screenshotEnabled) {
                     try {
                         needDisclosure = true;
                         mIWindowManager.requestAssistScreenshot(mScreenshotReceiver);
