@@ -6473,20 +6473,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
-        String[] permissions = data.getStringArrayExtra(
-                PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES);
-        final int[] grantResults = data.getIntArrayExtra(
-                PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS);
+        // If the package installer crashed we may have not data - best effort.
+        String[] permissions = (data != null) ? data.getStringArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES) : new String[0];
+        final int[] grantResults = (data != null) ? data.getIntArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS) : new int[0];
         onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void dispatchRequestPermissionsResultToFragment(int requestCode, Intent data,
-            Fragment fragement) {
-        String[] permissions = data.getStringArrayExtra(
-                PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES);
-        final int[] grantResults = data.getIntArrayExtra(
-                PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS);
-        fragement.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            Fragment fragment) {
+        // If the package installer crashed we may have not data - best effort.
+        String[] permissions = (data != null) ? data.getStringArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES) : new String[0];
+        final int[] grantResults = (data != null) ? data.getIntArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS) : new int[0];
+        fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
