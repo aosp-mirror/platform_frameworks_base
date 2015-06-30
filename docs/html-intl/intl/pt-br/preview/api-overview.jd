@@ -1,0 +1,521 @@
+page.title=Visão geral da API
+page.keywords=preview,sdk,compatibility
+page.tags=previewresources, androidm
+sdk.platform.apiLevel=22-mnc
+page.image=images/cards/card-api-overview_16-9_2x.png
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento
+ <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">mostrar mais</span>
+        <span class="less" style="display:none">mostrar menos</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#app-linking">Vínculo de aplicativo</a></li>
+  <li><a href="#backup">Backup automático para aplicativos</a></li>
+  <li><a href="#authentication">Autenticação</a>
+    <ol>
+      <li><a href="#fingerprint-authentication">Autenticação com impressão digital</a></li>
+      <li><a href="#confirm-credential">Confirmação de credencial</a></li>
+    </ol>
+  </li>
+  <li><a href="#direct-share">Compartilhamento direto</a></li>
+  <li><a href="#voice-interactions">Interações por voz</a></li>
+  <li><a href="#assist">Auxiliar API</a></li>
+  <li><a href="#notifications">Notificações</a></li>
+  <li><a href="#bluetooth-stylus">Suporte para Bluetooth Stylus</a></li>
+  <li><a href="#ble-scanning">Digitalização de baixa energia por Bluetooth aprimorada</a></li>
+  <li><a href="#hotspot">Suporte a Hotspot 2.0 Release 1</a></li>
+  <li><a href="#4K-display">Modo de exibição 4K</a></li>
+  <li><a href="#behavior-themeable-colorstatelists">ColorStateLists com tema</a></li>
+  <li><a href="#audio">Recursos de áudio</a></li>
+  <li><a href="#video">Recursos de vídeo</a></li>
+  <li><a href="#camera">Recursos de câmera</a>
+    <ol>
+      <li><a href="#flashlight">API da lanterna</a></li>
+      <li><a href="#reprocessing">Reprocessamento da câmera</a></li>
+    </ol>
+  </li>
+  <li><a href="#afw">Recursos do Android for Work</a></li>
+</ol>
+
+<h2>Diferenças de API</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API de nível 22 para M Preview &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>O M Developer Preview fornece uma visualização avançada no próximo lançamento
+ para a plataforma Android, oferecendo novos recursos para desenvolvedores e usuários
+de aplicativos. Este documento fornece uma introdução às APIs mais notáveis.</p>
+
+<p>O M Developer Preview foi feito para <strong>novos desenvolvedores
+adotantes</strong> e <strong>testadores</strong>. Caso tenha interesse
+ em influenciar a direção da estrutura do Android,
+<a href="{@docRoot}preview/setup-sdk.html">experimente o M Developer
+ Preview</a> e envie-nos feedback!</p>
+
+<p class="caution"><strong>Cuidado:</strong> não publique aplicativos
+que usam o M Developer Preview na Google Play Store.</p>
+
+<p class="note"><strong>Observação:</strong> este documento frequentemente
+menciona classes e métodos que ainda não possuem material de referência disponível em <a href="{@docRoot}">developer.android.com</a>. Esses elementos de API
+são formatados em {@code code style} neste documento (sem hyperlinks). Para a
+documentação de API preliminar destes elementos, faça o download da <a href="{@docRoot}preview/download.html#docs">referência da prévia</a>.</p>
+
+<h3>Alterações importantes de comportamento</h3>
+
+<p>Caso tenha publicado anteriormente um aplicativo para Android, saiba que ele pode ser afetado
+pelas alterações na plataforma.</p>
+
+<p>Consulte <a href="behavior-changes.html">alterações de comportamento</a> para obter mais informações.</p>
+
+<h2 id="app-linking">Vínculo de aplicativo</h2>
+<p>Esta prévia aprimora o sistema de intenções do Android fornecendo vínculo de aplicativo mais poderoso.
+Este recurso permite que você associe um aplicativo com um domínio de web próprio. Com base nesta
+associação, a plataforma pode determinar o aplicativo padrão a ser usado para lidar com um link da web
+em particular e ignorar a solicitação aos usuários para selecionar um aplicativo. Para aprender como implementar este aplicativo, consulte 
+<a href="{@docRoot}preview/features/app-linking.html">vínculo de aplicativo</a>.
+
+<h2 id="backup">Backup automático para aplicativos</h2>
+<p>O sistema agora realiza backup automático completo de dados e restauração para aplicativos. Este comportamento
+é ativado por padrão para aplicativos com M Preview; não é necessário mais código adicional. Se
+os usuários excluírem as contas da Google, os dados de backup também serão excluídos. Para aprender como este recurso
+funciona e como configurar o backup no sistema do arquivo, consulte
+<a href="{@docRoot}preview/backup/index.html">backup automático para aplicativos</a>.</p>
+
+<h2 id="authentication">Autenticação</h2>
+<p>Esta prévia oferece novas APIs para permitir que você autentique os usuários usando digitalizadores de impressão digital em dispositivos
+suportados e verifique o quão recentemente os usuários autenticaram pela última vez usando o
+mecanismo de desbloqueio por dispositivo (como senha de tela de bloqueio). Use essas APIs em conjunto com
+o <a href="{@docRoot}training/articles/keystore.html">sistema Android Keystore</a>.</p>
+
+<h3 id="fingerprint-authentication">Autenticação com impressão digital</h3>
+
+<p>Para autenticar os usuários por meio de digitalização de impressão digital, adquira uma instância da nova classe 
+{@code android.hardware.fingerprint.FingerprintManager} e chame o método 
+{@code FingerprintManager.authenticate()}. O aplicativo deve ser executado em um dispositivo
+compatível com sensor de impressão digital. Deve-se implementar a interface do usuário para o fluxo de autenticação
+de impressão digital no aplicativo e usar o ícone de impressão digital padrão do Android na IU.
+O ícone de impressão digital do Android ({@code c_fp_40px.png}) é incluído no 
+<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">aplicativo de exemplo</a>. Caso esteja desenvolvendo vários aplicativos que usam
+autenticação de impressão digital, observe que cada aplicativo deve autenticar a impressão digital do usuário independentemente.
+</p>
+
+<p>Para usar este recurso no aplicativo, adicione primeiro a permissão {@code USE_FINGERPRINT} no
+manifesto.</p>
+
+<pre>
+&lt;uses-permission
+        android:name="android.permission.USE_FINGERPRINT" /&gt;
+</pre>
+
+<img src="{@docRoot}preview/images/fingerprint-screen.png" srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+
+<p>Para ver a implementação do aplicativo da autenticação com impressão digital, consulte o
+<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">
+ exemplo de caixa de diálogo de impressão digital</a>.</p>
+
+<p>Caso esteja testando este recurso, siga estas etapas:</p>
+<ol>
+<li>Instale o Android SDK Tools Revision 24.3, caso ainda não tenha instalado.</li>
+<li>Registre uma nova impressão digital no emulador acessando 
+<strong>Configurações &gt; Segurança &gt; Impressão digital</strong> e, em seguida, siga as instruções de registro.</li>
+<li>Use um emulador para emular eventos de toque de dedo com o
+comando a seguir. Use o mesmo comando para emular os eventos de toque de impressão digital na tela de
+bloqueio ou no aplicativo.
+<pre class="no-prettyprint">
+adb -e emu finger touch &lt;finger_id&gt;
+</pre>
+<p>No Windows, talvez seja necessário executar {@code telnet 127.0.0.1 &lt;emulator-id&gt;} seguido de 
+{@code finger touch &lt;finger_id&gt;}.
+</p>
+</li>
+</ol>
+
+<h3 id="confirm-credential">Confirmação de credencial</h3>
+<p>O aplicativo pode autenticar os usuários com base no quão recentemente o dispositivo foi desbloqueado pela última vez. Este
+recurso libera o usuário de ter que lembrar de senhas específicas de aplicativo extras e evita
+a necessidade de implementar a própria interface do usuário de autenticação. O aplicativo deve usar este recurso
+em conjunto com uma implementação de chave secreta ou pública para a implementação de usuário.</p>
+
+<p>Para definir uma duração de tempo limite em que a mesma chave pode ser usada novamente
+após o usuário autenticar, chame o novo método 
+{@code android.security.keystore.KeyGenParameterSpec.setUserAuthenticationValidityDurationSeconds()}
+ ao definir um {@link javax.crypto.KeyGenerator} ou 
+{@link java.security.KeyPairGenerator}. Este recurso funciona para operações criptográficas
+simétricas.</p>
+
+<p>Evite exibir o diálogo de nova autenticação excessivamente — os aplicativos devem tentar
+usar o objeto criptográfico primeiro e, se o tempo limite expirar, usar o método 
+{@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence) createConfirmDeviceCredentialIntent()}
+ para autenticar novamente o usuário dentro do aplicativo.
+</p>
+
+<p>Para ver uma implementação de aplicativo deste recurso, consulte o 
+<a href="https://github.com/googlesamples/android-ConfirmCredential" class="external-link">
+exemplo de confirmação de credencial</a>.</p>
+
+<h2 id="direct-share">Compartilhamento direto</h2>
+
+<img src="{@docRoot}preview/images/direct-share-screen.png" srcset="{@docRoot}preview/images/direct-share-screen.png 1x, {@docRoot}preview/images/direct-share-screen_2x.png 2x" style="float:right; margin:0 0 20px 30px" width="312" height="329" />
+
+<p>Esta prévia fornece as APIs para tornar o compartilhamento intuitivo e rápido para os usuários. É possível
+definir os <em>alvos de compartilhamento direto</em> que iniciam uma atividade específica no aplicativo.
+Esses alvos de compartilhamento direto são expostos aos usuários por meio do menu <em>Compartilhar</em>. Este recurso permite que os usuários
+compartilhem conteúdos aos alvos, como contatos, dentro de outros aplicativos. Por exemplo: o alvo de compartilhamento direto
+pode iniciar uma atividade em outro aplicativo de rede social, o que permite que o usuário compartilhe o conteúdo diretamente
+para um amigo ou comunidade específica neste aplicativo.</p>
+
+<p>Para ativar os alvos de compartilhamento direto, deve-se definir uma classe que estende a classe 
+{@code android.service.} <br>
+{@code chooser.ChooserTargetService}. Declare o 
+{@code ChooserTargetService} no manifesto. Dentro desta declaração, especifique a permissão 
+{@code BIND_CHOOSER_TARGET_SERVICE} e um filtro de intenções na ação 
+{@code SERVICE_INTERFACE}.</p>
+<p>O seguinte exemplo mostra como se deve declarar o {@code ChooserTargetService} no
+manifesto.</p>
+<pre>
+&lt;service android:name=".ChooserTargetService"
+        android:label="&#64;string/service_name"
+        android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.service.chooser.ChooserTargetService" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service&gt;
+</pre>
+
+<p>Para cada atividade que quiser expor ao {@code ChooserTargetService}, adicione um elemento 
+{@code &lt;meta-data&gt;} com o nome 
+{@code "android.service.chooser.chooser_target_service"} no manifesto do aplicativo.
+</p>
+
+<pre>
+&lt;activity android:name=".MyShareActivity”
+        android:label="&#64;string/share_activity_label"&gt;
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND" /&gt;
+    &lt;/intent-filter>
+&lt;meta-data
+        android:name="android.service.chooser.chooser_target_service"
+        android:value=".ChooserTargetService" /&gt;
+&lt;/activity>
+</pre>
+
+<h2 id="voice-interactions">Interações por voz</h2>
+<p>
+Esta prévia fornece uma API de interação por voz que, junto com 
+<a href="https://developers.google.com/voice-actions/" class="external-link">ações de voz</a>
+, permite a criação de experiências por voz nos aplicativos. Chame o método 
+{@code android.app.Activity.isVoiceInteraction()} para determinar se a atividade
+foi iniciada em resposta à ação de voz. Caso tenha sido iniciada, o aplicativo pode usar a classe 
+{@code android.app.VoiceInteractor} para solicitar uma confirmação de voz do usuário,
+selecionar a partir de uma lista de opções e muito mais. Para aprender mais sobre a implementação de ações de voz, consulte 
+<a href="https://developers.google.com/voice-actions/interaction/" class="external-link">o site de desenvolvedor de ações de voz</a>.
+</p>
+
+<h2 id="assist">Auxiliar API</h2>
+<p>
+Esta prévia oferece uma nova maneira de usuários se envolverem com os aplicativos com um assistente. Para usar este
+recurso, o usuário deve possibilitar que o assistente use o contexto atual. Quando ativado,
+o usuário pode invocar um assistente dentro de qualquer aplicativo mantendo o botão <strong>Iniciar</strong> pressionado.</p>
+<p>O aplicativo pode optar por não compartilhar o contexto atual com o assistente configurando o sinalizador 
+{@link android.view.WindowManager.LayoutParams#FLAG_SECURE}. Além do conjunto
+padrão de informações que a plataforma passa ao assistente, o aplicativo pode compartilhar
+informações adicionais usando a nova classe {@code android.app.Activity.AssistContent}.</p>
+
+<p>Para fornecer ao assistente contexto adicional do aplicativo, siga estas etapas:</p>
+
+<ol>
+<li>Implemente a interface {@link android.app.Application.OnProvideAssistDataListener}.</li>
+<li>Registre esta escuta usando 
+{@link android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener) registerOnProvideAssistDataListener()}.</li>
+<li>Para fornecer informações contextuais específicas da atividade, substitua o retorno de chamada 
+{@link android.app.Activity#onProvideAssistData(android.os.Bundle) onProvideAssistData()}
+ e, opcionalmente, o novo retorno de chamada {@code Activity.onProvideAssistContent()}.
+</ol>
+
+<h2 id="notifications">Notificações</h2>
+<p>Esta prévia adiciona as seguintes alterações de API às notificações:</p>
+<ul>
+  <li>Novo nível de filtro {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} que corresponde
+ao modo "não perturbe" de <em>despertadores apenas</em>.</li>
+  <li>Novo valor da categoria {@code Notification.CATEGORY_REMINDER} que é usado para distinguir
+lembretes de agendamentos do usuário de outros eventos (
+{@link android.app.Notification#CATEGORY_EVENT}) e despertadores (
+{@link android.app.Notification#CATEGORY_ALARM}).</li>
+  <li>Nova classe {@code android.graphics.drawable.Icon} que pode ser anexada às notificações
+por meio dos métodos {@code Notification.Builder.setSmallIcon(Icon)} e 
+{@code Notification.Builder.setLargeIcon(Icon)}.</li>
+  <li>Novo método {@code NotificationManager.getActiveNotifications()} que permite que os aplicativos
+descubram quais das notificações ainda estão ativas. Para ver uma implementação de aplicativo que usa este recurso,
+consulte o <a href="https://github.com/googlesamples/android-ActiveNotifications" class="external-link">exemplo de notificações ativas</a>.</li>
+</ul>
+
+<h2 id="bluetooth-stylus">Suporte para Bluetooth Stylus</h2>
+<p>Esta prévia fornece um suporte aprimorado para a entrada de usuário usando um Bluetooth Stylus. Os usuários podem
+parear e conectar um Bluetooth Stylus compatível com o telefone ou tablet.  Quando conectado, as informações
+de posição da tela tátil são fundidas com as informações de botão e pressão do Stylus
+para fornecer um alcance maior de expressão em comparação à tela tátil sozinha. O aplicativo pode escutar o pressionar
+de botões do Stylus e realizar ações secundárias registrando os novos retornos de chamada 
+{@code View.onStylusButtonPressListener} e {@code GestureDetector.OnStylusButtonPressListener}
+ na atividade.</p>
+
+<p>Use as constantes e os métodos {@link android.view.MotionEvent} para detectar as interações
+de botão do Stylus:</p>
+<ul>
+<li>Se o usuário toca no Stylus com um botão na tela do aplicativo, o método 
+{@link android.view.MotionEvent#getToolType(int) getTooltype()} retorna 
+{@link android.view.MotionEvent#TOOL_TYPE_STYLUS}.</li>
+<li>Para aplicativos com M Preview, o método 
+{@link android.view.MotionEvent#getButtonState() getButtonState()}
+ retorna {@code MotionEvent.STYLUS_BUTTON_PRIMARY} quando o usuário
+pressiona o botão principal do Stylus. Se o Stylus tiver um segundo botão, o mesmo método retorna 
+{@code MotionEvent.STYLUS_BUTTON_SECONDARY} quando o usuário o pressiona. Se o usuário pressiona
+os dois botões simultaneamente, o método retorna os valores com OR juntos (
+{@code STYLUS_BUTTON_PRIMARY|STYLUS_BUTTON_SECONDARY}).</li>
+<li>
+Para aplicativos com uma versão de plataforma inferior , o método 
+{@link android.view.MotionEvent#getButtonState() getButtonState()} retorna 
+{@link android.view.MotionEvent#BUTTON_SECONDARY} (para o pressionar do botão principal do Stylus), 
+{@link android.view.MotionEvent#BUTTON_TERTIARY} (para o pressionar do botão secundário do Stylus) ou ambos.
+</li>
+</ul>
+
+<h2 id="ble-scanning">Digitalização de baixa energia por Bluetooth aprimorada</h2>
+<p>
+Se o aplicativo realizar digitalizações de baixa energia por Bluetooth, é possível usar o novo método 
+{@code android.bluetooth.le.ScanSettings.Builder.setCallbackType()} para especificar
+que você quer que os retornos de chamada sejam notificados apenas quando um pacote de propaganda correspondente ao conjunto 
+{@link android.bluetooth.le.ScanFilter} for encontrado primeiro e quando
+ele não for visto por um período. Esta abordagem de digitalização é mais eficiente
+do que a fornecida na versão anterior da plataforma.
+</p>
+
+<h2 id="hotspot">Suporte a Hotspot 2.0 Release 1</h2>
+<p>
+Esta prévia adiciona suporte ao Hotspot 2.0 Release 1 nos dispositivos Nexus 6 e Nexus 9. Para fornecer
+as credenciais de Hotspot 2.0 no aplicativo, use os novos métodos da classe 
+{@link android.net.wifi.WifiEnterpriseConfig}, como {@code setPlmn()} e 
+{@code setRealm()}. No objeto {@link android.net.wifi.WifiConfiguration}, é possível definir os campos 
+{@link android.net.wifi.WifiConfiguration#FQDN} e {@code providerFriendlyName}.
+A nova propriedade {@code ScanResult.PasspointNetwork} indica se uma rede detectada representa
+um ponto de acesso Hotspot 2.0.
+</p>
+
+<h2 id="4K-display">Modo de exibição 4K</h2>
+<p>A plataforma agora permite que aplicativos solicitem que a resolução seja aprimorada para renderização 4K
+em hardware compatível. Para consultar a resolução física atual, use as novas APIs
+{@code android.view.Display.Mode}. Se a IU for desenhada em uma resolução lógica
+menor e for redimensionada para uma resolução física maior, saiba que a resolução física que o método 
+{@code Display.Mode.getPhysicalWidth()} retorna pode ser diferente da resolução
+física informada por {@link android.view.Display#getSize(android.graphics.Point) getSize()}.</p>
+
+<p>É possível solicitar que o sistema altere a resolução física no aplicativo à medida que ele é executado configurando
+a propriedade {@code WindowManager.LayoutParams.preferredDisplayModeId} da janela do aplicativo.  Este
+recurso é útil se quiser alternar para a resolução de exibição 4K. Enquanto estiver no modo de exibição 4K,
+a IU continua a ser renderizada na resolução original (como 1080 p) e é escalonada para 4K, mas os objetos 
+{@link android.view.SurfaceView} podem exibir o conteúdo na resolução nativa.</p>
+
+<h2 id="behavior-themeable-colorstatelists">ColorStateLists com tema</h2>
+<p>Os atributos de tema agora são suportados no 
+{@link android.content.res.ColorStateList} para dispositivos que executam o M Preview. Os métodos 
+{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} e 
+{@link android.content.res.Resources#getColor(int) getColor()} ficaram obsoletos. Caso esteja chamando
+essas APIs, chame os novos métodos {@code Context.getColorStateList()} ou 
+{@code Context.getColor()}. Esses métodos também estão disponíveis na biblioteca
+v4 appcompat via {@link android.support.v4.content.ContextCompat}.</p>
+
+<h2 id="audio">Recursos de áudio</h2>
+
+<p>Esta prévia adiciona aprimoramentos ao processamento de áudio no Android, incluindo: </p>
+<ul>
+  <li>Suporte para protocolo <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a>
+, com as novas APIs {@code android.media.midi}. Use essas APIs para enviar e receber eventos
+de MIDI.</li>
+  <li>Use as novas classes {@code android.media.AudioRecord.Builder} e {@code android.media.AudioTrack.Builder}
+ para criar captura de áudio digital e objetos de reprodução, respectivamente,
+e configure a fonte de áudio e as propriedades do coletor para substituir os padrões do sistema.</li>
+  <li>Ganchos de API para associação de dispositivos de entrada e áudio. Isto é particularmente útil se o aplicativo
+permite que os usuários iniciem uma pesquisa de voz a partir de um controle de jogo ou controle remoto para Android
+TV. O sistema invoca o novo retorno de chamada {@code android.app.Activity.onSearchRequested()} quando
+o usuário inicia uma pesquisa. Para determinar se o dispositivo de entrada do usuário tem um microfone integrado, recupere
+o objeto {@link android.view.InputDevice} deste retorno de chamada e, em seguida, chame o novo método 
+{@code InputDevice.hasMic()}.</li>
+  <li>Novas classes {@code android.media.AudioDevicesManager} que permitem que você
+recupere uma lista completa de todas as fontes e dispositivos de áudio do coletor anexados. Também é possível especificar um objeto 
+{@code android.media.OnAudioDeviceConnectionListener} caso queira que o aplicativo seja notificado
+quando um dispositivo de áudio for conectado ou desconectado.</li>
+</ul>
+
+<h2 id="video">Recursos de vídeo</h2>
+<p>Esta prévia adiciona novas capacidades às APIs de processamento de vídeo, incluindo:</p>
+<ul>
+<li>A nova classe {@code android.media.MediaSync} que ajuda os aplicativos a renderizar transmissões
+de vídeo e áudio sincronizadamente. Os buffers de áudio são enviados sem bloqueio e retornados
+por um retorno de chamada. Eles também suportam taxa de reprodução dinâmica.
+</li>
+<li>O novo evento {@code MediaDrm.EVENT_SESSION_RECLAIMED}, que indica que uma sessão aberta pelo aplicativo
+foi recuperada pelo gerenciador de recursos. Se o aplicativo usa sessões de DRM, deve-se
+lidar com este evento e garantir que uma sessão recuperada não seja usada.
+</li>
+<li>O novo código de erro {@code MediaCodec.CodecException.ERROR_RECLAIMED}, que indica que o gerenciador
+de recurso recuperou o recurso de mídia usado pelo codec. Com esta exceção, o codec
+deve ser liberado, como se fosse movido para o estado terminal.
+</li>
+<li>A nova interface {@code MediaCodecInfo.CodecCapabilities.getMaxSupportedInstances()} para obter
+uma dica do número máximo suportado de instâncias de codec concorrentes.
+</li>
+<li>O novo método {@code MediaPlayer.setPlaybackParams()} para definir a taxa de reprodução de mídia
+para reprodução de movimento lento ou rápido. Ele também estica ou acelera a reprodução de áudio automaticamente
+em conjunto com o vídeo.</li>
+</ul>
+
+<h2 id="camera">Recursos de câmera</h2>
+<p>Esta prévia inclui as seguintes novas APIs para acessar a lanterna da câmera
+e para o reprocessamento da câmera de imagens:</p>
+
+<h3 id="flashlight">API da lanterna</h3>
+<p>Se um dispositivo de câmera tem uma unidade de flash, é possível chamar o método {@code CameraManager.setTorchMode()}
+para ligar ou desligar o modo de tocha da unidade de flash sem abrir o dispositivo da câmera. O aplicativo
+não tem propriedade exclusiva da unidade de flash ou do dispositivo de câmera. O modo de tocha é desativado
+e torna-se indisponível sempre que o dispositivo de câmera estiver indisponível ou quando outros
+recursos de câmera que mantêm a tocha ativada ficam indisponíveis. Outros aplicativos também podem chamar {@code setTorchMode()}
+para desativar o modo de tocha. Quando o aplicativo que ativou o modo
+de tocha for fechado, o modo é desativado.</p>
+
+<p>É possível registrar um retorno de chamada para ser notificado sobre o estado da tocha chamando o método
+{@code CameraManager.registerTorchCallback()}. Na primeira vez que o retorno de chamada é registrado,
+ele é imediatamente chamado com o estado do modo de tocha de todos os dispositivos de câmera conhecidos com
+uma unidade de flash. Se o modo de tocha é ativado ou desativado, o método
+{@code CameraManager.TorchCallback.onTorchModeChanged()} é invocado.</p>
+
+<h3 id="reprocessing">API de reprocessamento</h3>
+<p>A API {@link android.hardware.camera2 Camera2} é estendida para suportar YUV e reprocessamento
+de imagem de formato opaco privado. O aplicativo determina se as capacidades de reprocessamento estão disponíveis
+via {@code CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES}. Se um dispositivo suporta o reprocessamento,
+é possível criar uma sessão de captura de câmera de reprocessamento chamando
+{@code CameraDevice.createReprocessableCaptureSession()} e criando solicitações para o reprocessamento
+do buffer de entrada.</p>
+
+<p>Use a classe {@code ImageWriter} para conectar o fluxo de buffer de entrada à entrada de reprocessamento
+da câmera. Para obter um buffer vazio, siga este modelo de programação:</p>
+
+<ol>
+<li>Chame o método {@code ImageWriter.dequeueInputImage()}.</li>
+<li>Preencha os dados no buffer de entrada.</li>
+<li>Envie o buffer à câmera chamando o método {@code ImageWriter.queueInputImage()}.</li>
+</ol>
+
+<p>Caso esteja usando um objeto {@code ImageWriter} junto com uma imagem
+{@code android.graphics.ImageFormat.PRIVATE}, o aplicativo não poderá acessar os dados
+da imagem diretamente. Em vez disso, passe a imagem {@code ImageFormat.PRIVATE} diretamente ao
+{@code ImageWriter} chamando o método {@code ImageWriter.queueInputImage()} sem nenhuma
+cópia de buffer.</p>
+
+<p>A classe {@code ImageReader} agora suporta as transmissões de imagem
+de formato {@code android.graphics.ImageFormat.PRIVATE}. Este suporte permite que o aplicativo mantenha uma fila de imagem circular de imagens de saída
+{@code ImageReader}, selecione uma ou mais imagens e envie-as para
+{@code ImageWriter} para o reprocessamento de câmera.</p>
+
+<h2 id="afw">Recursos do Android for Work</h2>
+<p>Esta prévia inclui as seguintes novas APIs para Android for Work:</p>
+<ul>
+  <li><strong>Controles aprimorados para dispositivos de uso único e pertencentes a empresas:</strong> O dono do dispositivo
+pode controlar as seguintes configurações para aprimorar
+os dispositivos de uso único pertencentes a empresas (COSU):
+  <ul>
+    <li>Desativar ou reativar a proteção de bloqueio com o método
+{@code DevicePolicyManager.setKeyguardEnabledState()}.</li>
+    <li>Desativar ou reativar a barra de status (incluindo configurações rápidas,
+notificações e o gesto de arrastar para cima que inicia o Google Now) com o método 
+{@code DevicePolicyManager.setStatusBarEnabledState()}.</li>
+    <li>Desativar ou reativar inicialização segura com a constante {@link android.os.UserManager}
+{@code DISALLOW_SAFE_BOOT}.</li>
+    <li>Evitar que a tela desligue quando conectada com a constante 
+{@link android.provider.Settings.Global} {@code STAY_ON_WHILE_PLUGGED_IN}.</li>
+  </ul>
+  </li>
+  <li><strong>Instalação e desinstalação silenciosa de aplicativos pelo dono do dispositivo:</strong> O dono do dispositivo pode agora
+instalar e desinstalar aplicativos silenciosamente usando as APIs {@link android.content.pm.PackageInstaller},
+independente do Google Play for Work. É possível tomar providências para os dispositivos
+por meio de um dono do dispositivo que recupera e instala aplicativos se a interação de usuário. Este recurso é útil para ativar a provisão de um toque
+de telefones públicos ou de outros dispositivos sem a ativação da conta Google.</li>
+<li><strong>Acesso silencioso de certificado empresarial: </strong> Quando um aplicativo chama 
+{@link android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity,android.security.KeyChainAliasCallback,java.lang.String[],java.security.Principal[],java.lang.String,int,java.lang.String) choosePrivateKeyAlias()}
+, antes do usuário receber a solicitação para selecionar um certificado, o perfil ou dono do dispositivo
+pode chamar o método {@code DeviceAdminReceiver.onChoosePrivateKeyAlias()} para fornecer
+o alias silenciosamente ao aplicativo da solicitação. Este recurso permite que você forneça acesso de aplicativos gerenciados para certificados
+sem a interação de usuário.</li>
+<li><strong>Aceitação automática de atualizações do sistema.</strong> Ao configurar a política de atualização do sistema com 
+{@code DevicePolicyManager.setSystemUpdatePolicy()}, o dono do dispositivo pode aceitar automaticamente a atualização
+do sistema, no caso de um dispositivo público, ou adiar a atualização e evitar
+que ela seja feita pelo usuário por até 30 dias. Além disso, um administrador pode definir uma janela de tempo diária
+em que uma atualização deve ser realizada. Por exemplo: durante os momentos em que um dispositivo público não está em uso. Quando
+uma atualização do sistema está disponível, o sistema verifica se o aplicativo de controlador de política de trabalho definiu uma política de atualização
+do sistema e, portanto, comporta-se de acordo com a definição.
+</li>
+<li>
+<strong>Instalação de certificado delegado:</strong> Um perfil ou dono do dispositivo pode agora fornecer ao aplicativo
+de terceiros a habilidade de chamar essas APIs de gerenciamento
+de certificado de {@link android.app.admin.DevicePolicyManager}:
+<ul>
+  <li>{@link android.app.admin.DevicePolicyManager#getInstalledCaCerts(android.content.ComponentName)
+getInstalledCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#hasCaCertInstalled(android.content.ComponentName,byte[])
+hasCaCertInstalled()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installCaCert(android.content.ComponentName,byte[])
+installCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallCaCert(android.content.ComponentName,byte[])
+uninstallCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallAllUserCaCerts(android.content.ComponentName)
+uninstallAllUserCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName,java.security.PrivateKey,java.security.cert.Certificate,java.lang.String)
+installKeyPair()}</li>
+</ul>
+</li>
+<li><strong>Proteção de redefinição de fábrica da empresa:</strong> Ao preparar um dono do dispositivo, agora é possível
+configurar parâmetros para desbloquear a proteção de redefinição de fábrica (FRP) configurando o pacote 
+{@code DeviceManagerPolicy.EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS}. Um aplicativo de programador
+NFC pode fornecer estes parâmetros depois que um dispositivo for redefinido para desbloquear o FRP e preparar o dispositivo,
+sem a necessidade da conta Google anteriormente configurada. Caso não modifique esses parâmetros,
+o FRP permanece no local e evita que o dispositivo seja ativado sem as credenciais
+Google anteriormente ativadas.
+<p>Além disso, ao configurar as restrições do aplicativo nos serviços Google, o dono do dispositivo pode especificar contas
+Google alternativas para desbloquear o FRP para substituir as contas ativadas no dispositivo.</p>
+</li>
+<img src="{@docRoot}preview/images/work-profile-screen.png" srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+<li><strong>Rastreamento de uso de dados.</strong> Um perfil ou dono do dispositivo pode agora
+consultar as estatísticas de uso de dados visíveis em <strong>Configurações &gt; Uso de</strong> dados usando os novos métodos 
+{@code android.app.usage.NetworkStatsManager}. Os donos de perfis recebem automaticamente
+a permissão para consultar os dados no perfil que gerenciam, enquanto que os donos do dispositivo têm acesso aos dados
+de uso do usuário principal gerenciado.</li>
+<li><strong>Gerenciamento de permissão de tempo de execução:</strong>
+<p>Um perfil ou dono do dispositivo pode definir uma política
+de permissão para todas as solicitações do tempo de execução de todos os aplicativos que usam 
+{@code DevicePolicyManager.setPermissionPolicy()}, seja para solicitar ao usuário para conceder
+a permissão como normal ou automaticamente conceder ou negar a permissão silenciosamente. Se a política posterior
+for definida, o usuário não poderá modificar a seleção feita pelo perfil ou dono do dispositivo dentro da tela de permissões
+do aplicativo em <strong>configurações</strong>.</p></li>
+<li><strong>VPN em configurações:</strong> Os aplicativos de VPN agora estão visíveis em 
+<strong>Configurações &gt; Mais &gt; VPN</strong>.
+Além disso, as notificações que acompanham o uso de VPN são específicas sobre como essa VPN
+é configurada. Para o dono de um perfil, as notificações são específicas para determinar
+se a VPN é configurada para um perfil gerenciado, um perfil pessoal ou ambos. Para o dono do dispositivo, as notificações
+são específicas para determinar se a VPN é configurada para todo o dispositivo.</li>
+<li><strong>Notificação de estado de trabalho:</strong> Um ícone de pasta da barra de status agora aparece
+sempre que um aplicativo do perfil gerenciado tiver uma atividade no primeiro plano. Além disso, se o usuário é desbloqueado
+diretamente para a atividade de um aplicativo no perfil gerenciado, um aviso é exibido notificando
+ao usuário que ele está dentro do perfil de trabalho.
+</li>
+</ul>
+
+<p class="note">
+  Para obter uma vista detalhada de todas as alterações de API no M Developer Preview, consulte o <a href="{@docRoot}preview/download.html">relatório de diferenças de API</a>.
+</p>
