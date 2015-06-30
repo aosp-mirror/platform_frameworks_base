@@ -1,0 +1,178 @@
+page.title=アクティビティから結果を取得する
+page.tags=インテント
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#StartActivity">アクティビティを開始する</a></li>
+  <li><a href="#ReceiveResult">結果を受け取る</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">単純なデータの共有</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">ファイルの共有</a>
+</ul>
+
+  </div>
+</div>
+
+<p>別のアクティビティを開始する場合、必ずしも一方向である必要はありません。別のアクティビティを開始して、結果を受け取ることもできます。
+結果を受け取るには、（{@link android.app.Activity#startActivity
+startActivity()} ではなく） {@link android.app.Activity#startActivityForResult
+startActivityForResult()} を呼び出します。</p>
+
+<p>たとえば、自分のアプリでカメラアプリを起動し、結果として撮影した写真を受け取ることができます。または、ユーザーが連絡先を選択するケースにおいて、連絡帳アプリを起動し、結果として連絡先の詳細を受け取ることができます。
+
+</p>
+
+<p>もちろん、応答するアクティビティは結果を返すように設計されていなければなりません。その場合は、別の {@link android.content.Intent} オブジェクトとして結果を送信します。
+自分のアクティビティ側では、
+{@link android.app.Activity#onActivityResult onActivityResult()} コールバック内で結果を受け取ります。</p>
+
+<p class="note"><strong>注: </strong>
+{@link android.app.Activity#startActivityForResult startActivityForResult()} を呼び出す際は、明示的または暗黙的インテントを使用することができます。自分のアクティビティのいずれかを開始して結果を受け取ろうとする場合は、想定通りの結果を受け取れるようにするため、明示的なインテントを使用する必要があります。
+
+</p>
+
+
+<h2 id="StartActivity">アクティビティを開始する</h2>
+
+<p>結果を受け取るためにアクティビティを開始する際、使用する {@link android.content.Intent} オブジェクトに関して特に記すべき内容はありませんが、{@link
+android.app.Activity#startActivityForResult startActivityForResult()} メソッドに対して追加で整数の引数を渡す必要があります。
+</p>
+
+<p>整数の引数は、リクエストを識別する「要求コード」です。結果の
+{@link android.content.Intent} を受け取ると、アプリが正常に結果を識別し、その処理方法を決定することができるように、コールバックが同じ要求コードを提供します。
+</p>
+
+<p>たとえば、ユーザーが連絡先を選択できるようにするアクティビティの開始方法について、次に例を示します。</p>
+
+<pre>
+static final int PICK_CONTACT_REQUEST = 1;  // The request code
+...
+private void pickContact() {
+    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+    pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+    startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+}
+</pre>
+
+
+<h2 id="ReceiveResult">結果を受け取る</h2>
+
+<p>ユーザーが、その後のアクティビティを終えて復帰すると、システムは自分のアクティビティの
+{@link android.app.Activity#onActivityResult onActivityResult()} メソッドを呼び出します。このメソッドには、次の 3 つの引数が含まれます。
+</p>
+
+<ul>
+  <li>{@link
+android.app.Activity#startActivityForResult startActivityForResult()} に渡した要求コード。</li>
+  <li>第 2 のアクティビティによって指定された結果コード。これは、操作が成功した場合の {@link
+android.app.Activity#RESULT_OK} か、ユーザーがバックアウトしたり、何らかの理由で失敗したりした場合の {@link
+android.app.Activity#RESULT_CANCELED} か、いずれか一方です。
+</li>
+  <li>結果のデータを運ぶ {@link android.content.Intent}。</li>
+</ul>
+
+<p>たとえば、「連絡先を選ぶ」インテント用に結果を処理する方法について、次に例を示します。</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // The user picked a contact.
+            // The Intent's data Uri identifies which contact was selected.
+
+            // Do something with the contact here (bigger example below)
+        }
+    }
+}
+</pre>
+
+<p>この例では、Android の連絡先または連絡帳アプリから返される結果の {@link android.content.Intent} は、ユーザーが選択した連絡先を識別するコンテンツ {@link android.net.Uri} を提供します。
+
+</p>
+
+<p>正常に結果を処理するためには、結果の
+{@link android.content.Intent} の形式がどうなるかを理解する必要があります。これは、結果を返すアクティビティが自分のアクティビティの 1 つである場合には簡単です。
+Android プラットフォームに付属のアプリでは、特定の結果データに対して役立つ、独自の API を提供しています。
+たとえば、連絡帳アプリ（一部の古いバージョンでは連絡先アプリ）は常に選択した連絡先を識別するコンテンツ URI を含む結果を返し、カメラアプリは別に {@code "data"} で {@link android.graphics.Bitmap} を返します（<a href="{@docRoot}training/camera/index.html">写真を撮影する</a>のクラスを参照）。
+
+
+</p>
+
+
+<h4>ボーナス: 連絡先データを読み取る</h4>
+
+<p>連絡帳アプリから結果を取得する方法を示した上記のコードでは、実際に結果からデータを読み取る方法の詳細には触れていませんが、これは、<a href="{@docRoot}guide/topics/providers/content-providers.html">コンテンツプロバイダ</a>に関する高度な説明が必要であるためです。
+
+
+ここでは興味がある方向けに、結果データをクエリして、選択された連絡先から電話番号を取得する方法について、次にコード例を示します。
+</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request it is that we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // Get the URI that points to the selected contact
+            Uri contactUri = data.getData();
+            // We only need the NUMBER column, because there will be only one row in the result
+            String[] projection = {Phone.NUMBER};
+
+            // Perform the query on the contact to get the NUMBER column
+            // We don't need a selection or sort order (there's only one result for the given URI)
+            // CAUTION: The query() method should be called from a separate thread to avoid blocking
+            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+            // Consider using {@link android.content.CursorLoader} to perform the query.
+            Cursor cursor = getContentResolver()
+                    .query(contactUri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            // Retrieve the phone number from the NUMBER column
+            int column = cursor.getColumnIndex(Phone.NUMBER);
+            String number = cursor.getString(column);
+
+            // Do something with the phone number...
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>注: </strong>Android 2.3（API レベル 9）以前では、
+{@link android.provider.ContactsContract.Contacts Contacts Provider} でクエリ（上記のような）を実行する場合、自分のアプリで {@link
+android.Manifest.permission#READ_CONTACTS} パーミッション（<a href="{@docRoot}guide/topics/security/security.html">セキュリティとパーミッション</a>を参照）を宣言することが必要です。
+ただし、Android 2.3 からは連絡先または連絡帳アプリにより、結果を返すときに連絡先プロバイダから読み取るための一時的パーミッションが付与されます。
+
+一時的パーミッションは要求された特定の連絡先にのみ適用されるため、{@link
+android.Manifest.permission#READ_CONTACTS} パーミッションを宣言した場合を除き、インテントの {@link android.net.Uri} で指定したもの以外の連絡先はクエリできません。
+
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

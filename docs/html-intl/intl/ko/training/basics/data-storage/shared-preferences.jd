@@ -1,0 +1,120 @@
+page.title=키-값 세트 저장하기
+page.tags=data storage
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">SharedPreferences에 대한 핸들 가져오기</a></li>
+  <li><a href="#WriteSharedPreference">SharedPreferences에 쓰기</a></li>
+  <li><a href="#ReadSharedPreference">SharedPreferences에서 읽어오기</a></li>
+</ol>
+
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">SharedPreferences 사용하기</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>저장하고자 하는 키-값 컬렉션이 비교적 작은 경우,
+{@link android.content.SharedPreferences} API를 사용합니다.
+{@link android.content.SharedPreferences} 개체는
+키-값 쌍을 포함하는 파일을 가리키며, 키-값 쌍을 읽고 쓸 수 있는 간단한 메서드를 제공합니다. 각
+{@link android.content.SharedPreferences} 파일은 프레임워크로
+관리되며, 전용 또는 공유일 수 있습니다.</p>
+
+<p>이 클래스에서는 {@link android.content.SharedPreferences} API를 사용하여 단순한 값을 저장하고
+가져오는 방법을 보여줍니다.</p>
+
+<p class="note"><strong>참고:</strong> {@link android.content.SharedPreferences} API는
+키-값 쌍을 읽고 쓰는 용도로만 사용됩니다. 또한, (앱 설정을 저장하는 데 대한 구현으로 {@link android.content.SharedPreferences}를
+사용하기는 하지만) 앱 설정을 위한
+사용자 인터페이스 구축을 지원하는
+{@link android.preference.Preference} API와 혼동해서는 안 됩니다. {@link
+android.preference.Preference} API 사용에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/ui/settings.html">설정</a> 가이드를 참조하세요.</p>
+
+<h2 id="GetSharedPreferences">SharedPreferences에 대한 핸들 가져오기</h2>
+
+<p>다음 두 메서드 중
+하나를 호출하여 새로운 공유 기본 설정 파일을 생성하거나 기존 파일에 액세스할 수 있습니다.</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} &mdash; 여러 공유 기본 설정 파일이 필요한 경우 이 메서드를 사용합니다. 이러한 파일은 첫 번째 매개변수로 지정하는
+이름으로 식별됩니다. 앱 내부의 모든
+{@link android.content.Context}에서 이 메서드를 호출할 수 있습니다.</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; 액티비티에
+하나의 공유 기본 설정 파일만 사용해야 하는 경우
+{@link android.app.Activity}에서 이 메서드를 사용합니다. 이 메서드는 액티비티에 속한 기본 공유
+기본 설정 파일을 가져오기 때문에 이름을 제공할 필요가 없습니다.</li>
+</ul>
+
+<p>예를 들어 다음 코드는 {@link android.app.Fragment} 내부에서 실행됩니다.
+이 코드는 리소스 문자열 {@code R.string.preference_file_key}에 의해
+식별되는 공유 기본 설정 파일에 액세스하며, 본인의 앱만 파일에 액세스할 수 있도록 전용 모드에서
+파일을 엽니다.</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>공유 기본 설정 파일의 이름을 지정할 때는 {@code "com.example.myapp.PREFERENCE_FILE_KEY"}와 같이 앱에
+대한 고유 식별 이름을 사용해야 합니다.</p>
+
+<p>또는, 액티비티에 공유 기본 설정 파일만 필요할 경우
+{@link android.app.Activity#getPreferences(int) getPreferences()} 메서드를 사용할 수 있습니다.</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>주의:</strong> {@link android.content.Context#MODE_WORLD_READABLE} 또는 {@link
+android.content.Context#MODE_WORLD_WRITEABLE}을
+사용하여 공유 기본 설정 파일을 생성하는 경우, 파일 식별자를 인식하는 기타 모든 앱이
+데이터에 액세스할 수 있습니다.</p>
+
+
+<h2 id="WriteSharedPreference">SharedPreferences에 쓰기</h2>
+
+<p>공유 기본 설정 파일에 데이터를 쓰려면 {@link android.content.SharedPreferences}에서 {@link
+android.content.SharedPreferences#edit}를 호출하여 {@link
+android.content.SharedPreferences.Editor}를 생성해야 합니다.</p>
+
+<p>{@link
+android.content.SharedPreferences.Editor#putInt putInt()} 및 {@link
+android.content.SharedPreferences.Editor#putString putString()}과 같은 메서드를 사용하여 쓰고자 하는 키와 값을 전달합니다. 그런 다음 {@link
+android.content.SharedPreferences.Editor#commit}을 호출하여 변경 내용을 저장합니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">SharedPreferences에서 읽어오기</h2>
+
+<p>공유 기본 설정 파일에서 값을 가져오려면 원하는 값에
+대한 키를 제공하고 원하는 경우 키가
+없을 경우 반환할 기본값을 제공하여 {@link
+android.content.SharedPreferences#getInt getInt()} 및 {@link
+android.content.SharedPreferences#getString getString()}과 같은 메서드를 호출해야 합니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), defaultValue);
+</pre>
+

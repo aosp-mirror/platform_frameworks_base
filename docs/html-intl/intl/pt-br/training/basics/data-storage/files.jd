@@ -1,0 +1,379 @@
+page.title=Salvando arquivos
+page.tags=armazenamento de dados
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#InternalVsExternalStorage">Escolher entre armazenamento interno e externo</a></li>
+  <li><a href="#GetWritePermission">Obter permissões para armazenamento externo</a></li>
+  <li><a href="#WriteInternalStorage">Salvar arquivos em armazenamento interno</a></li>
+  <li><a href="#WriteExternalStorage">Salvar arquivos em armazenamento externo</a></li>
+  <li><a href="#GetFreeSpace">Consultar espaço livre</a></li>
+  <li><a href="#DeleteFile">Excluir um arquivo</a></li>
+</ol>
+
+<h2>Leia também</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">Utilizando armazenamento
+interno</a></li>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">Utilizando armazenamento
+externo</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>O Android usa um sistema de arquivos
+parecido com sistemas de arquivos em disco de outras plataformas. Esta lição explica
+como trabalhar com o sistema de arquivos Android para ler e gravar arquivos com APIs {@link java.io.File}
+.</p>
+
+<p>Um objeto {@link java.io.File} é adequado para ler ou gravar grandes quantidades de dados em
+ordens crescente sem pular nenhum item. Por exemplo, é bom para arquivos de imagens ou
+qualquer troca executada por uma rede.</p>
+
+<p>Esta lição demonstra como executar tarefas básicas relacionadas a arquivos em seu aplicativo.
+Assume-se que você já esteja familiarizado com os fundamentos do sistema de arquivos Linux e com
+APIs de entrada/saída de arquivos padrão no {@link java.io}.</p>
+
+
+<h2 id="InternalVsExternalStorage">Escolher entre armazenamento interno e externo</h2>
+
+<p>Todos os dispositivos Android têm duas áreas de armazenamento de arquivos: armazenamento “interno” e “externo”.  Estes nomes
+têm origem no início do Android, quando a maior parte de seus dispositivos oferecia memória embutida não volátil
+(armazenamento interno), além de uma mídia de armazenamento removível, como micro cartões SD (armazenamento externo).
+Alguns dispositivos dividem o espaço de armazenamento permanente em partições “interna” e “externa”. Assim, mesmo
+sem uma mídia de armazenamento removível, sempre há dois espaços de armazenamento e
+o comportamento da API permanece inalterado independentemente da remoção do armazenamento externo.
+A lista a seguir resume as principais informações sobre cada tipo de espaço de armazenamento.</p>
+
+<div class="col-5" style="margin-left:0">
+<p><b>Armazenamento interno:</b></p>
+<ul>
+<li>Está sempre disponível.</li>
+<li>Por padrão, os arquivos salvos aqui podem apenas ser acessados pelo seu aplicativo.</li>
+<li>Quando o usuário desinstala o aplicativo, o sistema exclui todos os arquivos do aplicativo salvos no
+armazenamento interno.</li>
+</ul>
+<p>O armazenamento interno funciona melhor quando você deseja garantir que o usuário nem outros aplicativos
+tenham acesso aos seus arquivos.</p>
+</div>
+
+<div class="col-7" style="margin-right:0">
+<p><b>Armazenamento externo:</b></p>
+<ul>
+<li>Não está sempre disponível porque o usuário pode montar o armazenamento externo, como um armazenamento USB,
+ e em alguns casos, removê-lo do dispositivo.</li>
+<li>É de leitura universal, ou seja,
+arquivos salvos aqui podem ser lidos em outros dispositivos.</li>
+<li>Quando o usuário desinstala o aplicativo, o sistema exclui todos os arquivos do aplicativo salvos aqui
+apenas se estiverem salvos no diretório de {@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()}.</li>
+</ul>
+<p>O armazenamento externo é o melhor
+local para arquivos que não exigem acesso restrito e para os arquivos que você deseja compartilhar
+com outros aplicativos ou permitir que o usuário acesse através com um computador.</p>
+</div>
+
+
+<p class="note" style="clear:both">
+<strong>Dica:</strong> embora os aplicativos sejam instalados no armazenamento interno por
+padrão, é possível especificar o atributo <a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code
+android:installLocation}</a> em seu manifesto para que o aplicativo
+seja instalado no armazenamento externo. Os usuários se beneficiam dessa opção quando o tamanho do APK é muito grande e
+ele dispõe de maior espaço em armazenamento externo do que interno. Para obter mais
+informações, consulte <a href="{@docRoot}guide/topics/data/install-location.html">Local de instalação do aplicativo</a>.</p>
+
+
+<h2 id="GetWritePermission">Obter permissões para armazenamento externo</h2>
+
+<p>Para gravar no armazenamento externo, você deve solicitar a
+permissão {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} em seu <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">arquivo de manifesto</a>:</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+
+<div class="caution"><p><strong>Cuidado:</strong>
+atualmente, os aplicativos podem ler o armazenamento externo
+sem precisar de permissão especial. No entanto, isso será alterado em lançamentos futuros. Se seu aplicativo precisar
+ler o armazenamento externo (mas não gravar nele), será necessário declarar a permissão {@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE}. Para garantir que o aplicativo continue
+a funcionar adequadamente, declare essa permissão agora antes que as mudanças entrem em vigor.</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+<p>No entanto, se seu aplicativo usa a permissão {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+, já existe uma permissão implícita para leitura do armazenamento externo.</p>
+</div>
+
+<p>Não é necessária permissão para salvar arquivos no armazenamento
+interno. Seu aplicativo sempre terá permissão para ler e
+gravar arquivos em seu diretório de armazenamento interno.</p>
+
+
+
+
+
+<h2 id="WriteInternalStorage">Salvar arquivos em armazenamento interno</h2>
+
+<p>Ao salvar um arquivo no armazenamento interno, você pode obter o diretório adequado como um
+{@link java.io.File} chamando um destes dois métodos:</p>
+
+<dl>
+  <dt>{@link android.content.Context#getFilesDir}</dt>
+  <dd>Retorna um {@link java.io.File} que representa um diretório interno para seu aplicativo.</dd>
+  <dt>{@link android.content.Context#getCacheDir}</dt>
+  <dd>Retorna um {@link java.io.File} que representa um diretório interno para os arquivos de cache temporários
+de seu aplicativo. Certifique-se de excluir cada arquivo assim que não
+for mais necessário e estabeleça um limite de tamanho razoável para a quantidade de memória usada em um determinado
+período de tempo, como 1MB. Se o sistema começar a ficar com pouco espaço de armazenamento, ele poderá excluir arquivos de cache
+sem avisar.</dd>
+</dl>
+
+<p>Para criar um novo arquivo em um desses diretórios, use o construtor {@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE}, transmitindo o {@link java.io.File} fornecido por um
+dos métodos acima que especifica o diretório de armazenamento interno. Por exemplo:</p>
+
+<pre>
+File file = new File(context.getFilesDir(), filename);
+</pre>
+
+<p>Uma outra alternativa é chamar {@link
+android.content.Context#openFileOutput openFileOutput()} para obter um {@link java.io.FileOutputStream}
+que grave em um arquivo salvo no seu diretório interno. O exemplo a seguir
+mostra como gravar texto em um arquivo:</p>
+
+<pre>
+String filename = "myfile";
+String string = "Hello world!";
+FileOutputStream outputStream;
+
+try {
+  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+  outputStream.write(string.getBytes());
+  outputStream.close();
+} catch (Exception e) {
+  e.printStackTrace();
+}
+</pre>
+
+<p>Em alternativa, caso precise colocar arquivos em cache, use {@link
+java.io.File#createTempFile createTempFile()}. Por exemplo, o método a seguir extrai o
+nome do arquivo de {@link java.net.URL} e cria um arquivo com o mesmo nome
+no diretório de cache interno de seu aplicativo.</p>
+
+<pre>
+public File getTempFile(Context context, String url) {
+    File file;
+    try {
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, null, context.getCacheDir());
+    catch (IOException e) {
+        // Error while creating file
+    }
+    return file;
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong>
+o diretório de armazenamento interno do seu aplicativo é especificado
+pelo nome do pacote do aplicativo em um local específico do sistema de arquivos Android.
+Teoricamente, outros aplicativos poderão ler seus arquivos internos se você definir
+o arquivo para modo leitura. No entanto, o outro aplicativo também precisaria saber o nome do pacote
+do seu aplicativo e os nomes dos arquivos. Outros aplicativos não podem navegar nos diretórios internos e não têm
+permissão para ler ou gravar a menos que os arquivos sejam explicitamente definidos para permitir tais ações. Portanto,
+desde que você utilize {@link android.content.Context#MODE_PRIVATE} para seus arquivos no armazenamento interno,
+eles não ficarão acessíveis a outros aplicativos.</p>
+
+
+
+
+
+<h2 id="WriteExternalStorage">Salvar arquivos em armazenamento externo</h2>
+
+<p>Como o armazenamento externo pode ficar indisponível, como se o usuário ativar o
+armazenamento no PC ou remover o cartão SD que fornece armazenamento externo,
+você deve sempre verificar se o volume está disponível antes de acessá-lo. Consulte o estado de armazenamento
+externo chamando {@link android.os.Environment#getExternalStorageState}. Se o estado
+retornado for igual a {@link android.os.Environment#MEDIA_MOUNTED}, os arquivos poderão ser lidos
+e gravados. Os métodos a seguir ajudam a determinar a disponibilidade
+de armazenamento:</p>
+
+<pre>
+/* Checks if external storage is available for read and write */
+public boolean isExternalStorageWritable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+        return true;
+    }
+    return false;
+}
+
+/* Checks if external storage is available to at least read */
+public boolean isExternalStorageReadable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state) ||
+        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        return true;
+    }
+    return false;
+}
+</pre>
+
+<p>Embora o usuário e outros aplicativos possam modificar o armazenamento externo, há duas
+categorias de arquivos que deverão ser salvas aqui:</p>
+
+<dl>
+  <dt>Arquivos públicos</dt>
+  <dd>Arquivos que
+precisam estar livremente disponíveis ao usuário e outros aplicativos. Ao desinstalar o aplicativo,
+o usuário deve continuar a ter acesso a esses arquivos.
+  <p>Por exemplo, fotos capturadas pelo aplicativo ou outros arquivos baixados.</p>
+  </dd>
+  <dt>Arquivos privados</dt>
+  <dd>Arquivos que pertencem ao aplicativo e que devem ser excluídos na desinstalação
+. Embora esses arquivos estejam teoricamente à disposição do usuário e de outros aplicativo por estarem
+no armazenamento externo, na verdade são arquivos que não têm valor para o usuário
+fora do aplicativo. Ao desinstalar o aplicativo, o sistema exclui
+todos os arquivos no diretório privado externo do aplicativo. 
+  <p>Por exemplo, recursos adicionais baixados através do aplicativo ou arquivos de mídia temporários.</p>
+  </dd>
+</dl>
+
+<p>Para salvar arquivos públicos no armazenamento externo, use o método 
+{@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} para obter um {@link java.io.File} que representa
+o diretório correto no armazenamento externo. O método exige um argumento que especifica
+o tipo de arquivo que se deseja salvar para que possa ser logicamente organizado com outros arquivos públicos
+, como {@link android.os.Environment#DIRECTORY_MUSIC} ou {@link
+android.os.Environment#DIRECTORY_PICTURES}. Por exemplo:</p>
+
+<pre>
+public File getAlbumStorageDir(String albumName) {
+    // Get the directory for the user's public pictures directory. 
+    File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+
+<p>Se você deseja salvar arquivos privados do aplicativo, obtenha o
+diretório correto chamando {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} e informe um nome indicando
+o tipo de diretório desejado. Cada diretório criado dessa forma é adicionado ao diretório principal
+que contém todos os arquivos do armazenamento externo do aplicativo que o sistema exclui quando o
+usuário faz a desinstalação.</p>
+
+<p>Por exemplo, este é um método que pode ser usado para criar um diretório para um álbum de fotos individual:</p>
+
+<pre>
+public File getAlbumStorageDir(Context context, String albumName) {
+    // Get the directory for the app's private pictures directory. 
+    File file = new File(context.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+<p>Se nenhum dos nomes de subdiretórios predefinidos se adequa aos arquivos, chame {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} e transmita {@code null}. Isso
+retorna o diretório raiz para o diretório privado do aplicativo no armazenamento externo.</p>
+
+<p>Lembre-se de que {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+cria um diretório dentro de um diretório que é excluído quando o usuário desinstala o aplicativo.
+Se os arquivos salvos precisarem estar disponíveis após a desinstalação do
+aplicativo, como
+quando seu aplicativo é uma câmera e o usuário deseja manter as fotos, use {@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()}.</p>
+
+
+<p>Independentemente do uso de {@link
+android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} para arquivos compartilhados ou
+{@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()} para arquivos privados do aplicativo, é importante usar
+os nomes de diretório fornecidos pelas constantes de API, como
+{@link android.os.Environment#DIRECTORY_PICTURES}. Esses nomes de diretório garantem
+que os arquivos sejam tratados de forma adequada pelo sistema. Por exemplo, arquivos salvos em {@link
+android.os.Environment#DIRECTORY_RINGTONES} são categorizados pelo scanner de mídia dos sistema como toques
+e não como música.</p>
+
+
+
+
+<h2 id="GetFreeSpace">Consultar espaço livre</h2>
+
+<p>Se você já souber antecipadamente a quantidade de dados a ser salvo, descubra se
+há espaço disponível suficiente sem fazer com que um {@link
+java.io.IOException} chame {@link java.io.File#getFreeSpace} ou {@link
+java.io.File#getTotalSpace}. Esses métodos informam o espaço disponível atual e o
+espaço total no volume de armazenamento. Essa informação ajuda a evitar o preenchimento
+do volume de armazenamento além de um determinado limite.</p>
+
+<p>No entanto, o sistema não garante que será possível gravar a quantidade de bytes indicada
+por {@link java.io.File#getFreeSpace}.  Se o número retornado tiver
+alguns MB além do tamanho dos dados que deseja salvar ou se o sistema de arquivos
+estiver abaixo de 90% cheio, é possível continuar com segurança.
+Caso contrário, não grave no armazenamento.</p>
+
+<p class="note"><strong>Observação:</strong> não é obrigatório verificar a quantidade de espaço disponível
+antes de salvar o arquivo. É possível tentar gravar o arquivo diretamente e depois
+obter um {@link java.io.IOException}, se houver. Essa ação é recomendada
+caso você não saiba exatamente quanto espaço será necessário. Por exemplo, se
+você alterar a codificação do arquivo antes de salvá-lo convertendo uma imagem PNG em
+JPEG, não é possível saber o tamanho do arquivo antecipadamente.</p>
+
+
+
+
+<h2 id="DeleteFile">Excluir um arquivo</h2>
+
+<p>Sempre exclua arquivos que não sejam mais necessários. A forma mais simples de apagar um
+arquivo é fazer com que o arquivo de referência aberto chame {@link java.io.File#delete} por conta própria.</p>
+
+<pre>
+myFile.delete();
+</pre>
+
+<p>Se o arquivo estiver salvo em armazenamento interno, é possível solicitar ao {@link android.content.Context} para localizar e
+excluir o arquivo chamando {@link android.content.Context#deleteFile deleteFile()}:</p>
+
+<pre>
+myContext.deleteFile(fileName);
+</pre>
+
+<div class="note">
+<p><strong>Observação:</strong> quando o usuário desinstala o aplicativo, o sistema Android também
+exclui:</p> 
+<ul>
+<li>Todos os arquivos salvos no armazenamento interno</li>
+<li>Todos os arquivos salvos no armazenamento externo usando {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
+</ul>
+<p>No entanto, recomenda-se exclui manualmente todos os arquivos em cache criados com
+{@link android.content.Context#getCacheDir()} regularmente e
+outros arquivos que não sejam mais necessários.</p>
+</div>
+

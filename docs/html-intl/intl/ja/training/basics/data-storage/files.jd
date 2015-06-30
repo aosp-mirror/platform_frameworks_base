@@ -1,0 +1,379 @@
+page.title=ファイルを保存する
+page.tags=データ ストレージ
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#InternalVsExternalStorage">内部または外部ストレージを選択する</a></li>
+  <li><a href="#GetWritePermission">外部ストレージのパーミッションを取得する</a></li>
+  <li><a href="#WriteInternalStorage">内部ストレージ上にファイルを保存する</a></li>
+  <li><a href="#WriteExternalStorage">外部ストレージ上にファイルを保存する</a></li>
+  <li><a href="#GetFreeSpace">空き領域をクエリする</a></li>
+  <li><a href="#DeleteFile">ファイルを削除する</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">内部ストレージを使用する</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">外部ストレージを使用する</a>
+</li>
+</ul>
+
+</div>
+</div>
+
+<p>Android は、他のプラットフォーム上のディスクベースの
+ファイル システムと同様なファイルシステムを使用しています。このレッスンでは、
+{@link java.io.File} API を使用したファイルの読み書きに関する Android ファイルシステムの操作方法について説明します。
+</p>
+
+<p>{@link java.io.File} オブジェクトは、スキップすることなく開始から終了までの順序で大量のデータを読み取りまたは書き込みするのに適しています。
+これは、たとえば画像ファイルやネットワークを介して交換される任意のファイルに対して有効です。
+</p>
+
+<p>このレッスンでは、自分のアプリで基本的なファイル関連のタスクを実行する方法を紹介します。ここでは、Linux ファイルシステムの基礎と
+{@link java.io} での標準的なファイル入力/出力の API に精通していることを前提としています。
+</p>
+
+
+<h2 id="InternalVsExternalStorage">内部または外部ストレージを選択する</h2>
+
+<p>すべての Android 端末には、「内部」ストレージと「外部」ストレージの 2 つのファイル記憶領域があります。これらの名前は初期の Android の名残として、当時ほとんどの端末が内蔵の不揮発性メモリ（内部ストレージ）を備えていたのに加え、マイクロ SD カードのような取り外し可能な記憶媒体（外部記憶装置）も備えていたことから来ています。一部の端末では、永続的なストレージ領域を「内部」と「外部」のパーティションに分割しており、リムーバブル記憶媒体が備わっていない場合でも常に 2 つのストレージ スペースがあり、外部ストレージが取り外し可能であるか否かにかかわらず、API の動作は同じです。以下のリストでは、各ストレージ スペースの特徴を要約しています。
+
+
+
+
+
+</p>
+
+<div class="col-5" style="margin-left:0">
+<p><b>内部ストレージ:</b></p>
+<ul>
+<li>常に使用可能。</li>
+<li>ここに保存されたファイルは、デフォルトでは自分のアプリからのみアクセスできます。</li>
+<li>ユーザーがアプリをアンインストールすると、システムは内部ストレージから当該アプリのファイルをすべて削除します。
+</li>
+</ul>
+<p>ユーザーからも他のアプリからも、自分のファイルにアクセスできないようにしたい場合、内部ストレージが最適です。
+</p>
+</div>
+
+<div class="col-7" style="margin-right:0">
+<p><b>外部ストレージ:</b></p>
+<ul>
+<li>ユーザーは、USB ストレージなどの外部記憶装置をマウントできますが、端末から取り外す場合もあるため、常に使用可能というわけではありません。
+</li>
+<li>誰でも読み取り可能なため、ここに保存されたファイルは自分のコントロールの及ばない所で読み取られる可能性があります。
+</li>
+<li>ユーザーがアプリをアンインストールすると、当該アプリのファイルは、{@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()} からディレクトリに保存された場合に限り、ここからすべて削除されます。
+</li>
+</ul>
+<p>アクセス制限を必要としないファイルや、他のアプリと共有したり、ユーザーがコンピュータ経由でアクセスできるようにしたりするファイルの場合、外部ストレージが最適です。
+
+</p>
+</div>
+
+
+<p class="note" style="clear:both">
+<strong>ヒント: </strong>アプリはデフォルトでは内部ストレージにインストールされますが、自分のアプリが外部ストレージにインストールされるように、マニフェスト内で <a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code
+android:installLocation}</a> 属性を指定できます。
+
+APK のサイズが非常に大きく、内部ストレージよりも外部ストレージ容量が大きい場合、ユーザーにとってこのオプションは便利なものとなります。
+詳細については、<a href="{@docRoot}guide/topics/data/install-location.html">App Install Location</a> をご覧ください。
+</p>
+
+
+<h2 id="GetWritePermission">外部ストレージのパーミッションを取得する</h2>
+
+<p>外部ストレージに書き込むには、自分の<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">マニフェスト ファイル</a>で
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} パーミッションをリクエストする必要があります。</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+
+<div class="caution"><p><strong>警告: </strong>現在、すべてのアプリは特別なパーミッションを必要とせずに、外部ストレージからの読み取りが可能です。
+
+ただし、これは将来のリリースで変更される予定です。自分のアプリで外部ストレージの読み取り（書き込みではなく）の必要がある場合は、{@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE} パーミッションを宣言する必要があります。
+アプリが正常に動作し続けるようにするには、すぐにこのパーミッションを宣言して、変更を有効にする必要があります。
+</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+<p>ただし、自分のアプリで {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}パーミッションを使用している場合は、暗黙的に外部ストレージの読み取りパーミッションも持つことになります。
+</p>
+</div>
+
+<p>内部ストレージにファイルを保存する際には、一切のパーミッションを必要としません。
+自分のアプリは常に、内部ストレージ ディレクトリ内のファイルの読み取りおよび書き込みパーミッションを持っています。
+</p>
+
+
+
+
+
+<h2 id="WriteInternalStorage">内部ストレージ上にファイルを保存する</h2>
+
+<p>内部ストレージにファイルを保存する場合は、次の 2 つのメソッドのいずれかを呼び出すことにより、
+{@link java.io.File} として適切なディレクトリを取得することができます。</p>
+
+<dl>
+  <dt>{@link android.content.Context#getFilesDir}</dt>
+  <dd>自分のアプリ用の内部ディレクトリを示す {@link java.io.File} を返します。</dd>
+  <dt>{@link android.content.Context#getCacheDir}</dt>
+  <dd>自分のアプリの一時キャッシュ ファイル用の内部ディレクトリを示す {@link java.io.File} を返します。
+必要がなくなった各ファイルを削除して、1MB などの、任意の時点で使用するメモリ量として適度なサイズ制限を実装してください。
+
+システムはストレージが不足し始めた場合、警告なしでキャッシュ ファイルを削除することがあります。
+</dd>
+</dl>
+
+<p>これらのディレクトリのいずれかに新しいファイルを作成するには、自分の内部ストレージ ディレクトリを指定する、上記のいずれかのメソッドで提供された {@link java.io.File} を渡して、{@link
+java.io.File#File(File,String) File()} コンストラクタを使用することができます。
+次に例を示します。</p>
+
+<pre>
+File file = new File(context.getFilesDir(), filename);
+</pre>
+
+<p>代わりに {@link
+android.content.Context#openFileOutput openFileOutput()} を呼び出して、自分の内部ディレクトリ内のファイルに書き込みを行う {@link java.io.FileOutputStream}を取得することができます。
+ファイルにテキストを書き込む方法の例を次に示します。
+</p>
+
+<pre>
+String filename = "myfile";
+String string = "Hello world!";
+FileOutputStream outputStream;
+
+try {
+  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+  outputStream.write(string.getBytes());
+  outputStream.close();
+} catch (Exception e) {
+  e.printStackTrace();
+}
+</pre>
+
+<p>または、いくつかのファイルをキャッシュする必要がある場合は、代わりに {@link
+java.io.File#createTempFile createTempFile()} を使用してください。たとえば、次のメソッドでは {@link java.net.URL} からファイル名を抽出し、自分のアプリの内部キャッシュ ディレクトリに、抽出した名前でファイルを作成します。
+
+</p>
+
+<pre>
+public File getTempFile(Context context, String url) {
+    File file;
+    try {
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, null, context.getCacheDir());
+    catch (IOException e) {
+        // Error while creating file
+    }
+    return file;
+}
+</pre>
+
+<p class="note"><strong>注:</strong>アプリの内部ストレージ ディレクトリは、Android ファイルシステムの特定の場所にアプリのパッケージ名で指定されています。技術的には、読み取り可能になるようファイル モードを設定した場合、別のアプリから自分の内部ストレージのファイルを読むことができます。
+
+
+
+ただし、他のアプリ側でもアプリのパッケージ名とファイル名が既知である必要があります。
+他のアプリからは、自分のアプリの内部ディレクトリを参照することはできず、明示的にファイルを読み取り可能または書き込み可能に設定しない限り、読み書きのアクセス権もないからです。
+すなわち、内部ストレージ上のファイルに対して {@link android.content.Context#MODE_PRIVATE} を使用する限り、ファイルは他のアプリからアクセス可能になることはありません。
+
+</p>
+
+
+
+
+
+<h2 id="WriteExternalStorage">外部ストレージ上にファイルを保存する</h2>
+
+<p>外部ストレージは使用できない場合があります（ユーザーが PC にストレージをマウントしているか、外部ストレージを提供する SD カードを取り外した場合など）。アクセスする前に、当該ボリュームが利用可能であるかを常に確認する必要があります。
+
+{@link android.os.Environment#getExternalStorageState} を呼び出すことによって、外部ストレージの状態をクエリすることができます。
+返された状態が {@link android.os.Environment#MEDIA_MOUNTED} に等しい場合は、ファイルの読み取りと書き込みができます。
+
+たとえば、次のメソッドは、ストレージの可用性を判断するのに有用です。
+</p>
+
+<pre>
+/* Checks if external storage is available for read and write */
+public boolean isExternalStorageWritable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+        return true;
+    }
+    return false;
+}
+
+/* Checks if external storage is available to at least read */
+public boolean isExternalStorageReadable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state) ||
+        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        return true;
+    }
+    return false;
+}
+</pre>
+
+<p>外部ストレージは、ユーザーや他のアプリから変更可能ですが、ここで保存可能なファイルには次の 2 つのカテゴリがあります。
+</p>
+
+<dl>
+  <dt>パブリック ファイル</dt>
+  <dd>他のアプリおよびユーザーから自由に利用可能にすべきファイル。
+ユーザーがアプリをアンインストールしても、これらのファイルはユーザーから利用可能なままにしておく必要があります。
+
+  <p>たとえば、アプリで撮影した写真、その他のダウンロードされたファイルなどです。</p>
+  </dd>
+  <dt>プライベート ファイル</dt>
+  <dd>正当に自分のアプリに帰属しているファイルは、ユーザーがアプリをアンインストールした時点で削除する必要があります。これらのファイルは外部ストレージ上にあるため、技術的にはユーザーと他のアプリからアクセス可能ですが、現実問題としてアプリを離れたユーザーにとって価値を持たないファイルです。そのため、ユーザーがアプリをアンインストールすると、アプリの外部プライベート ディレクトリ内のすべてのファイルが削除されます。
+
+
+
+ 
+  <p>たとえば、自分のアプリでダウンロードした追加のリソースや一時的なメディア ファイルです。</p>
+  </dd>
+</dl>
+
+<p>外部ストレージにパブリック ファイルを保存する場合は、
+{@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} メソッドを使用して、外部ストレージ上の適切なディレクトリを示す {@link java.io.File} を取得します。
+このメソッドは、{@link android.os.Environment#DIRECTORY_MUSIC} または {@link
+android.os.Environment#DIRECTORY_PICTURES} などの保存するファイルの種類を指定する引数を取り、他のパブリック ファイルとともに論理的に整理することができます。
+
+次に例を示します。</p>
+
+<pre>
+public File getAlbumStorageDir(String albumName) {
+    // Get the directory for the user's public pictures directory. 
+    File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+
+<p>自分のアプリのプライベート ファイルを保存する場合は、{@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} を呼び出して希望するディレクトリのタイプを示す名前を渡し、適切なディレクトリを取得することができます。
+
+このように作成した各ディレクトリは、ユーザーがアプリをアンインストールするときにシステムが削除するアプリの外部ストレージ ファイルのすべてをカプセル化する親ディレクトリに追加されます。
+
+</p>
+
+<p>ここでは、個々のフォト アルバム用のディレクトリを作成するために使用できるメソッドの例を次に示します。</p>
+
+<pre>
+public File getAlbumStorageDir(Context context, String albumName) {
+    // Get the directory for the app's private pictures directory. 
+    File file = new File(context.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+<p>あらかじめ定義されたサブディレクトリ名のいずれもが自分のファイルに適合しない場合、代わりに {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} を呼び出し、{@code null} を渡すことができます。これにより、外部ストレージ上のアプリのプライベート ディレクトリのルート ディレクトリが返されます。
+</p>
+
+<p>{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}は、ユーザーがアプリをアンインストールすると削除されるディレクトリ内にディレクトリを作成することに注意してください。ユーザーがアプリをアンインストールした後も、保存対象のファイルを利用可能にすべき場合（自分のアプリがカメラであり、ユーザーが撮った写真の利用を望むような場合）は、代わりに {@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} を使用する必要があります。
+
+
+
+</p>
+
+
+<p>共有ファイルに対して {@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} を使用しているか、自分のアプリにとってプライベートなファイルに対して
+{@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()} を使用しているかどうかに関係なく、
+{@link android.os.Environment#DIRECTORY_PICTURES} のような API 定数が提供するディレクトリ名を使用することが重要です。
+
+これらのディレクトリ名により、ファイルがシステムによって正しく処理されるようになります。
+たとえば、{@link
+android.os.Environment#DIRECTORY_RINGTONES} に保存されたファイルは、システムのメディア スキャナにより音楽ではなく着信音として分類されます。
+</p>
+
+
+
+
+<h2 id="GetFreeSpace">空き領域をクエリする</h2>
+
+<p>前もって保存対象のデータ量がわかっている場合は、{@link java.io.File#getFreeSpace} または {@link
+java.io.File#getTotalSpace} 呼び出して、{@link
+java.io.IOException} を生じさせることなく十分な空き領域が利用可能かどうかを調べることができます。
+これらのメソッドでは、それぞれ、ストレージ ボリューム内の現在利用可能な領域と総領域がそれぞれ得られます。
+この情報は、一定の閾値以上のストレージ ボリュームの消費を避けるためにも有用です。
+</p>
+
+<p>しかし、システム上、{@link java.io.File#getFreeSpace} で示されたバイト数の書き込みは保証されるものではありません。
+返された数量が保存するデータのサイズよりも数 MB 上回る場合、またはファイルシステムの使用率が 90％未満の場合は、続行しても安全でしょう。それ以外の場合は、ストレージへの書き込みは避けるべきです。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> ファイルを保存する前に、使用可能な領域の量をチェックする必要はありません。
+代わりにすぐにファイルを書き込んでみて、不都合が生じた場合に {@link java.io.IOException} を受け取ることができます。
+正確にどのくらいの領域が必要か不明な場合は、これを行う必要がある場合があります。
+たとえばファイルを保存する前に、PNG 画像を JPEG に 変換してエンコーディングを変更した場合、事前にファイルのサイズを知ることができません。
+
+</p>
+
+
+
+
+<h2 id="DeleteFile">ファイルを削除する</h2>
+
+<p>不要になったファイルは、常に削除する必要があります。ファイルを削除する最も簡単な方法は、
+開かれたファイル上で参照呼び出し {@link java.io.File#delete} を行うことです。</p>
+
+<pre>
+myFile.delete();
+</pre>
+
+<p>ファイルが内部ストレージに保存されている場合は、{@link android.content.Context} を使用して場所を特定し、
+{@link android.content.Context#deleteFile deleteFile()} を呼び出してファイルを削除することもできます。</p>
+
+<pre>
+myContext.deleteFile(fileName);
+</pre>
+
+<div class="note">
+<p><strong>注:</strong> ユーザーがアプリをアンインストールすると、Android システムは次を削除します。
+</p> 
+<ul>
+<li>内部ストレージに保存したすべてのファイル</li>
+<li>{@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} を使用して外部ストレージに保存したすべてのファイル</li>
+</ul>
+<p>ただし、定期的に
+{@link android.content.Context#getCacheDir()} で作成されたすべてのキャッシュ済みファイルを手動で削除し、必要なくなったファイルも定期的に削除する必要があります。
+</p>
+</div>
+

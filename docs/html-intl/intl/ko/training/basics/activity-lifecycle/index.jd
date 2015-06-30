@@ -1,0 +1,72 @@
+page.title=액티비티 수명 주기 관리하기
+page.tags=activity lifecycle
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<h2>종속관계 및 전제조건</h2>
+<ul>
+  <li>Android 프로젝트를 생성하는 방법(<a href="{@docRoot}training/basics/firstapp/creating-project.html">Android
+프로젝트 생성</a> 참조)</li>
+</ul>
+
+
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/activities.html">액티비티</a></li>
+</ul>
+
+
+<h2>실습하기</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">데모 다운로드</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>사용자가 앱을 탐색하고, 앱에서 나가고, 앱으로 다시 돌아가면, 앱의
+{@link android.app.Activity} 인스턴스는 
+수명 주기 안에서 서로 다른 상태 간에 전환됩니다. 예를 들어
+액티비티가 처음 시작되는 경우, 시스템의 전면에 표시되어 사용자의
+포커스를 받습니다. 이 과정에서 Android 시스템은 사용자 인터페이스 및 다른 구성요소에 설정된
+액티비티에 대해 일련의 수명 주기 메서드를 호출합니다. 사용자가 다른 액티비티를 시작하거나 다른 앱으로 전환하는 
+작업을 수행하면, 백그라운드(액티비티가 더
+이상 보이지 않지만 인스턴스와 해당 상태는 그대로 유지되는 상태)로 전환되면서 시스템은 액티비티에 대해 또 다른
+수명 주기 메서드 세트를 호출합니다.</p>
+
+<p>사용자가 액티비티를 떠났다가 다시 돌아왔을 때
+액티비티가 어떤 식으로 동작할지에 대해 수명 주기 콜백 메서드 내에 선언할 수 있습니다.  예를 들어 스트리밍 비디오 플레이어를 구축하는 경우,
+사용자가 다른
+앱으로 전환할 때 비디오를 일시정지하고 네트워크 연결을 종료할 수 있습니다. 사용자가 돌아오면, 네트워크를 다시 연결하고 사용자가 일시정지한 지점에서
+비디오를 다시 시작할 수 있게 할 수 있습니다.</p>
+
+<p>이 클래스에서는 각각의 {@link
+android.app.Activity} 인스턴스가 수신하는 중요한 수명 주기 콜백 메서드를 설명합니다. 또한 이러한 콜백 메서드를 사용하여 액티비티가
+사용자가 원하는 작업을 하고, 액티비티가 필요로 하지 않을 때 시스템 리소스 소비를 방지하는 방법에 대해서도 설명합니다.</p>
+
+<h2>과정</h2>
+ 
+<dl>
+  <dt><b><a href="starting.html">액티비티 시작하기</a></b></dt>
+  <dd>액티비티 수명 주기의 기본사항, 사용자가 앱을 시작하는 방법, 그리고 기본 액티비티 생성 작업을 수행하는
+방법에 대해 설명합니다.</dd>
+  <dt><b><a href="pausing.html">액티비티 일시정지 및 재개하기</a></b></dt>
+  <dd>액티비티가 일시정지(부분적으로 가려져 있음)되었다가 재개되는 경우 어떤 동작이 발생하는지, 그리고 이러한 상태 전환 과정에서 수행해야 하는
+작업은 무엇인지 설명합니다.</dd>
+  <dt><b><a href="stopping.html">액티비티 정지 및 재시작하기</a></b></dt>
+  <dd>사용자가 액티비티를 완전히 떠났다가 돌아왔을 때 어떤 동작이 발생하는지 설명합니다.</dd>
+  <dt><b><a href="recreating.html">액티비티 재생성하기</a></b></dt>
+  <dd>액티비티가 소멸되면 어떤 동작이 발생하는지, 그리고 필요 시 액티비티
+상태를 재구축하는 방법에 대해 설명합니다.</dd>
+</dl> 
+

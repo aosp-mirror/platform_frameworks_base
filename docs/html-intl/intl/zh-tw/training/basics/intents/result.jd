@@ -1,0 +1,178 @@
+page.title=從應用行為顯示取得結果
+page.tags=意圖
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#StartActivity">啟動應用行為顯示</a></li>
+  <li><a href="#ReceiveResult">接收結果</a></li>
+</ol>
+
+<h2>您也應該閱讀</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共用簡單資料</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">共用檔案</a>
+</ul>
+
+  </div>
+</div>
+
+<p>啟動其他應用行為顯示不必是單向作業。您也可以啟動其他應用行為顯示，然後接收傳回的結果。
+若要接收結果，請呼叫 {@link android.app.Activity#startActivityForResult
+startActivityForResult()} (而非 {@link android.app.Activity#startActivity
+startActivity()})。</p>
+
+<p>例如，您的應用程式可以啟動相機應用程式，然後接收所拍攝的相片作為結果。或者，您可以啟動人員應用程式 (以便讓使用者選取連絡人)，然後接收作為結果的連絡人詳細資料。
+
+</p>
+
+<p>當然，必須將提供回應的應用行為顯示設計為傳回結果。執行時，該應用行為顯示會以其他 {@link android.content.Intent} 物件的形式傳送結果。
+您的應用行為顯示會在 {@link android.app.Activity#onActivityResult onActivityResult()} 回呼中接收該結果。
+</p>
+
+<p class="note"><strong>注意：</strong>呼叫 {@link android.app.Activity#startActivityForResult startActivityForResult()} 時，您可以使用明確或隱含的意圖。
+啟動您的其中一個應用行為顯示以接收結果時，您應使用明確的意圖，以確保收到預期結果。
+
+</p>
+
+
+<h2 id="StartActivity">啟動應用行為顯示</h2>
+
+<p>啟動應用行為顯示以接收結果時，您使用的 {@link android.content.Intent} 物件沒有任何特殊之處，但是您需要將附加整數引數傳遞至 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 方法。
+</p>
+
+<p>該整數引數是識別您要求的「要求代碼」。在您接收結果 {@link android.content.Intent} 時，回呼會提供同一要求代碼，以便您的應用程式可以正確識別結果並判斷如何處理結果。
+
+</p>
+
+<p>例如，以下展示了如何啟動應用行為顯示 (使用者可藉此挑選連絡人)：</p>
+
+<pre>
+static final int PICK_CONTACT_REQUEST = 1;  // The request code
+...
+private void pickContact() {
+    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+    pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+    startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+}
+</pre>
+
+
+<h2 id="ReceiveResult">接收結果</h2>
+
+<p>使用者處理隨後的應用行為顯示並返回時，系統會呼叫應用行為顯示的 {@link android.app.Activity#onActivityResult onActivityResult()} 方法。
+此方法包括三個引數：
+</p>
+
+<ul>
+  <li>您傳遞至 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 的要求代碼。</li>
+  <li>由第二個應用行為顯示指定的結果代碼。此代碼是 {@link
+android.app.Activity#RESULT_OK} (若操作成功) 或 {@link
+android.app.Activity#RESULT_CANCELED} (若因故使用者退出或操作失敗)。
+</li>
+  <li>攜帶結果資料的 {@link android.content.Intent}。</li>
+</ul>
+
+<p>例如，以下為您展示了如何處理「挑選連絡人」意圖的結果：</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // The user picked a contact.
+            // The Intent's data Uri identifies which contact was selected.
+
+            // Do something with the contact here (bigger example below)
+        }
+    }
+}
+</pre>
+
+<p>在此範例中，由 Android 的連絡人或人員應用程式傳回的結果 {@link android.content.Intent} 可提供內容 {@link android.net.Uri} (能識別使用者所選取的連絡人)。
+
+</p>
+
+<p>若要成功處理結果，您必須了解結果 {@link android.content.Intent} 將採用的格式。
+若傳回結果的應用行為顯示是您的其中一個應用行為顯示，上述作業會非常簡單。
+Android 平台隨附的應用程式會針對特定結果資料提供您可以依賴的 API。
+例如，人員應用程式 (某些舊版上的連絡人應用程式) 會始終傳回含內容 URI (可識別選取的連絡人) 的結果，相機應用程式會在 {@code "data"} 額外項目中傳回 {@link android.graphics.Bitmap} (請參閱有關<a href="{@docRoot}training/camera/index.html">拍攝相片</a>的課程)。
+
+
+</p>
+
+
+<h4>額外說明：讀取連絡人資料</h4>
+
+<p>上述程式碼展示如何從人員應用程式取得結果，並未詳述如何實際讀取結果的資料，因為這需要進行更高級的
+<a href="{@docRoot}guide/topics/providers/content-providers.html">內容提供者</a>相關討論。
+
+但是，若您對此感到好奇，以下提供了另外一些程式碼，這些程式碼會展示如何查詢結果資料，以便取得所選連絡人的電話號碼：
+</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request it is that we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // Get the URI that points to the selected contact
+            Uri contactUri = data.getData();
+            // We only need the NUMBER column, because there will be only one row in the result
+            String[] projection = {Phone.NUMBER};
+
+            // Perform the query on the contact to get the NUMBER column
+            // We don't need a selection or sort order (there's only one result for the given URI)
+            // CAUTION: The query() method should be called from a separate thread to avoid blocking
+            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+            // Consider using {@link android.content.CursorLoader} to perform the query.
+            Cursor cursor = getContentResolver()
+                    .query(contactUri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            // Retrieve the phone number from the NUMBER column
+            int column = cursor.getColumnIndex(Phone.NUMBER);
+            String number = cursor.getString(column);
+
+            // Do something with the phone number...
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>在 Android 2.3 (API 級別為 9) 版之前，若在 {@link android.provider.ContactsContract.Contacts Contacts Provider} (例如以上所示) 上執行查詢，需要您的應用程式宣告 {@link
+android.Manifest.permission#READ_CONTACTS} 權限 (請參閱<a href="{@docRoot}guide/topics/security/security.html">安全性與權限</a>)。
+
+但是，從 Android 2.3 版開始，在連絡人提供者傳回結果時，連絡人/人員應用程式會為您的應用程式授予讀取連絡人提供者的臨時權限。
+
+該臨時權限僅適用於要求的特定連絡人，因此除非您已宣告 {@link
+android.Manifest.permission#READ_CONTACTS} 權限，否則無法查詢並非由意圖的 {@link android.net.Uri} 指定的連絡人。
+
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

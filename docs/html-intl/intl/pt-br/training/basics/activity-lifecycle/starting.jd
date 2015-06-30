@@ -1,0 +1,285 @@
+page.title=Iniciando uma atividade
+page.tags=ciclo de vida de atividade
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#lifecycle-states">Entender o ciclo de vida do retorno de chamada</a></li>
+  <li><a href="#launching-activity">Especificar a atividade da tela de início do aplicativo</a></li>
+  <li><a href="#Create">Criar uma nova instância</a></li>
+  <li><a href="#Destroy">Destruir a atividade</a></li>
+</ol>
+    
+    <h2>Leia também</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">Atividades</a></li>
+    </ul>
+
+<h2>Tente</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">Baixar a demonstração</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>Diferente de outros paradigmas de programação em que os aplicativos são lançados com um método {@code main()}, o
+sistema Android inicia o código em uma instância {@link android.app.Activity} chamando métodos específicos
+de retorno de chamada que correspondem a determinados estágios do seu
+ciclo de vida. Há uma sequência de métodos de retorno de chamada que iniciam uma atividade e uma sequência de métodos
+de retorno de chamada que interrompem uma atividade.</p>
+
+<p>Essa lição proporciona uma visão geral dos métodos do ciclo de vida mais importantes e mostra como
+lidar com o primeiro retorno de chamada do ciclo de vida que cria uma nova instância de sua atividade.</p>
+
+
+
+<h2 id="lifecycle-states">Entender o ciclo de vida do retorno de chamada</h2>
+
+<p>Durante a vida de uma atividade, o sistema chama um núcleo principal de métodos do ciclo de vida em
+uma sequência parecida com uma pirâmide em degraus. Isto é, cada estágio do
+ciclo de vida da atividade corresponde a um degrau da pirâmide. Conforme o sistema cria uma nova instância de atividade,
+cada método de retorno de chamada leva o estado da atividade um degrau acima. O topo da pirâmide é o
+ponto em que a atividade funciona em primeiro plano e o usuário pode interagir com ela.</p>
+
+<p>Conforme o usuário começa a sair da atividade, o sistema chama outros métodos que a movem
+de volta em direção à base da pirâmide para desfazer a atividade. Em alguns casos, a atividade é movida
+parcialmente em direção à base da pirâmide e aguarda (como quando o usuário muda para outro aplicativo), no
+ponto em que a atividade é movida novamente em direção ao topo (se o usuário retornar à atividade) e
+reinicia de onde o usuário parou.</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle.png" />
+<p class="img-caption"><strong>Figura 1.</strong> Ilustração simplificada do ciclo de vida
+da atividade, expressa como pirâmide em degraus. Isso mostra que, para cada retorno de chamada usado para levar
+uma atividade ao estado de Reiniciado, em direção ao topo, há um método de retorno de chamada
+que leva a atividade um degrau abaixo. A atividade também pode retornar ao estado de retomada do
+estado de Pausado e Interrompido.</p>
+
+
+<p>Dependendo da complexidade de sua atividade, não há necessidade de implementar todos os
+métodos do ciclo de vida. No entanto, é importante compreender cada um e implementar apenas aqueles que
+garantem que seu aplicativo tenha o desempenho esperado pelo usuário. A implementação adequada dos métodos do ciclo de vida da atividade
+garante que seu aplicativo tenha um bom desempenho em vários sentidos, incluindo que:</p>
+<ul>
+  <li>Não apresente falhas se o usuário receber uma chamada telefônica ou mudar para outro aplicativo
+enquanto estiver usando o seu aplicativo.</li>
+  <li>Não consuma recursos importantes do sistema quando o usuário não estiver utilizando
+ativamente o aplicativo.</li>
+  <li>Não perca o progresso do usuário se ele sair do aplicativo e retornar
+mais tarde.</li>
+  <li>Não apresente falhas nem perca o progresso do usuário quando a orientação da tela mudar entre
+paisagem e retrato.</li>
+</ul>
+
+<!--
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+methods.</p>
+<table>
+  <tr>
+    <th scope="col">Lifecycle State</th>
+    <th scope="col">Startup Method</th>
+    <th scope="col">Teardown Method</th>
+  </tr>
+  <tr>
+    <td>Created / Destroyed</td>
+    <td>{@link android.app.Activity#onCreate onCreate()}</td>
+    <td>{@link android.app.Activity#onDestroy()}</td>
+  </tr>
+  <tr>
+    <td>Started / Stopped</td>
+    <td>{@link android.app.Activity#onStart()}</td>
+    <td>{@link android.app.Activity#onStop()}</td>
+  </tr>
+  <tr>
+    <td>Resumed / Resumed</td>
+    <td>{@link android.app.Activity#onResume()}</td>
+    <td>{@link android.app.Activity#onPause()}</td>
+  </tr>
+</table>
+-->
+
+<p>Como você aprenderá nas lições seguintes, há várias situações de transições de
+atividades entre estados diferentes, como ilustrado na figura 1. No entanto, apenas três
+desses estados podem ser estáticos. Isto é, a atividade pode existir em um de apenas três estados por
+um período de tempo maior:</p>
+<dl>
+  <dt>Reiniciado</dt>
+    <dd>Neste estado, a atividade está no primeiro plano e o usuário consegue interagir.
+(Também chamado de estado de funcionamento.)</dd>
+  <dt>Pausado</dt>
+    <dd>Neste estado, a atividade está parcialmente obscurecida por outra atividade. A
+outra atividade que está em primeiro plano é semitransparente ou não cobre totalmente a tela. A
+atividade pausada não recebe entrada do usuário e não executa nenhum código.
+  <dt>Interrompido</dt>
+    <dd>Neste estado, a atividade está completamente oculta e não é visível para o usuário. Considera-se
+que está em segundo plano. Enquanto interrompido, a instância da atividade e todas as
+informações de estado, como variáveis de membro, são retidas, mas não é possível executar nenhum código.</dd>
+</dl>
+
+<p>Os outros estados (Criado e Iniciado) são temporários e o sistema rapidamente se move rapidamente de um
+estado a outro chamando o próximo método de retorno de chamada do ciclo de vida. Isto é, depois que o sistema chama
+{@link android.app.Activity#onCreate onCreate()}, ele rapidamente chama {@link
+android.app.Activity#onStart()}, que é seguido por {@link
+android.app.Activity#onResume()}.</p>
+
+<p>Isso é tudo que precisamos dizer sobre o ciclo de vida básico de atividades. Agora você aprenderá sobre alguns dos
+comportamentos específicos do ciclo de vida.</p>
+
+
+
+<h2 id="launching-activity">Especificar a atividade da tela de início do aplicativo</h2> 
+
+<p>Quando o usuário seleciona seu aplicativo na tela inicial, o sistema chama o método {@link
+android.app.Activity#onCreate onCreate()} para {@link android.app.Activity} no aplicativo
+que foi declarado como atividade da “inicializador” (ou “principal”). Essa é a atividade que serve como
+ponto de entrada principal da interface do usuário do aplicativo.</p>
+
+<p>É possível definir qual atividade será usada como principal no arquivo manifesto do Android, <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">{@code AndroidManifest.xml}</a>, que está
+na raiz do diretório do seu projeto.</p>
+
+<p>A principal atividade do aplicativo deve ser declarada no manifesto com um <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> que inclui a ação {@link
+android.content.Intent#ACTION_MAIN MAIN} e categoria
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER}. Por exemplo:</p> 
+
+<pre>
+&lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>Observação:</strong> ao criar um novo projeto do Android com ferramentas
+SDK Android, os arquivos padrões do projeto incluem uma classe {@link android.app.Activity} que é declarada no
+manifesto com esse filtro.</p>
+
+<p>Se a ação {@link android.content.Intent#ACTION_MAIN MAIN} nem a categoria
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} forem declaradas para uma de suas
+atividades, o ícone do aplicativo não aparecerá na lista de aplicativos da tela inicial.</p>
+
+
+
+<h2 id="Create">Criar uma nova instância</h2>
+
+<p>A maioria dos aplicativos tem várias atividades que permitem ao usuário realizar diferentes ações.
+Tanto para a atividade principal criada quando o usuário clica no ícone do aplicativo quanto uma
+atividade diferente que o aplicativo inicia em resposta à ação do usuário, o sistema cria
+cada nova instância do {@link android.app.Activity} chamando o método {@link
+android.app.Activity#onCreate onCreate()}.</p>
+
+<p>Implemente o método {@link android.app.Activity#onCreate onCreate()} para realizar a lógica básica
+de inicialização do aplicativo que deve acontecer apenas uma vez na vida completa da atividade. Por
+exemplo, sua implementação do {@link android.app.Activity#onCreate onCreate()} deve definir a
+interface do usuário e possivelmente instanciar algumas variáveis de escopo de classe.</p>
+
+<p>Por exemplo, o seguinte modelo do método {@link android.app.Activity#onCreate onCreate()}
+ mostra alguns códigos que realizam configurações fundamentais para a atividade, como
+declarar a interface do usuário (definida em arquivo de layout XML), definir variáveis de membro
+e configurar parte da interface do usuário.</p>
+
+<pre>
+TextView mTextView; // Member variable for text view in the layout
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Set the user interface layout for this Activity
+    // The layout file is defined in the project res/layout/main_activity.xml file
+    setContentView(R.layout.main_activity);
+    
+    // Initialize member TextView so we can manipulate it later
+    mTextView = (TextView) findViewById(R.id.text_message);
+    
+    // Make sure we're running on Honeycomb or higher to use ActionBar APIs
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // For the main activity, make sure the app icon in the action bar
+        // does not behave as a button
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(false);
+    }
+}
+</pre>
+
+<p class="caution"><strong>Cuidado:</strong> utilizar {@link android.os.Build.VERSION#SDK_INT} para
+evitar que sistemas antigos executem novas APIs funciona apenas no Android 2.0 (API Nível
+5) e versões posteriores. Versões mais antigas encontram uma exceção no tempo de execução.</p>
+
+<p>Depois que o {@link android.app.Activity#onCreate onCreate()} termina de executar, o sistema
+chama os métodos {@link android.app.Activity#onStart()} e {@link android.app.Activity#onResume()}
+ em rápida sucessão. A atividade nunca reside nos estados Criado ou Iniciado. Tecnicamente, a
+atividade se torna visível para o usuário quando {@link android.app.Activity#onStart()} é chamado, mas
+{@link android.app.Activity#onResume()} é executado e a atividade permanece no estado Reiniciado
+até que algo diferente ocorra, como o recebimento de uma chamada telefônica, o usuário
+navegar para outra atividade ou a tela do dispositivo desligar.</p>
+
+<p>Nas próximas lições, você verá como outros métodos de inicialização, {@link
+android.app.Activity#onStart()} e {@link android.app.Activity#onResume()}, podem ajudar
+no ciclo de vida da atividade quando utilizado para reiniciar a atividade dos estados Pausado e Interrompido.</p>
+
+<p class="note"><strong>Observação:</strong> o método {@link android.app.Activity#onCreate onCreate()}
+inclui um parâmetro chamado <code>savedInstanceState</code>, que será discutido mais adiante
+na lição <a href="recreating.html">Recriando uma atividade</a>.</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-create.png" />
+<p class="img-caption"><strong>Figura 2.</strong> Outra ilustração da estrutura do ciclo de vida da
+atividade com ênfase nos três retornos de chamada principais que o sistema chama na sequência quando
+cria uma nova instância da atividade: {@link android.app.Activity#onCreate onCreate()}, {@link
+android.app.Activity#onStart()} e{@link android.app.Activity#onResume()}. Depois que esta sequência de
+retornos de chamada for concluída, a atividade chega ao estado Reiniciado em que os usuários podem interagir com a
+atividade até que mude para outra atividade.</p>
+
+
+
+
+
+
+
+<h2 id="Destroy">Destruir a atividade</h2>
+
+<p>Embora o retorno de chamada do primeiro ciclo de vida da atividade seja {@link android.app.Activity#onCreate
+onCreate()}, o último retorno de chamada será {@link android.app.Activity#onDestroy}. O sistema chama
+este método na atividade como o último
+sinal de que a instância da atividade está sendo completamente removida da memória do sistema.</p>
+
+<p>A maioria dos aplicativos não exige a implementação desse método porque referências de classe locais são destruídas
+com a atividade, que realiza a maior parte da limpeza durante {@link
+android.app.Activity#onPause} e {@link android.app.Activity#onStop}. No entanto, se a
+atividade incluir threads de segundo plano criados durante {@link
+android.app.Activity#onCreate onCreate()} ou outro recurso de longa execução que pode
+vazar memória se não forem fechados adequadamente, você deve finalizá-los durante {@link
+android.app.Activity#onDestroy}.</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+    super.onDestroy();  // Always call the superclass
+    
+    // Stop method tracing that the activity started during onCreate()
+    android.os.Debug.stopMethodTracing();
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> o sistema chama {@link android.app.Activity#onDestroy}
+depois de ter chamado {@link android.app.Activity#onPause} e {@link
+android.app.Activity#onStop} em qualquer situação, exceto uma: quando você chama {@link
+android.app.Activity#finish()} pelo método {@link android.app.Activity#onCreate onCreate()}
+. Em alguns casos, como quando a atividade assume a posição temporária de tomadora de decisões para
+lançar outra atividade, chame {@link android.app.Activity#finish()} pelo {@link
+android.app.Activity#onCreate onCreate()} para destruir a atividade. Nesse caso, o sistema
+chama imediatamente {@link android.app.Activity#onDestroy} sem chamar qualquer outro
+ método do ciclo de vida.</p>

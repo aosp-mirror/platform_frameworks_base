@@ -1,0 +1,147 @@
+page.title=액티비티 일시정지 및 재개하기
+page.tags=activity lifecycle
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>이 과정에서 다루는 내용</h2>
+    <ol>
+      <li><a href="#Pause">액티비티 일지정지하기</a></li>
+      <li><a href="#Resume">액티비티 재개하기</a></li>
+    </ol>
+    
+    <h2>필독 항목</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">액티비티</a>
+      </li>
+    </ul>
+
+<h2>실습하기</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">데모 다운로드</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>일반적인 앱 사용 중에 가끔 다른 
+비주얼 구성요소로 인해 전면의 액티비티가 <em>일시정지</em>되는 경우가 있습니다.  예를 들어, 대화 상자 스타일과 같은 반투명
+액티비티가 열리면, 그 이전 액티비티는 일시정지됩니다. 액티비티가
+부분적으로 보이지만 현재 포커스 내에 있지 않는 한 일시정지된 상태로 유지됩니다.</p>
+
+<p>하지만 액티비티가 보이지 않고 완전히 가려지면, <em>정지</em> 상태가 됩니다(이에 대해서는
+다음 과정에서 설명함).</p>
+
+<p>액티비티가 일시정지 상태로 전환되면 시스템은 {@link android.app.Activity}에 대해 {@link
+android.app.Activity#onPause onPause()} 메서드를 호출합니다. 이를 통해
+비디오와 같이 일시정지되어 있는 동안에는 진행되어서는 안 되는 지속적인 작업을 정지하거나, 사용자가 앱에서 떠나더라도 영구 저장되어야 하는 정보를
+유지할 수 있습니다. 사용자가
+일시정지 상태에서 액티비티로 돌아오는 경우, 시스템은 액티비티를 재개하고 {@link android.app.Activity#onResume onResume()} 메서드를
+호출합니다.</p>
+
+<p class="note"><strong>참고:</strong> 액티비티가 {@link
+android.app.Activity#onPause()}에 대한 호출을 수신하는 경우, 이는 액티비티가
+잠시 일시정지되는 것이며, 사용자가 이 액티비티로 포커스를 다시 돌릴 수 있음을 나타냅니다. 하지만 이는 일반적으로 사용자가 액티비티를 떠남을 나타내는
+첫 번째 표시입니다.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-paused.png" />
+<p class="img-caption"><strong>그림 1.</strong> 액티비티를
+반투명 액티비티가 가릴 경우, 시스템은 {@link android.app.Activity#onPause onPause()}를 호출하고 액티비티는 일시정지된 상태로
+대기하게 됩니다(1). 사용자가 여전히 일시정지된 상태의 액티비티로 돌아오는 경우,
+시스템은 {@link android.app.Activity#onResume onResume()}을 호출합니다(2).</p>
+
+
+<h2 id="Pause">액티비티 일지정지하기</h2>
+      
+<p>시스템이 액티비티에 대해 {@link android.app.Activity#onPause()}를 호출하면, 이는
+엄밀해 말해 액티비티가 여전히 부분적으로 보일 수 있음을 의미하지만,
+대개의 경우 사용자가 액티비티를 떠나 곧 정지 상태로 전환될 것임을 나타냅니다.  일반적으로 다음 작업을 수행할 때
+{@link android.app.Activity#onPause()} 콜백을 사용해야 합니다.</p>
+
+<ul>
+  <li>애니메이션 또는 CPU 소비를 야기할 수 있는 기타 지속적인 작업 정지</li>
+  <li>저장되지 않은 변경 내용 커밋. 단, 사용자가 나갈 때
+이러한 변경 내용이 영구적으로 저장되기를 기대하는 경우에 한합니다(예: 이메일 임시저장).</li>
+  <li>브로드캐스트 리시버와 같은 시스템 리소스, GPS와
+같은 센서에 대한 핸들 또는 액티비티가 일지정지된 동안 배터리 수명에 영향을 미칠 수 있으며 사용자가
+필요로 하지 않는 모든 리소스 해제</li>
+</ul>
+
+<p>예를 들어 애플리케이션이 {@link android.hardware.Camera}를 사용하는 경우
+{@link android.app.Activity#onPause()} 메서드는 이를 해제할 수 있는 좋은 위치입니다.</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    super.onPause();  // Always call the superclass method first
+
+    // Release the Camera because we don't need it when paused
+    // and other activities might need to use it.
+    if (mCamera != null) {
+        mCamera.release()
+        mCamera = null;
+    }
+}
+</pre>
+
+<p>일반적으로 폼에 입력된 개인 정보와 같은
+사용자의 변경 내용을 {@link android.app.Activity#onPause()}를 사용하여 영구 저장소에 저장하면 <strong>안 됩니다</strong>. 이메일
+임시보관과 같이 사용자가 자동저장을 원할 것이란 확신이 있을 경우에만 {@link android.app.Activity#onPause()}
+내에서 사용자의 변경 내용을 영구 저장소에 유지해야 합니다.
+하지만 데이터베이스에 쓰기와 같이 CPU를 많이 소모하는 작업은 {@link
+android.app.Activity#onPause()} 중에는 수행하지 않아야 합니다. 그 이유는 이로 인해 다음 액티비티로 넘어가는 시각적
+전환이 느려질 수 있기 때문입니다(그 대신, 로드가 많은 셧다운 작업은 {@link android.app.Activity#onStop onStop()}
+중에 수행해야 함).</p>
+
+<p>액티비티가 실제로 정지된 경우 사용자가 다음
+대상으로 신속하게 전환할 수 있도록 {@link android.app.Activity#onPause
+onPause()} 메서드 내에서 수행되는 작업의 양을 비교적 단순하게 유지해야 합니다.</p>
+
+<p class="note"><strong>참고:</strong> 액티비티가 일시정지되면 {@link
+android.app.Activity} 인스턴스는 메모리에 계속 유지되며, 액티비티가 재개되면 다시 호출됩니다.
+최상위 상태가 재개됨 상태인 콜백 메서드 중에
+생성된 구성요소는 다시 초기화할 필요가 없습니다.</p>
+
+
+
+<h2 id="Resume">액티비티 재개하기</h2>
+
+<p>사용자가 일시정지됨 상태에서 액티비티를 재개하면, 시스템은 {@link
+android.app.Activity#onResume()} 메서드를 호출합니다.</p>
+
+<p>액티비티가 처음 생성되는 경우를
+포함하여 액티비티가 전면에 표시될 때마다 시스템이 이 메서드를 호출한다는 것을 유의해야 합니다. 이와 같이, {@link
+android.app.Activity#onResume()}을 구현하여 {@link
+android.app.Activity#onPause()} 중에 해제하는 구성요소를 초기화하고, 액티비티가
+재개됨 상태로 전환될 때마다 필요한 다른 초기화 작업도 수행해야 합니다(예: 애니메이션 시작 및 액티비티가 사용자 포커스를 받을 때에만
+사용되는 구성 요소 초기화).</p>
+
+<p>다음 {@link android.app.Activity#onResume()} 예제는 위에 표시된
+{@link android.app.Activity#onPause()} 예제와 대응관계에 있습니다. 따라서 이 예제에서는 액티비티가 일시정지될 때
+해제되는 카메라를 초기화합니다.</p>
+
+<pre>
+&#64;Override
+public void onResume() {
+    super.onResume();  // Always call the superclass method first
+
+    // Get the Camera instance as the activity achieves full user focus
+    if (mCamera == null) {
+        initializeCamera(); // Local method to handle camera init
+    }
+}
+</pre>
+
+
+
+
+
+
+

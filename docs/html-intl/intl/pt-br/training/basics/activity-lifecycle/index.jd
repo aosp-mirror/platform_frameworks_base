@@ -1,0 +1,72 @@
+page.title=Como gerenciar o ciclo de vida da atividade
+page.tags=ciclo de vida da atividade
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<h2>Dependências e pré-requisitos</h2>
+<ul>
+  <li>Como criar um projeto do Android (consulte <a href="{@docRoot}training/basics/firstapp/creating-project.html">Como criar um projeto
+do Android</a>)</li>
+</ul>
+
+
+<h2>Leia também</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/activities.html">Atividades</a></li>
+</ul>
+
+
+<h2>Tente</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">Baixar a demonstração</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Conforme o usuário navega, sai e retorna para o seu aplicativo, as
+instâncias {@link android.app.Activity} no aplicativo transitam entre diferentes estados no
+ciclo de vida. Por exemplo, quando a
+atividade começa pela primeira vez, ela fica em primeiro plano no sistema e tem o foco do
+usuário. Durante o processo, o sistema Android chama uma série de métodos do ciclo de vida na
+atividade, onde você define a interface do usuário e outros componentes. Se o usuário executa uma
+ação que inicia outra atividade ou alterna para outro aplicativo, o sistema chama outro conjunto de
+métodos do ciclo de vida em sua atividade conforme ela fica em segundo plano (onde a atividade já não
+está visível, mas a instância e seu estado permanecem intactos).</p>
+
+<p>Dentro dos métodos de retorno de chamada do ciclo de vida, você pode declarar como a atividade deve se comportar quando o
+usuário sai e retorna da atividade.  Por exemplo, se estiver construindo um reprodutor de vídeos de transmissão em sequência, 
+você pode pausar o vídeo e encerrar a conexão da rede quando o usuário alternar para outro
+aplicativo. Quando o usuário retornar, será possível reconectar a rede e permitir que ele reinicie o vídeo
+de onde parou.</p>
+
+<p>Essa lição explica a importância dos métodos de retorno de chamada do ciclo de vida que cada instância {@link
+android.app.Activity} recebe e como utilizá-los para que a atividade faça o que o
+usuário espera e não consuma recursos do sistema quando não estiver em uso.</p>
+
+<h2>Lições</h2>
+ 
+<dl>
+  <dt><b><a href="starting.html">Iniciando uma atividade</a></b></dt>
+  <dd>Aprenda os fundamentos sobre ciclo de vida da atividade, como o usuário pode iniciar seu aplicativo e como
+executar atividades básicas de criação.</dd>
+  <dt><b><a href="pausing.html">Pausando e reiniciando uma atividade</a></b></dt>
+  <dd>Aprenda sobre o que acontece quando sua atividade é pausada (parcialmente obscurecida) e retomada e o que
+fazer durante essas mudanças de estados.</dd>
+  <dt><b><a href="stopping.html">Interrompendo e reiniciando uma atividade</a></b></dt>
+  <dd>Aprenda sobre o que acontece quando o usuário sai da atividade completamente e retorna.</dd>
+  <dt><b><a href="recreating.html">Recriando uma atividade</a></b></dt>
+  <dd>Aprenda sobre o que acontece quando sua atividade é destruída e como reconstruir o estado
+da atividade quando necessário.</dd>
+</dl> 
+

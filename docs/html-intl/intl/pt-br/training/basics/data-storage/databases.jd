@@ -1,0 +1,317 @@
+page.title=Salvando dados em bancos de dados do SQL
+page.tags=armazenamento de dados
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#DefineContract">Definir um esquema e contrato</a></li>
+  <li><a href="#DbHelper">Criar um banco de dados usando de um SQL Helper</a></li>
+  <li><a href="#WriteDbRow">Colocar informações no banco de dados</a></li>
+  <li><a href="#ReadDbRow">Ler informações de um banco de dados</a></li>
+  <li><a href="#DeleteDbRow">Excluir informações de um banco de dados</a></li>
+  <li><a href="#UpdateDbRow">Atualizar um banco de dados</a></li>
+</ol>
+
+<h2>Leia também</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#db">Usando bancos de dados</a></li>
+</ul>
+
+<!--
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Sample.zip" class="button">Download the sample</a>
+  <p class="filename">Sample.zip</p>
+</div>
+-->
+
+</div>
+</div>
+
+
+<p>Salvar dados em um banco de dados é ideal para dados que se repetem ou estruturados,
+como informações de contato. Esta lição assume que você esteja
+familiarizado com bancos de dados do SQL em gera, e o ajuda a começar a trabalhar com bancos de dados
+do SQLite no Android. As APIs necessárias para usar um banco de dados
+no Android estão disponíveis no pacote {@link android.database.sqlite}.</p>
+
+
+<h2 id="DefineContract">Definir um esquema e contrato</h2>
+
+<p>Um dos princípios mais importantes de bancos de dados do SQL é o esquema: uma declaração
+formal de como o banco de dados é organizado. O esquema é refletido nas declarações SQL
+usadas na criação do banco de dados.  É aconselhável
+criar uma classe de acompanhamento, conhecida como classe de <em>contrato</em>, que especifica claramente
+o layout do esquema de forma sistemática e autodocumentada.</p>
+
+<p>Uma classe de contrato é o contêiner das constantes que definem nomes para URIs,
+tabelas e colunas. A classe de contrato permite usar as mesmas constantes
+em outras classes no mesmo pacote. Permite que você altere o nome da
+coluna em um local e que a mudança se propague pelos seus códigos.</p>
+
+<p>Uma boa forma de organizar uma classe de contrato é colocar definições que sejam
+globais para todo o banco de dados no nível raiz da classe. Crie uma classe
+interna para cada tabela que enumera suas colunas.</p>
+
+<p class="note"><strong>Observação:</strong> implementando a interface {@link
+android.provider.BaseColumns}, sua classe interior pode herdar um campo-chave
+primário chamado {@code _ID} que algumas classes do Android, como adaptadores de cursor, esperam
+ que você tenha.  Não é uma obrigatório, mas pode ajudar para um trabalho mais harmonioso com o banco de dados
+no framework do Android.</p>
+
+<p>Por exemplo, este trecho define o nome da tabela e das colunas para uma
+única tabela:</p>
+
+
+<pre>
+public final class FeedReaderContract {
+    // To prevent someone from accidentally instantiating the contract class,
+    // give it an empty constructor.
+    public FeedReaderContract() {}
+
+    /* Inner class that defines the table contents */
+    public static abstract class FeedEntry implements BaseColumns {
+        public static final String TABLE_NAME = &quot;entry&quot;;
+        public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
+        public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
+        public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
+        ...
+    }
+}
+</pre>
+
+
+
+<h2 id="DbHelper">Criar um banco de dados usando de um SQL Helper</h2>
+
+<p>Uma vez definidos o visual dos bancos de dados, implemente métodos
+que criam e cuidam do banco de dados e das tabelas.  Aqui estão algumas declarações
+comuns para criar e exclui a tabela:</P>
+
+<pre>
+private static final String TEXT_TYPE = &quot; TEXT&quot;;
+private static final String COMMA_SEP = &quot;,&quot;;
+private static final String SQL_CREATE_ENTRIES =
+    &quot;CREATE TABLE &quot; + FeedEntry.TABLE_NAME + &quot; (&quot; +
+    FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
+    FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+    FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
+    ... // Any other options for the CREATE command
+    &quot; )&quot;;
+
+private static final String SQL_DELETE_ENTRIES =
+    &quot;DROP TABLE IF EXISTS &quot; + FeedEntry.TABLE_NAME;
+</pre>
+
+<p>Da mesma forma você salva arquivos no <a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">armazenamento
+interno</a> do dispositivo, o Android armazena seu banco de dados no espaço privado do disco associado
+ao aplicativo. Seus dados estão protegidos porque, por padrão, essa área não
+pode ser acessada por outros aplicativos.</p>
+
+<p>Um conjunto de APIs está disponível na classe {@link
+android.database.sqlite.SQLiteOpenHelper}. 
+Ao usar esta classe para obter referências para seu banco de dados, o sistema
+realiza operações
+de possível longa execução para criar e atualizar o banco de dados apenas quando
+necessário e <em>não durante a inicialização do aplicativo</em>. Basta chamar 
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} ou 
+{@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}.</p>
+
+<p class="note"><strong>Observação:</strong> devido à possibilidade de serem de longa execução,
+certifique-se que chamar {@link
+android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} ou {@link
+android.database.sqlite.SQLiteOpenHelper#getReadableDatabase} em um thread de segundo plano,
+como {@link android.os.AsyncTask} ou {@link android.app.IntentService}.</p>
+
+<p>Para usar {@link android.database.sqlite.SQLiteOpenHelper}, crie uma subclasse que
+substitua os métodos de retorno de chamada {@link
+android.database.sqlite.SQLiteOpenHelper#onCreate onCreate()}, {@link
+android.database.sqlite.SQLiteOpenHelper#onUpgrade onUpgrade()} e {@link
+android.database.sqlite.SQLiteOpenHelper#onOpen onOpen()}. Também é possível
+implementar {@link android.database.sqlite.SQLiteOpenHelper#onDowngrade onDowngrade()},
+mas não é obrigatório.</p>
+
+<p>Por exemplo, esta é uma implementação de {@link
+android.database.sqlite.SQLiteOpenHelper} que utiliza alguns dos comandos exibidos abaixo:</p>
+
+<pre>
+public class FeedReaderDbHelper extends SQLiteOpenHelper {
+    // If you change the database schema, you must increment the database version.
+    public static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = &quot;FeedReader.db&quot;;
+
+    public FeedReaderDbHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_CREATE_ENTRIES);
+    }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // This database is only a cache for online data, so its upgrade policy is
+        // to simply to discard the data and start over
+        db.execSQL(SQL_DELETE_ENTRIES);
+        onCreate(db);
+    }
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+}
+</pre>
+
+<p>Para acessar seu banco de dados, instancie sua subclasse de {@link
+android.database.sqlite.SQLiteOpenHelper}:</p>
+
+<pre>
+FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(getContext());
+</pre>
+
+
+
+
+<h2 id="WriteDbRow">Colocar informações no banco de dados</h2>
+
+<p>Coloque dados no banco de dados transmitindo um objeto {@link android.content.ContentValues}
+ para o método {@link android.database.sqlite.SQLiteDatabase#insert insert()}.</p>
+
+<pre>
+// Gets the data repository in write mode
+SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+// Create a new map of values, where column names are the keys
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_ENTRY_ID, id);
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+values.put(FeedEntry.COLUMN_NAME_CONTENT, content);
+
+// Insert the new row, returning the primary key value of the new row
+long newRowId;
+newRowId = db.insert(
+         FeedEntry.TABLE_NAME,
+         FeedEntry.COLUMN_NAME_NULLABLE,
+         values);
+</pre>
+
+<p>Este primeiro argumento para {@link android.database.sqlite.SQLiteDatabase#insert insert()}
+é apenas o nome da tabela. O segundo argumento fornece
+o nome de uma coluna em que o framework pode inserir NULL caso o
+{@link android.content.ContentValues} esteja vazio (se você definir como {@code "null"},
+o framework não inserirá uma linha quando não houver valores).</p>
+
+
+
+
+<h2 id="ReadDbRow">Ler informações de um banco de dados</h2>
+
+<p>Para ler de um banco de dados, utilize o método {@link android.database.sqlite.SQLiteDatabase#query query()}
+, transmitindo seus critérios de seleção e colunas desejadas.
+O método combina elementos de {@link android.database.sqlite.SQLiteDatabase#insert insert()}
+ e {@link android.database.sqlite.SQLiteDatabase#update update()}, exceto que a lista da coluna
+define os dados que serão analisados e não os dados a serem inseridos. Os resultados da consulta
+são retornados em um objeto {@link android.database.Cursor}.</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// Define a <em>projection</em> that specifies which columns from the database
+// you will actually use after this query.
+String[] projection = {
+    FeedEntry._ID,
+    FeedEntry.COLUMN_NAME_TITLE,
+    FeedEntry.COLUMN_NAME_UPDATED,
+    ...
+    };
+
+// How you want the results sorted in the resulting Cursor
+String sortOrder =
+    FeedEntry.COLUMN_NAME_UPDATED + " DESC";
+
+Cursor c = db.query(
+    FeedEntry.TABLE_NAME,  // The table to query
+    projection,                               // The columns to return
+    selection,                                // The columns for the WHERE clause
+    selectionArgs,                            // The values for the WHERE clause
+    null,                                     // don't group the rows
+    null,                                     // don't filter by row groups
+    sortOrder                                 // The sort order
+    );
+</pre>
+
+<p>Para ver uma linha no cursor, utilize um dos métodos de movimento {@link android.database.Cursor},
+que sempre deverão ser chamados antes de começar a ler valores. Geralmente, deve-se iniciar
+chamando {@link android.database.Cursor#moveToFirst}, que coloca a “posição leitura” na
+primeira entrada nos resultados. Para cada linha, você pode ler um valor de coluna chamando um dos métodos GET
+{@link android.database.Cursor}, como {@link android.database.Cursor#getString
+getString()} ou {@link android.database.Cursor#getLong getLong()}. Para cada um dos métodos GET,
+você deve transmitir a posição de índice da coluna desejada, que pode ser obtida chamando
+{@link android.database.Cursor#getColumnIndex getColumnIndex()} ou
+{@link android.database.Cursor#getColumnIndexOrThrow getColumnIndexOrThrow()}.
+Por exemplo:</p>
+
+<pre>
+cursor.moveToFirst();
+long itemId = cursor.getLong(
+    cursor.getColumnIndexOrThrow(FeedEntry._ID)
+);
+</pre>
+
+
+
+
+<h2 id="DeleteDbRow">Excluir informações de um banco de dados</h2>
+
+<p>Para excluir linhas de uma tabela, forneça os critérios de seleção que as
+identifique. A API do banco de dados oferece um mecanismo para criar
+critérios de seleção que protegem contra injeção do SQL. O mecanismo divide a
+especificação da seleção em uma cláusula e argumentos de seleção. A
+cláusula define a coluna a se olhar e também permite combinar testes de
+coluna. Os argumentos são valores para testes comparativos que são dependentes dentro de uma cláusula.
+Como o resultado não é tratado da mesma forma que uma declaração SQL comum, ele fica
+imune à injeção de SQL.</p>
+
+<pre>
+// Define 'where' part of query.
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+// Specify arguments in placeholder order.
+String[] selectionArgs = { String.valueOf(rowId) };
+// Issue SQL statement.
+db.delete(table_name, selection, selectionArgs);
+</pre>
+
+
+
+<h2 id="UpdateDbRow">Atualizar um banco de dados</h2>
+
+<p>Quando precisar alterar um subconjunto dos valores de seu banco de dados, utilize o método {@link
+android.database.sqlite.SQLiteDatabase#update update()}.</p>
+
+<p>A atualização da tabela combina a sintaxe de valores do conteúdo de {@link
+android.database.sqlite.SQLiteDatabase#insert insert()} com a sintaxe {@code where} de
+{@link android.database.sqlite.SQLiteDatabase#delete delete()}.</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// New value for one column
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+
+// Which row to update, based on the ID
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String[] selectionArgs = { String.valueOf(rowId) };
+
+int count = db.update(
+    FeedReaderDbHelper.FeedEntry.TABLE_NAME,
+    values,
+    selection,
+    selectionArgs);
+</pre>
+
