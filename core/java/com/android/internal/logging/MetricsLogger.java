@@ -40,6 +40,7 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_BRIGHTNESS = 218;
     public static final int ACTION_BRIGHTNESS_AUTO = 219;
     public static final int BRIGHTNESS_DIALOG = 220;
+    public static final int SYSTEM_ALERT_WINDOW_APPS = 221;
     // Temporary constants go here, to await migration to MetricsConstants.
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
