@@ -352,7 +352,7 @@ public class WifiConfiguration implements Parcelable {
      * Roaming Consortium Id list for passpoint credential; identifies a set of networks where
      * passpoint credential will be considered valid
      */
-    public Long[] roamingConsortiumIds;
+    public long[] roamingConsortiumIds;
 
     /**
      * @hide
@@ -907,7 +907,7 @@ public class WifiConfiguration implements Parcelable {
         SSID = null;
         BSSID = null;
         FQDN = null;
-        roamingConsortiumIds = new Long[0];
+        roamingConsortiumIds = new long[0];
         priority = 0;
         hiddenSSID = false;
         disableReason = DISABLED_UNKNOWN_REASON;
@@ -1544,7 +1544,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(FQDN);
         dest.writeString(providerFriendlyName);
         dest.writeInt(roamingConsortiumIds.length);
-        for (Long roamingConsortiumId : roamingConsortiumIds) {
+        for (long roamingConsortiumId : roamingConsortiumIds) {
             dest.writeLong(roamingConsortiumId);
         }
         dest.writeString(preSharedKey);
@@ -1619,7 +1619,7 @@ public class WifiConfiguration implements Parcelable {
                 config.FQDN = in.readString();
                 config.providerFriendlyName = in.readString();
                 int numRoamingConsortiumIds = in.readInt();
-                config.roamingConsortiumIds = new Long[numRoamingConsortiumIds];
+                config.roamingConsortiumIds = new long[numRoamingConsortiumIds];
                 for (int i = 0; i < numRoamingConsortiumIds; i++) {
                     config.roamingConsortiumIds[i] = in.readLong();
                 }
