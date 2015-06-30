@@ -131,7 +131,7 @@ public class AssistManager {
         }
 
         final boolean isService = isAssistantService();
-        if (isService || !isVoiceSessionRunning()) {
+        if (!isService || !isVoiceSessionRunning()) {
             showOrb();
             mView.postDelayed(mHideRunnable, isService
                     ? TIMEOUT_SERVICE
@@ -225,10 +225,6 @@ public class AssistManager {
 
     public void launchVoiceAssistFromKeyguard() {
         mAssistUtils.launchVoiceAssistFromKeyguard();
-    }
-
-    private boolean getVoiceInteractorSupportsAssistGesture() {
-        return mAssistUtils.activeServiceSupportsAssistGesture();
     }
 
     public boolean canVoiceAssistBeLaunchedFromKeyguard() {
