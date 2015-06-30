@@ -15364,7 +15364,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize();
         if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
             if (width > 0 && height > 0) {
-                Log.w(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs "
+                Log.w(VIEW_LOG_TAG, getClass().getSimpleName() + " not displayed because it is"
+                        + " too large to fit into a software layer (or drawing cache), needs "
                         + projectedBitmapSize + " bytes, only "
                         + drawingCacheSize + " available");
             }
