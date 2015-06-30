@@ -2080,14 +2080,35 @@ public class PhoneNumberUtils
      * @hide
      */
     public static boolean isVoiceMailNumber(int subId, String number) {
-        String vmNumber;
+        return isVoiceMailNumber(null, subId, number);
+    }
 
+    /**
+     * isVoiceMailNumber: checks a given number against the voicemail
+     *   number provided by the RIL and SIM card. The caller must have
+     *   the READ_PHONE_STATE credential.
+     *
+     * @param context a non-null {@link Context}.
+     * @param subId the subscription id of the SIM.
+     * @param number the number to look up.
+     * @return true if the number is in the list of voicemail. False
+     * otherwise, including if the caller does not have the permission
+     * to read the VM number.
+     * @hide
+     */
+    public static boolean isVoiceMailNumber(Context context, int subId, String number) {
+        String vmNumber;
         try {
-            vmNumber = TelephonyManager.getDefault().getVoiceMailNumber(subId);
+            final TelephonyManager tm;
+            if (context == null) {
+                tm = TelephonyManager.getDefault();
+            } else {
+                tm = TelephonyManager.from(context);
+            }
+            vmNumber = tm.getVoiceMailNumber(subId);
         } catch (SecurityException ex) {
             return false;
         }
-
         // Strip the separators from the number before comparing it
         // to the list.
         number = extractNetworkPortionAlt(number);
