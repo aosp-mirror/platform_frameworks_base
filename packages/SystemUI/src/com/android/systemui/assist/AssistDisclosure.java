@@ -32,6 +32,7 @@ import android.graphics.PorterDuffXfermode;
 import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 
 /**
@@ -166,6 +167,7 @@ public class AssistDisclosure {
             super.onAttachedToWindow();
 
             startAnimation();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_ASSIST_READING_CONTEXT);
         }
 
         @Override

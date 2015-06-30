@@ -689,6 +689,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_CONTEXT_CLICKED = 0x00800000;
 
     /**
+     * Represents the event of the assistant currently reading the users screen context.
+     */
+    public static final int TYPE_ASSIST_READING_CONTEXT = 0x01000000;
+
+    /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
      * The type of change is not defined.
      */
@@ -1412,6 +1417,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                         builder.append(", ");
                     }
                     builder.append("TYPE_VIEW_CONTEXT_CLICKED");
+                    eventTypeCount++;
+                }
+                case TYPE_ASSIST_READING_CONTEXT: {
+                    if (eventTypeCount > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append("TYPE_ASSIST_READING_CONTEXT");
                     eventTypeCount++;
                 }
                     break;
